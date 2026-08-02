@@ -13,10 +13,12 @@ import '../../application/services/incoming_call_service/incoming_call_service.d
 import '../../application/services/network_connectivity_service/network_connectivity_service.dart';
 import '../../application/services/r_cards_service/r_card_chat_notifier_service.dart';
 import '../../application/services/settings_service/settings_service.dart';
+import '../../application/services/signing_service/signing_service.dart';
 import '../../application/services/vrc_service/vrc_service.dart';
 import '../../infrastructure/providers/app_badge_provider.dart';
 import '../../infrastructure/providers/credentials_sdk_provider.dart';
 import '../../infrastructure/providers/meeting_place_sdk_provider.dart';
+import '../../infrastructure/providers/mnemonic_configured_provider.dart';
 
 part 'app_controller.g.dart';
 
@@ -36,22 +38,31 @@ class AppController extends _$AppController with WidgetsBindingObserver {
           await sdk?.closeCredentialStreams();
           return;
         }
-        if (next) {
-          ref.read(controlPlaneServiceProvider);
-          ref.read(rCardChatNotifierServiceProvider);
-          ref.read(vrcServiceProvider);
-          await ref.read(contactsServiceProvider.notifier).ensureInitialized();
-          await ref
-              .read(connectionsServiceProvider.notifier)
-              .ensureInitialized();
-          ref.read(contactsConnectionsServiceProvider);
+        if (next && ref.read(mnemonicConfiguredProvider)) {
+          await _initializeServices();
         }
       },
       fireImmediately: true,
     );
 
+    ref.listen(mnemonicConfiguredProvider, (prev, next) async {
+      if (next && ref.read(authenticationServiceProvider).isAuthenticated) {
+        await _initializeServices();
+      }
+    });
+
     ref.read(settingsServiceProvider);
     ref.read(networkConnectivityServiceProvider);
+  }
+
+  Future<void> _initializeServices() async {
+    ref.read(controlPlaneServiceProvider);
+    ref.read(rCardChatNotifierServiceProvider);
+    ref.read(vrcServiceProvider);
+    await ref.read(contactsServiceProvider.notifier).ensureInitialized();
+    await ref.read(connectionsServiceProvider.notifier).ensureInitialized();
+    ref.read(contactsConnectionsServiceProvider);
+    ref.read(signingServiceProvider);
   }
 
   @override

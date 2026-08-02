@@ -11,6 +11,13 @@ class FakeEnvironment implements Environment {
     this.matrixHomeserver = 'https://test-matrix.org',
     String? defaultMediatorDid,
     this.maxOfferUsages = 100,
+    this.personalAiEnabled = false,
+    this._personalAiBaseUrl = 'http://127.0.0.1:8790',
+    this.personalAiSetupEndpoint = '/personal-agent/setup',
+    this._vtaBaseUrl = '',
+    this._vtaDid = '',
+    this.vtaMediatorUrl = '',
+    this.vtaMediatorDid = '',
     this._defaultMediators = const {},
     this.enabledIndividualChatTransports = const [
       ChannelTransport.didcomm,
@@ -37,7 +44,24 @@ class FakeEnvironment implements Environment {
   final int maxOfferUsages;
 
   @override
+  final bool personalAiEnabled;
+
+  final String _personalAiBaseUrl;
+
+  @override
+  final String personalAiSetupEndpoint;
+
+  @override
   final List<ChannelTransport> enabledIndividualChatTransports;
+
+  @override
+  String get microsoftOAuthTenantId => 'common';
+
+  @override
+  String get microsoftOAuthClientId => 'test-client-id';
+
+  @override
+  String get microsoftOAuthRedirectUrl => 'mpx://auth/microsoft/callback';
 
   @override
   int get maxLogMemoryEntries => 1000;
@@ -127,4 +151,28 @@ class FakeEnvironment implements Environment {
 
   @override
   Duration get callRingTimeout => const Duration(seconds: 60);
+
+  @override
+  Map<String, Map<String, dynamic>> get ciergeEventConfig => const {};
+
+  final String _vtaBaseUrl;
+
+  final String _vtaDid;
+
+  final String vtaMediatorUrl;
+
+  @override
+  final String vtaMediatorDid;
+
+  @override
+  String? personalAiBaseUrl(String mnemonicHash) => _personalAiBaseUrl;
+
+  @override
+  String? ciergeConnectorDid(String mnemonicHash) => null;
+
+  @override
+  String? vtaBaseUrl(String mnemonicHash) => _vtaBaseUrl;
+
+  @override
+  String? vtaDid(String mnemonicHash) => _vtaDid;
 }

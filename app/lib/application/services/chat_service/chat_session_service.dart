@@ -54,6 +54,7 @@ import 'handlers/contact_card_protocol_handler.dart';
 import 'handlers/effect_protocol_handler.dart';
 import 'handlers/group_details_protocol_handler.dart';
 import 'handlers/presence_protocol_handler.dart';
+import 'handlers/suggestion_protocol_handler.dart';
 import 'handlers/typing_protocol_handler.dart';
 import 'handlers/zkp_attachment_protocol_handler.dart';
 import 'missed_call_manager.dart';
@@ -211,6 +212,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
           callChatItemManager: _callChatItemManager,
           logger: _logger,
         ),
+        SuggestionProtocolHandler(onSuggestion: _onSuggestion, logger: _logger),
         ContactCardProtocolHandler(
           ref: ref,
           isGroupChat: () => _isGroupChat,
@@ -234,6 +236,32 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
         channelDid: channelDid,
       ),
     );
+  }
+
+  void _onSuggestion(ChatSuggestionEvent event, String channelDid) {
+    final hasRelatedMessage = state.messages.any(
+      (message) => message.messageId == event.relatedMessageId,
+    );
+    if (!hasRelatedMessage) return;
+
+    final suggestionText = _normalizeSuggestionText(event.text);
+
+    state = state.copyWith(
+      latestSuggestion: ChatSuggestion(
+        relatedMessageId: event.relatedMessageId,
+        text: suggestionText,
+        senderDid: event.senderDid,
+        createdTime: event.createdTime,
+      ),
+    );
+  }
+
+  String _normalizeSuggestionText(String text) {
+    if (text.length < 2) return text;
+    if (text.startsWith('"') && text.endsWith('"')) {
+      return text.substring(1, text.length - 1);
+    }
+    return text;
   }
 
   // ---------------------------------------------------------------------------
@@ -501,6 +529,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   Future<void> sendTextMessage(
     String message, {
     List<ChatAttachment>? attachments,
+    List<ChatMention> mentions = const [],
   }) async {
     final sdk = _chatSDK;
     if (sdk == null) {
@@ -508,6 +537,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
         id: const Uuid().v4(),
         text: message,
         attachments: List<ChatAttachment>.from(attachments ?? const []),
+        mentions: List<ChatMention>.from(mentions),
       );
       _bufferedOutboundMessages.add(bufferedMessage);
       _logger.info(
@@ -517,7 +547,11 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       return;
     }
 
-    await sdk.sendTextMessage(message, attachments: attachments ?? const []);
+    await sdk.sendTextMessage(
+      message,
+      attachments: attachments ?? const [],
+      mentions: mentions,
+    );
   }
 
   Future<void> _flushBufferedOutboundMessages() async {
@@ -560,6 +594,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
         await currentSdk.sendTextMessage(
           bufferedMessage.text,
           attachments: bufferedMessage.attachments,
+          mentions: bufferedMessage.mentions,
         );
       } catch (error, stackTrace) {
         _bufferedOutboundMessages.insertAll(0, batch.skip(index));
@@ -675,6 +710,22 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   }
 
   @override
+  Future<void> sendSuggestionRequest({
+    required String messageId,
+    required String text,
+  }) async {
+    await _chatSDK?.sendSuggestionRequest(messageId: messageId, text: text);
+  }
+
+  @override
+  Future<void> dismissSuggestion(String relatedMessageId) async {
+    if (state.latestSuggestion?.relatedMessageId != relatedMessageId) {
+      return;
+    }
+    state = state.copyWith(latestSuggestion: null);
+  }
+
+  @override
   Future<void> deleteMessage(
     Message message, {
     bool deleteForMeOnly = false,
@@ -691,8 +742,12 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   }
 
   @override
-  Future<void> editTextMessage(Message message, String newText) async {
-    await _chatSDK?.editTextMessage(message, newText);
+  Future<void> editTextMessage(
+    Message message,
+    String newText, {
+    List<ChatMention>? mentions,
+  }) async {
+    await _chatSDK?.editTextMessage(message, newText, mentions: mentions);
   }
 
   @override
@@ -803,7 +858,10 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     final messages = idx == -1
         ? existing.insertSorted(item)
         : existing.replaceItemAtIndex(idx, item);
-    state = state.copyWith(messages: messages);
+    state = state.copyWith(
+      messages: messages,
+      latestSuggestion: _latestSuggestionIfPresent(messages),
+    );
     _syncOpenCallActivityReadSeqNo(item);
     _maybeBumpMissedCallBadge(prior, item);
   }
@@ -908,6 +966,16 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     return status == CallStatus.missed ||
         status == CallStatus.declined ||
         status == CallStatus.ended;
+  }
+
+  ChatSuggestion? _latestSuggestionIfPresent(List<ChatItem> messages) {
+    final latestSuggestion = state.latestSuggestion;
+    if (latestSuggestion == null) return null;
+
+    final hasRelatedMessage = messages.any(
+      (message) => message.messageId == latestSuggestion.relatedMessageId,
+    );
+    return hasRelatedMessage ? latestSuggestion : null;
   }
 
   String _peerFirstNameForZkpUi() {
@@ -1121,7 +1189,10 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     final messages = state.messages
         .where((m) => m.messageId != item.messageId)
         .toList();
-    state = state.copyWith(messages: messages);
+    state = state.copyWith(
+      messages: messages,
+      latestSuggestion: _latestSuggestionIfPresent(messages),
+    );
   }
 
   Future<void> _refreshGroup() async {
@@ -1171,9 +1242,11 @@ class _BufferedOutboundMessage {
     required this.id,
     required this.text,
     required this.attachments,
+    required this.mentions,
   });
 
   final String id;
   final String text;
   final List<ChatAttachment> attachments;
+  final List<ChatMention> mentions;
 }

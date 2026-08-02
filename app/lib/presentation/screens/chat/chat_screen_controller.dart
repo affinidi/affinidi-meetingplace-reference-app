@@ -16,9 +16,11 @@ import 'package:synchronized/synchronized.dart';
 
 import '../../../application/services/chat_service/chat_service.dart';
 import '../../../application/services/chat_service/chat_session_service.dart';
+import '../../../application/services/chat_service/context_route_attachment_builder_service.dart';
 import '../../../application/services/chat_service/open_chat_registry.dart';
 import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../application/services/identities_service/identities_service.dart';
+import '../../../application/services/personal_ai_service/personal_ai_service.dart';
 import '../../../application/services/voice_playback_service/voice_playback_service.dart';
 import '../../../application/services/vrc_service/vrc_service.dart';
 import '../../../domain/models/contacts/contact.dart';
@@ -35,18 +37,48 @@ import '../../../infrastructure/plugins/r_card_attachments_plugin/r_card_attachm
 import '../../../infrastructure/plugins/vrc_attachments_plugin/vrc_attachments_plugin.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/available_attachment_plugins_provider.dart';
+import '../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../../infrastructure/providers/credentials_sdk_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
 import '../../effects/screen_effect.dart';
 import '../../validators/max_length_validator_type.dart';
 import '../../widgets/async_loaders/async_loading_controller.dart';
+import 'chat_mention_candidate.dart';
+import 'chat_mention_text_spans.dart';
 import 'chat_screen_state.dart';
 import 'chat_zkp/chat_zkp_message_list_policy.dart';
 import 'chat_zkp_handler.dart';
 import 'proof_flow_controller.dart';
 
 part 'chat_screen_controller.g.dart';
+
+final chatMentionCandidatesProvider =
+    Provider.family<List<ChatMentionCandidate>, String>((ref, contactId) {
+      final group = ref.watch(
+        chatScreenControllerProvider(contactId).select((state) => state.group),
+      );
+      final myDid = ref.watch(
+        chatScreenControllerProvider(contactId).select((state) => state.myDid),
+      );
+      final cacheManager = ref.read(cacheManagerProvider);
+
+      return group?.members
+              .where(
+                (member) =>
+                    member.status == sdk.GroupMemberStatus.approved &&
+                    member.did != myDid,
+              )
+              .map(
+                (member) => ChatMentionCandidate.fromGroupMember(
+                  member,
+                  cacheManager: cacheManager,
+                ),
+              )
+              .where((candidate) => candidate.label.isNotEmpty)
+              .toList() ??
+          const [];
+    });
 
 @riverpod
 /// Controller class for managing the state and logic of the chat screen.
@@ -60,8 +92,9 @@ class ChatScreenController extends _$ChatScreenController
 
   static const _logKey = 'UXCHAT';
   static final _maxChatMessageLength = MaxLengthValidatorType.extraLong.value;
+  static const _suggestionRequestTimeout = Duration(seconds: 12);
 
-  late final messageTextController = TextEditingController();
+  late final messageTextController = ChatMentionHighlightingTextController();
   late final _logger = ref.read(appLoggerProvider);
   late final _zkpHandler = ChatZkpHandler(
     ref: ref,
@@ -78,6 +111,8 @@ class ChatScreenController extends _$ChatScreenController
 
   TimedAction? _sendChatActivityTimedAction;
   Timer? _saveUnsentMessageDebouncer;
+  Timer? _suggestionRequestTimeoutTimer;
+  Completer<void>? _pendingSuggestionCompleter;
   bool _isPaused = false;
   bool _isDisposed = false;
   bool _isReadStatePausedForCoveringCall = false;
@@ -207,8 +242,21 @@ class ChatScreenController extends _$ChatScreenController
               .read(localVoiceAttachmentStoreProvider)
               .withLocalVoiceMetadata(next.messages);
 
+          final matchingPendingSuggestionMessageId =
+              pendingState.pendingSuggestionMessageId;
+          final resolvedSuggestion = next.latestSuggestion;
+          if (matchingPendingSuggestionMessageId != null &&
+              resolvedSuggestion?.relatedMessageId ==
+                  matchingPendingSuggestionMessageId) {
+            _completePendingSuggestionRequest();
+            pendingState = pendingState.copyWith(
+              pendingSuggestionMessageId: null,
+            );
+          }
+
           pendingState = pendingState.copyWith(
             messages: messages,
+            latestSuggestion: next.latestSuggestion,
             membersTyping: next.membersTyping,
             contactPresenceStatus: next.contactPresenceStatus,
             isActive: next.isActive,
@@ -281,6 +329,10 @@ class ChatScreenController extends _$ChatScreenController
       _rCardPluginSubscription?.cancel();
       _sendChatActivityTimedAction?.cancel();
       _saveUnsentMessageDebouncer?.cancel();
+      _suggestionRequestTimeoutTimer?.cancel();
+      _failPendingSuggestionRequest(
+        StateError('Chat screen disposed before suggestion arrived'),
+      );
 
       messageTextController.removeListener(_onMessageTextChanged);
       messageTextController.dispose();
@@ -333,6 +385,15 @@ class ChatScreenController extends _$ChatScreenController
     }
 
     await _restoreUnsentMessage();
+
+    final channelDid = state.contact?.channelDid?.trim();
+    if (channelDid != null && channelDid.isNotEmpty) {
+      unawaited(
+        ref
+            .read(personalAiServiceProvider.notifier)
+            .refreshAuthorizationSnapshotForChannel(channelDid),
+      );
+    }
   }
 
   bool pauseReadStateForCoveringCall() {
@@ -645,21 +706,45 @@ class ChatScreenController extends _$ChatScreenController
   ///
   /// The message text is trimmed and validated before sending.
   /// Clears the input field upon successful send.
-  Future<void> sendMessage() async {
+  Future<void> sendMessage({List<chat.ChatMention> mentions = const []}) async {
     final originalText = messageTextController.text;
     final trimmedMessage = originalText.trimRight();
     if (trimmedMessage.isEmpty) return;
     if (trimmedMessage.length > _maxChatMessageLength) return;
 
-    unawaited(_chatService?.sendTextMessage(trimmedMessage) ?? Future.value());
-    _sendChatActivityTimedAction?.cancel();
-    messageTextController.clear();
+    final routeAttachment = _buildContextRouteAttachment();
+    final attachments = routeAttachment == null
+        ? const <chat.ChatAttachment>[]
+        : <chat.ChatAttachment>[routeAttachment];
+
+    try {
+      await (_chatService?.sendTextMessage(
+            trimmedMessage,
+            attachments: attachments,
+            mentions: mentions,
+          ) ??
+          Future<void>.value());
+      _sendChatActivityTimedAction?.cancel();
+      messageTextController.clear();
+    } catch (error, stackTrace) {
+      _logger.error(
+        'Failed to send chat message',
+        error: error,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+      messageTextController.text = originalText;
+      messageTextController.selection = TextSelection.collapsed(
+        offset: messageTextController.text.length,
+      );
+    }
   }
 
   /// Sends a message directly with optional attachments
   Future<void> sendMessageDirect(
     String message, {
     List<ChatAttachment>? attachments,
+    List<chat.ChatMention> mentions = const [],
   }) async {
     final trimmedMessage = message.trimRight();
     // Allow empty messages if attachments are present
@@ -668,11 +753,55 @@ class ChatScreenController extends _$ChatScreenController
       return;
     }
 
+    final routeAttachment = _buildContextRouteAttachment();
+    final combinedAttachments = <ChatAttachment>[
+      ...?attachments,
+      ?routeAttachment,
+    ];
+
     await (_chatService?.sendTextMessage(
           trimmedMessage,
-          attachments: attachments,
+          attachments: combinedAttachments,
+          mentions: mentions,
         ) ??
         Future<void>.value());
+  }
+
+  Future<void> ignoreLatestSuggestion() async {
+    final suggestion = state.latestSuggestion;
+    if (suggestion == null) return;
+
+    await _chatService?.dismissSuggestion(suggestion.relatedMessageId);
+  }
+
+  Future<void> sendLatestSuggestionAsMe() async {
+    final suggestion = state.latestSuggestion;
+    if (suggestion == null) return;
+
+    await sendMessageDirect(suggestion.text);
+    await _chatService?.dismissSuggestion(suggestion.relatedMessageId);
+  }
+
+  Future<void> editLatestSuggestion() async {
+    final suggestion = state.latestSuggestion;
+    if (suggestion == null) return;
+
+    messageTextController.value = TextEditingValue(
+      text: suggestion.text,
+      selection: TextSelection.collapsed(offset: suggestion.text.length),
+    );
+    await _chatService?.dismissSuggestion(suggestion.relatedMessageId);
+  }
+
+  chat.ChatAttachment? _buildContextRouteAttachment() {
+    final contact = state.contact;
+    if (contact == null) {
+      return null;
+    }
+
+    return ref
+        .read(contextRouteAttachmentBuilderServiceProvider)
+        .buildForContactId(contactId);
   }
 
   Future<void> sendChatActivity() async {
@@ -850,6 +979,99 @@ class ChatScreenController extends _$ChatScreenController
     }
   }
 
+  Future<void> askForSuggestion(String messageId) async {
+    if (!(state.capabilities?.supports(chat.ChatFeature.suggestionRequests) ??
+        false)) {
+      clearSelectedReaction();
+      return;
+    }
+
+    if (state.pendingSuggestionMessageId != null) {
+      clearSelectedReaction();
+      return;
+    }
+
+    try {
+      _showActivity();
+      final message =
+          state.messages.firstWhereOrNull((m) => m.messageId == messageId)
+              as chat.Message?;
+
+      if (message == null) {
+        throw AppException(
+          'Unable to find message with id $messageId',
+          code: AppExceptionType.missingMessage.name,
+        );
+      }
+
+      final text = message.value.trim();
+      if (text.isEmpty) return;
+
+      _startPendingSuggestionRequest(message.messageId);
+      clearSelectedReaction();
+
+      await _chatService?.sendSuggestionRequest(
+        messageId: message.messageId,
+        text: text,
+      );
+
+      await _pendingSuggestionCompleter?.future;
+    } catch (error) {
+      if (error is TimeoutException) {
+        rethrow;
+      }
+
+      _clearPendingSuggestionRequest();
+      rethrow;
+    } finally {
+      _hideActivity();
+    }
+  }
+
+  void _startPendingSuggestionRequest(String messageId) {
+    _suggestionRequestTimeoutTimer?.cancel();
+    _failPendingSuggestionRequest(
+      StateError('Suggestion request replaced by a newer request'),
+    );
+
+    state = state.copyWith(pendingSuggestionMessageId: messageId);
+    _pendingSuggestionCompleter = Completer<void>();
+    _suggestionRequestTimeoutTimer = Timer(_suggestionRequestTimeout, () {
+      if (!ref.mounted) return;
+      if (state.pendingSuggestionMessageId != messageId) return;
+
+      _clearPendingSuggestionRequest();
+      _failPendingSuggestionRequest(
+        TimeoutException('Suggestion request timed out'),
+      );
+    });
+  }
+
+  void _completePendingSuggestionRequest() {
+    _suggestionRequestTimeoutTimer?.cancel();
+    _suggestionRequestTimeoutTimer = null;
+
+    final completer = _pendingSuggestionCompleter;
+    _pendingSuggestionCompleter = null;
+    if (completer != null && !completer.isCompleted) {
+      completer.complete();
+    }
+  }
+
+  void _clearPendingSuggestionRequest() {
+    _suggestionRequestTimeoutTimer?.cancel();
+    _suggestionRequestTimeoutTimer = null;
+    state = state.copyWith(pendingSuggestionMessageId: null);
+  }
+
+  void _failPendingSuggestionRequest(Object error) {
+    final completer = _pendingSuggestionCompleter;
+    _pendingSuggestionCompleter = null;
+    if (completer != null && !completer.isCompleted) {
+      completer.completeError(error);
+    }
+  }
+
   /// Maximum age at which the original sender can still delete their own
   /// message for everyone. Defers to the chat service (SDK option, falling
   /// back to the environment-configured default before the SDK is ready).
@@ -888,7 +1110,11 @@ class ChatScreenController extends _$ChatScreenController
     }
   }
 
-  Future<void> editTextMessage(String messageId, String newText) async {
+  Future<void> editTextMessage(
+    String messageId,
+    String newText, {
+    List<chat.ChatMention>? mentions,
+  }) async {
     final idx = state.messages.indexWhere((m) => m.messageId == messageId);
     final message = idx == -1 ? null : state.messages[idx] as chat.Message?;
 
@@ -899,7 +1125,7 @@ class ChatScreenController extends _$ChatScreenController
       );
     }
 
-    await _chatService?.editTextMessage(message, newText);
+    await _chatService?.editTextMessage(message, newText, mentions: mentions);
   }
 
   /// Sends a [ScreenEffect] to the chat screen.
@@ -1354,6 +1580,21 @@ extension ChatScreenControllerProviderSelectors
     return select(
       (state) =>
           state.capabilities?.supports(chat.ChatFeature.messageEdit) ?? false,
+    );
+  }
+
+  ProviderListenable<bool> get supportsMentions {
+    return select(
+      (state) =>
+          state.capabilities?.supports(chat.ChatFeature.mentions) ?? false,
+    );
+  }
+
+  ProviderListenable<bool> get supportsSuggestionRequests {
+    return select(
+      (state) =>
+          state.capabilities?.supports(chat.ChatFeature.suggestionRequests) ??
+          false,
     );
   }
 

@@ -1,0 +1,913 @@
+import 'dart:convert';
+import 'dart:developer' as developer;
+import 'dart:typed_data';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mpx_app_core/mpx_app_core.dart';
+import 'package:ssi/ssi.dart' show DataIntegrityEddsaJcsVerifier;
+
+import '../../../application/services/signing_service/signing_service.dart';
+import '../../../infrastructure/providers/shared_preferences_provider.dart';
+
+class CiergeTrustTaskPlugin implements AttachmentRenderer {
+  static const String pluginFormat = 'cierge/trust-task';
+
+  @override
+  AttachmentPluginIcon get icon => const AssetIcon('assets/sign.png');
+
+  @override
+  bool get isPlatformSupported => false;
+
+  @override
+  String localizedName(BuildContext context) => 'Trust Task';
+
+  @override
+  bool supportsFormat(ChatAttachment attachment) =>
+      attachment.format == pluginFormat;
+
+  @override
+  Widget renderAttachment(AttachmentRenderRequest request) {
+    developer.log(
+      'renderAttachment format=${request.attachment.format} '
+      'id=${request.attachment.id} '
+      'hasData=${request.attachment.data != null} '
+      'hasDownload=${request.download != null}',
+      name: 'CiergeTrustTaskPlugin',
+    );
+
+    final envelope = _parseEnvelope(request.attachment);
+    if (envelope != null) {
+      return _TrustTaskCard(envelope: envelope);
+    }
+
+    if (request.download != null) {
+      return _AsyncTrustTaskCard(
+        attachment: request.attachment,
+        download: request.download!,
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+
+  @override
+  Widget renderAttachments(AttachmentListRenderRequest request) {
+    if (request.attachments.isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: request.attachments
+          .map(
+            (attachment) => renderAttachment(
+              AttachmentRenderRequest(
+                attachment: attachment,
+                isFromMe: request.isFromMe,
+                chatItemColor: request.chatItemColor,
+                renderContext: request.renderContext,
+                download: request.download,
+              ),
+            ),
+          )
+          .toList(),
+    );
+  }
+
+  static Map<String, dynamic>? _parseEnvelope(ChatAttachment attachment) {
+    final data = attachment.data;
+    if (data == null) return null;
+    var raw = data.json;
+    if (raw == null) {
+      final b64 = data.base64;
+      if (b64 != null) {
+        try {
+          raw = utf8.decode(base64Decode(b64));
+        } catch (_) {
+          return null;
+        }
+      }
+    }
+    if (raw == null) return null;
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is Map<String, dynamic>) return decoded;
+    } on FormatException {
+      // ignore
+    }
+    return null;
+  }
+}
+
+class _AsyncTrustTaskCard extends StatefulWidget {
+  const _AsyncTrustTaskCard({required this.attachment, required this.download});
+
+  final ChatAttachment attachment;
+  final Future<Uint8List> Function(ChatAttachment) download;
+
+  @override
+  State<_AsyncTrustTaskCard> createState() => _AsyncTrustTaskCardState();
+}
+
+class _AsyncTrustTaskCardState extends State<_AsyncTrustTaskCard> {
+  Map<String, dynamic>? _envelope;
+  bool _loading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _downloadAndParse();
+  }
+
+  Future<void> _downloadAndParse() async {
+    try {
+      final bytes = await widget.download(widget.attachment);
+      final jsonStr = utf8.decode(bytes);
+      final decoded = jsonDecode(jsonStr);
+      if (decoded is Map<String, dynamic> && mounted) {
+        setState(() {
+          _envelope = decoded;
+          _loading = false;
+        });
+      } else if (mounted) {
+        setState(() {
+          _error = 'Invalid envelope format';
+          _loading = false;
+        });
+      }
+    } catch (e) {
+      developer.log(
+        'Failed to download trust task attachment: $e',
+        name: 'CiergeTrustTaskPlugin',
+      );
+      if (mounted) {
+        setState(() {
+          _error = 'Failed to load: $e';
+          _loading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return const SizedBox.shrink();
+    }
+
+    if (_envelope != null) {
+      return _TrustTaskCard(envelope: _envelope!);
+    }
+
+    if (_error != null) {
+      developer.log(
+        'Trust task load error: $_error',
+        name: 'CiergeTrustTaskPlugin',
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+}
+
+class _TrustTaskCard extends ConsumerStatefulWidget {
+  const _TrustTaskCard({required this.envelope});
+
+  final Map<String, dynamic> envelope;
+
+  @override
+  ConsumerState<_TrustTaskCard> createState() => _TrustTaskCardState();
+}
+
+class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
+  static const _blueAccent = Color(0xFF81D4FA);
+
+  bool _expanded = false;
+  bool _auditLoading = false;
+  Map<String, dynamic>? _auditEntry;
+  String? _auditError;
+  bool _verifying = false;
+  bool? _verificationResult;
+  String? _verificationError;
+  int _verifyStep = 0;
+
+  static const _verifySteps = [
+    'Canonicalizing envelope with JCS (RFC 8785)...',
+    'Computing SHA-256 hash of envelope...',
+    'Canonicalizing proof configuration...',
+    'Computing SHA-256 hash of proof...',
+    'Resolving DID to obtain public key...',
+    'Verifying Ed25519 signature...',
+  ];
+
+  bool get _isSignedDocument {
+    final type = widget.envelope['type'] as String? ?? '';
+    return type.contains('signed-document');
+  }
+
+  Color get _accent => _isSignedDocument ? Colors.greenAccent : _blueAccent;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_expanded) {
+      return GestureDetector(
+        onTap: _toggle,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: _accent.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(color: _accent.withValues(alpha: 0.2)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                _isSignedDocument ? Icons.verified : Icons.smart_toy_outlined,
+                color: _accent,
+                size: 14,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                _isSignedDocument ? 'Signed Document' : 'Signed by Agent',
+                style: const TextStyle(
+                  color: Colors.white54,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(width: 4),
+              const Icon(Icons.expand_more, color: Colors.white38, size: 16),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final proof = widget.envelope['proof'] as Map<String, dynamic>? ?? {};
+    final payload = widget.envelope['payload'] as Map<String, dynamic>? ?? {};
+    final issuer = widget.envelope['issuer'] as String? ?? '';
+    final proofType = proof['type'] as String? ?? '';
+    final cryptosuite = proof['cryptosuite'] as String? ?? '';
+    final proofCreated = proof['created'] as String? ?? '';
+    final title = _isSignedDocument
+        ? (payload['title'] as String? ?? 'Untitled Document')
+        : 'VTA Signed Response';
+
+    final shortIssuer = issuer.length > 24
+        ? '${issuer.substring(0, 12)}...${issuer.substring(issuer.length - 8)}'
+        : issuer;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.all(Radius.circular(10)),
+        gradient: RadialGradient(
+          center: Alignment.bottomCenter,
+          radius: 2,
+          colors: _isSignedDocument
+              ? const [
+                  Color.fromARGB(255, 36, 76, 56),
+                  Color.fromARGB(255, 18, 31, 24),
+                ]
+              : const [
+                  Color.fromARGB(255, 30, 60, 80),
+                  Color.fromARGB(255, 18, 24, 31),
+                ],
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.verified, color: _accent, size: 28),
+              const SizedBox(width: 12),
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.check_circle_outline,
+                          color: _accent,
+                          size: 14,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Signed',
+                          style: TextStyle(
+                            color: _accent,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'by $shortIssuer',
+                      style: const TextStyle(
+                        color: Colors.white38,
+                        fontSize: 11,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              GestureDetector(
+                onTap: _toggle,
+                child: const Icon(
+                  Icons.expand_less,
+                  color: Colors.white38,
+                  size: 20,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              const Icon(
+                Icons.shield_outlined,
+                color: Colors.white38,
+                size: 14,
+              ),
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  '$proofType · $cryptosuite',
+                  style: const TextStyle(color: Colors.white38, fontSize: 11),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          if (proofCreated.isNotEmpty) ...[
+            const SizedBox(height: 2),
+            Row(
+              children: [
+                const Icon(Icons.access_time, color: Colors.white38, size: 14),
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    'Signed at $proofCreated',
+                    style: const TextStyle(color: Colors.white38, fontSize: 11),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ],
+          const SizedBox(height: 10),
+          _buildVerifyButton(),
+          const SizedBox(height: 10),
+          _buildAgentDetailsSection(),
+        ],
+      ),
+    );
+  }
+
+  void _toggle() {
+    final wasExpanded = _expanded;
+    setState(() => _expanded = !_expanded);
+    if (_expanded && _auditEntry == null && !_auditLoading) {
+      _fetchAuditDetails();
+    }
+    if (wasExpanded) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Scrollable.ensureVisible(
+            context,
+            alignment: 0.5,
+            duration: const Duration(milliseconds: 200),
+          );
+        }
+      });
+    }
+  }
+
+  Widget _buildAgentDetailsSection() {
+    final isOwner =
+        ref.watch(signingServiceProvider.select((s) => s.status)) ==
+        SigningServiceStatus.connected;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.black26,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (isOwner) ...[
+            const Text(
+              'Trust Task',
+              style: TextStyle(
+                color: Colors.white54,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 6),
+            if (_auditLoading)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 4),
+                child: SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white38,
+                  ),
+                ),
+              )
+            else if (_auditError != null)
+              Text(
+                _auditError!,
+                style: const TextStyle(color: Colors.redAccent, fontSize: 10),
+              )
+            else if (_auditEntry != null)
+              _buildAuditRows(_auditEntry!)
+            else
+              const Text(
+                'No audit entry found',
+                style: TextStyle(color: Colors.white38, fontSize: 10),
+              ),
+          ],
+          const SizedBox(height: 10),
+          const Text(
+            'Raw Envelope',
+            style: TextStyle(
+              color: Colors.white54,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 6),
+          SelectableText(
+            _truncatedEnvelopeJson(widget.envelope),
+            style: const TextStyle(
+              color: Colors.white54,
+              fontSize: 10,
+              fontFamily: 'monospace',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVerifyButton() {
+    if (_verifying) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.white12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (var i = 0; i < _verifySteps.length; i++)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (i < _verifyStep)
+                      Icon(Icons.check_circle, color: _accent, size: 14)
+                    else if (i == _verifyStep)
+                      SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: _accent,
+                        ),
+                      )
+                    else
+                      const Icon(
+                        Icons.circle_outlined,
+                        color: Colors.white12,
+                        size: 14,
+                      ),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        i <= _verifyStep
+                            ? _verifySteps[i]
+                            : _verifySteps[i].replaceAll('...', ''),
+                        style: TextStyle(
+                          color: i < _verifyStep
+                              ? _accent.withValues(alpha: 0.7)
+                              : i == _verifyStep
+                              ? Colors.white70
+                              : Colors.white24,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      );
+    }
+
+    if (_verificationResult != null) {
+      final isValid = _verificationResult!;
+      final proof = widget.envelope['proof'] as Map<String, dynamic>? ?? {};
+      final verificationMethod = proof['verificationMethod'] as String? ?? '';
+      final cryptosuite = proof['cryptosuite'] as String? ?? '';
+      final proofPurpose = proof['proofPurpose'] as String? ?? '';
+      final created = proof['created'] as String? ?? '';
+      final issuer = widget.envelope['issuer'] as String? ?? '';
+
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: (isValid ? _accent : Colors.redAccent).withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: (isValid ? _accent : Colors.redAccent).withValues(
+              alpha: 0.3,
+            ),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  isValid ? Icons.verified_user : Icons.gpp_bad,
+                  color: isValid ? _accent : Colors.redAccent,
+                  size: 18,
+                ),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    isValid
+                        ? 'Cryptographic Signature Verified'
+                        : 'Signature Verification Failed',
+                    style: TextStyle(
+                      color: isValid ? _accent : Colors.redAccent,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            if (isValid) ...[
+              const SizedBox(height: 10),
+              _verifyDetailRow('Cryptosuite', cryptosuite),
+              _verifyDetailRow('Purpose', proofPurpose),
+              _verifyDetailRow('Signer', _truncateDid(issuer)),
+              _verifyDetailRow('Key', _truncateDid(verificationMethod)),
+              if (created.isNotEmpty) _verifyDetailRow('Signed at', created),
+              const SizedBox(height: 6),
+              Text(
+                _isSignedDocument
+                    ? 'The document has not been tampered with and was signed '
+                          'by the holder of the private key.'
+                    : 'The response has not been tampered with and was signed '
+                          'by the holder of the private key.',
+                style: const TextStyle(color: Colors.white38, fontSize: 10),
+              ),
+            ],
+            if (_verificationError != null) ...[
+              const SizedBox(height: 6),
+              Text(
+                _verificationError!,
+                style: const TextStyle(color: Colors.redAccent, fontSize: 10),
+              ),
+            ],
+          ],
+        ),
+      );
+    }
+
+    return GestureDetector(
+      onTap: _verifySignature,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          border: Border.all(color: _accent.withValues(alpha: 0.5)),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.fingerprint, color: _accent, size: 18),
+            const SizedBox(width: 8),
+            Text(
+              'Verify Signature',
+              style: TextStyle(
+                color: _accent,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _verifyDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 3),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 80,
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white38,
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 10,
+                fontFamily: 'monospace',
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _verifySignature() async {
+    setState(() {
+      _verifying = true;
+      _verifyStep = 0;
+    });
+
+    try {
+      final proof = widget.envelope['proof'] as Map<String, dynamic>? ?? {};
+      final verificationMethod = proof['verificationMethod'] as String? ?? '';
+      final verifierDid = verificationMethod.contains('#')
+          ? verificationMethod.substring(0, verificationMethod.indexOf('#'))
+          : verificationMethod;
+
+      for (var i = 0; i < _verifySteps.length - 1; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+        if (!mounted) return;
+        setState(() => _verifyStep = i + 1);
+      }
+
+      final verifier = DataIntegrityEddsaJcsVerifier(verifierDid: verifierDid);
+      final result = await verifier.verify(widget.envelope);
+
+      await Future<void>.delayed(const Duration(milliseconds: 400));
+      if (mounted) {
+        setState(() {
+          _verifying = false;
+          _verificationResult = result.isValid;
+          _verificationError = result.isValid ? null : result.toString();
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _verifying = false;
+          _verificationResult = false;
+          _verificationError = e.toString();
+        });
+      }
+    }
+  }
+
+  static const _auditCachePrefix = 'trust_task_audit_';
+
+  String? get _auditCacheKey {
+    final id = widget.envelope['id'] as String?;
+    return id != null ? '$_auditCachePrefix$id' : null;
+  }
+
+  Future<void> _fetchAuditDetails() async {
+    setState(() {
+      _auditLoading = true;
+      _auditError = null;
+    });
+
+    final cacheKey = _auditCacheKey;
+    if (cacheKey != null) {
+      try {
+        final prefs = ref.read(sharedPreferencesProvider);
+        final cached = prefs.getString(cacheKey);
+        if (cached != null) {
+          final entry = jsonDecode(cached) as Map<String, dynamic>;
+          if (mounted) {
+            setState(() {
+              _auditEntry = entry;
+              _auditLoading = false;
+            });
+          }
+          return;
+        }
+      } catch (_) {}
+    }
+
+    try {
+      final signingService = ref.read(signingServiceProvider.notifier);
+      final logs = await signingService.getSigningAuditLogs();
+      final match = _findMatchingAuditEntry(logs);
+      if (match != null && cacheKey != null) {
+        try {
+          final prefs = ref.read(sharedPreferencesProvider);
+          await prefs.setString(cacheKey, jsonEncode(match));
+        } catch (_) {}
+      }
+      if (mounted) {
+        setState(() {
+          _auditEntry = match;
+          _auditLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _auditError = 'Failed to load: $e';
+          _auditLoading = false;
+        });
+      }
+    }
+  }
+
+  Map<String, dynamic>? _findMatchingAuditEntry(
+    List<Map<String, dynamic>> entries,
+  ) {
+    final proof = widget.envelope['proof'] as Map<String, dynamic>? ?? {};
+    final proofCreated = proof['created'] as String? ?? '';
+    final envelopeId = widget.envelope['id'] as String?;
+
+    for (final entry in entries) {
+      final detail = entry['detail'] as Map<String, dynamic>?;
+      if (detail != null && envelopeId != null) {
+        if (detail['envelope_id'] == envelopeId) return entry;
+      }
+    }
+
+    if (proofCreated.isEmpty) return entries.isNotEmpty ? entries.first : null;
+
+    final proofTime = DateTime.tryParse(proofCreated);
+    if (proofTime == null) return entries.isNotEmpty ? entries.first : null;
+
+    Map<String, dynamic>? closest;
+    var minDiff = Duration.zero;
+    for (final entry in entries) {
+      final ts = entry['timestamp'];
+      DateTime? entryTime;
+      if (ts is int) {
+        entryTime = DateTime.fromMillisecondsSinceEpoch(ts * 1000, isUtc: true);
+      } else if (ts is String) {
+        entryTime = DateTime.tryParse(ts);
+      }
+      if (entryTime == null) continue;
+      final diff = proofTime.difference(entryTime).abs();
+      if (closest == null || diff < minDiff) {
+        closest = entry;
+        minDiff = diff;
+      }
+    }
+
+    return closest;
+  }
+
+  Widget _buildAuditRows(Map<String, dynamic> entry) {
+    final detail = entry['detail'] as Map<String, dynamic>?;
+    final items = <MapEntry<String, String>>[
+      MapEntry('Operation', entry['action'] as String? ?? 'unknown'),
+      MapEntry('Actor', _truncateDid(entry['actor'] as String? ?? '')),
+      MapEntry('Outcome', entry['outcome'] as String? ?? ''),
+      if (entry['resource'] != null)
+        MapEntry('Vault Entry', entry['resource'] as String),
+      if (entry['context_id'] != null)
+        MapEntry('Context', entry['context_id'] as String),
+      if (entry['channel'] != null)
+        MapEntry('Channel', entry['channel'] as String),
+      if (detail != null) ...[
+        if (detail['envelope_id'] != null)
+          MapEntry('Envelope ID', detail['envelope_id'] as String),
+        if (detail['envelope_type'] != null)
+          MapEntry('Envelope Type', detail['envelope_type'] as String),
+        if (detail['envelope_recipient'] != null)
+          MapEntry(
+            'Recipient',
+            _truncateDid(detail['envelope_recipient'] as String),
+          ),
+      ],
+    ];
+
+    final ts = entry['timestamp'];
+    String? timestamp;
+    if (ts is int) {
+      timestamp = DateTime.fromMillisecondsSinceEpoch(
+        ts * 1000,
+        isUtc: true,
+      ).toIso8601String();
+    } else if (ts is String) {
+      timestamp = ts;
+    }
+    if (timestamp != null) {
+      items.add(MapEntry('Timestamp', timestamp));
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (final item in items)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 100,
+                  child: Text(
+                    item.key,
+                    style: const TextStyle(
+                      color: Colors.white54,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: SelectableText(
+                    item.value,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 10,
+                      fontFamily: 'monospace',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  static String _truncateDid(String did) {
+    if (did.length <= 32) return did;
+    return '${did.substring(0, 16)}...${did.substring(did.length - 12)}';
+  }
+
+  static String _truncatedEnvelopeJson(Map<String, dynamic> data) {
+    const maxChars = 200;
+    final copy = Map<String, dynamic>.from(data);
+    for (final key in copy.keys.toList()) {
+      final value = copy[key];
+      if (value is Map<String, dynamic>) {
+        final valJson = jsonEncode(value);
+        if (valJson.length > maxChars) {
+          copy[key] = '${valJson.substring(0, maxChars)}... (truncated)';
+        }
+      } else if (value is String && value.length > maxChars) {
+        copy[key] = '${value.substring(0, maxChars)}... (truncated)';
+      }
+    }
+    return const JsonEncoder.withIndent('  ').convert(copy);
+  }
+}

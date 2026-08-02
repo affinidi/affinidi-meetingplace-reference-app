@@ -60,6 +60,79 @@ void main() {
         expect(find.text(l10n.chatMessageActionEdit), findsNothing);
       });
 
+      testWidgets('shows ask for suggestion for incoming messages', (
+        tester,
+      ) async {
+        final chatSdk = FakeChatSdk();
+        final l10n = await getL10n();
+
+        await navigateToChat(tester, contactId: contactId, chatSdk: chatSdk);
+        await _simulateIncomingMessage(tester, chatSdk, 'Incoming message');
+
+        await tester.longPress(find.text('Incoming message'));
+        await tester.pumpAndSettle();
+
+        expect(find.text(l10n.chatMessageActionAskSuggestion), findsOneWidget);
+      });
+
+      testWidgets('does not show ask for suggestion for own messages', (
+        tester,
+      ) async {
+        final chatSdk = FakeChatSdk();
+        final l10n = await getL10n();
+
+        await navigateToChat(tester, contactId: contactId, chatSdk: chatSdk);
+        await _simulateSentMessage(tester, chatSdk, 'My message');
+
+        await tester.longPress(find.text('My message'));
+        await tester.pumpAndSettle();
+
+        expect(find.text(l10n.chatMessageActionAskSuggestion), findsNothing);
+      });
+
+      testWidgets('tapping ask for suggestion calls the SDK and dismisses it', (
+        tester,
+      ) async {
+        final chatSdk = FakeChatSdk();
+        final l10n = await getL10n();
+
+        await navigateToChat(tester, contactId: contactId, chatSdk: chatSdk);
+        await _simulateIncomingMessage(tester, chatSdk, 'Incoming message');
+
+        await tester.longPress(find.text('Incoming message'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text(l10n.chatMessageActionAskSuggestion));
+        await tester.pumpAndSettle();
+
+        expect(chatSdk.sendSuggestionRequestCalls, hasLength(1));
+        expect(
+          chatSdk.sendSuggestionRequestCalls.first['text'],
+          'Incoming message',
+        );
+        expect(find.text(l10n.chatMessageActionAskSuggestion), findsNothing);
+      });
+
+      testWidgets('does not show ask for suggestion when unsupported', (
+        tester,
+      ) async {
+        final chatSdk = FakeChatSdk(
+          capabilities: const TransportCapabilities({
+            ChatFeature.textMessaging,
+            ChatFeature.reactions,
+          }),
+        );
+        final l10n = await getL10n();
+
+        await navigateToChat(tester, contactId: contactId, chatSdk: chatSdk);
+        await _simulateIncomingMessage(tester, chatSdk, 'Incoming message');
+
+        await tester.longPress(find.text('Incoming message'));
+        await tester.pumpAndSettle();
+
+        expect(find.text(l10n.chatMessageActionAskSuggestion), findsNothing);
+      });
+
       group('and tapping Edit', () {
         testWidgets('opens dialog pre-filled with current message text', (
           tester,

@@ -25,6 +25,7 @@ dependencies:
   app_badge_plus: ^1.2.3
   audio_session: ^0.2.4
   audioplayers: ^6.7.1
+  bip39_mnemonic: ^4.0.1
   camera: ^0.12.0+1
   circom_witnesscalc: ^0.0.1-beta.1
   clear_all_notifications: ^1.0.0
@@ -34,14 +35,18 @@ dependencies:
   connectivity_plus: ^7.0.0
   copy_with_extension: any
   cross_file: ^0.3.5
-  crypto: ^3.0.6
+  crypto: ^3.0.7
+  cryptography: ^2.7.0
   cupertino_icons: ^1.0.8
+  didcomm: ^2.3.4
+  dio: ^5.10.0
   drift: ^2.28.1
   file_picker: ^12.0.0-beta.5
   firebase_core: ^4.0.0
   firebase_messaging: ^16.0.0
   flutter:
     sdk: flutter
+  flutter_appauth: ^12.0.2
   flutter_cache_manager: ^3.4.1
   flutter_card_swiper: ^7.0.2
   flutter_hooks: ^0.21.2
@@ -73,9 +78,20 @@ dependencies:
   meeting_place_livekit_flutter: 
     path: ../packages/meeting_place_livekit_flutter
   meeting_place_matrix: ^0.0.1-dev.11
+  meeting_place_personal_agent:
+    git:  
+      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
+      path: packages/meeting_place_personal_agent
+      ref: main
+  meeting_place_vta_client:
+    git:  
+      url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
+      path: packages/meeting_place_vta_client
+      ref: main
   mobile_scanner: ^7.2.0
   mpx_app_core:
     path: ../packages/app-core
+  open_filex: ^4.5.0
   package_info_plus: ^10.1.0
   path: ^1.9.1
   path_provider: ^2.1.5
@@ -98,6 +114,10 @@ dependencies:
   uuid: ^4.5.1
   vc_zkp: ^1.2.5
   video_player: ^2.11.1
+  web_socket_channel: ^3.0.3
+
+dependency_overrides:
+  didcomm: ^2.3.4
 
 dev_dependencies:
   build_runner: ^2.15.0

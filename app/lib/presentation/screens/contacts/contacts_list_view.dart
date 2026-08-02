@@ -55,7 +55,7 @@ class _ContactsListView extends ConsumerWidget {
     );
 
     return ListView.builder(
-      // TODO(MA): Remove shrink wrap to enable lazy loading
+      //  c
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: contacts.length,
@@ -129,6 +129,21 @@ class _ContactListItem extends ConsumerWidget {
     ).format(contact.dateAdded);
     final statusColor = contact.getStatusColor(context, asAvatar: true);
 
+    Future<void> onContextSelected(AgentContext next) async {
+      await ref
+          .read<ContextRoutingService>(contextRoutingServiceProvider.notifier)
+          .assignContactContext(contact.id, next);
+
+      if (!context.mounted) return;
+      final l10n = context.l10n;
+      final label = next == AgentContext.work
+          ? l10n.agentContextWorkAiLabel
+          : l10n.agentContextPersonalAiLabel;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.contactsChannelContextSet(label))),
+      );
+    }
+
     final child = _ContactTile(
       contact: contact,
       isEditMode: isEditMode,
@@ -144,6 +159,7 @@ class _ContactListItem extends ConsumerWidget {
       onLongPress: () => onLongPress(contact: contact),
       onEditModeCheckChanged: (checked) =>
           onTap(contact: contact, isSelected: isSelected),
+      onContextSelected: onContextSelected,
     );
 
     return Dismissible(
@@ -199,6 +215,7 @@ class _ContactTile extends StatelessWidget {
     required this.onDoubleTap,
     required this.onLongPress,
     required this.onEditModeCheckChanged,
+    required this.onContextSelected,
   });
 
   final Contact contact;
@@ -215,6 +232,7 @@ class _ContactTile extends StatelessWidget {
   final VoidCallback onDoubleTap;
   final VoidCallback? onLongPress;
   final ValueChanged<bool?>? onEditModeCheckChanged;
+  final Future<void> Function(AgentContext context) onContextSelected;
 
   @override
   Widget build(BuildContext context) {

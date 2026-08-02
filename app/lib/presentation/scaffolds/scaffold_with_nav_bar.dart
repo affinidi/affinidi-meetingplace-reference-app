@@ -18,11 +18,21 @@ class ScaffoldWithNavBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final isZkpEnabled = ref.read(environmentProvider).zkpEnabled;
+    final environment = ref.read(environmentProvider);
+    final isZkpEnabled = environment.zkpEnabled;
+    final isPersonalAiEnabled = environment.personalAiEnabled;
 
-    final visibleTabs = isZkpEnabled
-        ? Tabs.values
-        : Tabs.values.where((tab) => tab != Tabs.credentials).toList();
+    final visibleTabs = Tabs.values.where((tab) {
+      if (!isZkpEnabled && tab == Tabs.credentials) {
+        return false;
+      }
+
+      if (!isPersonalAiEnabled && tab == Tabs.personalAgent) {
+        return false;
+      }
+
+      return true;
+    }).toList();
     final visibleBranchIndexes = visibleTabs.map((tab) => tab.index).toList();
 
     final currentIndex = navigationShell.currentIndex;

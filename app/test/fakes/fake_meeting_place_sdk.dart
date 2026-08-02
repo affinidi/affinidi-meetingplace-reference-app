@@ -20,6 +20,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
     this.offerToFind,
     this.findOfferHasError = false,
     this._shouldTimeout = false,
+    this._options = const MeetingPlaceMatrixSdkOptions(),
   }) : _channels = channels ?? {} {
     if (connectionOffers != null) {
       _allConnectionOffers.addAll(connectionOffers);
@@ -45,6 +46,10 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
   final acceptedCallIds = <String>[];
   final declinedCallIds = <String>[];
   int leaveCurrentCallCount = 0;
+  final MeetingPlaceMatrixSdkOptions _options;
+
+  @override
+  MeetingPlaceMatrixSdkOptions get options => _options;
 
   DidKeyManager? _fakeDidManager;
 
@@ -131,6 +136,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
     String? mediatorDid,
     String? metadata,
     String? externalRef,
+    String? contextKey,
     int? score,
   }) async {
     // Record the call parameters
@@ -145,6 +151,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
       'mediatorDid': mediatorDid,
       'metadata': metadata,
       'externalRef': externalRef,
+      'contextKey': contextKey,
       'score': score,
       'transport': transport,
     });
@@ -177,14 +184,16 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
   Future<AcceptOfferResult<T>> acceptOffer<T extends ConnectionOffer>({
     required T connectionOffer,
     required ContactCard contactCard,
-    String? senderInfo,
+    required String senderInfo,
     String? externalRef,
+    String? contextKey,
   }) async {
     _acceptOfferCalls.add({
       'connectionOffer': connectionOffer,
       'contactCard': contactCard.toJson(),
       'senderInfo': senderInfo,
       'externalRef': externalRef,
+      'contextKey': contextKey,
     });
 
     return _FakeAcceptOfferResult<T>(connectionOffer: connectionOffer);

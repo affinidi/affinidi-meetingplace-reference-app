@@ -66,7 +66,7 @@ final class AuthenticationServiceProvider
 }
 
 String _$authenticationServiceHash() =>
-    r'24fdca7b6c4ca87e55903090ddad6b62645c578a';
+    r'a6d8650e57561a35f2e2b74836ba6e0197c60148';
 
 /// Service responsible for managing authentication state and biometric flows.
 ///

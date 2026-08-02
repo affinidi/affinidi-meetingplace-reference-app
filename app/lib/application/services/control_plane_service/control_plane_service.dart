@@ -359,6 +359,15 @@ class _ControlPlaneEventsProcessor {
   // pending requests
   bool _shouldRunAgain = false;
 
+  bool _isTransientAclOfferFinalisedError(Object error) {
+    final text = error.toString();
+    return text.contains('e.p.authorization.access_list.denied') &&
+        (text.contains('OfferFinalisedEventHandler') ||
+            text.contains('connection-request-approval') ||
+            text.contains('agent-channel-inauguration') ||
+            text.contains('channel-inauguration'));
+  }
+
   /// Schedule processing of control plane events ensuring single concurrent
   /// run.
   ///
@@ -398,25 +407,42 @@ class _ControlPlaneEventsProcessor {
           onDone: (List<Object> errors) {
             if (errors.isNotEmpty) {
               for (final error in errors) {
-                _logger.error(
-                  'Control plane event processing error',
-                  error: error,
-                  name: _logKey,
-                );
+                if (_isTransientAclOfferFinalisedError(error)) {
+                  _logger.warning(
+                    'Transient mediator ACL denial during offer '
+                    'finalisation; ignoring and continuing',
+                    name: _logKey,
+                  );
+                } else {
+                  _logger.error(
+                    'Control plane event processing error',
+                    error: error,
+                    name: _logKey,
+                  );
+                }
               }
             }
             completer.complete();
           },
         );
       } catch (error, stackTrace) {
-        _logger.error(
-          'Error during processing control plane events',
-          error: error,
-          stackTrace: stackTrace,
-          name: _logKey,
-        );
-        completer.complete();
-        rethrow;
+        if (_isTransientAclOfferFinalisedError(error)) {
+          _logger.warning(
+            'Transient mediator ACL denial during offer '
+            'finalisation; suppressing exception',
+            name: _logKey,
+          );
+          _shouldRunAgain = true;
+        } else {
+          _logger.error(
+            'Error during processing control plane events',
+            error: error,
+            stackTrace: stackTrace,
+            name: _logKey,
+          );
+          completer.complete();
+          rethrow;
+        }
       }
       await completer.future;
     } while (_shouldRunAgain);

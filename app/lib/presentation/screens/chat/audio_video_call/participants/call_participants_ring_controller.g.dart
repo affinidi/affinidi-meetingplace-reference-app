@@ -11,9 +11,10 @@ part of 'call_participants_ring_controller.dart';
 /// Tracks the per-member re-ring state for a group call's participant list,
 /// keyed by the member's DID.
 ///
-/// Drives the bell -> ringing -> timeout affordance in the participant sheet.
-/// State is held here (not in the sheet) so it survives the sheet closing and
-/// reopening while a ring is still in flight.
+/// Drives the bell -> ringing -> timeout affordance in the participant sheet
+/// and sends the targeted call-invite to that member through the SDK. State is
+/// held here (not in the sheet) so it survives the sheet closing and reopening
+/// while a ring is still in flight.
 
 @ProviderFor(CallParticipantsRingController)
 const callParticipantsRingControllerProvider =
@@ -22,9 +23,10 @@ const callParticipantsRingControllerProvider =
 /// Tracks the per-member re-ring state for a group call's participant list,
 /// keyed by the member's DID.
 ///
-/// Drives the bell -> ringing -> timeout affordance in the participant sheet.
-/// State is held here (not in the sheet) so it survives the sheet closing and
-/// reopening while a ring is still in flight.
+/// Drives the bell -> ringing -> timeout affordance in the participant sheet
+/// and sends the targeted call-invite to that member through the SDK. State is
+/// held here (not in the sheet) so it survives the sheet closing and reopening
+/// while a ring is still in flight.
 final class CallParticipantsRingControllerProvider
     extends
         $NotifierProvider<
@@ -34,9 +36,10 @@ final class CallParticipantsRingControllerProvider
   /// Tracks the per-member re-ring state for a group call's participant list,
   /// keyed by the member's DID.
   ///
-  /// Drives the bell -> ringing -> timeout affordance in the participant sheet.
-  /// State is held here (not in the sheet) so it survives the sheet closing and
-  /// reopening while a ring is still in flight.
+  /// Drives the bell -> ringing -> timeout affordance in the participant sheet
+  /// and sends the targeted call-invite to that member through the SDK. State is
+  /// held here (not in the sheet) so it survives the sheet closing and reopening
+  /// while a ring is still in flight.
   const CallParticipantsRingControllerProvider._({
     required CallParticipantsRingControllerFamily super.from,
     required String super.argument,
@@ -83,14 +86,15 @@ final class CallParticipantsRingControllerProvider
 }
 
 String _$callParticipantsRingControllerHash() =>
-    r'6d279bf54db5d06c876fdba8194b731460b14c9c';
+    r'1a79afb7907610c1bc2e50825e636e7d0f564f07';
 
 /// Tracks the per-member re-ring state for a group call's participant list,
 /// keyed by the member's DID.
 ///
-/// Drives the bell -> ringing -> timeout affordance in the participant sheet.
-/// State is held here (not in the sheet) so it survives the sheet closing and
-/// reopening while a ring is still in flight.
+/// Drives the bell -> ringing -> timeout affordance in the participant sheet
+/// and sends the targeted call-invite to that member through the SDK. State is
+/// held here (not in the sheet) so it survives the sheet closing and reopening
+/// while a ring is still in flight.
 
 final class CallParticipantsRingControllerFamily extends $Family
     with
@@ -113,9 +117,10 @@ final class CallParticipantsRingControllerFamily extends $Family
   /// Tracks the per-member re-ring state for a group call's participant list,
   /// keyed by the member's DID.
   ///
-  /// Drives the bell -> ringing -> timeout affordance in the participant sheet.
-  /// State is held here (not in the sheet) so it survives the sheet closing and
-  /// reopening while a ring is still in flight.
+  /// Drives the bell -> ringing -> timeout affordance in the participant sheet
+  /// and sends the targeted call-invite to that member through the SDK. State is
+  /// held here (not in the sheet) so it survives the sheet closing and reopening
+  /// while a ring is still in flight.
 
   CallParticipantsRingControllerProvider call(String contactId) =>
       CallParticipantsRingControllerProvider._(argument: contactId, from: this);
@@ -127,9 +132,10 @@ final class CallParticipantsRingControllerFamily extends $Family
 /// Tracks the per-member re-ring state for a group call's participant list,
 /// keyed by the member's DID.
 ///
-/// Drives the bell -> ringing -> timeout affordance in the participant sheet.
-/// State is held here (not in the sheet) so it survives the sheet closing and
-/// reopening while a ring is still in flight.
+/// Drives the bell -> ringing -> timeout affordance in the participant sheet
+/// and sends the targeted call-invite to that member through the SDK. State is
+/// held here (not in the sheet) so it survives the sheet closing and reopening
+/// while a ring is still in flight.
 
 abstract class _$CallParticipantsRingController
     extends $Notifier<Map<String, CallRingState>> {

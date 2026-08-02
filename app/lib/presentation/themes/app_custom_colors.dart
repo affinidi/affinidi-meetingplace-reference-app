@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 @immutable
 class AppCustomColors extends ThemeExtension<AppCustomColors> {
   const AppCustomColors({
+    this._mention,
     this._cyan,
     this._purple,
     this._rose,
@@ -49,6 +50,7 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
   static const secondaryBrand90 = Color(0xFF1D2138);
   static const utilitySuccess100 = Color(0xFF00A08D);
 
+  final Color? _mention;
   final Color? _cyan;
   final Color? _purple;
   final Color? _rose;
@@ -83,6 +85,7 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
   final Color? _incomingCallBannerBackground;
   final Color? _incomingCallBannerCallTypeLabel;
 
+  Color get mention => _mention ?? Colors.orange;
   Color get cyan => _cyan ?? Colors.cyan;
   Color get purple => _purple ?? Colors.purple;
   Color get rose => _rose ?? const Color.fromARGB(255, 211, 31, 130);
@@ -138,6 +141,7 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
 
   @override
   AppCustomColors copyWith({
+    Color? mention,
     Color? cyan,
     Color? callChatItemBackground,
     Color? callChatItemFromMeBackground,
@@ -173,6 +177,7 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
     Color? incomingCallBannerCallTypeLabel,
   }) {
     return AppCustomColors(
+      mention: mention ?? _mention,
       cyan: cyan ?? _cyan,
       purple: purple ?? _purple,
       rose: rose ?? _rose,
@@ -222,6 +227,7 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
   AppCustomColors lerp(AppCustomColors? other, double t) {
     if (other is! AppCustomColors) return this;
     return AppCustomColors(
+      mention: Color.lerp(_mention, other._mention, t),
       cyan: Color.lerp(_cyan, other._cyan, t),
       purple: Color.lerp(_purple, other._purple, t),
       rose: Color.lerp(_rose, other._rose, t),

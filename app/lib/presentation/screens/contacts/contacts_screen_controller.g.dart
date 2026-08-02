@@ -42,7 +42,7 @@ final class ContactsScreenControllerProvider
 }
 
 String _$contactsScreenControllerHash() =>
-    r'0cc452ac351112a5db444a3d9f64857e5b3c43cd';
+    r'8b01210dbc327998f6fc57459bdd686c54a4834e';
 
 abstract class _$ContactsScreenController
     extends $Notifier<ContactsScreenState> {

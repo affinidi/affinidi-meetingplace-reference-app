@@ -71,7 +71,7 @@ final class ContactsServiceProvider
   }
 }
 
-String _$contactsServiceHash() => r'a507aa291deae357de576534a630e6dfcc4a373a';
+String _$contactsServiceHash() => r'86f43b518324353b789d6846952c2307456c83f7';
 
 /// Service responsible for managing contacts derived from channels and offers.
 ///

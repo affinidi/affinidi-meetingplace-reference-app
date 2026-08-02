@@ -107,6 +107,52 @@ class Environment {
     defaultValue: false,
   );
 
+  bool get personalAiEnabled =>
+      const bool.fromEnvironment('PERSONAL_AI_ENABLED', defaultValue: true);
+
+  /// Event configuration keyed by sha256 hex of the wallet mnemonic.
+  ///
+  /// Each entry maps to a nested map of event options, e.g.:
+  /// `{"<sha256>": {"ciergeConnectorDid": "did:key:..."}}`.
+  /// Sourced from the `WALLET_CONFIG` compile-time environment variable
+  /// as a JSON string. Returns an empty map when not set.
+  late final Map<String, Map<String, dynamic>> ciergeEventConfig = () {
+    final raw = const String.fromEnvironment('WALLET_CONFIG');
+    if (raw.isEmpty) return <String, Map<String, dynamic>>{};
+    final decoded = _tryJsonDecode(raw);
+    if (decoded is! Map) return <String, Map<String, dynamic>>{};
+    return decoded.map(
+      (k, v) => MapEntry(k as String, Map<String, dynamic>.from(v as Map)),
+    );
+  }();
+  String? personalAiBaseUrl(String mnemonicHash) =>
+      (ciergeEventConfig[mnemonicHash]?['ciergeConsoleUrl'] as String?)?.trim();
+  String? ciergeConnectorDid(String mnemonicHash) =>
+      (ciergeEventConfig[mnemonicHash]?['ciergeConnectorDid'] as String?)
+          ?.trim();
+  String? vtaBaseUrl(String mnemonicHash) =>
+      (ciergeEventConfig[mnemonicHash]?['vtaBaseUrl'] as String?)?.trim();
+  String? vtaDid(String mnemonicHash) =>
+      (ciergeEventConfig[mnemonicHash]?['vtaDid'] as String?)?.trim();
+  String get vtaMediatorDid => const String.fromEnvironment('VTA_MEDIATOR_DID');
+  String get personalAiSetupEndpoint => const String.fromEnvironment(
+    'PERSONAL_AI_SETUP_ENDPOINT',
+    defaultValue: '/personal-agent/setup',
+  );
+
+  String get microsoftOAuthTenantId => const String.fromEnvironment(
+    'MICROSOFT_OAUTH_TENANT_ID',
+    defaultValue: 'common',
+  );
+
+  String get microsoftOAuthClientId =>
+      const String.fromEnvironment('MICROSOFT_OAUTH_CLIENT_ID');
+
+  String get microsoftOAuthRedirectUrl => const String.fromEnvironment(
+    'MICROSOFT_OAUTH_REDIRECT_URL',
+    defaultValue: 'mpx://auth/microsoft/callback',
+  );
+
   String get appVersionName =>
       const String.fromEnvironment('APP_VERSION_NAME', defaultValue: '');
 

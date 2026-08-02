@@ -43,6 +43,9 @@ class _IdentityFormBottomContainer extends ConsumerWidget {
       );
 
       if (success && context.mounted) {
+        if (mode == IdentityFormMode.add) {
+          ref.read(personalAiServiceProvider.notifier).onIdentityCreated();
+        }
         controller.markAsCurrentIdentity();
         context.pop();
       }

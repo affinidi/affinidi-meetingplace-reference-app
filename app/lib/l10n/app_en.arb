@@ -3,7 +3,7 @@
 	"@appName": {
 		"type": "text"
 	},
-	"tabsTitle": "{tabName, select, connections{Invitations} contacts{Channels} identities{Identities} rCards{R-Cards} credentials{Credentials} settings{Settings} other{Invalid}}",
+	"tabsTitle": "{tabName, select, connections{Invitations} contacts{Channels} identities{Identities} rCards{R-Cards} personalAgent{Agent} credentials{Credentials} settings{Settings} other{Invalid}}",
 	"@tabsTitle": {
 		"type": "text",
 		"placeholders": {
@@ -12,6 +12,105 @@
 			}
 		}
 	},
+	"personalAgentPanelSubtitle": "Set up and manage your personal AI agent without exposing DID details.",
+	"personalAgentSetupInProgressButton": "Setting up and connecting...",
+	"personalAgentReconnectButton": "Reconnect Personal Agent",
+	"personalAgentConnectButton": "Connect Personal Agent",
+	"personalAgentReviewSetupPrompt": "Review setup prompt",
+	"personalAgentConnectedSectionTitle": "Connected",
+	"personalAgentSummaryContextId": "Context ID: {contextId}",
+	"@personalAgentSummaryContextId": {
+		"type": "text",
+		"placeholders": {
+			"contextId": {
+				"type": "String"
+			}
+		}
+	},
+	"personalAgentSummaryContextCreated": "Context created: {value}",
+	"@personalAgentSummaryContextCreated": {
+		"type": "text",
+		"placeholders": {
+			"value": {
+				"type": "String"
+			}
+		}
+	},
+	"personalAgentSummaryProfile": "Agent profile: {value}",
+	"@personalAgentSummaryProfile": {
+		"type": "text",
+		"placeholders": {
+			"value": {
+				"type": "String"
+			}
+		}
+	},
+	"personalAgentSummaryAgentCreated": "Agent created: {value}",
+	"@personalAgentSummaryAgentCreated": {
+		"type": "text",
+		"placeholders": {
+			"value": {
+				"type": "String"
+			}
+		}
+	},
+	"personalAgentSummaryMode": "Mode: {value}",
+	"@personalAgentSummaryMode": {
+		"type": "text",
+		"placeholders": {
+			"value": {
+				"type": "String"
+			}
+		}
+	},
+	"personalAgentSummarySetupStatus": "Setup status: {value}",
+	"@personalAgentSummarySetupStatus": {
+		"type": "text",
+		"placeholders": {
+			"value": {
+				"type": "String"
+			}
+		}
+	},
+	"personalAgentSummaryOfferAvailable": "Offer available: {value}",
+	"@personalAgentSummaryOfferAvailable": {
+		"type": "text",
+		"placeholders": {
+			"value": {
+				"type": "String"
+			}
+		}
+	},
+	"personalAgentStatusConnected": "Personal AI connected",
+	"personalAgentStatusContextRequired": "Context setup required",
+	"personalAgentStatusSettingUp": "Personal AI setup in progress",
+	"personalAgentStatusNotConnected": "Personal AI not connected",
+	"personalAgentStatusSubtitleConnected": "Your assistant is ready and will appear in contacts once the channel is active.",
+	"personalAgentStatusSubtitleNotConnected": "Connect your Personal AI in one tap. MPX stays usable throughout setup.",
+	"personalAgentContextSetupTitle": "Set Up Your Personal AI",
+	"personalAgentContextSetupDescription": "Help your Personal AI get to know you. Upload a text file with your background, preferences, and working style. This becomes the AI's long-term knowledge about you.",
+	"personalAgentContextWhatToIncludeTitle": "What to include in your file",
+	"personalAgentContextWhatToIncludeItem1": "Name, role, and professional background",
+	"personalAgentContextWhatToIncludeItem2": "Working style and communication preferences",
+	"personalAgentContextWhatToIncludeItem3": "Current responsibilities and focus areas",
+	"personalAgentContextWhatToIncludeItem4": "Any other context you'd like the AI to remember",
+	"personalAgentContextPickFile": "Tap to select a .txt file",
+	"personalAgentContextFileSelected": "File selected",
+	"personalAgentContextFileTapToChange": "Tap to choose a different file",
+	"personalAgentContextUploadButton": "Upload Context File",
+	"personalAgentContextUploading": "Uploading...",
+	"personalAgentContextUploadSuccess": "Context uploaded successfully",
+	"personalAgentContextUploadedFile": "Uploaded: {fileName}",
+	"@personalAgentContextUploadedFile": {
+		"placeholders": {
+			"fileName": { "type": "String" }
+		}
+	},
+	"personalAgentWhatHappensNext": "What happens next",
+	"personalAgentStepCreateOffer": "A Personal AI offer is created for your current identity.",
+	"personalAgentStepFetchMnemonic": "MPX retrieves the mnemonic from backend offer API.",
+	"personalAgentStepAcceptOffer": "The app accepts the offer and waits for channel inauguration.",
+	"personalAgentStepContactAppears": "Personal AI appears in contacts when channel activity arrives.",
 	"rCardsPlaceholderMessage": "R-Cards will appear here.",
 	"@rCardsPlaceholderMessage": {
 		"type": "text"
@@ -850,6 +949,22 @@
 	"@chatMessageActionCopy": {
 		"type": "text"
 	},
+	"chatMessageActionAskSuggestion": "Ask for suggestion",
+	"@chatMessageActionAskSuggestion": {
+		"type": "text"
+	},
+	"chatSuggestionActionIgnore": "Ignore",
+	"@chatSuggestionActionIgnore": {
+		"type": "text"
+	},
+	"chatSuggestionActionEdit": "Edit",
+	"@chatSuggestionActionEdit": {
+		"type": "text"
+	},
+	"chatSuggestionActionSendAsMe": "Send as Me",
+	"@chatSuggestionActionSendAsMe": {
+		"type": "text"
+	},
 	"chatMessageActionEdit": "Edit message",
 	"@chatMessageActionEdit": {
 		"type": "text"
@@ -880,6 +995,10 @@
 	},
 	"chatMessageDeleteFailed": "Could not delete message",
 	"@chatMessageDeleteFailed": {
+		"type": "text"
+	},
+	"chatSuggestionRequestFailed": "Could not request suggestion",
+	"@chatSuggestionRequestFailed": {
 		"type": "text"
 	},
 	"chatItemStatus": "{status, select, queued{Queued} delivered{Delivered} sending{Sending} sent{Sent} error{Error} groupDeleted{Group deleted} other{}}",
@@ -1901,6 +2020,141 @@
 	},
 	"generalEmail": "Email",
 	"vrcResponderIntro": "{name} has selected the following persona to verify the relationship:",
+	"agentContextWorkAiLabel": "Work AI",
+	"agentContextPersonalAiLabel": "Personal AI",
+	"contactsChannelContextSet": "Channel context set to {label}",
+	"@contactsChannelContextSet": {
+		"placeholders": {
+			"label": {
+				"type": "String"
+			}
+		}
+	},
+	"chatContextUploaded": "{label} context uploaded: {fileName}",
+	"@chatContextUploaded": {
+		"placeholders": {
+			"label": {
+				"type": "String"
+			},
+			"fileName": {
+				"type": "String"
+			}
+		}
+	},
+	"chatUploadFileFirst": "Upload {fileName} first.",
+	"@chatUploadFileFirst": {
+		"placeholders": {
+			"fileName": {
+				"type": "String"
+			}
+		}
+	},
+	"chatChannelUsesContext": "Channel now uses {label}.",
+	"@chatChannelUsesContext": {
+		"placeholders": {
+			"label": {
+				"type": "String"
+			}
+		}
+	},
+	"chatMenuUseWorkAi": "Use Work AI",
+	"chatMenuUsePersonalAi": "Use Personal AI",
+	"chatMenuUploadWorkContext": "Upload work-context.txt",
+	"chatMenuReuploadWorkContext": "Re-upload work-context.txt",
+	"chatMenuUploadPersonalContext": "Upload personal-context.txt",
+	"chatMenuReuploadPersonalContext": "Re-upload personal-context.txt",
+	"identitiesSetupMyAgent": "Set up my agent",
+	"identitiesSetupPromptDescription": "Choose Work or Personal in the Agent tab.",
+	"identitiesSettingUp": "Setting Up...",
+	"identitiesNotNow": "Not now",
+	"identitiesAgentConfiguredTooltip": "Agent configured",
+	"personalAgentNoContextCreated": "No context created",
+	"personalAgentContextUploadedSnackBar": "{label} uploaded: {fileName}",
+	"@personalAgentContextUploadedSnackBar": {
+		"placeholders": {
+			"label": {
+				"type": "String"
+			},
+			"fileName": {
+				"type": "String"
+			}
+		}
+	},
+	"personalAgentSetupSectionSubtitle": "Set up your AI. Choose what context to set up.",
+	"personalAgentChooseFileToSetUp": "Choose a file to set up",
+	"personalAgentAlreadySetUp": "Already set up: {fileName}",
+	"@personalAgentAlreadySetUp": {
+		"placeholders": {
+			"fileName": {
+				"type": "String"
+			}
+		}
+	},
+	"personalAgentSetupCardTitle": "Set up your AI",
+	"personalAgentSetupCardDescription": "Choose what context to set up.",
+	"personalAgentConnecting": "Connecting {label}...",
+	"@personalAgentConnecting": {
+		"placeholders": {
+			"label": {
+				"type": "String"
+			}
+		}
+	},
+	"personalAgentDefaultConnectingLabel": "agent",
+	"personalAgentWorkAgentTitle": "Work Agent",
+	"personalAgentPersonalAgentTitle": "Personal Agent",
+	"personalAgentMyWorkAiTitle": "My Work AI",
+	"personalAgentWorkContextLabel": "Work (ctx 0)",
+	"personalAgentMyPersonalAiTitle": "My Personal AI",
+	"personalAgentPersonalContextLabel": "Personal (ctx 1)",
+	"personalAgentCancelConnectionTitle": "Cancel {label} connection?",
+	"@personalAgentCancelConnectionTitle": {
+		"placeholders": {
+			"label": { "type": "String" }
+		}
+	},
+	"personalAgentCancelConnectionContent": "This will remove your connection to the {agentLabel}.",
+	"@personalAgentCancelConnectionContent": {
+		"placeholders": {
+			"agentLabel": { "type": "String" }
+		}
+	},
+	"personalAgentKeepConnection": "Keep connection",
+	"personalAgentCancelConnection": "Cancel connection",
+	"personalAgentConnectionCancelled": "{label} connection cancelled.",
+	"@personalAgentConnectionCancelled": {
+		"placeholders": {
+			"label": { "type": "String" }
+		}
+	},
+	"personalAgentCancelConnectionError": "Unable to cancel {label} connection.",
+	"@personalAgentCancelConnectionError": {
+		"placeholders": {
+			"label": { "type": "String" }
+		}
+	},
+	"personalAgentNotAvailable": "Not available",
+	"personalAgentNoSnapshotYet": "No snapshot yet",
+	"personalAgentNotSetUp": "Not set up",
+	"personalAgentAuthAgentDid": "Agent DID",
+	"personalAgentAuthAclRole": "ACL role",
+	"personalAgentAuthCapabilities": "Capabilities",
+	"personalAgentAuthContextScope": "Context scope",
+	"personalAgentAuthDomainId": "Domain ID",
+	"personalAgentAuthProvision": "Provision",
+	"personalAgentAuthUpdated": "Updated",
+	"mnemonicErrorOccurred": "An error occurred.",
+	"mnemonicEntrySelectionTitle": "How would you like\nto enter your wallet?",
+	"mnemonicScanQrTitle": "Scan QR Code",
+	"mnemonicScanQrSubtitle": "Use your camera to scan a wallet QR code",
+	"mnemonicEnterManuallyTitle": "Enter manually",
+	"mnemonicEnterManuallySubtitle": "Type the mnemonic phrase that was shared with you",
+	"mnemonicManualEntryTitle": "Enter your mnemonic",
+	"mnemonicManualEntrySubtitle": "Enter the mnemonic phrase that was shared with you.",
+	"mnemonicManualHint": "word1 word2 word3 ...",
+	"mnemonicContinue": "Continue",
+	"mnemonicSuccessTitle": "You're all set!",
+	"mnemonicSuccessSubtitle": "Enjoy MeetingPlace and get engaged\nwith your personal AI agent.",
 	"videoCallTitle": "Call",
 	"@videoCallTitle": {
 		"type": "text"
@@ -2239,5 +2493,16 @@
 				"type": "String"
 			}
 		}
-	}
+	},
+	"trustTaskHistoryTitle": "Trust task history",
+	"trustTaskHistoryRefresh": "Refresh",
+	"trustTaskHistoryEmpty": "No trust tasks yet",
+	"trustTaskHistoryError": "Couldn't load trust task history",
+	"trustTaskHistoryRetry": "Retry",
+	"trustTaskHistoryLoadMore": "Load more",
+	"trustTaskHistoryItemTitle": "Signing request",
+	"trustTaskHistoryDetails": "Details",
+	"trustTaskStatusSigned": "Signed",
+	"trustTaskStatusDenied": "Blocked",
+	"trustTaskStatusUnknown": "Unknown"
 }

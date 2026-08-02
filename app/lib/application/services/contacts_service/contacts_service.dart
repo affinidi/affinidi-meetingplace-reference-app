@@ -137,9 +137,38 @@ class ContactsService extends _$ContactsService {
       name: _logKey,
     );
 
-    final existingContact = state.getContactByChannelDid(
-      channel.otherPartyPermanentChannelDid!,
-    );
+    // AI work/personal setups can share the same remote DID while using
+    // different offer links. Prefer offer-link matching first to avoid
+    // collapsing both contexts into a single contact.
+    Contact? existingContact;
+    final existingByOfferLink = state.contacts.where((contact) {
+      return contact.offerLink == channel.offerLink;
+    });
+    if (existingByOfferLink.isNotEmpty) {
+      existingContact = existingByOfferLink.first;
+    } else {
+      final otherPartyDid = channel.otherPartyPermanentChannelDid;
+      if (otherPartyDid != null && otherPartyDid.isNotEmpty) {
+        final existingByDid = state.getContactByChannelDid(otherPartyDid);
+        if (existingByDid != null) {
+          final remoteType = channel.otherPartyContactCard?.type
+              .trim()
+              .toLowerCase();
+          final sameDidDifferentOffer =
+              existingByDid.offerLink != channel.offerLink;
+          final isAiContact =
+              existingByDid.category == ContactCategory.robot ||
+              remoteType == 'ai-agent';
+
+          // For AI contacts, keep one contact per offer link (work/personal)
+          // even when the remote DID is the same.
+          if (!(sameDidDifferentOffer && isAiContact)) {
+            existingContact = existingByDid;
+          }
+        }
+      }
+    }
+
     if (existingContact == null) {
       _logger.info(
         'Contact does not exist - creating new contact',
@@ -342,14 +371,28 @@ class ContactsService extends _$ContactsService {
   ///
   /// Returns:
   /// - `Future<void>` completes when the delete operations and refresh finish.
-  Future<void> deleteContacts(List<Contact> contacts) async {
+  Future<void> deleteContacts(List<Contact> contacts) =>
+      _deleteContacts(contacts, leaveChannel: true);
+
+  /// Removes contacts from local state without leaving their channels.
+  ///
+  /// Used when disconnecting an AI context locally: the connector keeps the
+  /// channel alive for re-arm, so the app keeps it too and a later reconnect
+  /// rebuilds the contact from the live channel instead of re-accepting.
+  Future<void> removeContactsWithoutLeavingChannel(List<Contact> contacts) =>
+      _deleteContacts(contacts, leaveChannel: false);
+
+  Future<void> _deleteContacts(
+    List<Contact> contacts, {
+    required bool leaveChannel,
+  }) async {
     if (contacts.isEmpty) return;
 
     await _markContactsAsDeleted(contacts);
     await fetchContacts();
     await Future<void>.delayed(const Duration(milliseconds: 300));
 
-    await _permanentlyDeleteContacts(contacts);
+    await _permanentlyDeleteContacts(contacts, leaveChannel: leaveChannel);
     await fetchContacts();
   }
 
@@ -365,11 +408,16 @@ class ContactsService extends _$ContactsService {
   }
 
   /// Actually delete a contact that's already marked as deleted
-  Future<void> _permanentlyDeleteContacts(List<Contact> contacts) async {
+  Future<void> _permanentlyDeleteContacts(
+    List<Contact> contacts, {
+    required bool leaveChannel,
+  }) async {
     _repository ??= await _ensureRepositoryInitialized();
 
     for (final contact in contacts) {
-      await _leaveChat(contact);
+      if (leaveChannel) {
+        await _leaveChat(contact);
+      }
       await _repository!.deleteContact(contact);
     }
   }
@@ -845,6 +893,25 @@ class ContactsService extends _$ContactsService {
       );
     }
 
+    final existing = _findExistingContactForChannel(channel);
+    if (existing != null) {
+      await updateContact(
+        existing.copyWith(
+          channelDid: contact.channelDid,
+          channelDidSha256: contact.channelDidSha256,
+          offerLink: contact.offerLink,
+          mediatorDid: contact.mediatorDid,
+          type: contact.type,
+          status: contact.status,
+          origin: contact.origin,
+          category: contact.category,
+          displayName: contact.displayName,
+          card: contact.card,
+        ),
+      );
+      return;
+    }
+
     await addContact(contact);
   }
 
@@ -892,7 +959,58 @@ class ContactsService extends _$ContactsService {
       );
     }
 
+    final existing = _findExistingContactForChannel(channel);
+    if (existing != null) {
+      await updateContact(
+        existing.copyWith(
+          channelDid: contact.channelDid,
+          channelDidSha256: contact.channelDidSha256,
+          offerLink: contact.offerLink,
+          mediatorDid: contact.mediatorDid,
+          type: contact.type,
+          status: contact.status,
+          origin: contact.origin,
+          category: contact.category,
+          displayName: contact.displayName,
+          card: contact.card,
+        ),
+      );
+      return;
+    }
+
     await addContact(contact);
+  }
+
+  Contact? _findExistingContactForChannel(sdk.Channel channel) {
+    final existingByOfferLink = state.contacts.where(
+      (contact) => contact.offerLink == channel.offerLink,
+    );
+    if (existingByOfferLink.isNotEmpty) {
+      return existingByOfferLink.first;
+    }
+
+    final otherPartyDid = channel.otherPartyPermanentChannelDid;
+    if (otherPartyDid == null || otherPartyDid.isEmpty) {
+      return null;
+    }
+
+    final existingByDid = state.getContactByChannelDid(otherPartyDid);
+    if (existingByDid == null) {
+      return null;
+    }
+
+    final remoteType = channel.otherPartyContactCard?.type.trim().toLowerCase();
+    final sameDidDifferentOffer = existingByDid.offerLink != channel.offerLink;
+    final isAiContact =
+        existingByDid.category == ContactCategory.robot ||
+        remoteType == 'ai-agent';
+
+    // For AI contacts, preserve separate contacts when the offer link differs.
+    if (sameDidDifferentOffer && isAiContact) {
+      return null;
+    }
+
+    return existingByDid;
   }
 
   /// Ensure and return the initialized contacts repository.

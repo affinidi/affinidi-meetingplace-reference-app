@@ -22,6 +22,37 @@ void main() {
     );
   });
 
+  group('normalizeCiergeConnectorDid', () {
+    test('keeps full DID values unchanged', () {
+      expect(normalizeCiergeConnectorDid(' did:key:zQ3abc '), 'did:key:zQ3abc');
+      expect(
+        normalizeCiergeConnectorDid('did:web:example.com:user:alice'),
+        'did:web:example.com:user:alice',
+      );
+    });
+
+    test('converts raw multibase keys to did:key DIDs', () {
+      expect(
+        normalizeCiergeConnectorDid(' zQ3shWNASv7i4SjexhxLXNywe1V4k5g '),
+        'did:key:zQ3shWNASv7i4SjexhxLXNywe1V4k5g',
+      );
+    });
+
+    test('returns null for blank values', () {
+      expect(normalizeCiergeConnectorDid(null), isNull);
+      expect(normalizeCiergeConnectorDid('   '), isNull);
+    });
+  });
+
+  // SharedPreferences instance with hasMnemonic=true, used so that
+  // meetingPlaceSdkProvider proceeds past the mnemonic-configured guard.
+  Future<SharedPreferences> mnemonicPrefs() async {
+    SharedPreferences.setMockInitialValues({
+      SharedPreferencesKeys.hasMnemonic.name: true,
+    });
+    return SharedPreferences.getInstance();
+  }
+
   group('meetingPlaceSdkProvider bootstrap ordering', () {
     test(
       '''fails with vodozemac error before SDK is created when fvod.init() throws''',
@@ -32,6 +63,7 @@ void main() {
         final container = ProviderContainer(
           overrides: [
             appLoggerProvider.overrideWithValue(AppLogger.instance),
+            sharedPreferencesProvider.overrideWithValue(await mnemonicPrefs()),
             secureStorageProvider.overrideWith(
               (ref) async => FakeSecureStorage(),
             ),
@@ -69,6 +101,7 @@ void main() {
         final container = ProviderContainer(
           overrides: [
             appLoggerProvider.overrideWithValue(AppLogger.instance),
+            sharedPreferencesProvider.overrideWithValue(await mnemonicPrefs()),
             secureStorageProvider.overrideWith(
               (ref) async => FakeSecureStorage(),
             ),
@@ -93,6 +126,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           appLoggerProvider.overrideWithValue(AppLogger.instance),
+          sharedPreferencesProvider.overrideWithValue(await mnemonicPrefs()),
           secureStorageProvider.overrideWith(
             (ref) async => FakeSecureStorage(),
           ),
@@ -124,7 +158,9 @@ void main() {
       final callLog = <String>[];
       final connectionOfferRepositoryReached = Completer<void>();
 
-      SharedPreferences.setMockInitialValues({});
+      SharedPreferences.setMockInitialValues({
+        SharedPreferencesKeys.hasMnemonic.name: true,
+      });
       final sharedPreferences = await SharedPreferences.getInstance();
 
       // When vodozemacInit succeeds, the provider must continue into the

@@ -109,8 +109,236 @@ abstract class AppLocalizations {
   /// No description provided for @tabsTitle.
   ///
   /// In en, this message translates to:
-  /// **'{tabName, select, connections{Invitations} contacts{Channels} identities{Identities} rCards{R-Cards} credentials{Credentials} settings{Settings} other{Invalid}}'**
+  /// **'{tabName, select, connections{Invitations} contacts{Channels} identities{Identities} rCards{R-Cards} personalAgent{Agent} credentials{Credentials} settings{Settings} other{Invalid}}'**
   String tabsTitle(String tabName);
+
+  /// No description provided for @personalAgentPanelSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up and manage your personal AI agent without exposing DID details.'**
+  String get personalAgentPanelSubtitle;
+
+  /// No description provided for @personalAgentSetupInProgressButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Setting up and connecting...'**
+  String get personalAgentSetupInProgressButton;
+
+  /// No description provided for @personalAgentReconnectButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconnect Personal Agent'**
+  String get personalAgentReconnectButton;
+
+  /// No description provided for @personalAgentConnectButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect Personal Agent'**
+  String get personalAgentConnectButton;
+
+  /// No description provided for @personalAgentReviewSetupPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Review setup prompt'**
+  String get personalAgentReviewSetupPrompt;
+
+  /// No description provided for @personalAgentConnectedSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected'**
+  String get personalAgentConnectedSectionTitle;
+
+  /// No description provided for @personalAgentSummaryContextId.
+  ///
+  /// In en, this message translates to:
+  /// **'Context ID: {contextId}'**
+  String personalAgentSummaryContextId(String contextId);
+
+  /// No description provided for @personalAgentSummaryContextCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Context created: {value}'**
+  String personalAgentSummaryContextCreated(String value);
+
+  /// No description provided for @personalAgentSummaryProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent profile: {value}'**
+  String personalAgentSummaryProfile(String value);
+
+  /// No description provided for @personalAgentSummaryAgentCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent created: {value}'**
+  String personalAgentSummaryAgentCreated(String value);
+
+  /// No description provided for @personalAgentSummaryMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Mode: {value}'**
+  String personalAgentSummaryMode(String value);
+
+  /// No description provided for @personalAgentSummarySetupStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Setup status: {value}'**
+  String personalAgentSummarySetupStatus(String value);
+
+  /// No description provided for @personalAgentSummaryOfferAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer available: {value}'**
+  String personalAgentSummaryOfferAvailable(String value);
+
+  /// No description provided for @personalAgentStatusConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal AI connected'**
+  String get personalAgentStatusConnected;
+
+  /// No description provided for @personalAgentStatusContextRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Context setup required'**
+  String get personalAgentStatusContextRequired;
+
+  /// No description provided for @personalAgentStatusSettingUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal AI setup in progress'**
+  String get personalAgentStatusSettingUp;
+
+  /// No description provided for @personalAgentStatusNotConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal AI not connected'**
+  String get personalAgentStatusNotConnected;
+
+  /// No description provided for @personalAgentStatusSubtitleConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Your assistant is ready and will appear in contacts once the channel is active.'**
+  String get personalAgentStatusSubtitleConnected;
+
+  /// No description provided for @personalAgentStatusSubtitleNotConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect your Personal AI in one tap. MPX stays usable throughout setup.'**
+  String get personalAgentStatusSubtitleNotConnected;
+
+  /// No description provided for @personalAgentContextSetupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Up Your Personal AI'**
+  String get personalAgentContextSetupTitle;
+
+  /// No description provided for @personalAgentContextSetupDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Help your Personal AI get to know you. Upload a text file with your background, preferences, and working style. This becomes the AI\'s long-term knowledge about you.'**
+  String get personalAgentContextSetupDescription;
+
+  /// No description provided for @personalAgentContextWhatToIncludeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What to include in your file'**
+  String get personalAgentContextWhatToIncludeTitle;
+
+  /// No description provided for @personalAgentContextWhatToIncludeItem1.
+  ///
+  /// In en, this message translates to:
+  /// **'Name, role, and professional background'**
+  String get personalAgentContextWhatToIncludeItem1;
+
+  /// No description provided for @personalAgentContextWhatToIncludeItem2.
+  ///
+  /// In en, this message translates to:
+  /// **'Working style and communication preferences'**
+  String get personalAgentContextWhatToIncludeItem2;
+
+  /// No description provided for @personalAgentContextWhatToIncludeItem3.
+  ///
+  /// In en, this message translates to:
+  /// **'Current responsibilities and focus areas'**
+  String get personalAgentContextWhatToIncludeItem3;
+
+  /// No description provided for @personalAgentContextWhatToIncludeItem4.
+  ///
+  /// In en, this message translates to:
+  /// **'Any other context you\'d like the AI to remember'**
+  String get personalAgentContextWhatToIncludeItem4;
+
+  /// No description provided for @personalAgentContextPickFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to select a .txt file'**
+  String get personalAgentContextPickFile;
+
+  /// No description provided for @personalAgentContextFileSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'File selected'**
+  String get personalAgentContextFileSelected;
+
+  /// No description provided for @personalAgentContextFileTapToChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to choose a different file'**
+  String get personalAgentContextFileTapToChange;
+
+  /// No description provided for @personalAgentContextUploadButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Context File'**
+  String get personalAgentContextUploadButton;
+
+  /// No description provided for @personalAgentContextUploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading...'**
+  String get personalAgentContextUploading;
+
+  /// No description provided for @personalAgentContextUploadSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Context uploaded successfully'**
+  String get personalAgentContextUploadSuccess;
+
+  /// No description provided for @personalAgentContextUploadedFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploaded: {fileName}'**
+  String personalAgentContextUploadedFile(String fileName);
+
+  /// No description provided for @personalAgentWhatHappensNext.
+  ///
+  /// In en, this message translates to:
+  /// **'What happens next'**
+  String get personalAgentWhatHappensNext;
+
+  /// No description provided for @personalAgentStepCreateOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'A Personal AI offer is created for your current identity.'**
+  String get personalAgentStepCreateOffer;
+
+  /// No description provided for @personalAgentStepFetchMnemonic.
+  ///
+  /// In en, this message translates to:
+  /// **'MPX retrieves the mnemonic from backend offer API.'**
+  String get personalAgentStepFetchMnemonic;
+
+  /// No description provided for @personalAgentStepAcceptOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'The app accepts the offer and waits for channel inauguration.'**
+  String get personalAgentStepAcceptOffer;
+
+  /// No description provided for @personalAgentStepContactAppears.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal AI appears in contacts when channel activity arrives.'**
+  String get personalAgentStepContactAppears;
 
   /// No description provided for @rCardsPlaceholderMessage.
   ///
@@ -1342,6 +1570,30 @@ abstract class AppLocalizations {
   /// **'Copy message'**
   String get chatMessageActionCopy;
 
+  /// No description provided for @chatMessageActionAskSuggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask for suggestion'**
+  String get chatMessageActionAskSuggestion;
+
+  /// No description provided for @chatSuggestionActionIgnore.
+  ///
+  /// In en, this message translates to:
+  /// **'Ignore'**
+  String get chatSuggestionActionIgnore;
+
+  /// No description provided for @chatSuggestionActionEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get chatSuggestionActionEdit;
+
+  /// No description provided for @chatSuggestionActionSendAsMe.
+  ///
+  /// In en, this message translates to:
+  /// **'Send as Me'**
+  String get chatSuggestionActionSendAsMe;
+
   /// No description provided for @chatMessageActionEdit.
   ///
   /// In en, this message translates to:
@@ -1389,6 +1641,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not delete message'**
   String get chatMessageDeleteFailed;
+
+  /// No description provided for @chatSuggestionRequestFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not request suggestion'**
+  String get chatSuggestionRequestFailed;
 
   /// No description provided for @chatItemStatus.
   ///
@@ -3034,6 +3292,366 @@ abstract class AppLocalizations {
   /// **'{name} has selected the following persona to verify the relationship:'**
   String vrcResponderIntro(Object name);
 
+  /// No description provided for @agentContextWorkAiLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Work AI'**
+  String get agentContextWorkAiLabel;
+
+  /// No description provided for @agentContextPersonalAiLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal AI'**
+  String get agentContextPersonalAiLabel;
+
+  /// No description provided for @contactsChannelContextSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Channel context set to {label}'**
+  String contactsChannelContextSet(String label);
+
+  /// No description provided for @chatContextUploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} context uploaded: {fileName}'**
+  String chatContextUploaded(String label, String fileName);
+
+  /// No description provided for @chatUploadFileFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload {fileName} first.'**
+  String chatUploadFileFirst(String fileName);
+
+  /// No description provided for @chatChannelUsesContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Channel now uses {label}.'**
+  String chatChannelUsesContext(String label);
+
+  /// No description provided for @chatMenuUseWorkAi.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Work AI'**
+  String get chatMenuUseWorkAi;
+
+  /// No description provided for @chatMenuUsePersonalAi.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Personal AI'**
+  String get chatMenuUsePersonalAi;
+
+  /// No description provided for @chatMenuUploadWorkContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload work-context.txt'**
+  String get chatMenuUploadWorkContext;
+
+  /// No description provided for @chatMenuReuploadWorkContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-upload work-context.txt'**
+  String get chatMenuReuploadWorkContext;
+
+  /// No description provided for @chatMenuUploadPersonalContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload personal-context.txt'**
+  String get chatMenuUploadPersonalContext;
+
+  /// No description provided for @chatMenuReuploadPersonalContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-upload personal-context.txt'**
+  String get chatMenuReuploadPersonalContext;
+
+  /// No description provided for @identitiesSetupMyAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up my agent'**
+  String get identitiesSetupMyAgent;
+
+  /// No description provided for @identitiesSetupPromptDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Work or Personal in the Agent tab.'**
+  String get identitiesSetupPromptDescription;
+
+  /// No description provided for @identitiesSettingUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Setting Up...'**
+  String get identitiesSettingUp;
+
+  /// No description provided for @identitiesNotNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get identitiesNotNow;
+
+  /// No description provided for @identitiesAgentConfiguredTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent configured'**
+  String get identitiesAgentConfiguredTooltip;
+
+  /// No description provided for @personalAgentNoContextCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'No context created'**
+  String get personalAgentNoContextCreated;
+
+  /// No description provided for @personalAgentContextUploadedSnackBar.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} uploaded: {fileName}'**
+  String personalAgentContextUploadedSnackBar(String label, String fileName);
+
+  /// No description provided for @personalAgentSetupSectionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up your AI. Choose what context to set up.'**
+  String get personalAgentSetupSectionSubtitle;
+
+  /// No description provided for @personalAgentChooseFileToSetUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a file to set up'**
+  String get personalAgentChooseFileToSetUp;
+
+  /// No description provided for @personalAgentAlreadySetUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Already set up: {fileName}'**
+  String personalAgentAlreadySetUp(String fileName);
+
+  /// No description provided for @personalAgentSetupCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up your AI'**
+  String get personalAgentSetupCardTitle;
+
+  /// No description provided for @personalAgentSetupCardDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose what context to set up.'**
+  String get personalAgentSetupCardDescription;
+
+  /// No description provided for @personalAgentConnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting {label}...'**
+  String personalAgentConnecting(String label);
+
+  /// No description provided for @personalAgentDefaultConnectingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'agent'**
+  String get personalAgentDefaultConnectingLabel;
+
+  /// No description provided for @personalAgentWorkAgentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Work Agent'**
+  String get personalAgentWorkAgentTitle;
+
+  /// No description provided for @personalAgentPersonalAgentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Agent'**
+  String get personalAgentPersonalAgentTitle;
+
+  /// No description provided for @personalAgentMyWorkAiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My Work AI'**
+  String get personalAgentMyWorkAiTitle;
+
+  /// No description provided for @personalAgentWorkContextLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Work (ctx 0)'**
+  String get personalAgentWorkContextLabel;
+
+  /// No description provided for @personalAgentMyPersonalAiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My Personal AI'**
+  String get personalAgentMyPersonalAiTitle;
+
+  /// No description provided for @personalAgentPersonalContextLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal (ctx 1)'**
+  String get personalAgentPersonalContextLabel;
+
+  /// No description provided for @personalAgentCancelConnectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel {label} connection?'**
+  String personalAgentCancelConnectionTitle(String label);
+
+  /// No description provided for @personalAgentCancelConnectionContent.
+  ///
+  /// In en, this message translates to:
+  /// **'This will remove your connection to the {agentLabel}.'**
+  String personalAgentCancelConnectionContent(String agentLabel);
+
+  /// No description provided for @personalAgentKeepConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep connection'**
+  String get personalAgentKeepConnection;
+
+  /// No description provided for @personalAgentCancelConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel connection'**
+  String get personalAgentCancelConnection;
+
+  /// No description provided for @personalAgentConnectionCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} connection cancelled.'**
+  String personalAgentConnectionCancelled(String label);
+
+  /// No description provided for @personalAgentCancelConnectionError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to cancel {label} connection.'**
+  String personalAgentCancelConnectionError(String label);
+
+  /// No description provided for @personalAgentNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Not available'**
+  String get personalAgentNotAvailable;
+
+  /// No description provided for @personalAgentNoSnapshotYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No snapshot yet'**
+  String get personalAgentNoSnapshotYet;
+
+  /// No description provided for @personalAgentNotSetUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set up'**
+  String get personalAgentNotSetUp;
+
+  /// No description provided for @personalAgentAuthAgentDid.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent DID'**
+  String get personalAgentAuthAgentDid;
+
+  /// No description provided for @personalAgentAuthAclRole.
+  ///
+  /// In en, this message translates to:
+  /// **'ACL role'**
+  String get personalAgentAuthAclRole;
+
+  /// No description provided for @personalAgentAuthCapabilities.
+  ///
+  /// In en, this message translates to:
+  /// **'Capabilities'**
+  String get personalAgentAuthCapabilities;
+
+  /// No description provided for @personalAgentAuthContextScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Context scope'**
+  String get personalAgentAuthContextScope;
+
+  /// No description provided for @personalAgentAuthDomainId.
+  ///
+  /// In en, this message translates to:
+  /// **'Domain ID'**
+  String get personalAgentAuthDomainId;
+
+  /// No description provided for @personalAgentAuthProvision.
+  ///
+  /// In en, this message translates to:
+  /// **'Provision'**
+  String get personalAgentAuthProvision;
+
+  /// No description provided for @personalAgentAuthUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated'**
+  String get personalAgentAuthUpdated;
+
+  /// No description provided for @mnemonicErrorOccurred.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred.'**
+  String get mnemonicErrorOccurred;
+
+  /// No description provided for @mnemonicEntrySelectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How would you like\nto enter your wallet?'**
+  String get mnemonicEntrySelectionTitle;
+
+  /// No description provided for @mnemonicScanQrTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan QR Code'**
+  String get mnemonicScanQrTitle;
+
+  /// No description provided for @mnemonicScanQrSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use your camera to scan a wallet QR code'**
+  String get mnemonicScanQrSubtitle;
+
+  /// No description provided for @mnemonicEnterManuallyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter manually'**
+  String get mnemonicEnterManuallyTitle;
+
+  /// No description provided for @mnemonicEnterManuallySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Type the mnemonic phrase that was shared with you'**
+  String get mnemonicEnterManuallySubtitle;
+
+  /// No description provided for @mnemonicManualEntryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your mnemonic'**
+  String get mnemonicManualEntryTitle;
+
+  /// No description provided for @mnemonicManualEntrySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the mnemonic phrase that was shared with you.'**
+  String get mnemonicManualEntrySubtitle;
+
+  /// No description provided for @mnemonicManualHint.
+  ///
+  /// In en, this message translates to:
+  /// **'word1 word2 word3 ...'**
+  String get mnemonicManualHint;
+
+  /// No description provided for @mnemonicContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get mnemonicContinue;
+
+  /// No description provided for @mnemonicSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re all set!'**
+  String get mnemonicSuccessTitle;
+
+  /// No description provided for @mnemonicSuccessSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enjoy MeetingPlace and get engaged\nwith your personal AI agent.'**
+  String get mnemonicSuccessSubtitle;
+
   /// No description provided for @videoCallTitle.
   ///
   /// In en, this message translates to:
@@ -3435,6 +4053,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ringing {name}'**
   String callParticipantRingingAction(String name);
+
+  /// No description provided for @trustTaskHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Trust task history'**
+  String get trustTaskHistoryTitle;
+
+  /// No description provided for @trustTaskHistoryRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get trustTaskHistoryRefresh;
+
+  /// No description provided for @trustTaskHistoryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No trust tasks yet'**
+  String get trustTaskHistoryEmpty;
+
+  /// No description provided for @trustTaskHistoryError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load trust task history'**
+  String get trustTaskHistoryError;
+
+  /// No description provided for @trustTaskHistoryRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get trustTaskHistoryRetry;
+
+  /// No description provided for @trustTaskHistoryLoadMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get trustTaskHistoryLoadMore;
+
+  /// No description provided for @trustTaskHistoryItemTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Signing request'**
+  String get trustTaskHistoryItemTitle;
+
+  /// No description provided for @trustTaskHistoryDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get trustTaskHistoryDetails;
+
+  /// No description provided for @trustTaskStatusSigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed'**
+  String get trustTaskStatusSigned;
+
+  /// No description provided for @trustTaskStatusDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked'**
+  String get trustTaskStatusDenied;
+
+  /// No description provided for @trustTaskStatusUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get trustTaskStatusUnknown;
 }
 
 class _AppLocalizationsDelegate

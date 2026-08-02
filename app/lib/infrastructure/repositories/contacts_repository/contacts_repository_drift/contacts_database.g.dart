@@ -245,6 +245,17 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
         ),
         clientDefault: () => false,
       );
+  static const VerificationMeta _personalAgentAuthorizationSnapshotMeta =
+      const VerificationMeta('personalAgentAuthorizationSnapshot');
+  @override
+  late final GeneratedColumn<String> personalAgentAuthorizationSnapshot =
+      GeneratedColumn<String>(
+        'personal_agent_authorization_snapshot',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -268,6 +279,7 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
     hasBeenOpened,
     lastKeepAliveMessage,
     notificationBannerDismissed,
+    personalAgentAuthorizationSnapshot,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -420,6 +432,15 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
         ),
       );
     }
+    if (data.containsKey('personal_agent_authorization_snapshot')) {
+      context.handle(
+        _personalAgentAuthorizationSnapshotMeta,
+        personalAgentAuthorizationSnapshot.isAcceptableOrUnknown(
+          data['personal_agent_authorization_snapshot']!,
+          _personalAgentAuthorizationSnapshotMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -521,6 +542,10 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
         DriftSqlType.bool,
         data['${effectivePrefix}notification_banner_dismissed'],
       )!,
+      personalAgentAuthorizationSnapshot: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}personal_agent_authorization_snapshot'],
+      ),
     );
   }
 
@@ -561,6 +586,7 @@ class Contact extends DataClass implements Insertable<Contact> {
   final bool hasBeenOpened;
   final DateTime? lastKeepAliveMessage;
   final bool notificationBannerDismissed;
+  final String? personalAgentAuthorizationSnapshot;
   const Contact({
     required this.id,
     this.channelDid,
@@ -583,6 +609,7 @@ class Contact extends DataClass implements Insertable<Contact> {
     required this.hasBeenOpened,
     this.lastKeepAliveMessage,
     required this.notificationBannerDismissed,
+    this.personalAgentAuthorizationSnapshot,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -638,6 +665,11 @@ class Contact extends DataClass implements Insertable<Contact> {
     map['notification_banner_dismissed'] = Variable<bool>(
       notificationBannerDismissed,
     );
+    if (!nullToAbsent || personalAgentAuthorizationSnapshot != null) {
+      map['personal_agent_authorization_snapshot'] = Variable<String>(
+        personalAgentAuthorizationSnapshot,
+      );
+    }
     return map;
   }
 
@@ -678,6 +710,10 @@ class Contact extends DataClass implements Insertable<Contact> {
           ? const Value.absent()
           : Value(lastKeepAliveMessage),
       notificationBannerDismissed: Value(notificationBannerDismissed),
+      personalAgentAuthorizationSnapshot:
+          personalAgentAuthorizationSnapshot == null && nullToAbsent
+          ? const Value.absent()
+          : Value(personalAgentAuthorizationSnapshot),
     );
   }
 
@@ -722,6 +758,9 @@ class Contact extends DataClass implements Insertable<Contact> {
       notificationBannerDismissed: serializer.fromJson<bool>(
         json['notificationBannerDismissed'],
       ),
+      personalAgentAuthorizationSnapshot: serializer.fromJson<String?>(
+        json['personalAgentAuthorizationSnapshot'],
+      ),
     );
   }
   @override
@@ -753,6 +792,9 @@ class Contact extends DataClass implements Insertable<Contact> {
       'notificationBannerDismissed': serializer.toJson<bool>(
         notificationBannerDismissed,
       ),
+      'personalAgentAuthorizationSnapshot': serializer.toJson<String?>(
+        personalAgentAuthorizationSnapshot,
+      ),
     };
   }
 
@@ -778,6 +820,7 @@ class Contact extends DataClass implements Insertable<Contact> {
     bool? hasBeenOpened,
     Value<DateTime?> lastKeepAliveMessage = const Value.absent(),
     bool? notificationBannerDismissed,
+    Value<String?> personalAgentAuthorizationSnapshot = const Value.absent(),
   }) => Contact(
     id: id ?? this.id,
     channelDid: channelDid.present ? channelDid.value : this.channelDid,
@@ -811,6 +854,10 @@ class Contact extends DataClass implements Insertable<Contact> {
         : this.lastKeepAliveMessage,
     notificationBannerDismissed:
         notificationBannerDismissed ?? this.notificationBannerDismissed,
+    personalAgentAuthorizationSnapshot:
+        personalAgentAuthorizationSnapshot.present
+        ? personalAgentAuthorizationSnapshot.value
+        : this.personalAgentAuthorizationSnapshot,
   );
   Contact copyWithCompanion(ContactsCompanion data) {
     return Contact(
@@ -863,6 +910,10 @@ class Contact extends DataClass implements Insertable<Contact> {
       notificationBannerDismissed: data.notificationBannerDismissed.present
           ? data.notificationBannerDismissed.value
           : this.notificationBannerDismissed,
+      personalAgentAuthorizationSnapshot:
+          data.personalAgentAuthorizationSnapshot.present
+          ? data.personalAgentAuthorizationSnapshot.value
+          : this.personalAgentAuthorizationSnapshot,
     );
   }
 
@@ -889,7 +940,10 @@ class Contact extends DataClass implements Insertable<Contact> {
           ..write('activeIncomingCallId: $activeIncomingCallId, ')
           ..write('hasBeenOpened: $hasBeenOpened, ')
           ..write('lastKeepAliveMessage: $lastKeepAliveMessage, ')
-          ..write('notificationBannerDismissed: $notificationBannerDismissed')
+          ..write('notificationBannerDismissed: $notificationBannerDismissed, ')
+          ..write(
+            'personalAgentAuthorizationSnapshot: $personalAgentAuthorizationSnapshot',
+          )
           ..write(')'))
         .toString();
   }
@@ -917,6 +971,7 @@ class Contact extends DataClass implements Insertable<Contact> {
     hasBeenOpened,
     lastKeepAliveMessage,
     notificationBannerDismissed,
+    personalAgentAuthorizationSnapshot,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -943,7 +998,9 @@ class Contact extends DataClass implements Insertable<Contact> {
           other.hasBeenOpened == this.hasBeenOpened &&
           other.lastKeepAliveMessage == this.lastKeepAliveMessage &&
           other.notificationBannerDismissed ==
-              this.notificationBannerDismissed);
+              this.notificationBannerDismissed &&
+          other.personalAgentAuthorizationSnapshot ==
+              this.personalAgentAuthorizationSnapshot);
 }
 
 class ContactsCompanion extends UpdateCompanion<Contact> {
@@ -968,6 +1025,7 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
   final Value<bool> hasBeenOpened;
   final Value<DateTime?> lastKeepAliveMessage;
   final Value<bool> notificationBannerDismissed;
+  final Value<String?> personalAgentAuthorizationSnapshot;
   final Value<int> rowid;
   const ContactsCompanion({
     this.id = const Value.absent(),
@@ -991,6 +1049,7 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     this.hasBeenOpened = const Value.absent(),
     this.lastKeepAliveMessage = const Value.absent(),
     this.notificationBannerDismissed = const Value.absent(),
+    this.personalAgentAuthorizationSnapshot = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ContactsCompanion.insert({
@@ -1015,6 +1074,7 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     this.hasBeenOpened = const Value.absent(),
     this.lastKeepAliveMessage = const Value.absent(),
     this.notificationBannerDismissed = const Value.absent(),
+    this.personalAgentAuthorizationSnapshot = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : offerLink = Value(offerLink),
        mediatorDid = Value(mediatorDid),
@@ -1044,6 +1104,7 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     Expression<bool>? hasBeenOpened,
     Expression<DateTime>? lastKeepAliveMessage,
     Expression<bool>? notificationBannerDismissed,
+    Expression<String>? personalAgentAuthorizationSnapshot,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1075,6 +1136,9 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
         'last_keep_alive_message': lastKeepAliveMessage,
       if (notificationBannerDismissed != null)
         'notification_banner_dismissed': notificationBannerDismissed,
+      if (personalAgentAuthorizationSnapshot != null)
+        'personal_agent_authorization_snapshot':
+            personalAgentAuthorizationSnapshot,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1101,6 +1165,7 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     Value<bool>? hasBeenOpened,
     Value<DateTime?>? lastKeepAliveMessage,
     Value<bool>? notificationBannerDismissed,
+    Value<String?>? personalAgentAuthorizationSnapshot,
     Value<int>? rowid,
   }) {
     return ContactsCompanion(
@@ -1127,6 +1192,9 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
       lastKeepAliveMessage: lastKeepAliveMessage ?? this.lastKeepAliveMessage,
       notificationBannerDismissed:
           notificationBannerDismissed ?? this.notificationBannerDismissed,
+      personalAgentAuthorizationSnapshot:
+          personalAgentAuthorizationSnapshot ??
+          this.personalAgentAuthorizationSnapshot,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1217,6 +1285,11 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
         notificationBannerDismissed.value,
       );
     }
+    if (personalAgentAuthorizationSnapshot.present) {
+      map['personal_agent_authorization_snapshot'] = Variable<String>(
+        personalAgentAuthorizationSnapshot.value,
+      );
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1247,6 +1320,9 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
           ..write('hasBeenOpened: $hasBeenOpened, ')
           ..write('lastKeepAliveMessage: $lastKeepAliveMessage, ')
           ..write('notificationBannerDismissed: $notificationBannerDismissed, ')
+          ..write(
+            'personalAgentAuthorizationSnapshot: $personalAgentAuthorizationSnapshot, ',
+          )
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1702,6 +1778,7 @@ typedef $$ContactsTableCreateCompanionBuilder =
       Value<bool> hasBeenOpened,
       Value<DateTime?> lastKeepAliveMessage,
       Value<bool> notificationBannerDismissed,
+      Value<String?> personalAgentAuthorizationSnapshot,
       Value<int> rowid,
     });
 typedef $$ContactsTableUpdateCompanionBuilder =
@@ -1727,6 +1804,7 @@ typedef $$ContactsTableUpdateCompanionBuilder =
       Value<bool> hasBeenOpened,
       Value<DateTime?> lastKeepAliveMessage,
       Value<bool> notificationBannerDismissed,
+      Value<String?> personalAgentAuthorizationSnapshot,
       Value<int> rowid,
     });
 
@@ -1875,6 +1953,12 @@ class $$ContactsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get personalAgentAuthorizationSnapshot =>
+      $composableBuilder(
+        column: $table.personalAgentAuthorizationSnapshot,
+        builder: (column) => ColumnFilters(column),
+      );
+
   Expression<bool> contactCardsRefs(
     Expression<bool> Function($$ContactCardsTableFilterComposer f) f,
   ) {
@@ -2014,6 +2098,12 @@ class $$ContactsTableOrderingComposer
     column: $table.notificationBannerDismissed,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get personalAgentAuthorizationSnapshot =>
+      $composableBuilder(
+        column: $table.personalAgentAuthorizationSnapshot,
+        builder: (column) => ColumnOrderings(column),
+      );
 }
 
 class $$ContactsTableAnnotationComposer
@@ -2116,6 +2206,12 @@ class $$ContactsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get personalAgentAuthorizationSnapshot =>
+      $composableBuilder(
+        column: $table.personalAgentAuthorizationSnapshot,
+        builder: (column) => column,
+      );
+
   Expression<T> contactCardsRefs<T extends Object>(
     Expression<T> Function($$ContactCardsTableAnnotationComposer a) f,
   ) {
@@ -2191,6 +2287,8 @@ class $$ContactsTableTableManager
                 Value<bool> hasBeenOpened = const Value.absent(),
                 Value<DateTime?> lastKeepAliveMessage = const Value.absent(),
                 Value<bool> notificationBannerDismissed = const Value.absent(),
+                Value<String?> personalAgentAuthorizationSnapshot =
+                    const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ContactsCompanion(
                 id: id,
@@ -2214,6 +2312,8 @@ class $$ContactsTableTableManager
                 hasBeenOpened: hasBeenOpened,
                 lastKeepAliveMessage: lastKeepAliveMessage,
                 notificationBannerDismissed: notificationBannerDismissed,
+                personalAgentAuthorizationSnapshot:
+                    personalAgentAuthorizationSnapshot,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2239,6 +2339,8 @@ class $$ContactsTableTableManager
                 Value<bool> hasBeenOpened = const Value.absent(),
                 Value<DateTime?> lastKeepAliveMessage = const Value.absent(),
                 Value<bool> notificationBannerDismissed = const Value.absent(),
+                Value<String?> personalAgentAuthorizationSnapshot =
+                    const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ContactsCompanion.insert(
                 id: id,
@@ -2262,6 +2364,8 @@ class $$ContactsTableTableManager
                 hasBeenOpened: hasBeenOpened,
                 lastKeepAliveMessage: lastKeepAliveMessage,
                 notificationBannerDismissed: notificationBannerDismissed,
+                personalAgentAuthorizationSnapshot:
+                    personalAgentAuthorizationSnapshot,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
