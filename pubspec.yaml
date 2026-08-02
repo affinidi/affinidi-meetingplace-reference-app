@@ -70,7 +70,7 @@ dependency_overrides:
   meeting_place_vta_client:
     git:
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git
-      ref: 24343285d97712fd2ff58402ecbaa93159fb8f7c
+      ref: c3ee274ad91398e08ba63428bcc70030d24a4b8c
       path: packages/meeting_place_vta_client
     # path: ../affinidi-meetingplace-sdk-dart/packages/meeting_place_vta_client
   meta: ^1.18.2

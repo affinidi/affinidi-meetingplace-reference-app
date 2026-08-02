@@ -1505,8 +1505,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/meeting_place_vta_client"
-      ref: "24343285d97712fd2ff58402ecbaa93159fb8f7c"
-      resolved-ref: "24343285d97712fd2ff58402ecbaa93159fb8f7c"
+      ref: c3ee274ad91398e08ba63428bcc70030d24a4b8c
+      resolved-ref: c3ee274ad91398e08ba63428bcc70030d24a4b8c
       url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
     source: git
     version: "1.0.0"
