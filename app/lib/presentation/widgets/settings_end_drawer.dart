@@ -7,7 +7,14 @@ import '../../navigation/tabs/tabs.dart';
 
 /// Right-side drawer with a shortcut to the Settings tab.
 class SettingsEndDrawer extends StatelessWidget {
-  const SettingsEndDrawer({super.key});
+  const SettingsEndDrawer({super.key, required this.isZkpEnabled});
+
+  final bool isZkpEnabled;
+
+  void _openCredentials(BuildContext context) {
+    Navigator.of(context).pop();
+    GoRouter.of(context).go(RoutePaths.credentials);
+  }
 
   void _openSettings(BuildContext context) {
     Navigator.of(context).pop();
@@ -33,6 +40,23 @@ class SettingsEndDrawer extends StatelessWidget {
                 onPressed: () => Navigator.of(context).pop(),
               ),
             ),
+            if (isZkpEnabled)
+              ListTile(
+                minLeadingWidth: 20,
+                horizontalTitleGap: 8,
+                leading: const Icon(
+                  Icons.verified_user,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                title: Text(
+                  l10n.tabsTitle(TabTitleKey.credentials.name),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleMedium?.copyWith(color: Colors.white),
+                ),
+                onTap: () => _openCredentials(context),
+              ),
             ListTile(
               minLeadingWidth: 20,
               horizontalTitleGap: 8,

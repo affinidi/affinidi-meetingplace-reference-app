@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../application/services/credential_service/credential_service.dart';
 import '../../../application/services/credential_service/credential_service_state.dart';
 import '../../../domain/models/credentials/liveness_credential_record.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../navigation/routes/route_paths.dart';
 import '../../../navigation/tabs/tabs.dart';
 import '../../widgets/cards/animated_stacked_card_deck.dart';
 import '../../widgets/cards/credential_card.dart';
@@ -31,6 +33,7 @@ class CredentialsScreen extends ConsumerWidget {
             SectionBanner(
               title: l10n.tabsTitle(Tabs.credentials.name),
               subtitle: l10n.verifiableCredentialWallet,
+              onClose: () => GoRouter.of(context).go(RoutePaths.contacts),
             ),
             credentials.isEmpty
                 ? const _EmptyStateWidget()
