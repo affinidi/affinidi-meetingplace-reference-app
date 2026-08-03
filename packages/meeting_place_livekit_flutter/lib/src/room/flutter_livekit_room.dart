@@ -13,15 +13,12 @@ import '../extensions/room_participants_extension.dart';
 /// Converts LiveKit events and participants into domain objects before
 /// publishing them through the interface.
 class FlutterLiveKitRoom implements LiveKitRoom {
-  FlutterLiveKitRoom({MeetingPlaceCoreSDKLogger? logger, Hardware? hardware})
-    : _logger = logger ?? DefaultMeetingPlaceCoreSDKLogger(className: _logKey),
-      _hardwareOverride = hardware;
+  FlutterLiveKitRoom({MeetingPlaceCoreSDKLogger? logger})
+    : _logger = logger ?? DefaultMeetingPlaceCoreSDKLogger(className: _logKey);
 
   static const _logKey = 'FlutterLiveKitRoom';
 
   final MeetingPlaceCoreSDKLogger _logger;
-  final Hardware? _hardwareOverride;
-  Hardware get _hardware => _hardwareOverride ?? Hardware.instance;
   Room? _room;
   bool _isDisposed = false;
   EventsListener<RoomEvent>? _roomListener;
@@ -177,7 +174,7 @@ class FlutterLiveKitRoom implements LiveKitRoom {
   @override
   Future<void> setSpeakerphoneEnabled(bool enabled) async {
     _logger.info('setSpeakerphoneEnabled: enabled=$enabled', name: _logKey);
-    await _hardware.setSpeakerphoneOn(enabled);
+    await AudioManager.instance.setSpeakerOutputPreferred(enabled);
   }
 
   @override

@@ -9,6 +9,8 @@ class _VrcBanner extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = chatScreenControllerProvider(_contactId);
     final controller = ref.read(provider.notifier);
+    final contact = ref.watch(provider.select((state) => state.contact));
+    final routingState = ref.watch(contextRoutingServiceProvider);
     final shouldShowVrcBanner = ref.watch(
       provider.select((state) => state.shouldShowVrcBanner),
     );
@@ -22,8 +24,16 @@ class _VrcBanner extends ConsumerWidget {
     final l10n = context.l10n;
     final colorScheme = context.colorScheme;
     final textScheme = context.textTheme;
+    final isPersonalAiChat =
+        contact != null &&
+        isPersonalAiContact(
+          contact: contact,
+          contactContexts: routingState.contactContexts,
+        );
 
-    if (!shouldShowVrcBanner || (otherPartyFirstName?.isEmpty ?? true)) {
+    if (isPersonalAiChat ||
+        !shouldShowVrcBanner ||
+        (otherPartyFirstName?.isEmpty ?? true)) {
       return const SizedBox.shrink();
     }
 

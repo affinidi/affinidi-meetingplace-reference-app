@@ -34,6 +34,7 @@ import '../../../application/services/chat_service/chat_service_state.dart';
 import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../application/services/context_routing_service/context_routing_service.dart';
 import '../../../application/services/network_connectivity_service/network_connectivity_service.dart';
+import '../../../application/services/personal_ai_service/personal_ai_contact_resolution.dart';
 import '../../../application/services/signing_service/signing_service.dart';
 import '../../../domain/models/chat/encryption_notice.dart';
 import '../../../domain/models/contacts/contact_category.dart';
