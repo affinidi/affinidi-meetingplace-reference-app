@@ -75,14 +75,7 @@ class SettingsScreen extends HookConsumerWidget {
             SectionBanner(
               title: l10n.tabsTitle(TabTitleKey.settings.name),
               subtitle: l10n.settingsScreenSubtitle,
-              onClose: () {
-                final router = GoRouter.of(context);
-                if (router.canPop()) {
-                  router.pop();
-                } else {
-                  router.go(RoutePaths.contacts);
-                }
-              },
+              onClose: () => GoRouter.of(context).go(RoutePaths.contacts),
             ),
             const SettingsPanelScrollContent(),
           ],

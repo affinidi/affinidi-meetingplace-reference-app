@@ -23,7 +23,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
     final isPersonalAiEnabled = environment.personalAiEnabled;
 
     final visibleTabs = Tabs.values.where((tab) {
-      if (!isZkpEnabled && tab == Tabs.credentials) {
+      if (tab == Tabs.credentials) {
         return false;
       }
 
@@ -37,10 +37,11 @@ class ScaffoldWithNavBar extends ConsumerWidget {
 
     final currentIndex = navigationShell.currentIndex;
     final selectedIndex = visibleBranchIndexes.indexOf(currentIndex);
+    final showBottomNav = selectedIndex != -1;
 
     return Scaffold(
       key: dashboardShellScaffoldKey,
-      endDrawer: const SettingsEndDrawer(),
+      endDrawer: SettingsEndDrawer(isZkpEnabled: isZkpEnabled),
       body: SafeArea(
         child: Column(
           children: [
@@ -49,14 +50,18 @@ class ScaffoldWithNavBar extends ConsumerWidget {
           ],
         ),
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: selectedIndex == -1 ? 0 : selectedIndex,
-        onDestinationSelected: (visibleIndex) {
-          final branchIndex = visibleBranchIndexes[visibleIndex];
-          navigationShell.goBranch(branchIndex);
-        },
-        destinations: visibleTabs.map((tab) => tab.destination(l10n)).toList(),
-      ),
+      bottomNavigationBar: showBottomNav
+          ? NavigationBar(
+              selectedIndex: selectedIndex,
+              onDestinationSelected: (visibleIndex) {
+                final branchIndex = visibleBranchIndexes[visibleIndex];
+                navigationShell.goBranch(branchIndex);
+              },
+              destinations: visibleTabs
+                  .map((tab) => tab.destination(l10n))
+                  .toList(),
+            )
+          : null,
     );
   }
 }
