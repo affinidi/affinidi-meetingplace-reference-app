@@ -161,10 +161,18 @@ class _ChatMediaOptions extends ConsumerWidget {
     );
     final shouldEnableRCardAttachment = !isGroupChat;
     final contact = ref.watch(provider.select((state) => state.contact));
+    final routingState = ref.watch(contextRoutingServiceProvider);
     final isOobChat = contact?.origin == ContactOrigin.directInteractive;
+    final isPersonalAiChat =
+        contact != null &&
+        isPersonalAiContact(
+          contact: contact,
+          contactContexts: routingState.contactContexts,
+        );
     final shouldEnableVrcAttachment =
         !isGroupChat &&
         !isOobChat &&
+        !isPersonalAiChat &&
         ref.watch(provider.select((state) => state.shouldEnableVrcAttachment));
     final isAgentChat =
         contact?.category == ContactCategory.robot ||
@@ -217,7 +225,8 @@ class _ChatMediaOptions extends ConsumerWidget {
           .map((plugin) {
             final platformSupported = plugin.isPlatformSupported;
             final enabled = switch (plugin) {
-              RCardAttachmentsPlugin() => shouldEnableRCardAttachment,
+              RCardAttachmentsPlugin() =>
+                shouldEnableRCardAttachment && !isPersonalAiChat,
               VrcAttachmentsPlugin() => shouldEnableVrcAttachment,
               _ => true,
             };

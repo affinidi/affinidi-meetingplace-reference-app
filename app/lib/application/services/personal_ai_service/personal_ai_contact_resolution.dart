@@ -115,6 +115,19 @@ bool isEstablishedPersonalAiContact({
       contactContexts[contact.id] == targetContext;
 }
 
+bool isPersonalAiContact({
+  required Contact contact,
+  required Map<String, AgentContext> contactContexts,
+}) {
+  final assignedContext = contactContexts[contact.id];
+  if (assignedContext == AgentContext.work ||
+      assignedContext == AgentContext.personal) {
+    return contact.category == ContactCategory.robot;
+  }
+
+  return false;
+}
+
 bool shouldRenamePersonalAiContact({
   required Contact contact,
   required String desiredName,
