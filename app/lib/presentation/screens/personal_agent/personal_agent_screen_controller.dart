@@ -160,6 +160,8 @@ class PersonalAgentScreenController
         PersonalAiAuthorizationSnapshot.tryDecode(
           personalContact?.personalAgentAuthorizationSnapshot,
         );
+    final workContextReady =
+        contextRoutingState.workContextUploaded || workContact != null;
 
     state = state.copyWith(
       holderDid: identity?.did,
@@ -174,14 +176,15 @@ class PersonalAgentScreenController
       personalContact: personalContact,
       workAuthorizationSnapshot: workAuthorizationSnapshot,
       personalAuthorizationSnapshot: personalAuthorizationSnapshot,
-      showWorkAuthorization:
-          workContact != null && contextRoutingState.workContextUploaded,
+      showWorkAuthorization: workContact != null && workContextReady,
       showPersonalAuthorization:
           personalContact != null &&
           contextRoutingState.personalContextUploaded,
-      workContextUploaded: contextRoutingState.workContextUploaded,
+      workContextUploaded: workContextReady,
       personalContextUploaded: contextRoutingState.personalContextUploaded,
-      workContextFileName: contextRoutingState.workContextFileName,
+      workContextFileName:
+          contextRoutingState.workContextFileName ??
+          (workContact != null ? 'Work AI connected' : null),
       personalContextFileName: contextRoutingState.personalContextFileName,
       clearErrorMessage: personalAiState.errorMessage == null,
       clearContextUploadError: personalAiState.contextUploadError == null,
