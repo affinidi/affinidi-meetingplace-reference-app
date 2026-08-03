@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 
@@ -23,6 +26,8 @@ mixin AsyncLoadingStatusErrorLocalizer {
   /// or any other error object.
   String getErrorMessage(BuildContext context, Object exception) {
     final errorCode = switch (exception) {
+      TimeoutException _ => 'network_error',
+      SocketException _ => 'network_error',
       AppException appException => appException.code,
       MeetingPlaceCoreSDKException mpxSdkException => _extractErrorCode(
         context,
