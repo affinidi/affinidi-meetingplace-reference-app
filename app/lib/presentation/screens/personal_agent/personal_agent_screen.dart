@@ -1127,7 +1127,10 @@ class _AgentContextSetupCard extends StatelessWidget {
           ? workContextFileName
           : personalContextFileName;
       if (contextTarget == AgentContext.work) {
-        return 'Connect OneDrive to set up work context';
+        if (file == null || file.isEmpty) {
+          return 'Connect OneDrive to set up work context';
+        }
+        return l10n.personalAgentAlreadySetUp(file);
       }
       if (file == null || file.isEmpty) {
         return l10n.personalAgentChooseFileToSetUp;
