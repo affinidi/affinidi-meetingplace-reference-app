@@ -35,7 +35,7 @@ class MicrosoftOneDriveAuthService {
   MicrosoftOneDriveAuthService(this._ref, {FlutterAppAuth? appAuth})
     : _appAuth = appAuth ?? const FlutterAppAuth();
 
-  static const _logKey = 'ONEDRIVEAUTH';
+  static const _logKey = 'MICROSOFT365AUTH';
 
   final Ref _ref;
   final FlutterAppAuth _appAuth;
@@ -57,31 +57,41 @@ class MicrosoftOneDriveAuthService {
 
   Future<MicrosoftOneDriveOAuthResult> authorize() async {
     _logger.info(
-      'Starting Microsoft OneDrive OAuth connection.',
+      'Starting Microsoft 365 OAuth connection for Work AI.',
       name: _logKey,
     );
 
-    final clientId = _environment.microsoftOAuthClientId.trim();
+    final clientId = _environment.agentStreamOAuthClientId.trim();
     if (clientId.isEmpty) {
       _logger.error(
-        'Microsoft OAuth client id is missing; cannot open authorization URL.',
+        'Agent Stream OAuth client id is missing; cannot open authorization URL.',
         name: _logKey,
       );
       throw StateError(
-        'MICROSOFT_OAUTH_CLIENT_ID must be configured to connect OneDrive.',
+        'AGENT_STREAM_OAUTH_CLIENT_ID must be configured to connect Microsoft 365 through Agent Stream.',
       );
     }
 
-    final tenantId = _environment.microsoftOAuthTenantId.trim().isEmpty
+    final tenantId = _environment.agentStreamOAuthTenantId.trim().isEmpty
         ? 'common'
-        : _environment.microsoftOAuthTenantId.trim();
+        : _environment.agentStreamOAuthTenantId.trim();
     final authorizationBase =
         'https://login.microsoftonline.com/$tenantId/oauth2/v2.0';
+    final scopes = _agentStreamScopes(_environment.agentStreamOAuthScopes);
+    if (scopes.isEmpty) {
+      _logger.error(
+        'Microsoft OAuth scopes do not include Microsoft Graph Copilot scopes.',
+        name: _logKey,
+      );
+      throw StateError(
+        'AGENT_STREAM_OAUTH_SCOPES must include Microsoft Graph Copilot scopes.',
+      );
+    }
 
     _logger.info(
-      'Opening Microsoft OAuth authorization session '
+      'Opening Agent Stream OAuth authorization session '
       '(tenant=$tenantId, clientId=${_redact(clientId)}, '
-      'redirect=${_environment.microsoftOAuthRedirectUrl})',
+      'redirect=${_environment.agentStreamOAuthRedirectUrl}, scopes=${scopes.join(' ')})',
       name: _logKey,
     );
 
@@ -90,18 +100,12 @@ class MicrosoftOneDriveAuthService {
       response = await _appAuth.authorizeAndExchangeCode(
         AuthorizationTokenRequest(
           clientId,
-          _environment.microsoftOAuthRedirectUrl,
+          _environment.agentStreamOAuthRedirectUrl,
           serviceConfiguration: AuthorizationServiceConfiguration(
             authorizationEndpoint: '$authorizationBase/authorize',
             tokenEndpoint: '$authorizationBase/token',
           ),
-          scopes: const [
-            'openid',
-            'profile',
-            'offline_access',
-            'User.Read',
-            'Files.Read',
-          ],
+          scopes: scopes,
         ),
       );
     } catch (error, stackTrace) {
@@ -149,16 +153,8 @@ class MicrosoftOneDriveAuthService {
       refreshToken: refreshToken,
       clientId: clientId,
       tenantId: tenantId,
-      redirectUrl: _environment.microsoftOAuthRedirectUrl,
-      scopes:
-          response.scopes ??
-          const [
-            'openid',
-            'profile',
-            'offline_access',
-            'User.Read',
-            'Files.Read',
-          ],
+      redirectUrl: _environment.agentStreamOAuthRedirectUrl,
+      scopes: response.scopes ?? scopes,
       tokenType: response.tokenType,
       accessTokenExpirationDateTime: response.accessTokenExpirationDateTime,
     );
@@ -174,7 +170,7 @@ class MicrosoftOneDriveAuthService {
     final mnemonicHash = (await _ref.read(mnemonicHashProvider.future))?.hash;
     if (mnemonicHash == null) {
       _logger.error(
-        '''Cannot store OneDrive OAuth refresh token: mnemonic hash is not configured.''',
+        '''Cannot store Microsoft 365 OAuth refresh token: mnemonic hash is not configured.''',
         name: _logKey,
       );
       throw StateError('Mnemonic hash is not configured.');
@@ -182,7 +178,7 @@ class MicrosoftOneDriveAuthService {
     final personalAiBaseUrl = _environment.personalAiBaseUrl(mnemonicHash);
     if (personalAiBaseUrl == null || personalAiBaseUrl.trim().isEmpty) {
       _logger.error(
-        '''Cannot store OneDrive OAuth refresh token: personal AI base URL is not configured for mnemonic hash $mnemonicHash.''',
+        '''Cannot store Microsoft 365 OAuth refresh token: personal AI base URL is not configured for mnemonic hash $mnemonicHash.''',
         name: _logKey,
       );
       throw StateError(
@@ -198,7 +194,7 @@ class MicrosoftOneDriveAuthService {
       '/integrations/microsoft/onedrive',
     );
     _logger.info(
-      'Storing OneDrive OAuth refresh token via personal AI endpoint '
+      'Storing Microsoft 365 OAuth refresh token via personal AI endpoint '
       '(baseUrl=$personalAiBaseUrl, endpoint=$endpoint, '
       'setupId=${_redact(normalizedSetupId)}, '
       'holderDid=${_redact(normalizedHolderDid)})',
@@ -229,7 +225,7 @@ class MicrosoftOneDriveAuthService {
       final body = error.body?.trim() ?? '';
       if (error.statusCode == 404 && body.isEmpty) {
         final message =
-            'OneDrive OAuth storage endpoint was not found. '
+            'Microsoft 365 OAuth storage endpoint was not found. '
             'Restart the Personal AI/Cierge backend so it includes '
             '$endpoint.';
         _logger.error(
@@ -243,7 +239,7 @@ class MicrosoftOneDriveAuthService {
 
       final bodyForLog = body.isEmpty ? '(empty)' : body;
       _logger.error(
-        'Failed to store OneDrive OAuth refresh token '
+        'Failed to store Microsoft 365 OAuth refresh token '
         '(status=${error.statusCode}, body=$bodyForLog).',
         error: error,
         stackTrace: stackTrace,
@@ -252,7 +248,7 @@ class MicrosoftOneDriveAuthService {
       rethrow;
     } catch (error, stackTrace) {
       _logger.error(
-        'Failed to store OneDrive OAuth refresh token.',
+        'Failed to store Microsoft 365 OAuth refresh token.',
         error: error,
         stackTrace: stackTrace,
         name: _logKey,
@@ -261,7 +257,7 @@ class MicrosoftOneDriveAuthService {
     }
 
     _logger.info(
-      'OneDrive OAuth refresh token stored successfully.',
+      'Microsoft 365 OAuth refresh token stored successfully.',
       name: _logKey,
     );
   }
@@ -279,5 +275,29 @@ class MicrosoftOneDriveAuthService {
     if (value.isEmpty) return '(empty)';
     if (value.length <= 12) return '${value.substring(0, 3)}...';
     return '${value.substring(0, 8)}...${value.substring(value.length - 4)}';
+  }
+
+  List<String> _agentStreamScopes(List<String> configuredScopes) {
+    const graphScopeSuffixes = {
+      'Sites.Read.All',
+      'Mail.Read',
+      'People.Read.All',
+      'OnlineMeetingTranscript.Read.All',
+      'Chat.Read',
+      'ChannelMessage.Read.All',
+      'ExternalItem.Read.All',
+    };
+    final filtered = <String>[];
+    for (final scope in configuredScopes) {
+      final trimmed = scope.trim();
+      if (trimmed.isEmpty) continue;
+      if (trimmed == 'offline_access' ||
+          graphScopeSuffixes.any(
+            (suffix) => trimmed == suffix || trimmed.endsWith('/$suffix'),
+          )) {
+        filtered.add(trimmed);
+      }
+    }
+    return filtered.toSet().toList(growable: false);
   }
 }
