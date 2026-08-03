@@ -48,7 +48,7 @@ Familiarise yourself with these key terms before diving into the code.
 
 ## Preview
 
-The reference app showcases the core capabilities of a secure, private messaging application - identity setup, connection offers, peer-to-peer messaging, and group messaging, all built on best practices from the Affinidi Meeting Place SDK.
+The reference app showcases the core capabilities of a secure, private messaging application - identity setup, connection offers, peer-to-peer messaging, group messaging, and voice and video calls, all built on best practices from the Affinidi Meeting Place SDK.
 
 ![App preview screenshots](assets/docs/meetingplace-screenshot.png)
 
@@ -59,6 +59,7 @@ The reference app showcases the core capabilities of a secure, private messaging
 | **Multiple Identities** | Set a primary identity for your main profile, plus create aliases for specific contexts (e.g. a hobbyist persona or professional profile). |
 | **Connect with Invitations** | Create and publish invitations with custom options: a custom phrase, a usage limit, or an expiry date. |
 | **Secure Messaging** | Individual and group chats with end-to-end privacy built in. |
+| **Voice and Video Calls** | Individual and group voice and video calls in Matrix based chats, with per-participant end-to-end encryption. |
 | **Configurable Chat Transport** | Depending on your use case, use DIDComm, Matrix based transport, or both. DIDComm supports individual chats only and does not support group chats. Use Matrix for group chats and richer chat features like voice messages, message edit, message delete, reactions, and file/document/audio/video attachments. Configure transports with `ENABLED_INDIVIDUAL_CHAT_TRANSPORTS`. |
 | **Verified Identity (R-Card and VRC)** | Share your R-Card (a signed digital contact card) in any chat, or initiate a mutual VRC exchange to create a verifiable record of your relationship. See [Feature Demonstrations](#feature-demos). |
 | **Messaging Server** | Use the Affinidi-hosted messaging server or bring your own managed mediator. |
@@ -79,6 +80,8 @@ Individual chats can use DIDComm based transport or Matrix based transport. DIDC
 | File/document attachments | ❌ | ✅ |
 | Audio/video attachments | ❌ | ✅ |
 | Voice messages | ❌ | ✅ |
+| Voice calls | ❌ | ✅ |
+| Video calls | ❌ | ✅ |
 | Message edit/delete | ❌ | ✅ |
 | Reactions | ✅ | ✅ |
 | Typing indicators | ✅ | ✅ |
@@ -259,6 +262,7 @@ Matrix enables the richer chat features in this reference app.
 | **Voice messages** | Record and play audio messages in chat. |
 | **Message actions** | React to messages, edit sent messages, and delete messages. |
 | **Media messages** | Share images, videos, files, and documents in chat. |
+| **Voice and video calls** | Start individual or group voice and video calls, with incoming-call banners, mute and camera controls, and picture-in-picture. |
 
 The screenshots below show the Matrix based chat flow and rich message actions.
 
@@ -284,6 +288,42 @@ The screenshots below show the Matrix based chat flow and rich message actions.
 <td align="center" width="33%"><img src="assets/matrix/matrix-edit-message.png" alt="Edit a Matrix message" /></td>
 <td align="center" width="33%"><img src="assets/matrix/matrix-delete-message.png" alt="Delete a Matrix message" /></td>
 <td align="center" width="33%"><img src="assets/matrix/matrix-group-chat.png" alt="Matrix group chat" /></td>
+</tr>
+</table>
+
+</details>
+
+<details id="panel-calls">
+<summary><strong>Voice and Video Calls</strong></summary>
+
+Voice and video calls run over Matrix using LiveKit for real-time media, with per-participant end-to-end encryption. Calls require Matrix based transport.
+
+| Feature | What it shows |
+|---------|---------------|
+| **Individual calls** | Start a voice or video call with a contact from a Matrix based chat. |
+| **Group calls** | Start a voice or video call with everyone in a Matrix based group chat. |
+| **Call controls** | Mute the microphone, toggle and switch the camera, and end the call. |
+
+The screenshots below show individual and group voice and video calls.
+
+<table>
+<tr>
+<td align="center" width="50%"><strong>Individual voice call</strong></td>
+<td align="center" width="50%"><strong>Individual video call</strong></td>
+</tr>
+<tr>
+<td align="center" width="50%"><img src="assets/calls/call-voice-individual.png" alt="Individual voice call" /></td>
+<td align="center" width="50%"><img src="assets/calls/call-video-individual.png" alt="Individual video call" /></td>
+</tr>
+</table>
+<table>
+<tr>
+<td align="center" width="50%"><strong>Group voice call</strong></td>
+<td align="center" width="50%"><strong>Group video call</strong></td>
+</tr>
+<tr>
+<td align="center" width="50%"><img src="assets/calls/call-voice-group.png" alt="Group voice call" /></td>
+<td align="center" width="50%"><img src="assets/calls/call-video-group.png" alt="Group video call" /></td>
 </tr>
 </table>
 
@@ -426,6 +466,18 @@ ENABLED_INDIVIDUAL_CHAT_TRANSPORTS='["didcomm", "matrix"]'
 ```
 
 Group chats always use Matrix, so `MATRIX_HOMESERVER` is required for group chat.
+
+#### Enable Voice and Video Calls
+
+Voice and video calls run over Matrix using LiveKit for real-time media, so `MATRIX_HOMESERVER` must be set. Point the app at your LiveKit token service and SFU:
+
+```bash
+# LiveKit token service endpoint (HTTPS)
+LIVEKIT_SERVICE_URL=""
+
+# LiveKit SFU media endpoint (WSS)
+LIVEKIT_SFU_URL=""
+```
 
 #### Enable Push Notifications
 
