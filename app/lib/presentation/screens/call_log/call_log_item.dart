@@ -36,6 +36,7 @@ class _CallLogItem extends StatelessWidget {
         : null;
 
     return Card(
+      color: colorScheme.inverseSurface.withValues(alpha: 0.5),
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
