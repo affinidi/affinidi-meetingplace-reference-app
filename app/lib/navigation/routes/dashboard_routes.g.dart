@@ -19,23 +19,34 @@ RouteBase get $dashboardShellRouteData => StatefulShellRouteData.$route(
         GoRouteData.$route(
           path: '/contacts',
           name: 'contacts',
+          hasOverriddenOnExit: false,
           factory: $ContactsRoute._fromState,
           routes: [
             GoRouteData.$route(
               path: ':contactId/connection-details',
               name: 'connectionDetails',
+              hasOverriddenOnExit: false,
               parentNavigatorKey: ConnectionDetailsRoute.$parentNavigatorKey,
               factory: $ConnectionDetailsRoute._fromState,
             ),
             GoRouteData.$route(
+              path: 'call-log',
+              name: 'callLog',
+              hasOverriddenOnExit: false,
+              parentNavigatorKey: CallLogRoute.$parentNavigatorKey,
+              factory: $CallLogRoute._fromState,
+            ),
+            GoRouteData.$route(
               path: ':contactId/chat',
               name: 'chat',
+              hasOverriddenOnExit: false,
               parentNavigatorKey: ChatRoute.$parentNavigatorKey,
               factory: $ChatRoute._fromState,
               routes: [
                 GoRouteData.$route(
                   path: 'audio-video-call',
                   name: 'audioVideoCall',
+                  hasOverriddenOnExit: false,
                   parentNavigatorKey: AudioVideoCallRoute.$parentNavigatorKey,
                   factory: $AudioVideoCallRoute._fromState,
                 ),
@@ -52,17 +63,20 @@ RouteBase get $dashboardShellRouteData => StatefulShellRouteData.$route(
         GoRouteData.$route(
           path: '/connections',
           name: 'connections',
+          hasOverriddenOnExit: false,
           factory: $ConnectionsRoute._fromState,
           routes: [
             GoRouteData.$route(
               path: 'find-offer',
               name: 'findOffer',
+              hasOverriddenOnExit: false,
               parentNavigatorKey: FindOfferRoute.$parentNavigatorKey,
               factory: $FindOfferRoute._fromState,
               routes: [
                 GoRouteData.$route(
                   path: ':mnemonic/accept',
                   name: 'acceptOffer',
+                  hasOverriddenOnExit: false,
                   parentNavigatorKey: AcceptOfferRoute.$parentNavigatorKey,
                   factory: $AcceptOfferRoute._fromState,
                 ),
@@ -71,24 +85,28 @@ RouteBase get $dashboardShellRouteData => StatefulShellRouteData.$route(
             GoRouteData.$route(
               path: 'publish-offer',
               name: 'publishOffer',
+              hasOverriddenOnExit: false,
               parentNavigatorKey: PublishOfferRoute.$parentNavigatorKey,
               factory: $PublishOfferRoute._fromState,
             ),
             GoRouteData.$route(
               path: 'offer-details',
               name: 'offerDetails',
+              hasOverriddenOnExit: false,
               parentNavigatorKey: OfferDetailsRoute.$parentNavigatorKey,
               factory: $OfferDetailsRoute._fromState,
             ),
             GoRouteData.$route(
               path: 'oob-share-qr',
               name: 'oobQr',
+              hasOverriddenOnExit: false,
               parentNavigatorKey: OOBShareQrRoute.$parentNavigatorKey,
               factory: $OOBShareQrRoute._fromState,
             ),
             GoRouteData.$route(
               path: 'oob-scan-qr',
               name: 'qrScanner',
+              hasOverriddenOnExit: false,
               parentNavigatorKey: OOBScanQrRoute.$parentNavigatorKey,
               factory: $OOBScanQrRoute._fromState,
             ),
@@ -103,11 +121,13 @@ RouteBase get $dashboardShellRouteData => StatefulShellRouteData.$route(
         GoRouteData.$route(
           path: '/identities',
           name: 'identities',
+          hasOverriddenOnExit: false,
           factory: $IdentitiesRoute._fromState,
           routes: [
             GoRouteData.$route(
               path: 'identity-form',
               name: 'identityForm',
+              hasOverriddenOnExit: false,
               parentNavigatorKey: IdentityFormRoute.$parentNavigatorKey,
               factory: $IdentityFormRoute._fromState,
             ),
@@ -122,17 +142,20 @@ RouteBase get $dashboardShellRouteData => StatefulShellRouteData.$route(
         GoRouteData.$route(
           path: '/r-cards',
           name: 'rCards',
+          hasOverriddenOnExit: false,
           factory: $RCardsRoute._fromState,
           routes: [
             GoRouteData.$route(
               path: ':subjectDid/details',
               name: 'rCardDetails',
+              hasOverriddenOnExit: false,
               parentNavigatorKey: RCardDetailsRoute.$parentNavigatorKey,
               factory: $RCardDetailsRoute._fromState,
             ),
             GoRouteData.$route(
               path: ':credentialId/vrc-details',
               name: 'vrcDetails',
+              hasOverriddenOnExit: false,
               parentNavigatorKey: VrcDetailsRoute.$parentNavigatorKey,
               factory: $VrcDetailsRoute._fromState,
             ),
@@ -147,6 +170,7 @@ RouteBase get $dashboardShellRouteData => StatefulShellRouteData.$route(
         GoRouteData.$route(
           path: '/credentials',
           name: 'credentials',
+          hasOverriddenOnExit: false,
           factory: $CredentialsRoute._fromState,
         ),
       ],
@@ -189,6 +213,26 @@ mixin $ConnectionDetailsRoute on GoRouteData {
   String get location => GoRouteData.$location(
     '/contacts/${Uri.encodeComponent(_self.contactId)}/connection-details',
   );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $CallLogRoute on GoRouteData {
+  static CallLogRoute _fromState(GoRouterState state) => const CallLogRoute();
+
+  @override
+  String get location => GoRouteData.$location('/contacts/call-log');
 
   @override
   void go(BuildContext context) => context.go(location);

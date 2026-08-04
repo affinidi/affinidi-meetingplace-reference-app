@@ -14,6 +14,9 @@ class RouteNames {
   // Connections
   static const connectionDetails = 'connectionDetails';
 
+  // Call log
+  static const callLog = 'callLog';
+
   // Offers
   static const publishOffer = 'publishOffer';
   static const offerDetails = 'offerDetails';

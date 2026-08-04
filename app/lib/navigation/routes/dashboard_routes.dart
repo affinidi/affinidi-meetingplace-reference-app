@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../presentation/page_transitions/slide_up_transition_page.dart';
 import '../../presentation/scaffolds/scaffold_with_nav_bar.dart';
+import '../../presentation/screens/call_log/call_log_screen.dart';
 import '../../presentation/screens/chat/audio_video_call/audio_video_call_screen.dart';
 import '../../presentation/screens/chat/chat_screen.dart';
 import '../../presentation/screens/connections/connection_details/connection_details_screen.dart';
@@ -26,6 +27,7 @@ import 'route_paths.dart';
 
 part 'connection/connection_details_route.dart';
 part 'contact/audio_video_call_route.dart';
+part 'contact/call_log_route.dart';
 part 'contact/chat_route.dart';
 part 'dashboard_routes.g.dart';
 part 'identity/identity_form_route.dart';
@@ -50,6 +52,10 @@ part 'vrc/vrc_details_route.dart';
             TypedGoRoute<ConnectionDetailsRoute>(
               path: RoutePaths.connectionDetails,
               name: RouteNames.connectionDetails,
+            ),
+            TypedGoRoute<CallLogRoute>(
+              path: RoutePaths.callLog,
+              name: RouteNames.callLog,
             ),
             TypedGoRoute<ChatRoute>(
               path: RoutePaths.chat,

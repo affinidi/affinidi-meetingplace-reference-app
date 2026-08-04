@@ -2137,6 +2137,37 @@
 		"type": "text",
 		"placeholders": {}
 	},
+	"callLogScreenTitle": "Call log",
+	"@callLogScreenTitle": {
+		"type": "text"
+	},
+	"callLogScreenSubtitle": "Your past audio and video calls.",
+	"@callLogScreenSubtitle": {
+		"type": "text"
+	},
+	"callLogEmpty": "No calls yet.",
+	"@callLogEmpty": {
+		"type": "text"
+	},
+	"callLogParticipantsCount": "{count, plural, =1{1 participant} other{{count} participants}}",
+	"@callLogParticipantsCount": {
+		"type": "text",
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"callLogInProgress": "In progress",
+	"@callLogInProgress": {
+		"type": "text",
+		"description": "Status text shown in the Call log for a call that is still ongoing"
+	},
+	"callLogError": "Unable to load call log.",
+	"@callLogError": {
+		"type": "text",
+		"description": "Message shown in the Call log screen when loading past calls fails"
+	},
 	"callDurationHourFormat": "{count, plural, =1{1 h} other{{count} h}}",
 	"@callDurationHourFormat": {
 		"type": "text",

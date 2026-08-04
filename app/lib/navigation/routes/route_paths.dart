@@ -17,6 +17,9 @@ class RoutePaths {
   // Connections
   static const connectionDetails = ':contactId/connection-details';
 
+  // Call log
+  static const callLog = 'call-log';
+
   // Offers
   static const publishOffer = 'publish-offer';
   static const offerDetails = 'offer-details';
