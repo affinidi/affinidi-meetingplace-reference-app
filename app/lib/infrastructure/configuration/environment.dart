@@ -8,6 +8,17 @@ import 'package:meeting_place_core/meeting_place_core.dart';
 import 'firebase_environment.dart';
 import 'image_config.dart';
 
+const _defaultAgentStreamOAuthScopes = [
+  'offline_access',
+  'https://graph.microsoft.com/Sites.Read.All',
+  'https://graph.microsoft.com/Mail.Read',
+  'https://graph.microsoft.com/People.Read.All',
+  'https://graph.microsoft.com/OnlineMeetingTranscript.Read.All',
+  'https://graph.microsoft.com/Chat.Read',
+  'https://graph.microsoft.com/ChannelMessage.Read.All',
+  'https://graph.microsoft.com/ExternalItem.Read.All',
+];
+
 /// Centralized runtime configuration sourced from compile-time environment
 /// variables and sensible defaults used across the app.
 ///
@@ -140,18 +151,29 @@ class Environment {
     defaultValue: '/personal-agent/setup',
   );
 
-  String get microsoftOAuthTenantId => const String.fromEnvironment(
-    'MICROSOFT_OAUTH_TENANT_ID',
+  String get agentStreamOAuthTenantId => const String.fromEnvironment(
+    'AGENT_STREAM_OAUTH_TENANT_ID',
     defaultValue: 'common',
   );
 
-  String get microsoftOAuthClientId =>
-      const String.fromEnvironment('MICROSOFT_OAUTH_CLIENT_ID');
+  String get agentStreamOAuthClientId =>
+      const String.fromEnvironment('AGENT_STREAM_OAUTH_CLIENT_ID');
 
-  String get microsoftOAuthRedirectUrl => const String.fromEnvironment(
-    'MICROSOFT_OAUTH_REDIRECT_URL',
-    defaultValue: 'mpx://auth/microsoft/callback',
+  String get agentStreamOAuthRedirectUrl => const String.fromEnvironment(
+    'AGENT_STREAM_OAUTH_REDIRECT_URL',
+    defaultValue: 'mpx://auth/agent-stream/callback',
   );
+
+  List<String> get agentStreamOAuthScopes {
+    const raw = String.fromEnvironment('AGENT_STREAM_OAUTH_SCOPES');
+    if (raw.trim().isEmpty) return _defaultAgentStreamOAuthScopes;
+    final scopes = raw
+        .split(RegExp(r'[\s,]+'))
+        .map((scope) => scope.trim())
+        .where((scope) => scope.isNotEmpty)
+        .toList(growable: false);
+    return scopes.isEmpty ? _defaultAgentStreamOAuthScopes : scopes;
+  }
 
   String get appVersionName =>
       const String.fromEnvironment('APP_VERSION_NAME', defaultValue: '');

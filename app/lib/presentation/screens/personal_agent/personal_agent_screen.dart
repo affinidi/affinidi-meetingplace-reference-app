@@ -11,6 +11,7 @@ import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/trust_task/trust_task_record.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/media/file_picker/file_picker_platform_provider.dart';
+import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../navigation/tabs/tabs.dart';
 import '../../widgets/section_banner.dart';
@@ -184,11 +185,22 @@ class PersonalAgentScreen extends ConsumerWidget {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(outcome.message)));
-      } catch (error) {
+      } catch (error, stackTrace) {
+        final exactError = error.toString();
+        ref
+            .read(appLoggerProvider)
+            .error(
+              'Work AI Microsoft 365 connection failed in UI action. exactError=$exactError',
+              error: error,
+              stackTrace: stackTrace,
+              name: 'PERSONALAGENT',
+            );
         if (!context.mounted) return;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(error.toString())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Microsoft 365 connection failed. Check logs.'),
+          ),
+        );
       }
     }
 
@@ -1127,10 +1139,7 @@ class _AgentContextSetupCard extends StatelessWidget {
           ? workContextFileName
           : personalContextFileName;
       if (contextTarget == AgentContext.work) {
-        if (file == null || file.isEmpty) {
-          return 'Connect OneDrive to set up work context';
-        }
-        return l10n.personalAgentAlreadySetUp(file);
+        return 'Connect Microsoft 365 to set up Work AI';
       }
       if (file == null || file.isEmpty) {
         return l10n.personalAgentChooseFileToSetUp;

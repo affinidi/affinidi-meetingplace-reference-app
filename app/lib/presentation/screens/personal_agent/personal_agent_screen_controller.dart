@@ -283,19 +283,19 @@ class PersonalAgentScreenController
     final holderDid = _currentHolderDid();
     if (holderDid.isEmpty) {
       _logger.error(
-        'Cannot connect OneDrive because current holder DID is missing.',
+        'Cannot connect Microsoft 365 because current holder DID is missing.',
         name: _logKey,
       );
       return const WorkOneDriveConnectionOutcome(
         completed: false,
         message:
-            'Unable to connect OneDrive because the current identity is '
+            'Unable to connect Microsoft 365 because the current identity is '
             'missing a DID.',
       );
     }
 
     _logger.info(
-      'Starting Work AI OneDrive connection (holderDid=${_redact(holderDid)})',
+      'Starting Work AI Microsoft 365 connection (holderDid=${_redact(holderDid)})',
       name: _logKey,
     );
 
@@ -317,7 +317,7 @@ class PersonalAgentScreenController
       Future<void>? setupFuture;
       if (!canReuseExistingSetup) {
         _logger.info(
-          'Starting Work AI setup while OneDrive OAuth opens.',
+          'Starting Work AI setup while Microsoft 365 OAuth opens.',
           name: _logKey,
         );
         setupFuture =
@@ -330,7 +330,7 @@ class PersonalAgentScreenController
             });
       } else {
         _logger.info(
-          'Reusing existing Work AI setup for OneDrive OAuth '
+          'Reusing existing Work AI setup for Microsoft 365 OAuth '
           '(setupId=${_redact(existingSetup.setupId ?? '')})',
           name: _logKey,
         );
@@ -354,19 +354,19 @@ class PersonalAgentScreenController
       final setupId = _setupForContext(spec.contextName)?.setupId?.trim() ?? '';
       if (setupId.isEmpty) {
         _logger.error(
-          'Cannot connect OneDrive because Work AI setup id is missing.',
+          'Cannot connect Microsoft 365 because Work AI setup id is missing.',
           name: _logKey,
         );
         _clearConnecting();
         return const WorkOneDriveConnectionOutcome(
           completed: false,
           message:
-              'Unable to connect OneDrive because Work AI setup is incomplete.',
+              'Unable to connect Microsoft 365 because Work AI setup is incomplete.',
         );
       }
 
       _logger.info(
-        'Work AI setup is ready; starting OneDrive OAuth '
+        'Work AI setup is ready; starting Microsoft 365 OAuth '
         '(setupId=${_redact(setupId)})',
         name: _logKey,
       );
@@ -378,8 +378,7 @@ class PersonalAgentScreenController
       );
 
       _logger.info(
-        'OneDrive OAuth storage completed; Work AI will query OneDrive at '
-        'answer time.',
+        'Microsoft 365 OAuth storage completed; Agent Stream will use Microsoft Graph grounding at answer time.',
         name: _logKey,
       );
 
@@ -387,7 +386,7 @@ class PersonalAgentScreenController
           .read<ContextRoutingService>(contextRoutingServiceProvider.notifier)
           .markContextUploaded(
             context: spec.target,
-            fileName: 'OneDrive runtime connection',
+            fileName: 'Microsoft 365 Agent Stream connection',
           );
 
       await _ref
@@ -399,11 +398,12 @@ class PersonalAgentScreenController
       _clearConnecting();
       return const WorkOneDriveConnectionOutcome(
         completed: true,
-        message: 'OneDrive connected. Work AI will query it at answer time.',
+        message:
+            'Microsoft 365 connected. Work AI will use Agent Stream at answer time.',
       );
     } catch (error, stackTrace) {
       _logger.error(
-        'Work AI OneDrive connection failed.',
+        'Work AI Microsoft 365 connection failed.',
         error: error,
         stackTrace: stackTrace,
         name: _logKey,

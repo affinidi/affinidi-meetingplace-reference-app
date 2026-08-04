@@ -55,13 +55,25 @@ class FakeEnvironment implements Environment {
   final List<ChannelTransport> enabledIndividualChatTransports;
 
   @override
-  String get microsoftOAuthTenantId => 'common';
+  String get agentStreamOAuthTenantId => 'common';
 
   @override
-  String get microsoftOAuthClientId => 'test-client-id';
+  String get agentStreamOAuthClientId => 'test-agent-stream-client-id';
 
   @override
-  String get microsoftOAuthRedirectUrl => 'mpx://auth/microsoft/callback';
+  String get agentStreamOAuthRedirectUrl => 'mpx://auth/agent-stream/callback';
+
+  @override
+  List<String> get agentStreamOAuthScopes => const [
+    'offline_access',
+    'https://graph.microsoft.com/Sites.Read.All',
+    'https://graph.microsoft.com/Mail.Read',
+    'https://graph.microsoft.com/People.Read.All',
+    'https://graph.microsoft.com/OnlineMeetingTranscript.Read.All',
+    'https://graph.microsoft.com/Chat.Read',
+    'https://graph.microsoft.com/ChannelMessage.Read.All',
+    'https://graph.microsoft.com/ExternalItem.Read.All',
+  ];
 
   @override
   int get maxLogMemoryEntries => 1000;
