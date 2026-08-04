@@ -33,6 +33,7 @@ class _CallChatItem extends ConsumerWidget {
       status: call.status,
       isFromMe: isFromMe,
     );
+    final isRecallable = isCallChatItemRecallable(call.status);
 
     final colors = resolveCallChatItemColors(
       status: call.status,
@@ -68,6 +69,16 @@ class _CallChatItem extends ConsumerWidget {
                         isAudioOnly: call.mediaType == CallMediaType.audio,
                       ),
                     ),
+                  ),
+                );
+              }
+            : isRecallable
+            ? () {
+                unawaited(
+                  _CallChatItemActions.show(
+                    context: context,
+                    contactId: _contactId,
+                    mediaType: call.mediaType,
                   ),
                 );
               }

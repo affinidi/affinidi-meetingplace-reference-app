@@ -86,6 +86,7 @@ import 'chat_zkp/chat_zkp_overlay.dart';
 import 'proof_flow_controller.dart';
 
 part 'awaiting_members_warning.dart';
+part 'call_chat_item_actions.dart';
 part 'chat_contact_display_name.dart';
 part 'chat_contact_presence_status.dart';
 part 'chat_effect.dart';

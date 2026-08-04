@@ -123,6 +123,16 @@ bool isCallChatItemTappable({
   required bool isFromMe,
 }) => status == CallStatus.inProgress;
 
+/// Whether the item represents a finished call that can be re-initiated.
+///
+/// True for any terminal outcome that isn't currently in progress: `ended`,
+/// `missed`, or `declined`. Tapping such an item opens the re-call sheet
+/// instead of rejoining a live session.
+bool isCallChatItemRecallable(CallStatus status) =>
+    status == CallStatus.ended ||
+    status == CallStatus.missed ||
+    status == CallStatus.declined;
+
 /// Maps any live (non-final) call state to the [CallStatus] to persist on
 /// the chat item while a call is in progress.
 ///
