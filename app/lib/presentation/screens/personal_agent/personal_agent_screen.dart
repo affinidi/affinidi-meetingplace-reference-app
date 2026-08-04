@@ -1314,15 +1314,17 @@ class _AgentContextSetupCard extends StatelessWidget {
             onPressed: onUploadWork,
             onReset: onResetWork,
           ),
-          const SizedBox(height: 10),
-          buildContextTile(
-            title: l10n.personalAgentPersonalAgentTitle,
-            subtitle: subtitleFor(AgentContext.personal),
-            icon: Icons.upload_file_outlined,
-            isLocked: personalContextUploaded,
-            onPressed: onUploadPersonal,
-            onReset: onResetPersonal,
-          ),
+          // Personal context is disabled in the UI while Agent Stream only
+          // supports the work context.
+          // const SizedBox(height: 10),
+          // buildContextTile(
+          //   title: l10n.personalAgentPersonalAgentTitle,
+          //   subtitle: subtitleFor(AgentContext.personal),
+          //   icon: Icons.upload_file_outlined,
+          //   isLocked: personalContextUploaded,
+          //   onPressed: onUploadPersonal,
+          //   onReset: onResetPersonal,
+          // ),
         ],
       ),
     );
