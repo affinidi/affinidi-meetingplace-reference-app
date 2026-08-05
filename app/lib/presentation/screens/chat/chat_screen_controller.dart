@@ -1277,8 +1277,23 @@ extension ChatScreenControllerProviderSelectors
           .where((did) => did != null)
           .toSet();
 
+      final memberDidsWhoJoined = state.messages
+          .whereType<chat.EventMessage>()
+          .where(
+            (message) =>
+                message.eventType ==
+                chat.EventMessageType.groupMemberJoinedGroup,
+          )
+          .map((message) => message.memberDid)
+          .where((did) => did != null)
+          .toSet();
+
       final awaitingMemberNames = awaitingMembers
-          .where((message) => !memberDidsWhoLeft.contains(message.memberDid))
+          .where(
+            (message) =>
+                !memberDidsWhoLeft.contains(message.memberDid) &&
+                !memberDidsWhoJoined.contains(message.memberDid),
+          )
           .map((message) => message.contactCard?.firstName)
           .where((firstName) => firstName != null)
           .cast<String>();
