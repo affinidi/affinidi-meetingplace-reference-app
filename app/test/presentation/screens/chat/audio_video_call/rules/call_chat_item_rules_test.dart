@@ -108,6 +108,23 @@ void main() {
     });
   });
 
+  group('isCallChatItemRecallable', () {
+    test('returns true for ended, missed, and declined statuses', () {
+      expect(isCallChatItemRecallable(CallStatus.ended), isTrue);
+      expect(isCallChatItemRecallable(CallStatus.missed), isTrue);
+      expect(isCallChatItemRecallable(CallStatus.declined), isTrue);
+    });
+
+    test('returns false for inProgress status', () {
+      expect(isCallChatItemRecallable(CallStatus.inProgress), isFalse);
+    });
+
+    test('returns false for calling and ringing statuses', () {
+      expect(isCallChatItemRecallable(CallStatus.calling), isFalse);
+      expect(isCallChatItemRecallable(CallStatus.ringing), isFalse);
+    });
+  });
+
   group('formatCallDuration', () {
     test('formats seconds only', () {
       expect(
