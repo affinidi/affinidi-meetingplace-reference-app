@@ -7,6 +7,7 @@ import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import '../../../domain/models/call_log/call_log_entry.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/extensions/widget_ref_extensions.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../widgets/section_banner.dart';
 import '../chat/audio_video_call/rules/call_chat_item_rules.dart';
 import 'call_log_screen_controller.dart';

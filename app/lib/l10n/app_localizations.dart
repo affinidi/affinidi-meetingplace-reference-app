@@ -3358,6 +3358,12 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 participant} other{{count} participants}}'**
   String callLogParticipantsCount(int count);
 
+  /// Participants label for a group call log entry when only some participant DIDs resolved to a known contact
+  ///
+  /// In en, this message translates to:
+  /// **'{names} and {othersCount, plural, =1{1 other} other{{othersCount} others}}'**
+  String callLogParticipantsNamesAndOthers(String names, int othersCount);
+
   /// Status text shown in the Call log for a call that is still ongoing
   ///
   /// In en, this message translates to:

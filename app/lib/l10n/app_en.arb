@@ -2158,6 +2158,19 @@
 			}
 		}
 	},
+	"callLogParticipantsNamesAndOthers": "{names} and {othersCount, plural, =1{1 other} other{{othersCount} others}}",
+	"@callLogParticipantsNamesAndOthers": {
+		"type": "text",
+		"description": "Participants label for a group call log entry when only some participant DIDs resolved to a known contact",
+		"placeholders": {
+			"names": {
+				"type": "String"
+			},
+			"othersCount": {
+				"type": "int"
+			}
+		}
+	},
 	"callLogInProgress": "In progress",
 	"@callLogInProgress": {
 		"type": "text",

@@ -565,6 +565,7 @@
 	"callLogScreenSubtitle": "Tus llamadas de audio y video anteriores.",
 	"callLogEmpty": "Aún no hay llamadas.",
 	"callLogParticipantsCount": "{count, plural, =1{1 participante} other{{count} participantes}}",
+	"callLogParticipantsNamesAndOthers": "{names} y {othersCount, plural, =1{1 más} other{{othersCount} más}}",
 	"callLogInProgress": "En curso",
 	"callLogError": "No se pudo cargar el registro de llamadas.",
 	"incomingCallBannerIsCalling": "{callerName} está llamando",

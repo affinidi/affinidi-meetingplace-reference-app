@@ -1,5 +1,34 @@
 part of 'call_log_screen.dart';
 
+/// Resolves the participants label shown under a group call log entry, or
+/// `null` for a 1:1 call.
+///
+/// [CallLogEntry.participantNames] only carries the subset of
+/// [CallLogEntry.participantCount] peers whose DID resolved to a known
+/// contact (see [CallParticipation.participantDids]), so a partial match
+/// must not be rendered as if it were the full roster. Falls back to the
+/// count label when no name resolved; appends the unresolved remainder as
+/// "and N others" when some, but not all, resolved.
+String? resolveCallLogParticipantsLabel(
+  AppLocalizations l10n,
+  CallLogEntry entry,
+) {
+  if (!entry.isGroupCall) return null;
+
+  final participantNames = entry.participantNames;
+  if (participantNames == null || participantNames.isEmpty) {
+    return l10n.callLogParticipantsCount(entry.participantCount);
+  }
+
+  final unresolvedCount = entry.participantCount - participantNames.length;
+  if (unresolvedCount <= 0) return participantNames.join(', ');
+
+  return l10n.callLogParticipantsNamesAndOthers(
+    participantNames.join(', '),
+    unresolvedCount,
+  );
+}
+
 /// Renders a single past-call entry. Tapping this item is intentionally a
 /// no-op — the Call log screen has no per-item action or navigation.
 class _CallLogItem extends StatelessWidget {
@@ -28,12 +57,7 @@ class _CallLogItem extends StatelessWidget {
             mediaType: entry.mediaType,
           );
 
-    final participantNames = entry.participantNames;
-    final participantsLabel = entry.isGroupCall
-        ? (participantNames != null && participantNames.isNotEmpty
-              ? participantNames.join(', ')
-              : l10n.callLogParticipantsCount(entry.participantCount))
-        : null;
+    final participantsLabel = resolveCallLogParticipantsLabel(l10n, entry);
 
     return Card(
       color: colorScheme.inverseSurface.withValues(alpha: 0.5),

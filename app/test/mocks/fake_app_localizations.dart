@@ -32,6 +32,14 @@ class FakeAppLocalizations implements AppLocalizations {
   String get callChatItemYouLeft => 'You left';
 
   @override
+  String callLogParticipantsCount(int count) =>
+      count == 1 ? '1 participant' : '$count participants';
+
+  @override
+  String callLogParticipantsNamesAndOthers(String names, int othersCount) =>
+      '$names and ${othersCount == 1 ? '1 other' : '$othersCount others'}';
+
+  @override
   String callDurationHourFormat(int h) => '${h}h';
 
   @override

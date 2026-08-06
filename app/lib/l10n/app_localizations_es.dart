@@ -2233,6 +2233,17 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String callLogParticipantsNamesAndOthers(String names, int othersCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      othersCount,
+      locale: localeName,
+      other: '$othersCount más',
+      one: '1 más',
+    );
+    return '$names y $_temp0';
+  }
+
+  @override
   String get callLogInProgress => 'En curso';
 
   @override
