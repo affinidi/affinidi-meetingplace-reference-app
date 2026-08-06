@@ -302,7 +302,6 @@ String _contextBadgeText(String? contextKey) {
   final normalized = contextKey?.trim().toLowerCase();
   return switch (normalized) {
     'ctx-0' => 'Work (ctx-0)',
-    'ctx-1' => 'Personal (ctx-1)',
     String value when value.isNotEmpty => 'Context ($value)',
     _ => 'Context (-)',
   };

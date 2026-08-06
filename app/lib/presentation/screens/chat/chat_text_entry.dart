@@ -16,16 +16,17 @@ class _ChatTextEntry extends HookConsumerWidget {
         (state) => state.getContactById(_contactId),
       ),
     );
+    final messages = ref.watch(provider.select((state) => state.messages));
 
     AgentContext inferredDefaultContext() {
       final mapped = routingState.contactContexts[_contactId];
       if (mapped != null) return mapped;
 
-      if (contact == null) return AgentContext.personal;
+      if (contact == null) return AgentContext.work;
       final isAiContact =
           contact.category == ContactCategory.robot ||
           contact.card.type.trim().toLowerCase() == 'ai-agent';
-      if (!isAiContact) return AgentContext.personal;
+      if (!isAiContact) return AgentContext.work;
 
       final label = [
         contact.displayName ?? '',
@@ -33,7 +34,7 @@ class _ChatTextEntry extends HookConsumerWidget {
         contact.card.firstName,
       ].join(' ').toLowerCase();
       if (label.contains('work')) return AgentContext.work;
-      if (label.contains('personal')) return AgentContext.personal;
+      if (label.contains('personal')) return AgentContext.work;
 
       final aiContacts =
           contactsState.contacts
@@ -47,13 +48,22 @@ class _ChatTextEntry extends HookConsumerWidget {
       if (aiContacts.length >= 2) {
         final idx = aiContacts.indexWhere((c) => c.id == contact.id);
         if (idx == 0) return AgentContext.work;
-        if (idx == 1) return AgentContext.personal;
+        if (idx == 1) return AgentContext.work;
       }
 
-      return AgentContext.personal;
+      return AgentContext.work;
     }
 
     final activeContext = inferredDefaultContext();
+    final isWorkAgentChat =
+        contact != null &&
+        isPersonalAiContact(
+          contact: contact,
+          contactContexts: routingState.contactContexts,
+        ) &&
+        activeContext == AgentContext.work;
+    final waitingForWorkAgentReply =
+        isWorkAgentChat && _isWaitingForWorkAgentReply(messages);
 
     useEffect(
       () {
@@ -169,6 +179,7 @@ class _ChatTextEntry extends HookConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (waitingForWorkAgentReply) const _WorkAgentReplyIndicator(),
             if (mentionDraft.shouldShowSuggestions)
               _ChatMentionSuggestions(
                 suggestions: mentionDraft.suggestions,
@@ -375,6 +386,53 @@ class _ChatTextEntry extends HookConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+bool _isWaitingForWorkAgentReply(List<chat.ChatItem> messages) {
+  final latestVisibleMessage = messages.firstWhereOrNull(
+    (message) =>
+        !_isVrcRequestOnlyMessage(message) &&
+        !_isLocalAgentResponseMessage(message) &&
+        message is chat.Message,
+  );
+
+  if (latestVisibleMessage == null || !latestVisibleMessage.isFromMe) {
+    return false;
+  }
+
+  return latestVisibleMessage.status != chat.ChatItemStatus.error;
+}
+
+class _WorkAgentReplyIndicator extends StatelessWidget {
+  const _WorkAgentReplyIndicator();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox.square(
+            dimension: 14,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: context.colorScheme.primary,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            'Waiting for Work AI to reply',
+            style: TextStyle(
+              color: context.colorScheme.onSurface.withValues(alpha: 0.72),
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
       ),
     );
   }

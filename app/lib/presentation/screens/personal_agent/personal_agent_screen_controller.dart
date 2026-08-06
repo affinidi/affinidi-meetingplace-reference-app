@@ -52,18 +52,10 @@ class _RoutingTargetSpec {
   });
 
   factory _RoutingTargetSpec.from(AgentContext target) {
-    if (target == AgentContext.work) {
-      return _RoutingTargetSpec(
-        target: AgentContext.work,
-        contextName: AgentContext.work.setupContextName,
-        displayName: 'Work AI',
-      );
-    }
-
     return _RoutingTargetSpec(
-      target: AgentContext.personal,
-      contextName: AgentContext.personal.setupContextName,
-      displayName: 'Personal AI',
+      target: AgentContext.work,
+      contextName: AgentContext.work.setupContextName,
+      displayName: 'Work AI',
     );
   }
 
@@ -147,19 +139,9 @@ class PersonalAgentScreenController
       contactContexts: contextRoutingState.contactContexts,
       targetContext: AgentContext.work,
     );
-    final personalContact = findPersonalAiContactForContext(
-      contacts: contactsState.contacts,
-      contactContexts: contextRoutingState.contactContexts,
-      targetContext: AgentContext.personal,
-    );
-
     final workAuthorizationSnapshot = PersonalAiAuthorizationSnapshot.tryDecode(
       workContact?.personalAgentAuthorizationSnapshot,
     );
-    final personalAuthorizationSnapshot =
-        PersonalAiAuthorizationSnapshot.tryDecode(
-          personalContact?.personalAgentAuthorizationSnapshot,
-        );
     final workContextReady =
         contextRoutingState.workContextUploaded || workContact != null;
 
@@ -173,19 +155,12 @@ class PersonalAgentScreenController
       contextUploadError: personalAiState.contextUploadError,
       setupResult: personalAiState.setupResult,
       workContact: workContact,
-      personalContact: personalContact,
       workAuthorizationSnapshot: workAuthorizationSnapshot,
-      personalAuthorizationSnapshot: personalAuthorizationSnapshot,
       showWorkAuthorization: workContact != null && workContextReady,
-      showPersonalAuthorization:
-          personalContact != null &&
-          contextRoutingState.personalContextUploaded,
       workContextUploaded: workContextReady,
-      personalContextUploaded: contextRoutingState.personalContextUploaded,
       workContextFileName:
           contextRoutingState.workContextFileName ??
           (workContact != null ? 'Work AI connected' : null),
-      personalContextFileName: contextRoutingState.personalContextFileName,
       clearErrorMessage: personalAiState.errorMessage == null,
       clearContextUploadError: personalAiState.contextUploadError == null,
       clearSetupResult: personalAiState.setupResult == null,
