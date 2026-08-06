@@ -27,6 +27,7 @@ class _CallChatItem extends ConsumerWidget {
     final colorScheme = context.colorScheme;
     final textTheme = context.textTheme;
     final l10n = context.l10n;
+    final logger = ref.read(appLoggerProvider);
 
     final isFromMe = _message.isFromMe;
     final isTappable = isCallChatItemTappable(
@@ -79,7 +80,14 @@ class _CallChatItem extends ConsumerWidget {
                     context: context,
                     contactId: _contactId,
                     mediaType: call.mediaType,
-                  ),
+                  ).catchError((Object error, StackTrace stackTrace) {
+                    logger.error(
+                      'Failed to open recall actions sheet',
+                      error: error,
+                      stackTrace: stackTrace,
+                      name: '_CallChatItem',
+                    );
+                  }),
                 );
               }
             : null,
