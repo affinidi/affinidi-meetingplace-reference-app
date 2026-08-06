@@ -84,6 +84,7 @@ class _ActionsBar extends ConsumerWidget {
             IconButton(
               key: const Key('call_log_button'),
               icon: const Icon(Icons.history),
+              tooltip: l10n.callLogScreenTitle,
               onPressed: () {
                 unawaited(const CallLogRoute().push<void>(context));
               },
