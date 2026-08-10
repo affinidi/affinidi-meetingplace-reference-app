@@ -18,8 +18,7 @@ final contextRoutingStoreProvider = Provider<ContextRoutingStore>(
 );
 
 enum AgentContext {
-  work('ctx-0', 'work-ai'),
-  personal('ctx-1', 'personal-ai');
+  work('ctx-0', 'work-ai');
 
   const AgentContext(this.routeKey, this.setupContextName);
 
@@ -33,8 +32,7 @@ enum AgentContext {
     final normalized = value.trim().toLowerCase();
     return switch (normalized) {
       'ctx-0' || 'work' || 'work-ai' => AgentContext.work,
-      'ctx-1' || 'personal' || 'personal-ai' => AgentContext.personal,
-      _ => AgentContext.personal,
+      _ => AgentContext.work,
     };
   }
 }
@@ -42,59 +40,43 @@ enum AgentContext {
 class ContextRoutingState {
   const ContextRoutingState({
     this.workContextUploaded = false,
-    this.personalContextUploaded = false,
     this.workContextFileName,
-    this.personalContextFileName,
     this.contactContexts = const {},
     this.initialized = false,
   });
 
   final bool workContextUploaded;
-  final bool personalContextUploaded;
   final String? workContextFileName;
-  final String? personalContextFileName;
   final Map<String, AgentContext> contactContexts;
   final bool initialized;
 
   ContextRoutingState copyWith({
     bool? workContextUploaded,
-    bool? personalContextUploaded,
     String? workContextFileName,
     bool clearWorkContextFileName = false,
-    String? personalContextFileName,
-    bool clearPersonalContextFileName = false,
     Map<String, AgentContext>? contactContexts,
     bool? initialized,
   }) {
     return ContextRoutingState(
       workContextUploaded: workContextUploaded ?? this.workContextUploaded,
-      personalContextUploaded:
-          personalContextUploaded ?? this.personalContextUploaded,
       workContextFileName: clearWorkContextFileName
           ? null
           : workContextFileName ?? this.workContextFileName,
-      personalContextFileName: clearPersonalContextFileName
-          ? null
-          : personalContextFileName ?? this.personalContextFileName,
       contactContexts: contactContexts ?? this.contactContexts,
       initialized: initialized ?? this.initialized,
     );
   }
 
   bool isContextUploaded(AgentContext context) {
-    return context == AgentContext.work
-        ? workContextUploaded
-        : personalContextUploaded;
+    return workContextUploaded;
   }
 
   AgentContext contextForContactId(String contactId) {
-    return contactContexts[contactId] ?? AgentContext.personal;
+    return contactContexts[contactId] ?? AgentContext.work;
   }
 
   String? fileNameForContext(AgentContext context) {
-    return context == AgentContext.work
-        ? workContextFileName
-        : personalContextFileName;
+    return workContextFileName;
   }
 }
 
@@ -109,9 +91,7 @@ class ContextRoutingService extends StateNotifier<ContextRoutingState> {
   }
 
   static const _workUploadedKey = 'cierge_context_uploaded_work';
-  static const _personalUploadedKey = 'cierge_context_uploaded_personal';
   static const _workFileNameKey = 'cierge_context_file_name_work';
-  static const _personalFileNameKey = 'cierge_context_file_name_personal';
   static const _contactContextMapKey = 'cierge_contact_context_map';
 
   final Ref _ref;
@@ -123,9 +103,7 @@ class ContextRoutingService extends StateNotifier<ContextRoutingState> {
     final decoded = _decodeContactMap(rawMap);
     state = state.copyWith(
       workContextUploaded: _store.getBool(_workUploadedKey) ?? false,
-      personalContextUploaded: _store.getBool(_personalUploadedKey) ?? false,
       workContextFileName: _store.getString(_workFileNameKey),
-      personalContextFileName: _store.getString(_personalFileNameKey),
       contactContexts: decoded,
       initialized: true,
     );
@@ -146,45 +124,25 @@ class ContextRoutingService extends StateNotifier<ContextRoutingState> {
     required AgentContext context,
     required String fileName,
   }) async {
-    if (context == AgentContext.work) {
-      state = state.copyWith(
-        workContextUploaded: true,
-        workContextFileName: fileName,
-      );
-      await _store.setBool(_workUploadedKey, true);
-      await _store.setString(_workFileNameKey, fileName);
-      return;
-    }
-
     state = state.copyWith(
-      personalContextUploaded: true,
-      personalContextFileName: fileName,
+      workContextUploaded: true,
+      workContextFileName: fileName,
     );
-    await _store.setBool(_personalUploadedKey, true);
-    await _store.setString(_personalFileNameKey, fileName);
+    await _store.setBool(_workUploadedKey, true);
+    await _store.setString(_workFileNameKey, fileName);
   }
 
   Future<void> clearContext({required AgentContext context}) async {
     final next = Map<String, AgentContext>.from(state.contactContexts)
       ..removeWhere((_, assigned) => assigned == context);
 
-    if (context == AgentContext.work) {
-      state = state.copyWith(
-        workContextUploaded: false,
-        clearWorkContextFileName: true,
-        contactContexts: next,
-      );
-      await _store.setBool(_workUploadedKey, false);
-      await _store.setString(_workFileNameKey, '');
-    } else {
-      state = state.copyWith(
-        personalContextUploaded: false,
-        clearPersonalContextFileName: true,
-        contactContexts: next,
-      );
-      await _store.setBool(_personalUploadedKey, false);
-      await _store.setString(_personalFileNameKey, '');
-    }
+    state = state.copyWith(
+      workContextUploaded: false,
+      clearWorkContextFileName: true,
+      contactContexts: next,
+    );
+    await _store.setBool(_workUploadedKey, false);
+    await _store.setString(_workFileNameKey, '');
 
     await _store.setString(_contactContextMapKey, _encodeContactMap(next));
   }

@@ -15,15 +15,10 @@ class PersonalAgentScreenState {
     required this.errorMessage,
     required this.setupResult,
     required this.workContact,
-    required this.personalContact,
     required this.workAuthorizationSnapshot,
-    required this.personalAuthorizationSnapshot,
     required this.showWorkAuthorization,
-    required this.showPersonalAuthorization,
     required this.workContextUploaded,
-    required this.personalContextUploaded,
     required this.workContextFileName,
-    required this.personalContextFileName,
     this.contextUploadError,
     this.autoResponseEnabled = false,
     this.autoResponseLoading = false,
@@ -42,15 +37,10 @@ class PersonalAgentScreenState {
       contextUploadError = null,
       setupResult = null,
       workContact = null,
-      personalContact = null,
       workAuthorizationSnapshot = null,
-      personalAuthorizationSnapshot = null,
       showWorkAuthorization = false,
-      showPersonalAuthorization = false,
       workContextUploaded = false,
-      personalContextUploaded = false,
       workContextFileName = null,
-      personalContextFileName = null,
       autoResponseEnabled = false,
       autoResponseLoading = false,
       autoResponseAvailable = false;
@@ -71,15 +61,10 @@ class PersonalAgentScreenState {
   final String? contextUploadError;
   final PersonalAgentSetupResult? setupResult;
   final Contact? workContact;
-  final Contact? personalContact;
   final PersonalAiAuthorizationSnapshot? workAuthorizationSnapshot;
-  final PersonalAiAuthorizationSnapshot? personalAuthorizationSnapshot;
   final bool showWorkAuthorization;
-  final bool showPersonalAuthorization;
   final bool workContextUploaded;
-  final bool personalContextUploaded;
   final String? workContextFileName;
-  final String? personalContextFileName;
   final bool autoResponseEnabled;
   final bool autoResponseLoading;
   final bool autoResponseAvailable;
@@ -96,15 +81,10 @@ class PersonalAgentScreenState {
     String? contextUploadError,
     PersonalAgentSetupResult? setupResult,
     Contact? workContact,
-    Contact? personalContact,
     PersonalAiAuthorizationSnapshot? workAuthorizationSnapshot,
-    PersonalAiAuthorizationSnapshot? personalAuthorizationSnapshot,
     bool? showWorkAuthorization,
-    bool? showPersonalAuthorization,
     bool? workContextUploaded,
-    bool? personalContextUploaded,
     String? workContextFileName,
-    String? personalContextFileName,
     bool? autoResponseEnabled,
     bool? autoResponseLoading,
     bool? autoResponseAvailable,
@@ -131,21 +111,12 @@ class PersonalAgentScreenState {
           : (contextUploadError ?? this.contextUploadError),
       setupResult: clearSetupResult ? null : (setupResult ?? this.setupResult),
       workContact: workContact ?? this.workContact,
-      personalContact: personalContact ?? this.personalContact,
       workAuthorizationSnapshot:
           workAuthorizationSnapshot ?? this.workAuthorizationSnapshot,
-      personalAuthorizationSnapshot:
-          personalAuthorizationSnapshot ?? this.personalAuthorizationSnapshot,
       showWorkAuthorization:
           showWorkAuthorization ?? this.showWorkAuthorization,
-      showPersonalAuthorization:
-          showPersonalAuthorization ?? this.showPersonalAuthorization,
       workContextUploaded: workContextUploaded ?? this.workContextUploaded,
-      personalContextUploaded:
-          personalContextUploaded ?? this.personalContextUploaded,
       workContextFileName: workContextFileName ?? this.workContextFileName,
-      personalContextFileName:
-          personalContextFileName ?? this.personalContextFileName,
       autoResponseEnabled: autoResponseEnabled ?? this.autoResponseEnabled,
       autoResponseLoading: autoResponseLoading ?? this.autoResponseLoading,
       autoResponseAvailable:

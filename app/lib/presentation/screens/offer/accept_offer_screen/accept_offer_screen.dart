@@ -368,13 +368,6 @@ class _ActionBar extends ConsumerWidget {
                   Navigator.of(dialogContext).pop(AgentContext.work),
               child: Text(context.l10n.agentContextWorkAiLabel),
             ),
-            // Personal context is disabled in the UI while Agent Stream only
-            // supports the work context.
-            // TextButton(
-            //   onPressed: () =>
-            //       Navigator.of(dialogContext).pop(AgentContext.personal),
-            //   child: Text(context.l10n.agentContextPersonalAiLabel),
-            // ),
           ],
         ),
       );

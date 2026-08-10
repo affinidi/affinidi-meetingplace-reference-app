@@ -204,8 +204,8 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
   Future<void> uploadContext({
     required String setupId,
     required String content,
-    String setupContextName = 'personal-ai',
-    String agentDisplayName = 'My Personal AI',
+    String setupContextName = 'work-ai',
+    String agentDisplayName = 'Work AI',
   }) async {
     if (!_environment.personalAiEnabled) return;
     if (state.contextUploading) return;
@@ -290,10 +290,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
   }
 
   String _routeKeyForSetupContextName(String setupContextName) {
-    return setupContextName.trim().toLowerCase() ==
-            AgentContext.work.setupContextName
-        ? AgentContext.work.routeKey
-        : AgentContext.personal.routeKey;
+    return AgentContext.work.routeKey;
   }
 
   bool _isMissingSetupError(VtaClientException error) {
@@ -328,8 +325,8 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
 
   Future<void> setupPersonalAi({
     required String holderDid,
-    String contextName = 'personal-ai',
-    String agentDisplayName = 'My Personal AI',
+    String contextName = 'work-ai',
+    String agentDisplayName = 'Work AI',
   }) async {
     if (!_environment.personalAiEnabled) {
       return;
@@ -481,8 +478,8 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
   /// requested context.
   Future<PersonalAgentSetupResult?> waitUntilConnected({
     required String holderDid,
-    String contextName = 'personal-ai',
-    String agentDisplayName = 'My Personal AI',
+    String contextName = 'work-ai',
+    String agentDisplayName = 'Work AI',
     int maxAttempts = 20,
     Duration pollEvery = const Duration(seconds: 1),
   }) async {
@@ -578,7 +575,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
       }
 
       var anyConnected = false;
-      for (final contextName in const ['work-ai', 'personal-ai']) {
+      for (final contextName in const ['work-ai']) {
         try {
           final contextResult = await sdk.ensurePersonalAgentSetup(
             request: PersonalAgentSetupRequest(
@@ -634,10 +631,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     }
     var setupId = initialSetupId;
 
-    final contextName =
-        result.contextId.trim().toLowerCase().startsWith('work-ai')
-        ? 'work-ai'
-        : 'personal-ai';
+    final contextName = AgentContext.work.setupContextName;
 
     final identitiesService = _ref.read(identitiesServiceProvider.notifier);
     await identitiesService.ensureInitialized();
@@ -824,6 +818,10 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     required String agentDisplayName,
   }) async {
     final sdk = await _loadSdk();
+    final offerLabel =
+        contextName.trim().toLowerCase() == AgentContext.work.setupContextName
+        ? 'Work AI'
+        : 'Personal AI';
     var currentSetupId = setupId;
     const maxAttempts = 12;
     for (var attempt = 1; attempt <= maxAttempts; attempt++) {
@@ -888,11 +886,11 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     }
 
     _logger.error(
-      'Timed out waiting for Personal AI offer details after '
+      'Timed out waiting for $offerLabel offer details after '
       '$maxAttempts attempts.',
       name: _logKey,
     );
-    throw StateError('Timed out waiting for Personal AI offer details.');
+    throw StateError('Timed out waiting for $offerLabel offer details.');
   }
 
   Future<bool> _waitForPersonalAiContact({

@@ -42,14 +42,14 @@ class ContextRouteAttachmentBuilderService {
         .read(contactsServiceProvider)
         .getContactById(contactId);
     if (contact == null) {
-      return AgentContext.personal;
+      return AgentContext.work;
     }
 
     final isAiContact =
         contact.category == ContactCategory.robot ||
         contact.card.type.trim().toLowerCase() == 'ai-agent';
     if (!isAiContact) {
-      return AgentContext.personal;
+      return AgentContext.work;
     }
 
     final label = [
@@ -59,7 +59,7 @@ class ContextRouteAttachmentBuilderService {
     ].join(' ').toLowerCase();
 
     if (label.contains('work')) return AgentContext.work;
-    if (label.contains('personal')) return AgentContext.personal;
+    if (label.contains('personal')) return AgentContext.work;
 
     final aiContacts =
         _ref
@@ -75,10 +75,10 @@ class ContextRouteAttachmentBuilderService {
     if (aiContacts.length >= 2) {
       final idx = aiContacts.indexWhere((c) => c.id == contact.id);
       if (idx == 0) return AgentContext.work;
-      if (idx == 1) return AgentContext.personal;
+      if (idx == 1) return AgentContext.work;
     }
 
-    return AgentContext.personal;
+    return AgentContext.work;
   }
 }
 

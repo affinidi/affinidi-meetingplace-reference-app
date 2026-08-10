@@ -9,8 +9,8 @@ String canonicalPersonalAiContextName({
   required String displayName,
 }) {
   final explicit = explicitContextName?.trim().toLowerCase();
-  if (explicit == 'work-ai' || explicit == 'personal-ai') {
-    return explicit!;
+  if (explicit == AgentContext.work.setupContextName) {
+    return AgentContext.work.setupContextName;
   }
 
   final normalizedContextId = contextId.trim().toLowerCase();
@@ -24,20 +24,14 @@ String canonicalPersonalAiContextName({
   if (normalizedDisplayName.contains('work')) {
     return AgentContext.work.setupContextName;
   }
-  return AgentContext.personal.setupContextName;
+  return AgentContext.work.setupContextName;
 }
 
 AgentContext agentContextForSetup({
   required String contextId,
   required String displayName,
 }) {
-  final contextName = canonicalPersonalAiContextName(
-    contextId: contextId,
-    displayName: displayName,
-  );
-  return contextName == AgentContext.work.setupContextName
-      ? AgentContext.work
-      : AgentContext.personal;
+  return AgentContext.work;
 }
 
 bool isAiContactBoundToOtherContext({
@@ -120,8 +114,7 @@ bool isPersonalAiContact({
   required Map<String, AgentContext> contactContexts,
 }) {
   final assignedContext = contactContexts[contact.id];
-  if (assignedContext == AgentContext.work ||
-      assignedContext == AgentContext.personal) {
+  if (assignedContext == AgentContext.work) {
     return contact.category == ContactCategory.robot;
   }
 

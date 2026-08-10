@@ -44,7 +44,7 @@ class PersonalAiServiceState {
   /// Stores the most recently set up setup result (for backward compatibility).
   final PersonalAgentSetupResult? setupResult;
 
-  /// Maps context name (e.g., 'work-ai', 'personal-ai') to its setup result.
+  /// Maps context name (e.g., 'work-ai') to its setup result.
   /// Allows tracking multiple concurrent agent setups.
   final Map<String, PersonalAgentSetupResult> setupResultsByContext;
 
