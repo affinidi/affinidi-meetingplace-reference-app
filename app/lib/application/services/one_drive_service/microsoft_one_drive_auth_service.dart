@@ -31,6 +31,10 @@ class MicrosoftOneDriveOAuthResult {
   final DateTime? accessTokenExpirationDateTime;
 }
 
+class MicrosoftOneDriveAuthCancelledException implements Exception {
+  const MicrosoftOneDriveAuthCancelledException();
+}
+
 class MicrosoftOneDriveAuthService {
   MicrosoftOneDriveAuthService(this._ref, {FlutterAppAuth? appAuth})
     : _appAuth = appAuth ?? const FlutterAppAuth();
@@ -64,11 +68,11 @@ class MicrosoftOneDriveAuthService {
     final clientId = _environment.agentStreamOAuthClientId.trim();
     if (clientId.isEmpty) {
       _logger.error(
-        'Agent Stream OAuth client id is missing; cannot open authorization URL.',
+        'Agent Stream OAuth client id is missing',
         name: _logKey,
       );
       throw StateError(
-        'AGENT_STREAM_OAUTH_CLIENT_ID must be configured to connect Microsoft 365 through Agent Stream.',
+        'AGENT_STREAM_OAUTH_CLIENT_ID must be configured',
       );
     }
 
@@ -84,14 +88,15 @@ class MicrosoftOneDriveAuthService {
         name: _logKey,
       );
       throw StateError(
-        'AGENT_STREAM_OAUTH_SCOPES must include Microsoft Graph Copilot scopes.',
+        'AGENT_STREAM_OAUTH_SCOPES must include Microsoft Copilot scopes.',
       );
     }
 
     _logger.info(
       'Opening Agent Stream OAuth authorization session '
       '(tenant=$tenantId, clientId=${_redact(clientId)}, '
-      'redirect=${_environment.agentStreamOAuthRedirectUrl}, scopes=${scopes.join(' ')})',
+      'redirect=${_environment.agentStreamOAuthRedirectUrl},'
+      'scopes=${scopes.join(' ')})',
       name: _logKey,
     );
 
@@ -108,6 +113,12 @@ class MicrosoftOneDriveAuthService {
           scopes: scopes,
         ),
       );
+    } on FlutterAppAuthUserCancelledException {
+      _logger.info(
+        'Microsoft OAuth authorization session was cancelled by the user.',
+        name: _logKey,
+      );
+      throw const MicrosoftOneDriveAuthCancelledException();
     } catch (error, stackTrace) {
       _logger.error(
         'Microsoft OAuth authorization session failed.',

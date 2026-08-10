@@ -9,6 +9,7 @@ import 'package:mpx_flutter_reference_app/application/services/contacts_service/
 import 'package:mpx_flutter_reference_app/application/services/context_routing_service/context_routing_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service_state.dart';
+import 'package:mpx_flutter_reference_app/application/services/one_drive_service/microsoft_one_drive_auth_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/personal_ai_service/personal_ai_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/personal_ai_service/personal_ai_service_state.dart';
 import 'package:mpx_flutter_reference_app/application/services/signing_service/signing_service.dart';
@@ -214,7 +215,8 @@ void main() {
           promptDismissed: false,
           contextProvisioned: true,
           contextUploading: false,
-          setupResult: _readyPersonalSetup(),
+          setupResult: _readyWorkSetup(),
+          setupResultsByContext: {'work-ai': _readyWorkSetup()},
         ),
       );
 
@@ -248,7 +250,7 @@ void main() {
         );
 
         final outcome = await controller.uploadRoutingContext(
-          AgentContext.personal,
+          AgentContext.work,
           fileName: 'context.md',
           content: 'hello',
         );
@@ -262,14 +264,14 @@ void main() {
       final contact = FakeContacts.agentContact;
       final container = makeContainer(
         contacts: [contact],
-        contactContexts: {contact.id: AgentContext.personal},
+        contactContexts: {contact.id: AgentContext.work},
       );
       final controller = container.read(
         personalAgentScreenControllerProvider.notifier,
       );
 
       final outcome = await controller.uploadRoutingContext(
-        AgentContext.personal,
+        AgentContext.work,
         fileName: 'context.md',
         content: 'hello',
       );
@@ -278,22 +280,220 @@ void main() {
       expect(fakePersonalAi.setupCallCount, 0);
     });
   });
+
+  group('PersonalAgentScreenController – Work AI Microsoft 365', () {
+    late _RecordingPersonalAiNotifier fakePersonalAi;
+    late _RecordingOneDriveAuthService fakeOneDriveAuth;
+    late _RecordingContextRoutingNotifier fakeContextRouting;
+
+    ProviderContainer makeContainer(
+      PersonalAgentSetupResult setupResult, {
+      bool authCancelled = false,
+      List<Contact> contacts = const [],
+      Map<String, AgentContext> contactContexts = const {},
+    }) {
+      fakePersonalAi = _RecordingPersonalAiNotifier(
+        PersonalAiServiceState(
+          status: PersonalAiSetupStatus.ready,
+          showSetupPrompt: false,
+          promptDismissed: false,
+          contextProvisioned: true,
+          contextUploading: false,
+          setupResult: setupResult,
+          setupResultsByContext: {'work-ai': setupResult},
+        ),
+      );
+      fakeOneDriveAuth = _RecordingOneDriveAuthService(
+        shouldCancel: authCancelled,
+      );
+      fakeContextRouting = _RecordingContextRoutingNotifier(
+        const ContextRoutingState(),
+      );
+
+      final container = ProviderContainer(
+        overrides: [
+          identitiesServiceProvider.overrideWith(_PrimaryIdentityService.new),
+          personalAiServiceProvider.overrideWith((ref) => fakePersonalAi),
+          contactsServiceProvider.overrideWith(
+            () => _StubContactsService(contacts),
+          ),
+          contextRoutingServiceProvider.overrideWith((ref) {
+            fakeContextRouting = _RecordingContextRoutingNotifier(
+              ContextRoutingState(contactContexts: contactContexts),
+            );
+            return fakeContextRouting;
+          }),
+          microsoftOneDriveAuthServiceProvider.overrideWith(
+            (ref) => fakeOneDriveAuth,
+          ),
+          signingServiceProvider.overrideWith(
+            (ref) => _FakeSigningNotifier(stepUpEnabled: false),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      return container;
+    }
+
+    test(
+      'does not start Agent Stream setup when Microsoft auth is cancelled',
+      () async {
+        final container = makeContainer(
+          _incompleteWorkSetup(),
+          authCancelled: true,
+        );
+        final controller = container.read(
+          personalAgentScreenControllerProvider.notifier,
+        );
+
+        final outcome = await controller.connectWorkOneDrive();
+
+        expect(outcome.completed, isFalse);
+        expect(outcome.message, 'Microsoft 365 sign-in cancelled.');
+        expect(fakeOneDriveAuth.authorizeCallCount, 1);
+        expect(fakePersonalAi.setupCallCount, 0);
+        expect(fakeOneDriveAuth.storeCallCount, 0);
+        expect(fakeContextRouting.markContextUploadedCallCount, 0);
+      },
+    );
+
+    test(
+      'starts Agent Stream setup only after Microsoft auth succeeds',
+      () async {
+        final container = makeContainer(_incompleteWorkSetup());
+        final controller = container.read(
+          personalAgentScreenControllerProvider.notifier,
+        );
+
+        final outcome = await controller.connectWorkOneDrive();
+
+        expect(outcome.completed, isFalse);
+        expect(outcome.message, contains('Work AI setup is incomplete'));
+        expect(fakeOneDriveAuth.authorizeCallCount, 1);
+        expect(fakePersonalAi.setupCallCount, 1);
+        expect(fakeOneDriveAuth.storeCallCount, 0);
+        expect(fakeContextRouting.markContextUploadedCallCount, 0);
+      },
+    );
+
+    test(
+      'stores Microsoft auth when setup has id but offer is still pending',
+      () async {
+        final container = makeContainer(_offerPendingWorkSetup());
+        final controller = container.read(
+          personalAgentScreenControllerProvider.notifier,
+        );
+
+        final outcome = await controller.connectWorkOneDrive();
+
+        expect(outcome.completed, isTrue);
+        expect(fakeOneDriveAuth.authorizeCallCount, 1);
+        expect(fakePersonalAi.setupCallCount, 1);
+        expect(fakeOneDriveAuth.storeCallCount, 1);
+        expect(fakeContextRouting.markContextUploadedCallCount, 1);
+      },
+    );
+
+    test(
+      'stores Microsoft auth when setup is pending but Work AI contact exists',
+      () async {
+        final contact = FakeContacts.agentContact;
+        final container = makeContainer(
+          _offerPendingWorkSetup(),
+          contacts: [contact],
+          contactContexts: {contact.id: AgentContext.work},
+        );
+        final controller = container.read(
+          personalAgentScreenControllerProvider.notifier,
+        );
+
+        final outcome = await controller.connectWorkOneDrive();
+
+        expect(outcome.completed, isTrue);
+        expect(fakeOneDriveAuth.authorizeCallCount, 1);
+        expect(fakePersonalAi.setupCallCount, 1);
+        expect(fakeOneDriveAuth.storeCallCount, 1);
+        expect(fakeContextRouting.markContextUploadedCallCount, 1);
+      },
+    );
+
+    test(
+      'stores Microsoft auth when finalized Work AI contact is unassigned',
+      () async {
+        final contact = FakeContacts.agentContact;
+        final container = makeContainer(
+          _offerPendingWorkSetup(),
+          contacts: [contact],
+        );
+        final controller = container.read(
+          personalAgentScreenControllerProvider.notifier,
+        );
+
+        final outcome = await controller.connectWorkOneDrive();
+
+        final routingState = container.read(contextRoutingServiceProvider);
+        expect(outcome.completed, isTrue);
+        expect(routingState.contactContexts[contact.id], AgentContext.work);
+        expect(fakeOneDriveAuth.storeCallCount, 1);
+        expect(fakeContextRouting.markContextUploadedCallCount, 1);
+      },
+    );
+  });
 }
 
-PersonalAgentSetupResult _readyPersonalSetup() {
+PersonalAgentSetupResult _readyWorkSetup() {
   return const PersonalAgentSetupResult(
     holderDid: 'did:key:primary-identity',
-    contextId: 'personal-ai',
+    contextId: 'work-ai',
     contextCreated: true,
     agentDid: 'did:key:agent',
     agentCreated: true,
     profile: PersonalAgentProfile(
       agentDid: 'did:key:agent',
-      displayName: 'Personal AI',
+      displayName: 'Work AI',
       mode: PersonalAgentMode.suggestions,
     ),
-    setupId: 'setup-personal-1',
+    setupId: 'setup-work-1',
     setupStatus: 'ready',
+    mpxConnectionCreated: true,
+  );
+}
+
+PersonalAgentSetupResult _incompleteWorkSetup() {
+  return const PersonalAgentSetupResult(
+    holderDid: 'did:key:primary-identity',
+    contextId: 'work-ai',
+    contextCreated: true,
+    agentDid: 'did:key:agent',
+    agentCreated: true,
+    profile: PersonalAgentProfile(
+      agentDid: 'did:key:agent',
+      displayName: 'Work AI',
+      mode: PersonalAgentMode.suggestions,
+    ),
+    setupId: 'setup-work-1',
+    setupStatus: 'cancelled',
+    mpxConnectionCreated: false,
+    availableInContacts: false,
+  );
+}
+
+PersonalAgentSetupResult _offerPendingWorkSetup() {
+  return const PersonalAgentSetupResult(
+    holderDid: 'did:key:primary-identity',
+    contextId: 'work-ai',
+    contextCreated: true,
+    agentDid: 'did:key:agent',
+    agentCreated: true,
+    profile: PersonalAgentProfile(
+      agentDid: 'did:key:agent',
+      displayName: 'Work AI',
+      mode: PersonalAgentMode.suggestions,
+    ),
+    setupId: 'setup-work-1',
+    setupStatus: 'offer_pending_acceptance',
+    mpxConnectionCreated: false,
+    availableInContacts: false,
   );
 }
 
@@ -376,6 +576,17 @@ class _RecordingPersonalAiNotifier extends StateNotifier<PersonalAiServiceState>
   }
 
   @override
+  Future<PersonalAgentSetupResult?> waitUntilConnected({
+    required String holderDid,
+    String contextName = 'work-ai',
+    String agentDisplayName = 'Work AI',
+    int maxAttempts = 20,
+    Duration pollEvery = const Duration(seconds: 1),
+  }) async {
+    return state.getSetupResultForContext(contextName) ?? state.setupResult;
+  }
+
+  @override
   Future<void> uploadContext({
     required String setupId,
     required String content,
@@ -394,6 +605,7 @@ class _StubContactsService extends ContactsService {
   _StubContactsService(this._contacts);
 
   final List<Contact> _contacts;
+  int fetchCallCount = 0;
 
   @override
   ContactsServiceState build() => ContactsServiceState(contacts: _contacts);
@@ -402,7 +614,9 @@ class _StubContactsService extends ContactsService {
   Future<void> ensureInitialized() async {}
 
   @override
-  Future<void> fetchContacts() async {}
+  Future<void> fetchContacts() async {
+    fetchCallCount++;
+  }
 }
 
 class _StubContextRoutingNotifier extends StateNotifier<ContextRoutingState>
@@ -410,10 +624,70 @@ class _StubContextRoutingNotifier extends StateNotifier<ContextRoutingState>
   _StubContextRoutingNotifier(super.state);
 
   @override
+  Future<void> assignContactContext(
+    String contactId,
+    AgentContext context,
+  ) async {
+    final next = Map<String, AgentContext>.from(state.contactContexts)
+      ..[contactId] = context;
+    state = state.copyWith(contactContexts: next);
+  }
+
+  @override
   Future<void> markContextUploaded({
     required AgentContext context,
     required String fileName,
   }) async {}
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
+}
+
+class _RecordingContextRoutingNotifier extends _StubContextRoutingNotifier {
+  _RecordingContextRoutingNotifier(super.state);
+
+  int markContextUploadedCallCount = 0;
+
+  @override
+  Future<void> markContextUploaded({
+    required AgentContext context,
+    required String fileName,
+  }) async {
+    markContextUploadedCallCount++;
+  }
+}
+
+class _RecordingOneDriveAuthService implements MicrosoftOneDriveAuthService {
+  _RecordingOneDriveAuthService({this.shouldCancel = false});
+
+  final bool shouldCancel;
+  int authorizeCallCount = 0;
+  int storeCallCount = 0;
+
+  @override
+  Future<MicrosoftOneDriveOAuthResult> authorize() async {
+    authorizeCallCount++;
+    if (shouldCancel) {
+      throw const MicrosoftOneDriveAuthCancelledException();
+    }
+    return const MicrosoftOneDriveOAuthResult(
+      accessToken: 'access-token',
+      refreshToken: 'refresh-token',
+      clientId: 'client-id',
+      tenantId: 'tenant-id',
+      redirectUrl: 'app://callback',
+      scopes: ['User.Read'],
+    );
+  }
+
+  @override
+  Future<void> storeConnection({
+    required String setupId,
+    required String holderDid,
+    required MicrosoftOneDriveOAuthResult oauthResult,
+  }) async {
+    storeCallCount++;
+  }
 
   @override
   dynamic noSuchMethod(Invocation invocation) => null;
