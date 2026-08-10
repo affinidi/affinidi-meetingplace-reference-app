@@ -67,13 +67,8 @@ class MicrosoftOneDriveAuthService {
 
     final clientId = _environment.agentStreamOAuthClientId.trim();
     if (clientId.isEmpty) {
-      _logger.error(
-        'Agent Stream OAuth client id is missing',
-        name: _logKey,
-      );
-      throw StateError(
-        'AGENT_STREAM_OAUTH_CLIENT_ID must be configured',
-      );
+      _logger.error('Agent Stream OAuth client id is missing', name: _logKey);
+      throw StateError('AGENT_STREAM_OAUTH_CLIENT_ID must be configured');
     }
 
     final tenantId = _environment.agentStreamOAuthTenantId.trim().isEmpty
