@@ -117,7 +117,7 @@ class PersonalAgentScreen extends ConsumerWidget {
         ref
             .read(appLoggerProvider)
             .error(
-              'Work AI Microsoft 365 connection failed in UI action. exactError=$exactError',
+              'Work AI Microsoft 365 connection failed. exactError=$exactError',
               error: error,
               stackTrace: stackTrace,
               name: 'PERSONALAGENT',

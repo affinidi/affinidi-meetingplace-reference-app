@@ -11,6 +11,9 @@ import '../../../application/services/personal_ai_service/personal_ai_authorizat
 import '../../../application/services/personal_ai_service/personal_ai_contact_resolution.dart';
 import '../../../application/services/personal_ai_service/personal_ai_service.dart';
 import '../../../application/services/signing_service/signing_service.dart';
+import '../../../domain/models/contacts/contact.dart';
+import '../../../domain/models/contacts/contact_category.dart';
+import '../../../domain/models/contacts/contact_status.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import 'personal_agent_screen_state.dart';
 
@@ -270,7 +273,8 @@ class PersonalAgentScreenController
     }
 
     _logger.info(
-      'Starting Work AI Microsoft 365 connection (holderDid=${_redact(holderDid)})',
+      'Starting Work AI Microsoft 365 connection '
+      '(holderDid=${_redact(holderDid)})',
       name: _logKey,
     );
 
@@ -287,22 +291,17 @@ class PersonalAgentScreenController
     _setConnecting(spec.displayName);
 
     try {
-      Object? setupError;
-      StackTrace? setupStackTrace;
-      Future<void>? setupFuture;
+      final oneDriveAuthService = _ref.read(
+        microsoftOneDriveAuthServiceProvider,
+      );
+      final oauthResult = await oneDriveAuthService.authorize();
+
       if (!canReuseExistingSetup) {
         _logger.info(
-          'Starting Work AI setup while Microsoft 365 OAuth opens.',
+          'Microsoft 365 OAuth completed; starting Work AI setup.',
           name: _logKey,
         );
-        setupFuture =
-            _ensureSetupAndConnection(
-              spec: spec,
-              holderDid: holderDid,
-            ).catchError((Object error, StackTrace stackTrace) {
-              setupError = error;
-              setupStackTrace = stackTrace;
-            });
+        await _ensureSetupAndConnection(spec: spec, holderDid: holderDid);
       } else {
         _logger.info(
           'Reusing existing Work AI setup for Microsoft 365 OAuth '
@@ -311,38 +310,31 @@ class PersonalAgentScreenController
         );
       }
 
-      final oneDriveAuthService = _ref.read(
-        microsoftOneDriveAuthServiceProvider,
-      );
-      final oauthResult = await oneDriveAuthService.authorize();
-
-      if (setupFuture != null) {
-        await setupFuture;
-        if (setupError != null) {
-          Error.throwWithStackTrace(
-            setupError!,
-            setupStackTrace ?? StackTrace.current,
-          );
-        }
-      }
-
-      final setupId = _setupForContext(spec.contextName)?.setupId?.trim() ?? '';
-      if (setupId.isEmpty) {
+      final setupResult = _setupForContext(spec.contextName);
+      final setupId = setupResult?.setupId?.trim() ?? '';
+      final contactReady = await _waitForContactForContext(spec.target);
+      final setupReady =
+          setupResult != null &&
+          _matchesTargetContext(setupResult, spec.contextName) &&
+          !_isTerminalSetupFailure(setupResult) &&
+          setupId.isNotEmpty;
+      if (!setupReady) {
         _logger.error(
-          'Cannot connect Microsoft 365 because Work AI setup id is missing.',
+          'Cannot connect Microsoft 365 because Work AI setup is incomplete.',
           name: _logKey,
         );
         _clearConnecting();
         return const WorkOneDriveConnectionOutcome(
           completed: false,
           message:
-              'Unable to connect Microsoft 365 because Work AI setup is incomplete.',
+              'Unable to connect Microsoft 365 because Work AI setup is '
+              'incomplete.',
         );
       }
 
       _logger.info(
-        'Work AI setup is ready; starting Microsoft 365 OAuth '
-        '(setupId=${_redact(setupId)})',
+        'Work AI setup can store Microsoft 365 OAuth '
+        '(setupId=${_redact(setupId)}, contactReady=$contactReady)',
         name: _logKey,
       );
 
@@ -353,7 +345,8 @@ class PersonalAgentScreenController
       );
 
       _logger.info(
-        'Microsoft 365 OAuth storage completed; Agent Stream will use Microsoft Graph grounding at answer time.',
+        'Microsoft 365 OAuth storage completed; Agent Stream will use '
+        'Microsoft Graph grounding at answer time.',
         name: _logKey,
       );
 
@@ -374,7 +367,18 @@ class PersonalAgentScreenController
       return const WorkOneDriveConnectionOutcome(
         completed: true,
         message:
-            'Microsoft 365 connected. Work AI will use Agent Stream at answer time.',
+            'Microsoft 365 connected. Work AI will use Agent Stream at '
+            'answer time.',
+      );
+    } on MicrosoftOneDriveAuthCancelledException {
+      _logger.info(
+        'Work AI Microsoft 365 connection cancelled before Agent Stream setup.',
+        name: _logKey,
+      );
+      _clearConnecting();
+      return const WorkOneDriveConnectionOutcome(
+        completed: false,
+        message: 'Microsoft 365 sign-in cancelled.',
       );
     } catch (error, stackTrace) {
       _logger.error(
@@ -460,6 +464,76 @@ class PersonalAgentScreenController
         null;
   }
 
+  Contact? _findUnassignedPersonalAiContactForContext(AgentContext target) {
+    final contactsState = _ref.read(contactsServiceProvider);
+    final routingState = _ref.read(contextRoutingServiceProvider);
+    final candidates = contactsState.contacts
+        .where((contact) {
+          if (contact.category != ContactCategory.robot ||
+              contact.status != ContactStatus.active) {
+            return false;
+          }
+          if (isAiContactBoundToOtherContext(
+            contact: contact,
+            targetContext: target,
+            contactContexts: routingState.contactContexts,
+          )) {
+            return false;
+          }
+          final assignedContext = routingState.contactContexts[contact.id];
+          if (assignedContext == target) {
+            return true;
+          }
+          final cardType = contact.card.type.trim().toLowerCase();
+          final otherPartyType = contact.otherPartyCard?.type
+              .trim()
+              .toLowerCase();
+          return assignedContext == null &&
+              (cardType == 'ai-agent' || otherPartyType == 'ai-agent');
+        })
+        .toList(growable: false);
+
+    if (candidates.length == 1) {
+      return candidates.first;
+    }
+    return null;
+  }
+
+  Future<bool> _ensureLocalContactForContext(AgentContext target) async {
+    if (_hasContactForContext(target)) {
+      return true;
+    }
+
+    final fallbackContact = _findUnassignedPersonalAiContactForContext(target);
+    if (fallbackContact == null) {
+      return false;
+    }
+
+    await _ref
+        .read<ContextRoutingService>(contextRoutingServiceProvider.notifier)
+        .assignContactContext(fallbackContact.id, target);
+    syncFromDependencies();
+    return true;
+  }
+
+  Future<bool> _waitForContactForContext(
+    AgentContext target, {
+    int maxAttempts = 5,
+    Duration pollEvery = const Duration(seconds: 1),
+  }) async {
+    for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+      await _ref.read(contactsServiceProvider.notifier).fetchContacts();
+      syncFromDependencies();
+      if (await _ensureLocalContactForContext(target)) {
+        return true;
+      }
+      if (attempt < maxAttempts) {
+        await Future<void>.delayed(pollEvery);
+      }
+    }
+    return false;
+  }
+
   String _currentHolderDid() {
     final identity = _ref.read(
       identitiesServiceProvider.currentIdentityOrPrimary,
@@ -488,6 +562,13 @@ class PersonalAgentScreenController
       return true;
     }
     return setupResult.availableInContacts == true;
+  }
+
+  bool _isTerminalSetupFailure(PersonalAgentSetupResult setupResult) {
+    final setupStatus = (setupResult.setupStatus ?? '').trim().toLowerCase();
+    return setupStatus == 'cancelled' ||
+        setupStatus == 'failed' ||
+        setupStatus == 'error';
   }
 
   bool _matchesTargetContext(
@@ -561,7 +642,8 @@ class PersonalAgentScreenController
       );
       await signingService.setStepUpEnabled(newStepUp);
       _logger.info(
-        '''Auto response toggled successfully: $previousValue -> $newAutoResponse''',
+        'Auto response toggled successfully: '
+        '$previousValue -> $newAutoResponse',
         name: _logKey,
       );
       state = state.copyWith(
