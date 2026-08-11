@@ -354,13 +354,14 @@ class _ChatMentionDraftController extends ChangeNotifier {
       ambiguousLabels.add(key);
     }
 
-    for (final match in RegExp(r'@\S+').allMatches(text)) {
+    for (final match in RegExp(r'@[^@\n\r\t]*').allMatches(text)) {
       final start = match.start;
       final end = match.end;
       if (start > 0 && !_isWhitespace(text[start - 1])) continue;
       if (_rangeOverlapsExistingToken(validTokens, start, end)) continue;
 
-      final label = match.group(0)!;
+      final label = match.group(0)!.trimRight();
+      if (label.length <= 1) continue;
       final candidate = candidateLabels[label.toLowerCase()];
       if (candidate == null) continue;
 
@@ -525,9 +526,13 @@ _ChatActiveMentionQuery? _findActiveMentionQuery(TextEditingValue value) {
   if (start > 0 && !_isWhitespace(text[start - 1])) return null;
 
   final token = text.substring(start + 1, cursor);
-  if (token.contains(RegExp(r'[@\s]'))) return null;
+  if (token.contains('@') || token.trim().isEmpty) return null;
 
-  return _ChatActiveMentionQuery(start: start, end: cursor, query: token);
+  return _ChatActiveMentionQuery(
+    start: start,
+    end: cursor,
+    query: token.trimLeft(),
+  );
 }
 
 bool _isWhitespace(String char) => RegExp(r'\s').hasMatch(char);
