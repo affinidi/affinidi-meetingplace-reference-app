@@ -7,6 +7,7 @@ import 'package:mpx_flutter_reference_app/application/services/chat_service/open
 import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/network_connectivity_service/network_connectivity_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/network_connectivity_service/network_connectivity_service_state.dart';
+import 'package:mpx_flutter_reference_app/domain/models/contacts/contact.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/configuration/environment.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_badge_provider.dart';
@@ -108,6 +109,9 @@ void main() {
       await pumpEventQueue();
 
       expect(fakeContactsService.updateContactCalls, hasLength(1));
+      final call = fakeContactsService.updateContactCalls.single;
+      expect((call['contact'] as Contact).channelDid, channelDid);
+      expect(call['sequenceNumber'], FakeChannels.individualChannel.seqNo);
     });
   });
 }
