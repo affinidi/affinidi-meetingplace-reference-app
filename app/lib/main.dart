@@ -105,10 +105,6 @@ void main() async {
             GalleryAttachmentsPlugin(
               cacheManager: ref.read(cacheManagerProvider),
             ),
-            RCardAttachmentsPlugin(
-              cacheManager: ref.read(cacheManagerProvider),
-            ),
-            VrcAttachmentsPlugin(),
             DocumentAttachmentsPlugin(
               cacheManager: ref.read(cacheManagerProvider),
               filePickerPlatform: ref.read(filePickerPlatformProvider),
