@@ -271,7 +271,7 @@ class SigningService extends StateNotifier<SigningServiceState> {
     );
 
     try {
-      await _approvalOp!.approve(approveRequest: payload);
+      await _approveRelayedRequestWithRetry(payload);
       _logger.info('Relayed step-up approved and submitted', name: _logKey);
     } catch (e) {
       final msg = e.toString();
@@ -291,6 +291,28 @@ class SigningService extends StateNotifier<SigningServiceState> {
       challenge: payload['challenge'] as String?,
       mediatorDid: mediatorDid,
     );
+  }
+
+  Future<void> _approveRelayedRequestWithRetry(
+    Map<String, dynamic> approveRequest,
+  ) async {
+    try {
+      await _approvalOp!.approve(approveRequest: approveRequest);
+    } on VtaAuthException catch (error) {
+      if (!_shouldReconnectAfterApprovalAuthFailure(error)) rethrow;
+      _logger.info(
+        '''Approval auth failed (${error.statusCode}); reconnecting VTA session and retrying once...''',
+        name: _logKey,
+      );
+      await _authWorkflow!.reconnect();
+      await _approvalOp!.approve(approveRequest: approveRequest);
+    }
+  }
+
+  bool _shouldReconnectAfterApprovalAuthFailure(VtaAuthException error) {
+    return error.statusCode == 401 ||
+        error.code == 'e.vta.auth.unauthorized' ||
+        (error.body?.contains('token superseded') ?? false);
   }
 
   Future<void> _notifyAgentApproved(
