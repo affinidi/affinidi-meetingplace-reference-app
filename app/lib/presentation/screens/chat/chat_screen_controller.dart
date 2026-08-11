@@ -92,7 +92,7 @@ class ChatScreenController extends _$ChatScreenController
 
   static const _logKey = 'UXCHAT';
   static final _maxChatMessageLength = MaxLengthValidatorType.extraLong.value;
-  static const _suggestionRequestTimeout = Duration(seconds: 12);
+  static const _suggestionRequestTimeout = Duration(seconds: 20);
 
   late final messageTextController = ChatMentionHighlightingTextController();
   late final _logger = ref.read(appLoggerProvider);
