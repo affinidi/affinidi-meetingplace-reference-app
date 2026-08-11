@@ -610,6 +610,51 @@ void main() {
         expect(mentions.first.display, '@First Name');
       });
 
+      testWidgets('it keeps multi-word member names as one mention', (
+        tester,
+      ) async {
+        final chatSdk = FakeChatSdk(capabilities: groupMentionCapabilities);
+        final coreSdk = FakeMeetingPlaceSDK(channels: FakeChannels.allChannels)
+          ..setMockGroup(FakeGroups.approvedGroup());
+
+        await navigateToChat(
+          tester,
+          contactId: contactId,
+          chatSdk: chatSdk,
+          contacts: contacts,
+          meetingPlaceCoreSDK: coreSdk,
+        );
+
+        await enterChatMessage(tester, 'Hello @Earl');
+        await pumpMentionDebounce(tester);
+
+        expect(
+          find.byKey(const Key('chat_mention_suggestions')),
+          findsOneWidget,
+        );
+        expect(find.text('Earl Alice'), findsOneWidget);
+
+        await tester.tap(find.text('Earl Alice'));
+        await tester.pumpAndSettle();
+
+        final inputField = findChatMessageInput();
+        final textField = tester.widget<TextFormField>(inputField);
+        expect(textField.controller?.text, 'Hello @Earl Alice ');
+
+        await tapSendButton(tester);
+        await tester.pumpAndSettle();
+
+        expect(chatSdk.sendTextMessageCalls, hasLength(1));
+        final sendCall = chatSdk.sendTextMessageCalls.first;
+        expect(sendCall['text'], 'Hello @Earl Alice');
+        final mentions = sendCall['mentions'] as List<ChatMention>;
+        expect(mentions, hasLength(1));
+        expect(mentions.first.target, FakeGroups.multiWordMemberDid);
+        expect(mentions.first.start, 6);
+        expect(mentions.first.length, '@Earl Alice'.length);
+        expect(mentions.first.display, '@Earl Alice');
+      });
+
       testWidgets('it shows mention suggestions without waiting for debounce', (
         tester,
       ) async {
