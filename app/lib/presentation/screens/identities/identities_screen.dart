@@ -93,87 +93,194 @@ class _IdentitiesPanel extends ConsumerWidget {
       children: [
         if (personalAiState.showSetupPrompt)
           Padding(
-            padding: const EdgeInsets.fromLTRB(8, 8, 8, 4),
-            child: Card(
-              color: context.colorScheme.primaryContainer,
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.identitiesSetupMyAgent,
-                      style: context.textTheme.titleMedium?.copyWith(
-                        color: context.colorScheme.onPrimaryContainer,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      l10n.identitiesSetupPromptDescription,
-                      style: context.textTheme.bodyMedium?.copyWith(
-                        color: context.colorScheme.onPrimaryContainer,
-                      ),
-                    ),
-                    if (personalAiState.errorMessage != null) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        personalAiState.errorMessage!,
-                        style: TextStyle(color: context.colorScheme.error),
-                      ),
-                    ],
-                    const SizedBox(height: 10),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        FilledButton.icon(
-                          style: FilledButton.styleFrom(
-                            backgroundColor: context.colorScheme.primary,
-                            foregroundColor: context.colorScheme.onPrimary,
-                            disabledBackgroundColor: context
-                                .colorScheme
-                                .onPrimaryContainer
-                                .withValues(alpha: 0.28),
-                            disabledForegroundColor:
-                                context.colorScheme.onPrimaryContainer,
-                          ),
-                          onPressed: personalAiState.isSettingUp
-                              ? null
-                              : () {
-                                  personalAiController.dismissSetupPrompt();
-                                  if (context.mounted) {
-                                    const PersonalAgentRoute().go(context);
-                                  }
-                                },
-                          icon: personalAiState.isSettingUp
-                              ? SizedBox(
-                                  width: 16,
-                                  height: 16,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: context.colorScheme.onPrimary,
-                                  ),
-                                )
-                              : const Icon(Icons.smart_toy_outlined),
-                          label: Text(
-                            personalAiState.isSettingUp
-                                ? l10n.identitiesSettingUp
-                                : l10n.identitiesSetupMyAgent,
-                          ),
-                        ),
-                        TextButton(
-                          style: TextButton.styleFrom(
-                            foregroundColor:
-                                context.colorScheme.onPrimaryContainer,
-                          ),
-                          onPressed: personalAiState.isSettingUp
-                              ? null
-                              : personalAiController.dismissSetupPrompt,
-                          child: Text(l10n.identitiesNotNow),
-                        ),
-                      ],
+            padding: const EdgeInsets.fromLTRB(14, 14, 14, 6),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    context.colorScheme.primaryContainer,
+                    context.colorScheme.secondaryContainer.withValues(
+                      alpha: 0.82,
                     ),
                   ],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: context.colorScheme.primary.withValues(alpha: 0.14),
+                    blurRadius: 22,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  context.colorScheme.surface.withValues(
+                                    alpha: 0.56,
+                                  ),
+                                  context.colorScheme.primary.withValues(
+                                    alpha: 0.18,
+                                  ),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: context.colorScheme.primary.withValues(
+                                    alpha: 0.16,
+                                  ),
+                                  blurRadius: 14,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              Icons.auto_awesome_rounded,
+                              color: context.colorScheme.primary,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.identitiesSetupMyAgent,
+                                  style: context.textTheme.titleMedium
+                                      ?.copyWith(
+                                        color: context
+                                            .colorScheme
+                                            .onPrimaryContainer,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  l10n.identitiesSetupPromptDescription,
+                                  style: context.textTheme.bodyMedium?.copyWith(
+                                    color: context
+                                        .colorScheme
+                                        .onPrimaryContainer
+                                        .withValues(alpha: 0.78),
+                                    height: 1.35,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (personalAiState.errorMessage != null) ...[
+                        const SizedBox(height: 12),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            color: context.colorScheme.errorContainer
+                                .withValues(alpha: 0.62),
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Text(
+                            personalAiState.errorMessage!,
+                            style: TextStyle(
+                              color: context.colorScheme.onErrorContainer,
+                            ),
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 14),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: FilledButton(
+                              style: FilledButton.styleFrom(
+                                backgroundColor: context.colorScheme.primary,
+                                foregroundColor: context.colorScheme.onPrimary,
+                                disabledBackgroundColor: context
+                                    .colorScheme
+                                    .onPrimaryContainer
+                                    .withValues(alpha: 0.28),
+                                disabledForegroundColor:
+                                    context.colorScheme.onPrimaryContainer,
+                                minimumSize: const Size.fromHeight(44),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                              ),
+                              onPressed: personalAiState.isSettingUp
+                                  ? null
+                                  : () {
+                                      personalAiController.dismissSetupPrompt();
+                                      if (context.mounted) {
+                                        const PersonalAgentRoute().go(context);
+                                      }
+                                    },
+                              child: personalAiState.isSettingUp
+                                  ? Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        SizedBox(
+                                          width: 16,
+                                          height: 16,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color:
+                                                context.colorScheme.onPrimary,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(l10n.identitiesSettingUp),
+                                      ],
+                                    )
+                                  : Text(l10n.identitiesSetupButton),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: TextButton(
+                              style: TextButton.styleFrom(
+                                foregroundColor:
+                                    context.colorScheme.onPrimaryContainer,
+                                backgroundColor: context.colorScheme.surface
+                                    .withValues(alpha: 0.24),
+                                minimumSize: const Size.fromHeight(44),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                              ),
+                              onPressed: personalAiState.isSettingUp
+                                  ? null
+                                  : personalAiController.dismissSetupPrompt,
+                              child: Text(l10n.identitiesNotNow),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
