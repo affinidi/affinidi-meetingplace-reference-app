@@ -6,7 +6,8 @@ import '../../../infrastructure/extensions/contact_card_extensions.dart';
 
 String chatMentionDisplayNameForMember(sdk.GroupMember member) {
   String normalize(String value) {
-    return value.trim().replaceFirst(RegExp(r'^@+'), '');
+    final cleaned = value.trim().replaceFirst(RegExp(r'^@+'), '');
+    return cleaned.split(RegExp(r'\s+')).first;
   }
 
   final firstName = normalize(member.contactCard.firstName);
