@@ -3367,13 +3367,19 @@ abstract class AppLocalizations {
   /// No description provided for @identitiesSetupMyAgent.
   ///
   /// In en, this message translates to:
-  /// **'Set up my agent'**
+  /// **'Set up your AI'**
   String get identitiesSetupMyAgent;
+
+  /// No description provided for @identitiesSetupButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up'**
+  String get identitiesSetupButton;
 
   /// No description provided for @identitiesSetupPromptDescription.
   ///
   /// In en, this message translates to:
-  /// **'Choose Work or Personal in the Agent tab.'**
+  /// **'Add a work context so your AI is ready when you need it.'**
   String get identitiesSetupPromptDescription;
 
   /// No description provided for @identitiesSettingUp.

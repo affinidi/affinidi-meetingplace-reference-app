@@ -2188,11 +2188,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Re-upload personal-context.txt';
 
   @override
-  String get identitiesSetupMyAgent => 'Set up my agent';
+  String get identitiesSetupMyAgent => 'Set up your AI';
+
+  @override
+  String get identitiesSetupButton => 'Set up';
 
   @override
   String get identitiesSetupPromptDescription =>
-      'Choose Work or Personal in the Agent tab.';
+      'Add a work context so your AI is ready when you need it.';
 
   @override
   String get identitiesSettingUp => 'Setting Up...';
