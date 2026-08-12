@@ -31,6 +31,8 @@ class _PlainTextChatItem extends ConsumerWidget {
       ),
     );
     final group = ref.watch(provider.select((state) => state.group));
+    final myDid = ref.watch(provider.select((state) => state.myDid));
+    final myCard = ref.watch(provider.select((state) => state.myCard));
 
     void selectReaction() {
       if (!context.mounted) return;
@@ -128,10 +130,16 @@ class _PlainTextChatItem extends ConsumerWidget {
     final hasIntrinsicUnsafeAttachment = attachments.any(
       (attachment) => attachment.isRCard || attachment.isVoice,
     );
+    final myDisplayName = switch ((myDid, myCard)) {
+      (String did, final card?) when did.isNotEmpty =>
+        '''@${[card.firstName.trim(), card.lastName?.trim() ?? ''].where((part) => part.isNotEmpty).join(' ').replaceFirst(RegExp(r'^@+'), '')}''',
+      _ => null,
+    };
     final mentionDisplayNames = <String, String>{
       if (group != null)
         for (final member in group.members)
           member.did: '@${chatMentionDisplayNameForMember(member)}',
+      if (myDid != null && myDisplayName != null) myDid: myDisplayName,
     };
 
     return LayoutBuilder(
@@ -211,9 +219,11 @@ class _TextMessage extends StatelessWidget {
   final bool _isEdited;
 
   List<chat.ChatMention> get _effectiveMentions {
-    if (_mentions.isNotEmpty ||
-        _mentionDisplayNames.isEmpty ||
-        !_text.contains('@')) {
+    if (_mentionDisplayNames.isEmpty || !_text.contains('@')) {
+      return _mentions;
+    }
+
+    if (_mentions.isNotEmpty && _hasUsableMentionRanges) {
       return _mentions;
     }
 
@@ -257,6 +267,32 @@ class _TextMessage extends StatelessWidget {
 
     derivedMentions.sort((a, b) => a.start.compareTo(b.start));
     return derivedMentions;
+  }
+
+  bool get _hasUsableMentionRanges {
+    for (final mention in _mentions) {
+      if (mention.isRoomMention) {
+        final end = mention.start + mention.length;
+        if (mention.start >= 0 &&
+            mention.length == '@room'.length &&
+            end <= _text.length &&
+            _text.substring(mention.start, end).toLowerCase() == '@room') {
+          continue;
+        }
+        return false;
+      }
+
+      final end = mention.start + mention.length;
+      if (mention.start < 0 || mention.length <= 0 || end > _text.length) {
+        return false;
+      }
+
+      final rawMention = _text.substring(mention.start, end);
+      if (!rawMention.startsWith('@')) {
+        return false;
+      }
+    }
+    return true;
   }
 
   @override

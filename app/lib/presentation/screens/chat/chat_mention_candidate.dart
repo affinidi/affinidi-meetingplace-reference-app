@@ -6,14 +6,13 @@ import '../../../infrastructure/extensions/contact_card_extensions.dart';
 
 String chatMentionDisplayNameForMember(sdk.GroupMember member) {
   String normalize(String value) {
-    final cleaned = value.trim().replaceFirst(RegExp(r'^@+'), '');
-    return cleaned.split(RegExp(r'\s+')).first;
+    return value.trim().replaceFirst(RegExp(r'^@+'), '');
   }
 
-  final firstName = normalize(member.contactCard.firstName);
-  if (firstName.isNotEmpty) return firstName;
   final fullName = normalize(member.contactCard.fullName);
   if (fullName.isNotEmpty) return fullName;
+  final firstName = normalize(member.contactCard.firstName);
+  if (firstName.isNotEmpty) return firstName;
   return member.did;
 }
 
@@ -31,17 +30,16 @@ class ChatMentionCandidate {
     sdk.GroupMember member, {
     required BaseCacheManager cacheManager,
   }) {
-    final fullName = member.contactCard.fullName.trim();
     final baseLabel = chatMentionDisplayNameForMember(member);
     return ChatMentionCandidate(
       target: member.did,
       label: '@$baseLabel',
       normalizedLabel: baseLabel.toLowerCase(),
-      subtitle: fullName.isNotEmpty && fullName != baseLabel ? fullName : null,
+      subtitle: null,
       avatarImage: member.contactCard.image(cacheManager: cacheManager),
       searchText: [
         baseLabel,
-        fullName,
+        member.contactCard.fullName.trim(),
         member.did,
       ].where((value) => value.trim().isNotEmpty).join(' ').toLowerCase(),
     );

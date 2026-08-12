@@ -201,6 +201,20 @@ class _ChatMentionDraftController extends ChangeNotifier {
     return null;
   }
 
+  bool _hasCompletedMentionImmediatelyBeforeCursor(String text, int cursor) {
+    if (cursor <= 0 || cursor > text.length) return false;
+    if (!_isWhitespace(text[cursor - 1])) return false;
+
+    var mentionEnd = cursor;
+    while (mentionEnd > 0 && _isWhitespace(text[mentionEnd - 1])) {
+      mentionEnd -= 1;
+    }
+    if (mentionEnd <= 0) return false;
+
+    final token = _matchingTokenAtCursor(text, mentionEnd);
+    return token != null && token.end == mentionEnd;
+  }
+
   void _handleTextChanged() {
     final value = _textController.value;
     final textChanged = value.text != _lastValue.text;
@@ -306,7 +320,8 @@ class _ChatMentionDraftController extends ChangeNotifier {
     final nextQuery =
         !_enabled ||
             !value.selection.isCollapsed ||
-            _matchingTokenAtCursor(value.text, cursor) != null
+            _matchingTokenAtCursor(value.text, cursor) != null ||
+            _hasCompletedMentionImmediatelyBeforeCursor(value.text, cursor)
         ? null
         : _findActiveMentionQuery(value);
     final nextSuggestions = nextQuery == null
@@ -340,35 +355,6 @@ class _ChatMentionDraftController extends ChangeNotifier {
       _tokens = validTokens;
       return;
     }
-
-    final candidateLabels = <String, ChatMentionCandidate>{};
-    final ambiguousLabels = <String>{};
-    for (final candidate in _allCandidates) {
-      final key = candidate.label.toLowerCase();
-      if (ambiguousLabels.contains(key)) continue;
-      if (!candidateLabels.containsKey(key)) {
-        candidateLabels[key] = candidate;
-        continue;
-      }
-      candidateLabels.remove(key);
-      ambiguousLabels.add(key);
-    }
-
-    for (final match in RegExp(r'@\S+').allMatches(text)) {
-      final start = match.start;
-      final end = match.end;
-      if (start > 0 && !_isWhitespace(text[start - 1])) continue;
-      if (_rangeOverlapsExistingToken(validTokens, start, end)) continue;
-
-      final label = match.group(0)!;
-      final candidate = candidateLabels[label.toLowerCase()];
-      if (candidate == null) continue;
-
-      validTokens.add(
-        _ChatMentionToken(target: candidate.target, label: label, start: start),
-      );
-    }
-
     validTokens.sort((a, b) => a.start.compareTo(b.start));
     _tokens = validTokens;
   }
@@ -510,13 +496,15 @@ _ChatActiveMentionQuery? _findActiveMentionQuery(TextEditingValue value) {
   if (cursor <= 0 || cursor > value.text.length) return null;
 
   final text = value.text;
-  var start = cursor - 1;
+  var queryEnd = cursor;
+  while (queryEnd > 0 && _isWhitespace(text[queryEnd - 1])) {
+    queryEnd -= 1;
+  }
+  if (queryEnd <= 0) return null;
+
+  var start = queryEnd - 1;
   while (start >= 0) {
     final char = text[start];
-    if (_isWhitespace(char)) {
-      start += 1;
-      break;
-    }
     if (char == '@') break;
     start -= 1;
   }
@@ -524,8 +512,8 @@ _ChatActiveMentionQuery? _findActiveMentionQuery(TextEditingValue value) {
   if (start < 0 || start >= text.length || text[start] != '@') return null;
   if (start > 0 && !_isWhitespace(text[start - 1])) return null;
 
-  final token = text.substring(start + 1, cursor);
-  if (token.contains(RegExp(r'[@\s]'))) return null;
+  final token = text.substring(start + 1, queryEnd);
+  if (token.contains('@')) return null;
 
   return _ChatActiveMentionQuery(start: start, end: cursor, query: token);
 }
@@ -579,16 +567,4 @@ bool _listShallowEquals<T>(List<T> left, List<T> right) {
     if (left[index] != right[index]) return false;
   }
   return true;
-}
-
-bool _rangeOverlapsExistingToken(
-  List<_ChatMentionToken> tokens,
-  int start,
-  int end,
-) {
-  for (final token in tokens) {
-    if (token.end <= start || token.start >= end) continue;
-    return true;
-  }
-  return false;
 }
