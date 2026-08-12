@@ -18,6 +18,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'contacts': 'Kanäle',
       'identities': 'Identitäten',
       'rCards': 'R-Karten',
+      'personalAgent': 'Agent',
       'credentials': 'Anmeldeinformationen',
       'settings': 'Einstellungen',
       'other': 'Ungültig',
@@ -27,78 +28,81 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get personalAgentPanelSubtitle =>
-      'Set up and manage your personal AI agent without exposing DID details.';
+      'Richten Sie Ihren persönlichen KI-Agenten ein und verwalten Sie ihn, ohne DID-Details offenzulegen.';
 
   @override
   String get personalAgentSetupInProgressButton =>
-      'Setting up and connecting...';
+      'Einrichtung und Verbindung läuft...';
 
   @override
-  String get personalAgentReconnectButton => 'Reconnect Personal Agent';
+  String get personalAgentReconnectButton =>
+      'Persönlichen Agenten erneut verbinden';
 
   @override
-  String get personalAgentConnectButton => 'Connect Personal Agent';
+  String get personalAgentConnectButton => 'Persönlichen Agenten verbinden';
 
   @override
-  String get personalAgentReviewSetupPrompt => 'Review setup prompt';
+  String get personalAgentReviewSetupPrompt => 'Einrichtungshinweis ansehen';
 
   @override
-  String get personalAgentConnectedSectionTitle => 'Connected';
+  String get personalAgentConnectedSectionTitle => 'Verbunden';
 
   @override
   String personalAgentSummaryContextId(String contextId) {
-    return 'Context ID: $contextId';
+    return 'Kontext-ID: $contextId';
   }
 
   @override
   String personalAgentSummaryContextCreated(String value) {
-    return 'Context created: $value';
+    return 'Kontext erstellt: $value';
   }
 
   @override
   String personalAgentSummaryProfile(String value) {
-    return 'Agent profile: $value';
+    return 'Agentenprofil: $value';
   }
 
   @override
   String personalAgentSummaryAgentCreated(String value) {
-    return 'Agent created: $value';
+    return 'Agent erstellt: $value';
   }
 
   @override
   String personalAgentSummaryMode(String value) {
-    return 'Mode: $value';
+    return 'Modus: $value';
   }
 
   @override
   String personalAgentSummarySetupStatus(String value) {
-    return 'Setup status: $value';
+    return 'Einrichtungsstatus: $value';
   }
 
   @override
   String personalAgentSummaryOfferAvailable(String value) {
-    return 'Offer available: $value';
+    return 'Angebot verfugbar: $value';
   }
 
   @override
-  String get personalAgentStatusConnected => 'Personal AI connected';
+  String get personalAgentStatusConnected => 'Persönliche KI verbunden';
 
   @override
   String get personalAgentStatusContextRequired => 'Context setup required';
 
   @override
-  String get personalAgentStatusSettingUp => 'Personal AI setup in progress';
+  String get personalAgentStatusSettingUp =>
+      'Einrichtung der persönlichen KI läuft';
 
   @override
-  String get personalAgentStatusNotConnected => 'Personal AI not connected';
+  String get personalAgentStatusNotConnected =>
+      'Persönliche KI nicht verbunden';
 
   @override
   String get personalAgentStatusSubtitleConnected =>
-      'Your assistant is ready and will appear in contacts once the channel is active.';
+      'Ihr Assistent ist bereit und erscheint in den Kontakten, sobald der Kanal aktiv ist.';
 
   @override
   String get personalAgentStatusSubtitleNotConnected =>
-      'Connect your Personal AI in one tap. MPX stays usable throughout setup.';
+      'Verbinden Sie Ihre persönliche KI mit einem Tippen. MPX bleibt während der Einrichtung nutzbar.';
 
   @override
   String get personalAgentContextSetupTitle => 'Set Up Your Personal AI';
@@ -153,23 +157,23 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get personalAgentWhatHappensNext => 'What happens next';
+  String get personalAgentWhatHappensNext => 'So geht es weiter';
 
   @override
   String get personalAgentStepCreateOffer =>
-      'A Personal AI offer is created for your current identity.';
+      'Für Ihre aktuelle Identität wird ein persönliches KI-Angebot erstellt.';
 
   @override
   String get personalAgentStepFetchMnemonic =>
-      'MPX retrieves the mnemonic from backend offer API.';
+      'MPX ruft die Mnemonik aus der Backend-Angebots-API ab.';
 
   @override
   String get personalAgentStepAcceptOffer =>
-      'The app accepts the offer and waits for channel inauguration.';
+      'Die App akzeptiert das Angebot und wartet auf die Kanaleinrichtung.';
 
   @override
   String get personalAgentStepContactAppears =>
-      'Personal AI appears in contacts when channel activity arrives.';
+      'Die persönliche KI erscheint in den Kontakten, wenn Kanalaktivität eintrifft.';
 
   @override
   String get rCardsPlaceholderMessage => 'R-Cards werden hier angezeigt.';
@@ -1100,16 +1104,16 @@ class AppLocalizationsDe extends AppLocalizations {
   String get chatMessageActionCopy => 'Nachricht kopieren';
 
   @override
-  String get chatMessageActionAskSuggestion => 'Ask for suggestion';
+  String get chatMessageActionAskSuggestion => 'Vorschlag anfragen';
 
   @override
-  String get chatSuggestionActionIgnore => 'Ignore';
+  String get chatSuggestionActionIgnore => 'Ignorieren';
 
   @override
-  String get chatSuggestionActionEdit => 'Edit';
+  String get chatSuggestionActionEdit => 'Bearbeiten';
 
   @override
-  String get chatSuggestionActionSendAsMe => 'Send as Me';
+  String get chatSuggestionActionSendAsMe => 'Als mich senden';
 
   @override
   String get chatMessageActionEdit => 'Nachricht bearbeiten';
@@ -1139,7 +1143,8 @@ class AppLocalizationsDe extends AppLocalizations {
       'Nachricht konnte nicht gelöscht werden';
 
   @override
-  String get chatSuggestionRequestFailed => 'Could not request suggestion';
+  String get chatSuggestionRequestFailed =>
+      'Vorschlag konnte nicht angefordert werden';
 
   @override
   String chatItemStatus(String status) {
@@ -2194,96 +2199,94 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String contactsChannelContextSet(String label) {
-    return 'Channel context set to $label';
+    return 'Kanal-Kontext gesetzt auf $label';
   }
 
   @override
   String chatContextUploaded(String label, String fileName) {
-    return '$label context uploaded: $fileName';
+    return '$label-Kontext hochgeladen: $fileName';
   }
 
   @override
   String chatUploadFileFirst(String fileName) {
-    return 'Upload $fileName first.';
+    return 'Laden Sie zuerst $fileName hoch.';
   }
 
   @override
   String chatChannelUsesContext(String label) {
-    return 'Channel now uses $label.';
+    return 'Kanal verwendet jetzt $label.';
   }
 
   @override
-  String get chatMenuUseWorkAi => 'Use Work AI';
+  String get chatMenuUseWorkAi => 'Work AI verwenden';
 
   @override
-  String get chatMenuUsePersonalAi => 'Use Personal AI';
+  String get chatMenuUsePersonalAi => 'Personal AI verwenden';
 
   @override
-  String get chatMenuUploadWorkContext => 'Upload work-context.txt';
+  String get chatMenuUploadWorkContext => 'work-context.txt hochladen';
 
   @override
-  String get chatMenuReuploadWorkContext => 'Re-upload work-context.txt';
+  String get chatMenuReuploadWorkContext => 'work-context.txt erneut hochladen';
 
   @override
-  String get chatMenuUploadPersonalContext => 'Upload personal-context.txt';
+  String get chatMenuUploadPersonalContext => 'personal-context.txt hochladen';
 
   @override
   String get chatMenuReuploadPersonalContext =>
-      'Re-upload personal-context.txt';
+      'personal-context.txt erneut hochladen';
 
   @override
-  String get identitiesSetupMyAgent => 'Set up your AI';
-
-  @override
-  String get identitiesSetupButton => 'Set up';
+  String get identitiesSetupMyAgent => 'Meinen Agenten einrichten';
 
   @override
   String get identitiesSetupPromptDescription =>
-      'Add a work context so your AI is ready when you need it.';
+      'Wählen Sie im Agent-Tab Work oder Personal.';
 
   @override
-  String get identitiesSettingUp => 'Setting Up...';
+  String get identitiesSettingUp => 'Wird eingerichtet...';
 
   @override
-  String get identitiesNotNow => 'Not now';
+  String get identitiesNotNow => 'Nicht jetzt';
 
   @override
-  String get identitiesAgentConfiguredTooltip => 'Agent configured';
+  String get identitiesAgentConfiguredTooltip => 'Agent eingerichtet';
 
   @override
-  String get personalAgentNoContextCreated => 'No context created';
+  String get personalAgentNoContextCreated => 'Kein Kontext erstellt';
 
   @override
   String personalAgentContextUploadedSnackBar(String label, String fileName) {
-    return '$label uploaded: $fileName';
+    return '$label hochgeladen: $fileName';
   }
 
   @override
   String get personalAgentSetupSectionSubtitle =>
-      'Set up your AI. Choose what context to set up.';
+      'Richten Sie Ihre KI ein. Wählen Sie, welchen Kontext Sie einrichten möchten.';
 
   @override
-  String get personalAgentChooseFileToSetUp => 'Choose a file to set up';
+  String get personalAgentChooseFileToSetUp =>
+      'Wählen Sie eine Datei zur Einrichtung';
 
   @override
   String personalAgentAlreadySetUp(String fileName) {
-    return 'Already set up: $fileName';
+    return 'Bereits eingerichtet: $fileName';
   }
 
   @override
-  String get personalAgentSetupCardTitle => 'Set up your AI';
+  String get personalAgentSetupCardTitle => 'Richten Sie Ihre KI ein';
 
   @override
   String get personalAgentSetupCardDescription =>
-      'Choose what context to set up.';
+      'Wählen Sie, welchen Kontext Sie einrichten möchten.';
 
   @override
   String personalAgentConnecting(String label) {
-    return 'Connecting $label...';
+    return 'Verbinde $label...';
   }
 
   @override
-  String get personalAgentDefaultConnectingLabel => 'agent';
+  String get personalAgentDefaultConnectingLabel => 'Agent';
 
   @override
   String get personalAgentWorkAgentTitle => 'Work Agent';
@@ -2292,113 +2295,113 @@ class AppLocalizationsDe extends AppLocalizations {
   String get personalAgentPersonalAgentTitle => 'Personal Agent';
 
   @override
-  String get personalAgentMyWorkAiTitle => 'My Work AI';
+  String get personalAgentMyWorkAiTitle => 'Meine Work-KI';
 
   @override
-  String get personalAgentWorkContextLabel => 'Work (ctx 0)';
+  String get personalAgentWorkContextLabel => 'Work (Kontext 0)';
 
   @override
-  String get personalAgentMyPersonalAiTitle => 'My Personal AI';
+  String get personalAgentMyPersonalAiTitle => 'Meine persönliche KI';
 
   @override
-  String get personalAgentPersonalContextLabel => 'Personal (ctx 1)';
+  String get personalAgentPersonalContextLabel => 'Persönlich (Kontext 1)';
 
   @override
   String personalAgentCancelConnectionTitle(String label) {
-    return 'Cancel $label connection?';
+    return '$label-Verbindung abbrechen?';
   }
 
   @override
   String personalAgentCancelConnectionContent(String agentLabel) {
-    return 'This will remove your connection to the $agentLabel.';
+    return 'Dies entfernt Ihre Verbindung zum $agentLabel.';
   }
 
   @override
-  String get personalAgentKeepConnection => 'Keep connection';
+  String get personalAgentKeepConnection => 'Verbindung behalten';
 
   @override
-  String get personalAgentCancelConnection => 'Cancel connection';
+  String get personalAgentCancelConnection => 'Verbindung abbrechen';
 
   @override
   String personalAgentConnectionCancelled(String label) {
-    return '$label connection cancelled.';
+    return '$label-Verbindung abgebrochen.';
   }
 
   @override
   String personalAgentCancelConnectionError(String label) {
-    return 'Unable to cancel $label connection.';
+    return '$label-Verbindung konnte nicht abgebrochen werden.';
   }
 
   @override
-  String get personalAgentNotAvailable => 'Not available';
+  String get personalAgentNotAvailable => 'Nicht verfügbar';
 
   @override
-  String get personalAgentNoSnapshotYet => 'No snapshot yet';
+  String get personalAgentNoSnapshotYet => 'Noch kein Snapshot';
 
   @override
-  String get personalAgentNotSetUp => 'Not set up';
+  String get personalAgentNotSetUp => 'Nicht eingerichtet';
 
   @override
-  String get personalAgentAuthAgentDid => 'Agent DID';
+  String get personalAgentAuthAgentDid => 'Agent-DID';
 
   @override
-  String get personalAgentAuthAclRole => 'ACL role';
+  String get personalAgentAuthAclRole => 'ACL-Rolle';
 
   @override
-  String get personalAgentAuthCapabilities => 'Capabilities';
+  String get personalAgentAuthCapabilities => 'Fähigkeiten';
 
   @override
-  String get personalAgentAuthContextScope => 'Context scope';
+  String get personalAgentAuthContextScope => 'Kontext-Umfang';
 
   @override
-  String get personalAgentAuthDomainId => 'Domain ID';
+  String get personalAgentAuthDomainId => 'Domain-ID';
 
   @override
-  String get personalAgentAuthProvision => 'Provision';
+  String get personalAgentAuthProvision => 'Bereitstellung';
 
   @override
-  String get personalAgentAuthUpdated => 'Updated';
+  String get personalAgentAuthUpdated => 'Aktualisiert';
 
   @override
-  String get mnemonicErrorOccurred => 'An error occurred.';
+  String get mnemonicErrorOccurred => 'Ein Fehler ist aufgetreten.';
 
   @override
   String get mnemonicEntrySelectionTitle =>
-      'How would you like\nto enter your wallet?';
+      'Wie möchten Sie\nIhr Wallet eingeben?';
 
   @override
-  String get mnemonicScanQrTitle => 'Scan QR Code';
+  String get mnemonicScanQrTitle => 'QR-Code scannen';
 
   @override
   String get mnemonicScanQrSubtitle =>
-      'Use your camera to scan a wallet QR code';
+      'Verwenden Sie Ihre Kamera, um einen Wallet-QR-Code zu scannen';
 
   @override
-  String get mnemonicEnterManuallyTitle => 'Enter manually';
+  String get mnemonicEnterManuallyTitle => 'Manuell eingeben';
 
   @override
   String get mnemonicEnterManuallySubtitle =>
-      'Type the mnemonic phrase that was shared with you';
+      'Geben Sie die mit Ihnen geteilte Mnemonic-Phrase ein';
 
   @override
-  String get mnemonicManualEntryTitle => 'Enter your mnemonic';
+  String get mnemonicManualEntryTitle => 'Geben Sie Ihre Mnemonic ein';
 
   @override
   String get mnemonicManualEntrySubtitle =>
-      'Enter the mnemonic phrase that was shared with you.';
+      'Geben Sie die mit Ihnen geteilte Mnemonic-Phrase ein.';
 
   @override
-  String get mnemonicManualHint => 'word1 word2 word3 ...';
+  String get mnemonicManualHint => 'wort1 wort2 wort3 ...';
 
   @override
-  String get mnemonicContinue => 'Continue';
+  String get mnemonicContinue => 'Weiter';
 
   @override
-  String get mnemonicSuccessTitle => 'You\'re all set!';
+  String get mnemonicSuccessTitle => 'Alles bereit!';
 
   @override
   String get mnemonicSuccessSubtitle =>
-      'Enjoy MeetingPlace and get engaged\nwith your personal AI agent.';
+      'Viel Freude mit MeetingPlace und Ihrem persönlichen KI-Agenten.';
 
   @override
   String get videoCallTitle => 'Anruf';
@@ -2681,35 +2684,35 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get trustTaskHistoryTitle => 'Trust task history';
+  String get trustTaskHistoryTitle => 'Verlauf der Trust-Aufgaben';
 
   @override
-  String get trustTaskHistoryRefresh => 'Refresh';
+  String get trustTaskHistoryRefresh => 'Aktualisieren';
 
   @override
-  String get trustTaskHistoryEmpty => 'No trust tasks yet';
+  String get trustTaskHistoryEmpty => 'Noch keine Trust-Aufgaben';
 
   @override
-  String get trustTaskHistoryError => 'Couldn\'t load trust task history';
+  String get trustTaskHistoryError => 'Verlauf konnte nicht geladen werden';
 
   @override
-  String get trustTaskHistoryRetry => 'Retry';
+  String get trustTaskHistoryRetry => 'Erneut versuchen';
 
   @override
-  String get trustTaskHistoryLoadMore => 'Load more';
+  String get trustTaskHistoryLoadMore => 'Mehr laden';
 
   @override
-  String get trustTaskHistoryItemTitle => 'Signing request';
+  String get trustTaskHistoryItemTitle => 'Signaturanfrage';
 
   @override
   String get trustTaskHistoryDetails => 'Details';
 
   @override
-  String get trustTaskStatusSigned => 'Signed';
+  String get trustTaskStatusSigned => 'Signiert';
 
   @override
-  String get trustTaskStatusDenied => 'Blocked';
+  String get trustTaskStatusDenied => 'Blockiert';
 
   @override
-  String get trustTaskStatusUnknown => 'Unknown';
+  String get trustTaskStatusUnknown => 'Unbekannt';
 }
