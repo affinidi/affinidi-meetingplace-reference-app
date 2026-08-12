@@ -1,10 +1,13 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
+import 'package:mpx_flutter_reference_app/application/services/chat_service/chat_session_service.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/plugins/audio_attachments_plugin/audio_attachments_plugin.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/chat/chat_screen_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/profile_circle_avatar.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -155,6 +158,62 @@ sdk.Group groupWithAlphabeticSpacedFullNameMentionMember() {
           },
         ),
         publicKey: 'fake-public-key-2',
+      ),
+    ],
+    created: DateTime.now(),
+    publicKey: 'fake-public-key',
+  );
+}
+
+sdk.Group groupWithCollidingMentionMembers() {
+  return sdk.Group(
+    id: 'group-id',
+    did: 'group-did',
+    offerLink: FakeContacts.groupContact.offerLink,
+    members: [
+      sdk.GroupMember(
+        did: 'did:key:member',
+        dateAdded: DateTime.now(),
+        status: sdk.GroupMemberStatus.approved,
+        membershipType: sdk.GroupMembershipType.member,
+        contactCard: FakeContacts.sdkContactCard,
+        publicKey: 'fake-public-key',
+      ),
+      sdk.GroupMember(
+        did: FakeGroups.removableMemberDid,
+        dateAdded: DateTime.now(),
+        status: sdk.GroupMemberStatus.approved,
+        membershipType: sdk.GroupMembershipType.member,
+        contactCard: sdk.ContactCard(
+          did: FakeGroups.removableMemberDid,
+          type: FakeContacts.sdkContactCard.type,
+          contactInfo: {
+            'n': {
+              'given': 'Bob',
+              'surname': 'Builder',
+              'displayName': 'Display Bob Builder',
+            },
+          },
+        ),
+        publicKey: 'fake-public-key-2',
+      ),
+      sdk.GroupMember(
+        did: FakeGroups.adminMemberDid,
+        dateAdded: DateTime.now(),
+        status: sdk.GroupMemberStatus.approved,
+        membershipType: sdk.GroupMembershipType.member,
+        contactCard: sdk.ContactCard(
+          did: FakeGroups.adminMemberDid,
+          type: FakeContacts.sdkContactCard.type,
+          contactInfo: {
+            'n': {
+              'given': 'Bob',
+              'surname': 'Builder',
+              'displayName': 'Display Bob Builder 2',
+            },
+          },
+        ),
+        publicKey: 'fake-public-key-3',
       ),
     ],
     created: DateTime.now(),
@@ -575,7 +634,7 @@ void main() {
         expect(find.text('Bob Builder'), findsOneWidget);
       });
 
-      testWidgets('it detects fully typed mentions without selection', (
+      testWidgets('it does not bind fully typed mentions without selection', (
         tester,
       ) async {
         final chatSdk = FakeChatSdk(capabilities: groupMentionCapabilities);
@@ -593,8 +652,6 @@ void main() {
         await enterChatMessage(tester, 'Hello @Bob Builder');
         await tester.pumpAndSettle();
 
-        expect(find.byKey(const Key('chat_mention_suggestions')), findsNothing);
-
         await tapSendButton(tester);
         await tester.pumpAndSettle();
 
@@ -603,15 +660,11 @@ void main() {
         expect(sendCall['text'], 'Hello @Bob Builder');
         expect(sendCall['mentions'], isA<List<ChatMention>>());
         final mentions = sendCall['mentions'] as List<ChatMention>;
-        expect(mentions, hasLength(1));
-        expect(mentions.first.target, FakeGroups.removableMemberDid);
-        expect(mentions.first.start, 6);
-        expect(mentions.first.length, '@Bob Builder'.length);
-        expect(mentions.first.display, '@Bob Builder');
+        expect(mentions, isEmpty);
       });
 
       testWidgets(
-        'it detects fully typed multi-word mentions without selection',
+        'it does not bind fully typed multi-word mentions without selection',
         (tester) async {
           final chatSdk = FakeChatSdk(capabilities: groupMentionCapabilities);
           final coreSdk = FakeMeetingPlaceSDK(
@@ -629,22 +682,13 @@ void main() {
           await enterChatMessage(tester, 'Hello @First Name');
           await tester.pumpAndSettle();
 
-          expect(
-            find.byKey(const Key('chat_mention_suggestions')),
-            findsNothing,
-          );
-
           await tapSendButton(tester);
           await tester.pumpAndSettle();
 
           final sendCall = chatSdk.sendTextMessageCalls.first;
           expect(sendCall['text'], 'Hello @First Name');
           final mentions = sendCall['mentions'] as List<ChatMention>;
-          expect(mentions, hasLength(1));
-          expect(mentions.first.target, FakeGroups.removableMemberDid);
-          expect(mentions.first.start, 6);
-          expect(mentions.first.length, '@First Name'.length);
-          expect(mentions.first.display, '@First Name');
+          expect(mentions, isEmpty);
         },
       );
 
@@ -688,7 +732,7 @@ void main() {
       );
 
       testWidgets(
-        'it keeps mention suggestions open across spaces in an alphabetic full name',
+        '''it keeps mention suggestions open across spaces in an alphabetic full name''',
         (tester) async {
           final chatSdk = FakeChatSdk(capabilities: groupMentionCapabilities);
           final coreSdk = FakeMeetingPlaceSDK(
@@ -726,7 +770,7 @@ void main() {
         },
       );
 
-      testWidgets('it detects fully typed mentions case-insensitively', (
+      testWidgets('it does not bind fully typed mentions case-insensitively', (
         tester,
       ) async {
         final chatSdk = FakeChatSdk(capabilities: groupMentionCapabilities);
@@ -744,8 +788,6 @@ void main() {
         await enterChatMessage(tester, 'Hello @bob builder');
         await tester.pumpAndSettle();
 
-        expect(find.byKey(const Key('chat_mention_suggestions')), findsNothing);
-
         await tapSendButton(tester);
         await tester.pumpAndSettle();
 
@@ -754,12 +796,83 @@ void main() {
         expect(sendCall['text'], 'Hello @bob builder');
         expect(sendCall['mentions'], isA<List<ChatMention>>());
         final mentions = sendCall['mentions'] as List<ChatMention>;
-        expect(mentions, hasLength(1));
-        expect(mentions.first.target, FakeGroups.removableMemberDid);
-        expect(mentions.first.start, 6);
-        expect(mentions.first.length, '@bob builder'.length);
-        expect(mentions.first.display, '@bob builder');
+        expect(mentions, isEmpty);
       });
+
+      testWidgets(
+        '''it binds a colliding multi-word mention only from the selected suggestion''',
+        (tester) async {
+          final chatSdk = FakeChatSdk(capabilities: groupMentionCapabilities);
+          final coreSdk = FakeMeetingPlaceSDK(
+            channels: FakeChannels.allChannels,
+          )..setMockGroup(groupWithCollidingMentionMembers());
+
+          await navigateToChat(
+            tester,
+            contactId: contactId,
+            chatSdk: chatSdk,
+            contacts: contacts,
+            meetingPlaceCoreSDK: coreSdk,
+          );
+
+          await enterChatMessage(tester, 'Hello @Bob Bu');
+          await tester.pumpAndSettle();
+
+          expect(
+            find.byKey(const Key('chat_mention_suggestions')),
+            findsOneWidget,
+          );
+          expect(find.text('Bob Builder'), findsNWidgets(2));
+
+          await tester.tap(
+            find.byKey(
+              const Key('chat_mention_suggestion_${FakeGroups.adminMemberDid}'),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          await tapSendButton(tester);
+          await tester.pumpAndSettle();
+
+          expect(chatSdk.sendTextMessageCalls, hasLength(1));
+          final sendCall = chatSdk.sendTextMessageCalls.first;
+          final mentions = sendCall['mentions'] as List<ChatMention>;
+          expect(mentions, hasLength(1));
+          expect(mentions.first.target, FakeGroups.adminMemberDid);
+          expect(mentions.first.display, '@Bob Builder');
+        },
+      );
+
+      testWidgets(
+        'it refuses to auto-bind a colliding multi-word mention from free text',
+        (tester) async {
+          final chatSdk = FakeChatSdk(capabilities: groupMentionCapabilities);
+          final coreSdk = FakeMeetingPlaceSDK(
+            channels: FakeChannels.allChannels,
+          )..setMockGroup(groupWithCollidingMentionMembers());
+
+          await navigateToChat(
+            tester,
+            contactId: contactId,
+            chatSdk: chatSdk,
+            contacts: contacts,
+            meetingPlaceCoreSDK: coreSdk,
+          );
+
+          await enterChatMessage(tester, 'Hello @Bob Builder');
+          await tester.pumpAndSettle();
+
+          await tapSendButton(tester);
+          await tester.pumpAndSettle();
+
+          expect(chatSdk.sendTextMessageCalls, hasLength(1));
+          final sendCall = chatSdk.sendTextMessageCalls.first;
+          expect(sendCall['text'], 'Hello @Bob Builder');
+          expect(sendCall['mentions'], isA<List<ChatMention>>());
+          final mentions = sendCall['mentions'] as List<ChatMention>;
+          expect(mentions, isEmpty);
+        },
+      );
 
       testWidgets('it does not reopen suggestions for an existing mention', (
         tester,
@@ -1010,6 +1123,104 @@ void main() {
 
         expect(mentionSpan.style?.color, isNot(Colors.white));
       });
+
+      testWidgets(
+        '''it keeps receiver bubble mention highlighting for the local user after a refresh''',
+        (tester) async {
+          final chatSdk = FakeChatSdk(capabilities: groupMentionCapabilities);
+          final approvedGroup = FakeGroups.approvedGroup();
+          final remoteOnlyGroup = sdk.Group(
+            id: approvedGroup.id,
+            did: approvedGroup.did,
+            offerLink: approvedGroup.offerLink,
+            members: approvedGroup.members
+                .where((member) => member.did != 'did:key:member')
+                .toList(),
+            created: approvedGroup.created,
+            publicKey: approvedGroup.publicKey,
+          );
+          final coreSdk = FakeMeetingPlaceSDK(
+            channels: FakeChannels.allChannels,
+          )..setMockGroup(remoteOnlyGroup);
+
+          await navigateToChat(
+            tester,
+            contactId: contactId,
+            chatSdk: chatSdk,
+            contacts: contacts,
+            meetingPlaceCoreSDK: coreSdk,
+          );
+
+          final context = tester.element(find.byType(Scaffold).first);
+          final container = ProviderScope.containerOf(context, listen: false);
+          final chatService = container.read(
+            chatSessionServiceProvider(contact.channelDid!).notifier,
+          );
+          final chatState = container.read(
+            chatScreenControllerProvider(contactId),
+          );
+          final myCard = chatState.myCard!;
+          final myDid = chatState.myDid ?? myCard.did;
+          final expectedMention =
+              '''@${[myCard.firstName.trim(), myCard.lastName?.trim() ?? ''].where((part) => part.isNotEmpty).join(' ')}''';
+
+          final mentions = [
+            ChatMention(
+              target: myDid,
+              start: 6,
+              length: expectedMention.length,
+              display: expectedMention,
+            ),
+          ];
+
+          final original = Message(
+            chatId: 'fake-chat-id',
+            messageId: 'receiver-refresh-highlight-message',
+            value: 'Hello $expectedMention',
+            dateCreated: DateTime.now(),
+            status: ChatItemStatus.confirmed,
+            isFromMe: false,
+            senderDid: FakeGroups.removableMemberDid,
+            attachments: [],
+            mentions: mentions,
+          );
+          chatService.upsertChatItem(original);
+          await tester.pumpAndSettle();
+
+          final refreshed = Message(
+            chatId: original.chatId,
+            messageId: original.messageId,
+            value: original.value,
+            dateCreated: original.dateCreated,
+            status: ChatItemStatus.received,
+            isFromMe: original.isFromMe,
+            senderDid: original.senderDid,
+            attachments: [],
+            mentions: const [
+              ChatMention(
+                target: '@alice:example.org',
+                start: 0,
+                length: 0,
+                display: '@alice',
+              ),
+            ],
+          );
+          chatService.upsertChatItem(refreshed);
+          await tester.pumpAndSettle();
+
+          final bubbleText = find.byWidgetPredicate(
+            (widget) =>
+                widget is RichText &&
+                widget.text.toPlainText() == 'Hello $expectedMention',
+          );
+          final richText = tester.widget<RichText>(bubbleText.first);
+          final mentionSpan = flattenTextSpans(
+            richText.text as TextSpan,
+          ).firstWhere((span) => span.text == expectedMention);
+
+          expect(mentionSpan.style?.color, isNot(Colors.white));
+        },
+      );
 
       testWidgets('it supports mentions in the edit dialog', (tester) async {
         final chatSdk = FakeChatSdk(capabilities: groupMentionCapabilities);

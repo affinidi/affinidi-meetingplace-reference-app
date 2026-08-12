@@ -355,49 +355,6 @@ class _ChatMentionDraftController extends ChangeNotifier {
       _tokens = validTokens;
       return;
     }
-
-    final candidateLabels = <String, ChatMentionCandidate>{};
-    final ambiguousLabels = <String>{};
-    for (final candidate in _allCandidates) {
-      final key = candidate.label.toLowerCase();
-      if (ambiguousLabels.contains(key)) continue;
-      if (!candidateLabels.containsKey(key)) {
-        candidateLabels[key] = candidate;
-        continue;
-      }
-      candidateLabels.remove(key);
-      ambiguousLabels.add(key);
-    }
-
-    for (var start = 0; start < text.length; start++) {
-      if (text[start] != '@') continue;
-      if (start > 0 && !_isWhitespace(text[start - 1])) continue;
-
-      ChatMentionCandidate? matchedCandidate;
-      var matchedLabel = '';
-      for (final entry in candidateLabels.entries) {
-        final label = entry.key;
-        final end = start + label.length;
-        if (end > text.length) continue;
-        if (_rangeOverlapsExistingToken(validTokens, start, end)) continue;
-        if (!_textRegionEqualsIgnoreCase(text, start, label)) continue;
-        if (end < text.length && !_isWhitespace(text[end])) continue;
-        if (label.length <= matchedLabel.length) continue;
-
-        matchedCandidate = entry.value;
-        matchedLabel = text.substring(start, end);
-      }
-
-      if (matchedCandidate == null) continue;
-      validTokens.add(
-        _ChatMentionToken(
-          target: matchedCandidate.target,
-          label: matchedLabel,
-          start: start,
-        ),
-      );
-    }
-
     validTokens.sort((a, b) => a.start.compareTo(b.start));
     _tokens = validTokens;
   }
@@ -610,21 +567,4 @@ bool _listShallowEquals<T>(List<T> left, List<T> right) {
     if (left[index] != right[index]) return false;
   }
   return true;
-}
-
-bool _rangeOverlapsExistingToken(
-  List<_ChatMentionToken> tokens,
-  int start,
-  int end,
-) {
-  for (final token in tokens) {
-    if (token.end <= start || token.start >= end) continue;
-    return true;
-  }
-  return false;
-}
-
-bool _textRegionEqualsIgnoreCase(String text, int start, String candidate) {
-  final end = start + candidate.length;
-  return text.substring(start, end).toLowerCase() == candidate;
 }
