@@ -3,6 +3,7 @@ import 'package:meeting_place_chat/meeting_place_chat.dart';
 
 import 'fakes/fake_channels.dart';
 import 'fakes/fake_chat_sdk.dart';
+import 'fakes/fake_context_routing_store.dart';
 import 'utils/app.dart';
 
 Future<Message> _simulateIncomingMessage(
@@ -34,6 +35,9 @@ Future<void> _simulateIncomingSuggestion(
 
 void main() {
   const contactId = 'individual-contact-id';
+  final readyContextRoutingStore = FakeContextRoutingStore(
+    workContextUploaded: true,
+  );
 
   group('chat suggestions', () {
     testWidgets('shows the latest incoming suggestion under its message', (
@@ -41,7 +45,12 @@ void main() {
     ) async {
       final chatSdk = FakeChatSdk();
 
-      await navigateToChat(tester, contactId: contactId, chatSdk: chatSdk);
+      await navigateToChat(
+        tester,
+        contactId: contactId,
+        chatSdk: chatSdk,
+        contextRoutingStore: readyContextRoutingStore,
+      );
       final message = await _simulateIncomingMessage(
         tester,
         chatSdk,
@@ -63,7 +72,12 @@ void main() {
     ) async {
       final chatSdk = FakeChatSdk();
 
-      await navigateToChat(tester, contactId: contactId, chatSdk: chatSdk);
+      await navigateToChat(
+        tester,
+        contactId: contactId,
+        chatSdk: chatSdk,
+        contextRoutingStore: readyContextRoutingStore,
+      );
       final firstMessage = await _simulateIncomingMessage(
         tester,
         chatSdk,
@@ -99,7 +113,12 @@ void main() {
     ) async {
       final chatSdk = FakeChatSdk();
 
-      await navigateToChat(tester, contactId: contactId, chatSdk: chatSdk);
+      await navigateToChat(
+        tester,
+        contactId: contactId,
+        chatSdk: chatSdk,
+        contextRoutingStore: readyContextRoutingStore,
+      );
       await _simulateIncomingMessage(tester, chatSdk, 'Incoming message');
 
       await _simulateIncomingSuggestion(
@@ -110,6 +129,38 @@ void main() {
       );
 
       expect(find.text('Orphaned suggestion'), findsNothing);
+    });
+
+    testWidgets('clears visible suggestion after leaving and reopening chat', (
+      tester,
+    ) async {
+      final chatSdk = FakeChatSdk();
+
+      await navigateToChat(
+        tester,
+        contactId: contactId,
+        chatSdk: chatSdk,
+        contextRoutingStore: readyContextRoutingStore,
+      );
+      final message = await _simulateIncomingMessage(
+        tester,
+        chatSdk,
+        'Incoming message',
+      );
+
+      await _simulateIncomingSuggestion(
+        tester,
+        chatSdk,
+        relatedMessageId: message.messageId,
+        text: 'Use a shorter reply',
+      );
+      expect(find.text('Use a shorter reply'), findsOneWidget);
+
+      await pushRoute(tester, '/contacts');
+      expect(find.text('Use a shorter reply'), findsNothing);
+
+      await pushRoute(tester, '/contacts/$contactId/chat');
+      expect(find.text('Use a shorter reply'), findsNothing);
     });
   });
 }

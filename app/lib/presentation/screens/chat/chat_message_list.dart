@@ -24,6 +24,9 @@ class _ChatMessageList extends HookConsumerWidget {
     final supportsSuggestionRequests = ref.watch(
       provider.supportsSuggestionRequests,
     );
+    final isSuggestionAgentReady = ref.watch(
+      provider.select((state) => state.isPersonalAgentReady),
+    );
     final zkpPolicy = ChatZkpMessageListPolicy.fromMessages(
       enabled:
           ref.read(environmentProvider).zkpEnabled &&
@@ -149,6 +152,7 @@ class _ChatMessageList extends HookConsumerWidget {
 
                   final showSuggestionAction =
                       supportsSuggestionRequests &&
+                      isSuggestionAgentReady &&
                       chatItem is chat.Message &&
                       !chatItem.isFromMe &&
                       selectedReactionIndex == index &&
