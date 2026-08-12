@@ -108,7 +108,9 @@ List<String> _resolveParticipantNames(
 ) {
   final names = <String>[];
   for (final did in participantDids) {
-    final contact = contacts.firstWhereOrNull((c) => c.channelDid == did);
+    final contact =
+        contacts.firstWhereOrNull((c) => c.channelDid == did) ??
+        contacts.firstWhereOrNull((c) => c.card.did == did);
     if (contact != null) names.add(_resolveDisplayLabel(contact));
   }
   return names;

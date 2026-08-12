@@ -94,10 +94,9 @@ class _CallLogItem extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Text(
-              DateFormat(
-                'MMM d, h:mm a',
+              DateFormat.MMMd(
                 l10n.localeName,
-              ).format(entry.timestamp.toLocal()),
+              ).add_jm().format(entry.timestamp.toLocal()),
               style: textTheme.labelSmall,
             ),
           ],
