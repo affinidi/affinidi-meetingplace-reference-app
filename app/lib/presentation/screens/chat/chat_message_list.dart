@@ -221,7 +221,8 @@ class _ChatMessageList extends HookConsumerWidget {
                               chatItem: chatItem,
                               contactId: _contactId,
                             ),
-                          thisItemStatus.isNotEmpty
+                          thisItemStatus.isNotEmpty &&
+                                  !_isCallOnlyMessage(chatItem)
                               ? Align(
                                   alignment: (chatItem.isFromMe)
                                       ? Alignment.topRight
