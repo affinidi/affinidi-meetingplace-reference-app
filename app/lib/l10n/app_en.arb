@@ -87,6 +87,7 @@
 	"personalAgentStatusNotConnected": "Personal AI not connected",
 	"personalAgentStatusSubtitleConnected": "Your assistant is ready and will appear in contacts once the channel is active.",
 	"personalAgentStatusSubtitleNotConnected": "Connect your Personal AI in one tap. MPX stays usable throughout setup.",
+	"signDocumentRequiresAgentSetup": "To use Sign Document, go to the Agent tab and complete setup.",
 	"personalAgentContextSetupTitle": "Set Up Your Personal AI",
 	"personalAgentContextSetupDescription": "Help your Personal AI get to know you. Upload a text file with your background, preferences, and working style. This becomes the AI's long-term knowledge about you.",
 	"personalAgentContextWhatToIncludeTitle": "What to include in your file",

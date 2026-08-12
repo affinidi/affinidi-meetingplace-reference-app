@@ -26,12 +26,83 @@ IconData _resolveMediaOptionIcon(AttachmentPicker plugin) => switch (plugin) {
   _ => _resolveAttachmentIcon(plugin.icon),
 };
 
+OverlayEntry? _activeChatMediaToast;
+Timer? _activeChatMediaToastTimer;
+
+void _showChatMediaToast(BuildContext context, {required String message}) {
+  final overlay = Overlay.of(context, rootOverlay: true);
+  _activeChatMediaToastTimer?.cancel();
+  _activeChatMediaToastTimer = null;
+  _activeChatMediaToast?.remove();
+  _activeChatMediaToast = null;
+
+  final colorScheme = context.colorScheme;
+  final entry = OverlayEntry(
+    builder: (overlayContext) {
+      final mediaQuery = MediaQuery.of(overlayContext);
+      return Positioned(
+        left: 16,
+        right: 16,
+        bottom: mediaQuery.padding.bottom + 24,
+        child: IgnorePointer(
+          child: Material(
+            type: MaterialType.transparency,
+            child: SafeArea(
+              top: false,
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 640),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: colorScheme.inverseSurface,
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: const [
+                        BoxShadow(
+                          blurRadius: 18,
+                          offset: Offset(0, 8),
+                          color: Color(0x33000000),
+                        ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      child: Text(
+                        message,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: colorScheme.onInverseSurface),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    },
+  );
+
+  overlay.insert(entry);
+  _activeChatMediaToast = entry;
+  _activeChatMediaToastTimer = Timer(const Duration(seconds: 4), () {
+    if (_activeChatMediaToast == entry) {
+      _activeChatMediaToast = null;
+    }
+    _activeChatMediaToastTimer = null;
+    entry.remove();
+  });
+}
+
 class _ChatMediaOptionItem {
   const _ChatMediaOptionItem({
     required this.icon,
     required this.label,
     required this.onTap,
     this.enabled = true,
+    this.onDisabledTap,
     this.subtitle,
     this.isBalloon = false,
   });
@@ -40,6 +111,7 @@ class _ChatMediaOptionItem {
   final String label;
   final VoidCallback? onTap;
   final bool enabled;
+  final VoidCallback? onDisabledTap;
   final String? subtitle;
   final bool isBalloon;
 }
@@ -56,7 +128,7 @@ class _ChatMediaOption extends StatelessWidget {
         ? colorScheme.primary
         : context.theme.disabledColor;
 
-    return Semantics(
+    final content = Semantics(
       button: true,
       enabled: item.enabled,
       label: item.label,
@@ -108,6 +180,16 @@ class _ChatMediaOption extends StatelessWidget {
           ),
         ),
       ),
+    );
+
+    if (item.enabled || item.onDisabledTap == null) {
+      return content;
+    }
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: item.onDisabledTap,
+      child: content,
     );
   }
 }
@@ -162,6 +244,9 @@ class _ChatMediaOptions extends ConsumerWidget {
     final shouldEnableRCardAttachment = !isGroupChat;
     final contact = ref.watch(provider.select((state) => state.contact));
     final routingState = ref.watch(contextRoutingServiceProvider);
+    final isPersonalAgentReady = ref.watch(
+      provider.select((state) => state.isPersonalAgentReady),
+    );
     final isOobChat = contact?.origin == ContactOrigin.directInteractive;
     final isPersonalAiChat =
         contact != null &&
@@ -177,6 +262,14 @@ class _ChatMediaOptions extends ConsumerWidget {
     final isAgentChat =
         contact?.category == ContactCategory.robot ||
         contact?.card.type.trim().toLowerCase() == 'ai-agent';
+    final shouldEnableSignDocument = !isGroupChat && isPersonalAgentReady;
+
+    void showSignDocumentAgentSetupMessage() {
+      _showChatMediaToast(
+        context,
+        message: context.l10n.signDocumentRequiresAgentSetup,
+      );
+    }
 
     void attachFromPlugin(AttachmentPicker plugin) async {
       if (!context.mounted) return;
@@ -228,6 +321,7 @@ class _ChatMediaOptions extends ConsumerWidget {
               RCardAttachmentsPlugin() =>
                 shouldEnableRCardAttachment && !isPersonalAiChat,
               VrcAttachmentsPlugin() => shouldEnableVrcAttachment,
+              SignDocumentPlugin() => shouldEnableSignDocument,
               _ => true,
             };
             final supported = platformSupported && enabled;
@@ -245,6 +339,12 @@ class _ChatMediaOptions extends ConsumerWidget {
               label: label,
               onTap: supported ? () => attachFromPlugin(plugin) : null,
               enabled: supported,
+              onDisabledTap: switch (plugin) {
+                SignDocumentPlugin()
+                    when platformSupported && !isGroupChat && !isAgentChat =>
+                  showSignDocumentAgentSetupMessage,
+                _ => null,
+              },
             );
           }),
       if (isZkpEnabled && supportsHumanZkp)

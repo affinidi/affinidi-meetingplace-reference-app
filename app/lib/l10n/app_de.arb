@@ -273,6 +273,7 @@
 	"personalAgentStatusNotConnected": "Persönliche KI nicht verbunden",
 	"personalAgentStatusSubtitleConnected": "Ihr Assistent ist bereit und erscheint in den Kontakten, sobald der Kanal aktiv ist.",
 	"personalAgentStatusSubtitleNotConnected": "Verbinden Sie Ihre persönliche KI mit einem Tippen. MPX bleibt während der Einrichtung nutzbar.",
+	"signDocumentRequiresAgentSetup": "Um Dokument signieren zu verwenden, wechseln Sie zum Agent-Tab und schließen Sie die Einrichtung ab.",
 	"personalAgentWhatHappensNext": "So geht es weiter",
 	"personalAgentStepCreateOffer": "Für Ihre aktuelle Identität wird ein persönliches KI-Angebot erstellt.",
 	"personalAgentStepFetchMnemonic": "MPX ruft die Mnemonik aus der Backend-Angebots-API ab.",

@@ -7,16 +7,69 @@ PersonalAgentOfferResult _offer({
   String status = 'offer_pending_acceptance',
   String? mnemonic,
   String? channelDid,
+  String? channelId,
 }) {
   return PersonalAgentOfferResult(
     setupId: 'setup-1',
     status: status,
     mnemonic: mnemonic,
     channelDid: channelDid,
+    channelId: channelId,
+  );
+}
+
+PersonalAgentSetupResult _setup({
+  String status = 'offer_pending_acceptance',
+  bool mpxConnectionCreated = false,
+  bool availableInContacts = false,
+}) {
+  return PersonalAgentSetupResult(
+    holderDid: 'did:key:holder',
+    contextId: 'work-ai',
+    contextCreated: true,
+    agentDid: 'did:key:agent',
+    agentCreated: true,
+    profile: const PersonalAgentProfile(
+      agentDid: 'did:key:agent',
+      displayName: 'Work AI',
+      mode: PersonalAgentMode.suggestions,
+    ),
+    setupId: 'setup-1',
+    setupStatus: status,
+    mpxConnectionCreated: mpxConnectionCreated,
+    availableInContacts: availableInContacts,
   );
 }
 
 void main() {
+  group('PersonalAiService.isConnectedForRestore', () {
+    test('returns true when setup already reports ready', () {
+      final result = PersonalAiService.isConnectedForRestore(
+        setupResult: _setup(status: 'ready'),
+      );
+
+      expect(result, isTrue);
+    });
+
+    test('returns true when offer carries a connected channel', () {
+      final result = PersonalAiService.isConnectedForRestore(
+        setupResult: _setup(status: 'offer_pending_acceptance'),
+        offer: _offer(channelDid: 'did:channel'),
+      );
+
+      expect(result, isTrue);
+    });
+
+    test('returns false for a stale pending offer without channel', () {
+      final result = PersonalAiService.isConnectedForRestore(
+        setupResult: _setup(status: 'offer_pending_acceptance'),
+        offer: _offer(mnemonic: 'm1'),
+      );
+
+      expect(result, isFalse);
+    });
+  });
+
   group('PersonalAiService.awaitChannelAfterAccept', () {
     test('returns as soon as a new channel DID appears', () async {
       final offers = <PersonalAgentOfferResult>[

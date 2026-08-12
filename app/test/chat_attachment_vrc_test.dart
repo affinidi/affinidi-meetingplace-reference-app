@@ -1,11 +1,14 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:meeting_place_personal_agent/meeting_place_personal_agent.dart';
+import 'package:mpx_flutter_reference_app/application/services/personal_ai_service/personal_ai_service_state.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/plugins/sign_document_plugin/sign_document_plugin.dart';
 
 import 'fakes/fake_channels.dart';
 import 'fakes/fake_chat_sdk.dart';
 import 'fakes/fake_contacts.dart';
+import 'fakes/fake_context_routing_store.dart';
 import 'fakes/fake_identities.dart';
 import 'utils/app.dart';
 
@@ -22,6 +25,33 @@ bool _isVrcOptionEnabled(WidgetTester tester, String label) {
   );
 
   return option.onTap != null;
+}
+
+PersonalAiServiceState _personalAiState({required bool isReady}) {
+  return isReady
+      ? const PersonalAiServiceState(
+          status: PersonalAiSetupStatus.ready,
+          showSetupPrompt: false,
+          promptDismissed: false,
+          contextProvisioned: true,
+          contextUploading: false,
+          setupResult: PersonalAgentSetupResult(
+            holderDid: 'did:key:primary-identity',
+            contextId: 'work-ai',
+            contextCreated: true,
+            agentDid: 'did:key:agent',
+            agentCreated: true,
+            profile: PersonalAgentProfile(
+              agentDid: 'did:key:agent',
+              displayName: 'Work AI',
+              mode: PersonalAgentMode.suggestions,
+            ),
+            setupId: 'setup-work-1',
+            setupStatus: 'ready',
+            mpxConnectionCreated: true,
+          ),
+        )
+      : const PersonalAiServiceState.initial();
 }
 
 List<SignDocumentPlugin> _signDocumentPlugins() => [
@@ -108,6 +138,93 @@ void main() {
       await _openMediaSheet(tester);
 
       expect(find.text('Sign Document'), findsNothing);
+    });
+
+    testWidgets('disables Sign Document when personal agent is not connected', (
+      tester,
+    ) async {
+      await navigateToChat(
+        tester,
+        attachmentPlugins: _signDocumentPlugins(),
+        personalAiState: _personalAiState(isReady: false),
+      );
+      await _openMediaSheet(tester);
+
+      final enabled = _isVrcOptionEnabled(tester, 'Sign Document');
+      expect(enabled, isFalse);
+    });
+
+    testWidgets('shows guidance when disabled Sign Document is tapped', (
+      tester,
+    ) async {
+      await navigateToChat(
+        tester,
+        attachmentPlugins: _signDocumentPlugins(),
+        personalAiState: _personalAiState(isReady: false),
+      );
+      await _openMediaSheet(tester);
+
+      await tester.tap(find.text('Sign Document'), warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text(
+          'To use Sign Document, go to the Agent tab and complete setup.',
+        ),
+        findsOneWidget,
+      );
+
+      await tester.pump(const Duration(seconds: 4));
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('enables Sign Document when personal agent is connected', (
+      tester,
+    ) async {
+      await navigateToChat(
+        tester,
+        attachmentPlugins: _signDocumentPlugins(),
+        personalAiState: _personalAiState(isReady: true),
+        contextRoutingStore: FakeContextRoutingStore(workContextUploaded: true),
+      );
+      await _openMediaSheet(tester);
+
+      final enabled = _isVrcOptionEnabled(tester, 'Sign Document');
+      expect(enabled, isTrue);
+    });
+
+    testWidgets(
+      '''enables Sign Document after restart when work context is already connected''',
+      (tester) async {
+        await navigateToChat(
+          tester,
+          attachmentPlugins: _signDocumentPlugins(),
+          personalAiState: _personalAiState(isReady: false),
+          contextRoutingStore: FakeContextRoutingStore(
+            workContextUploaded: true,
+          ),
+        );
+        await _openMediaSheet(tester);
+
+        final enabled = _isVrcOptionEnabled(tester, 'Sign Document');
+        expect(enabled, isTrue);
+      },
+    );
+
+    testWidgets('disables Sign Document in group chat', (tester) async {
+      final groupContactId = FakeContacts.groupContact.id;
+
+      await navigateToChat(
+        tester,
+        contactId: groupContactId,
+        contacts: [FakeContacts.groupContact],
+        attachmentPlugins: _signDocumentPlugins(),
+        personalAiState: _personalAiState(isReady: true),
+      );
+      await _openMediaSheet(tester);
+
+      final enabled = _isVrcOptionEnabled(tester, 'Sign Document');
+      expect(enabled, isFalse);
     });
   });
 }

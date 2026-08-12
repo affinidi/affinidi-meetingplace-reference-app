@@ -37,6 +37,7 @@ abstract class ChatScreenState with _$ChatScreenState {
     String? notificationToken,
     String? myDid,
     @Default(false) bool shouldEnableVrcAttachment,
+    @Default(false) bool isPersonalAgentReady,
     @Default(false) bool shouldShowVrcBanner,
     @Default(false) bool shouldStartVrcExchangeFromAttachment,
     chat.TransportCapabilities? capabilities,

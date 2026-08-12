@@ -19,7 +19,9 @@ import '../../../application/services/chat_service/chat_session_service.dart';
 import '../../../application/services/chat_service/context_route_attachment_builder_service.dart';
 import '../../../application/services/chat_service/open_chat_registry.dart';
 import '../../../application/services/contacts_service/contacts_service.dart';
+import '../../../application/services/context_routing_service/context_routing_service.dart';
 import '../../../application/services/identities_service/identities_service.dart';
+import '../../../application/services/personal_ai_service/personal_ai_contact_resolution.dart';
 import '../../../application/services/personal_ai_service/personal_ai_service.dart';
 import '../../../application/services/voice_playback_service/voice_playback_service.dart';
 import '../../../application/services/vrc_service/vrc_service.dart';
@@ -147,6 +149,21 @@ class ChatScreenController extends _$ChatScreenController
     return chatService.downloadMedia(attachment);
   }
 
+  bool _isPersonalAgentReadyForSigning() {
+    final routingState = ref.read(contextRoutingServiceProvider);
+    if (routingState.workContextUploaded) {
+      return true;
+    }
+
+    final contactsState = ref.read(contactsServiceProvider);
+    final workContact = findPersonalAiContactForContext(
+      contacts: contactsState.contacts,
+      contactContexts: routingState.contactContexts,
+      targetContext: AgentContext.work,
+    );
+    return workContact != null;
+  }
+
   @override
   ChatScreenState build(String contactId) {
     _isDisposed = false;
@@ -159,6 +176,7 @@ class ChatScreenController extends _$ChatScreenController
     });
 
     final contact = ref.read(contactsServiceProvider).getContactById(contactId);
+    final isPersonalAgentReady = _isPersonalAgentReadyForSigning();
     _channelDid = contact?.channelDid;
     final channelDid = _channelDid;
     var pendingState = ChatScreenState(
@@ -166,6 +184,7 @@ class ChatScreenController extends _$ChatScreenController
       isActive: true,
       isInitialized: false,
       contactPresenceStatus: ContactPresenceStatus.unknown,
+      isPersonalAgentReady: isPersonalAgentReady,
     );
     var hasInitializedState = false;
 
@@ -309,6 +328,27 @@ class ChatScreenController extends _$ChatScreenController
       },
       fireImmediately: true,
     );
+
+    void syncPersonalAgentReady() {
+      Future.microtask(() {
+        if (!ref.mounted) return;
+        state = state.copyWith(
+          isPersonalAgentReady: _isPersonalAgentReadyForSigning(),
+        );
+      });
+    }
+
+    ref.listen(personalAiServiceProvider, (_, _) {
+      syncPersonalAgentReady();
+    }, fireImmediately: true);
+
+    ref.listen(contactsServiceProvider, (_, _) {
+      syncPersonalAgentReady();
+    });
+
+    ref.listen(contextRoutingServiceProvider, (_, _) {
+      syncPersonalAgentReady();
+    });
 
     messageTextController.addListener(_onMessageTextChanged);
     _subscribeToVrcPlugin();

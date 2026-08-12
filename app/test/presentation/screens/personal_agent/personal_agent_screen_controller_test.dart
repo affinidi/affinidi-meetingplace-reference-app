@@ -439,6 +439,65 @@ void main() {
       },
     );
   });
+
+  group('PersonalAgentScreenController – disconnect', () {
+    late _RecordingPersonalAiNotifier fakePersonalAi;
+
+    ProviderContainer makeContainer() {
+      final contact = FakeContacts.agentContact;
+      fakePersonalAi = _RecordingPersonalAiNotifier(
+        PersonalAiServiceState(
+          status: PersonalAiSetupStatus.ready,
+          showSetupPrompt: false,
+          promptDismissed: false,
+          contextProvisioned: true,
+          contextUploading: false,
+          setupResult: _readyWorkSetup(),
+          setupResultsByContext: {'work-ai': _readyWorkSetup()},
+        ),
+      );
+
+      final container = ProviderContainer(
+        overrides: [
+          identitiesServiceProvider.overrideWith(_PrimaryIdentityService.new),
+          personalAiServiceProvider.overrideWith((ref) => fakePersonalAi),
+          contactsServiceProvider.overrideWith(
+            () => _StubContactsService([contact]),
+          ),
+          contextRoutingServiceProvider.overrideWith(
+            (ref) => _StubContextRoutingNotifier(
+              ContextRoutingState(
+                contactContexts: {contact.id: AgentContext.work},
+              ),
+            ),
+          ),
+          signingServiceProvider.overrideWith(
+            (ref) => _FakeSigningNotifier(stepUpEnabled: false),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      return container;
+    }
+
+    test('disconnectRoutingContext clears ready state', () async {
+      final container = makeContainer();
+      final controller = container.read(
+        personalAgentScreenControllerProvider.notifier,
+      );
+
+      await controller.disconnectRoutingContext(AgentContext.work);
+
+      final personalAiState = container.read(personalAiServiceProvider);
+      final screenState = container.read(personalAgentScreenControllerProvider);
+
+      expect(personalAiState.isReady, isFalse);
+      expect(personalAiState.status, PersonalAiSetupStatus.notConfigured);
+      expect(personalAiState.setupResultsByContext, isEmpty);
+      expect(personalAiState.setupResult, isNull);
+      expect(screenState.isReady, isFalse);
+    });
+  });
 }
 
 PersonalAgentSetupResult _readyWorkSetup() {
@@ -598,6 +657,25 @@ class _RecordingPersonalAiNotifier extends StateNotifier<PersonalAiServiceState>
   Future<void> refreshPersonalAiContactSync() async {}
 
   @override
+  Future<void> removeSetupForContext(AgentContext target) async {
+    final updatedMap = Map<String, PersonalAgentSetupResult>.from(
+      state.setupResultsByContext,
+    )..remove(target.setupContextName);
+
+    state = state.copyWith(
+      status: updatedMap.isEmpty
+          ? PersonalAiSetupStatus.notConfigured
+          : PersonalAiSetupStatus.settingUp,
+      setupResultsByContext: updatedMap,
+      clearSetupResult: updatedMap.isEmpty,
+      setupResult: updatedMap.isEmpty ? null : updatedMap.values.first,
+      contextProvisioned: updatedMap.isNotEmpty && state.contextProvisioned,
+      clearErrorMessage: true,
+      clearContextUploadError: true,
+    );
+  }
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => null;
 }
 
@@ -616,6 +694,16 @@ class _StubContactsService extends ContactsService {
   @override
   Future<void> fetchContacts() async {
     fetchCallCount++;
+  }
+
+  @override
+  Future<void> removeContactsWithoutLeavingChannel(
+    List<Contact> contacts,
+  ) async {
+    _contacts.removeWhere(
+      (contact) => contacts.any((item) => item.id == contact.id),
+    );
+    state = ContactsServiceState(contacts: List<Contact>.from(_contacts));
   }
 }
 
@@ -638,6 +726,15 @@ class _StubContextRoutingNotifier extends StateNotifier<ContextRoutingState>
     required AgentContext context,
     required String fileName,
   }) async {}
+
+  @override
+  Future<void> clearContext({required AgentContext context}) async {
+    state = state.copyWith(
+      workContextUploaded: false,
+      clearWorkContextFileName: true,
+      contactContexts: <String, AgentContext>{},
+    );
+  }
 
   @override
   dynamic noSuchMethod(Invocation invocation) => null;
