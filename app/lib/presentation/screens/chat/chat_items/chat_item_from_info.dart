@@ -53,10 +53,47 @@ class _ChatItemFromInfo extends ConsumerWidget {
     final groupMember = ref.watch(
       provider.select(
         (state) => state.group?.members.firstWhereOrNull(
-          (gm) => gm.did == _chatItem.senderDid,
+          (gm) =>
+              gm.did == _chatItem.senderDid ||
+              gm.contactCard.did == _chatItem.senderDid,
         ),
       ),
     );
+
+    final isAgentReply =
+        !_chatItem.isFromMe &&
+        _chatItem is chat.Message &&
+        _chatItem.attachments.any((a) => a.isCiergeAgentMarker);
+
+    if (isAgentReply) {
+      // Agents are not group members. The connector stamps the owning member's
+      // DID on the reply, so resolve the member name from that when the direct
+      // roster lookup misses.
+      final ownerDids = _chatItem.attachments
+          .expand((a) => a.ciergeOwnerDids)
+          .toSet();
+      final ownerMember = ref.watch(
+        provider.select(
+          (state) => state.group?.members.firstWhereOrNull(
+            (gm) =>
+                ownerDids.contains(gm.did) ||
+                ownerDids.contains(gm.contactCard.did),
+          ),
+        ),
+      );
+      final senderName =
+          groupMember?.contactCard.fullName ??
+          ownerMember?.contactCard.fullName ??
+          workAiLabel;
+      return Text(
+        context.l10n.agentReplyInfo(
+          senderName,
+          DateFormat.jm().format(dateCreated),
+        ),
+        style: const TextStyle(color: Colors.grey, fontSize: 12),
+        textAlign: TextAlign.start,
+      );
+    }
 
     if (_chatItem.senderDid.isEmpty || groupMember == null) {
       return const SizedBox(height: 17);
