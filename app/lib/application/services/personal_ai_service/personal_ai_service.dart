@@ -641,14 +641,13 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     required PersonalAgentSetupResult setupResult,
     PersonalAgentOfferResult? offer,
   }) {
-    final setupStatus = (setupResult.setupStatus ?? '').trim().toLowerCase();
-    if (setupStatus == 'inaugurated' || setupStatus == 'ready') {
+    final setupStatus = _parseRestoreConnectionStatus(setupResult.setupStatus);
+    if ((setupStatus == _RestoreConnectionStatus.inaugurated ||
+            setupStatus == _RestoreConnectionStatus.ready) &&
+        _hasRestoreConnectionSetupSignal(setupResult)) {
       return true;
     }
-    if (setupResult.mpxConnectionCreated == true) {
-      return true;
-    }
-    if (setupResult.availableInContacts == true) {
+    if (_hasRestoreConnectionSetupSignal(setupResult)) {
       return true;
     }
 
@@ -657,13 +656,34 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
       return false;
     }
 
-    final offerStatus = normalizedOffer.status.trim().toLowerCase();
-    if (offerStatus == 'inaugurated' || offerStatus == 'ready') {
+    final offerStatus = _parseRestoreConnectionStatus(normalizedOffer.status);
+    if ((offerStatus == _RestoreConnectionStatus.inaugurated ||
+            offerStatus == _RestoreConnectionStatus.ready) &&
+        _hasRestoreConnectionOfferSignal(normalizedOffer)) {
       return true;
     }
 
-    return (normalizedOffer.channelDid?.trim().isNotEmpty ?? false) ||
-        (normalizedOffer.channelId?.trim().isNotEmpty ?? false);
+    return _hasRestoreConnectionOfferSignal(normalizedOffer);
+  }
+
+  static _RestoreConnectionStatus _parseRestoreConnectionStatus(String? raw) {
+    return switch ((raw ?? '').trim().toLowerCase()) {
+      'inaugurated' => _RestoreConnectionStatus.inaugurated,
+      'ready' => _RestoreConnectionStatus.ready,
+      _ => _RestoreConnectionStatus.unknown,
+    };
+  }
+
+  static bool _hasRestoreConnectionSetupSignal(
+    PersonalAgentSetupResult setupResult,
+  ) {
+    return setupResult.mpxConnectionCreated == true ||
+        setupResult.availableInContacts == true;
+  }
+
+  static bool _hasRestoreConnectionOfferSignal(PersonalAgentOfferResult offer) {
+    return (offer.channelDid?.trim().isNotEmpty ?? false) ||
+        (offer.channelId?.trim().isNotEmpty ?? false);
   }
 
   Future<void> _restoreSessionAfterRestart() async {
@@ -1393,3 +1413,5 @@ class _PersonalAiLifecycleObserver extends WidgetsBindingObserver {
     }
   }
 }
+
+enum _RestoreConnectionStatus { inaugurated, ready, unknown }

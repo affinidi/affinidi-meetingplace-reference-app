@@ -43,9 +43,20 @@ PersonalAgentSetupResult _setup({
 
 void main() {
   group('PersonalAiService.isConnectedForRestore', () {
-    test('returns true when setup already reports ready', () {
+    test(
+      'returns false when setup status is ready without structural proof',
+      () {
+        final result = PersonalAiService.isConnectedForRestore(
+          setupResult: _setup(status: 'ready'),
+        );
+
+        expect(result, isFalse);
+      },
+    );
+
+    test('returns true when ready setup also has a structural signal', () {
       final result = PersonalAiService.isConnectedForRestore(
-        setupResult: _setup(status: 'ready'),
+        setupResult: _setup(status: 'ready', mpxConnectionCreated: true),
       );
 
       expect(result, isTrue);
@@ -68,6 +79,18 @@ void main() {
 
       expect(result, isFalse);
     });
+
+    test(
+      'returns false when offer status is ready without channel evidence',
+      () {
+        final result = PersonalAiService.isConnectedForRestore(
+          setupResult: _setup(status: 'offer_pending_acceptance'),
+          offer: _offer(status: 'ready', mnemonic: 'm1'),
+        );
+
+        expect(result, isFalse);
+      },
+    );
   });
 
   group(
