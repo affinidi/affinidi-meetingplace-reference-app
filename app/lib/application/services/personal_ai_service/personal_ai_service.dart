@@ -225,7 +225,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     final storage = await _ref.read(secureStorageProvider.future);
     final persistedHolderDid = (await storage.readPersonalAiHolderDid())
         ?.trim();
-    if (shouldClearPersistedHolderDidAfterContextRemoval(
+    if (shouldClearPersistedHolderDid(
       removedSetup: removedSetup,
       remainingSetupsByContext: updatedMap,
       persistedHolderDid: persistedHolderDid,
@@ -235,7 +235,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
   }
 
   @visibleForTesting
-  static bool shouldClearPersistedHolderDidAfterContextRemoval({
+  static bool shouldClearPersistedHolderDid({
     required PersonalAgentSetupResult? removedSetup,
     required Map<String, PersonalAgentSetupResult> remainingSetupsByContext,
     required String? persistedHolderDid,

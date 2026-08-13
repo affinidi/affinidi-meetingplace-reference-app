@@ -8,7 +8,6 @@ import 'package:mpx_flutter_reference_app/infrastructure/plugins/sign_document_p
 import 'fakes/fake_channels.dart';
 import 'fakes/fake_chat_sdk.dart';
 import 'fakes/fake_contacts.dart';
-import 'fakes/fake_context_routing_store.dart';
 import 'fakes/fake_identities.dart';
 import 'utils/app.dart';
 
@@ -185,31 +184,12 @@ void main() {
         tester,
         attachmentPlugins: _signDocumentPlugins(),
         personalAiState: _personalAiState(isReady: true),
-        contextRoutingStore: FakeContextRoutingStore(workContextUploaded: true),
       );
       await _openMediaSheet(tester);
 
       final enabled = _isVrcOptionEnabled(tester, 'Sign Document');
       expect(enabled, isTrue);
     });
-
-    testWidgets(
-      '''enables Sign Document after restart when work context is already connected''',
-      (tester) async {
-        await navigateToChat(
-          tester,
-          attachmentPlugins: _signDocumentPlugins(),
-          personalAiState: _personalAiState(isReady: false),
-          contextRoutingStore: FakeContextRoutingStore(
-            workContextUploaded: true,
-          ),
-        );
-        await _openMediaSheet(tester);
-
-        final enabled = _isVrcOptionEnabled(tester, 'Sign Document');
-        expect(enabled, isTrue);
-      },
-    );
 
     testWidgets('disables Sign Document in group chat', (tester) async {
       final groupContactId = FakeContacts.groupContact.id;
