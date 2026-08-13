@@ -567,6 +567,7 @@
 	"chatMenuUploadPersonalContext": "Subir personal-context.txt",
 	"chatMenuReuploadPersonalContext": "Volver a subir personal-context.txt",
 	"identitiesSetupMyAgent": "Configurar mi agente",
+	"identitiesSetupButton": "Configurar",
 	"identitiesSetupPromptDescription": "Elige Work o Personal en la pestaña Agent.",
 	"identitiesSettingUp": "Configurando...",
 	"identitiesNotNow": "Ahora no",
