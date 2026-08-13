@@ -152,6 +152,18 @@
 	"groupMemberExited": "Salió del grupo",
 	"groupMembers": "Miembros del grupo",
 	"groupMessageInfo": "{memberName} en {date} en {time}",
+	"agentReplyInfo": "respuesta del agente de {senderName} a las {time}",
+	"@agentReplyInfo": {
+		"type": "text",
+		"placeholders": {
+			"senderName": {
+				"type": "String"
+			},
+			"time": {
+				"type": "String"
+			}
+		}
+	},
 	"groupNoMembersToChat": "Actualmente eres el único miembro de este grupo. Puede comenzar a chatear cuando otro miembro se una.",
 	"groupOfferHelperText": "La invitación representará un chat grupal para que varios contactos se unan y chateen. Todavía tienes control sobre quién puede unirse al chat grupal.",
 	"headline": "Titular",
