@@ -102,6 +102,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Connect your Personal AI in one tap. MPX stays usable throughout setup.';
 
   @override
+  String get signDocumentRequiresAgentSetup =>
+      'To use Sign Document, go to the Agent tab and complete setup.';
+
+  @override
   String get personalAgentContextSetupTitle => 'Set Up Your Personal AI';
 
   @override

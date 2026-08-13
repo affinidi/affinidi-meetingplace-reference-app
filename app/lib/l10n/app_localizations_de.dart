@@ -105,6 +105,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'Verbinden Sie Ihre persönliche KI mit einem Tippen. MPX bleibt während der Einrichtung nutzbar.';
 
   @override
+  String get signDocumentRequiresAgentSetup =>
+      'Um Dokument signieren zu verwenden, wechseln Sie zum Agent-Tab und schließen Sie die Einrichtung ab.';
+
+  @override
   String get personalAgentContextSetupTitle => 'Set Up Your Personal AI';
 
   @override
@@ -2238,6 +2242,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get identitiesSetupMyAgent => 'Meinen Agenten einrichten';
+
+  @override
+  String get identitiesSetupButton => 'Set up';
 
   @override
   String get identitiesSetupPromptDescription =>

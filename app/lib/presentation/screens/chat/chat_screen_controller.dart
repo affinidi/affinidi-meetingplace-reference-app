@@ -159,6 +159,11 @@ class ChatScreenController extends _$ChatScreenController
     });
 
     final contact = ref.read(contactsServiceProvider).getContactById(contactId);
+    final isPersonalAgentReady = ref.read(
+      personalAiServiceProvider.select(
+        (personalAiState) => personalAiState.isReady,
+      ),
+    );
     _channelDid = contact?.channelDid;
     final channelDid = _channelDid;
     var pendingState = ChatScreenState(
@@ -166,6 +171,7 @@ class ChatScreenController extends _$ChatScreenController
       isActive: true,
       isInitialized: false,
       contactPresenceStatus: ContactPresenceStatus.unknown,
+      isPersonalAgentReady: isPersonalAgentReady,
     );
     var hasInitializedState = false;
 
@@ -306,6 +312,21 @@ class ChatScreenController extends _$ChatScreenController
           if (!ref.mounted) return;
           state = state.copyWith(contact: next);
         });
+      },
+      fireImmediately: true,
+    );
+
+    void syncPersonalAgentReady(bool isReady) {
+      Future.microtask(() {
+        if (!ref.mounted) return;
+        state = state.copyWith(isPersonalAgentReady: isReady);
+      });
+    }
+
+    ref.listen(
+      personalAiServiceProvider.select((next) => next.isReady),
+      (_, next) {
+        syncPersonalAgentReady(next);
       },
       fireImmediately: true,
     );

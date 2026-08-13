@@ -7,16 +7,157 @@ PersonalAgentOfferResult _offer({
   String status = 'offer_pending_acceptance',
   String? mnemonic,
   String? channelDid,
+  String? channelId,
 }) {
   return PersonalAgentOfferResult(
     setupId: 'setup-1',
     status: status,
     mnemonic: mnemonic,
     channelDid: channelDid,
+    channelId: channelId,
+  );
+}
+
+PersonalAgentSetupResult _setup({
+  String status = 'offer_pending_acceptance',
+  bool mpxConnectionCreated = false,
+  bool availableInContacts = false,
+}) {
+  return PersonalAgentSetupResult(
+    holderDid: 'did:key:holder',
+    contextId: 'work-ai',
+    contextCreated: true,
+    agentDid: 'did:key:agent',
+    agentCreated: true,
+    profile: const PersonalAgentProfile(
+      agentDid: 'did:key:agent',
+      displayName: 'Work AI',
+      mode: PersonalAgentMode.suggestions,
+    ),
+    setupId: 'setup-1',
+    setupStatus: status,
+    mpxConnectionCreated: mpxConnectionCreated,
+    availableInContacts: availableInContacts,
   );
 }
 
 void main() {
+  group('PersonalAiService.isConnectedForRestore', () {
+    test(
+      'returns false when setup status is ready without structural proof',
+      () {
+        final result = PersonalAiService.isConnectedForRestore(
+          setupResult: _setup(status: 'ready'),
+        );
+
+        expect(result, isFalse);
+      },
+    );
+
+    test('returns true when ready setup also has a structural signal', () {
+      final result = PersonalAiService.isConnectedForRestore(
+        setupResult: _setup(status: 'ready', mpxConnectionCreated: true),
+      );
+
+      expect(result, isTrue);
+    });
+
+    test('returns true when offer carries a connected channel', () {
+      final result = PersonalAiService.isConnectedForRestore(
+        setupResult: _setup(status: 'offer_pending_acceptance'),
+        offer: _offer(channelDid: 'did:channel'),
+      );
+
+      expect(result, isTrue);
+    });
+
+    test('returns false for a stale pending offer without channel', () {
+      final result = PersonalAiService.isConnectedForRestore(
+        setupResult: _setup(status: 'offer_pending_acceptance'),
+        offer: _offer(mnemonic: 'm1'),
+      );
+
+      expect(result, isFalse);
+    });
+
+    test(
+      'returns false when offer status is ready without channel evidence',
+      () {
+        final result = PersonalAiService.isConnectedForRestore(
+          setupResult: _setup(status: 'offer_pending_acceptance'),
+          offer: _offer(status: 'ready', mnemonic: 'm1'),
+        );
+
+        expect(result, isFalse);
+      },
+    );
+  });
+
+  group(
+    'PersonalAiService.shouldClearPersistedHolderDidAfterContextRemoval',
+    () {
+      test('returns true when no setup remains after disconnect', () {
+        final result = PersonalAiService.shouldClearPersistedHolderDid(
+          removedSetup: _setup(),
+          remainingSetupsByContext: const {},
+          persistedHolderDid: 'did:key:holder',
+        );
+
+        expect(result, isTrue);
+      });
+
+      test('returns false when another setup still uses the persisted DID', () {
+        final result = PersonalAiService.shouldClearPersistedHolderDid(
+          removedSetup: _setup(),
+          remainingSetupsByContext: {'personal-ai-2': _setup()},
+          persistedHolderDid: 'did:key:holder',
+        );
+
+        expect(result, isFalse);
+      });
+
+      test(
+        'returns true when remaining setups do not use the persisted DID',
+        () {
+          final remaining = const PersonalAgentSetupResult(
+            holderDid: 'did:key:other',
+            contextId: 'home-ai',
+            contextCreated: true,
+            agentDid: 'did:key:agent-2',
+            agentCreated: true,
+            profile: PersonalAgentProfile(
+              agentDid: 'did:key:agent-2',
+              displayName: 'Home AI',
+              mode: PersonalAgentMode.suggestions,
+            ),
+            setupId: 'setup-2',
+            setupStatus: 'ready',
+            mpxConnectionCreated: true,
+            availableInContacts: true,
+          );
+
+          final result = PersonalAiService.shouldClearPersistedHolderDid(
+            removedSetup: _setup(),
+            remainingSetupsByContext: {'home-ai': remaining},
+            persistedHolderDid: 'did:key:holder',
+          );
+
+          expect(result, isTrue);
+        },
+      );
+
+      test('returns false when persisted DID belongs to another identity', () {
+        final result = PersonalAiService.shouldClearPersistedHolderDid(
+          removedSetup: _setup(),
+          remainingSetupsByContext: {'home-ai': _setup()},
+          persistedHolderDid: 'did:key:other',
+        );
+
+        expect(result, isFalse);
+      });
+    },
+  );
+
   group('PersonalAiService.awaitChannelAfterAccept', () {
     test('returns as soon as a new channel DID appears', () async {
       final offers = <PersonalAgentOfferResult>[

@@ -168,6 +168,21 @@ class FakeSecureStorage extends SecureStorage {
       '''abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about''';
 
   @override
+  Future<String?> readPersonalAiHolderDid() async {
+    return _storedKeys['personalAiHolderDid'];
+  }
+
+  @override
+  Future<void> writePersonalAiHolderDid(String did) async {
+    _storedKeys['personalAiHolderDid'] = did;
+  }
+
+  @override
+  Future<void> clearPersonalAiHolderDid() async {
+    _storedKeys.remove('personalAiHolderDid');
+  }
+
+  @override
   dynamic noSuchMethod(Invocation invocation) {
     throw UnimplementedError();
   }

@@ -226,6 +226,12 @@ abstract class AppLocalizations {
   /// **'Connect your Personal AI in one tap. MPX stays usable throughout setup.'**
   String get personalAgentStatusSubtitleNotConnected;
 
+  /// No description provided for @signDocumentRequiresAgentSetup.
+  ///
+  /// In en, this message translates to:
+  /// **'To use Sign Document, go to the Agent tab and complete setup.'**
+  String get signDocumentRequiresAgentSetup;
+
   /// No description provided for @personalAgentContextSetupTitle.
   ///
   /// In en, this message translates to:

@@ -273,6 +273,7 @@
 	"personalAgentStatusNotConnected": "IA personal no conectada",
 	"personalAgentStatusSubtitleConnected": "Tu asistente está listo y aparecerá en contactos cuando el canal esté activo.",
 	"personalAgentStatusSubtitleNotConnected": "Conecta tu IA personal con un toque. MPX sigue siendo utilizable durante la configuración.",
+	"signDocumentRequiresAgentSetup": "Para usar Firmar documento, ve a la pestaña Agente y completa la configuración.",
 	"personalAgentWhatHappensNext": "Qué sucede a continuación",
 	"personalAgentStepCreateOffer": "Se crea una oferta de IA personal para tu identidad actual.",
 	"personalAgentStepFetchMnemonic": "MPX obtiene la mnemónica desde la API de ofertas del backend.",

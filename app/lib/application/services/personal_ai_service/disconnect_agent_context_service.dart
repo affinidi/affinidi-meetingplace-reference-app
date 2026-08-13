@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../contacts_service/contacts_service.dart';
 import '../context_routing_service/context_routing_service.dart';
 import 'personal_ai_contact_resolution.dart';
+import 'personal_ai_service.dart';
 
 final disconnectAgentContextServiceProvider =
     Provider<DisconnectAgentContextService>(DisconnectAgentContextService.new);
@@ -31,5 +32,9 @@ class DisconnectAgentContextService {
     await _ref
         .read(contextRoutingServiceProvider.notifier)
         .clearContext(context: target);
+
+    await _ref
+        .read(personalAiServiceProvider.notifier)
+        .removeSetupForContext(target);
   }
 }

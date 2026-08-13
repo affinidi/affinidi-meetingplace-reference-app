@@ -200,6 +200,96 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     );
   }
 
+  Future<void> removeSetupForContext(AgentContext target) async {
+    final contextKey = target.setupContextName;
+    final removedSetup = state.setupResultsByContext[contextKey];
+    final updatedMap = Map<String, PersonalAgentSetupResult>.from(
+      state.setupResultsByContext,
+    )..remove(contextKey);
+
+    final fallbackSetup = _fallbackSetupResult(updatedMap);
+    final nextStatus = _deriveStatusFromSetupMap(updatedMap);
+
+    state = state.copyWith(
+      status: nextStatus,
+      setupResult: fallbackSetup,
+      setupResultsByContext: updatedMap,
+      contextProvisioned: updatedMap.isNotEmpty && state.contextProvisioned,
+      showSetupPrompt: false,
+      contextUploading: false,
+      clearErrorMessage: true,
+      clearContextUploadError: true,
+      clearSetupResult: fallbackSetup == null,
+    );
+
+    final storage = await _ref.read(secureStorageProvider.future);
+    final persistedHolderDid = (await storage.readPersonalAiHolderDid())
+        ?.trim();
+    if (shouldClearPersistedHolderDid(
+      removedSetup: removedSetup,
+      remainingSetupsByContext: updatedMap,
+      persistedHolderDid: persistedHolderDid,
+    )) {
+      await storage.clearPersonalAiHolderDid();
+    }
+  }
+
+  @visibleForTesting
+  static bool shouldClearPersistedHolderDid({
+    required PersonalAgentSetupResult? removedSetup,
+    required Map<String, PersonalAgentSetupResult> remainingSetupsByContext,
+    required String? persistedHolderDid,
+  }) {
+    if (remainingSetupsByContext.isEmpty) {
+      return true;
+    }
+
+    final normalizedPersistedHolderDid = persistedHolderDid?.trim() ?? '';
+    if (normalizedPersistedHolderDid.isEmpty) {
+      return false;
+    }
+
+    final removedHolderDid = removedSetup?.holderDid.trim() ?? '';
+    if (removedHolderDid.isEmpty ||
+        removedHolderDid != normalizedPersistedHolderDid) {
+      return false;
+    }
+
+    return !remainingSetupsByContext.values.any(
+      (setup) => setup.holderDid.trim() == normalizedPersistedHolderDid,
+    );
+  }
+
+  PersonalAgentSetupResult? _fallbackSetupResult(
+    Map<String, PersonalAgentSetupResult> setupsByContext,
+  ) {
+    if (setupsByContext.isEmpty) {
+      return null;
+    }
+
+    for (final setup in setupsByContext.values) {
+      if (_isConnectionReady(setup)) {
+        return setup;
+      }
+    }
+
+    return setupsByContext.values.first;
+  }
+
+  PersonalAiSetupStatus _deriveStatusFromSetupMap(
+    Map<String, PersonalAgentSetupResult> setupsByContext,
+  ) {
+    if (setupsByContext.isEmpty) {
+      return PersonalAiSetupStatus.notConfigured;
+    }
+
+    if (setupsByContext.values.any(_isConnectionReady)) {
+      return PersonalAiSetupStatus.ready;
+    }
+
+    return PersonalAiSetupStatus.settingUp;
+  }
+
   /// Upload the user's context file and store it as the agent's initial memory.
   Future<void> uploadContext({
     required String setupId,
@@ -546,6 +636,56 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
     return result.availableInContacts == true;
   }
 
+  @visibleForTesting
+  static bool isConnectedForRestore({
+    required PersonalAgentSetupResult setupResult,
+    PersonalAgentOfferResult? offer,
+  }) {
+    final setupStatus = _parseRestoreConnectionStatus(setupResult.setupStatus);
+    if ((setupStatus == _RestoreConnectionStatus.inaugurated ||
+            setupStatus == _RestoreConnectionStatus.ready) &&
+        _hasRestoreConnectionSetupSignal(setupResult)) {
+      return true;
+    }
+    if (_hasRestoreConnectionSetupSignal(setupResult)) {
+      return true;
+    }
+
+    final normalizedOffer = offer;
+    if (normalizedOffer == null) {
+      return false;
+    }
+
+    final offerStatus = _parseRestoreConnectionStatus(normalizedOffer.status);
+    if ((offerStatus == _RestoreConnectionStatus.inaugurated ||
+            offerStatus == _RestoreConnectionStatus.ready) &&
+        _hasRestoreConnectionOfferSignal(normalizedOffer)) {
+      return true;
+    }
+
+    return _hasRestoreConnectionOfferSignal(normalizedOffer);
+  }
+
+  static _RestoreConnectionStatus _parseRestoreConnectionStatus(String? raw) {
+    return switch ((raw ?? '').trim().toLowerCase()) {
+      'inaugurated' => _RestoreConnectionStatus.inaugurated,
+      'ready' => _RestoreConnectionStatus.ready,
+      _ => _RestoreConnectionStatus.unknown,
+    };
+  }
+
+  static bool _hasRestoreConnectionSetupSignal(
+    PersonalAgentSetupResult setupResult,
+  ) {
+    return setupResult.mpxConnectionCreated == true ||
+        setupResult.availableInContacts == true;
+  }
+
+  static bool _hasRestoreConnectionOfferSignal(PersonalAgentOfferResult offer) {
+    return (offer.channelDid?.trim().isNotEmpty ?? false) ||
+        (offer.channelId?.trim().isNotEmpty ?? false);
+  }
+
   Future<void> _restoreSessionAfterRestart() async {
     if (!_environment.personalAiEnabled || state.isReady || state.isSettingUp) {
       return;
@@ -583,13 +723,24 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
               contextName: contextName,
             ),
           );
+          PersonalAgentOfferResult? offer;
+          if (!isConnectedForRestore(setupResult: contextResult)) {
+            final setupId = contextResult.setupId?.trim();
+            if (setupId != null && setupId.isNotEmpty) {
+              try {
+                offer = await sdk.fetchPersonalAgentOffer(setupId: setupId);
+              } catch (_) {
+                // Best-effort restore; leave offer null when unavailable.
+              }
+            }
+          }
           // Only restore a context as set-up when it is actually connected.
           // After a reinstall the persisted holder DID survives in the
           // keychain while the local channel/contact store is wiped and the
           // connector has published a fresh, unaccepted offer. Restoring such
           // a context would falsely show "Already set up" with no contact and
           // block re-setup.
-          if (_isConnectionReady(contextResult)) {
+          if (isConnectedForRestore(setupResult: contextResult, offer: offer)) {
             _updateSetupResult(contextResult, contextName: contextName);
             anyConnected = true;
           }
@@ -1262,3 +1413,5 @@ class _PersonalAiLifecycleObserver extends WidgetsBindingObserver {
     }
   }
 }
+
+enum _RestoreConnectionStatus { inaugurated, ready, unknown }

@@ -5,6 +5,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meeting_place_credentials/meeting_place_credentials.dart';
@@ -12,6 +13,8 @@ import 'package:meeting_place_drift_repository/meeting_place_drift_repository.da
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:mpx_flutter_reference_app/application/services/context_routing_service/context_routing_service.dart';
+import 'package:mpx_flutter_reference_app/application/services/personal_ai_service/personal_ai_service.dart';
+import 'package:mpx_flutter_reference_app/application/services/personal_ai_service/personal_ai_service_state.dart';
 import 'package:mpx_flutter_reference_app/application/services/r_cards_service/r_cards_service.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact.dart';
 import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
@@ -89,6 +92,8 @@ Future<void> startApp(
   List<AttachmentPlugin>? attachmentPlugins,
   RCardsService Function()? rCardsServiceFactory,
   Environment? environment,
+  PersonalAiServiceState? personalAiState,
+  ContextRoutingStore? contextRoutingStore,
 }) async {
   TestWidgetsFlutterBinding.ensureInitialized();
   addTearDown(() async {
@@ -189,7 +194,7 @@ Future<void> startApp(
         (ref) => pushNotificationMessaging ?? FakePushNotificationMessaging(),
       ),
       contextRoutingStoreProvider.overrideWith(
-        (ref) => FakeContextRoutingStore(),
+        (ref) => contextRoutingStore ?? FakeContextRoutingStore(),
       ),
       groupsRepositoryProvider.overrideWith(groupsRepositoryInMemoryDrift),
       rCardsRepositoryProvider.overrideWith((ref) async {
@@ -268,6 +273,10 @@ Future<void> startApp(
         shareServiceProvider.overrideWith((ref) => shareService),
       if (qrCodeViewFactory != null)
         qrCodeViewFactoryProvider.overrideWith((ref) => qrCodeViewFactory),
+      if (personalAiState != null)
+        personalAiServiceProvider.overrideWith(
+          (ref) => _TestPersonalAiNotifier(personalAiState),
+        ),
     ],
     child: data == null
         ? App(locale: locale)
@@ -304,6 +313,8 @@ Future<void> navigateToLocation(
   List<AttachmentPlugin>? attachmentPlugins,
   RCardsService Function()? rCardsServiceFactory,
   Environment? environment,
+  PersonalAiServiceState? personalAiState,
+  ContextRoutingStore? contextRoutingStore,
 }) async {
   await startApp(
     tester,
@@ -328,6 +339,8 @@ Future<void> navigateToLocation(
     attachmentPlugins: attachmentPlugins,
     rCardsServiceFactory: rCardsServiceFactory,
     environment: environment,
+    personalAiState: personalAiState,
+    contextRoutingStore: contextRoutingStore,
   );
 
   await tester.pumpAndSettle();
@@ -363,6 +376,8 @@ Future<void> navigateToChat(
   List<RCard> rCards = const [],
   MeetingPlaceMatrixSDK? meetingPlaceCoreSDK,
   FakeEnvironment? environment,
+  PersonalAiServiceState? personalAiState,
+  ContextRoutingStore? contextRoutingStore,
 }) async {
   await navigateToLocation(
     tester,
@@ -387,8 +402,24 @@ Future<void> navigateToChat(
     rCardsServiceFactory: rCardsServiceFactory,
     rCards: rCards,
     environment: environment,
+    personalAiState: personalAiState,
+    contextRoutingStore: contextRoutingStore,
   );
   await tester.pumpAndSettle();
+}
+
+class _TestPersonalAiNotifier extends StateNotifier<PersonalAiServiceState>
+    implements PersonalAiService {
+  _TestPersonalAiNotifier(super.state);
+
+  @override
+  Future<void> refreshAuthorizationSnapshotForChannel(
+    String channelDid, {
+    bool suppressErrors = true,
+  }) async {}
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
 }
 
 Future<void> _closeChat(WidgetTester tester) async {
