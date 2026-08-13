@@ -162,21 +162,33 @@ class _CallScreenBody extends HookConsumerWidget {
         ? l10n.videoCallError('')
         : l10n.videoCallError(errorCode.name);
 
+    // A call cancelled before the peer ever joined (endState null, no
+    // no-answer screen, no calling-back screen, not a join failure) renders
+    // nothing below — this must also pop, otherwise the caller's manual end
+    // of a still-ringing call has no reactive path back to the chat.
+    final endedWithNoScreen =
+        phase == CallUiPhase.ended &&
+        endState == null &&
+        !peerIsCallingBack &&
+        !isJoinFailure;
+
     useEffect(() {
-      if (!isCallEnded && !isJoinFailure) return null;
+      if (!isCallEnded && !isJoinFailure && !endedWithNoScreen) return null;
       final durationSeconds = ref.read(
         provider.select((s) => s.callDurationSeconds),
       );
       Future.microtask(() {
-        ref
-            .read(callEndedControllerProvider.notifier)
-            .show(
-              contactId: contactId,
-              peerName: peerName,
-              callDurationSeconds: durationSeconds,
-              isAudioOnly: callIsAudioOnly,
-              errorMessage: isJoinFailure ? localizedJoinError : null,
-            );
+        if (isCallEnded || isJoinFailure) {
+          ref
+              .read(callEndedControllerProvider.notifier)
+              .show(
+                contactId: contactId,
+                peerName: peerName,
+                callDurationSeconds: durationSeconds,
+                isAudioOnly: callIsAudioOnly,
+                errorMessage: isJoinFailure ? localizedJoinError : null,
+              );
+        }
         if (context.mounted &&
             (ModalRoute.of(context)?.isCurrent ?? false) &&
             Navigator.of(context).canPop()) {
@@ -184,7 +196,7 @@ class _CallScreenBody extends HookConsumerWidget {
         }
       });
       return null;
-    }, [isCallEnded, isJoinFailure, localizedJoinError]);
+    }, [isCallEnded, isJoinFailure, endedWithNoScreen, localizedJoinError]);
 
     // Ended state: call finished (missed, declined, disconnected, error).
     if (phase == CallUiPhase.ended) {

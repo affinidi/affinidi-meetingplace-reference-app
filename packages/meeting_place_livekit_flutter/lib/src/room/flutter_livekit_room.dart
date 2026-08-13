@@ -28,6 +28,7 @@ class FlutterLiveKitRoom implements LiveKitRoom {
   BaseKeyProvider? _keyProvider;
 
   Map<String, String> _participantIdToDid = const {};
+  bool _isReconnecting = false;
 
   @override
   String? get ownParticipantId => _room?.localParticipant?.identity;
@@ -61,6 +62,7 @@ class FlutterLiveKitRoom implements LiveKitRoom {
   }) async {
     if (_isDisposed) return;
     _participantIdToDid = participantIdToDid;
+    _isReconnecting = false;
     _logger.info('connect: url=$url', name: _logKey);
 
     final keyProvider = _keyProvider;
@@ -70,10 +72,10 @@ class FlutterLiveKitRoom implements LiveKitRoom {
 
     final room = Room(roomOptions: RoomOptions(e2eeOptions: e2eeOptions));
 
+    final needsPeerPresenceTracking =
+        onParticipantDisconnected != null || onParticipantsChanged != null;
     final needsListener =
-        onE2EEStateChanged != null ||
-        onParticipantDisconnected != null ||
-        onParticipantsChanged != null;
+        onE2EEStateChanged != null || needsPeerPresenceTracking;
 
     if (needsListener) {
       final listener = room.createListener();
@@ -85,8 +87,36 @@ class FlutterLiveKitRoom implements LiveKitRoom {
           );
         });
       }
+      if (needsPeerPresenceTracking) {
+        listener
+          ..on<ReconnectingEvent>((_) => _isReconnecting = true)
+          ..on<RoomReconnectedEvent>((_) {
+            _isReconnecting = false;
+            if (onParticipantsChanged != null &&
+                room.remoteParticipants.isEmpty) {
+              _logger.info(
+                'connect: Reconnected with no remote participants; '
+                'surfacing peer departure',
+                name: _logKey,
+              );
+              onParticipantsChanged();
+            }
+          })
+          ..on<RoomDisconnectedEvent>((_) => _isReconnecting = false);
+      }
       if (onParticipantDisconnected != null) {
         listener.on<ParticipantDisconnectedEvent>((event) {
+          if (_isReconnecting ||
+              room.connectionState != ConnectionState.connected) {
+            _logger.info(
+              'connect: Ignoring participant-disconnect for '
+              '${event.participant.identity}; room is not stably connected '
+              '(reconnecting=$_isReconnecting, '
+              'connectionState=${room.connectionState})',
+              name: _logKey,
+            );
+            return;
+          }
           onParticipantDisconnected(event.participant.identity);
         });
       }

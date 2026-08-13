@@ -128,7 +128,8 @@ void main() {
         expect(updateCallCount, equals(firstCount));
       });
 
-      test('callChatItemEnded flag prevents subsequent writes', () {
+      test('callChatItemEnded flag prevents subsequent writes', () async {
+        var updateCallCount = 0;
         final handler = CallChatItemHandler(
           resolveItemId: ({required bool isCaller, String? callId}) async =>
               'msg-def',
@@ -138,18 +139,22 @@ void main() {
                 required CallStatus status,
                 Duration? duration,
                 CallParticipation? participation,
-              }) async {},
+              }) async {
+                updateCallCount++;
+              },
           isDisposed: () => false,
           logger: FakeAppLogger(),
         );
 
         handler.endCall(assumeRole: CallRole.caller);
+        await handler.endCallWrite;
 
         expect(handler.callChatItemEnded, isTrue);
 
         handler.endCall(assumeRole: CallRole.recipient);
 
         expect(handler.endCallWrite, isNotNull);
+        expect(updateCallCount, equals(1));
       });
     });
 

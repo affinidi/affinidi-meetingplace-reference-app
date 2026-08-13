@@ -477,18 +477,23 @@ void main() {
           callId: 'test-call-id',
         ),
       );
+      // Let the session's own ended status reach the handler before the
+      // manual endCall() races it, matching the "ended status, then
+      // endCall()" ordering this test exercises.
+      await Future<void>.delayed(Duration.zero);
       handler.endCall();
       await Future<void>.delayed(const Duration(milliseconds: 50));
 
       expect(calls.where((c) => c.status == CallStatus.declined), hasLength(1));
     });
 
-    test('endCall sets callChatItemEnded immediately', () {
+    test('endCall sets callChatItemEnded once the write lands', () async {
       final calls =
           <({String messageId, CallStatus status, Duration? duration})>[];
       final handler = makeHandler(calls);
 
       handler.endCall(assumeRole: CallRole.caller);
+      await handler.endCallWrite;
 
       expect(handler.callChatItemEnded, isTrue);
     });

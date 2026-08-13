@@ -37,7 +37,6 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   AudioVideoCallSession? _session;
   CallSessionHandler? _sessionHandler;
   StreamSubscription<String>? _contactCardUpdatedSub;
-  StreamSubscription<CallParticipantEvent>? _participantEventSub;
   StreamSubscription<CallSignal>? _signalSub;
   bool _isDisposed = false;
   bool _isMinimizing = false;
@@ -185,7 +184,6 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
       _isDisposed = true;
       _sessionHandler?.dispose();
       _contactCardUpdatedSub?.cancel();
-      _participantEventSub?.cancel();
       if (!_isMinimizing) {
         logger.info(
           'onDispose: Screen controller releasing session from banner',
@@ -475,7 +473,6 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     bool skipBannerRegistration = false,
   }) {
     _sessionHandler?.dispose();
-    _participantEventSub?.cancel();
     if (!fromBuild) state = state.copyWith(session: session);
     if (!skipBannerRegistration) {
       _logger.info(
@@ -495,39 +492,11 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
             isGroupContact: _isGroupContact,
           );
     }
-    _participantEventSub = session.participantEvents.listen(
-      _onParticipantEvent,
-    );
     final handler = CallSessionHandler(
       logger: _logger,
       onUpdate: _applySessionUpdate,
     )..attach(session);
     _sessionHandler = handler;
-  }
-
-  /// Ends a 1-on-1 call immediately when the only peer leaves.
-  void _onParticipantEvent(CallParticipantEvent event) {
-    if (_isDisposed) return;
-    if (event.type != CallParticipantEventType.left) return;
-    if (_isGroupContact) {
-      _logger.info(
-        '_onParticipantEvent: Peer left group call, call continues',
-        name: _logKey,
-      );
-      return;
-    }
-    if (!state.hasHadPeer) {
-      _logger.warning(
-        '_onParticipantEvent: Peer left but hasHadPeer=false, skipping',
-        name: _logKey,
-      );
-      return;
-    }
-    _logger.info(
-      '_onParticipantEvent: Peer left 1-on-1 call, ending call',
-      name: _logKey,
-    );
-    unawaited(hangUp());
   }
 
   /// Applies handler-transformed session events to the screen

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../application/services/contacts_service/contacts_service.dart';
+import '../../../application/services/incoming_call_service/incoming_call_notifier.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../screens/chat/audio_video_call/call_ended_screen.dart';
@@ -18,6 +19,16 @@ class CallEndedOverlay extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // A fresh incoming call takes priority over a lingering Call Ended
+    // screen: otherwise this opaque overlay covers the incoming-call banner
+    // underneath until the user manually dismisses it, so the caller's ring
+    // times out unanswered.
+    ref.listen(incomingCallProvider, (_, next) {
+      if (next.eventOrNull == null) return;
+      if (ref.read(callEndedControllerProvider) == null) return;
+      ref.read(callEndedControllerProvider.notifier).dismiss();
+    });
+
     final callEndedState = ref.watch(callEndedControllerProvider);
     if (callEndedState == null) return const SizedBox.shrink();
 
