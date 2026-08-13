@@ -70,6 +70,75 @@ void main() {
     });
   });
 
+  group(
+    'PersonalAiService.shouldClearPersistedHolderDidAfterContextRemoval',
+    () {
+      test('returns true when no setup remains after disconnect', () {
+        final result =
+            PersonalAiService.shouldClearPersistedHolderDidAfterContextRemoval(
+              removedSetup: _setup(),
+              remainingSetupsByContext: const {},
+              persistedHolderDid: 'did:key:holder',
+            );
+
+        expect(result, isTrue);
+      });
+
+      test('returns false when another setup still uses the persisted DID', () {
+        final result =
+            PersonalAiService.shouldClearPersistedHolderDidAfterContextRemoval(
+              removedSetup: _setup(),
+              remainingSetupsByContext: {'personal-ai-2': _setup()},
+              persistedHolderDid: 'did:key:holder',
+            );
+
+        expect(result, isFalse);
+      });
+
+      test(
+        'returns true when remaining setups do not use the persisted DID',
+        () {
+          final remaining = PersonalAgentSetupResult(
+            holderDid: 'did:key:other',
+            contextId: 'home-ai',
+            contextCreated: true,
+            agentDid: 'did:key:agent-2',
+            agentCreated: true,
+            profile: const PersonalAgentProfile(
+              agentDid: 'did:key:agent-2',
+              displayName: 'Home AI',
+              mode: PersonalAgentMode.suggestions,
+            ),
+            setupId: 'setup-2',
+            setupStatus: 'ready',
+            mpxConnectionCreated: true,
+            availableInContacts: true,
+          );
+
+          final result =
+              PersonalAiService.shouldClearPersistedHolderDidAfterContextRemoval(
+                removedSetup: _setup(),
+                remainingSetupsByContext: {'home-ai': remaining},
+                persistedHolderDid: 'did:key:holder',
+              );
+
+          expect(result, isTrue);
+        },
+      );
+
+      test('returns false when persisted DID belongs to another identity', () {
+        final result =
+            PersonalAiService.shouldClearPersistedHolderDidAfterContextRemoval(
+              removedSetup: _setup(),
+              remainingSetupsByContext: {'home-ai': _setup()},
+              persistedHolderDid: 'did:key:other',
+            );
+
+        expect(result, isFalse);
+      });
+    },
+  );
+
   group('PersonalAiService.awaitChannelAfterAccept', () {
     test('returns as soon as a new channel DID appears', () async {
       final offers = <PersonalAgentOfferResult>[

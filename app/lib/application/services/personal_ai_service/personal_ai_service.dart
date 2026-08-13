@@ -202,6 +202,7 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
 
   Future<void> removeSetupForContext(AgentContext target) async {
     final contextKey = target.setupContextName;
+    final removedSetup = state.setupResultsByContext[contextKey];
     final updatedMap = Map<String, PersonalAgentSetupResult>.from(
       state.setupResultsByContext,
     )..remove(contextKey);
@@ -221,10 +222,42 @@ class PersonalAiService extends StateNotifier<PersonalAiServiceState> {
       clearSetupResult: fallbackSetup == null,
     );
 
-    if (updatedMap.isEmpty) {
-      final storage = await _ref.read(secureStorageProvider.future);
+    final storage = await _ref.read(secureStorageProvider.future);
+    final persistedHolderDid = (await storage.readPersonalAiHolderDid())
+        ?.trim();
+    if (shouldClearPersistedHolderDidAfterContextRemoval(
+      removedSetup: removedSetup,
+      remainingSetupsByContext: updatedMap,
+      persistedHolderDid: persistedHolderDid,
+    )) {
       await storage.clearPersonalAiHolderDid();
     }
+  }
+
+  @visibleForTesting
+  static bool shouldClearPersistedHolderDidAfterContextRemoval({
+    required PersonalAgentSetupResult? removedSetup,
+    required Map<String, PersonalAgentSetupResult> remainingSetupsByContext,
+    required String? persistedHolderDid,
+  }) {
+    if (remainingSetupsByContext.isEmpty) {
+      return true;
+    }
+
+    final normalizedPersistedHolderDid = persistedHolderDid?.trim() ?? '';
+    if (normalizedPersistedHolderDid.isEmpty) {
+      return false;
+    }
+
+    final removedHolderDid = removedSetup?.holderDid.trim() ?? '';
+    if (removedHolderDid.isEmpty ||
+        removedHolderDid != normalizedPersistedHolderDid) {
+      return false;
+    }
+
+    return !remainingSetupsByContext.values.any(
+      (setup) => setup.holderDid.trim() == normalizedPersistedHolderDid,
+    );
   }
 
   PersonalAgentSetupResult? _fallbackSetupResult(
