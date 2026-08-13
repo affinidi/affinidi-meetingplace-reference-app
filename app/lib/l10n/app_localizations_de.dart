@@ -1435,6 +1435,11 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String agentReplyInfo(String senderName, String time) {
+    return 'Antwort des Agenten von $senderName um $time';
+  }
+
+  @override
   String contactStatus(String status) {
     String _temp0 = intl.Intl.selectLogic(status, {
       'pendingApproval': 'Ausstehende Genehmigung',

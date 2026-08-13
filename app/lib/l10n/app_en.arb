@@ -1337,6 +1337,18 @@
 			}
 		}
 	},
+	"agentReplyInfo": "{senderName}'s agent response at {time}",
+	"@agentReplyInfo": {
+		"type": "text",
+		"placeholders": {
+			"senderName": {
+				"type": "String"
+			},
+			"time": {
+				"type": "String"
+			}
+		}
+	},
 	"contactStatus": "{status, select, pendingApproval{Pending Approval} pendingInauguration{Establishing Connection} approved{Active Contact} rejected{Rejected} error{Error} deleted{Deleted} active{Active Channel} unknown{Unknown} other{Unknown}}",
 	"@contactStatus": {
 		"type": "text",

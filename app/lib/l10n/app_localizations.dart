@@ -2086,6 +2086,12 @@ abstract class AppLocalizations {
   /// **'{memberName} on {date} at {time}'**
   String groupMessageInfo(String memberName, String date, String time);
 
+  /// No description provided for @agentReplyInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'{senderName}\'s agent response at {time}'**
+  String agentReplyInfo(String senderName, String time);
+
   /// No description provided for @contactStatus.
   ///
   /// In en, this message translates to:
