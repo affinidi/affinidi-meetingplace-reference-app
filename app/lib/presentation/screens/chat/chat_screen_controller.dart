@@ -109,6 +109,11 @@ class ChatScreenController extends _$ChatScreenController
       ref.read(environmentProvider).zkpEnabled &&
       (state.capabilities?.supports(chat.ChatFeature.humanZkp) ?? false);
 
+  bool _isVrcRegistered() => ref
+      .read(availableAttachmentPluginsProvider)
+      .whereType<VrcAttachmentsPlugin>()
+      .isNotEmpty;
+
   TimedAction? _sendChatActivityTimedAction;
   Timer? _saveUnsentMessageDebouncer;
   Timer? _suggestionRequestTimeoutTimer;
@@ -678,7 +683,7 @@ class ChatScreenController extends _$ChatScreenController
               hasVrcRequestReceived ||
               hasVrcExchangeDoLater);
       state = state.copyWith(
-        shouldShowVrcBanner: !suppressBanner,
+        shouldShowVrcBanner: !suppressBanner && _isVrcRegistered(),
         shouldEnableVrcAttachment: shouldEnableAttachment,
       );
     }
