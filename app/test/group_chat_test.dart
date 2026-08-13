@@ -1834,6 +1834,54 @@ void main() {
         });
       });
 
+      group('and an awaiting member joins the group', () {
+        testWidgets(
+          'clears the awaiting-members banner once the member joins',
+          (WidgetTester tester) async {
+            final contactId = FakeContacts.groupContact.id;
+            final chatSdk = FakeChatSdk();
+            final l10n = await getL10n();
+            final memberName = 'Deepak';
+            final memberDid = 'did:member:789';
+
+            await navigateToChat(
+              tester,
+              contactId: contactId,
+              chatSdk: chatSdk,
+              contacts: contacts,
+            );
+
+            chatSdk.simulateAwaitingGroupMember(
+              memberName: memberName,
+              memberDid: memberDid,
+              senderDid:
+                  FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
+              recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
+            );
+            await tester.pumpAndSettle();
+
+            expect(
+              find.text(l10n.awaitingMembersToJoin(memberName, 1, 0)),
+              findsOneWidget,
+            );
+
+            chatSdk.simulateMemberJoinedGroup(
+              memberName: memberName,
+              memberDid: memberDid,
+              senderDid:
+                  FakeChannels.groupChannel.otherPartyPermanentChannelDid!,
+              recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
+            );
+            await tester.pumpAndSettle();
+
+            expect(
+              find.text(l10n.awaitingMembersToJoin(memberName, 1, 0)),
+              findsNothing,
+            );
+          },
+        );
+      });
+
       group('and member leaves the group', () {
         testWidgets('shows member left message', (WidgetTester tester) async {
           final contactId = FakeContacts.groupContact.id;
