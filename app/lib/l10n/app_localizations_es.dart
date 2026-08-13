@@ -2232,7 +2232,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get identitiesSetupMyAgent => 'Configurar mi agente';
 
   @override
-  String get identitiesSetupButton => 'Set up';
+  String get identitiesSetupButton => 'Configurar';
 
   @override
   String get identitiesSetupPromptDescription =>
