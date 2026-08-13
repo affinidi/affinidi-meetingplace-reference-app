@@ -283,6 +283,49 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
     return conciergeMessage;
   }
 
+  /// Simulates the SDK recording that it is awaiting a member to join
+  EventMessage simulateAwaitingGroupMember({
+    required String memberName,
+    required String memberDid,
+    required String senderDid,
+    required String recipientDid,
+  }) {
+    final eventMessage = EventMessage(
+      chatId: 'fake-chat-id',
+      messageId: 'event-awaiting-${DateTime.now().millisecondsSinceEpoch}',
+      senderDid: senderDid,
+      isFromMe: false,
+      dateCreated: DateTime.now(),
+      status: ChatItemStatus.received,
+      eventType: EventMessageType.awaitingGroupMemberToJoin,
+      data: {
+        'memberDid': memberDid,
+        'contactCard': {
+          'did': 'did:key:identity-id',
+          'type': ContactCardType.individual.value,
+          'contactInfo': {
+            'n': {'given': memberName},
+          },
+        },
+      },
+    );
+
+    final chatEvent = UnhandledChatEvent(
+      type: 'https://affinidi.com/chat/1.0/event',
+      senderDid: senderDid,
+      body: {
+        'type': 'awaitingGroupMemberToJoin',
+        'memberName': memberName,
+        'timestamp': eventMessage.dateCreated.toIso8601String(),
+      },
+      createdTime: eventMessage.dateCreated,
+    );
+
+    _emit(StreamData(event: chatEvent, chatItem: eventMessage));
+
+    return eventMessage;
+  }
+
   /// Simulates a member joining the group event
   EventMessage simulateMemberJoinedGroup({
     required String memberName,
