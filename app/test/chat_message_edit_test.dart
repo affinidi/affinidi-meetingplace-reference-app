@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
+import 'package:mpx_flutter_reference_app/application/services/personal_ai_service/personal_ai_service.dart';
+import 'package:mpx_flutter_reference_app/application/services/personal_ai_service/personal_ai_service_state.dart';
 
 import 'fakes/fake_channels.dart';
 import 'fakes/fake_chat_sdk.dart';
@@ -29,6 +32,13 @@ Future<void> _simulateIncomingMessage(
 
 void main() {
   const contactId = 'individual-contact-id';
+  const readyPersonalAiState = PersonalAiServiceState(
+    status: PersonalAiSetupStatus.ready,
+    showSetupPrompt: false,
+    promptDismissed: false,
+    contextProvisioned: true,
+    contextUploading: false,
+  );
 
   group('chat message edit', () {
     group('when long pressing an own message', () {
@@ -51,7 +61,12 @@ void main() {
         final chatSdk = FakeChatSdk();
         final l10n = await getL10n();
 
-        await navigateToChat(tester, contactId: contactId, chatSdk: chatSdk);
+        await navigateToChat(
+          tester,
+          contactId: contactId,
+          chatSdk: chatSdk,
+          personalAiState: readyPersonalAiState,
+        );
         await _simulateIncomingMessage(tester, chatSdk, 'Incoming message');
 
         await tester.longPress(find.text('Incoming message'));
@@ -66,7 +81,12 @@ void main() {
         final chatSdk = FakeChatSdk();
         final l10n = await getL10n();
 
-        await navigateToChat(tester, contactId: contactId, chatSdk: chatSdk);
+        await navigateToChat(
+          tester,
+          contactId: contactId,
+          chatSdk: chatSdk,
+          personalAiState: readyPersonalAiState,
+        );
         await _simulateIncomingMessage(tester, chatSdk, 'Incoming message');
 
         await tester.longPress(find.text('Incoming message'));
@@ -96,7 +116,12 @@ void main() {
         final chatSdk = FakeChatSdk();
         final l10n = await getL10n();
 
-        await navigateToChat(tester, contactId: contactId, chatSdk: chatSdk);
+        await navigateToChat(
+          tester,
+          contactId: contactId,
+          chatSdk: chatSdk,
+          personalAiState: readyPersonalAiState,
+        );
         await _simulateIncomingMessage(tester, chatSdk, 'Incoming message');
 
         await tester.longPress(find.text('Incoming message'));
@@ -132,6 +157,61 @@ void main() {
 
         expect(find.text(l10n.chatMessageActionAskSuggestion), findsNothing);
       });
+
+      testWidgets('does not show ask for suggestion when agent is not ready', (
+        tester,
+      ) async {
+        final chatSdk = FakeChatSdk();
+        final l10n = await getL10n();
+
+        await navigateToChat(
+          tester,
+          contactId: contactId,
+          chatSdk: chatSdk,
+          personalAiState: const PersonalAiServiceState.initial(),
+        );
+        await _simulateIncomingMessage(tester, chatSdk, 'Incoming message');
+
+        await tester.longPress(find.text('Incoming message'));
+        await tester.pumpAndSettle();
+
+        expect(find.text(l10n.chatMessageActionAskSuggestion), findsNothing);
+      });
+
+      testWidgets(
+        '''clears the current long-press selection when agent setup becomes ready''',
+        (tester) async {
+          final chatSdk = FakeChatSdk();
+          final l10n = await getL10n();
+
+          await navigateToChat(tester, contactId: contactId, chatSdk: chatSdk);
+          await _simulateIncomingMessage(tester, chatSdk, 'Incoming message');
+
+          await tester.longPress(find.text('Incoming message'));
+          await tester.pumpAndSettle();
+
+          expect(find.text(l10n.chatMessageActionAskSuggestion), findsNothing);
+          expect(find.text('❤'), findsOneWidget);
+
+          final context = tester.element(find.byType(Scaffold).first);
+          final container = ProviderScope.containerOf(context, listen: false);
+
+          container.read(personalAiServiceProvider.notifier).state =
+              readyPersonalAiState;
+          await tester.pumpAndSettle();
+
+          expect(find.text(l10n.chatMessageActionAskSuggestion), findsNothing);
+          expect(find.text('❤'), findsNothing);
+
+          await tester.longPress(find.text('Incoming message'));
+          await tester.pumpAndSettle();
+
+          expect(
+            find.text(l10n.chatMessageActionAskSuggestion),
+            findsOneWidget,
+          );
+        },
+      );
 
       group('and tapping Edit', () {
         testWidgets('opens dialog pre-filled with current message text', (

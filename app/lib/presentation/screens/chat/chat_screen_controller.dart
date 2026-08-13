@@ -262,7 +262,7 @@ class ChatScreenController extends _$ChatScreenController
 
           pendingState = pendingState.copyWith(
             messages: messages,
-            latestSuggestion: next.latestSuggestion,
+            latestSuggestion: resolvedSuggestion,
             membersTyping: next.membersTyping,
             contactPresenceStatus: next.contactPresenceStatus,
             isActive: next.isActive,
@@ -319,7 +319,10 @@ class ChatScreenController extends _$ChatScreenController
     void syncPersonalAgentReady(bool isReady) {
       Future.microtask(() {
         if (!ref.mounted) return;
-        state = state.copyWith(isPersonalAgentReady: isReady);
+        state = state.copyWith(
+          isPersonalAgentReady: isReady,
+          selectedReactionIndex: -1,
+        );
       });
     }
 
@@ -400,6 +403,11 @@ class ChatScreenController extends _$ChatScreenController
 
   Future<void> onScreenOpened() async {
     if (!state.isInitialized) return;
+
+    final latestSuggestion = state.latestSuggestion;
+    if (latestSuggestion != null) {
+      await _chatService?.dismissSuggestion(latestSuggestion.relatedMessageId);
+    }
 
     if (_isHumanZkpSupported()) {
       ref.read(proofFlowControllerProvider(contactId).notifier).resetSession();
@@ -1003,6 +1011,11 @@ class ChatScreenController extends _$ChatScreenController
   Future<void> askForSuggestion(String messageId) async {
     if (!(state.capabilities?.supports(chat.ChatFeature.suggestionRequests) ??
         false)) {
+      clearSelectedReaction();
+      return;
+    }
+
+    if (!state.isPersonalAgentReady) {
       clearSelectedReaction();
       return;
     }
