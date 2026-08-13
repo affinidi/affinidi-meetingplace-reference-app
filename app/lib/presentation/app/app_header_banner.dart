@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../application/services/incoming_call_service/incoming_call_notifier.dart';
 import '../../infrastructure/extensions/build_context_extensions.dart';
 import '../widgets/banners/active_call/active_call_banner.dart';
 import '../widgets/banners/active_call/active_call_controller.dart';
 import '../widgets/banners/end_call/end_call_banner.dart';
 import '../widgets/banners/end_call/end_call_banner_controller.dart';
+import '../widgets/banners/incoming_call/incoming_call_banner_controller.dart';
 import '../widgets/banners/incoming_call_banner.dart';
 import '../widgets/banners/no_connection_banner.dart';
 import '../widgets/call/video_call_pip_overlay.dart';
@@ -35,11 +37,23 @@ class AppHeaderBanner extends ConsumerWidget {
       _ => 0.0,
     };
 
+    final incomingCallBannerHidden = ref.watch(
+      incomingCallBannerControllerProvider,
+    );
+    final incomingCallEvent = ref.watch(incomingCallProvider).eventOrNull;
+    final incomingCallBannerActive =
+        callState == null &&
+        !incomingCallBannerHidden &&
+        incomingCallEvent != null;
+
     final originalMq = context.mediaQuery;
-    final inflatedMq = bannerActive
+    final reservedTop =
+        bannerHeight +
+        (incomingCallBannerActive ? IncomingCallBanner.height : 0.0);
+    final inflatedMq = reservedTop > 0
         ? originalMq.copyWith(
             padding: originalMq.padding.copyWith(
-              top: originalMq.padding.top + bannerHeight,
+              top: originalMq.padding.top + reservedTop,
             ),
           )
         : originalMq;
