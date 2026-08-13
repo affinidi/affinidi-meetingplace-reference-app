@@ -28,21 +28,29 @@ class _ChatItemFromInfo extends ConsumerWidget {
         return const SizedBox(height: 17);
       }
 
-      final peerName = ref.watch(
-        provider.select(
-          (state) =>
-              state.otherPartyCard?.fullName ?? state.contact?.displayName,
-        ),
+      final ownerDids = item.attachments
+          .expand((a) => a.ciergeOwnerDids)
+          .toSet();
+
+      final agentOwnerName = ref.watch(
+        provider.select((state) {
+          if (ownerDids.isNotEmpty &&
+              state.myDid != null &&
+              ownerDids.contains(state.myDid)) {
+            return state.myCard?.fullName ?? state.myCard?.displayName;
+          }
+          return state.otherPartyCard?.fullName ?? state.contact?.card.fullName;
+        }),
       );
-      if (peerName == null ||
-          peerName.isEmpty ||
-          peerName.trim() == workAiLabel) {
+      if (agentOwnerName == null ||
+          agentOwnerName.isEmpty ||
+          agentOwnerName.trim() == workAiLabel) {
         return const SizedBox(height: 17);
       }
 
       return Text(
         context.l10n.agentReplyInfo(
-          peerName,
+          agentOwnerName,
           DateFormat.jm().format(dateCreated),
         ),
         style: const TextStyle(color: Colors.grey, fontSize: 12),
