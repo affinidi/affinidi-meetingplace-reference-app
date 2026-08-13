@@ -9,6 +9,7 @@ class RoutePaths {
   static const rCards = '/r-cards';
   static const credentials = '/credentials';
   static const settings = '/settings';
+  static const callLog = '/call-log';
 
   // Contacts
   static const chat = ':contactId/chat';
@@ -16,9 +17,6 @@ class RoutePaths {
 
   // Connections
   static const connectionDetails = ':contactId/connection-details';
-
-  // Call log
-  static const callLog = 'call-log';
 
   // Offers
   static const publishOffer = 'publish-offer';

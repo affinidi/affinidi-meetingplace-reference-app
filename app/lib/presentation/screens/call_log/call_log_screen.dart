@@ -6,8 +6,8 @@ import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
 import '../../../domain/models/call_log/call_log_entry.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
-import '../../../infrastructure/extensions/widget_ref_extensions.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../navigation/routes/route_paths.dart';
 import '../../widgets/section_banner.dart';
 import '../chat/audio_video_call/rules/call_chat_item_rules.dart';
 import 'call_log_screen_controller.dart';
@@ -21,7 +21,6 @@ class CallLogScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final provider = callLogScreenControllerProvider;
-    ref.keepAround(provider);
 
     final isLoading = ref.watch(provider.select((state) => state.isLoading));
     final entries = ref.watch(provider.select((state) => state.entries));
@@ -40,6 +39,8 @@ class CallLogScreen extends ConsumerWidget {
               final router = GoRouter.of(context);
               if (router.canPop()) {
                 router.pop();
+              } else {
+                router.go(RoutePaths.contacts);
               }
             },
           ),

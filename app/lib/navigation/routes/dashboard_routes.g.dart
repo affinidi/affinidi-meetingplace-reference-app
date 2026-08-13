@@ -30,13 +30,6 @@ RouteBase get $dashboardShellRouteData => StatefulShellRouteData.$route(
               factory: $ConnectionDetailsRoute._fromState,
             ),
             GoRouteData.$route(
-              path: 'call-log',
-              name: 'callLog',
-              hasOverriddenOnExit: false,
-              parentNavigatorKey: CallLogRoute.$parentNavigatorKey,
-              factory: $CallLogRoute._fromState,
-            ),
-            GoRouteData.$route(
               path: ':contactId/chat',
               name: 'chat',
               hasOverriddenOnExit: false,
@@ -213,26 +206,6 @@ mixin $ConnectionDetailsRoute on GoRouteData {
   String get location => GoRouteData.$location(
     '/contacts/${Uri.encodeComponent(_self.contactId)}/connection-details',
   );
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-mixin $CallLogRoute on GoRouteData {
-  static CallLogRoute _fromState(GoRouterState state) => const CallLogRoute();
-
-  @override
-  String get location => GoRouteData.$location('/contacts/call-log');
 
   @override
   void go(BuildContext context) => context.go(location);

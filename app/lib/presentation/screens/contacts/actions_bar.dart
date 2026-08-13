@@ -81,14 +81,6 @@ class _ActionsBar extends ConsumerWidget {
               ),
               onPressed: controller.toggleFilterVisibility,
             ),
-            IconButton(
-              key: const Key('call_log_button'),
-              icon: const Icon(Icons.history),
-              tooltip: l10n.callLogScreenTitle,
-              onPressed: () {
-                unawaited(const CallLogRoute().push<void>(context));
-              },
-            ),
           ],
         ),
         const Expanded(child: _ContactsSearchField()),
