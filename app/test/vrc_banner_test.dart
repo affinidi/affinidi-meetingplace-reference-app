@@ -1,4 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mpx_flutter_reference_app/mpx_flutter_reference_app.dart'
+    show VrcAttachmentsPlugin;
 
 import 'fakes/fake_channels.dart';
 import 'fakes/fake_chat_sdk.dart';
@@ -104,5 +106,34 @@ void main() {
         expect(find.text(l10n.generateVrc), findsWidgets);
       },
     );
+  });
+
+  group('VrcBanner plugin gating', () {
+    testWidgets('hides when VrcAttachmentsPlugin is not registered', (
+      tester,
+    ) async {
+      final l10n = await getL10n();
+      final firstName =
+          FakeContacts.individualContact.otherPartyCard!.firstName;
+
+      await navigateToChat(tester, attachmentPlugins: const []);
+
+      expect(find.text(l10n.verifyRelationshipPrompt(firstName)), findsNothing);
+    });
+
+    testWidgets('shows when VrcAttachmentsPlugin is registered', (
+      tester,
+    ) async {
+      final l10n = await getL10n();
+      final firstName =
+          FakeContacts.individualContact.otherPartyCard!.firstName;
+
+      await navigateToChat(tester, attachmentPlugins: [VrcAttachmentsPlugin()]);
+
+      expect(
+        find.text(l10n.verifyRelationshipPrompt(firstName)),
+        findsOneWidget,
+      );
+    });
   });
 }
