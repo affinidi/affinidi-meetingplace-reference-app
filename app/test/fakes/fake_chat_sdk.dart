@@ -141,6 +141,29 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
     _emit(StreamData(event: chatEvent, chatItem: message));
   }
 
+  /// Simulates an incoming text message using the real `ChatMessageEvent`
+  /// production emits for `ChatProtocol.chatMessage` (see
+  /// `chat_event_conversion.dart` in `meeting_place_matrix`/`meeting_place_chat`),
+  /// unlike [simulateIncomingTextMessage] which uses `UnhandledChatEvent`.
+  /// Needed to exercise handlers whose `canHandle` matches `ChatMessageEvent`
+  /// specifically, e.g. `ChatMessageProtocolHandler`.
+  void simulateIncomingChatMessageEvent({
+    required String text,
+    String senderDid = 'fake-sender-did',
+  }) {
+    final message = Message(
+      chatId: 'fake-chat-id',
+      messageId: 'msg-chatmessage-${DateTime.now().microsecondsSinceEpoch}',
+      value: text,
+      dateCreated: DateTime.now(),
+      status: ChatItemStatus.confirmed,
+      isFromMe: false,
+      senderDid: senderDid,
+      attachments: const [],
+    );
+    _emit(StreamData(event: const ChatMessageEvent(), chatItem: message));
+  }
+
   /// Simulates an incoming concierge message for join group requests
   /// Returns the created ConciergeMessage for verification in tests
   ConciergeMessage simulateJoinGroupRequest({
