@@ -42,7 +42,10 @@ class CiergeSignatureAttachmentsPlugin implements AttachmentRenderer {
         'memory=${inlineProof.memory ?? '-'}',
         name: 'CiergeSignaturePlugin',
       );
-      return _SignedResponseBadge(proof: inlineProof);
+      return _SignedResponseBadge(
+        proof: inlineProof,
+        chatItemColor: request.chatItemColor,
+      );
     }
 
     final download = request.download;
@@ -54,6 +57,7 @@ class CiergeSignatureAttachmentsPlugin implements AttachmentRenderer {
       key: ValueKey(attachmentKey),
       attachmentKey: attachmentKey,
       attachment: request.attachment,
+      chatItemColor: request.chatItemColor,
       download: download,
     );
   }
@@ -92,48 +96,51 @@ String _attachmentCacheKey(ChatAttachment attachment) {
 }
 
 class _SignedResponseBadge extends StatelessWidget {
-  const _SignedResponseBadge({required this.proof});
+  const _SignedResponseBadge({required this.proof, this.chatItemColor});
 
   final CiergeSignatureProof proof;
+  final Color? chatItemColor;
 
   @override
   Widget build(BuildContext context) {
     const badgeTextColor = Colors.white;
-    const badgeBg = Color(0xFF2F3F64);
-    const badgeBorder = Color(0xFF9BB2E6);
     final badge = _contextBadgeText(proof.context);
 
     return Padding(
       padding: const EdgeInsets.only(top: 6),
-      child: InkWell(
-        onTap: () => _showSignedResponseSheet(context, proof),
-        borderRadius: BorderRadius.circular(14),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: badgeBg,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: badgeBorder),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                CiergeSignatureAttachmentsPlugin.signatureGlyph,
-                style: context.textTheme.bodySmall?.copyWith(
-                  color: badgeTextColor,
-                  fontWeight: FontWeight.w700,
+      child: Material(
+        color: chatItemColor ?? Colors.transparent,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: BorderSide(color: chatItemColor ?? Colors.transparent),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => _showSignedResponseSheet(context, proof),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  CiergeSignatureAttachmentsPlugin.signatureGlyph,
+                  style: context.textTheme.bodySmall?.copyWith(
+                    color: badgeTextColor,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 6),
-              Text(
-                badge,
-                style: context.textTheme.bodySmall?.copyWith(
-                  color: badgeTextColor,
-                  fontWeight: FontWeight.w700,
+                const SizedBox(width: 6),
+                Text(
+                  badge,
+                  style: context.textTheme.bodySmall?.copyWith(
+                    color: badgeTextColor,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -147,11 +154,13 @@ class _AsyncSignedResponseBadge extends HookWidget {
     required this.attachmentKey,
     required this.attachment,
     required this.download,
+    this.chatItemColor,
   });
 
   final String attachmentKey;
   final ChatAttachment attachment;
   final Future<List<int>> Function(ChatAttachment attachment) download;
+  final Color? chatItemColor;
 
   Future<CiergeSignatureProof?> _loadProof() async {
     developer.log(
@@ -190,7 +199,7 @@ class _AsyncSignedResponseBadge extends HookWidget {
       'memory=${proof.memory ?? '-'}',
       name: 'CiergeSignaturePlugin',
     );
-    return _SignedResponseBadge(proof: proof);
+    return _SignedResponseBadge(proof: proof, chatItemColor: chatItemColor);
   }
 }
 
