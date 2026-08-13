@@ -10,6 +10,46 @@ class _ChatItemFromInfo extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = chatScreenControllerProvider(_contactId);
     final isGroupChat = ref.watch(provider.isGroupChat);
+    final workAiLabel = context.l10n.agentContextWorkAiLabel;
+
+    if (_chatItem is chat.ConciergeMessage) {
+      return const SizedBox(height: 17);
+    }
+
+    final dateCreated = _chatItem.dateCreated.toLocal();
+
+    if (!isGroupChat) {
+      final item = _chatItem;
+      final isAgentReply =
+          !_chatItem.isFromMe &&
+          item is chat.Message &&
+          item.attachments.any((a) => a.isCiergeAgentMarker);
+      if (!isAgentReply) {
+        return const SizedBox(height: 17);
+      }
+
+      final peerName = ref.watch(
+        provider.select(
+          (state) =>
+              state.otherPartyCard?.fullName ?? state.contact?.displayName,
+        ),
+      );
+      if (peerName == null ||
+          peerName.isEmpty ||
+          peerName.trim() == workAiLabel) {
+        return const SizedBox(height: 17);
+      }
+
+      return Text(
+        context.l10n.agentReplyInfo(
+          peerName,
+          DateFormat.jm().format(dateCreated),
+        ),
+        style: const TextStyle(color: Colors.grey, fontSize: 12),
+        textAlign: TextAlign.start,
+      );
+    }
+
     final groupMember = ref.watch(
       provider.select(
         (state) => state.group?.members.firstWhereOrNull(
@@ -18,16 +58,9 @@ class _ChatItemFromInfo extends ConsumerWidget {
       ),
     );
 
-    // AL: Refactored to one statement, and returns a spacer
-    // to prevent layout shift
-    if (!isGroupChat ||
-        _chatItem is chat.ConciergeMessage ||
-        _chatItem.senderDid.isEmpty ||
-        groupMember == null) {
+    if (_chatItem.senderDid.isEmpty || groupMember == null) {
       return const SizedBox(height: 17);
     }
-
-    final dateCreated = _chatItem.dateCreated.toLocal();
 
     return Text(
       context.l10n.groupMessageInfo(
