@@ -477,18 +477,23 @@ void main() {
           callId: 'test-call-id',
         ),
       );
+      // Let the session's own ended status reach the handler before the
+      // manual endCall() races it, matching the "ended status, then
+      // endCall()" ordering this test exercises.
+      await Future<void>.delayed(Duration.zero);
       handler.endCall();
       await Future<void>.delayed(const Duration(milliseconds: 50));
 
       expect(calls.where((c) => c.status == CallStatus.declined), hasLength(1));
     });
 
-    test('endCall sets callChatItemEnded immediately', () {
+    test('endCall sets callChatItemEnded once the write lands', () async {
       final calls =
           <({String messageId, CallStatus status, Duration? duration})>[];
       final handler = makeHandler(calls);
 
       handler.endCall(assumeRole: CallRole.caller);
+      await handler.endCallWrite;
 
       expect(handler.callChatItemEnded, isTrue);
     });
@@ -502,6 +507,36 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 50));
 
       expect(calls, isEmpty);
+    });
+
+    test('gives up retrying and skips the write once resolve attempts are '
+        'exhausted', () async {
+      final calls =
+          <({String messageId, CallStatus status, Duration? duration})>[];
+      var resolveAttempts = 0;
+      final handler = CallChatItemHandler(
+        resolveItemId: ({required bool isCaller, String? callId}) async {
+          resolveAttempts++;
+          return null;
+        },
+        updateItem: (id, {required status, duration, participation}) async {
+          calls.add((messageId: id, status: status, duration: duration));
+        },
+        isDisposed: () => false,
+        logger: logger,
+      )..attach(session);
+
+      await session.emitState(
+        const AudioVideoCallState(
+          status: AudioVideoCallStatus.missed,
+          ownRole: CallRole.recipient,
+        ),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 700));
+
+      expect(calls, isEmpty);
+      expect(resolveAttempts, 4);
+      expect(handler.callChatItemEnded, isFalse);
     });
   });
 }

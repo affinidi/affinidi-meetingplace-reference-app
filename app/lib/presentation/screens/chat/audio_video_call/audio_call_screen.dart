@@ -139,10 +139,7 @@ class _AudioCallScreen extends ConsumerWidget {
           onConfirm: () => unawaited(controller.toggleCamera()),
         ),
       ),
-      onEndCall: () {
-        unawaited(controller.endCallFromScreen());
-        if (context.mounted) Navigator.of(context).pop();
-      },
+      onEndCall: () => unawaited(controller.endCallFromScreen()),
     );
 
     return _AudioCallScaffold(
