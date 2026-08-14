@@ -741,14 +741,14 @@ class _AgentAuthorizationCard extends StatelessWidget {
         constraints: const BoxConstraints(maxWidth: 160),
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: colorScheme.primary.withValues(alpha: 0.08),
+            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: colorScheme.primary.withValues(alpha: 0.16),
+              color: colorScheme.outlineVariant.withValues(alpha: 0.46),
             ),
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -756,16 +756,16 @@ class _AgentAuthorizationCard extends StatelessWidget {
                 Text(
                   label,
                   style: textTheme.labelSmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w700,
+                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.78),
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-                const SizedBox(height: 3),
+                const SizedBox(height: 4),
                 Text(
                   value,
                   style: textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurface,
-                    fontWeight: FontWeight.w700,
+                    height: 1.25,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -779,28 +779,29 @@ class _AgentAuthorizationCard extends StatelessWidget {
 
     Widget detailRow(String label, String value, {bool emphasize = false}) {
       return Padding(
-        padding: const EdgeInsets.only(top: 10),
+        padding: const EdgeInsets.only(top: 9),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              width: 96,
+              width: 104,
               child: Text(
                 label,
                 style: textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
+                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.78),
+                  fontWeight: FontWeight.w500,
+                  height: 1.35,
                 ),
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 12),
             Expanded(
               child: Text(
                 value,
                 style: textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurface,
-                  height: 1.25,
-                  fontWeight: FontWeight.w600,
+                  height: 1.35,
+                  fontWeight: emphasize ? FontWeight.w600 : FontWeight.w400,
                 ),
                 softWrap: true,
                 overflow: TextOverflow.visible,
@@ -840,7 +841,7 @@ class _AgentAuthorizationCard extends StatelessWidget {
                           : 'Trust task entry',
                       style: textTheme.labelLarge?.copyWith(
                         color: colorScheme.onSurface,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
@@ -944,7 +945,7 @@ class _AgentAuthorizationCard extends StatelessWidget {
                         child: Text(
                           'Domain map',
                           style: textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
