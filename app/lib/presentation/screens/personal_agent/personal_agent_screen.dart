@@ -656,7 +656,12 @@ String _friendlyIdentifier(String value) {
       .split(RegExp(r'\s+'));
   return words
       .where((word) => word.isNotEmpty)
-      .map((word) => '${word[0].toUpperCase()}${word.substring(1)}')
+      .map((word) {
+        final lower = word.toLowerCase();
+        if (lower == 'vta') return 'VTA';
+        if (lower == 'ai') return 'AI';
+        return '${word[0].toUpperCase()}${word.substring(1)}';
+      })
       .join(' ');
 }
 
@@ -736,42 +741,65 @@ class _AgentAuthorizationCard extends StatelessWidget {
       return _breakableIdentifier(text);
     }
 
-    Widget mapChip(String label, String value) {
-      return ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 160),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: colorScheme.outlineVariant.withValues(alpha: 0.46),
+    Widget mapValue(String label, String value) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: textTheme.labelSmall?.copyWith(
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
+              fontWeight: FontWeight.w500,
             ),
           ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  label,
-                  style: textTheme.labelSmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.78),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  value,
-                  style: textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurface,
-                    height: 1.25,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurface,
+              height: 1.25,
             ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      );
+    }
+
+    Widget domainContextSummary() {
+      return DecoratedBox(
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.22),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: colorScheme.outlineVariant.withValues(alpha: 0.34),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: mapValue(
+                  'Domain',
+                  readableValue(domainMap, 'domain_id'),
+                ),
+              ),
+              Container(
+                width: 1,
+                height: 38,
+                margin: const EdgeInsets.symmetric(horizontal: 14),
+                color: colorScheme.outlineVariant.withValues(alpha: 0.38),
+              ),
+              Expanded(
+                child: mapValue(
+                  'Context',
+                  readableValue(domainMap, 'context_id'),
+                ),
+              ),
+            ],
           ),
         ),
       );
@@ -952,17 +980,8 @@ class _AgentAuthorizationCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 16,
-                    runSpacing: 8,
-                    children: [
-                      mapChip('Domain', readableValue(domainMap, 'domain_id')),
-                      mapChip(
-                        'Context',
-                        readableValue(domainMap, 'context_id'),
-                      ),
-                    ],
-                  ),
+                  domainContextSummary(),
+                  const SizedBox(height: 8),
                   detailRow('Source', readableValue(domainMap, 'source')),
                   detailRow('Agent DID', readableValue(domainMap, 'agent_did')),
                   const SizedBox(height: 14),
