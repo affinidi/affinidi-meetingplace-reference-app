@@ -667,6 +667,25 @@ String _breakableIdentifier(String value) {
   );
 }
 
+DateTime? _parseDomainMapTimestamp(Object? value) {
+  if (value is num) {
+    final timestamp = value.toInt();
+    final millis = timestamp > 9999999999 ? timestamp : timestamp * 1000;
+    return DateTime.fromMillisecondsSinceEpoch(millis).toLocal();
+  }
+
+  final text = value?.toString().trim();
+  if (text == null || text.isEmpty) return null;
+
+  final numeric = int.tryParse(text);
+  if (numeric != null) {
+    final millis = numeric > 9999999999 ? numeric : numeric * 1000;
+    return DateTime.fromMillisecondsSinceEpoch(millis).toLocal();
+  }
+
+  return DateTime.tryParse(text)?.toLocal();
+}
+
 class _AgentAuthorizationCard extends StatelessWidget {
   const _AgentAuthorizationCard({
     required this.title,
@@ -708,6 +727,10 @@ class _AgentAuthorizationCard extends StatelessWidget {
         return _friendlyIdentifier(text);
       }
       if (key == 'timestamp') {
+        final timestamp = _parseDomainMapTimestamp(source[key]);
+        if (timestamp != null) {
+          return _TrustTaskHistoryTile._formatTimestamp(timestamp);
+        }
         return text.replaceFirst('T', ' ').replaceFirst('Z', ' UTC');
       }
       return _breakableIdentifier(text);
@@ -821,18 +844,6 @@ class _AgentAuthorizationCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Flexible(
-                    child: Text(
-                      readableValue(entry, 'channel'),
-                      style: textTheme.labelSmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w700,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.end,
-                    ),
-                  ),
                 ],
               ),
               detailRow(
@@ -840,7 +851,7 @@ class _AgentAuthorizationCard extends StatelessWidget {
                 readableValue(entry, 'outcome'),
                 emphasize: true,
               ),
-              detailRow('Operation', readableValue(entry, 'operation')),
+              detailRow('VTA mediator DID', readableValue(entry, 'channel')),
               detailRow('Actor', readableValue(entry, 'actor')),
               detailRow('Vault', readableValue(entry, 'vault_entry')),
               detailRow('Time', readableValue(entry, 'timestamp')),
@@ -941,7 +952,7 @@ class _AgentAuthorizationCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Wrap(
-                    spacing: 8,
+                    spacing: 16,
                     runSpacing: 8,
                     children: [
                       mapChip('Domain', readableValue(domainMap, 'domain_id')),
@@ -949,14 +960,9 @@ class _AgentAuthorizationCard extends StatelessWidget {
                         'Context',
                         readableValue(domainMap, 'context_id'),
                       ),
-                      mapChip(
-                        'Scope',
-                        readableValue(domainMap, 'context_scope'),
-                      ),
                     ],
                   ),
                   detailRow('Source', readableValue(domainMap, 'source')),
-                  detailRow('Task type', readableValue(domainMap, 'task_type')),
                   detailRow('Agent DID', readableValue(domainMap, 'agent_did')),
                   const SizedBox(height: 14),
                   if (entries.isEmpty)
