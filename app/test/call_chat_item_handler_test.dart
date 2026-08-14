@@ -508,6 +508,36 @@ void main() {
 
       expect(calls, isEmpty);
     });
+
+    test('gives up retrying and skips the write once resolve attempts are '
+        'exhausted', () async {
+      final calls =
+          <({String messageId, CallStatus status, Duration? duration})>[];
+      var resolveAttempts = 0;
+      final handler = CallChatItemHandler(
+        resolveItemId: ({required bool isCaller, String? callId}) async {
+          resolveAttempts++;
+          return null;
+        },
+        updateItem: (id, {required status, duration, participation}) async {
+          calls.add((messageId: id, status: status, duration: duration));
+        },
+        isDisposed: () => false,
+        logger: logger,
+      )..attach(session);
+
+      await session.emitState(
+        const AudioVideoCallState(
+          status: AudioVideoCallStatus.missed,
+          ownRole: CallRole.recipient,
+        ),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 700));
+
+      expect(calls, isEmpty);
+      expect(resolveAttempts, 4);
+      expect(handler.callChatItemEnded, isFalse);
+    });
   });
 }
 

@@ -162,15 +162,12 @@ class _CallScreenBody extends HookConsumerWidget {
         ? l10n.videoCallError('')
         : l10n.videoCallError(errorCode.name);
 
-    // A call cancelled before the peer ever joined (endState null, no
-    // no-answer screen, no calling-back screen, not a join failure) renders
-    // nothing below — this must also pop, otherwise the caller's manual end
-    // of a still-ringing call has no reactive path back to the chat.
-    final endedWithNoScreen =
-        phase == CallUiPhase.ended &&
-        endState == null &&
-        !peerIsCallingBack &&
-        !isJoinFailure;
+    final endedWithNoScreen = isEndedWithNoScreen(
+      phase: phase,
+      endState: endState,
+      peerIsCallingBack: peerIsCallingBack,
+      isJoinFailure: isJoinFailure,
+    );
 
     useEffect(() {
       if (!isCallEnded && !isJoinFailure && !endedWithNoScreen) return null;

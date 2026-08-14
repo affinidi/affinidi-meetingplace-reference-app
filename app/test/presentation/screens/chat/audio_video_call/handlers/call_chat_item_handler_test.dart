@@ -156,6 +156,44 @@ void main() {
         expect(handler.endCallWrite, isNotNull);
         expect(updateCallCount, equals(1));
       });
+
+      test('gives up retrying and skips the write once resolve attempts are '
+          'exhausted', () async {
+        var resolveAttempts = 0;
+        var updateCallCount = 0;
+        final handler = CallChatItemHandler(
+          resolveItemId: ({required bool isCaller, String? callId}) async {
+            resolveAttempts++;
+            return null;
+          },
+          updateItem:
+              (
+                _, {
+                required CallStatus status,
+                Duration? duration,
+                CallParticipation? participation,
+              }) async {
+                updateCallCount++;
+              },
+          isDisposed: () => false,
+          logger: FakeAppLogger(),
+        );
+
+        final session = MockAudioVideoCallSession();
+        handler.attach(session);
+
+        await session.emitState(
+          const AudioVideoCallState(
+            status: AudioVideoCallStatus.missed,
+            ownRole: CallRole.recipient,
+          ),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 700));
+
+        expect(updateCallCount, isZero);
+        expect(resolveAttempts, 4);
+        expect(handler.callChatItemEnded, isFalse);
+      });
     });
 
     group('stream lifecycle: caller', () {

@@ -150,3 +150,18 @@ bool shouldShowNoAnswerScreen({
     endState != null &&
     endState != CallEndState.callEnded &&
     !peerIsCallingBack;
+
+/// A call cancelled before the peer ever joined (ended, no end-state, no
+/// calling-back screen, not a join failure) renders nothing — the screen
+/// must pop on its own in that case, otherwise the caller's manual end of a
+/// still-ringing call has no reactive path back to the chat.
+bool isEndedWithNoScreen({
+  required CallUiPhase phase,
+  required CallEndState? endState,
+  required bool peerIsCallingBack,
+  required bool isJoinFailure,
+}) =>
+    phase == CallUiPhase.ended &&
+    endState == null &&
+    !peerIsCallingBack &&
+    !isJoinFailure;

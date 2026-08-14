@@ -28,7 +28,7 @@ class FlutterLiveKitRoom implements LiveKitRoom {
   BaseKeyProvider? _keyProvider;
 
   Map<String, String> _participantIdToDid = const {};
-  bool _isReconnecting = false;
+  final ReconnectGuard _reconnectGuard = ReconnectGuard();
 
   @override
   String? get ownParticipantId => _room?.localParticipant?.identity;
@@ -62,7 +62,7 @@ class FlutterLiveKitRoom implements LiveKitRoom {
   }) async {
     if (_isDisposed) return;
     _participantIdToDid = participantIdToDid;
-    _isReconnecting = false;
+    _reconnectGuard.reset();
     _logger.info('connect: url=$url', name: _logKey);
 
     final keyProvider = _keyProvider;
@@ -89,9 +89,9 @@ class FlutterLiveKitRoom implements LiveKitRoom {
       }
       if (needsPeerPresenceTracking) {
         listener
-          ..on<ReconnectingEvent>((_) => _isReconnecting = true)
+          ..on<ReconnectingEvent>((_) => _reconnectGuard.onReconnecting())
           ..on<RoomReconnectedEvent>((_) {
-            _isReconnecting = false;
+            _reconnectGuard.onReconnected();
             if (onParticipantsChanged != null &&
                 room.remoteParticipants.isEmpty) {
               _logger.info(
@@ -102,16 +102,15 @@ class FlutterLiveKitRoom implements LiveKitRoom {
               onParticipantsChanged();
             }
           })
-          ..on<RoomDisconnectedEvent>((_) => _isReconnecting = false);
+          ..on<RoomDisconnectedEvent>((_) => _reconnectGuard.onDisconnected());
       }
       if (onParticipantDisconnected != null) {
         listener.on<ParticipantDisconnectedEvent>((event) {
-          if (_isReconnecting ||
-              room.connectionState != ConnectionState.connected) {
+          if (_reconnectGuard.shouldIgnoreDisconnect(room.connectionState)) {
             _logger.info(
               'connect: Ignoring participant-disconnect for '
               '${event.participant.identity}; room is not stably connected '
-              '(reconnecting=$_isReconnecting, '
+              '(reconnecting=${_reconnectGuard.isReconnecting}, '
               'connectionState=${room.connectionState})',
               name: _logKey,
             );
@@ -285,4 +284,33 @@ class FlutterLiveKitRoom implements LiveKitRoom {
     E2EEState.kInternalError => CallE2EEState.internalError,
     E2EEState.kNew => CallE2EEState.newState,
   };
+}
+
+/// Tracks LiveKit reconnect churn so a mid-reconnect
+/// `ParticipantDisconnectedEvent` — which LiveKit fires for every remote
+/// participant even though nobody actually left — is told apart from a real
+/// peer departure.
+class ReconnectGuard {
+  bool _isReconnecting = false;
+
+  /// Whether the room is currently mid-reconnect.
+  bool get isReconnecting => _isReconnecting;
+
+  /// Resets to the initial (not reconnecting) state, e.g. before a fresh
+  /// connect attempt.
+  void reset() => _isReconnecting = false;
+
+  /// Call when the room starts reconnecting.
+  void onReconnecting() => _isReconnecting = true;
+
+  /// Call once the room has reconnected.
+  void onReconnected() => _isReconnecting = false;
+
+  /// Call when the room disconnects for good.
+  void onDisconnected() => _isReconnecting = false;
+
+  /// Whether a participant-disconnect event observed right now reflects
+  /// reconnect noise rather than a real departure.
+  bool shouldIgnoreDisconnect(ConnectionState connectionState) =>
+      _isReconnecting || connectionState != ConnectionState.connected;
 }

@@ -376,4 +376,66 @@ void main() {
       expect(resolveCallEndState(AudioVideoCallStatus.active), isNull);
     });
   });
+
+  group('isEndedWithNoScreen', () {
+    test('is true for a call cancelled before the peer ever joined', () {
+      expect(
+        isEndedWithNoScreen(
+          phase: CallUiPhase.ended,
+          endState: null,
+          peerIsCallingBack: false,
+          isJoinFailure: false,
+        ),
+        isTrue,
+      );
+    });
+
+    test('is false when not in the ended phase', () {
+      expect(
+        isEndedWithNoScreen(
+          phase: CallUiPhase.calling,
+          endState: null,
+          peerIsCallingBack: false,
+          isJoinFailure: false,
+        ),
+        isFalse,
+      );
+    });
+
+    test('is false when an end-state screen should show', () {
+      expect(
+        isEndedWithNoScreen(
+          phase: CallUiPhase.ended,
+          endState: CallEndState.missedCall,
+          peerIsCallingBack: false,
+          isJoinFailure: false,
+        ),
+        isFalse,
+      );
+    });
+
+    test('is false when the peer is calling back', () {
+      expect(
+        isEndedWithNoScreen(
+          phase: CallUiPhase.ended,
+          endState: null,
+          peerIsCallingBack: true,
+          isJoinFailure: false,
+        ),
+        isFalse,
+      );
+    });
+
+    test('is false for a join failure', () {
+      expect(
+        isEndedWithNoScreen(
+          phase: CallUiPhase.ended,
+          endState: null,
+          peerIsCallingBack: false,
+          isJoinFailure: true,
+        ),
+        isFalse,
+      );
+    });
+  });
 }
