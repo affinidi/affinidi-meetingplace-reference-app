@@ -1,3 +1,7 @@
+## 0.0.1-dev.8
+
+ - **FEAT**: add call log screen (#288).
+
 ## 0.0.1-dev.7
 
  - **FEAT**: add ongoing group audio call banner in chat (#268).
