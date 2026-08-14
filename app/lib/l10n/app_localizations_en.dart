@@ -2270,28 +2270,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String personalAgentCancelConnectionTitle(String label) {
-    return 'Cancel $label connection?';
+    return 'Kill $label connection?';
   }
 
   @override
   String personalAgentCancelConnectionContent(String agentLabel) {
-    return 'This will remove your connection to the $agentLabel.';
+    return 'Are you sure you want to kill your connection to the $agentLabel? You won’t be able to re-connect.';
   }
 
   @override
   String get personalAgentKeepConnection => 'Keep connection';
 
   @override
-  String get personalAgentCancelConnection => 'Cancel connection';
+  String get personalAgentCancelConnection => 'Kill connection';
 
   @override
   String personalAgentConnectionCancelled(String label) {
-    return '$label connection cancelled.';
+    return '$label connection killed.';
   }
 
   @override
   String personalAgentCancelConnectionError(String label) {
-    return 'Unable to cancel $label connection.';
+    return 'Unable to kill $label connection.';
   }
 
   @override

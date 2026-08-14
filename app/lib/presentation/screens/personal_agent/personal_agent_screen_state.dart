@@ -19,6 +19,7 @@ class PersonalAgentScreenState {
     required this.showWorkAuthorization,
     required this.workContextUploaded,
     required this.workContextFileName,
+    required this.workContextKilled,
     this.contextUploadError,
     this.autoResponseEnabled = false,
     this.autoResponseLoading = false,
@@ -41,6 +42,7 @@ class PersonalAgentScreenState {
       showWorkAuthorization = false,
       workContextUploaded = false,
       workContextFileName = null,
+      workContextKilled = false,
       autoResponseEnabled = false,
       autoResponseLoading = false,
       autoResponseAvailable = false;
@@ -65,6 +67,7 @@ class PersonalAgentScreenState {
   final bool showWorkAuthorization;
   final bool workContextUploaded;
   final String? workContextFileName;
+  final bool workContextKilled;
   final bool autoResponseEnabled;
   final bool autoResponseLoading;
   final bool autoResponseAvailable;
@@ -85,6 +88,7 @@ class PersonalAgentScreenState {
     bool? showWorkAuthorization,
     bool? workContextUploaded,
     String? workContextFileName,
+    bool? workContextKilled,
     bool? autoResponseEnabled,
     bool? autoResponseLoading,
     bool? autoResponseAvailable,
@@ -117,6 +121,7 @@ class PersonalAgentScreenState {
           showWorkAuthorization ?? this.showWorkAuthorization,
       workContextUploaded: workContextUploaded ?? this.workContextUploaded,
       workContextFileName: workContextFileName ?? this.workContextFileName,
+      workContextKilled: workContextKilled ?? this.workContextKilled,
       autoResponseEnabled: autoResponseEnabled ?? this.autoResponseEnabled,
       autoResponseLoading: autoResponseLoading ?? this.autoResponseLoading,
       autoResponseAvailable:

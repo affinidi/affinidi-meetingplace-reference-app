@@ -3505,13 +3505,13 @@ abstract class AppLocalizations {
   /// No description provided for @personalAgentCancelConnectionTitle.
   ///
   /// In en, this message translates to:
-  /// **'Cancel {label} connection?'**
+  /// **'Kill {label} connection?'**
   String personalAgentCancelConnectionTitle(String label);
 
   /// No description provided for @personalAgentCancelConnectionContent.
   ///
   /// In en, this message translates to:
-  /// **'This will remove your connection to the {agentLabel}.'**
+  /// **'Are you sure you want to kill your connection to the {agentLabel}? You won’t be able to re-connect.'**
   String personalAgentCancelConnectionContent(String agentLabel);
 
   /// No description provided for @personalAgentKeepConnection.
@@ -3523,19 +3523,19 @@ abstract class AppLocalizations {
   /// No description provided for @personalAgentCancelConnection.
   ///
   /// In en, this message translates to:
-  /// **'Cancel connection'**
+  /// **'Kill connection'**
   String get personalAgentCancelConnection;
 
   /// No description provided for @personalAgentConnectionCancelled.
   ///
   /// In en, this message translates to:
-  /// **'{label} connection cancelled.'**
+  /// **'{label} connection killed.'**
   String personalAgentConnectionCancelled(String label);
 
   /// No description provided for @personalAgentCancelConnectionError.
   ///
   /// In en, this message translates to:
-  /// **'Unable to cancel {label} connection.'**
+  /// **'Unable to kill {label} connection.'**
   String personalAgentCancelConnectionError(String label);
 
   /// No description provided for @personalAgentNotAvailable.

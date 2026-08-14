@@ -6,9 +6,11 @@ class FakeContextRoutingStore implements ContextRoutingStore {
   FakeContextRoutingStore({
     bool workContextUploaded = false,
     String? workContextFileName,
+    bool workContextKilled = false,
     Map<String, AgentContext> contactContexts = const {},
   }) {
     _store['cierge_context_uploaded_work'] = workContextUploaded;
+    _store['cierge_context_killed_work'] = workContextKilled;
     if (workContextFileName != null) {
       _store['cierge_context_file_name_work'] = workContextFileName;
     }

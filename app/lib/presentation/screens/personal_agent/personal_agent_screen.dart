@@ -39,6 +39,7 @@ class PersonalAgentScreen extends ConsumerWidget {
           showWorkAuthorization: state.showWorkAuthorization,
           workContextUploaded: state.workContextUploaded,
           workContextFileName: state.workContextFileName,
+          workContextKilled: state.workContextKilled,
           autoResponseEnabled: state.autoResponseEnabled,
           autoResponseLoading: state.autoResponseLoading,
           autoResponseAvailable: state.autoResponseAvailable,
@@ -75,7 +76,7 @@ class PersonalAgentScreen extends ConsumerWidget {
                   Expanded(
                     child: FilledButton(
                       onPressed: () => Navigator.of(dialogContext).pop(true),
-                      child: const Text('Disconnect'),
+                      child: Text(l10n.personalAgentCancelConnection),
                     ),
                   ),
                 ],
@@ -178,6 +179,7 @@ class PersonalAgentScreen extends ConsumerWidget {
                 _AgentContextSetupCard(
                   workContextUploaded: ui.workContextUploaded,
                   workContextFileName: ui.workContextFileName,
+                  workContextKilled: ui.workContextKilled,
                   isUploading: ui.contextUploading,
                   isConnecting: ui.isConnecting,
                   connectingLabel: ui.connectingLabel,
@@ -997,6 +999,7 @@ class _AgentContextSetupCard extends StatelessWidget {
   const _AgentContextSetupCard({
     required this.workContextUploaded,
     required this.workContextFileName,
+    required this.workContextKilled,
     required this.isUploading,
     required this.isConnecting,
     required this.connectingLabel,
@@ -1007,6 +1010,7 @@ class _AgentContextSetupCard extends StatelessWidget {
 
   final bool workContextUploaded;
   final String? workContextFileName;
+  final bool workContextKilled;
   final bool isUploading;
   final bool isConnecting;
   final String? connectingLabel;
@@ -1021,6 +1025,9 @@ class _AgentContextSetupCard extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     String subtitleFor(AgentContext contextTarget) {
+      if (workContextKilled) {
+        return 'Connection killed. You cannot re-connect.';
+      }
       final file = workContextFileName;
       return file == null || file.isEmpty
           ? 'Connect Microsoft 365 to set up Work AI'
@@ -1032,12 +1039,15 @@ class _AgentContextSetupCard extends StatelessWidget {
       required String subtitle,
       required IconData icon,
       required bool isLocked,
+      required bool isKilled,
       required VoidCallback onPressed,
       VoidCallback? onReset,
     }) {
-      final disabled = isUploading || isConnecting || isLocked;
+      final disabled = isUploading || isConnecting || isLocked || isKilled;
       final accentColor = isLocked
           ? context.customColors.success
+          : isKilled
+          ? colorScheme.error
           : colorScheme.primary;
 
       return Material(
@@ -1064,7 +1074,11 @@ class _AgentContextSetupCard extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.all(10),
                     child: Icon(
-                      isLocked ? Icons.check_circle_outline : icon,
+                      isKilled
+                          ? Icons.block
+                          : isLocked
+                          ? Icons.check_circle_outline
+                          : icon,
                       color: accentColor,
                     ),
                   ),
@@ -1115,7 +1129,9 @@ class _AgentContextSetupCard extends StatelessWidget {
                           ),
                         )
                       : Icon(
-                          isLocked
+                          isKilled
+                              ? Icons.block
+                              : isLocked
                               ? Icons.lock_outline
                               : Icons.arrow_forward_rounded,
                           color: colorScheme.onSurface.withValues(
@@ -1191,8 +1207,8 @@ class _AgentContextSetupCard extends StatelessWidget {
             subtitle: subtitleFor(AgentContext.work),
             icon: Icons.cloud_sync_outlined,
             isLocked: workContextUploaded,
+            isKilled: workContextKilled,
             onPressed: onUploadWork,
-            onReset: onResetWork,
           ),
         ],
       ),

@@ -207,6 +207,7 @@ void main() {
     ProviderContainer makeContainer({
       required List<Contact> contacts,
       required Map<String, AgentContext> contactContexts,
+      bool workContextKilled = false,
     }) {
       fakePersonalAi = _RecordingPersonalAiNotifier(
         PersonalAiServiceState(
@@ -229,7 +230,10 @@ void main() {
           ),
           contextRoutingServiceProvider.overrideWith(
             (ref) => _StubContextRoutingNotifier(
-              ContextRoutingState(contactContexts: contactContexts),
+              ContextRoutingState(
+                contactContexts: contactContexts,
+                workContextKilled: workContextKilled,
+              ),
             ),
           ),
           signingServiceProvider.overrideWith(
@@ -259,6 +263,26 @@ void main() {
         expect(fakePersonalAi.setupCallCount, 1);
       },
     );
+
+    test('uploadRoutingContext skips setup when context is killed', () async {
+      final container = makeContainer(
+        contacts: [],
+        contactContexts: {},
+        workContextKilled: true,
+      );
+      final controller = container.read(
+        personalAgentScreenControllerProvider.notifier,
+      );
+
+      final outcome = await controller.uploadRoutingContext(
+        AgentContext.work,
+        fileName: 'context.md',
+        content: 'hello',
+      );
+
+      expect(outcome.uploaded, isFalse);
+      expect(fakePersonalAi.setupCallCount, 0);
+    });
 
     test('uploadRoutingContext reuses setup when the contact exists', () async {
       final contact = FakeContacts.agentContact;
@@ -291,6 +315,7 @@ void main() {
       bool authCancelled = false,
       List<Contact> contacts = const [],
       Map<String, AgentContext> contactContexts = const {},
+      bool workContextKilled = false,
     }) {
       fakePersonalAi = _RecordingPersonalAiNotifier(
         PersonalAiServiceState(
@@ -319,7 +344,10 @@ void main() {
           ),
           contextRoutingServiceProvider.overrideWith((ref) {
             fakeContextRouting = _RecordingContextRoutingNotifier(
-              ContextRoutingState(contactContexts: contactContexts),
+              ContextRoutingState(
+                contactContexts: contactContexts,
+                workContextKilled: workContextKilled,
+              ),
             );
             return fakeContextRouting;
           }),
@@ -356,6 +384,25 @@ void main() {
         expect(fakeContextRouting.markContextUploadedCallCount, 0);
       },
     );
+
+    test('does not reconnect after Work AI connection is killed', () async {
+      final container = makeContainer(
+        _readyWorkSetup(),
+        workContextKilled: true,
+      );
+      final controller = container.read(
+        personalAgentScreenControllerProvider.notifier,
+      );
+
+      final outcome = await controller.connectWorkOneDrive();
+
+      expect(outcome.completed, isFalse);
+      expect(outcome.message, contains('cannot be re-connected'));
+      expect(fakeOneDriveAuth.authorizeCallCount, 0);
+      expect(fakePersonalAi.setupCallCount, 0);
+      expect(fakeOneDriveAuth.storeCallCount, 0);
+      expect(fakeContextRouting.markContextUploadedCallCount, 0);
+    });
 
     test(
       'starts Agent Stream setup only after Microsoft auth succeeds',
@@ -697,6 +744,14 @@ class _StubContactsService extends ContactsService {
   }
 
   @override
+  Future<void> deleteContacts(List<Contact> contacts) async {
+    _contacts.removeWhere(
+      (contact) => contacts.any((item) => item.id == contact.id),
+    );
+    state = ContactsServiceState(contacts: List<Contact>.from(_contacts));
+  }
+
+  @override
   Future<void> removeContactsWithoutLeavingChannel(
     List<Contact> contacts,
   ) async {
@@ -732,6 +787,16 @@ class _StubContextRoutingNotifier extends StateNotifier<ContextRoutingState>
     state = state.copyWith(
       workContextUploaded: false,
       clearWorkContextFileName: true,
+      contactContexts: <String, AgentContext>{},
+    );
+  }
+
+  @override
+  Future<void> killContext({required AgentContext context}) async {
+    state = state.copyWith(
+      workContextUploaded: false,
+      clearWorkContextFileName: true,
+      workContextKilled: true,
       contactContexts: <String, AgentContext>{},
     );
   }

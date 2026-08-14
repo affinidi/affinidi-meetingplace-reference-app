@@ -41,12 +41,14 @@ class ContextRoutingState {
   const ContextRoutingState({
     this.workContextUploaded = false,
     this.workContextFileName,
+    this.workContextKilled = false,
     this.contactContexts = const {},
     this.initialized = false,
   });
 
   final bool workContextUploaded;
   final String? workContextFileName;
+  final bool workContextKilled;
   final Map<String, AgentContext> contactContexts;
   final bool initialized;
 
@@ -54,6 +56,7 @@ class ContextRoutingState {
     bool? workContextUploaded,
     String? workContextFileName,
     bool clearWorkContextFileName = false,
+    bool? workContextKilled,
     Map<String, AgentContext>? contactContexts,
     bool? initialized,
   }) {
@@ -62,6 +65,7 @@ class ContextRoutingState {
       workContextFileName: clearWorkContextFileName
           ? null
           : workContextFileName ?? this.workContextFileName,
+      workContextKilled: workContextKilled ?? this.workContextKilled,
       contactContexts: contactContexts ?? this.contactContexts,
       initialized: initialized ?? this.initialized,
     );
@@ -92,6 +96,7 @@ class ContextRoutingService extends StateNotifier<ContextRoutingState> {
 
   static const _workUploadedKey = 'cierge_context_uploaded_work';
   static const _workFileNameKey = 'cierge_context_file_name_work';
+  static const _workKilledKey = 'cierge_context_killed_work';
   static const _contactContextMapKey = 'cierge_contact_context_map';
 
   final Ref _ref;
@@ -104,6 +109,7 @@ class ContextRoutingService extends StateNotifier<ContextRoutingState> {
     state = state.copyWith(
       workContextUploaded: _store.getBool(_workUploadedKey) ?? false,
       workContextFileName: _store.getString(_workFileNameKey),
+      workContextKilled: _store.getBool(_workKilledKey) ?? false,
       contactContexts: decoded,
       initialized: true,
     );
@@ -124,6 +130,8 @@ class ContextRoutingService extends StateNotifier<ContextRoutingState> {
     required AgentContext context,
     required String fileName,
   }) async {
+    if (state.workContextKilled) return;
+
     state = state.copyWith(
       workContextUploaded: true,
       workContextFileName: fileName,
@@ -144,6 +152,22 @@ class ContextRoutingService extends StateNotifier<ContextRoutingState> {
     await _store.setBool(_workUploadedKey, false);
     await _store.setString(_workFileNameKey, '');
 
+    await _store.setString(_contactContextMapKey, _encodeContactMap(next));
+  }
+
+  Future<void> killContext({required AgentContext context}) async {
+    final next = Map<String, AgentContext>.from(state.contactContexts)
+      ..removeWhere((_, assigned) => assigned == context);
+
+    state = state.copyWith(
+      workContextUploaded: false,
+      clearWorkContextFileName: true,
+      workContextKilled: true,
+      contactContexts: next,
+    );
+    await _store.setBool(_workUploadedKey, false);
+    await _store.setString(_workFileNameKey, '');
+    await _store.setBool(_workKilledKey, true);
     await _store.setString(_contactContextMapKey, _encodeContactMap(next));
   }
 

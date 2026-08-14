@@ -24,14 +24,14 @@ class DisconnectAgentContextService {
     );
 
     if (contact != null) {
-      await _ref
-          .read(contactsServiceProvider.notifier)
-          .removeContactsWithoutLeavingChannel([contact]);
+      await _ref.read(contactsServiceProvider.notifier).deleteContacts([
+        contact,
+      ]);
     }
 
     await _ref
         .read(contextRoutingServiceProvider.notifier)
-        .clearContext(context: target);
+        .killContext(context: target);
 
     await _ref
         .read(personalAiServiceProvider.notifier)

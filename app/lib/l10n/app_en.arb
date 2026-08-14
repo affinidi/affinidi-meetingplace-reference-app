@@ -2121,27 +2121,27 @@
 	"personalAgentWorkContextLabel": "Work (ctx 0)",
 	"personalAgentMyPersonalAiTitle": "My Personal AI",
 	"personalAgentPersonalContextLabel": "Personal (ctx 1)",
-	"personalAgentCancelConnectionTitle": "Cancel {label} connection?",
+	"personalAgentCancelConnectionTitle": "Kill {label} connection?",
 	"@personalAgentCancelConnectionTitle": {
 		"placeholders": {
 			"label": { "type": "String" }
 		}
 	},
-	"personalAgentCancelConnectionContent": "This will remove your connection to the {agentLabel}.",
+	"personalAgentCancelConnectionContent": "Are you sure you want to kill your connection to the {agentLabel}? You won’t be able to re-connect.",
 	"@personalAgentCancelConnectionContent": {
 		"placeholders": {
 			"agentLabel": { "type": "String" }
 		}
 	},
 	"personalAgentKeepConnection": "Keep connection",
-	"personalAgentCancelConnection": "Cancel connection",
-	"personalAgentConnectionCancelled": "{label} connection cancelled.",
+	"personalAgentCancelConnection": "Kill connection",
+	"personalAgentConnectionCancelled": "{label} connection killed.",
 	"@personalAgentConnectionCancelled": {
 		"placeholders": {
 			"label": { "type": "String" }
 		}
 	},
-	"personalAgentCancelConnectionError": "Unable to cancel {label} connection.",
+	"personalAgentCancelConnectionError": "Unable to kill {label} connection.",
 	"@personalAgentCancelConnectionError": {
 		"placeholders": {
 			"label": { "type": "String" }

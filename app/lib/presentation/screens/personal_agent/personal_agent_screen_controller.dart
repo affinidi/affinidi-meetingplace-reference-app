@@ -164,6 +164,7 @@ class PersonalAgentScreenController
       workContextFileName:
           contextRoutingState.workContextFileName ??
           (workContact != null ? 'Work AI connected' : null),
+      workContextKilled: contextRoutingState.workContextKilled,
       clearErrorMessage: personalAiState.errorMessage == null,
       clearContextUploadError: personalAiState.contextUploadError == null,
       clearSetupResult: personalAiState.setupResult == null,
@@ -176,6 +177,11 @@ class PersonalAgentScreenController
     required String content,
   }) async {
     final spec = _RoutingTargetSpec.from(target);
+    final routingState = _ref.read(contextRoutingServiceProvider);
+    if (routingState.workContextKilled) {
+      return const RoutingContextUploadOutcome.skipped();
+    }
+
     if (fileName.trim().isEmpty || content.trim().isEmpty) {
       return const RoutingContextUploadOutcome.skipped();
     }
@@ -258,6 +264,14 @@ class PersonalAgentScreenController
 
   Future<WorkOneDriveConnectionOutcome> connectWorkOneDrive() async {
     final spec = _RoutingTargetSpec.from(AgentContext.work);
+    final routingState = _ref.read(contextRoutingServiceProvider);
+    if (routingState.workContextKilled) {
+      return const WorkOneDriveConnectionOutcome(
+        completed: false,
+        message: 'Work AI connection was killed and cannot be re-connected.',
+      );
+    }
+
     final holderDid = _currentHolderDid();
     if (holderDid.isEmpty) {
       _logger.error(
