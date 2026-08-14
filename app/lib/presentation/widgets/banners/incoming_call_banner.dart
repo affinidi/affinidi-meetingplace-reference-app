@@ -14,6 +14,8 @@ import '../banners/incoming_call/incoming_call_banner_controller.dart';
 class IncomingCallBanner extends ConsumerStatefulWidget {
   const IncomingCallBanner({super.key});
 
+  static const double height = 72;
+
   @override
   ConsumerState<IncomingCallBanner> createState() => _IncomingCallBannerState();
 }
