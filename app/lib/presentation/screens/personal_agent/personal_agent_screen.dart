@@ -433,8 +433,9 @@ class _TrustTaskHistoryTile extends StatelessWidget {
         ? record.raw
         : <String, dynamic>{
             'id': record.id,
-            'timestamp':
-                record.timestamp.toUtc().millisecondsSinceEpoch ~/ 1000,
+            if (record.timestamp != null)
+              'timestamp':
+                  record.timestamp!.toUtc().millisecondsSinceEpoch ~/ 1000,
             'outcome': record.rawOutcome,
             if (record.entryId != null) 'resource': record.entryId,
             if (record.actor != null) 'actor': record.actor,
@@ -459,7 +460,8 @@ class _TrustTaskHistoryTile extends StatelessWidget {
     }
   }
 
-  static String _formatTimestamp(DateTime timestamp) {
+  static String _formatTimestamp(DateTime? timestamp) {
+    if (timestamp == null) return '—';
     String two(int n) => n.toString().padLeft(2, '0');
     const months = [
       'Jan',

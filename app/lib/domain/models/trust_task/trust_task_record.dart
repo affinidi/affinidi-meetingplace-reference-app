@@ -33,17 +33,13 @@ class TrustTaskRecord {
   /// Builds a record from a raw VTA audit-log entry map.
   factory TrustTaskRecord.fromAuditEntry(Map<String, dynamic> entry) {
     final rawOutcome = (entry['outcome'] as String?)?.trim() ?? '';
-    final timestampSeconds = _asInt(entry['timestamp']) ?? 0;
 
     return TrustTaskRecord(
-      id: entry['id'] as String? ?? '',
-      timestamp: DateTime.fromMillisecondsSinceEpoch(
-        timestampSeconds * 1000,
-        isUtc: true,
-      ).toLocal(),
+      id: entry['eventId'] as String? ?? entry['id'] as String? ?? '',
+      timestamp: _parseTimestamp(entry['recordedAt'] ?? entry['timestamp']),
       status: _statusFromOutcome(rawOutcome),
       rawOutcome: rawOutcome,
-      entryId: entry['resource'] as String?,
+      entryId: entry['target'] as String? ?? entry['resource'] as String?,
       actor: entry['actor'] as String?,
       contextId: entry['context_id'] as String?,
       detail: entry['detail'] is String ? entry['detail'] as String : null,
@@ -54,8 +50,9 @@ class TrustTaskRecord {
   /// Stable audit-row id (used as a list key and for de-duplication).
   final String id;
 
-  /// When the task was recorded.
-  final DateTime timestamp;
+  /// When the task was recorded, or `null` when the audit row carries no
+  /// parseable timestamp.
+  final DateTime? timestamp;
 
   /// Classified outcome.
   final TrustTaskStatus status;
@@ -64,7 +61,8 @@ class TrustTaskRecord {
   /// `"denied:auth/step-up/required"`). Kept for display of the denial code.
   final String rawOutcome;
 
-  /// The vault entry that was signed (`resource` in the audit row).
+  /// The vault entry that was signed (`target`, or legacy `resource`, in the
+  /// audit row).
   final String? entryId;
 
   /// The DID that performed the task (the connector's VTA signing identity).
@@ -101,6 +99,25 @@ class TrustTaskRecord {
     if (value is String) return int.tryParse(value);
     return null;
   }
+
+  /// Parses a VTA audit timestamp, which may be epoch seconds (int/num/numeric
+  /// string) or an ISO8601 string. Returns `null` when the value is absent,
+  /// unparseable, or an implausible pre-2000 epoch (e.g. a `0` fallback written
+  /// on a clock error), so the UI shows a placeholder instead of "Jan 1, 1970".
+  static DateTime? _parseTimestamp(Object? value) {
+    DateTime? parsed;
+    final seconds = _asInt(value);
+    if (seconds != null) {
+      parsed = DateTime.fromMillisecondsSinceEpoch(
+        seconds * 1000,
+        isUtc: true,
+      ).toLocal();
+    } else if (value is String) {
+      parsed = DateTime.tryParse(value)?.toLocal();
+    }
+    if (parsed == null || parsed.toUtc().year < 2000) return null;
+    return parsed;
+  }
 }
 
 /// A page of trust-task history plus the pagination metadata needed to know
@@ -130,9 +147,9 @@ class TrustTaskHistoryPage {
           .map((e) => TrustTaskRecord.fromAuditEntry(e.cast<String, dynamic>()))
           .toList(growable: false),
       page: _asInt(body['page']) ?? 1,
-      pageSize: _asInt(body['page_size']) ?? entries.length,
-      total: _asInt(body['total']) ?? entries.length,
-      totalPages: _asInt(body['total_pages']) ?? 1,
+      pageSize: _asInt(body['page_size'] ?? body['pageSize']) ?? entries.length,
+      total: _asInt(body['total'] ?? body['totalCount']) ?? entries.length,
+      totalPages: _asInt(body['total_pages'] ?? body['totalPages']) ?? 1,
     );
   }
 

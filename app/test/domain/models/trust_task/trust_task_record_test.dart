@@ -21,7 +21,7 @@ void main() {
       expect(record.contextId, 'ctx-0');
       expect(record.deniedCode, isNull);
       expect(
-        record.timestamp.toUtc(),
+        record.timestamp!.toUtc(),
         DateTime.fromMillisecondsSinceEpoch(1700000000 * 1000, isUtc: true),
       );
     });
@@ -69,6 +69,53 @@ void main() {
       expect(record.status, TrustTaskStatus.unknown);
       expect(record.entryId, isNull);
       expect(record.contextId, isNull);
+    });
+
+    test('parses an ISO8601 string timestamp', () {
+      final record = TrustTaskRecord.fromAuditEntry({
+        'id': 'log:iso',
+        'timestamp': '2026-08-13T07:30:00Z',
+        'outcome': 'success',
+      });
+
+      expect(record.timestamp!.toUtc(), DateTime.utc(2026, 8, 13, 7, 30));
+    });
+
+    test('leaves timestamp null when the audit row has none', () {
+      final record = TrustTaskRecord.fromAuditEntry({
+        'id': 'log:no-ts',
+        'outcome': 'success',
+      });
+
+      expect(record.timestamp, isNull);
+    });
+
+    test('treats a pre-2000 epoch as null instead of Jan 1 1970', () {
+      final record = TrustTaskRecord.fromAuditEntry({
+        'id': 'log:zero',
+        'timestamp': 0,
+        'outcome': 'success',
+      });
+
+      expect(record.timestamp, isNull);
+    });
+
+    test('maps the live VTA row shape (eventId/recordedAt/target)', () {
+      final record = TrustTaskRecord.fromAuditEntry({
+        'eventId': '9d1e643e-b53b-4fb7-a9c9-5fe429204954',
+        'recordedAt': '2026-08-13T14:24:07+00:00',
+        'action': 'vault.sign-trust-task',
+        'outcome': 'success',
+        'actor': 'did:key:z6MkmUgWVSReYyequYqL1J1qLFoG8wrfHPDJAcKo8xngb5Lj',
+        'target': 'cierge-agent-signing-ctx-1',
+        'detail': {'channel': 'trust-task'},
+      });
+
+      expect(record.id, '9d1e643e-b53b-4fb7-a9c9-5fe429204954');
+      expect(record.status, TrustTaskStatus.signed);
+      expect(record.entryId, 'cierge-agent-signing-ctx-1');
+      expect(record.contextId, isNull);
+      expect(record.timestamp!.toUtc(), DateTime.utc(2026, 8, 13, 14, 24, 7));
     });
   });
 
