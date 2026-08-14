@@ -40,6 +40,12 @@ class _ChatMessageList extends HookConsumerWidget {
     final isGroupChat = ref.watch(
       provider.select((state) => state.group != null),
     );
+    final myDid = ref.watch(provider.select((state) => state.myDid));
+    final isAgentContact = ref.watch(
+      provider.select(
+        (state) => state.contact?.category == ContactCategory.robot,
+      ),
+    );
 
     var lastUsedChatItemStatus = chat.ChatItemStatus.error;
 
@@ -90,6 +96,11 @@ class _ChatMessageList extends HookConsumerWidget {
                 itemCount: sortedMessages.length,
                 itemBuilder: (context, index) {
                   final chatItem = sortedMessages[index];
+                  final visuallyFromMe = _isVisuallyFromMe(
+                    chatItem,
+                    myDid: myDid,
+                    isAgentContact: isAgentContact,
+                  );
 
                   if (_isVrcRequestOnlyMessage(chatItem) ||
                       zkpPolicy.shouldHide(chatItem) ||
@@ -154,13 +165,13 @@ class _ChatMessageList extends HookConsumerWidget {
                       supportsSuggestionRequests &&
                       isSuggestionAgentReady &&
                       chatItem is chat.Message &&
-                      !chatItem.isFromMe &&
+                      !visuallyFromMe &&
                       selectedReactionIndex == index &&
                       chatItem.value.trim().isNotEmpty;
                   final showReactionPicker =
                       selectedReactionIndex == index &&
                       chatItem is chat.Message &&
-                      !chatItem.isFromMe;
+                      !visuallyFromMe;
                   final matchingSuggestion =
                       chatItem is chat.Message &&
                           latestSuggestion?.relatedMessageId ==
@@ -184,7 +195,7 @@ class _ChatMessageList extends HookConsumerWidget {
                                   chatItem.status ==
                                       chat.ChatItemStatus.userInput)
                               ? Alignment.center
-                              : (chatItem.isFromMe)
+                              : visuallyFromMe
                               ? Alignment.centerRight
                               : Alignment.centerLeft,
                           child: Column(
@@ -192,7 +203,7 @@ class _ChatMessageList extends HookConsumerWidget {
                                 (chatItem is EncryptionNotice ||
                                     chatItem is chat.ConciergeMessage)
                                 ? CrossAxisAlignment.center
-                                : chatItem.isFromMe
+                                : visuallyFromMe
                                 ? CrossAxisAlignment.end
                                 : CrossAxisAlignment.start,
                             children: [
@@ -233,6 +244,7 @@ class _ChatMessageList extends HookConsumerWidget {
                                       selectedReactionIndex:
                                           selectedReactionIndex,
                                       policy: zkpPolicy,
+                                      visuallyFromMe: visuallyFromMe,
                                     ),
                             ],
                           ),
@@ -240,11 +252,11 @@ class _ChatMessageList extends HookConsumerWidget {
                         if (chatItem is chat.Message) ...[
                           chatItem.reactions.isNotEmpty
                               ? Align(
-                                  alignment: (chatItem.isFromMe)
+                                  alignment: visuallyFromMe
                                       ? Alignment.topRight
                                       : Alignment.topLeft,
                                   child: Padding(
-                                    padding: (chatItem.isFromMe)
+                                    padding: visuallyFromMe
                                         ? const EdgeInsets.fromLTRB(60, 0, 5, 8)
                                         : const EdgeInsets.fromLTRB(
                                             5,
@@ -273,7 +285,7 @@ class _ChatMessageList extends HookConsumerWidget {
                             _SuggestionNoticeChatItem(
                               contactId: _contactId,
                               suggestion: matchingSuggestion,
-                              isFromMe: chatItem.isFromMe,
+                              isFromMe: visuallyFromMe,
                               onSendAsMe: () async {
                                 await controller.sendLatestSuggestionAsMe();
                                 if (!scrollController.hasClients) return;
@@ -288,11 +300,11 @@ class _ChatMessageList extends HookConsumerWidget {
                             ),
                           thisItemStatus.isNotEmpty
                               ? Align(
-                                  alignment: (chatItem.isFromMe)
+                                  alignment: visuallyFromMe
                                       ? Alignment.topRight
                                       : Alignment.topLeft,
                                   child: Padding(
-                                    padding: (chatItem.isFromMe)
+                                    padding: visuallyFromMe
                                         ? const EdgeInsets.fromLTRB(60, 0, 5, 8)
                                         : const EdgeInsets.fromLTRB(
                                             5,
@@ -393,6 +405,22 @@ bool _isLocalAgentResponseMessage(chat.ChatItem chatItem) {
   return chatItem.attachments.any(
     (attachment) =>
         attachment.format == chat.CiergeSignatureProof.attachmentFormat,
+  );
+}
+
+bool _isVisuallyFromMe(
+  chat.ChatItem chatItem, {
+  required String? myDid,
+  required bool isAgentContact,
+}) {
+  if (chatItem.isFromMe) return true;
+  if (isAgentContact) return false;
+  if (myDid == null || myDid.isEmpty || chatItem is! chat.Message) {
+    return false;
+  }
+  if (!chatItem.attachments.any((a) => a.isCiergeAgentMarker)) return false;
+  return chatItem.attachments.any(
+    (attachment) => attachment.ciergeOwnerDids.contains(myDid),
   );
 }
 
@@ -548,6 +576,7 @@ class _ZkpBubble extends StatelessWidget {
     required this.contactId,
     required this.selectedReactionIndex,
     required this.policy,
+    required this.visuallyFromMe,
   });
 
   final chat.ChatItem chatItem;
@@ -555,16 +584,25 @@ class _ZkpBubble extends StatelessWidget {
   final String contactId;
   final int? selectedReactionIndex;
   final ChatZkpMessageListPolicy policy;
+  final bool visuallyFromMe;
 
   @override
   Widget build(BuildContext context) {
-    final bubbleColor = policy.bubbleColor(context.colorScheme, chatItem);
+    final bubbleColor = visuallyFromMe
+        ? _outgoingBubbleColor(context.colorScheme, chatItem)
+        : policy.bubbleColor(context.colorScheme, chatItem);
     return Container(
-      margin: policy.bubbleMargin(
-        item: chatItem,
-        index: index,
-        selectedReactionIndex: selectedReactionIndex ?? -1,
-      ),
+      margin: visuallyFromMe
+          ? _outgoingBubbleMargin(
+              chatItem,
+              index: index,
+              selectedReactionIndex: selectedReactionIndex ?? -1,
+            )
+          : policy.bubbleMargin(
+              item: chatItem,
+              index: index,
+              selectedReactionIndex: selectedReactionIndex ?? -1,
+            ),
       decoration: BoxDecoration(
         color: bubbleColor,
         borderRadius: BorderRadius.circular(16.0),
@@ -577,4 +615,30 @@ class _ZkpBubble extends StatelessWidget {
       ),
     );
   }
+}
+
+EdgeInsets _outgoingBubbleMargin(
+  chat.ChatItem chatItem, {
+  required int selectedReactionIndex,
+  required int index,
+}) {
+  if (chatItem is EncryptionNotice ||
+      chatItem is chat.ConciergeMessage ||
+      chatItem is chat.EventMessage) {
+    return const EdgeInsets.fromLTRB(20, 8, 20, 8);
+  }
+  return EdgeInsets.fromLTRB(
+    60,
+    8,
+    0,
+    selectedReactionIndex == index ||
+            (chatItem is chat.Message && chatItem.reactions.isNotEmpty)
+        ? 0
+        : 8,
+  );
+}
+
+Color _outgoingBubbleColor(ColorScheme colorScheme, chat.ChatItem chatItem) {
+  if (chatItem.status == chat.ChatItemStatus.error) return Colors.red;
+  return colorScheme.primary;
 }
