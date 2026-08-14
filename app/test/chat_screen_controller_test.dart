@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -173,6 +175,43 @@ void main() {
             .pendingSuggestionMessageId,
         isNull,
       );
+    });
+
+    testWidgets('clears message draft immediately to prevent duplicate sends', (
+      tester,
+    ) async {
+      final chatSdk = FakeChatSdk();
+      final sendBlocker = Completer<void>();
+      chatSdk.sendTextMessageBlocker = sendBlocker;
+      final contact = FakeContacts.individualContact;
+
+      await navigateToChat(
+        tester,
+        contactId: contact.id,
+        contacts: [contact],
+        chatSdk: chatSdk,
+      );
+
+      final context = tester.element(find.byType(Scaffold).first);
+      final container = ProviderScope.containerOf(context, listen: false);
+      final controller = container.read(
+        chatScreenControllerProvider(contact.id).notifier,
+      );
+
+      controller.messageTextController.text = 'Hello twice';
+
+      final firstSend = controller.sendMessage();
+      await tester.pump();
+
+      expect(controller.messageTextController.text, isEmpty);
+
+      await controller.sendMessage();
+
+      expect(chatSdk.sendTextMessageCalls, hasLength(1));
+      expect(chatSdk.sendTextMessageCalls.single['text'], 'Hello twice');
+
+      sendBlocker.complete();
+      await firstSend;
     });
   });
 }

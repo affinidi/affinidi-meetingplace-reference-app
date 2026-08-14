@@ -73,6 +73,7 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
   int refreshCurrentContactCardCallCount = 0;
   bool shouldThrowOnStartSession = false;
   int sendTextMessageFailuresRemaining = 0;
+  Completer<void>? sendTextMessageBlocker;
   String? lastRemovedMemberDid;
   int removeMemberCallCount = 0;
   Completer<void>? removeMemberBlocker;
@@ -634,6 +635,10 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
       'attachments': attachments,
       'mentions': mentions,
     });
+
+    if (sendTextMessageBlocker != null) {
+      await sendTextMessageBlocker!.future;
+    }
 
     var normalizedAttachments = attachments ?? const <ChatAttachment>[];
     final firstAttachment = normalizedAttachments.firstOrNull;
