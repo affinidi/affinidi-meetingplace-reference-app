@@ -77,7 +77,7 @@ dependencies:
   meeting_place_drift_repository: ^0.0.1-dev.58
   meeting_place_livekit_flutter: 
     path: ../packages/meeting_place_livekit_flutter
-  meeting_place_matrix: ^0.0.1-dev.11
+  meeting_place_matrix: ^0.0.1-dev.14
   meeting_place_personal_agent:
     git:  
       url: https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git

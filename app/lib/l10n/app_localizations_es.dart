@@ -2601,6 +2601,44 @@ class AppLocalizationsEs extends AppLocalizations {
   String get callChatItemYouLeft => 'Saliste';
 
   @override
+  String get callLogScreenTitle => 'Registro de llamadas';
+
+  @override
+  String get callLogScreenSubtitle =>
+      'Tus llamadas de audio y video anteriores.';
+
+  @override
+  String get callLogEmpty => 'Aún no hay llamadas.';
+
+  @override
+  String callLogParticipantsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count participantes',
+      one: '1 participante',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String callLogParticipantsNamesAndOthers(String names, int othersCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      othersCount,
+      locale: localeName,
+      other: '$othersCount más',
+      one: '1 más',
+    );
+    return '$names y $_temp0';
+  }
+
+  @override
+  String get callLogInProgress => 'En curso';
+
+  @override
+  String get callLogError => 'No se pudo cargar el registro de llamadas.';
+
+  @override
   String callDurationHourFormat(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

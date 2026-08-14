@@ -2613,6 +2613,43 @@ class AppLocalizationsDe extends AppLocalizations {
   String get callChatItemYouLeft => 'Du hast verlassen';
 
   @override
+  String get callLogScreenTitle => 'Anrufliste';
+
+  @override
+  String get callLogScreenSubtitle => 'Deine letzten Audio- und Videoanrufe.';
+
+  @override
+  String get callLogEmpty => 'Noch keine Anrufe.';
+
+  @override
+  String callLogParticipantsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Teilnehmer',
+      one: '1 Teilnehmer',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String callLogParticipantsNamesAndOthers(String names, int othersCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      othersCount,
+      locale: localeName,
+      other: '$othersCount weitere',
+      one: '1 weiteren',
+    );
+    return '$names und $_temp0';
+  }
+
+  @override
+  String get callLogInProgress => 'Läuft';
+
+  @override
+  String get callLogError => 'Anrufliste konnte nicht geladen werden.';
+
+  @override
   String callDurationHourFormat(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

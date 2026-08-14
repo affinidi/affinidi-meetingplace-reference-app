@@ -10,6 +10,7 @@ class RoutePaths {
   static const personalAgent = '/personal-agent';
   static const credentials = '/credentials';
   static const settings = '/settings';
+  static const callLog = '/call-log';
 
   // Contacts
   static const chat = ':contactId/chat';

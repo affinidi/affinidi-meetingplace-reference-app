@@ -3970,6 +3970,48 @@ abstract class AppLocalizations {
   /// **'You left'**
   String get callChatItemYouLeft;
 
+  /// No description provided for @callLogScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Call log'**
+  String get callLogScreenTitle;
+
+  /// No description provided for @callLogScreenSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your past audio and video calls.'**
+  String get callLogScreenSubtitle;
+
+  /// No description provided for @callLogEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No calls yet.'**
+  String get callLogEmpty;
+
+  /// No description provided for @callLogParticipantsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 participant} other{{count} participants}}'**
+  String callLogParticipantsCount(int count);
+
+  /// Participants label for a group call log entry when only some participant DIDs resolved to a known contact
+  ///
+  /// In en, this message translates to:
+  /// **'{names} and {othersCount, plural, =1{1 other} other{{othersCount} others}}'**
+  String callLogParticipantsNamesAndOthers(String names, int othersCount);
+
+  /// Status text shown in the Call log for a call that is still ongoing
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get callLogInProgress;
+
+  /// Message shown in the Call log screen when loading past calls fails
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load call log.'**
+  String get callLogError;
+
   /// No description provided for @callDurationHourFormat.
   ///
   /// In en, this message translates to:

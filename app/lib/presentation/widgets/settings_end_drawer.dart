@@ -5,7 +5,7 @@ import '../../infrastructure/extensions/build_context_extensions.dart';
 import '../../navigation/routes/route_paths.dart';
 import '../../navigation/tabs/tabs.dart';
 
-/// Right-side drawer with a shortcut to the Settings tab.
+/// Right-side drawer with shortcuts to Settings and the call log.
 class SettingsEndDrawer extends StatelessWidget {
   const SettingsEndDrawer({super.key, required this.isZkpEnabled});
 
@@ -19,6 +19,11 @@ class SettingsEndDrawer extends StatelessWidget {
   void _openSettings(BuildContext context) {
     Navigator.of(context).pop();
     GoRouter.of(context).push(RoutePaths.settings);
+  }
+
+  void _openCallLog(BuildContext context) {
+    Navigator.of(context).pop();
+    GoRouter.of(context).push(RoutePaths.callLog);
   }
 
   @override
@@ -72,6 +77,18 @@ class SettingsEndDrawer extends StatelessWidget {
                 ).textTheme.titleMedium?.copyWith(color: Colors.white),
               ),
               onTap: () => _openSettings(context),
+            ),
+            ListTile(
+              minLeadingWidth: 20,
+              horizontalTitleGap: 8,
+              leading: const Icon(Icons.history, color: Colors.white, size: 20),
+              title: Text(
+                l10n.callLogScreenTitle,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(color: Colors.white),
+              ),
+              onTap: () => _openCallLog(context),
             ),
           ],
         ),
