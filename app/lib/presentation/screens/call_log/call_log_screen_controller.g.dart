@@ -42,7 +42,7 @@ final class CallLogScreenControllerProvider
 }
 
 String _$callLogScreenControllerHash() =>
-    r'af79109e12aae435848b34acee97c72ac44c9b3f';
+    r'b3ce442f2d6d1b2c431b6c84f204780406d2d214';
 
 abstract class _$CallLogScreenController extends $Notifier<CallLogScreenState> {
   CallLogScreenState build();
