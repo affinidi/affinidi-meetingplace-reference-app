@@ -151,7 +151,10 @@ class _AsyncTrustTaskCardState extends State<_AsyncTrustTaskCard> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const SizedBox.shrink();
+      return const _TrustTaskCollapsedCard(
+        accent: _TrustTaskCardState.blueAccent,
+        isSignedDocument: false,
+      );
     }
 
     if (_envelope != null) {
@@ -169,6 +172,54 @@ class _AsyncTrustTaskCardState extends State<_AsyncTrustTaskCard> {
   }
 }
 
+class _TrustTaskCollapsedCard extends StatelessWidget {
+  const _TrustTaskCollapsedCard({
+    required this.accent,
+    required this.isSignedDocument,
+    this.onTap,
+  });
+
+  final Color accent;
+  final bool isSignedDocument;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: accent.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: accent.withValues(alpha: 0.2)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isSignedDocument ? Icons.verified : Icons.smart_toy_outlined,
+              color: accent,
+              size: 14,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              isSignedDocument ? 'Signed Document' : 'Signed by Agent',
+              style: const TextStyle(
+                color: Colors.white54,
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(width: 4),
+            const Icon(Icons.expand_more, color: Colors.white38, size: 16),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _TrustTaskCard extends ConsumerStatefulWidget {
   const _TrustTaskCard({required this.envelope});
 
@@ -179,7 +230,7 @@ class _TrustTaskCard extends ConsumerStatefulWidget {
 }
 
 class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
-  static const _blueAccent = Color(0xFF81D4FA);
+  static const blueAccent = Color(0xFF81D4FA);
 
   bool _expanded = false;
   bool _auditLoading = false;
@@ -204,42 +255,15 @@ class _TrustTaskCardState extends ConsumerState<_TrustTaskCard> {
     return type.contains('signed-document');
   }
 
-  Color get _accent => _isSignedDocument ? Colors.greenAccent : _blueAccent;
+  Color get _accent => _isSignedDocument ? Colors.greenAccent : blueAccent;
 
   @override
   Widget build(BuildContext context) {
     if (!_expanded) {
-      return GestureDetector(
+      return _TrustTaskCollapsedCard(
+        accent: _accent,
+        isSignedDocument: _isSignedDocument,
         onTap: _toggle,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          decoration: BoxDecoration(
-            color: _accent.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(6),
-            border: Border.all(color: _accent.withValues(alpha: 0.2)),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                _isSignedDocument ? Icons.verified : Icons.smart_toy_outlined,
-                color: _accent,
-                size: 14,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                _isSignedDocument ? 'Signed Document' : 'Signed by Agent',
-                style: const TextStyle(
-                  color: Colors.white54,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(width: 4),
-              const Icon(Icons.expand_more, color: Colors.white38, size: 16),
-            ],
-          ),
-        ),
       );
     }
 

@@ -30,8 +30,15 @@ extension ChatAttachmentExtension on chat.ChatAttachment {
     if (format != CiergeSignatureAttachmentsPlugin.pluginFormat) {
       return const [];
     }
-    final fromFilename = _ownerDidsFromFilename();
-    if (fromFilename.isNotEmpty) return fromFilename;
+    final fromFilename = _signatureMetadataFromFilename()?['ownerDids'];
+    if (fromFilename is List) {
+      return fromFilename
+          .whereType<String>()
+          .where((d) => d.isNotEmpty)
+          .toList();
+    }
+    final legacyFromFilename = _legacyOwnerDidsFromFilename();
+    if (legacyFromFilename.isNotEmpty) return legacyFromFilename;
     final inline = metadata?['ownerDids'];
     if (inline is List) {
       return inline.whereType<String>().where((d) => d.isNotEmpty).toList();
@@ -49,9 +56,49 @@ extension ChatAttachmentExtension on chat.ChatAttachment {
     }
   }
 
-  /// Reads the owner DIDs from the `cierge-signature.<token>.json` filename,
-  /// the only inline attachment field that survives the Matrix transport.
-  List<String> _ownerDidsFromFilename() {
+  String? get ciergeSignatureContext {
+    if (format != CiergeSignatureAttachmentsPlugin.pluginFormat) return null;
+
+    final fromFilename = _signatureMetadataFromFilename()?['context'];
+    if (fromFilename is String && fromFilename.trim().isNotEmpty) {
+      return fromFilename.trim();
+    }
+
+    final inline = metadata?['context'];
+    if (inline is String && inline.trim().isNotEmpty) return inline.trim();
+
+    final raw = data?.json ?? _decodeBase64(data?.base64);
+    if (raw == null || raw.trim().isEmpty) return null;
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is! Map<String, dynamic>) return null;
+      final context = decoded['context'];
+      if (context is String && context.trim().isNotEmpty) {
+        return context.trim();
+      }
+      return null;
+    } on FormatException {
+      return null;
+    }
+  }
+
+  Map<String, dynamic>? _signatureMetadataFromFilename() {
+    final name = filename;
+    if (name == null) return null;
+    final match = RegExp(r'^cierge-signature\.([^.]+)\.json$').firstMatch(name);
+    if (match == null) return null;
+    try {
+      final decoded = jsonDecode(
+        utf8.decode(base64Url.decode(match.group(1)!)),
+      );
+      if (decoded is Map<String, dynamic>) return decoded;
+      return null;
+    } on FormatException {
+      return null;
+    }
+  }
+
+  List<String> _legacyOwnerDidsFromFilename() {
     final name = filename;
     if (name == null) return const [];
     final match = RegExp(r'^cierge-signature\.([^.]+)\.json$').firstMatch(name);

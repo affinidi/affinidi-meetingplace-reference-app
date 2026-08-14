@@ -6,6 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mpx_app_core/mpx_app_core.dart';
 
 import '../../extensions/build_context_extensions.dart';
+import '../../extensions/chat_attachment_extensions.dart';
 
 class CiergeSignatureAttachmentsPlugin implements AttachmentRenderer {
   static const String pluginFormat = CiergeSignatureProof.attachmentFormat;
@@ -57,6 +58,7 @@ class CiergeSignatureAttachmentsPlugin implements AttachmentRenderer {
       key: ValueKey(attachmentKey),
       attachmentKey: attachmentKey,
       attachment: request.attachment,
+      fallbackContext: request.attachment.ciergeSignatureContext,
       chatItemColor: request.chatItemColor,
       download: download,
     );
@@ -84,6 +86,8 @@ class CiergeSignatureAttachmentsPlugin implements AttachmentRenderer {
   }
 }
 
+final Map<String, CiergeSignatureProof> _proofCache = {};
+
 String _attachmentCacheKey(ChatAttachment attachment) {
   final id = attachment.id;
   if (id.isNotEmpty) return id;
@@ -96,15 +100,22 @@ String _attachmentCacheKey(ChatAttachment attachment) {
 }
 
 class _SignedResponseBadge extends StatelessWidget {
-  const _SignedResponseBadge({required this.proof, this.chatItemColor});
+  const _SignedResponseBadge({required this.proof, this.chatItemColor})
+    : fallbackContext = null;
 
-  final CiergeSignatureProof proof;
+  const _SignedResponseBadge.placeholder({
+    this.fallbackContext,
+    this.chatItemColor,
+  }) : proof = null;
+
+  final CiergeSignatureProof? proof;
+  final String? fallbackContext;
   final Color? chatItemColor;
 
   @override
   Widget build(BuildContext context) {
     const badgeTextColor = Colors.white;
-    final badge = _contextBadgeText(proof.context);
+    final badge = _contextBadgeText(proof?.context ?? fallbackContext);
 
     return Padding(
       padding: const EdgeInsets.only(top: 6),
@@ -118,7 +129,9 @@ class _SignedResponseBadge extends StatelessWidget {
         ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
-          onTap: () => _showSignedResponseSheet(context, proof),
+          onTap: proof == null
+              ? null
+              : () => _showSignedResponseSheet(context, proof!),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             child: Row(
@@ -154,15 +167,20 @@ class _AsyncSignedResponseBadge extends HookWidget {
     required this.attachmentKey,
     required this.attachment,
     required this.download,
+    this.fallbackContext,
     this.chatItemColor,
   });
 
   final String attachmentKey;
   final ChatAttachment attachment;
   final Future<List<int>> Function(ChatAttachment attachment) download;
+  final String? fallbackContext;
   final Color? chatItemColor;
 
   Future<CiergeSignatureProof?> _loadProof() async {
+    final cached = _proofCache[attachmentKey];
+    if (cached != null) return cached;
+
     developer.log(
       'inline proof missing, attempting download '
       'id=${attachment.id}',
@@ -175,7 +193,9 @@ class _AsyncSignedResponseBadge extends HookWidget {
     );
     if (bytes.isEmpty) return null;
     final raw = utf8.decode(bytes, allowMalformed: true);
-    return CiergeSignatureProof.fromRawJson(raw);
+    final proof = CiergeSignatureProof.fromRawJson(raw);
+    if (proof != null) _proofCache[attachmentKey] = proof;
+    return proof;
   }
 
   @override
@@ -185,7 +205,10 @@ class _AsyncSignedResponseBadge extends HookWidget {
     final proof = snapshot.data;
 
     if (snapshot.connectionState == ConnectionState.waiting) {
-      return const SizedBox.shrink();
+      return _SignedResponseBadge.placeholder(
+        fallbackContext: fallbackContext,
+        chatItemColor: chatItemColor,
+      );
     }
     if (proof == null) {
       developer.log(
