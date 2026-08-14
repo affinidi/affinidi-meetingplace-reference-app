@@ -9,6 +9,7 @@ class RoutePaths {
   static const rCards = '/r-cards';
   static const credentials = '/credentials';
   static const settings = '/settings';
+  static const callLog = '/call-log';
 
   // Contacts
   static const chat = ':contactId/chat';

@@ -64,6 +64,7 @@ class CallChatItemHandler {
   AudioVideoCallStatus _lastStatus = AudioVideoCallStatus.idle;
 
   Set<String> _seenPeerIds = {};
+  Set<String> _seenPeerDids = {};
   bool _didSelfJoin = false;
   bool _selfLeftBeforeEnd = false;
   bool _peerPresentNow = false;
@@ -135,6 +136,10 @@ class CallChatItemHandler {
     if (_isGroupCall) {
       _seenPeerIds = accumulateSeenPeerIds(
         previous: _seenPeerIds,
+        participants: next.participants,
+      );
+      _seenPeerDids = accumulateSeenPeerDids(
+        previous: _seenPeerDids,
         participants: next.participants,
       );
       _didSelfJoin = computeDidSelfJoin(
@@ -291,6 +296,7 @@ class CallChatItemHandler {
       didSelfJoin: _didSelfJoin,
       selfLeftBeforeEnd: _selfLeftBeforeEnd,
       initiatorDid: _isCaller ? _selfDid : null,
+      seenPeerDids: _seenPeerDids,
     );
   }
 

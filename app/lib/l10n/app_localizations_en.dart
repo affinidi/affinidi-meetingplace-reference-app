@@ -2174,6 +2174,43 @@ class AppLocalizationsEn extends AppLocalizations {
   String get callChatItemYouLeft => 'You left';
 
   @override
+  String get callLogScreenTitle => 'Call log';
+
+  @override
+  String get callLogScreenSubtitle => 'Your past audio and video calls.';
+
+  @override
+  String get callLogEmpty => 'No calls yet.';
+
+  @override
+  String callLogParticipantsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count participants',
+      one: '1 participant',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String callLogParticipantsNamesAndOthers(String names, int othersCount) {
+    String _temp0 = intl.Intl.pluralLogic(
+      othersCount,
+      locale: localeName,
+      other: '$othersCount others',
+      one: '1 other',
+    );
+    return '$names and $_temp0';
+  }
+
+  @override
+  String get callLogInProgress => 'In progress';
+
+  @override
+  String get callLogError => 'Unable to load call log.';
+
+  @override
   String callDurationHourFormat(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

@@ -74,6 +74,22 @@ Set<String> accumulateSeenPeerIds({
   return next;
 }
 
+/// Accumulates the running set of distinct peer DIDs seen during a call,
+/// excluding the local party. A peer whose DID could not be resolved at the
+/// moment it was observed contributes nothing here; [accumulateSeenPeerIds]
+/// still counts it via [AudioVideoCallParticipant.participantId].
+Set<String> accumulateSeenPeerDids({
+  required Set<String> previous,
+  required List<AudioVideoCallParticipant> participants,
+}) {
+  final next = {...previous};
+  for (final participant in participants) {
+    final did = participant.did;
+    if (!participant.isSelf && did != null) next.add(did);
+  }
+  return next;
+}
+
 /// Latch: whether the local party has fully joined the call media session.
 /// Once true, stays true for the rest of the call.
 bool computeDidSelfJoin({
@@ -95,11 +111,13 @@ CallParticipation buildCallParticipation({
   required bool didSelfJoin,
   required bool selfLeftBeforeEnd,
   String? initiatorDid,
+  Set<String> seenPeerDids = const {},
 }) => CallParticipation(
   participantCount: seenPeerIds.length,
   didSelfJoin: didSelfJoin,
   selfLeftBeforeEnd: selfLeftBeforeEnd,
   initiatorDid: initiatorDid,
+  participantDids: seenPeerDids.toList(growable: false),
 );
 
 // =========================================================================
