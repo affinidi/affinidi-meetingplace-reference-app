@@ -162,21 +162,30 @@ class _CallScreenBody extends HookConsumerWidget {
         ? l10n.videoCallError('')
         : l10n.videoCallError(errorCode.name);
 
+    final endedWithNoScreen = isEndedWithNoScreen(
+      phase: phase,
+      endState: endState,
+      peerIsCallingBack: peerIsCallingBack,
+      isJoinFailure: isJoinFailure,
+    );
+
     useEffect(() {
-      if (!isCallEnded && !isJoinFailure) return null;
+      if (!isCallEnded && !isJoinFailure && !endedWithNoScreen) return null;
       final durationSeconds = ref.read(
         provider.select((s) => s.callDurationSeconds),
       );
       Future.microtask(() {
-        ref
-            .read(callEndedControllerProvider.notifier)
-            .show(
-              contactId: contactId,
-              peerName: peerName,
-              callDurationSeconds: durationSeconds,
-              isAudioOnly: callIsAudioOnly,
-              errorMessage: isJoinFailure ? localizedJoinError : null,
-            );
+        if (isCallEnded || isJoinFailure) {
+          ref
+              .read(callEndedControllerProvider.notifier)
+              .show(
+                contactId: contactId,
+                peerName: peerName,
+                callDurationSeconds: durationSeconds,
+                isAudioOnly: callIsAudioOnly,
+                errorMessage: isJoinFailure ? localizedJoinError : null,
+              );
+        }
         if (context.mounted &&
             (ModalRoute.of(context)?.isCurrent ?? false) &&
             Navigator.of(context).canPop()) {
@@ -184,7 +193,7 @@ class _CallScreenBody extends HookConsumerWidget {
         }
       });
       return null;
-    }, [isCallEnded, isJoinFailure, localizedJoinError]);
+    }, [isCallEnded, isJoinFailure, endedWithNoScreen, localizedJoinError]);
 
     // Ended state: call finished (missed, declined, disconnected, error).
     if (phase == CallUiPhase.ended) {

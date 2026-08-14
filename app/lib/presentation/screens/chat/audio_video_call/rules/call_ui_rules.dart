@@ -151,22 +151,17 @@ bool shouldShowNoAnswerScreen({
     endState != CallEndState.callEnded &&
     !peerIsCallingBack;
 
-/// Whether a 1-on-1 call should auto-end because the only peer has left.
-///
-/// True when all three conditions hold:
-/// - This is not a group call ([isGroupContact] is false)
-/// - A peer was connected at some point ([hasHadPeer] is true)
-/// - No peer is currently present and the call is still live
-///
-/// Group calls stay open when participants leave; only individual calls
-/// end automatically when the peer disconnects.
-bool shouldAutoEndCallForPeer({
-  required bool isGroupContact,
-  required bool hasHadPeer,
-  required List<AudioVideoCallParticipant> participants,
-  required AudioVideoCallStatus status,
+/// A call cancelled before the peer ever joined (ended, no end-state, no
+/// calling-back screen, not a join failure) renders nothing — the screen
+/// must pop on its own in that case, otherwise the caller's manual end of a
+/// still-ringing call has no reactive path back to the chat.
+bool isEndedWithNoScreen({
+  required CallUiPhase phase,
+  required CallEndState? endState,
+  required bool peerIsCallingBack,
+  required bool isJoinFailure,
 }) =>
-    !isGroupContact &&
-    hasHadPeer &&
-    !hasPeerParticipant(participants) &&
-    isLiveCallStatus(status);
+    phase == CallUiPhase.ended &&
+    endState == null &&
+    !peerIsCallingBack &&
+    !isJoinFailure;

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:livekit_client/livekit_client.dart' show ConnectionState;
 import 'package:meeting_place_livekit_flutter/src/extensions/room_participants_extension.dart';
 import 'package:meeting_place_livekit_flutter/src/room/flutter_livekit_room.dart';
 
@@ -66,6 +67,49 @@ void main() {
         room.forceRemoteKeyframe('@alice:example.org'),
         completes,
       );
+    });
+  });
+
+  group('ReconnectGuard', () {
+    test('does not ignore a disconnect while stably connected', () {
+      final guard = ReconnectGuard();
+      expect(guard.shouldIgnoreDisconnect(ConnectionState.connected), isFalse);
+    });
+
+    test('ignores a disconnect once reconnecting has started', () {
+      final guard = ReconnectGuard()..onReconnecting();
+      expect(guard.isReconnecting, isTrue);
+      expect(guard.shouldIgnoreDisconnect(ConnectionState.connected), isTrue);
+    });
+
+    test('surfaces a disconnect again once reconnected', () {
+      final guard = ReconnectGuard()
+        ..onReconnecting()
+        ..onReconnected();
+      expect(guard.isReconnecting, isFalse);
+      expect(guard.shouldIgnoreDisconnect(ConnectionState.connected), isFalse);
+    });
+
+    test('stays cleared once disconnected for good', () {
+      final guard = ReconnectGuard()
+        ..onReconnecting()
+        ..onDisconnected();
+      expect(guard.isReconnecting, isFalse);
+    });
+
+    test('ignores a disconnect when not stably connected, even without a '
+        'reconnect event', () {
+      final guard = ReconnectGuard();
+      expect(
+        guard.shouldIgnoreDisconnect(ConnectionState.reconnecting),
+        isTrue,
+      );
+    });
+
+    test('resets to the initial state', () {
+      final guard = ReconnectGuard()..onReconnecting();
+      guard.reset();
+      expect(guard.isReconnecting, isFalse);
     });
   });
 }
