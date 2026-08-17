@@ -78,6 +78,9 @@ class SigningService extends StateNotifier<SigningServiceState> {
   VtaStepUpApprovalCoordinator? _coordinator;
   VtaStepUpApprovalOperation? _approvalOp;
 
+  /// entryId → human label, populated once after connect.
+  Map<String, String> _entryLabels = {};
+
   static const _vtaKeyId = "m/44'/60'/0'/0'/0'";
 
   Future<void> _initialize() async {
@@ -213,6 +216,7 @@ class SigningService extends StateNotifier<SigningServiceState> {
       // );
       // await _coordinator!.start();
 
+      await _fetchEntryLabels();
       state = state.copyWith(status: SigningServiceStatus.connected);
       _logger.info(
         'Signing service connected (chat-item approval only)',
@@ -396,6 +400,34 @@ class SigningService extends StateNotifier<SigningServiceState> {
     }
   }
 
+  /// Returns the human-readable label for a vault entry id, or null.
+  String? resolveEntryLabel(String? entryId) =>
+      entryId == null ? null : _entryLabels[entryId];
+
+  Future<void> _fetchEntryLabels() async {
+    if (_vtaClient == null || _authWorkflow == null) return;
+    try {
+      final token = await _authWorkflow!.getValidAccessToken();
+      _vtaClient!.setAuthToken(token);
+      final response = await _vtaClient!.vault.listEntries();
+      final payload = response['payload'] as Map<String, dynamic>?;
+      final entries = (payload?['entries'] as List?) ?? const [];
+      _entryLabels = <String, String>{
+        for (final e in entries.whereType<Map<String, dynamic>>())
+          ...switch (_VaultEntryMeta.tryParse(e)) {
+            _VaultEntryMeta(:final id, :final label) => {id: label},
+            null => <String, String>{},
+          },
+      };
+      _logger.info(
+        'Loaded ${_entryLabels.length} vault entry labels: $_entryLabels',
+        name: _logKey,
+      );
+    } catch (e) {
+      _logger.warning('Failed to load vault entry labels: $e', name: _logKey);
+    }
+  }
+
   /// Fetches a page of trust-task (document/message signing) history from the
   /// VTA audit log. Captures both autonomous and step-up gated signings, and
   /// every outcome (success and denied), newest-first.
@@ -520,5 +552,19 @@ class SigningService extends StateNotifier<SigningServiceState> {
     _channel?.disconnect();
     _authWorkflow?.disconnect();
     super.dispose();
+  }
+}
+
+class _VaultEntryMeta {
+  const _VaultEntryMeta({required this.id, required this.label});
+
+  final String id;
+  final String label;
+
+  static _VaultEntryMeta? tryParse(Map<String, dynamic> json) {
+    final id = json['id'] as String?;
+    final label = json['label'] as String?;
+    if (id == null || label == null) return null;
+    return _VaultEntryMeta(id: id, label: label);
   }
 }

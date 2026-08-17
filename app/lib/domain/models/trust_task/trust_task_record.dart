@@ -24,6 +24,7 @@ class TrustTaskRecord {
     required this.status,
     required this.rawOutcome,
     this.entryId,
+    this.resourceLabel,
     this.actor,
     this.contextId,
     this.detail,
@@ -66,6 +67,10 @@ class TrustTaskRecord {
 
   /// The vault entry that was signed (`resource` in the audit row).
   final String? entryId;
+
+  /// Human-readable label resolved from the vault after connect;
+  /// null until resolved.
+  final String? resourceLabel;
 
   /// The DID that performed the task (the connector's VTA signing identity).
   final String? actor;

@@ -436,7 +436,8 @@ class _TrustTaskHistoryTile extends StatelessWidget {
             'timestamp':
                 record.timestamp.toUtc().millisecondsSinceEpoch ~/ 1000,
             'outcome': record.rawOutcome,
-            if (record.entryId != null) 'resource': record.entryId,
+            if (record.entryId != null)
+              'resource': record.resourceLabel ?? record.entryId!,
             if (record.actor != null) 'actor': record.actor,
             if (record.contextId != null) 'context_id': record.contextId,
             if (record.detail != null) 'detail': record.detail,
@@ -444,12 +445,35 @@ class _TrustTaskHistoryTile extends StatelessWidget {
 
     final keys = source.keys.toList()..sort();
     return [
-      for (final key in keys) MapEntry(key, _stringifyValue(source[key])),
+      for (final key in keys)
+        MapEntry(_formatKey(key), _stringifyValue(key, source[key])),
     ];
   }
 
-  static String _stringifyValue(Object? value) {
+  static String _formatKey(String key) {
+    return key
+        .split(RegExp(r'[_\s]+'))
+        .map((w) => w.isEmpty ? w : '${w[0].toUpperCase()}${w.substring(1)}')
+        .join(' ');
+  }
+
+  static String _stringifyValue(String key, Object? value) {
     if (value == null) return '—';
+    if (key == 'timestamp') {
+      final seconds = value is num
+          ? value.toInt()
+          : value is String
+          ? int.tryParse(value)
+          : null;
+      if (seconds != null && seconds > 0) {
+        return _formatTimestamp(
+          DateTime.fromMillisecondsSinceEpoch(
+            seconds * 1000,
+            isUtc: true,
+          ).toLocal(),
+        );
+      }
+    }
     if (value is String) return value.isEmpty ? '—' : value;
     if (value is num || value is bool) return value.toString();
     try {
