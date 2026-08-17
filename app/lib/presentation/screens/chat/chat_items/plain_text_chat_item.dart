@@ -33,6 +33,16 @@ class _PlainTextChatItem extends ConsumerWidget {
     final group = ref.watch(provider.select((state) => state.group));
     final myDid = ref.watch(provider.select((state) => state.myDid));
     final myCard = ref.watch(provider.select((state) => state.myCard));
+    final isAgentContact = ref.watch(
+      provider.select(
+        (state) => state.contact?.category == ContactCategory.robot,
+      ),
+    );
+    final visuallyFromMe = _isVisuallyFromMe(
+      chatItem,
+      myDid: myDid,
+      isAgentContact: isAgentContact,
+    );
 
     void selectReaction() {
       if (!context.mounted) return;
@@ -145,7 +155,7 @@ class _PlainTextChatItem extends ConsumerWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final maxBubbleWidth = constraints.hasBoundedWidth
-            ? chatItem.isFromMe
+            ? visuallyFromMe
                   ? constraints.maxWidth * _maxTextBubbleWidthFactor
                   : constraints.maxWidth
             : double.infinity;
@@ -158,7 +168,7 @@ class _PlainTextChatItem extends ConsumerWidget {
                 contactId: _contactId,
                 chatItem: chatItem,
                 attachment: attachment,
-                isFromMe: chatItem.isFromMe,
+                isFromMe: visuallyFromMe,
                 chatItemColor: _chatItemColor,
               ),
             if (chatItem.value.isNotEmpty)
@@ -179,7 +189,7 @@ class _PlainTextChatItem extends ConsumerWidget {
                 contactId: _contactId,
                 chatItem: chatItem,
                 attachment: attachment,
-                isFromMe: chatItem.isFromMe,
+                isFromMe: visuallyFromMe,
                 chatItemColor: _chatItemColor,
               ),
           ],
