@@ -656,7 +656,12 @@ String _friendlyIdentifier(String value) {
       .split(RegExp(r'\s+'));
   return words
       .where((word) => word.isNotEmpty)
-      .map((word) => '${word[0].toUpperCase()}${word.substring(1)}')
+      .map((word) {
+        final lower = word.toLowerCase();
+        if (lower == 'vta') return 'VTA';
+        if (lower == 'ai') return 'AI';
+        return '${word[0].toUpperCase()}${word.substring(1)}';
+      })
       .join(' ');
 }
 
@@ -665,6 +670,25 @@ String _breakableIdentifier(String value) {
     RegExp(r'([:/._-])'),
     (match) => '${match.group(1)} ',
   );
+}
+
+DateTime? _parseDomainMapTimestamp(Object? value) {
+  if (value is num) {
+    final timestamp = value.toInt();
+    final millis = timestamp > 9999999999 ? timestamp : timestamp * 1000;
+    return DateTime.fromMillisecondsSinceEpoch(millis).toLocal();
+  }
+
+  final text = value?.toString().trim();
+  if (text == null || text.isEmpty) return null;
+
+  final numeric = int.tryParse(text);
+  if (numeric != null) {
+    final millis = numeric > 9999999999 ? numeric : numeric * 1000;
+    return DateTime.fromMillisecondsSinceEpoch(millis).toLocal();
+  }
+
+  return DateTime.tryParse(text)?.toLocal();
 }
 
 class _AgentAuthorizationCard extends StatelessWidget {
@@ -708,47 +732,74 @@ class _AgentAuthorizationCard extends StatelessWidget {
         return _friendlyIdentifier(text);
       }
       if (key == 'timestamp') {
+        final timestamp = _parseDomainMapTimestamp(source[key]);
+        if (timestamp != null) {
+          return _TrustTaskHistoryTile._formatTimestamp(timestamp);
+        }
         return text.replaceFirst('T', ' ').replaceFirst('Z', ' UTC');
       }
       return _breakableIdentifier(text);
     }
 
-    Widget mapChip(String label, String value) {
-      return ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 160),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: colorScheme.primary.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: colorScheme.primary.withValues(alpha: 0.16),
+    Widget mapValue(String label, String value) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: textTheme.labelSmall?.copyWith(
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
+              fontWeight: FontWeight.w500,
             ),
           ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  label,
-                  style: textTheme.labelSmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  value,
-                  style: textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurface,
-                    fontWeight: FontWeight.w700,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurface,
+              height: 1.25,
             ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      );
+    }
+
+    Widget domainContextSummary() {
+      return DecoratedBox(
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.22),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: colorScheme.outlineVariant.withValues(alpha: 0.34),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: mapValue(
+                  'Domain',
+                  readableValue(domainMap, 'domain_id'),
+                ),
+              ),
+              Container(
+                width: 1,
+                height: 38,
+                margin: const EdgeInsets.symmetric(horizontal: 14),
+                color: colorScheme.outlineVariant.withValues(alpha: 0.38),
+              ),
+              Expanded(
+                child: mapValue(
+                  'Context',
+                  readableValue(domainMap, 'context_id'),
+                ),
+              ),
+            ],
           ),
         ),
       );
@@ -756,28 +807,29 @@ class _AgentAuthorizationCard extends StatelessWidget {
 
     Widget detailRow(String label, String value, {bool emphasize = false}) {
       return Padding(
-        padding: const EdgeInsets.only(top: 10),
+        padding: const EdgeInsets.only(top: 9),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              width: 96,
+              width: 104,
               child: Text(
                 label,
                 style: textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
+                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.78),
+                  fontWeight: FontWeight.w500,
+                  height: 1.35,
                 ),
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 12),
             Expanded(
               child: Text(
                 value,
                 style: textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurface,
-                  height: 1.25,
-                  fontWeight: FontWeight.w600,
+                  height: 1.35,
+                  fontWeight: emphasize ? FontWeight.w600 : FontWeight.w400,
                 ),
                 softWrap: true,
                 overflow: TextOverflow.visible,
@@ -817,20 +869,8 @@ class _AgentAuthorizationCard extends StatelessWidget {
                           : 'Trust task entry',
                       style: textTheme.labelLarge?.copyWith(
                         color: colorScheme.onSurface,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w600,
                       ),
-                    ),
-                  ),
-                  Flexible(
-                    child: Text(
-                      readableValue(entry, 'channel'),
-                      style: textTheme.labelSmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w700,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.end,
                     ),
                   ),
                 ],
@@ -840,7 +880,7 @@ class _AgentAuthorizationCard extends StatelessWidget {
                 readableValue(entry, 'outcome'),
                 emphasize: true,
               ),
-              detailRow('Operation', readableValue(entry, 'operation')),
+              detailRow('VTA mediator DID', readableValue(entry, 'channel')),
               detailRow('Actor', readableValue(entry, 'actor')),
               detailRow('Vault', readableValue(entry, 'vault_entry')),
               detailRow('Time', readableValue(entry, 'timestamp')),
@@ -933,30 +973,16 @@ class _AgentAuthorizationCard extends StatelessWidget {
                         child: Text(
                           'Domain map',
                           style: textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      mapChip('Domain', readableValue(domainMap, 'domain_id')),
-                      mapChip(
-                        'Context',
-                        readableValue(domainMap, 'context_id'),
-                      ),
-                      mapChip(
-                        'Scope',
-                        readableValue(domainMap, 'context_scope'),
-                      ),
-                    ],
-                  ),
+                  domainContextSummary(),
+                  const SizedBox(height: 8),
                   detailRow('Source', readableValue(domainMap, 'source')),
-                  detailRow('Task type', readableValue(domainMap, 'task_type')),
                   detailRow('Agent DID', readableValue(domainMap, 'agent_did')),
                   const SizedBox(height: 14),
                   if (entries.isEmpty)
