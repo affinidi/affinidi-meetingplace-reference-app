@@ -85,7 +85,7 @@ class TrustTaskHistoryController extends StateNotifier<TrustTaskHistoryState> {
       _loadedOnce = true;
       state = TrustTaskHistoryState(
         status: TrustTaskHistoryStatus.ready,
-        records: result.records,
+        records: _resolveLabels(result.records),
         hasMore: result.hasMore,
         page: result.page,
       );
@@ -119,7 +119,7 @@ class TrustTaskHistoryController extends StateNotifier<TrustTaskHistoryState> {
       );
       state = state.copyWith(
         status: TrustTaskHistoryStatus.ready,
-        records: [...state.records, ...result.records],
+        records: [...state.records, ..._resolveLabels(result.records)],
         hasMore: result.hasMore,
         page: result.page,
       );
@@ -129,6 +129,26 @@ class TrustTaskHistoryController extends StateNotifier<TrustTaskHistoryState> {
         errorMessage: e.toString(),
       );
     }
+  }
+
+  List<TrustTaskRecord> _resolveLabels(List<TrustTaskRecord> records) {
+    return [
+      for (final r in records)
+        r.resourceLabel != null
+            ? r
+            : TrustTaskRecord(
+                id: r.id,
+                timestamp: r.timestamp,
+                status: r.status,
+                rawOutcome: r.rawOutcome,
+                entryId: r.entryId,
+                resourceLabel: _signingService.resolveEntryLabel(r.entryId),
+                actor: r.actor,
+                contextId: r.contextId,
+                detail: r.detail,
+                raw: r.raw,
+              ),
+    ];
   }
 }
 
