@@ -746,6 +746,8 @@ class ChatScreenController extends _$ChatScreenController
     if (trimmedMessage.isEmpty) return;
     if (trimmedMessage.length > _maxChatMessageLength) return;
 
+    messageTextController.clear();
+
     final routeAttachment = _buildContextRouteAttachment();
     final attachments = routeAttachment == null
         ? const <chat.ChatAttachment>[]
@@ -759,7 +761,6 @@ class ChatScreenController extends _$ChatScreenController
           ) ??
           Future<void>.value());
       _sendChatActivityTimedAction?.cancel();
-      messageTextController.clear();
     } catch (error, stackTrace) {
       _logger.error(
         'Failed to send chat message',
