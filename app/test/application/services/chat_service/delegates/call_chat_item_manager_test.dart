@@ -500,33 +500,54 @@ void main() {
       },
     );
 
+    test('reconcileCallOutcome keeps selfLeftBeforeEnd and writes the longer '
+        'duration', () async {
+      fakeChatSdk.sessionMessages = [
+        callMessage(
+          messageId: 'msg-1',
+          isFromMe: true,
+          status: CallStatus.ended,
+          callId: 'target-call',
+          durationMs: 1000,
+          participation: CallParticipation(
+            participantCount: 2,
+            didSelfJoin: true,
+            selfLeftBeforeEnd: true,
+          ),
+        ),
+      ];
+
+      final updated = await manager.reconcileCallOutcome(
+        'msg-1',
+        duration: const Duration(minutes: 5),
+      );
+
+      final metadata = CallMetadata.maybeOf(updated!.attachments.single);
+      expect(metadata?.status, CallStatus.ended);
+      expect(metadata?.durationMs, const Duration(minutes: 5).inMilliseconds);
+      expect(metadata?.participation?.selfLeftBeforeEnd, isTrue);
+    });
+
     test(
-      'reconcileCallOutcome clears selfLeftBeforeEnd and writes full duration',
+      'reconcileCallOutcome never regresses a longer existing duration',
       () async {
         fakeChatSdk.sessionMessages = [
           callMessage(
-            messageId: 'msg-1',
+            messageId: 'msg-1b',
             isFromMe: true,
             status: CallStatus.ended,
             callId: 'target-call',
-            durationMs: 1000,
-            participation: CallParticipation(
-              participantCount: 2,
-              didSelfJoin: true,
-              selfLeftBeforeEnd: true,
-            ),
+            durationMs: const Duration(minutes: 2).inMilliseconds,
           ),
         ];
 
         final updated = await manager.reconcileCallOutcome(
-          'msg-1',
-          duration: const Duration(minutes: 5),
+          'msg-1b',
+          duration: const Duration(seconds: 29),
         );
 
         final metadata = CallMetadata.maybeOf(updated!.attachments.single);
-        expect(metadata?.status, CallStatus.ended);
-        expect(metadata?.durationMs, const Duration(minutes: 5).inMilliseconds);
-        expect(metadata?.participation?.selfLeftBeforeEnd, isFalse);
+        expect(metadata?.durationMs, const Duration(minutes: 2).inMilliseconds);
       },
     );
 
@@ -762,7 +783,7 @@ void main() {
     });
   });
 
-  group('reconcileCallOutcome converges early leavers to the duration', () {
+  group('reconcileCallOutcome preserves early leavers\' "you left" label', () {
     late FakeChatSdk fakeChatSdk;
     late CallChatItemManager manager;
 
@@ -799,7 +820,7 @@ void main() {
       ],
     );
 
-    test('clears selfLeftBeforeEnd and writes the full duration', () async {
+    test('keeps selfLeftBeforeEnd and writes the longer duration', () async {
       fakeChatSdk.sessionMessages = [groupCallItem(selfLeftBeforeEnd: true)];
 
       final updated = await manager.reconcileCallOutcome(
@@ -812,7 +833,7 @@ void main() {
       final call = CallMetadata.maybeOf(attachment)!;
       expect(call.status, CallStatus.ended);
       expect(call.durationMs, const Duration(seconds: 25).inMilliseconds);
-      expect(call.participation?.selfLeftBeforeEnd, isFalse);
+      expect(call.participation?.selfLeftBeforeEnd, isTrue);
       expect(call.participation?.participantCount, 1);
     });
 

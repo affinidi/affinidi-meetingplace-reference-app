@@ -131,6 +131,12 @@ abstract class ChatService implements ConciergeMessaging, GroupManaging {
   /// answering.
   Future<bool> markCallAsDeclined({String? callId});
 
+  /// Resolves the media type (audio/video) of the call item carrying
+  /// [callId]. Used to join an ongoing call with its real media type instead
+  /// of guessing, since a device that has not joined yet has no session state
+  /// of its own to read it from. Returns `null` when no item carries [callId].
+  Future<CallMediaType?> resolveCallMediaType(String callId);
+
   /// Updates the local-only [status] and participation [duration] of a
   /// previously emitted call chat item, in place. Per-side and local-only: it
   /// does not propagate to the other party.
@@ -144,4 +150,10 @@ abstract class ChatService implements ConciergeMessaging, GroupManaging {
     Duration? duration,
     CallParticipation? participation,
   });
+
+  /// Redacts this device's own outgoing call item for [callId] after losing a
+  /// call glare (both peers dialled each other simultaneously). No-ops when
+  /// no item carries [callId], it isn't this device's own item, it is already
+  /// deleted, or the call already connected.
+  Future<void> redactSupersededOutgoingCall(String callId);
 }

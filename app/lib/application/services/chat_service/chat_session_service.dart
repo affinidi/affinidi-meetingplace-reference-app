@@ -1115,6 +1115,10 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       _callChatItemManager.resolveOutgoingCallChatItemId(callId: callId);
 
   @override
+  Future<CallMediaType?> resolveCallMediaType(String callId) =>
+      _callChatItemManager.resolveCallMediaType(callId);
+
+  @override
   Future<bool> markCallAsMissed({String? callId}) {
     if (_chatId == null || _missedCallManager == null) {
       return Future.value(false);
@@ -1144,6 +1148,10 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     );
     if (updated != null) upsertChatItem(updated);
   }
+
+  @override
+  Future<void> redactSupersededOutgoingCall(String callId) =>
+      _callChatItemManager.redactSupersededOutgoingCall(callId);
 
   void _removeChatItem(ChatItem item) {
     final messages = state.messages

@@ -158,6 +158,15 @@ class IncomingCallService extends _$IncomingCallService
   void _onIncomingCall(IncomingAudioVideoCallEvent event) {
     final log = 'Incoming call received: ${event.callerPermanentChannelDid}';
     _logger.info(log, name: _logKey);
+    final restartedOwnCallId = event.restartedOwnCallId;
+    if (restartedOwnCallId != null) {
+      unawaited(
+        _redactSupersededOutgoingCall(
+          event.otherPartyPermanentChannelDid,
+          callId: restartedOwnCallId,
+        ),
+      );
+    }
     // Start a fresh missed-call episode for this ring. Every terminal signal of
     // this call (local timeout/decline and the caller's trailing `call-decline`
     // broadcast) credits the badge under this one id.
@@ -165,6 +174,34 @@ class IncomingCallService extends _$IncomingCallService
         .v4();
     ref.read(incomingCallProvider.notifier).set(event);
     _startRingTimer(event.callId);
+  }
+
+  /// Redacts this device's own outgoing call item for [callId] after losing a
+  /// call glare against [contactId] (both sides dialled each other
+  /// simultaneously). The loser's outgoing item is a real, synced chat
+  /// message keyed by its own callId; left alone it renders as a permanent
+  /// duplicate call-history entry once the winning call (a different callId)
+  /// proceeds.
+  Future<void> _redactSupersededOutgoingCall(
+    String contactId, {
+    required String callId,
+  }) async {
+    _logger.info(
+      'Glare loss: redacting own outgoing call $callId for $contactId',
+      name: _logKey,
+    );
+    try {
+      await ref
+          .read(chatSessionServiceProvider(contactId).notifier)
+          .redactSupersededOutgoingCall(callId);
+    } catch (e, stackTrace) {
+      _logger.error(
+        '_redactSupersededOutgoingCall: failed for $contactId/$callId',
+        error: e,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+    }
   }
 
   void _startRingTimer(String callId) {

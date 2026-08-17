@@ -38,6 +38,7 @@ class OngoingGroupCallBannerData {
   OngoingGroupCallBannerData({
     required this.participantCount,
     required List<OngoingGroupCallAvatar> avatars,
+    required this.isAudioOnly,
   }) : avatars = List.unmodifiable(avatars);
 
   /// The number of distinct remote people currently in the call. Shown in the
@@ -48,14 +49,20 @@ class OngoingGroupCallBannerData {
   /// order. The widget decides how many fit before the Join button.
   final List<OngoingGroupCallAvatar> avatars;
 
+  /// The ongoing call's real media type, resolved from its own chat item so
+  /// Join starts the local user with the media the call actually uses.
+  final bool isAudioOnly;
+
   @override
   bool operator ==(Object other) =>
       other is OngoingGroupCallBannerData &&
       other.participantCount == participantCount &&
+      other.isAudioOnly == isAudioOnly &&
       _listEquals(other.avatars, avatars);
 
   @override
-  int get hashCode => Object.hash(participantCount, Object.hashAll(avatars));
+  int get hashCode =>
+      Object.hash(participantCount, isAudioOnly, Object.hashAll(avatars));
 }
 
 bool _listEquals(

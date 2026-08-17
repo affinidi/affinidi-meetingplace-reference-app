@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../application/services/chat_service/chat_session_service.dart';
 import '../../../../application/services/contacts_service/contacts_service.dart';
 import '../../../../domain/models/contact_card/contact_card.dart';
 import '../../../../infrastructure/extensions/contact_card_extensions.dart';
@@ -59,14 +60,16 @@ Stream<OngoingGroupCallBannerData?> ongoingGroupCallBanner(
   };
 
   final sdk = await ref.watch(meetingPlaceSdkProvider.future);
+  final chatSession = ref.read(chatSessionServiceProvider(channelDid).notifier);
 
   yield* sdk
       .watchOngoingGroupCall(groupChannelDid: channelDid)
-      .map(
+      .asyncMap(
         (ongoing) => _toBannerData(
           ongoing: ongoing,
           memberCards: memberCards,
           cacheManager: cacheManager,
+          chatSession: chatSession,
         ),
       )
       .distinct();
@@ -74,11 +77,19 @@ Stream<OngoingGroupCallBannerData?> ongoingGroupCallBanner(
 
 /// Maps an [OngoingGroupCall] snapshot to banner data, de-duplicating people by
 /// Matrix user ID and excluding the local user's own memberships.
-OngoingGroupCallBannerData? _toBannerData({
+///
+/// Resolves the real media type from the call's own chat item rather than
+/// assuming one: a group call can be started as audio-only or video, and a
+/// device that has not joined yet has no session state of its own to read it
+/// from. Falls back to audio-only when it cannot be resolved, so an
+/// unresolved lookup never forces a camera on for what might be an
+/// audio-only call.
+Future<OngoingGroupCallBannerData?> _toBannerData({
   required OngoingGroupCall? ongoing,
   required Map<String, ContactCard> memberCards,
   required BaseCacheManager cacheManager,
-}) {
+  required ChatSessionService chatSession,
+}) async {
   if (ongoing == null) return null;
 
   final seen = <String>{};
@@ -99,8 +110,10 @@ OngoingGroupCallBannerData? _toBannerData({
   }
 
   if (avatars.isEmpty) return null;
+  final mediaType = await chatSession.resolveCallMediaType(ongoing.callId);
   return OngoingGroupCallBannerData(
     participantCount: avatars.length,
     avatars: avatars,
+    isAudioOnly: mediaType != CallMediaType.video,
   );
 }
