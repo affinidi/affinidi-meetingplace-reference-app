@@ -17,13 +17,13 @@ const _logKey = 'CallLogService';
 /// Aggregates past calls across all contacts' chats for the Call log screen.
 ///
 /// For each contact, resolves its chat via `getChannelByOtherPartyPermanentDid`
-/// and `Chat.deriveId`, fetches its messages via
-/// `chat.ChatRepository.listMessages`, filters to messages carrying
-/// [CallMetadata] (`CallMetadata.isCall`), maps each to a [CallLogEntry], and
-/// returns the combined list sorted most-recent-first. Contacts whose channel
-/// or chat cannot be resolved are skipped, as are contacts whose message
-/// history fails to load (logged, not rethrown), so one bad chat cannot fail
-/// the whole Call log.
+/// and `Chat.deriveId`, fetches its call-only messages via
+/// `chat.ChatRepository.listMessagesByMediaKind`, filters to messages
+/// carrying [CallMetadata] (`CallMetadata.isCall`), maps each to a
+/// [CallLogEntry], and returns the combined list sorted most-recent-first.
+/// Contacts whose channel or chat cannot be resolved are skipped, as are
+/// contacts whose message history fails to load (logged, not rethrown), so
+/// one bad chat cannot fail the whole Call log.
 @riverpod
 Future<List<CallLogEntry>> callLogEntries(Ref ref) async {
   await ref.read(contactsServiceProvider.notifier).ensureInitialized();
@@ -54,7 +54,10 @@ Future<List<CallLogEntry>> callLogEntries(Ref ref) async {
         otherPartyDid: otherPartyDid,
       );
 
-      final messages = await chatRepository.listMessages(chatId);
+      final messages = await chatRepository.listMessagesByMediaKind(
+        chatId,
+        mediaKind: CallMetadata.callKind,
+      );
       for (final item in messages) {
         if (item is! chat.Message) continue;
         for (final attachment in item.attachments) {
