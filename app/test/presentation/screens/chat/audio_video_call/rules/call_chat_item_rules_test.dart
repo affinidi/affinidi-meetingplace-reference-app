@@ -24,6 +24,20 @@ void main() {
           CallStatus.ended,
         );
       });
+
+      test('returns missed (not declined) for a timed-out outcome', () {
+        expect(
+          resolveEndStatus(outcome: CallOutcome.timedOut, isFromMe: true),
+          CallStatus.missed,
+        );
+      });
+
+      test('returns missed (not declined) for a cancelled outcome', () {
+        expect(
+          resolveEndStatus(outcome: CallOutcome.cancelled, isFromMe: true),
+          CallStatus.missed,
+        );
+      });
     });
 
     group('receiver (isFromMe=false)', () {
@@ -285,7 +299,7 @@ void main() {
       expect(result, contains(':'));
     });
 
-    test('returns not answered for declined from me', () {
+    test('returns declined for declined from me', () {
       expect(
         resolveCallChatItemStatusText(
           status: CallStatus.declined,
@@ -294,7 +308,20 @@ void main() {
           callStartedAt: null,
           l10n: l10n,
         ),
-        l10n.callChatItemNotAnswered,
+        l10n.callChatItemDeclined,
+      );
+    });
+
+    test('returns declined for declined from other', () {
+      expect(
+        resolveCallChatItemStatusText(
+          status: CallStatus.declined,
+          isFromMe: false,
+          durationMs: null,
+          callStartedAt: null,
+          l10n: l10n,
+        ),
+        l10n.callChatItemDeclined,
       );
     });
 
@@ -468,7 +495,7 @@ void main() {
     test('a never-answered group call falls back to 1:1 not answered text', () {
       expect(
         resolveCallChatItemStatusText(
-          status: CallStatus.declined,
+          status: CallStatus.missed,
           isFromMe: true,
           durationMs: null,
           callStartedAt: null,
@@ -477,6 +504,22 @@ void main() {
           participation: participation(count: 2, didSelfJoin: false),
         ),
         l10n.callChatItemNotAnswered,
+      );
+    });
+
+    test('a never-answered group call the caller declined falls back to 1:1 '
+        'declined text', () {
+      expect(
+        resolveCallChatItemStatusText(
+          status: CallStatus.declined,
+          isFromMe: true,
+          durationMs: null,
+          callStartedAt: null,
+          l10n: l10n,
+          mediaType: CallMediaType.video,
+          participation: participation(count: 2, didSelfJoin: false),
+        ),
+        l10n.callChatItemDeclined,
       );
     });
   });

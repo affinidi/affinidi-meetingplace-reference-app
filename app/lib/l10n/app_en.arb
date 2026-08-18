@@ -2114,6 +2114,10 @@
 	"@callChatItemNotAnswered": {
 		"type": "text"
 	},
+	"callChatItemDeclined": "Declined",
+	"@callChatItemDeclined": {
+		"type": "text"
+	},
 	"callChatItemGroupOngoingVideo": "Ongoing video call ({count})",
 	"@callChatItemGroupOngoingVideo": {
 		"type": "text",

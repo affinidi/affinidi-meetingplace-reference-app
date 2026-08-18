@@ -18,10 +18,11 @@ import 'call_ui_rules.dart';
 /// the single authority for the local "who sees what end state" asymmetry, and
 /// is reused by both individual and group calls:
 ///   - [CallOutcome.ended] → [CallStatus.ended] on both sides
-///   - any unanswered outcome ([CallOutcome.cancelled], [CallOutcome.declined],
-///     [CallOutcome.timedOut]):
-///       - caller ([isFromMe] true) → [CallStatus.declined] ("Not answered")
+///   - [CallOutcome.declined] (the peer actively declined before answering):
+///       - caller ([isFromMe] true) → [CallStatus.declined] ("Declined")
 ///       - recipient ([isFromMe] false) → [CallStatus.missed] ("Missed")
+///   - [CallOutcome.cancelled] or [CallOutcome.timedOut] (no active decline;
+///     the call just went unanswered) → [CallStatus.missed] on both sides
 ///
 /// [CallOutcome.ongoing] is not a terminal outcome; it maps defensively to
 /// [CallStatus.inProgress].
@@ -31,9 +32,8 @@ CallStatus resolveEndStatus({
 }) => switch (outcome) {
   CallOutcome.ended => CallStatus.ended,
   CallOutcome.ongoing => CallStatus.inProgress,
-  CallOutcome.cancelled ||
-  CallOutcome.declined ||
-  CallOutcome.timedOut => isFromMe ? CallStatus.declined : CallStatus.missed,
+  CallOutcome.declined => isFromMe ? CallStatus.declined : CallStatus.missed,
+  CallOutcome.cancelled || CallOutcome.timedOut => CallStatus.missed,
 };
 
 /// Resolves the shared [CallOutcome] from this device's local session history.
@@ -251,8 +251,9 @@ String resolveCallChatItemStatusText({
       final dt = callStartedAt ?? clock.now();
       return DateFormat('h:mm a').format(dt.toLocal());
     case CallStatus.missed:
-    case CallStatus.declined:
       return isFromMe ? l10n.callChatItemNotAnswered : l10n.callChatItemMissed;
+    case CallStatus.declined:
+      return l10n.callChatItemDeclined;
   }
 }
 

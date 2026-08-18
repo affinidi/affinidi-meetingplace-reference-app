@@ -492,7 +492,7 @@ void main() {
     });
 
     test(
-      'caller with no peer emits CallStatus.declined with null duration',
+      'caller with no peer emits CallStatus.missed with null duration',
       () async {
         final chatSvc = FakeChatSessionService(resolveOutgoingResult: _kMsgId);
         final container = _makeContainer(chatService: chatSvc);
@@ -520,7 +520,7 @@ void main() {
         await _pumpAsync();
 
         expect(chatSvc.updateCalls, isNotEmpty);
-        expect(chatSvc.updateCalls.last.status, CallStatus.declined);
+        expect(chatSvc.updateCalls.last.status, CallStatus.missed);
         expect(chatSvc.updateCalls.last.duration, isNull);
       },
     );
@@ -548,7 +548,7 @@ void main() {
       await _pumpAsync();
 
       expect(chatSvc.updateCalls, isNotEmpty);
-      expect(chatSvc.updateCalls.last.status, CallStatus.declined);
+      expect(chatSvc.updateCalls.last.status, CallStatus.missed);
     });
 
     test('does not overwrite existing _ownRole', () async {
@@ -919,40 +919,38 @@ void main() {
   });
 
   group('endCallChatItem', () {
-    test(
-      'flushes the caller end status when the peer declined off-stream',
-      () async {
-        final chatSvc = FakeChatSessionService(resolveOutgoingResult: _kMsgId);
-        final container = _makeContainer(chatService: chatSvc);
-        final ctrl = container.read(activeCallControllerProvider.notifier);
-        final session = MockAudioVideoCallSession();
+    test('flushes the caller end status when the outgoing call was never '
+        'answered', () async {
+      final chatSvc = FakeChatSessionService(resolveOutgoingResult: _kMsgId);
+      final container = _makeContainer(chatService: chatSvc);
+      final ctrl = container.read(activeCallControllerProvider.notifier);
+      final session = MockAudioVideoCallSession();
 
-        ctrl.registerSession(
-          session,
-          channelDid: _kChannelDid,
-          isAudioOnly: false,
-          initialStatus: AudioVideoCallStatus.outgoingRinging,
-          peerName: _kPeerName,
-          isMicEnabled: true,
-          isMinimized: false,
-          isGroupContact: false,
-        );
+      ctrl.registerSession(
+        session,
+        channelDid: _kChannelDid,
+        isAudioOnly: false,
+        initialStatus: AudioVideoCallStatus.outgoingRinging,
+        peerName: _kPeerName,
+        isMicEnabled: true,
+        isMinimized: false,
+        isGroupContact: false,
+      );
 
-        await session.emitState(
-          const AudioVideoCallState(
-            status: AudioVideoCallStatus.outgoingRinging,
-            ownRole: CallRole.caller,
-          ),
-        );
-        await _pumpAsync();
+      await session.emitState(
+        const AudioVideoCallState(
+          status: AudioVideoCallStatus.outgoingRinging,
+          ownRole: CallRole.caller,
+        ),
+      );
+      await _pumpAsync();
 
-        await ctrl.endCallChatItem(role: CallRole.caller);
-        await _pumpAsync();
+      await ctrl.endCallChatItem(role: CallRole.caller);
+      await _pumpAsync();
 
-        expect(chatSvc.updateCalls, isNotEmpty);
-        expect(chatSvc.updateCalls.last.status, CallStatus.declined);
-      },
-    );
+      expect(chatSvc.updateCalls, isNotEmpty);
+      expect(chatSvc.updateCalls.last.status, CallStatus.missed);
+    });
 
     test('awaits the write so a following clear does not drop it', () async {
       final chatSvc = FakeChatSessionService(resolveOutgoingResult: _kMsgId);
@@ -984,7 +982,7 @@ void main() {
       await _pumpAsync();
 
       expect(chatSvc.updateCalls, isNotEmpty);
-      expect(chatSvc.updateCalls.last.status, CallStatus.declined);
+      expect(chatSvc.updateCalls.last.status, CallStatus.missed);
     });
   });
 }

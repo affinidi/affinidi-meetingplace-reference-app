@@ -3316,6 +3316,12 @@ abstract class AppLocalizations {
   /// **'Not answered'**
   String get callChatItemNotAnswered;
 
+  /// No description provided for @callChatItemDeclined.
+  ///
+  /// In en, this message translates to:
+  /// **'Declined'**
+  String get callChatItemDeclined;
+
   /// No description provided for @callChatItemGroupOngoingVideo.
   ///
   /// In en, this message translates to:

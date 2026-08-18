@@ -2210,6 +2210,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get callChatItemNotAnswered => 'Nicht beantwortet';
 
   @override
+  String get callChatItemDeclined => 'Abgelehnt';
+
+  @override
   String callChatItemGroupOngoingVideo(int count) {
     return 'Laufender Videoanruf ($count)';
   }

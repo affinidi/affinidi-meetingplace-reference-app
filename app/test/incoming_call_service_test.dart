@@ -172,7 +172,24 @@ void main() {
     group('and the recipient declines the call', () {
       test('it clears the state and forwards the call id to the SDK', () async {
         final fakeSDK = _FakeMeetingPlaceMatrixSDK();
-        final container = buildContainer(fakeSDK);
+        // A directly-constructed, individually-overridden fake is required
+        // here (rather than the shared `buildContainer` family override):
+        // chatSessionServiceProvider is autoDispose, so a plain
+        // `container.read` taken *after* decline() would observe a freshly
+        // recreated instance instead of the one the service actually wrote
+        // to. Holding our own reference keeps the mutation visible.
+        final chatService = FakeChatSessionService();
+        final container = ProviderContainer(
+          overrides: [
+            meetingPlaceSdkProvider.overrideWith((ref) async => fakeSDK),
+            chatSessionServiceProvider.overrideWith(FakeChatSessionService.new),
+            chatSessionServiceProvider(
+              'did:key:caller',
+            ).overrideWith(() => chatService),
+            contactsServiceProvider.overrideWith(FakeContactsService.new),
+            canUsePlatformAudioSessionProvider.overrideWith((ref) => false),
+          ],
+        );
         addTearDown(container.dispose);
 
         container.read(incomingCallServiceProvider);
@@ -202,6 +219,11 @@ void main() {
               .setPendingMissedCallCalls,
           ['did:key:caller'],
         );
+        // The chat item must be written as declined, never missed: this is
+        // the regression guard for the actual bug fix (an active decline is
+        // indistinguishable from a timeout without it).
+        expect(chatService.markCallAsDeclinedAttempts, 1);
+        expect(chatService.markCallAsMissedAttempts, 0);
       });
     });
 

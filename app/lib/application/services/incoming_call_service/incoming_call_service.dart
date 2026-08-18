@@ -90,7 +90,7 @@ class IncomingCallService extends _$IncomingCallService
     _ensureSDK((sdk) => unawaited(_acceptCall(sdk, callId: callId)));
   }
 
-  /// Declines the incoming call and marks it as missed in the chat history.
+  /// Declines the incoming call and marks it as declined in the chat history.
   void decline({required String callId}) {
     _logger.info('Declining call: $callId', name: _logKey);
     final channelDid = ref
@@ -101,7 +101,7 @@ class IncomingCallService extends _$IncomingCallService
     _ensureSDK((sdk) => unawaited(sdk.declineCall(callId: callId)));
     if (channelDid != null) {
       unawaited(
-        _markCallAsMissed(
+        _markCallAsDeclined(
           channelDid,
           callId: callId,
           missId: _missEpisodeIdByContact[channelDid] ?? const Uuid().v4(),
@@ -329,6 +329,58 @@ class IncomingCallService extends _$IncomingCallService
     } catch (e, stackTrace) {
       _logger.error(
         '_markCallAsMissed: Chat item update failed for $contactId',
+        error: e,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+    }
+  }
+
+  /// Records the actively declined incoming call: bumps the recipient's
+  /// unread badge and sets the durable pending-call marker exactly like
+  /// [_markCallAsMissed], but writes the chat item as [CallStatus.declined]
+  /// so the transcript distinguishes an active decline from a plain timeout.
+  ///
+  /// [missId] is the badge dedup key; see [_markCallAsMissed] for details.
+  Future<void> _markCallAsDeclined(
+    String contactId, {
+    String? callId,
+    String? missId,
+  }) async {
+    _logger.warning('Marking call as declined for $contactId', name: _logKey);
+    if (missId != null) {
+      try {
+        await ref
+            .read(contactsServiceProvider.notifier)
+            .incrementMissedCallBadge(contactId, callId: missId);
+      } catch (e, stackTrace) {
+        _logger.error(
+          '_markCallAsDeclined: Badge bump failed for $contactId',
+          error: e,
+          stackTrace: stackTrace,
+          name: _logKey,
+        );
+      }
+    }
+    try {
+      await ref
+          .read(chatSessionServiceProvider(contactId).notifier)
+          .markCallAsDeclined(callId: callId);
+    } catch (e, stackTrace) {
+      _logger.error(
+        '_markCallAsDeclined: Chat item update failed for $contactId',
+        error: e,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+    }
+    try {
+      await ref
+          .read(contactsServiceProvider.notifier)
+          .setPendingMissedCall(contactId, callId: callId);
+    } catch (e, stackTrace) {
+      _logger.error(
+        '_markCallAsDeclined: Recording missed call failed for $contactId',
         error: e,
         stackTrace: stackTrace,
         name: _logKey,

@@ -1113,7 +1113,7 @@ void main() {
       expect(find.text(l10n.videoCallAgain), findsOneWidget);
     });
 
-    testWidgets('shows no-answer screen for audio declined call', (
+    testWidgets('shows declined screen for audio declined call', (
       tester,
     ) async {
       final state = AudioVideoCallScreenState(
@@ -1131,7 +1131,7 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.text('Mia'), findsOneWidget);
-      expect(find.text(l10n.videoCallNoAnswer), findsOneWidget);
+      expect(find.text(l10n.videoCallCallDeclined), findsOneWidget);
       expect(find.text(l10n.videoCallCancel), findsOneWidget);
       expect(find.text(l10n.videoCallAgain), findsOneWidget);
     });

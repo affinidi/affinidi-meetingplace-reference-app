@@ -327,7 +327,7 @@ void main() {
     });
 
     test('re-registering the same caller session still ends '
-        'the outgoing item as declined once', () async {
+        'the outgoing item as missed once', () async {
       final chat = FakeChatSessionService(
         sendOutgoingResult: 'outgoing-id',
         resolveOutgoingResult: 'outgoing-id',
@@ -357,7 +357,7 @@ void main() {
 
       expect(chat.updateCalls, isNotEmpty);
       expect(chat.updateCalls.last.messageId, 'outgoing-id');
-      expect(chat.updateCalls.last.status, CallStatus.declined);
+      expect(chat.updateCalls.last.status, CallStatus.missed);
     });
   });
 
