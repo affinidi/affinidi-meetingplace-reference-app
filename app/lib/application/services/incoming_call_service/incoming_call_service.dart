@@ -336,10 +336,17 @@ class IncomingCallService extends _$IncomingCallService
     }
   }
 
-  /// Records the actively declined incoming call: bumps the recipient's
-  /// unread badge and sets the durable pending-call marker exactly like
-  /// [_markCallAsMissed], but writes the chat item as [CallStatus.declined]
-  /// so the transcript distinguishes an active decline from a plain timeout.
+  /// Records the actively declined incoming call: bumps the recipient's unread
+  /// badge and writes the chat item as [CallStatus.declined] so the transcript
+  /// distinguishes an active decline from a plain timeout.
+  ///
+  /// Unlike [_markCallAsMissed], the chat item is written first and the durable
+  /// pending-call marker is set after. Setting the marker is a persist that
+  /// yields the event loop; a concurrent stale-item heal would otherwise settle
+  /// the still-ringing item to `missed` before the declined write lands,
+  /// leaving it stuck on "Missed". The write-failure safety net is preserved:
+  /// if the declined write fails, the marker still reconciles the item to
+  /// `missed`.
   ///
   /// [missId] is the badge dedup key; see [_markCallAsMissed] for details.
   Future<void> _markCallAsDeclined(
@@ -374,13 +381,15 @@ class IncomingCallService extends _$IncomingCallService
         name: _logKey,
       );
     }
+    // Set the durable marker only after the declined write above has landed, so
+    // a concurrent heal cannot settle the ringing item to missed first.
     try {
       await ref
           .read(contactsServiceProvider.notifier)
           .setPendingMissedCall(contactId, callId: callId);
     } catch (e, stackTrace) {
       _logger.error(
-        '_markCallAsDeclined: Recording missed call failed for $contactId',
+        '_markCallAsDeclined: Recording pending marker failed for $contactId',
         error: e,
         stackTrace: stackTrace,
         name: _logKey,

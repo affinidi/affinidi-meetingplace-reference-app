@@ -14,15 +14,23 @@ import 'call_ui_rules.dart';
 /// Returns the [CallStatus] to persist on the call chat item for a terminal
 /// [CallOutcome].
 ///
-/// [CallOutcome] is the shared, wire-level fact both sides agree on. This is
-/// the single authority for the local "who sees what end state" asymmetry, and
-/// is reused by both individual and group calls:
+/// [CallOutcome] is the shared, wire-level fact both sides agree on. This maps
+/// an outcome resolved from this device's local call session (the call screen's
+/// own terminal write) to the status the transcript persists, and drives the
+/// local "who sees what end state" asymmetry for that path. It is reused by
+/// both individual and group calls:
 ///   - [CallOutcome.ended] → [CallStatus.ended] on both sides
 ///   - [CallOutcome.declined] (the peer actively declined before answering):
 ///       - caller ([isFromMe] true) → [CallStatus.declined] ("Declined")
 ///       - recipient ([isFromMe] false) → [CallStatus.missed] ("Missed")
 ///   - [CallOutcome.cancelled] or [CallOutcome.timedOut] (no active decline;
 ///     the call just went unanswered) → [CallStatus.missed] on both sides
+///
+/// The recipient of an active decline does not reach this mapping: their
+/// item is written directly as [CallStatus.declined] by `IncomingCallService`
+/// from the incoming-call banner, so the [isFromMe] false,
+/// [CallOutcome.declined] branch above only covers a decline that still
+/// resolves through the local session.
 ///
 /// [CallOutcome.ongoing] is not a terminal outcome; it maps defensively to
 /// [CallStatus.inProgress].
