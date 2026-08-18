@@ -109,11 +109,12 @@ void main() {
         fakeContactsService.incrementMissedCallBadgeCallIds;
 
     // All scenarios run in one test to keep a single session lifecycle.
-    test('badges the caller-side declined call once keyed by the call item '
-        'message id, ignores missed and answered calls', () async {
+    test('badges the caller-side unanswered call (missed or declined) once '
+        'keyed by the call item message id, ignores recipient-side and '
+        'answered calls', () async {
       await chatService.startChatSession();
 
-      // calling -> declined (caller cancelled/declined): bumps once, and the
+      // calling -> declined (callee actively declined): bumps once, and the
       // dedup key is the call item message id.
       chatService.upsertChatItem(
         callItem('call-1', CallStatus.calling, isFromMe: true),
@@ -140,6 +141,16 @@ void main() {
       );
       expect(badgeCallIds(), ['call-1', 'call-2']);
 
+      // A caller-side missed call (outgoing call cancelled or timed out with
+      // no answer): also bumps, keyed by its own message id.
+      chatService.upsertChatItem(
+        callItem('call-2b', CallStatus.calling, isFromMe: true),
+      );
+      chatService.upsertChatItem(
+        callItem('call-2b', CallStatus.missed, isFromMe: true),
+      );
+      expect(badgeCallIds(), ['call-1', 'call-2', 'call-2b']);
+
       // A recipient-side missed transition is not badged here (owned by
       // IncomingCallService).
       chatService.upsertChatItem(
@@ -148,7 +159,7 @@ void main() {
       chatService.upsertChatItem(
         callItem('call-3', CallStatus.missed, isFromMe: false),
       );
-      expect(badgeCallIds(), ['call-1', 'call-2']);
+      expect(badgeCallIds(), ['call-1', 'call-2', 'call-2b']);
 
       // A recipient-side declined transition is not badged here either
       // (owned by IncomingCallService, which already bumps for its own
@@ -159,7 +170,7 @@ void main() {
       chatService.upsertChatItem(
         callItem('call-3b', CallStatus.declined, isFromMe: false),
       );
-      expect(badgeCallIds(), ['call-1', 'call-2']);
+      expect(badgeCallIds(), ['call-1', 'call-2', 'call-2b']);
 
       // An answered call that ended: does not badge.
       chatService.upsertChatItem(
@@ -171,7 +182,7 @@ void main() {
       chatService.upsertChatItem(
         callItem('call-4', CallStatus.ended, isFromMe: true),
       );
-      expect(badgeCallIds(), ['call-1', 'call-2']);
+      expect(badgeCallIds(), ['call-1', 'call-2', 'call-2b']);
 
       container
           .read(openChatRegistryProvider.notifier)
@@ -182,7 +193,7 @@ void main() {
       chatService.upsertChatItem(
         callItem('call-5', CallStatus.declined, isFromMe: true),
       );
-      expect(badgeCallIds(), ['call-1', 'call-2']);
+      expect(badgeCallIds(), ['call-1', 'call-2', 'call-2b']);
     });
 
     test('syncs call activity as read only while the chat is open', () async {
