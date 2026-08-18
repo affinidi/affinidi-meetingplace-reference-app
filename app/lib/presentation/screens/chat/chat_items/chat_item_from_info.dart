@@ -34,10 +34,16 @@ class _ChatItemFromInfo extends ConsumerWidget {
 
       final agentOwnerName = ref.watch(
         provider.select((state) {
-          if (ownerDids.isNotEmpty &&
-              state.myDid != null &&
-              ownerDids.contains(state.myDid)) {
-            return state.myCard?.fullName ?? state.myCard?.displayName;
+          if (ownerDids.isNotEmpty) {
+            if (state.myDid != null && ownerDids.contains(state.myDid)) {
+              final name = state.myCard?.fullName ?? state.myCard?.displayName;
+              if (name != null && name.isNotEmpty) return name;
+            }
+            final otherDid = state.otherPartyCard?.did ?? '';
+            if (otherDid.isNotEmpty && ownerDids.contains(otherDid)) {
+              return state.otherPartyCard?.fullName ??
+                  state.contact?.card.fullName;
+            }
           }
           return state.otherPartyCard?.fullName ?? state.contact?.card.fullName;
         }),

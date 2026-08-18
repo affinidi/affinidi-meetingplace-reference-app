@@ -415,14 +415,7 @@ bool _isVisuallyFromMe(
   required bool isAgentContact,
 }) {
   if (chatItem.isFromMe) return true;
-  if (isAgentContact) return false;
-  if (myDid == null || myDid.isEmpty || chatItem is! chat.Message) {
-    return false;
-  }
-  if (!chatItem.attachments.any((a) => a.isCiergeAgentMarker)) return false;
-  return chatItem.attachments.any(
-    (attachment) => attachment.ciergeOwnerDids.contains(myDid),
-  );
+  return false;
 }
 
 class _RCardBubble extends StatelessWidget {
