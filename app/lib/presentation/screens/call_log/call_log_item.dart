@@ -9,24 +9,23 @@ part of 'call_log_screen.dart';
 /// must not be rendered as if it were the full roster. Falls back to the
 /// count label when no name resolved; appends the unresolved remainder as
 /// "and N others" when some, but not all, resolved.
-String? resolveCallLogParticipantsLabel(
-  AppLocalizations l10n,
-  CallLogEntry entry,
-) {
-  if (!entry.isGroupCall) return null;
+extension CallLogEntryPresentationX on CallLogEntry {
+  String? resolveParticipantsLabel(AppLocalizations l10n) {
+    if (!isGroupCall) return null;
 
-  final participantNames = entry.participantNames;
-  if (participantNames == null || participantNames.isEmpty) {
-    return l10n.callLogParticipantsCount(entry.participantCount);
+    final participantNames = this.participantNames;
+    if (participantNames == null || participantNames.isEmpty) {
+      return l10n.callLogParticipantsCount(participantCount);
+    }
+
+    final unresolvedCount = participantCount - participantNames.length;
+    if (unresolvedCount <= 0) return participantNames.join(', ');
+
+    return l10n.callLogParticipantsNamesAndOthers(
+      participantNames.join(', '),
+      unresolvedCount,
+    );
   }
-
-  final unresolvedCount = entry.participantCount - participantNames.length;
-  if (unresolvedCount <= 0) return participantNames.join(', ');
-
-  return l10n.callLogParticipantsNamesAndOthers(
-    participantNames.join(', '),
-    unresolvedCount,
-  );
 }
 
 /// Renders a single past-call entry. Tapping this item is intentionally a
@@ -57,7 +56,7 @@ class _CallLogItem extends StatelessWidget {
             mediaType: entry.mediaType,
           );
 
-    final participantsLabel = resolveCallLogParticipantsLabel(l10n, entry);
+    final participantsLabel = entry.resolveParticipantsLabel(l10n);
 
     return Card(
       color: colorScheme.inverseSurface.withValues(alpha: 0.5),
