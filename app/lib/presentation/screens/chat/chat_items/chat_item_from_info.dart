@@ -36,8 +36,7 @@ class _ChatItemFromInfo extends ConsumerWidget {
         provider.select((state) {
           if (ownerDids.isNotEmpty) {
             if (state.myDid != null && ownerDids.contains(state.myDid)) {
-              final name =
-                  state.myCard?.fullName ?? state.myCard?.displayName;
+              final name = state.myCard?.fullName ?? state.myCard?.displayName;
               if (name != null && name.isNotEmpty) return name;
             }
             final otherDid = state.otherPartyCard?.did ?? '';
