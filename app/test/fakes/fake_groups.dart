@@ -53,8 +53,8 @@ class FakeGroups {
             contactInfo: {
               'n': {
                 'given': multiWordMemberFirstName,
-                'surname': 'Smith',
-                'displayName': 'Display Earl Alice',
+                'surname': '',
+                'displayName': '',
               },
             },
           ),
