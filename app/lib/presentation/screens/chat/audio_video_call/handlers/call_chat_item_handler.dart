@@ -33,8 +33,6 @@ class CallChatItemHandler {
   });
 
   static const _logKey = 'CallChatItemHandler';
-  static const _terminalResolveRetryDelay = Duration(milliseconds: 200);
-  static const _terminalResolveMaxAttempts = 3;
 
   final Future<String?> Function(String callId)? _onInitiator;
   final Future<String?> Function({required bool isCaller, String? callId})
@@ -194,11 +192,24 @@ class CallChatItemHandler {
       name: _logKey,
     );
     _initiatorIdFuture = _onInitiator(_sessionCallId!);
-    unawaited(
-      _initiatorIdFuture!.then((id) {
-        if (id != null) _callChatItemId ??= id;
-      }),
-    );
+    // Serialize creation onto the write queue so the end-call write, enqueued
+    // after, runs only once creation has completed — no retrying to resolve
+    // it.
+    _writeQueue = _writeQueue
+        .then((_) => _initiatorIdFuture)
+        .then(
+          (id) {
+            if (id != null) _callChatItemId ??= id;
+          },
+          onError: (Object error, StackTrace stackTrace) {
+            _logger.error(
+              'call chat item write failed',
+              error: error,
+              stackTrace: stackTrace,
+              name: _logKey,
+            );
+          },
+        );
   }
 
   void _writeInProgressStatus(CallStatus status) {
@@ -241,15 +252,19 @@ class CallChatItemHandler {
         outcome: outcome,
         hasHadPeer: hasHadPeer,
         callDuration: callDuration,
-        attemptsRemaining: _terminalResolveMaxAttempts,
       ),
     );
     unawaited(_endCallWrite);
   }
 
-  /// Resolves the call chat item id and writes the terminal status, retrying
-  /// the resolve a bounded number of times when the item hasn't synced into
-  /// local storage yet.
+  /// Resolves the call chat item id and writes the terminal status.
+  ///
+  /// The caller item's creation is enqueued onto [_writeQueue] as soon as it
+  /// starts (see [_resolveRoleAndEmit]), and this write is enqueued after it,
+  /// so by the time this runs the id has already resolved naturally — no
+  /// retrying needed. If it still can't be resolved (e.g. the recipient's
+  /// local storage hasn't synced the caller's item yet), the write is skipped
+  /// and left to missed-call reconciliation.
   ///
   /// [_callChatItemEnded] is set only once this write actually lands, never
   /// up front: an unconditional lock would silently and permanently skip the
@@ -261,7 +276,6 @@ class CallChatItemHandler {
     required CallOutcome outcome,
     required bool hasHadPeer,
     required Duration callDuration,
-    required int attemptsRemaining,
   }) async {
     if (_isDisposed()) {
       _logger.info(
@@ -272,21 +286,12 @@ class CallChatItemHandler {
     }
     final messageId = await _resolveId(isCaller: isCaller);
     if (messageId == null) {
-      if (attemptsRemaining <= 0) {
-        _logger.info(
-          'endCallChatItem: Skipping update (messageId=$messageId)',
-          name: _logKey,
-        );
-        return;
-      }
-      await Future<void>.delayed(_terminalResolveRetryDelay);
-      return _resolveAndWriteTerminalStatus(
-        isCaller: isCaller,
-        outcome: outcome,
-        hasHadPeer: hasHadPeer,
-        callDuration: callDuration,
-        attemptsRemaining: attemptsRemaining - 1,
+      _logger.info(
+        'endCallChatItem: Skipping update (messageId=null); missed-call '
+        'reconciliation will resolve it',
+        name: _logKey,
       );
+      return;
     }
     final endStatus = resolveEndStatus(outcome: outcome, isFromMe: isCaller);
     await _updateItem(
