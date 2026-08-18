@@ -879,6 +879,75 @@ void main() {
     });
 
     test(
+      'restarting as answerer seeds hasHadPeer and resets callDurationSeconds',
+      () async {
+        final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+        final contactId = FakeContacts.individualContact.id;
+        final container = _buildContainer(fakeSDK: fakeSDK);
+        addTearDown(container.dispose);
+
+        await container.read(meetingPlaceSdkProvider.future);
+        final controller = container.read(
+          audioVideoCallScreenControllerProvider(contactId).notifier,
+        );
+
+        await controller.joinCall();
+
+        // Peer joins with a call-started timestamp, seeding a nonzero
+        // duration through the banner timer.
+        fakeSDK.emitState(
+          AudioVideoCallState(
+            status: AudioVideoCallStatus.active,
+            callStartedAt: DateTime.now().subtract(const Duration(seconds: 30)),
+            participants: const [
+              AudioVideoCallParticipant(participantId: 'local', isSelf: true),
+              AudioVideoCallParticipant(participantId: 'remote-1'),
+            ],
+          ),
+        );
+        await Future<void>.microtask(() {});
+
+        // Call ends as declined (e.g. peer hot-restarted mid-call).
+        fakeSDK.emitState(
+          const AudioVideoCallState(status: AudioVideoCallStatus.declined),
+        );
+        await Future<void>.microtask(() {});
+
+        final preRestartState = container.read(
+          audioVideoCallScreenControllerProvider(contactId),
+        );
+        expect(
+          preRestartState.callDurationSeconds,
+          greaterThan(0),
+          reason:
+              'peer-join with a 30s-ago callStartedAt must seed a nonzero '
+              'duration, so the post-restart reset to 0 is a real change',
+        );
+
+        // acceptRecall path: the controller is reused in place, so the
+        // build-time hasHadPeer seed must be reapplied here instead.
+        await controller.restartCall(isAudioOnly: false, asAnswerer: true);
+
+        final state = container.read(
+          audioVideoCallScreenControllerProvider(contactId),
+        );
+        expect(
+          state.hasHadPeer,
+          isTrue,
+          reason:
+              'answerer restarts must reseed hasHadPeer so the reused '
+              'controller does not flash "Calling..." before the real '
+              'peer-join arrives',
+        );
+        expect(
+          state.callDurationSeconds,
+          0,
+          reason: 'a carried-over duration must not render a stale timer',
+        );
+      },
+    );
+
+    test(
       'sets isAudioOnly and isCameraEnabled=false on audio restart',
       () async {
         final fakeSDK = _FakeMeetingPlaceMatrixSDK();

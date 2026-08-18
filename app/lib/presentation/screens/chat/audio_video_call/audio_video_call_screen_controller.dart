@@ -241,18 +241,33 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   }
 
   /// Discards a finished call (missed or declined) and places a fresh
-  /// outgoing call. Used by the "Call again" action on the end-call screen.
-  Future<void> restartCall({required bool isAudioOnly}) async {
-    _logger.info('restartCall: isAudioOnly=$isAudioOnly', name: _logKey);
+  /// outgoing call. Used by the "Call again" action on the end-call screen,
+  /// and by [acceptRecall] when the answerer accepts a peer's callback.
+  ///
+  /// [asAnswerer] seeds `hasHadPeer` the same way the build-time guard does
+  /// for a normal accepted call (see [build]) — this path reuses the existing
+  /// controller instead of rebuilding it, so that seed would otherwise be
+  /// skipped and the reused controller would briefly show "Calling..." until
+  /// the real peer-join flips the latch. Defaults to false: a genuine
+  /// outbound "Call again" correctly still shows "Calling...".
+  Future<void> restartCall({
+    required bool isAudioOnly,
+    bool asAnswerer = false,
+  }) async {
+    _logger.info(
+      'restartCall: isAudioOnly=$isAudioOnly, asAnswerer=$asAnswerer',
+      name: _logKey,
+    );
     _isMinimizing = false;
     _session = null;
     _sessionHandler?.dispose();
     _sessionHandler = null;
     state = state.copyWith(
       status: AudioVideoCallStatus.idle,
-      hasHadPeer: false,
+      hasHadPeer: asAnswerer,
       participants: [],
       session: null,
+      callDurationSeconds: 0,
       isAudioOnly: isAudioOnly,
       isCameraEnabled: !isAudioOnly,
     );
@@ -269,7 +284,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   Future<void> acceptRecall({required bool isAudioOnly}) async {
     state = state.copyWith(peerIsCallingBack: false);
     _clearIncomingCallState();
-    await restartCall(isAudioOnly: isAudioOnly);
+    await restartCall(isAudioOnly: isAudioOnly, asAnswerer: true);
   }
 
   /// Toggles top-bar and controls-bar visibility (tap-anywhere behaviour).
