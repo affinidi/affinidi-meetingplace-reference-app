@@ -11,8 +11,28 @@ class MockAudioVideoCallSession implements AudioVideoCallSession {
 
   int hangUpCalls = 0;
 
+  // Latest state emitted, replayed to late subscribers so a fresh listen
+  // (matching the real session's documented "emits immediately with the
+  // current state" contract) never misses the current value.
+  AudioVideoCallState _latestState = AudioVideoCallState.initial;
+
   @override
-  Stream<AudioVideoCallState> get state => _stateController.stream;
+  Stream<AudioVideoCallState> get state {
+    late final StreamController<AudioVideoCallState> controller;
+    StreamSubscription<AudioVideoCallState>? sourceSubscription;
+    controller = StreamController<AudioVideoCallState>(
+      onListen: () {
+        sourceSubscription = _stateController.stream.listen(
+          controller.add,
+          onError: controller.addError,
+          onDone: controller.close,
+        );
+        controller.add(_latestState);
+      },
+      onCancel: () => sourceSubscription?.cancel(),
+    );
+    return controller.stream;
+  }
 
   @override
   Stream<CallParticipantEvent> get participantEvents =>
@@ -20,6 +40,7 @@ class MockAudioVideoCallSession implements AudioVideoCallSession {
 
   /// Emits a state to the stream.
   Future<void> emitState(AudioVideoCallState state) {
+    _latestState = state;
     _stateController.add(state);
     return Future.microtask(() {});
   }

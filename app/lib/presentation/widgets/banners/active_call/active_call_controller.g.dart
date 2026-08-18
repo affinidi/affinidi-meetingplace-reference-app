@@ -42,7 +42,7 @@ final class ActiveCallControllerProvider
 }
 
 String _$activeCallControllerHash() =>
-    r'eb70adafdcfda18e76332a1ded0ac6e6d4add057';
+    r'2b330bf846509aa198f994c88722eb1b5d927d5c';
 
 abstract class _$ActiveCallController extends $Notifier<ActiveCallState?> {
   ActiveCallState? build();

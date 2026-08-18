@@ -298,7 +298,8 @@ class _ChatMessageList extends HookConsumerWidget {
                                 );
                               },
                             ),
-                          thisItemStatus.isNotEmpty
+                          thisItemStatus.isNotEmpty &&
+                                  !_isCallOnlyMessage(chatItem)
                               ? Align(
                                   alignment: visuallyFromMe
                                       ? Alignment.topRight

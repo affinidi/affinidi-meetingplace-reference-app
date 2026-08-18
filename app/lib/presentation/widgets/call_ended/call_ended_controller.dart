@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../application/services/incoming_call_service/incoming_call_notifier.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import 'call_ended_state.dart';
@@ -15,6 +16,17 @@ class CallEndedController extends _$CallEndedController {
   @override
   CallEndedState? build() {
     _logger = ref.read(appLoggerProvider);
+
+    // A fresh incoming call takes priority over a lingering Call Ended
+    // screen: otherwise this opaque overlay covers the incoming-call banner
+    // underneath until the user manually dismisses it, so the caller's ring
+    // times out unanswered.
+    ref.listen(incomingCallProvider, (_, next) {
+      if (next.eventOrNull == null) return;
+      if (state == null) return;
+      dismiss();
+    });
+
     return null;
   }
 

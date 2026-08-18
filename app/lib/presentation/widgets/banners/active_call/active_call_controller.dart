@@ -27,14 +27,12 @@ class ActiveCallController extends _$ActiveCallController {
   Timer? _durationTimer;
   DateTime? _callStartedAt;
   StreamSubscription<AudioVideoCallState>? _sessionStateSub;
-  StreamSubscription<CallParticipantEvent>? _participantEventSub;
   CallRole? _ownRole;
   CallChatItemHandler? _chatItemHandler;
   ChatSessionService? _chatService;
   ProviderSubscription<Object?>? _chatServiceSub;
   bool _isAudioOnly = false;
   bool _isDisposed = false;
-  bool _isGroupContact = false;
 
   // Pins this controller alive for the lifetime of a call so its instance
   // (and the terminated guard below) survive the dismiss window, instead of
@@ -54,7 +52,6 @@ class ActiveCallController extends _$ActiveCallController {
       _isDisposed = true;
       _durationTimer?.cancel();
       _sessionStateSub?.cancel();
-      _participantEventSub?.cancel();
       _chatServiceSub?.close();
       _chatServiceSub = null;
     });
@@ -163,8 +160,6 @@ class ActiveCallController extends _$ActiveCallController {
     _callStartedAt = null;
     _sessionStateSub?.cancel();
     _sessionStateSub = null;
-    _participantEventSub?.cancel();
-    _participantEventSub = null;
     _session = null;
     final chatItemHandler = _chatItemHandler;
     chatItemHandler?.endCall(assumeRole: _ownRole);
@@ -237,7 +232,6 @@ class ActiveCallController extends _$ActiveCallController {
       (_, _) {},
     );
     _isAudioOnly = isAudioOnly;
-    _isGroupContact = isGroupContact;
     _chatItemHandler = CallChatItemHandler(
       onInitiator: _sendOutgoingCallMessage,
       resolveItemId: _resolveCallChatItemId,
@@ -247,11 +241,7 @@ class ActiveCallController extends _$ActiveCallController {
       isGroupCall: isGroupContact,
     )..attach(session);
     _sessionStateSub?.cancel();
-    _participantEventSub?.cancel();
     _sessionStateSub = session.state.listen(_onSessionState, onDone: clear);
-    _participantEventSub = session.participantEvents.listen(
-      _onParticipantEvent,
-    );
   }
 
   /// Removes the registered session when the call is fully torn down.
@@ -261,8 +251,6 @@ class ActiveCallController extends _$ActiveCallController {
     resetVideoCallPiPPosition();
     _sessionStateSub?.cancel();
     _sessionStateSub = null;
-    _participantEventSub?.cancel();
-    _participantEventSub = null;
     _session = null;
     _chatServiceSub?.close();
     _chatServiceSub = null;
@@ -370,33 +358,6 @@ class ActiveCallController extends _$ActiveCallController {
       _chatService = null;
       subToClose.close();
     });
-  }
-
-  /// Ends a minimized 1-on-1 call immediately when the only peer leaves.
-  void _onParticipantEvent(CallParticipantEvent event) {
-    if (_isDisposed) return;
-    if (event.type != CallParticipantEventType.left) return;
-    final current = state;
-    if (current == null || !current.isMinimized) return;
-    if (_isGroupContact) {
-      _logger.info(
-        '_onParticipantEvent: Peer left group call, call continues',
-        name: _logKey,
-      );
-      return;
-    }
-    if (!current.hasHadPeer) {
-      _logger.warning(
-        '_onParticipantEvent: Peer left but hasHadPeer=false, skipping',
-        name: _logKey,
-      );
-      return;
-    }
-    _logger.info(
-      '_onParticipantEvent: Peer left 1-on-1 call, ending call',
-      name: _logKey,
-    );
-    hangUp();
   }
 
   void _onSessionState(AudioVideoCallState sessionState) {

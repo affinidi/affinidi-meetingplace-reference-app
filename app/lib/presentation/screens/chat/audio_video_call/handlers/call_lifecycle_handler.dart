@@ -72,7 +72,7 @@ class CallLifecycleHandler {
 
   /// Cancels an outgoing call that has not yet been answered.
   Future<void> cancelCall() async {
-    final hasHadPeer = _getState().hasHadPeer;
+    final hasHadPeer = await _hasHadPeerNow();
     try {
       await _getSDK()?.leaveCurrentCall();
       _setSession(null);
@@ -121,7 +121,7 @@ class CallLifecycleHandler {
 
   /// Cancels if still ringing/connecting, otherwise leaves an active call.
   Future<void> hangUp() async {
-    final status = _getState().status;
+    final status = await _currentStatus();
     if (status == AudioVideoCallStatus.outgoingRinging ||
         status == AudioVideoCallStatus.connecting) {
       await cancelCall();
@@ -141,6 +141,36 @@ class CallLifecycleHandler {
         clearIncomingCall: true,
         endOutcome: CallOutcome.declined,
       ),
+    );
+  }
+
+  /// Reads the SDK session's authoritative current status, falling back to
+  /// the locally tracked screen status when no session is attached.
+  ///
+  /// The screen's own status lags the session by however long its state
+  /// update takes to propagate through the controller. A hang-up racing a
+  /// just-arrived peer-joined event must not act on that stale status:
+  /// [AudioVideoCallSession.state] replays its current value to every fresh
+  /// subscriber, so subscribing here reads the truth directly instead of the
+  /// delayed copy.
+  Future<AudioVideoCallStatus> _currentStatus() async {
+    final session = _getSession();
+    if (session == null) return _getState().status;
+    return (await session.state.first).status;
+  }
+
+  /// Whether a peer has ever joined, combining the local latch (which never
+  /// regresses once true) with the session's authoritative current status and
+  /// participants, so a peer that joined moments ago and hasn't propagated to
+  /// the screen state yet still counts.
+  Future<bool> _hasHadPeerNow() async {
+    final session = _getSession();
+    if (session == null) return _getState().hasHadPeer;
+    final current = await session.state.first;
+    return computeHasHadPeer(
+      previous: _getState().hasHadPeer,
+      status: current.status,
+      participants: current.participants,
     );
   }
 

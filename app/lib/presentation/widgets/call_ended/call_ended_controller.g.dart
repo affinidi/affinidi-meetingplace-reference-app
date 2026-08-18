@@ -42,7 +42,7 @@ final class CallEndedControllerProvider
 }
 
 String _$callEndedControllerHash() =>
-    r'033c7a621b53f79d4df2071e8fbeee61a6c4d0ba';
+    r'f61c89805ffaf07f756eea8f540f269ccc202bdc';
 
 abstract class _$CallEndedController extends $Notifier<CallEndedState?> {
   CallEndedState? build();

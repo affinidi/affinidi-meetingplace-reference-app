@@ -195,7 +195,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
           logger: _logger,
         ),
         ChatMessageProtocolHandler(
-          onUpdateSequenceNumber: updateContactSequenceNumber,
+          onUpdateSequenceNumber: _advanceReadSeqNoForIncomingMessage,
           logger: _logger,
         ),
         ZkpAttachmentProtocolHandler(
@@ -772,6 +772,21 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     await ref
         .read(contactsServiceProvider.notifier)
         .updateContactSequenceNumber(channelDid, channel.seqNo);
+  }
+
+  /// Advances the read baseline for an incoming message only while the user is
+  /// actually viewing this chat. When the chat is closed — e.g. the session is
+  /// alive only because a minimized call is holding it — the message must stay
+  /// unread so the contact badge counts it.
+  Future<void> _advanceReadSeqNoForIncomingMessage(String channelDid) async {
+    final contact = ref
+        .read(contactsServiceProvider)
+        .getContactByChannelDid(channelDid);
+    if (contact == null ||
+        !ref.read(openChatRegistryProvider.notifier).isOpen(contact.id)) {
+      return;
+    }
+    await updateContactSequenceNumber(channelDid);
   }
 
   @override

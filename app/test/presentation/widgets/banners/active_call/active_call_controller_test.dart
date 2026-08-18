@@ -733,11 +733,54 @@ void main() {
   });
 
   // =========================================================================
-  // Peer-left auto-end (1-on-1 calls)
+  // Peer-left termination now owned by the SDK state machine, not the banner.
   // =========================================================================
 
-  group('peer-left auto-end', () {
-    test('hangs up when peer leaves a 1-on-1 live call', () async {
+  group('peer-left termination (SDK-owned)', () {
+    test(
+      'a bare participant-left event no longer ends the call on its own',
+      () async {
+        final container = _makeContainer();
+        final ctrl = container.read(activeCallControllerProvider.notifier);
+        final session = MockAudioVideoCallSession();
+
+        ctrl.registerSession(
+          session,
+          channelDid: _kChannelDid,
+          isAudioOnly: false,
+          initialStatus: AudioVideoCallStatus.connecting,
+          peerName: _kPeerName,
+          isMicEnabled: true,
+          isMinimized: true,
+          isGroupContact: false,
+        );
+
+        // Peer joins via state so hasHadPeer latches
+        await session.emitState(
+          AudioVideoCallState(
+            status: AudioVideoCallStatus.active,
+            participants: [_remotePeer()],
+          ),
+        );
+        await _pumpAsync();
+
+        // The participantEvents stream is no longer observed by the banner;
+        // only the session's authoritative state drives termination.
+        await session.emitParticipantEvent(
+          CallParticipantEvent(
+            type: CallParticipantEventType.left,
+            participant: _remotePeer(),
+          ),
+        );
+        await _pumpAsync();
+
+        expect(session.hangUpCalls, 0);
+        expect(container.read(activeCallControllerProvider), isNotNull);
+      },
+    );
+
+    test('clears the banner without redundantly hanging up when the session '
+        'reports the call ended', () async {
       final container = _makeContainer();
       final ctrl = container.read(activeCallControllerProvider.notifier);
       final session = MockAudioVideoCallSession();
@@ -753,7 +796,6 @@ void main() {
         isGroupContact: false,
       );
 
-      // Peer joins via state so hasHadPeer latches
       await session.emitState(
         AudioVideoCallState(
           status: AudioVideoCallStatus.active,
@@ -762,79 +804,15 @@ void main() {
       );
       await _pumpAsync();
 
-      // Peer leaves via participantEvent (the actual trigger path)
-      await session.emitParticipantEvent(
-        CallParticipantEvent(
-          type: CallParticipantEventType.left,
-          participant: _remotePeer(),
-        ),
-      );
-      await _pumpAsync();
-
-      expect(session.hangUpCalls, 1);
-    });
-
-    test('does not hang up when peer leaves a group call', () async {
-      final container = _makeContainer();
-      final ctrl = container.read(activeCallControllerProvider.notifier);
-      final session = MockAudioVideoCallSession();
-
-      ctrl.registerSession(
-        session,
-        channelDid: _kChannelDid,
-        isAudioOnly: false,
-        initialStatus: AudioVideoCallStatus.connecting,
-        peerName: _kPeerName,
-        isMicEnabled: true,
-        isMinimized: true,
-        isGroupContact: true,
-      );
-
+      // The SDK reducer already ran LeaveMatrixCall/DisconnectRoom before
+      // reporting ended; the banner must not call hangUp() again.
       await session.emitState(
-        AudioVideoCallState(
-          status: AudioVideoCallStatus.active,
-          participants: [_remotePeer()],
-        ),
-      );
-      await _pumpAsync();
-
-      await session.emitParticipantEvent(
-        CallParticipantEvent(
-          type: CallParticipantEventType.left,
-          participant: _remotePeer(),
-        ),
+        const AudioVideoCallState(status: AudioVideoCallStatus.ended),
       );
       await _pumpAsync();
 
       expect(session.hangUpCalls, 0);
-    });
-
-    test('does not hang up when no peer was ever connected', () async {
-      final container = _makeContainer();
-      final ctrl = container.read(activeCallControllerProvider.notifier);
-      final session = MockAudioVideoCallSession();
-
-      ctrl.registerSession(
-        session,
-        channelDid: _kChannelDid,
-        isAudioOnly: false,
-        initialStatus: AudioVideoCallStatus.connecting,
-        peerName: _kPeerName,
-        isMicEnabled: true,
-        isMinimized: true,
-        isGroupContact: false,
-      );
-
-      // No state emission — hasHadPeer stays false
-      await session.emitParticipantEvent(
-        CallParticipantEvent(
-          type: CallParticipantEventType.left,
-          participant: _remotePeer(),
-        ),
-      );
-      await _pumpAsync();
-
-      expect(session.hangUpCalls, 0);
+      expect(container.read(activeCallControllerProvider), isNull);
     });
   });
 

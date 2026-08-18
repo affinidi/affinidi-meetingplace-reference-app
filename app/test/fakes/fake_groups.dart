@@ -4,6 +4,9 @@ import 'fake_contacts.dart';
 class FakeGroups {
   static const removableMemberDid = 'did:key:removable-member';
   static const removableMemberFirstName = 'Bob';
+  static const removableMemberDisplayName = 'Bob Builder';
+  static const multiWordMemberDid = 'did:key:multi-word-member';
+  static const multiWordMemberFirstName = 'Earl Alice';
   static const adminMemberDid = 'did:key:admin-member';
   static const adminMemberFirstName = 'Carol';
 
@@ -33,11 +36,29 @@ class FakeGroups {
               'n': {
                 'given': removableMemberFirstName,
                 'surname': 'Builder',
-                'displayName': 'Display Bob',
+                'displayName': removableMemberDisplayName,
               },
             },
           ),
           publicKey: 'fake-public-key-2',
+        ),
+        sdk.GroupMember(
+          did: multiWordMemberDid,
+          dateAdded: DateTime.now(),
+          status: sdk.GroupMemberStatus.approved,
+          membershipType: sdk.GroupMembershipType.member,
+          contactCard: sdk.ContactCard(
+            did: multiWordMemberDid,
+            type: FakeContacts.sdkContactCard.type,
+            contactInfo: {
+              'n': {
+                'given': multiWordMemberFirstName,
+                'surname': '',
+                'displayName': '',
+              },
+            },
+          ),
+          publicKey: 'fake-public-key-4',
         ),
         sdk.GroupMember(
           did: adminMemberDid,

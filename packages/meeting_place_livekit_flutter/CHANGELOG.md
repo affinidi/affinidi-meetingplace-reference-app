@@ -1,3 +1,11 @@
+## 0.0.1-dev.9
+
+ - **FIX**: correct call status sync and end-of-call handling on both sides (#306).
+
+## 0.0.1-dev.8
+
+ - **FEAT**: add call log screen (#288).
+
 ## 0.0.1-dev.7
 
  - **FEAT**: add ongoing group audio call banner in chat (#268).

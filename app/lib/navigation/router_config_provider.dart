@@ -9,6 +9,7 @@ import '../application/services/identities_service/identities_service.dart';
 import '../application/services/settings_service/settings_service.dart';
 import '../infrastructure/providers/mnemonic_configured_provider.dart';
 import '../presentation/screens/authentication/authentication_screen/authentication_screen.dart';
+import '../presentation/screens/call_log/call_log_screen.dart';
 import '../presentation/screens/mnemonic/mnemonic_screen.dart';
 import '../presentation/screens/onboarding/onboarding_screen/onboarding_screen.dart';
 import '../presentation/screens/settings/settings_screen.dart';
@@ -144,6 +145,12 @@ GoRouter routerConfig(Ref ref) {
         parentNavigatorKey: rootNavigatorKey,
         pageBuilder: (context, state) =>
             const NoTransitionPage(child: SettingsScreen()),
+      ),
+      GoRoute(
+        path: RoutePaths.callLog,
+        parentNavigatorKey: rootNavigatorKey,
+        pageBuilder: (context, state) =>
+            const NoTransitionPage(child: CallLogScreen()),
       ),
       GoRoute(
         path: RoutePaths.authentication,

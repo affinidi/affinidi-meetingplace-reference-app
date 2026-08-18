@@ -377,68 +377,62 @@ void main() {
     });
   });
 
-  group('shouldAutoEndCallForPeer', () {
-    final peer = const AudioVideoCallParticipant(participantId: 'peer-1');
-    final self = const AudioVideoCallParticipant(
-      participantId: 'self-1',
-      isSelf: true,
-    );
-
-    test('returns true for 1-on-1 when peer leaves during active call', () {
+  group('isEndedWithNoScreen', () {
+    test('is true for a call cancelled before the peer ever joined', () {
       expect(
-        shouldAutoEndCallForPeer(
-          isGroupContact: false,
-          hasHadPeer: true,
-          participants: [self],
-          status: AudioVideoCallStatus.active,
+        isEndedWithNoScreen(
+          phase: CallUiPhase.ended,
+          endState: null,
+          peerIsCallingBack: false,
+          isJoinFailure: false,
         ),
         isTrue,
       );
     });
 
-    test('returns false for group contact when peer leaves', () {
+    test('is false when not in the ended phase', () {
       expect(
-        shouldAutoEndCallForPeer(
-          isGroupContact: true,
-          hasHadPeer: true,
-          participants: [self],
-          status: AudioVideoCallStatus.active,
+        isEndedWithNoScreen(
+          phase: CallUiPhase.calling,
+          endState: null,
+          peerIsCallingBack: false,
+          isJoinFailure: false,
         ),
         isFalse,
       );
     });
 
-    test('returns false when hasHadPeer is false', () {
+    test('is false when an end-state screen should show', () {
       expect(
-        shouldAutoEndCallForPeer(
-          isGroupContact: false,
-          hasHadPeer: false,
-          participants: [self],
-          status: AudioVideoCallStatus.active,
+        isEndedWithNoScreen(
+          phase: CallUiPhase.ended,
+          endState: CallEndState.missedCall,
+          peerIsCallingBack: false,
+          isJoinFailure: false,
         ),
         isFalse,
       );
     });
 
-    test('returns false when peer is still present', () {
+    test('is false when the peer is calling back', () {
       expect(
-        shouldAutoEndCallForPeer(
-          isGroupContact: false,
-          hasHadPeer: true,
-          participants: [self, peer],
-          status: AudioVideoCallStatus.active,
+        isEndedWithNoScreen(
+          phase: CallUiPhase.ended,
+          endState: null,
+          peerIsCallingBack: true,
+          isJoinFailure: false,
         ),
         isFalse,
       );
     });
 
-    test('returns false when status is not a live call status', () {
+    test('is false for a join failure', () {
       expect(
-        shouldAutoEndCallForPeer(
-          isGroupContact: false,
-          hasHadPeer: true,
-          participants: [self],
-          status: AudioVideoCallStatus.ended,
+        isEndedWithNoScreen(
+          phase: CallUiPhase.ended,
+          endState: null,
+          peerIsCallingBack: false,
+          isJoinFailure: true,
         ),
         isFalse,
       );

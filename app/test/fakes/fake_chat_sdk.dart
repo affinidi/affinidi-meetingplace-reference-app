@@ -149,6 +149,29 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
     return message;
   }
 
+  /// Simulates an incoming text message using the real `ChatMessageEvent`
+  /// production emits for `ChatProtocol.chatMessage` (see
+  /// `chat_event_conversion.dart` in `meeting_place_matrix`/`meeting_place_chat`),
+  /// unlike [simulateIncomingTextMessage] which uses `UnhandledChatEvent`.
+  /// Needed to exercise handlers whose `canHandle` matches `ChatMessageEvent`
+  /// specifically, e.g. `ChatMessageProtocolHandler`.
+  void simulateIncomingChatMessageEvent({
+    required String text,
+    String senderDid = 'fake-sender-did',
+  }) {
+    final message = Message(
+      chatId: 'fake-chat-id',
+      messageId: 'msg-chatmessage-${DateTime.now().microsecondsSinceEpoch}',
+      value: text,
+      dateCreated: DateTime.now(),
+      status: ChatItemStatus.confirmed,
+      isFromMe: false,
+      senderDid: senderDid,
+      attachments: const [],
+    );
+    _emit(StreamData(event: const ChatMessageEvent(), chatItem: message));
+  }
+
   /// Simulates an incoming concierge message for join group requests
   /// Returns the created ConciergeMessage for verification in tests
   ConciergeMessage simulateJoinGroupRequest({
@@ -289,6 +312,49 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
     _emit(StreamData(event: chatEvent, chatItem: conciergeMessage));
 
     return conciergeMessage;
+  }
+
+  /// Simulates the SDK recording that it is awaiting a member to join
+  EventMessage simulateAwaitingGroupMember({
+    required String memberName,
+    required String memberDid,
+    required String senderDid,
+    required String recipientDid,
+  }) {
+    final eventMessage = EventMessage(
+      chatId: 'fake-chat-id',
+      messageId: 'event-awaiting-${DateTime.now().millisecondsSinceEpoch}',
+      senderDid: senderDid,
+      isFromMe: false,
+      dateCreated: DateTime.now(),
+      status: ChatItemStatus.received,
+      eventType: EventMessageType.awaitingGroupMemberToJoin,
+      data: {
+        'memberDid': memberDid,
+        'contactCard': {
+          'did': 'did:key:identity-id',
+          'type': ContactCardType.individual.value,
+          'contactInfo': {
+            'n': {'given': memberName},
+          },
+        },
+      },
+    );
+
+    final chatEvent = UnhandledChatEvent(
+      type: 'https://affinidi.com/chat/1.0/event',
+      senderDid: senderDid,
+      body: {
+        'type': 'awaitingGroupMemberToJoin',
+        'memberName': memberName,
+        'timestamp': eventMessage.dateCreated.toIso8601String(),
+      },
+      createdTime: eventMessage.dateCreated,
+    );
+
+    _emit(StreamData(event: chatEvent, chatItem: eventMessage));
+
+    return eventMessage;
   }
 
   /// Simulates a member joining the group event
