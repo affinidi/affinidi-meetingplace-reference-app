@@ -27,7 +27,8 @@ extension ChatAttachmentExtension on chat.ChatAttachment {
   /// group agent reply can be attributed back to the owning member. Empty when
   /// this attachment carries no owner metadata.
   List<String> get ciergeOwnerDids {
-    if (format != CiergeSignatureAttachmentsPlugin.pluginFormat) {
+    if (format != CiergeSignatureAttachmentsPlugin.pluginFormat &&
+        format != CiergeTrustTaskPlugin.pluginFormat) {
       return const [];
     }
     final fromFilename = _ownerDidsFromFilename();
@@ -60,8 +61,10 @@ extension ChatAttachmentExtension on chat.ChatAttachment {
       final decoded = jsonDecode(
         utf8.decode(base64Url.decode(match.group(1)!)),
       );
-      if (decoded is! List) return const [];
-      return decoded.whereType<String>().where((d) => d.isNotEmpty).toList();
+      // Token encodes the full metadata map {ownerDids:[...], context:...}.
+      final owners = decoded is Map ? decoded['ownerDids'] : decoded;
+      if (owners is! List) return const [];
+      return owners.whereType<String>().where((d) => d.isNotEmpty).toList();
     } on FormatException {
       return const [];
     }
