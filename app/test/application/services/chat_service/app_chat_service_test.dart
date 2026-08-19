@@ -13,6 +13,7 @@ import 'package:mpx_flutter_reference_app/application/services/chat_service/chat
 import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service_state.dart';
+import 'package:mpx_flutter_reference_app/application/services/incoming_call_service/incoming_call_notifier.dart';
 import 'package:mpx_flutter_reference_app/application/services/network_connectivity_service/network_connectivity_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/network_connectivity_service/network_connectivity_service_state.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact.dart';
@@ -1370,7 +1371,24 @@ void main() {
         ),
       ];
 
+      // The call is genuinely still ringing while the chat opens, so the
+      // chat-open unmarked sweep must not heal it prematurely.
+      container
+          .read(incomingCallProvider.notifier)
+          .set(
+            IncomingAudioVideoCallEvent(
+              callId: 'incoming-call-id',
+              callerPermanentChannelDid: channelDid,
+              otherPartyPermanentChannelDid: channelDid,
+              mediaType: CallMediaType.video,
+              invitedAt: DateTime.now(),
+            ),
+          );
       await chatService.startChatSession();
+
+      // The call ends unanswered: the ring clears and the miss handler marks
+      // the durable marker before the explicit reconciliation call below.
+      container.read(incomingCallProvider.notifier).clear();
       await fakeContactsService.setPendingMissedCall(channelDid);
       final healed = await chatService.markCallAsMissed();
 

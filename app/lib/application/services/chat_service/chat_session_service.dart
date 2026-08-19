@@ -402,7 +402,9 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       await chatStreamAttached;
 
       if (_missedCallManager != null) {
-        await _missedCallManager!.reconcilePendingMissedCall();
+        await _missedCallManager!.reconcilePendingMissedCall(
+          sweepUnmarked: true,
+        );
       }
 
       await _resetBadgeCount();

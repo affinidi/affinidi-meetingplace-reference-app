@@ -33,14 +33,27 @@ class MissedCallManager {
 
   /// Reconciles the durable missed-call marker against chat history.
   ///
-  /// Runs at chat open and after a marker is written. Resolves the incoming
-  /// call item the marker points at and settles it:
-  /// - not synced yet: keeps the marker so the stream can heal it on arrival.
-  /// - stale (still calling/ringing): heals it to missed and clears the marker.
-  /// - already terminal: clears the marker, nothing left to heal.
+  /// Runs at chat open and after a marker is written. Heals EVERY stale
+  /// incoming call item at or before the marker, not only the one the marker
+  /// points at: back-to-back missed calls overwrite the single-slot marker,
+  /// so earlier calls' items lose their marker and would otherwise stay stuck
+  /// on `ringing`.
+  /// - marked item not synced yet: keeps the marker so the stream can heal it
+  ///   on arrival.
+  /// - marked item already terminal: clears the marker, nothing left to heal.
+  ///
+  /// When [sweepUnmarked] is set (chat open only), also heals stale incoming
+  /// items that never got a marker at all: rapid back-to-back calls can leave
+  /// the latest call's own miss event never firing, so its item never gets a
+  /// marker and the marker-gated sweep above skips it. This is safe because
+  /// the top-of-method ringing guard already skips the whole reconcile while
+  /// a call is ringing for the contact, so with no active ring, a stale
+  /// incoming item is a settled miss. The miss-event and stream paths keep
+  /// the marker-gated (DIDComm-race-safe) behavior by leaving [sweepUnmarked]
+  /// at its default `false`.
   ///
   /// Skipped while a call is ringing. Returns true only when it heals an item.
-  Future<bool> reconcilePendingMissedCall() async {
+  Future<bool> reconcilePendingMissedCall({bool sweepUnmarked = false}) async {
     const methodName = 'reconcilePendingMissedCall';
     if (!ref.mounted) return false;
     final pendingCallId = await _pendingMissedCallId();
@@ -53,33 +66,59 @@ class MissedCallManager {
     }
 
     final pendingAt = await _pendingMissedCallAt();
-    if (pendingAt == null) {
+    if (pendingAt == null && !sweepUnmarked) {
       _logger.info('$methodName: Skip, no pending marker', name: _className);
       return false;
     }
 
-    final item = await callChatItemManager.resolveIncomingCallItemBefore(
+    // Heal EVERY stale incoming call item at or before the marker, not only
+    // the one the marker points at. Back-to-back missed calls overwrite the
+    // single-slot marker, so earlier calls' items lose their marker and would
+    // otherwise stay stuck on `ringing`. A call currently ringing for this
+    // contact is excluded so a live call is never healed prematurely.
+    final ringingEvent = ref.read(incomingCallProvider).eventOrNull;
+    final activeRingCallId =
+        (ringingEvent != null &&
+            ringingEvent.otherPartyPermanentChannelDid ==
+                otherPartyPermanentChannelDid)
+        ? ringingEvent.callId
+        : null;
+
+    final staleItems = await callChatItemManager
+        .resolveStaleIncomingCallItemsBefore(
+          pendingAt,
+          excludeCallId: activeRingCallId,
+        );
+    var healedAny = false;
+    for (final item in staleItems) {
+      if (!ref.mounted) return healedAny;
+      await _healIncomingCallItemMissed(
+        item.messageId,
+        clearPendingMarker: false,
+      );
+      healedAny = true;
+    }
+
+    // No durable marker to manage on the chat-open unmarked sweep.
+    if (pendingAt == null) return healedAny;
+
+    // The marker stays tied to its own target: if the latest missed call's
+    // item has not synced yet, keep the marker so the stream can heal it on
+    // arrival; otherwise it is settled now, so clear the marker.
+    if (!ref.mounted) return healedAny;
+    final markedItem = await callChatItemManager.resolveIncomingCallItemBefore(
       pendingAt,
       callId: pendingCallId,
     );
-    if (item == null) {
+    if (markedItem == null) {
       _logger.info(
-        '$methodName: Item not synced yet, keeping marker',
+        '$methodName: Marked item not synced yet, keeping marker',
         name: _className,
       );
-      return false;
+      return healedAny;
     }
-    if (!callChatItemManager.isStaleIncomingCall(item)) {
-      _logger.info(
-        '$methodName: Item already settled, clearing marker',
-        name: _className,
-      );
-      await _clearPendingMissedCall();
-      return false;
-    }
-
-    await _healIncomingCallItemMissed(item.messageId, clearPendingMarker: true);
-    return true;
+    await _clearPendingMissedCall();
+    return healedAny;
   }
 
   /// Heals [message] to `missed` when a stale incoming call item arrives via
