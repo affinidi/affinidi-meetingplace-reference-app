@@ -416,6 +416,40 @@ void main() {
     );
 
     test(
+      'reconcilePendingMissedCall keeps a null-callId marker when the sweep '
+      'heals nothing and the time-only resolve matches an unrelated settled '
+      'item, so the real target can still heal when it syncs via the stream',
+      () async {
+        final markerTime = DateTime(2026, 7, 9, 10, 30).toUtc();
+        final contact = FakeContacts.individualContact.copyWith(
+          channelDid: channelDid,
+          pendingMissedCallAt: markerTime,
+        );
+        final contactsService = FakeContactsService(contacts: [contact]);
+        final callItemManager = FakeCallChatItemManager(
+          staleItemsReturn: const [],
+          resolveReturn: incomingCallMessage(
+            messageId: 'msg-unrelated-settled',
+            dateCreated: markerTime.subtract(const Duration(minutes: 5)),
+          ),
+        );
+
+        final manager = MissedCallManager(
+          ref: _createTestRef(contactsService),
+          otherPartyPermanentChannelDid: channelDid,
+          callChatItemManager: callItemManager,
+          onUpsertChatItem: (_) {},
+        );
+
+        final healed = await manager.reconcilePendingMissedCall();
+
+        expect(healed, isFalse);
+        expect(callItemManager.updateCallCount, 0);
+        expect(contactsService.clearPendingMissedCallCalls, isEmpty);
+      },
+    );
+
+    test(
       'reconcilePendingMissedCall heals ALL stale incoming items before the '
       'marker, not just the marked one (back-to-back missed calls)',
       () async {

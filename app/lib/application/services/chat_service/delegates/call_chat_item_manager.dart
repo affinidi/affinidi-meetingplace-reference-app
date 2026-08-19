@@ -432,6 +432,21 @@ class CallChatItemManager {
         );
         return null;
       }
+      // The transport outcome converges a call this device took part in (in
+      // progress, or already ended locally) onto the authoritative duration.
+      // It must never overwrite an unanswered terminal: a missed/declined item
+      // means this device did not join, and a ringing/calling item never
+      // connected here, so forcing it to ended would fabricate a completed
+      // call.
+      if (existing.status != CallStatus.inProgress &&
+          existing.status != CallStatus.ended) {
+        logger.info(
+          'reconcileCallOutcome: $messageId is ${existing.status}, not a '
+          'participated call; preserving status',
+          name: _logKey,
+        );
+        return item;
+      }
       final convergedParticipation = existing.participation?.copyWith(
         selfLeftBeforeEnd: false,
       );

@@ -273,6 +273,88 @@ void main() {
         expect(ids.first, isNot(ids.last));
       });
 
+      test('a ring timeout followed by an unmatched cancel with a real callId '
+          'for the same contact counts as two distinct missed calls', () {
+        fakeAsync((async) {
+          final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+          final container = buildContainer(fakeSDK);
+
+          container.read(incomingCallServiceProvider);
+          async.flushMicrotasks();
+
+          // Call A rings and times out unanswered.
+          fakeSDK.emitIncoming(_event(callId: 'call-a'));
+          async.flushMicrotasks();
+          async.elapse(const Duration(seconds: 60));
+          async.flushMicrotasks();
+          expect(container.read(incomingCallProvider).eventOrNull, isNull);
+
+          // Call B is a cancel that beat its own invite, carrying a real
+          // transport call id (not the caller-DID fallback).
+          fakeSDK.emitCancelled(_event(callId: 'call-b-real-id'));
+          async.flushMicrotasks();
+
+          final contacts =
+              container.read(contactsServiceProvider.notifier)
+                  as FakeContactsService;
+          expect(contacts.incrementMissedCallBadgeCalls, [
+            'did:key:caller',
+            'did:key:caller',
+          ]);
+          final ids = contacts.incrementMissedCallBadgeCallIds;
+          expect(ids, hasLength(2));
+          expect(ids.first, isNot(ids.last));
+
+          container.dispose();
+        });
+      });
+
+      test("a ring timeout followed by the caller's trailing DID-fallback "
+          'broadcast for a group call still counts as one missed call', () {
+        fakeAsync((async) {
+          final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+          final container = buildContainer(fakeSDK);
+
+          container.read(incomingCallServiceProvider);
+          async.flushMicrotasks();
+
+          const groupDid = 'did:key:group-broadcast';
+          // Call A rings and times out unanswered.
+          fakeSDK.emitIncoming(
+            _event(
+              callId: 'room@1',
+              callerPermanentChannelDid: groupDid,
+              otherPartyPermanentChannelDid: groupDid,
+            ),
+          );
+          async.flushMicrotasks();
+          async.elapse(const Duration(seconds: 60));
+          async.flushMicrotasks();
+          expect(container.read(incomingCallProvider).eventOrNull, isNull);
+
+          // The caller's trailing call-decline broadcast re-reports the
+          // same call with the group-DID fallback id.
+          fakeSDK.emitCancelled(
+            _event(
+              callId: groupDid,
+              callerPermanentChannelDid: groupDid,
+              otherPartyPermanentChannelDid: groupDid,
+            ),
+          );
+          async.flushMicrotasks();
+
+          final contacts =
+              container.read(contactsServiceProvider.notifier)
+                  as FakeContactsService;
+          expect(contacts.incrementMissedCallBadgeCalls, [groupDid, groupDid]);
+          final ids = contacts.incrementMissedCallBadgeCallIds;
+          expect(ids, hasLength(2));
+          expect(ids.first, ids.last);
+
+          container.dispose();
+        });
+      });
+
       test('it marks the third-party call as missed when busy auto-reject fires'
           ' while already in another call', () async {
         final fakeSDK = _FakeMeetingPlaceMatrixSDK();

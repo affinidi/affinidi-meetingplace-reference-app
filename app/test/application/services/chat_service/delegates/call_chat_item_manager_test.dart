@@ -549,6 +549,29 @@ void main() {
         expect(metadata?.durationMs, 4242);
       },
     );
+
+    test(
+      'reconcileCallOutcome never overwrites an unanswered missed call item',
+      () async {
+        fakeChatSdk.sessionMessages = [
+          callMessage(
+            messageId: 'msg-missed',
+            isFromMe: false,
+            status: CallStatus.missed,
+            callId: 'target-call',
+          ),
+        ];
+
+        final updated = await manager.reconcileCallOutcome(
+          'msg-missed',
+          duration: const Duration(minutes: 5),
+        );
+
+        final metadata = CallMetadata.maybeOf(updated!.attachments.single);
+        expect(metadata?.status, CallStatus.missed);
+        expect(metadata?.durationMs, isNull);
+      },
+    );
   });
 
   group('CallChatItemManager.sendOutgoingCallMessage', () {

@@ -377,8 +377,20 @@ class IncomingCallService extends _$IncomingCallService
     // fallback id. Consume that call's episode id so it credits the badge under
     // the same key and counts once. A cancel that beat its own invite has no
     // episode (its ring never showed), so it counts on a fresh id.
-    final episodeId =
-        _missEpisodeIdByContact.remove(targetChannelDid) ?? const Uuid().v4();
+    final String episodeId;
+    if (isDidFallbackCallId) {
+      // Group broadcast: the group-DID fallback id cannot match the local
+      // terminal's room-id credit, so bridge to the same call via the per-call
+      // episode id the ring recorded. Absent (a cancel that beat its invite)
+      // means a fresh id, so it counts on its own.
+      episodeId =
+          _missEpisodeIdByContact.remove(targetChannelDid) ?? const Uuid().v4();
+    } else {
+      // The transport resolved a real per-call id. Dedup the badge by that id
+      // directly; do NOT consume the per-contact episode id, which belongs to a
+      // different (ring-shown) call and would wrongly dedup this distinct call.
+      episodeId = event.callId;
+    }
 
     _logger.info(
       'No active ring for ${event.callId} — badging missed call for '

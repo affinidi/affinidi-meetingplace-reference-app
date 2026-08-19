@@ -139,6 +139,15 @@ class MissedCallManager {
       );
       return healedAny;
     }
+    // A null/empty pending call id resolves the marked item by time alone, so
+    // it can match an unrelated older settled item. Only clear the marker when
+    // the sweep actually healed the target; otherwise keep it so the marker-
+    // gated stream heal (healArrivedStaleCallItemIfPending) can heal the real
+    // target when it syncs.
+    final hasPendingCallId = pendingCallId != null && pendingCallId.isNotEmpty;
+    if (!hasPendingCallId && !healedAny) {
+      return healedAny;
+    }
     await _clearPendingMissedCall();
     return healedAny;
   }
