@@ -1112,11 +1112,12 @@ void main() {
       required String messageId,
       required bool isFromMe,
       required CallStatus status,
+      DateTime? dateCreated,
     }) => Message(
       chatId: 'fake-chat-id',
       messageId: messageId,
       value: '',
-      dateCreated: DateTime.now(),
+      dateCreated: dateCreated ?? DateTime.now(),
       status: ChatItemStatus.confirmed,
       isFromMe: isFromMe,
       senderDid: isFromMe ? 'me' : channelDid,
@@ -1444,6 +1445,58 @@ void main() {
           await fakeContactsService.getPendingMissedCallAt(channelDid),
           isNotNull,
         );
+      },
+    );
+
+    test(
+      'startChatSession heals an unmarked stale incoming call item older than '
+      'the ring window (trailing missed call with no marker)',
+      () async {
+        fakeContactsService.setContacts([FakeContacts.individualContact]);
+        fakeChatSdk.sessionMessages = [
+          callMessage(
+            messageId: 'trailing-missed',
+            isFromMe: false,
+            status: CallStatus.calling,
+            dateCreated: DateTime.now().toUtc().subtract(
+              const Duration(minutes: 2),
+            ),
+          ),
+        ];
+
+        await chatService.startChatSession();
+        await pumpEventQueue();
+
+        expect(fakeChatSdk.updateMessageCalls, hasLength(1));
+        final updated = fakeChatSdk.updateMessageCalls.single;
+        expect(updated.messageId, 'trailing-missed');
+        final call = CallMetadata.maybeOf(
+          updated.attachments.firstWhere(CallMetadata.isCall),
+        );
+        expect(call?.status, CallStatus.missed);
+      },
+    );
+
+    test(
+      'startChatSession does NOT heal an unmarked stale incoming call item '
+      'younger than the ring window (protects a live call arriving pre-ring)',
+      () async {
+        fakeContactsService.setContacts([FakeContacts.individualContact]);
+        fakeChatSdk.sessionMessages = [
+          callMessage(
+            messageId: 'young-live-call',
+            isFromMe: false,
+            status: CallStatus.calling,
+            dateCreated: DateTime.now().toUtc().subtract(
+              const Duration(seconds: 5),
+            ),
+          ),
+        ];
+
+        await chatService.startChatSession();
+        await pumpEventQueue();
+
+        expect(fakeChatSdk.updateMessageCalls, isEmpty);
       },
     );
 

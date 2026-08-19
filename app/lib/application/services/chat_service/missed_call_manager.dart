@@ -1,7 +1,9 @@
+import 'package:clock/clock.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
+import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../contacts_service/contacts_service.dart';
@@ -50,7 +52,9 @@ class MissedCallManager {
   /// a call is ringing for the contact, so with no active ring, a stale
   /// incoming item is a settled miss. The miss-event and stream paths keep
   /// the marker-gated (DIDComm-race-safe) behavior by leaving [sweepUnmarked]
-  /// at its default `false`.
+  /// at its default `false`. It also never heals an item younger than the
+  /// call ring timeout, so a live call whose invite item arrives before its
+  /// ring signal is never mistaken for a settled miss.
   ///
   /// Skipped while a call is ringing. Returns true only when it heals an item.
   Future<bool> reconcilePendingMissedCall({bool sweepUnmarked = false}) async {
@@ -84,9 +88,27 @@ class MissedCallManager {
         ? ringingEvent.callId
         : null;
 
+    // Bound the sweep. The marker-gated path sweeps up to the marker time.
+    // The unmarked chat-open sweep additionally guards a live call whose
+    // invite item arrived before its ring signal reached incomingCallProvider
+    // (a transport race): it never heals an item younger than the ring
+    // timeout, so a call that might still be ringing is left alone and only
+    // settled misses are healed. An unmarked item older than the ring window
+    // can no longer be ringing, so it heals on this or a later chat open. The
+    // marker is kept whenever it is more recent, so a fresh miss still heals
+    // immediately.
+    final sweepBound = sweepUnmarked
+        ? _laterOf(
+            pendingAt,
+            clock.now().toUtc().subtract(
+              ref.read(environmentProvider).callRingTimeout,
+            ),
+          )
+        : pendingAt;
+
     final staleItems = await callChatItemManager
         .resolveStaleIncomingCallItemsBefore(
-          pendingAt,
+          sweepBound,
           excludeCallId: activeRingCallId,
         );
     var healedAny = false;
@@ -172,6 +194,10 @@ class MissedCallManager {
     if (callId == null || callId.isEmpty) return true;
     return ringingEvent.callId == callId;
   }
+
+  /// Returns the later of two instants. A null [a] yields [b].
+  DateTime _laterOf(DateTime? a, DateTime b) =>
+      (a != null && a.toUtc().isAfter(b)) ? a : b;
 
   /// Updates a stale incoming call item to missed.
   Future<void> _healIncomingCallItemMissed(

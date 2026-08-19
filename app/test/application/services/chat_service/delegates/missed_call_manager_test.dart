@@ -1,3 +1,4 @@
+import 'package:clock/clock.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
@@ -129,6 +130,90 @@ void main() {
 
         expect(healed, isFalse);
         expect(callItemManager.updateCallCount, 0);
+      },
+    );
+
+    test('chat-open unmarked sweep bounds to the ring window when no marker is '
+        'present (protects a live call whose item arrived pre-ring)', () async {
+      final now = DateTime(2026, 7, 9, 10, 30).toUtc();
+      await withClock(Clock.fixed(now), () async {
+        final contactsService = FakeContactsService();
+        final callItemManager = FakeCallChatItemManager(isStaleReturn: true);
+
+        final manager = MissedCallManager(
+          ref: _createTestRef(contactsService),
+          otherPartyPermanentChannelDid: channelDid,
+          callChatItemManager: callItemManager,
+          onUpsertChatItem: (_) {},
+        );
+
+        await manager.reconcilePendingMissedCall(sweepUnmarked: true);
+
+        expect(
+          callItemManager.lastSweepBound,
+          now.subtract(const Duration(seconds: 60)),
+        );
+      });
+    });
+
+    test(
+      'chat-open unmarked sweep raises the bound to the ring window when the '
+      'marker is older than it, so trailing unmarked items still heal',
+      () async {
+        final now = DateTime(2026, 7, 9, 10, 30).toUtc();
+        await withClock(Clock.fixed(now), () async {
+          final staleMarker = now.subtract(const Duration(minutes: 5));
+          final contact = FakeContacts.individualContact.copyWith(
+            channelDid: channelDid,
+            pendingMissedCallAt: staleMarker,
+            pendingMissedCallId: 'call-123',
+          );
+          final contactsService = FakeContactsService(contacts: [contact]);
+          final callItemManager = FakeCallChatItemManager(isStaleReturn: true);
+
+          final manager = MissedCallManager(
+            ref: _createTestRef(contactsService),
+            otherPartyPermanentChannelDid: channelDid,
+            callChatItemManager: callItemManager,
+            onUpsertChatItem: (_) {},
+          );
+
+          await manager.reconcilePendingMissedCall(sweepUnmarked: true);
+
+          expect(
+            callItemManager.lastSweepBound,
+            now.subtract(const Duration(seconds: 60)),
+          );
+        });
+      },
+    );
+
+    test(
+      'chat-open unmarked sweep keeps the marker time as the bound when the '
+      'marker is more recent than the ring window (fresh miss heals now)',
+      () async {
+        final now = DateTime(2026, 7, 9, 10, 30).toUtc();
+        await withClock(Clock.fixed(now), () async {
+          final freshMarker = now.subtract(const Duration(seconds: 5));
+          final contact = FakeContacts.individualContact.copyWith(
+            channelDid: channelDid,
+            pendingMissedCallAt: freshMarker,
+            pendingMissedCallId: 'call-123',
+          );
+          final contactsService = FakeContactsService(contacts: [contact]);
+          final callItemManager = FakeCallChatItemManager(isStaleReturn: true);
+
+          final manager = MissedCallManager(
+            ref: _createTestRef(contactsService),
+            otherPartyPermanentChannelDid: channelDid,
+            callChatItemManager: callItemManager,
+            onUpsertChatItem: (_) {},
+          );
+
+          await manager.reconcilePendingMissedCall(sweepUnmarked: true);
+
+          expect(callItemManager.lastSweepBound, freshMarker);
+        });
       },
     );
 
