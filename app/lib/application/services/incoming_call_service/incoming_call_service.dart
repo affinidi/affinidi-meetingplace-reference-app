@@ -379,10 +379,9 @@ class IncomingCallService extends _$IncomingCallService
     // episode (its ring never showed), so it counts on a fresh id.
     final String episodeId;
     if (isDidFallbackCallId) {
-      // Group broadcast: the group-DID fallback id cannot match the local
-      // terminal's room-id credit, so bridge to the same call via the per-call
-      // episode id the ring recorded. Absent (a cancel that beat its invite)
-      // means a fresh id, so it counts on its own.
+      // Group broadcast: bridge to the same call via the ring's episode id,
+      // since the fallback id can't match the local room-id credit. Absent
+      // means a fresh id.
       episodeId =
           _missEpisodeIdByContact.remove(targetChannelDid) ?? const Uuid().v4();
     } else {

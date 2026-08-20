@@ -148,11 +148,9 @@ class CallChatItemManager {
   /// created no later than [notAfter], excluding any item whose call id equals
   /// [excludeCallId].
   ///
-  /// Back-to-back missed calls overwrite the single-slot durable marker, so
-  /// only the latest call keeps a marker and earlier items are orphaned on
-  /// `ringing`. Reconciliation uses this to heal them all, not just the
-  /// marked one. [excludeCallId] protects a call that is currently ringing
-  /// from being healed.
+  /// Used by reconciliation to heal every orphaned item, not just the marked
+  /// one, since back-to-back missed calls overwrite the single-slot marker.
+  /// [excludeCallId] protects a currently-ringing call from being healed.
   ///
   /// A null [notAfter] returns every stale incoming item with no upper time
   /// bound. Used by the chat-open reconcile, which has no marker to bound by.
@@ -432,12 +430,9 @@ class CallChatItemManager {
         );
         return null;
       }
-      // The transport outcome converges a call this device took part in (in
-      // progress, or already ended locally) onto the authoritative duration.
-      // It must never overwrite an unanswered terminal: a missed/declined item
-      // means this device did not join, and a ringing/calling item never
-      // connected here, so forcing it to ended would fabricate a completed
-      // call.
+      // Only converge a call this device took part in (in progress or ended
+      // locally). An unanswered terminal or an item that never connected here
+      // must not be forced to ended, which would fabricate a completed call.
       if (existing.status != CallStatus.inProgress &&
           existing.status != CallStatus.ended) {
         logger.info(

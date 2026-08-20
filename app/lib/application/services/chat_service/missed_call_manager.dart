@@ -33,30 +33,13 @@ class MissedCallManager {
 
   AppLogger get _logger => ref.read(appLoggerProvider);
 
-  /// Reconciles the durable missed-call marker against chat history.
+  /// Reconciles stale incoming call items to `missed`.
   ///
-  /// Runs at chat open and after a marker is written. Heals EVERY stale
-  /// incoming call item at or before the marker, not only the one the marker
-  /// points at: back-to-back missed calls overwrite the single-slot marker,
-  /// so earlier calls' items lose their marker and would otherwise stay stuck
-  /// on `ringing`.
-  /// - marked item not synced yet: keeps the marker so the stream can heal it
-  ///   on arrival.
-  /// - marked item already terminal: clears the marker, nothing left to heal.
-  ///
-  /// When [sweepUnmarked] is set (chat open only), also heals stale incoming
-  /// items that never got a marker at all: rapid back-to-back calls can leave
-  /// the latest call's own miss event never firing, so its item never gets a
-  /// marker and the marker-gated sweep above skips it. This is safe because
-  /// the top-of-method ringing guard already skips the whole reconcile while
-  /// a call is ringing for the contact, so with no active ring, a stale
-  /// incoming item is a settled miss. The miss-event and stream paths keep
-  /// the marker-gated (DIDComm-race-safe) behavior by leaving [sweepUnmarked]
-  /// at its default `false`. It also never heals an item younger than the
-  /// call ring timeout, so a live call whose invite item arrives before its
-  /// ring signal is never mistaken for a settled miss.
-  ///
-  /// Skipped while a call is ringing. Returns true only when it heals an item.
+  /// Heals every stale incoming call item up to `sweepBound`.
+  /// When [sweepUnmarked] is true (chat-open only), sweeps all unmarked stale
+  /// items.
+  /// Skipped while a call is ringing. Returns true only when at least one
+  /// item was healed.
   Future<bool> reconcilePendingMissedCall({bool sweepUnmarked = false}) async {
     const methodName = 'reconcilePendingMissedCall';
     if (!ref.mounted) return false;
@@ -75,11 +58,8 @@ class MissedCallManager {
       return false;
     }
 
-    // Heal EVERY stale incoming call item at or before the marker, not only
-    // the one the marker points at. Back-to-back missed calls overwrite the
-    // single-slot marker, so earlier calls' items lose their marker and would
-    // otherwise stay stuck on `ringing`. A call currently ringing for this
-    // contact is excluded so a live call is never healed prematurely.
+    // Exclude a call currently ringing for this contact so it's never healed
+    // prematurely.
     final ringingEvent = ref.read(incomingCallProvider).eventOrNull;
     final activeRingCallId =
         (ringingEvent != null &&
@@ -88,15 +68,9 @@ class MissedCallManager {
         ? ringingEvent.callId
         : null;
 
-    // Bound the sweep. The marker-gated path sweeps up to the marker time.
-    // The unmarked chat-open sweep additionally guards a live call whose
-    // invite item arrived before its ring signal reached incomingCallProvider
-    // (a transport race): it never heals an item younger than the ring
-    // timeout, so a call that might still be ringing is left alone and only
-    // settled misses are healed. An unmarked item older than the ring window
-    // can no longer be ringing, so it heals on this or a later chat open. The
-    // marker is kept whenever it is more recent, so a fresh miss still heals
-    // immediately.
+    // Bound the sweep: the marker time, or — for the unmarked sweep — no
+    // later than the ring timeout, so an item that might still be ringing is
+    // left alone. The marker wins whenever it's more recent.
     final sweepBound = sweepUnmarked
         ? _laterOf(
             pendingAt,
@@ -139,11 +113,9 @@ class MissedCallManager {
       );
       return healedAny;
     }
-    // A null/empty pending call id resolves the marked item by time alone, so
-    // it can match an unrelated older settled item. Only clear the marker when
-    // the sweep actually healed the target; otherwise keep it so the marker-
-    // gated stream heal (healArrivedStaleCallItemIfPending) can heal the real
-    // target when it syncs.
+    // A null/empty call id can match an unrelated older item by time alone,
+    // so only clear the marker when this sweep actually healed the target;
+    // otherwise keep it for the marker-gated stream heal to catch later.
     final hasPendingCallId = pendingCallId != null && pendingCallId.isNotEmpty;
     if (!hasPendingCallId && !healedAny) {
       return healedAny;
