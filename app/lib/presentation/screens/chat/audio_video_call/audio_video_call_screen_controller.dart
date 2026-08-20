@@ -240,16 +240,10 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     await joinCall();
   }
 
-  /// Discards a finished call (missed or declined) and places a fresh
-  /// outgoing call. Used by the "Call again" action on the end-call screen,
-  /// and by [acceptRecall] when the answerer accepts a peer's callback.
-  ///
-  /// [asAnswerer] seeds `hasHadPeer` the same way the build-time guard does
-  /// for a normal accepted call (see [build]) — this path reuses the existing
-  /// controller instead of rebuilding it, so that seed would otherwise be
-  /// skipped and the reused controller would briefly show "Calling..." until
-  /// the real peer-join flips the latch. Defaults to false: a genuine
-  /// outbound "Call again" correctly still shows "Calling...".
+  /// Discards the finished call and places a fresh outgoing call, used by
+  /// "Call again" and by [acceptRecall] on a peer callback. [asAnswerer]
+  /// seeds `hasHadPeer` so the reused controller skips the "Calling..."
+  /// flash on a callback; defaults to false so "Call again" still shows it.
   Future<void> restartCall({
     required bool isAudioOnly,
     bool asAnswerer = false,
