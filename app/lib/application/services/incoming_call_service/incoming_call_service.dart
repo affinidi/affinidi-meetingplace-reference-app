@@ -294,46 +294,16 @@ class IncomingCallService extends _$IncomingCallService
     String contactId, {
     String? callId,
     String? missId,
-  }) async {
+  }) {
     _logger.warning('Marking call as missed for $contactId', name: _logKey);
-    if (missId != null) {
-      try {
-        await ref
-            .read(contactsServiceProvider.notifier)
-            .incrementMissedCallBadge(contactId, callId: missId);
-      } catch (e, stackTrace) {
-        _logger.error(
-          '_markCallAsMissed: Badge bump failed for $contactId',
-          error: e,
-          stackTrace: stackTrace,
-          name: _logKey,
-        );
-      }
-    }
-    try {
-      await ref
-          .read(contactsServiceProvider.notifier)
-          .setPendingMissedCall(contactId, callId: callId);
-    } catch (e, stackTrace) {
-      _logger.error(
-        '_markCallAsMissed: Recording missed call failed for $contactId',
-        error: e,
-        stackTrace: stackTrace,
-        name: _logKey,
-      );
-    }
-    try {
-      await ref
-          .read(chatSessionServiceProvider(contactId).notifier)
-          .markCallAsMissed(callId: callId);
-    } catch (e, stackTrace) {
-      _logger.error(
-        '_markCallAsMissed: Chat item update failed for $contactId',
-        error: e,
-        stackTrace: stackTrace,
-        name: _logKey,
-      );
-    }
+    return _recordTerminalIncomingCall(
+      contactId,
+      status: CallStatus.missed,
+      writeChatItemBeforeMarker: false,
+      logLabel: '_markCallAsMissed',
+      callId: callId,
+      missId: missId,
+    );
   }
 
   /// Records the actively declined incoming call: bumps the recipient's unread
@@ -353,8 +323,38 @@ class IncomingCallService extends _$IncomingCallService
     String contactId, {
     String? callId,
     String? missId,
-  }) async {
+  }) {
     _logger.warning('Marking call as declined for $contactId', name: _logKey);
+    return _recordTerminalIncomingCall(
+      contactId,
+      status: CallStatus.declined,
+      writeChatItemBeforeMarker: true,
+      logLabel: '_markCallAsDeclined',
+      callId: callId,
+      missId: missId,
+    );
+  }
+
+  /// Shared recorder behind [_markCallAsMissed] and [_markCallAsDeclined]:
+  /// bumps the missed-call badge, writes the chat item for [status], and sets
+  /// the durable pending-call marker.
+  ///
+  /// [writeChatItemBeforeMarker] controls whether the chat item write or the
+  /// marker set runs first; this ordering is load-bearing. [_markCallAsMissed]
+  /// passes `false` (marker first). [_markCallAsDeclined] passes `true` (chat
+  /// item first) because setting the marker is a persist that yields the
+  /// event loop, and a concurrent stale-item heal would otherwise settle the
+  /// still-ringing item to `missed` before the declined write lands, leaving
+  /// it stuck on "Missed". The write-failure safety net still applies either
+  /// way: if the chat item write fails, the marker still reconciles the item.
+  Future<void> _recordTerminalIncomingCall(
+    String contactId, {
+    required CallStatus status,
+    required bool writeChatItemBeforeMarker,
+    required String logLabel,
+    String? callId,
+    String? missId,
+  }) async {
     if (missId != null) {
       try {
         await ref
@@ -362,38 +362,58 @@ class IncomingCallService extends _$IncomingCallService
             .incrementMissedCallBadge(contactId, callId: missId);
       } catch (e, stackTrace) {
         _logger.error(
-          '_markCallAsDeclined: Badge bump failed for $contactId',
+          '$logLabel: Badge bump failed for $contactId',
           error: e,
           stackTrace: stackTrace,
           name: _logKey,
         );
       }
     }
-    try {
-      await ref
-          .read(chatSessionServiceProvider(contactId).notifier)
-          .markCallAsDeclined(callId: callId);
-    } catch (e, stackTrace) {
-      _logger.error(
-        '_markCallAsDeclined: Chat item update failed for $contactId',
-        error: e,
-        stackTrace: stackTrace,
-        name: _logKey,
-      );
+
+    Future<void> writeChatItem() async {
+      try {
+        if (status == CallStatus.declined) {
+          await ref
+              .read(chatSessionServiceProvider(contactId).notifier)
+              .markCallAsDeclined(callId: callId);
+        } else {
+          await ref
+              .read(chatSessionServiceProvider(contactId).notifier)
+              .markCallAsMissed(callId: callId);
+        }
+      } catch (e, stackTrace) {
+        _logger.error(
+          '$logLabel: Chat item update failed for $contactId',
+          error: e,
+          stackTrace: stackTrace,
+          name: _logKey,
+        );
+      }
     }
-    // Set the durable marker only after the declined write above has landed, so
-    // a concurrent heal cannot settle the ringing item to missed first.
-    try {
-      await ref
-          .read(contactsServiceProvider.notifier)
-          .setPendingMissedCall(contactId, callId: callId);
-    } catch (e, stackTrace) {
-      _logger.error(
-        '_markCallAsDeclined: Recording pending marker failed for $contactId',
-        error: e,
-        stackTrace: stackTrace,
-        name: _logKey,
-      );
+
+    Future<void> setMarker() async {
+      try {
+        await ref
+            .read(contactsServiceProvider.notifier)
+            .setPendingMissedCall(contactId, callId: callId);
+      } catch (e, stackTrace) {
+        _logger.error(
+          status == CallStatus.declined
+              ? '$logLabel: Recording pending marker failed for $contactId'
+              : '$logLabel: Recording missed call failed for $contactId',
+          error: e,
+          stackTrace: stackTrace,
+          name: _logKey,
+        );
+      }
+    }
+
+    if (writeChatItemBeforeMarker) {
+      await writeChatItem();
+      await setMarker();
+    } else {
+      await setMarker();
+      await writeChatItem();
     }
   }
 
