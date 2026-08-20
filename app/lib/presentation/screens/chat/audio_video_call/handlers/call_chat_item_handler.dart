@@ -257,20 +257,10 @@ class CallChatItemHandler {
     unawaited(_endCallWrite);
   }
 
-  /// Resolves the call chat item id and writes the terminal status.
+  /// Writes the terminal status for this call.
   ///
-  /// The caller item's creation is enqueued onto [_writeQueue] as soon as it
-  /// starts (see [_resolveRoleAndEmit]), and this write is enqueued after it,
-  /// so by the time this runs the id has already resolved naturally — no
-  /// retrying needed. If it still can't be resolved (e.g. the recipient's
-  /// local storage hasn't synced the caller's item yet), the write is skipped
-  /// and left to missed-call reconciliation.
-  ///
-  /// [_callChatItemEnded] is set only once this write actually lands, never
-  /// up front: an unconditional lock would silently and permanently skip the
-  /// write whenever the resolve loses this race, leaving the widget stuck on
-  /// its last in-progress status while the independent missed-call
-  /// reconciliation still resolves the badge, so the two disagree.
+  /// Creation is enqueued before this, so the item id should be resolved.
+  /// If not, the write is skipped.
   Future<void> _resolveAndWriteTerminalStatus({
     required bool isCaller,
     required CallOutcome outcome,
@@ -305,11 +295,10 @@ class CallChatItemHandler {
     _callChatItemEnded = true;
   }
 
-  /// Serializes chat item writes so they apply in enqueue order. Combined with
-  /// [_callChatItemEnded], set once the terminal write in
-  /// [_resolveAndWriteTerminalStatus] actually lands, this guarantees a
-  /// confirmed terminal status is the last write and no in-flight in-progress
-  /// write can overtake it.
+  /// Serializes chat item writes so they apply in enqueue order. Combined
+  /// with [_callChatItemEnded] (set once the write in
+  /// [_resolveAndWriteTerminalStatus] lands), this guarantees the terminal
+  /// status is always the last write.
   Future<void> _enqueueWrite(Future<void> Function() op) {
     final next = _writeQueue.then((_) => op()).catchError((
       Object error,
