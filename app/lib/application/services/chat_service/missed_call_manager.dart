@@ -111,20 +111,13 @@ class MissedCallManager {
 
   /// CallId of a call currently ringing for this contact, to exclude from
   /// healing.
-  String? _activeRingCallId() {
-    final ringingEvent = ref.read(incomingCallProvider).eventOrNull;
-    return (ringingEvent != null &&
-            ringingEvent.otherPartyPermanentChannelDid ==
-                otherPartyPermanentChannelDid)
-        ? ringingEvent.callId
-        : null;
-  }
+  String? _activeRingCallId() => _ringEventForContact()?.callId;
 
   /// Bounds the sweep to [pendingAt], or no later than the ring timeout when
   /// [sweepUnmarked].
   DateTime? _resolveSweepBound(DateTime? pendingAt, bool sweepUnmarked) {
     if (!sweepUnmarked) return pendingAt;
-    return _laterOf(
+    return _mostRecent(
       pendingAt,
       clock.now().toUtc().subtract(
         ref.read(environmentProvider).callRingTimeout,
@@ -187,18 +180,24 @@ class MissedCallManager {
 
   /// Returns true if a call for this contact is currently ringing.
   bool _isRingingForContact({String? callId}) {
-    final ringingEvent = ref.read(incomingCallProvider).eventOrNull;
+    final ringingEvent = _ringEventForContact();
     if (ringingEvent == null) return false;
-    if (ringingEvent.otherPartyPermanentChannelDid !=
-        otherPartyPermanentChannelDid) {
-      return false;
-    }
     if (callId == null || callId.isEmpty) return true;
     return ringingEvent.callId == callId;
   }
 
+  /// The ringing event, if the current ring is for this contact.
+  IncomingAudioVideoCallEvent? _ringEventForContact() {
+    final ringingEvent = ref.read(incomingCallProvider).eventOrNull;
+    return (ringingEvent != null &&
+            ringingEvent.otherPartyPermanentChannelDid ==
+                otherPartyPermanentChannelDid)
+        ? ringingEvent
+        : null;
+  }
+
   /// Returns the later of two instants. A null [a] yields [b].
-  DateTime _laterOf(DateTime? a, DateTime b) =>
+  DateTime _mostRecent(DateTime? a, DateTime b) =>
       (a != null && a.toUtc().isAfter(b)) ? a : b;
 
   /// Updates a stale incoming call item to missed.
