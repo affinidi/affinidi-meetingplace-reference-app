@@ -399,8 +399,12 @@ class IncomingCallService extends _$IncomingCallService
       } catch (e, stackTrace) {
         _logger.error(
           status == CallStatus.declined
-              ? '$logLabel: Recording pending marker failed for $contactId'
-              : '$logLabel: Recording missed call failed for $contactId',
+              ? '$logLabel: CRITICAL — pending marker write failed '
+                    'for $contactId; call item cannot reconcile to '
+                    'missed on replay'
+              : '$logLabel: CRITICAL — missed-call marker write failed '
+                    'for $contactId; call item cannot reconcile to '
+                    'missed on replay',
           error: e,
           stackTrace: stackTrace,
           name: _logKey,
