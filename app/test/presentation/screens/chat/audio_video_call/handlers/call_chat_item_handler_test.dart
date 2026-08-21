@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/handlers/call_chat_item_handler.dart';
@@ -157,8 +159,8 @@ void main() {
         expect(updateCallCount, equals(1));
       });
 
-      test('gives up retrying and skips the write once resolve attempts are '
-          'exhausted', () async {
+      test('skips the terminal write when the id cannot be resolved, leaving '
+          'it to reconciliation', () async {
         var resolveAttempts = 0;
         var updateCallCount = 0;
         final handler = CallChatItemHandler(
@@ -188,11 +190,82 @@ void main() {
             ownRole: CallRole.recipient,
           ),
         );
-        await Future<void>.delayed(const Duration(milliseconds: 700));
+        // Let the emitted state actually reach _onSessionState (and start
+        // the terminal write) before capturing endCallWrite; emitState's
+        // own Future only guarantees the event was posted, not processed.
+        await Future<void>.delayed(Duration.zero);
+        await handler.endCallWrite;
 
         expect(updateCallCount, isZero);
-        expect(resolveAttempts, 4);
+        expect(resolveAttempts, 1);
         expect(handler.callChatItemEnded, isFalse);
+      });
+
+      test('caller terminal write resolves the enqueued creation id with no '
+          'storage fallback', () async {
+        final creationGate = Completer<void>();
+        var creationCompleted = false;
+        final resolveCalls = <({bool isCaller, String? callId})>[];
+        final updates = <(String, CallStatus)>[];
+        final handler = CallChatItemHandler(
+          onInitiator: (_) async {
+            await creationGate.future;
+            creationCompleted = true;
+            return 'outgoing-id';
+          },
+          resolveItemId: ({required bool isCaller, String? callId}) async {
+            resolveCalls.add((isCaller: isCaller, callId: callId));
+            return 'stale-id';
+          },
+          updateItem:
+              (
+                id, {
+                required CallStatus status,
+                Duration? duration,
+                CallParticipation? participation,
+              }) async {
+                updates.add((id, status));
+              },
+          isDisposed: () => false,
+          logger: FakeAppLogger(),
+        );
+
+        final session = MockAudioVideoCallSession();
+        handler.attach(session);
+
+        // A single already-ended caller state triggers both the eager
+        // creation and the terminal write in the same stream event.
+        await session.emitState(
+          AudioVideoCallState(
+            status: AudioVideoCallStatus.disconnected,
+            ownRole: CallRole.caller,
+            callId: 'test-call-id',
+            callStartedAt: DateTime.now(),
+          ),
+        );
+        // Let the emitted state reach _onSessionState so onInitiator is
+        // actually invoked and awaiting the still-open gate below.
+        await Future<void>.delayed(Duration.zero);
+
+        creationGate.complete();
+        await handler.endCallWrite;
+
+        expect(
+          creationCompleted,
+          isTrue,
+          reason:
+              'onInitiator must run to completion before the terminal '
+              'write resolves',
+        );
+        expect(updates, equals([('outgoing-id', CallStatus.declined)]));
+        expect(
+          resolveCalls,
+          isEmpty,
+          reason:
+              'The caller resolves its item from the enqueued initiator '
+              'write, never from a storage lookup',
+        );
+        expect(handler.callChatItemEnded, isTrue);
       });
     });
 

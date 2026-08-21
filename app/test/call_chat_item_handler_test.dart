@@ -509,8 +509,8 @@ void main() {
       expect(calls, isEmpty);
     });
 
-    test('gives up retrying and skips the write once resolve attempts are '
-        'exhausted', () async {
+    test('skips the terminal write when the id cannot be resolved, leaving it '
+        'to reconciliation', () async {
       final calls =
           <({String messageId, CallStatus status, Duration? duration})>[];
       var resolveAttempts = 0;
@@ -532,10 +532,14 @@ void main() {
           ownRole: CallRole.recipient,
         ),
       );
-      await Future<void>.delayed(const Duration(milliseconds: 700));
+      // Let the emitted state actually reach _onSessionState (and start
+      // the terminal write) before capturing endCallWrite; emitState's
+      // own Future only guarantees the event was posted, not processed.
+      await Future<void>.delayed(Duration.zero);
+      await handler.endCallWrite;
 
       expect(calls, isEmpty);
-      expect(resolveAttempts, 4);
+      expect(resolveAttempts, 1);
       expect(handler.callChatItemEnded, isFalse);
     });
   });

@@ -33,8 +33,6 @@ class CallChatItemHandler {
   });
 
   static const _logKey = 'CallChatItemHandler';
-  static const _terminalResolveRetryDelay = Duration(milliseconds: 200);
-  static const _terminalResolveMaxAttempts = 3;
 
   final Future<String?> Function(String callId)? _onInitiator;
   final Future<String?> Function({required bool isCaller, String? callId})
@@ -194,11 +192,24 @@ class CallChatItemHandler {
       name: _logKey,
     );
     _initiatorIdFuture = _onInitiator(_sessionCallId!);
-    unawaited(
-      _initiatorIdFuture!.then((id) {
-        if (id != null) _callChatItemId ??= id;
-      }),
-    );
+    // Serialize creation onto the write queue so the end-call write, enqueued
+    // after, runs only once creation has completed — no retrying to resolve
+    // it.
+    _writeQueue = _writeQueue
+        .then((_) => _initiatorIdFuture)
+        .then(
+          (id) {
+            if (id != null) _callChatItemId ??= id;
+          },
+          onError: (Object error, StackTrace stackTrace) {
+            _logger.error(
+              'call chat item write failed',
+              error: error,
+              stackTrace: stackTrace,
+              name: _logKey,
+            );
+          },
+        );
   }
 
   void _writeInProgressStatus(CallStatus status) {
@@ -241,27 +252,20 @@ class CallChatItemHandler {
         outcome: outcome,
         hasHadPeer: hasHadPeer,
         callDuration: callDuration,
-        attemptsRemaining: _terminalResolveMaxAttempts,
       ),
     );
     unawaited(_endCallWrite);
   }
 
-  /// Resolves the call chat item id and writes the terminal status, retrying
-  /// the resolve a bounded number of times when the item hasn't synced into
-  /// local storage yet.
+  /// Writes the terminal status for this call.
   ///
-  /// [_callChatItemEnded] is set only once this write actually lands, never
-  /// up front: an unconditional lock would silently and permanently skip the
-  /// write whenever the resolve loses this race, leaving the widget stuck on
-  /// its last in-progress status while the independent missed-call
-  /// reconciliation still resolves the badge, so the two disagree.
+  /// Creation is enqueued before this, so the item id should be resolved.
+  /// If not, the write is skipped.
   Future<void> _resolveAndWriteTerminalStatus({
     required bool isCaller,
     required CallOutcome outcome,
     required bool hasHadPeer,
     required Duration callDuration,
-    required int attemptsRemaining,
   }) async {
     if (_isDisposed()) {
       _logger.info(
@@ -272,21 +276,12 @@ class CallChatItemHandler {
     }
     final messageId = await _resolveId(isCaller: isCaller);
     if (messageId == null) {
-      if (attemptsRemaining <= 0) {
-        _logger.info(
-          'endCallChatItem: Skipping update (messageId=$messageId)',
-          name: _logKey,
-        );
-        return;
-      }
-      await Future<void>.delayed(_terminalResolveRetryDelay);
-      return _resolveAndWriteTerminalStatus(
-        isCaller: isCaller,
-        outcome: outcome,
-        hasHadPeer: hasHadPeer,
-        callDuration: callDuration,
-        attemptsRemaining: attemptsRemaining - 1,
+      _logger.info(
+        'endCallChatItem: Skipping update (messageId=null); missed-call '
+        'reconciliation will resolve it',
+        name: _logKey,
       );
+      return;
     }
     final endStatus = resolveEndStatus(outcome: outcome, isFromMe: isCaller);
     await _updateItem(
@@ -300,11 +295,10 @@ class CallChatItemHandler {
     _callChatItemEnded = true;
   }
 
-  /// Serializes chat item writes so they apply in enqueue order. Combined with
-  /// [_callChatItemEnded], set once the terminal write in
-  /// [_resolveAndWriteTerminalStatus] actually lands, this guarantees a
-  /// confirmed terminal status is the last write and no in-flight in-progress
-  /// write can overtake it.
+  /// Serializes chat item writes so they apply in enqueue order. Combined
+  /// with [_callChatItemEnded] (set once the write in
+  /// [_resolveAndWriteTerminalStatus] lands), this guarantees the terminal
+  /// status is always the last write.
   Future<void> _enqueueWrite(Future<void> Function() op) {
     final next = _writeQueue.then((_) => op()).catchError((
       Object error,
