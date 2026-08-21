@@ -161,11 +161,13 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
 
       _signalSub = sdk.callSignals.listen((signal) {
         if (_isDisposed) return;
-
-        if (signal is CallDeclineSignal && _isCaller) {
-          _logger.info('Call declined by peer, ending call', name: _logKey);
-          unawaited(onPeerDeclined());
+        if (signal is! CallDeclineSignal || !_isCaller || _isGroupContact) {
+          return;
         }
+        final declinerDid = signal.otherPartyPermanentChannelDid;
+        if (declinerDid != null && declinerDid != _channelDid) return;
+        _logger.info('Call declined by peer, ending call', name: _logKey);
+        unawaited(onPeerDeclined());
       });
 
       ref.onDispose(_signalSub!.cancel);

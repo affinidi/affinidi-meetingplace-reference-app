@@ -178,11 +178,14 @@ ProviderContainer _buildContainer({
   FakePermissionService? permissionService,
   FakeAudioSession? audioSession,
   bool canUsePlatformAudioSession = false,
+  FakeChatSessionService Function()? chatSessionServiceFactory,
 }) {
   return ProviderContainer(
     overrides: [
       contactsServiceProvider.overrideWith(FakeContactsService.new),
-      chatSessionServiceProvider.overrideWith(FakeChatSessionService.new),
+      chatSessionServiceProvider.overrideWith(
+        chatSessionServiceFactory ?? FakeChatSessionService.new,
+      ),
       meetingPlaceSdkProvider.overrideWith(
         (ref) async => fakeSDK ?? _FakeMeetingPlaceMatrixSDK(),
       ),
@@ -1255,5 +1258,311 @@ void main() {
 
       expect(controller, isNotNull);
     });
+
+    test('group call survives a CallDeclineSignal from the caller '
+        '(core regression guard)', () async {
+      final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+      final contactId = FakeContacts.groupContact.id;
+      final channelDid = FakeContacts.groupContact.channelDid!;
+      // An immediately-resolving chat service is used (instead of
+      // `_buildContainer`'s default fake) so that, were the group guard ever
+      // removed, `onPeerDeclined()`'s `endCallChatItem` await would resolve
+      // within a single `pumpEventQueue()` instead of masking the regression
+      // behind the handler's 200ms x3 retry chain.
+      final container = _buildContainer(
+        fakeSDK: fakeSDK,
+        chatSessionServiceFactory: () => FakeChatSessionService(
+          resolveOutgoingResult: 'group-declined-call-item',
+          resolveIncomingResult: 'group-declined-call-item',
+        ),
+      );
+      addTearDown(container.dispose);
+      addTearDown(fakeSDK.dispose);
+      final subscription = container.listen(
+        audioVideoCallScreenControllerProvider(contactId),
+        (_, _) {},
+      );
+      addTearDown(subscription.close);
+
+      await container.read(meetingPlaceSdkProvider.future);
+      final controller = container.read(
+        audioVideoCallScreenControllerProvider(contactId).notifier,
+      );
+
+      await controller.joinCall();
+      fakeSDK.emitState(
+        const AudioVideoCallState(
+          status: AudioVideoCallStatus.connecting,
+          ownRole: CallRole.caller,
+        ),
+      );
+      await pumpEventQueue();
+
+      fakeSDK.emitCallSignal(CallDeclineSignal(ownChannelDid: channelDid));
+      await pumpEventQueue();
+
+      expect(
+        container
+            .read(audioVideoCallScreenControllerProvider(contactId))
+            .status,
+        AudioVideoCallStatus.connecting,
+        reason:
+            'a single member declining a group call must not end it '
+            'for the remaining participants',
+      );
+    });
+
+    test('recipient (non-caller) receiving a CallDeclineSignal does not end '
+        'the call', () async {
+      final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+      final contactId = FakeContacts.individualContact.id;
+      final channelDid = FakeContacts.individualContact.channelDid!;
+      // An immediately-resolving chat service, matching the group test, so a
+      // regression in guard A that let `onPeerDeclined` proceed would surface
+      // within a single `pumpEventQueue()` instead of being masked by the
+      // handler's 200ms x3 retry chain.
+      final container = _buildContainer(
+        fakeSDK: fakeSDK,
+        chatSessionServiceFactory: () => FakeChatSessionService(
+          resolveOutgoingResult: 'recipient-declined-call-item',
+          resolveIncomingResult: 'recipient-declined-call-item',
+        ),
+      );
+      addTearDown(container.dispose);
+      addTearDown(fakeSDK.dispose);
+      final subscription = container.listen(
+        audioVideoCallScreenControllerProvider(contactId),
+        (_, _) {},
+      );
+      addTearDown(subscription.close);
+
+      await container.read(meetingPlaceSdkProvider.future);
+      final controller = container.read(
+        audioVideoCallScreenControllerProvider(contactId).notifier,
+      );
+
+      await controller.joinCall();
+      fakeSDK.emitState(
+        const AudioVideoCallState(
+          status: AudioVideoCallStatus.connecting,
+          ownRole: CallRole.recipient,
+        ),
+      );
+      await pumpEventQueue();
+
+      fakeSDK.emitCallSignal(
+        CallDeclineSignal(
+          ownChannelDid: channelDid,
+          otherPartyPermanentChannelDid: channelDid,
+        ),
+      );
+      await pumpEventQueue();
+
+      expect(
+        container
+            .read(audioVideoCallScreenControllerProvider(contactId))
+            .status,
+        AudioVideoCallStatus.connecting,
+      );
+    });
+
+    test('a non-CallDeclineSignal call signal does not end the call', () async {
+      final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+      final contactId = FakeContacts.individualContact.id;
+      final channelDid = FakeContacts.individualContact.channelDid!;
+      final container = _buildContainer(
+        fakeSDK: fakeSDK,
+        chatSessionServiceFactory: () => FakeChatSessionService(
+          resolveOutgoingResult: 'non-decline-signal-call-item',
+          resolveIncomingResult: 'non-decline-signal-call-item',
+        ),
+      );
+      addTearDown(container.dispose);
+      addTearDown(fakeSDK.dispose);
+      final subscription = container.listen(
+        audioVideoCallScreenControllerProvider(contactId),
+        (_, _) {},
+      );
+      addTearDown(subscription.close);
+
+      await container.read(meetingPlaceSdkProvider.future);
+      final controller = container.read(
+        audioVideoCallScreenControllerProvider(contactId).notifier,
+      );
+
+      await controller.joinCall();
+      fakeSDK.emitState(
+        const AudioVideoCallState(
+          status: AudioVideoCallStatus.connecting,
+          ownRole: CallRole.caller,
+        ),
+      );
+      await pumpEventQueue();
+
+      fakeSDK.emitCallSignal(IncomingCallSignal(ownChannelDid: channelDid));
+      await pumpEventQueue();
+
+      expect(
+        container
+            .read(audioVideoCallScreenControllerProvider(contactId))
+            .status,
+        AudioVideoCallStatus.connecting,
+      );
+    });
+
+    test(
+      '1:1 caller ignores a CallDeclineSignal from a different peer DID',
+      () async {
+        final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+        final contactId = FakeContacts.individualContact.id;
+        final channelDid = FakeContacts.individualContact.channelDid!;
+        // An immediately-resolving chat service, matching the group test, so a
+        // regression in guard B that let `onPeerDeclined` proceed would
+        // surface within a single `pumpEventQueue()` instead of being masked
+        // by the handler's 200ms x3 retry chain.
+        final container = _buildContainer(
+          fakeSDK: fakeSDK,
+          chatSessionServiceFactory: () => FakeChatSessionService(
+            resolveOutgoingResult: 'different-peer-call-item',
+            resolveIncomingResult: 'different-peer-call-item',
+          ),
+        );
+        addTearDown(container.dispose);
+        addTearDown(fakeSDK.dispose);
+        final subscription = container.listen(
+          audioVideoCallScreenControllerProvider(contactId),
+          (_, _) {},
+        );
+        addTearDown(subscription.close);
+
+        await container.read(meetingPlaceSdkProvider.future);
+        final controller = container.read(
+          audioVideoCallScreenControllerProvider(contactId).notifier,
+        );
+
+        await controller.joinCall();
+        fakeSDK.emitState(
+          const AudioVideoCallState(
+            status: AudioVideoCallStatus.connecting,
+            ownRole: CallRole.caller,
+          ),
+        );
+        await pumpEventQueue();
+
+        fakeSDK.emitCallSignal(
+          CallDeclineSignal(
+            ownChannelDid: channelDid,
+            otherPartyPermanentChannelDid: 'did:key:someone-else',
+          ),
+        );
+        await pumpEventQueue();
+
+        expect(
+          container
+              .read(audioVideoCallScreenControllerProvider(contactId))
+              .status,
+          AudioVideoCallStatus.connecting,
+        );
+      },
+    );
+
+    test(
+      '1:1 caller ends the call on a CallDeclineSignal for this peer',
+      () async {
+        final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+        final contactId = FakeContacts.individualContact.id;
+        final channelDid = FakeContacts.individualContact.channelDid!;
+        final container = _buildContainer(
+          fakeSDK: fakeSDK,
+          chatSessionServiceFactory: () => FakeChatSessionService(
+            resolveOutgoingResult: 'declined-call-item',
+            resolveIncomingResult: 'declined-call-item',
+          ),
+        );
+        addTearDown(container.dispose);
+        addTearDown(fakeSDK.dispose);
+        final subscription = container.listen(
+          audioVideoCallScreenControllerProvider(contactId),
+          (_, _) {},
+        );
+        addTearDown(subscription.close);
+
+        await container.read(meetingPlaceSdkProvider.future);
+        final controller = container.read(
+          audioVideoCallScreenControllerProvider(contactId).notifier,
+        );
+
+        await controller.joinCall();
+        fakeSDK.emitState(
+          const AudioVideoCallState(
+            status: AudioVideoCallStatus.connecting,
+            ownRole: CallRole.caller,
+          ),
+        );
+        await pumpEventQueue();
+
+        fakeSDK.emitCallSignal(
+          CallDeclineSignal(
+            ownChannelDid: channelDid,
+            otherPartyPermanentChannelDid: channelDid,
+          ),
+        );
+        await pumpEventQueue();
+
+        expect(
+          container
+              .read(audioVideoCallScreenControllerProvider(contactId))
+              .status,
+          AudioVideoCallStatus.declined,
+        );
+      },
+    );
+
+    test(
+      '1:1 caller ends the call on a CallDeclineSignal with no decliner DID',
+      () async {
+        final fakeSDK = _FakeMeetingPlaceMatrixSDK();
+        final contactId = FakeContacts.individualContact.id;
+        final channelDid = FakeContacts.individualContact.channelDid!;
+        final container = _buildContainer(
+          fakeSDK: fakeSDK,
+          chatSessionServiceFactory: () => FakeChatSessionService(
+            resolveOutgoingResult: 'declined-call-item',
+            resolveIncomingResult: 'declined-call-item',
+          ),
+        );
+        addTearDown(container.dispose);
+        addTearDown(fakeSDK.dispose);
+        final subscription = container.listen(
+          audioVideoCallScreenControllerProvider(contactId),
+          (_, _) {},
+        );
+        addTearDown(subscription.close);
+
+        await container.read(meetingPlaceSdkProvider.future);
+        final controller = container.read(
+          audioVideoCallScreenControllerProvider(contactId).notifier,
+        );
+
+        await controller.joinCall();
+        fakeSDK.emitState(
+          const AudioVideoCallState(
+            status: AudioVideoCallStatus.connecting,
+            ownRole: CallRole.caller,
+          ),
+        );
+        await pumpEventQueue();
+
+        fakeSDK.emitCallSignal(CallDeclineSignal(ownChannelDid: channelDid));
+        await pumpEventQueue();
+
+        expect(
+          container
+              .read(audioVideoCallScreenControllerProvider(contactId))
+              .status,
+          AudioVideoCallStatus.declined,
+        );
+      },
+    );
   });
 }
