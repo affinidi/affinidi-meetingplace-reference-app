@@ -28,6 +28,28 @@ class FakeInMemoryChatRepository implements chat.ChatRepository {
       _store.values.where((m) => m.chatId == chatId).toList();
 
   @override
+  Future<List<chat.ChatItem>> listMessagesByMediaKind(
+    String chatId, {
+    required String mediaKind,
+    int? limit,
+  }) async {
+    final messages = await listMessages(chatId);
+    final filtered = messages
+        .whereType<chat.Message>()
+        .where(
+          (m) => m.attachments.any(
+            (a) =>
+                a.metadata?[chat.VoiceMessageMetadata.mediaKindKey] ==
+                mediaKind,
+          ),
+        )
+        .toList();
+    return limit != null && filtered.length > limit
+        ? filtered.sublist(0, limit)
+        : filtered;
+  }
+
+  @override
   Future<chat.ChatItem?> getMessage({
     required String chatId,
     required String messageId,

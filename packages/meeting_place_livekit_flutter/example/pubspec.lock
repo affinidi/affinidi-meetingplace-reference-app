@@ -708,10 +708,10 @@ packages:
     dependency: transitive
     description:
       name: meeting_place_chat
-      sha256: "0132b2f18bfefe83088d01a8f40d9a4c7661d596560d4bd121353b8f2a248242"
+      sha256: "73a58cd4d0cb9d89dd47e18c6cf360f61fffa804012b5f0b88a674d7b6df9c10"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev.58"
+    version: "0.0.1-dev.60"
   meeting_place_control_plane:
     dependency: transitive
     description:
@@ -724,33 +724,33 @@ packages:
     dependency: transitive
     description:
       name: meeting_place_core
-      sha256: cbd1662777c83480ab6835503305b7fa83c73e0dd1e2d8f55a248db70db0eaa7
+      sha256: "5451d301c40e091b1f83667f5537794292f20683547c745171672c63215cba1e"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev.48"
+    version: "0.0.1-dev.49"
   meeting_place_credentials:
     dependency: transitive
     description:
       name: meeting_place_credentials
-      sha256: "86c08477cd9fc1d58ca4600d4e129f76278909b584b2bb8947edee524a718ab0"
+      sha256: "4ac0adecfc73faf4cfe2a972e838564b756cd31a6d6073c33aeaf7980e01098a"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev.13"
+    version: "0.0.1-dev.14"
   meeting_place_livekit_flutter:
     dependency: "direct main"
     description:
       path: ".."
       relative: true
     source: path
-    version: "0.0.1-dev.7"
+    version: "0.0.1-dev.9"
   meeting_place_matrix:
     dependency: transitive
     description:
       name: meeting_place_matrix
-      sha256: "1e85bce07eb0636890ce147c74a07790c7bfe0ba42606cbc3d897999e67ffd5f"
+      sha256: "5f8a0456d1231ab8cb727646193f8f724e11ec8c8e098a1ea4211ed7af8d3c9c"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev.14"
+    version: "0.0.1-dev.19"
   meeting_place_mediator:
     dependency: transitive
     description:
