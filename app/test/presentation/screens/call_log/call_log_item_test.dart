@@ -23,7 +23,7 @@ CallLogEntry _groupEntry({
 );
 
 void main() {
-  group('resolveCallLogParticipantsLabel', () {
+  group('CallLogEntry.resolveParticipantsLabel', () {
     late AppLocalizations l10n;
 
     setUp(() {
@@ -43,14 +43,14 @@ void main() {
         participantCount: 1,
       );
 
-      expect(resolveCallLogParticipantsLabel(l10n, entry), isNull);
+      expect(entry.resolveParticipantsLabel(l10n), isNull);
     });
 
     test('falls back to the count label when no name resolved', () {
       final entry = _groupEntry(participantCount: 3);
 
       expect(
-        resolveCallLogParticipantsLabel(l10n, entry),
+        entry.resolveParticipantsLabel(l10n),
         l10n.callLogParticipantsCount(3),
       );
     });
@@ -61,7 +61,7 @@ void main() {
         participantNames: ['Alice', 'Bob'],
       );
 
-      expect(resolveCallLogParticipantsLabel(l10n, entry), 'Alice, Bob');
+      expect(entry.resolveParticipantsLabel(l10n), 'Alice, Bob');
     });
 
     test('appends the unresolved remainder when some, but not all, peers '
@@ -72,7 +72,7 @@ void main() {
       );
 
       expect(
-        resolveCallLogParticipantsLabel(l10n, entry),
+        entry.resolveParticipantsLabel(l10n),
         l10n.callLogParticipantsNamesAndOthers('Alice', 2),
       );
     });
@@ -84,7 +84,7 @@ void main() {
         participantNames: ['Alice'],
       );
 
-      final label = resolveCallLogParticipantsLabel(l10n, entry)!;
+      final label = entry.resolveParticipantsLabel(l10n)!;
 
       expect(label, contains('Alice'));
       expect(label, contains('2'));
