@@ -34,6 +34,7 @@ class FakeChatSessionService extends ChatSessionService {
   bool incomingItemAvailable;
   int resolveCallItemMaxAttempts;
   int markCallAsMissedAttempts = 0;
+  int markCallAsDeclinedAttempts = 0;
   int schedulePendingMissedCallFollowUpCalls = 0;
   int resolveIncomingCallChatItemIdAttempts = 0;
   String? lastResolveIncomingCallId;
@@ -177,6 +178,17 @@ class FakeChatSessionService extends ChatSessionService {
         await resolveIncomingCallChatItemId(callId: callId);
     if (!incomingItemAvailable || messageId == null) return false;
     await updateCallChatItem(messageId, status: CallStatus.missed);
+    return true;
+  }
+
+  @override
+  Future<bool> markCallAsDeclined({String? callId}) async {
+    markCallAsDeclinedAttempts++;
+    final messageId =
+        markCallAsMissedMessageId ??
+        await resolveIncomingCallChatItemId(callId: callId);
+    if (!incomingItemAvailable || messageId == null) return false;
+    await updateCallChatItem(messageId, status: CallStatus.declined);
     return true;
   }
 

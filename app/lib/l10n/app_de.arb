@@ -558,6 +558,7 @@
 	"callChatItemTapToReturn": "Zum Zurückkehren tippen",
 	"callChatItemMissed": "Verpasst",
 	"callChatItemNotAnswered": "Nicht beantwortet",
+	"callChatItemDeclined": "Abgelehnt",
 	"callChatItemGroupOngoingVideo": "Laufender Videoanruf ({count})",
 	"callChatItemGroupOngoingAudio": "Laufender Audioanruf ({count})",
 	"callChatItemYouLeft": "Du hast verlassen",

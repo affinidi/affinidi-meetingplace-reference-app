@@ -2199,6 +2199,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get callChatItemNotAnswered => 'Sin respuesta';
 
   @override
+  String get callChatItemDeclined => 'Rechazada';
+
+  @override
   String callChatItemGroupOngoingVideo(int count) {
     return 'Videollamada en curso ($count)';
   }

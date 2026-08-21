@@ -257,7 +257,7 @@ void main() {
               'onInitiator must run to completion before the terminal '
               'write resolves',
         );
-        expect(updates, equals([('outgoing-id', CallStatus.declined)]));
+        expect(updates, equals([('outgoing-id', CallStatus.missed)]));
         expect(
           resolveCalls,
           isEmpty,

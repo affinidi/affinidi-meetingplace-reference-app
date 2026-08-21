@@ -843,21 +843,28 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     );
   }
 
-  /// Bumps the contact's unread badge once when a call chat item first reaches
-  /// the `declined` status while the chat is not open, keyed by the call item
-  /// message id so repeated terminal upserts of the same call count once.
+  /// Bumps the contact's unread badge once when the caller's own outgoing call
+  /// chat item first reaches an unanswered terminal status (`missed` or
+  /// `declined`) while the chat is not open, keyed by the call item message id
+  /// so repeated terminal upserts of the same call count once.
   ///
-  /// This owns the CALLER side: when the local user cancels an outgoing call,
-  /// or the callee declines it, the call item transitions to `declined`
-  /// locally, so leaving that chat surfaces a badge just as an open chat would
-  /// show the call widget update. The recipient's missed call is badged by
-  /// `IncomingCallService` instead (its `missed` item is often not synced at
-  /// miss time), so `missed` is deliberately not badged here to avoid a
-  /// double-count.
+  /// This owns the CALLER side of an unanswered outgoing call: when the callee
+  /// actively declines, the caller's item becomes `declined`; when the call is
+  /// cancelled or times out with no answer, it becomes `missed`. Either way the
+  /// call went unanswered, so leaving that chat surfaces a badge just as an
+  /// open chat would show the call widget update. The callee's incoming item is
+  /// badged by `IncomingCallService` instead (for both `missed` and
+  /// `declined`), so this only ever bumps for the caller's own (`isFromMe`)
+  /// item to avoid a double-count.
   void _maybeBumpMissedCallBadge(ChatItem? prior, ChatItem next) {
     if (_isGroupChat || next is! Message) return;
+    if (!next.isFromMe) return;
     final nextCall = _callMetadataOf(next);
-    if (nextCall == null || nextCall.status != CallStatus.declined) return;
+    if (nextCall == null ||
+        (nextCall.status != CallStatus.missed &&
+            nextCall.status != CallStatus.declined)) {
+      return;
+    }
 
     final priorCall = prior is Message ? _callMetadataOf(prior) : null;
     if (priorCall != null && _isFinalCallStatus(priorCall.status)) return;
@@ -1117,6 +1124,10 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     }
     return _missedCallManager!.reconcilePendingMissedCall();
   }
+
+  @override
+  Future<bool> markCallAsDeclined({String? callId}) =>
+      _callChatItemManager.markCallAsDeclined(callId: callId);
 
   @override
   Future<void> updateCallChatItem(

@@ -216,7 +216,9 @@ class _CallScreenBody extends HookConsumerWidget {
           contactId: contactId,
           mediaType: mediaType,
           peerName: peerName,
-          message: l10n.videoCallNoAnswer,
+          message: endState == CallEndState.declinedCall
+              ? l10n.videoCallCallDeclined
+              : l10n.videoCallNoAnswer,
           calleeAvatarImage: callIsAudioOnly ? calleeAvatarImage : null,
         );
       }

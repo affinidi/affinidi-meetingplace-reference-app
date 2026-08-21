@@ -120,8 +120,16 @@ abstract class ChatService implements ConciergeMessaging, GroupManaging {
   /// [CallStatus.missed]. Returns `true` when an item was healed, `false` when
   /// there was nothing to update or the session is not live.
   ///
-  /// Called when the ring timer expires or the user declines before answering.
+  /// Called when the ring timer expires or the caller cancels before answer.
   Future<bool> markCallAsMissed({String? callId});
+
+  /// Updates the recipient's pending incoming call chat item to
+  /// [CallStatus.declined]. Returns `true` when an item was updated, `false`
+  /// when there was nothing to update.
+  ///
+  /// Called when the user actively declines an incoming call before
+  /// answering.
+  Future<bool> markCallAsDeclined({String? callId});
 
   /// Updates the local-only [status] and participation [duration] of a
   /// previously emitted call chat item, in place. Per-side and local-only: it

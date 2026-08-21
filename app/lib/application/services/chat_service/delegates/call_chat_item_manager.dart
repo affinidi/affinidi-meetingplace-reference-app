@@ -273,6 +273,21 @@ class CallChatItemManager {
     return true;
   }
 
+  /// Marks the latest pending incoming call item as `declined`. Returns
+  /// `true` when an item was found and updated, `false` otherwise.
+  Future<bool> markCallAsDeclined({String? callId}) async {
+    final messageId = await resolveIncomingCallChatItemId(callId: callId);
+    if (messageId == null) {
+      logger.info(
+        'markCallAsDeclined: No pending incoming call item found',
+        name: _logKey,
+      );
+      return false;
+    }
+    await updateCallChatItem(messageId, status: CallStatus.declined);
+    return true;
+  }
+
   /// Whether [message] is an incoming call item still in a non-final status
   /// (`calling`/`ringing`), eligible to be reconciled to `missed`.
   bool isStaleIncomingCall(Message message) {

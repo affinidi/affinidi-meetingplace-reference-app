@@ -90,7 +90,7 @@ class IncomingCallService extends _$IncomingCallService
     _ensureSDK((sdk) => unawaited(_acceptCall(sdk, callId: callId)));
   }
 
-  /// Declines the incoming call and marks it as missed in the chat history.
+  /// Declines the incoming call and marks it as declined in the chat history.
   void decline({required String callId}) {
     _logger.info('Declining call: $callId', name: _logKey);
     final channelDid = ref
@@ -101,7 +101,7 @@ class IncomingCallService extends _$IncomingCallService
     _ensureSDK((sdk) => unawaited(sdk.declineCall(callId: callId)));
     if (channelDid != null) {
       unawaited(
-        _markCallAsMissed(
+        _markCallAsDeclined(
           channelDid,
           callId: callId,
           missId: _missEpisodeIdByContact[channelDid] ?? const Uuid().v4(),
@@ -294,8 +294,73 @@ class IncomingCallService extends _$IncomingCallService
     String contactId, {
     String? callId,
     String? missId,
-  }) async {
+  }) {
     _logger.warning('Marking call as missed for $contactId', name: _logKey);
+    return _recordTerminalIncomingCall(
+      contactId,
+      status: CallStatus.missed,
+      writeChatItemBeforeMarker: false,
+      logLabel: '_markCallAsMissed',
+      callId: callId,
+      missId: missId,
+    );
+  }
+
+  /// Records the actively declined incoming call: bumps the recipient's unread
+  /// badge and writes the chat item as [CallStatus.declined] so the transcript
+  /// distinguishes an active decline from a plain timeout.
+  ///
+  /// Unlike [_markCallAsMissed], the chat item is written first and the durable
+  /// pending-call marker is set after. Setting the marker is a persist that
+  /// yields the event loop; a concurrent stale-item heal would otherwise settle
+  /// the still-ringing item to `missed` before the declined write lands,
+  /// leaving it stuck on "Missed". The write-failure safety net is preserved:
+  /// if the declined write fails, the marker still reconciles the item to
+  /// `missed`.
+  ///
+  /// [missId] is the badge dedup key; see [_markCallAsMissed] for details.
+  Future<void> _markCallAsDeclined(
+    String contactId, {
+    String? callId,
+    String? missId,
+  }) {
+    _logger.warning('Marking call as declined for $contactId', name: _logKey);
+    return _recordTerminalIncomingCall(
+      contactId,
+      status: CallStatus.declined,
+      writeChatItemBeforeMarker: true,
+      logLabel: '_markCallAsDeclined',
+      callId: callId,
+      missId: missId,
+    );
+  }
+
+  /// Shared recorder behind [_markCallAsMissed] and [_markCallAsDeclined]:
+  /// bumps the missed-call badge, writes the chat item for [status], and sets
+  /// the durable pending-call marker.
+  ///
+  /// [writeChatItemBeforeMarker] controls whether the chat item write or the
+  /// marker set runs first; this ordering is load-bearing. [_markCallAsMissed]
+  /// passes `false` (marker first). [_markCallAsDeclined] passes `true` (chat
+  /// item first) because setting the marker is a persist that yields the
+  /// event loop, and a concurrent stale-item heal would otherwise settle the
+  /// still-ringing item to `missed` before the declined write lands, leaving
+  /// it stuck on "Missed". The write-failure safety net still applies either
+  /// way: if the chat item write fails, the marker still reconciles the item.
+  Future<void> _recordTerminalIncomingCall(
+    String contactId, {
+    required CallStatus status,
+    required bool writeChatItemBeforeMarker,
+    required String logLabel,
+    String? callId,
+    String? missId,
+  }) async {
+    // A failed bump leaves the episode's id uncredited on the durable marker
+    // (lastCreditedMissId stays behind pendingMissedCallMissId), so the derived
+    // "owed" stays true and reconciliation replays the credit; otherwise the
+    // unread count would stay permanently short by one. No flag to track: owed
+    // is derived from the durable marker, and a successful bump records the
+    // credited id in the same write.
     if (missId != null) {
       try {
         await ref
@@ -303,36 +368,62 @@ class IncomingCallService extends _$IncomingCallService
             .incrementMissedCallBadge(contactId, callId: missId);
       } catch (e, stackTrace) {
         _logger.error(
-          '_markCallAsMissed: Badge bump failed for $contactId',
+          '$logLabel: Badge bump failed for $contactId',
           error: e,
           stackTrace: stackTrace,
           name: _logKey,
         );
       }
     }
-    try {
-      await ref
-          .read(contactsServiceProvider.notifier)
-          .setPendingMissedCall(contactId, callId: callId);
-    } catch (e, stackTrace) {
-      _logger.error(
-        '_markCallAsMissed: Recording missed call failed for $contactId',
-        error: e,
-        stackTrace: stackTrace,
-        name: _logKey,
-      );
+
+    Future<void> writeChatItem() async {
+      try {
+        if (status == CallStatus.declined) {
+          await ref
+              .read(chatSessionServiceProvider(contactId).notifier)
+              .markCallAsDeclined(callId: callId);
+        } else {
+          await ref
+              .read(chatSessionServiceProvider(contactId).notifier)
+              .markCallAsMissed(callId: callId);
+        }
+      } catch (e, stackTrace) {
+        _logger.error(
+          '$logLabel: Chat item update failed for $contactId',
+          error: e,
+          stackTrace: stackTrace,
+          name: _logKey,
+        );
+      }
     }
-    try {
-      await ref
-          .read(chatSessionServiceProvider(contactId).notifier)
-          .markCallAsMissed(callId: callId);
-    } catch (e, stackTrace) {
-      _logger.error(
-        '_markCallAsMissed: Chat item update failed for $contactId',
-        error: e,
-        stackTrace: stackTrace,
-        name: _logKey,
-      );
+
+    Future<void> setMarker() async {
+      try {
+        await ref
+            .read(contactsServiceProvider.notifier)
+            .setPendingMissedCall(contactId, callId: callId, missId: missId);
+      } catch (e, stackTrace) {
+        _logger.error(
+          status == CallStatus.declined
+              ? '$logLabel: CRITICAL — pending marker write failed '
+                    'for $contactId; call item cannot reconcile to '
+                    'missed on replay'
+              : '$logLabel: CRITICAL — missed-call marker write failed '
+                    'for $contactId; call item cannot reconcile to '
+                    'missed on replay',
+          error: e,
+          stackTrace: stackTrace,
+          name: _logKey,
+        );
+      }
+    }
+
+    if (writeChatItemBeforeMarker) {
+      await writeChatItem();
+      await setMarker();
+    } else {
+      await setMarker();
+      await writeChatItem();
     }
   }
 

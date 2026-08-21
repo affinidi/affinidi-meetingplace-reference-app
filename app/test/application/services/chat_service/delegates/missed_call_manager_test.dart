@@ -703,6 +703,164 @@ void main() {
       expect(contactsService.clearPendingMissedCallCalls, [channelDid]);
     });
   });
+
+  group('MissedCallManager badge-credit recovery', () {
+    const channelDid = 'did:peer:other-party';
+
+    Message incomingCallMessage({
+      required String messageId,
+      required DateTime dateCreated,
+    }) => Message(
+      chatId: 'chat-123',
+      messageId: messageId,
+      value: '',
+      dateCreated: dateCreated,
+      status: ChatItemStatus.confirmed,
+      isFromMe: false,
+      senderDid: channelDid,
+      attachments: [
+        CallMetadata.buildAttachment(
+          id: const Uuid().v4(),
+          mediaType: CallMediaType.video,
+          status: CallStatus.calling,
+          callId: 'call-123',
+        ),
+      ],
+    );
+
+    test(
+      'Case 1 — replays the owed badge credit under the stored missId when a '
+      'stale item heals via the stream, then clears the marker',
+      () async {
+        final markerTime = DateTime(2026, 7, 9, 10, 30).toUtc();
+        // Owed is derived: the episode id has not been recorded as credited
+        // (lastCreditedMissId is null, != pendingMissedCallMissId).
+        final contact = FakeContacts.individualContact.copyWith(
+          channelDid: channelDid,
+          pendingMissedCallAt: markerTime,
+          pendingMissedCallId: 'call-123',
+          pendingMissedCallMissId: 'miss-1',
+        );
+        final contactsService = FakeContactsService(contacts: [contact]);
+        final callItemManager = FakeCallChatItemManager(isStaleReturn: true);
+
+        final message = incomingCallMessage(
+          messageId: 'msg-stale',
+          dateCreated: markerTime.subtract(const Duration(minutes: 5)),
+        );
+
+        final manager = MissedCallManager(
+          ref: _createTestRef(contactsService),
+          otherPartyPermanentChannelDid: channelDid,
+          callChatItemManager: callItemManager,
+          onUpsertChatItem: (_) {},
+        );
+
+        await manager.healArrivedStaleCallItemIfPending(message);
+
+        expect(callItemManager.updateCallCount, 1);
+        expect(contactsService.incrementMissedCallBadgeCalls, [channelDid]);
+        expect(
+          contactsService.incrementMissedCallBadgeCallIds,
+          ['miss-1'],
+          reason: 'the replay must credit under the stored badge episode id',
+        );
+        expect(contactsService.clearPendingMissedCallCalls, [channelDid]);
+      },
+    );
+
+    test(
+      'Case 3 — does NOT replay a badge credit when the initial bump succeeded '
+      '(the episode id is already recorded as credited)',
+      () async {
+        final markerTime = DateTime(2026, 7, 9, 10, 30).toUtc();
+        // Not owed: the pending episode id has already been recorded as
+        // credited (lastCreditedMissId == pendingMissedCallMissId).
+        final contact = FakeContacts.individualContact.copyWith(
+          channelDid: channelDid,
+          pendingMissedCallAt: markerTime,
+          pendingMissedCallId: 'call-123',
+          pendingMissedCallMissId: 'miss-1',
+          lastCreditedMissId: 'miss-1',
+        );
+        final contactsService = FakeContactsService(contacts: [contact]);
+        final callItemManager = FakeCallChatItemManager(isStaleReturn: true);
+
+        final message = incomingCallMessage(
+          messageId: 'msg-stale',
+          dateCreated: markerTime.subtract(const Duration(minutes: 5)),
+        );
+
+        final manager = MissedCallManager(
+          ref: _createTestRef(contactsService),
+          otherPartyPermanentChannelDid: channelDid,
+          callChatItemManager: callItemManager,
+          onUpsertChatItem: (_) {},
+        );
+
+        await manager.healArrivedStaleCallItemIfPending(message);
+
+        expect(callItemManager.updateCallCount, 1);
+        expect(
+          contactsService.incrementMissedCallBadgeCalls,
+          isEmpty,
+          reason: 'a successful initial bump must never be re-credited',
+        );
+        expect(contactsService.clearPendingMissedCallCalls, [channelDid]);
+      },
+    );
+
+    test(
+      'Case 4 — after a restart, a still-owed credit is replayed exactly once '
+      'and not again on a later reconcile (durable clear, not in-memory dedup)',
+      () async {
+        final markerTime = DateTime(2026, 7, 9, 10, 30).toUtc();
+        // Owed: the episode id is not yet recorded as credited.
+        final contact = FakeContacts.individualContact.copyWith(
+          channelDid: channelDid,
+          pendingMissedCallAt: markerTime,
+          pendingMissedCallId: 'call-123',
+          pendingMissedCallMissId: 'miss-1',
+        );
+        final contactsService = FakeContactsService(contacts: [contact]);
+        final callItemManager = FakeCallChatItemManager(
+          isStaleReturn: true,
+          resolveReturn: incomingCallMessage(
+            messageId: 'msg-marked',
+            dateCreated: markerTime.subtract(const Duration(minutes: 5)),
+          ),
+        );
+
+        final manager = MissedCallManager(
+          ref: _createTestRef(contactsService),
+          otherPartyPermanentChannelDid: channelDid,
+          callChatItemManager: callItemManager,
+          onUpsertChatItem: (_) {},
+        );
+
+        final healedFirst = await manager.reconcilePendingMissedCall();
+        expect(healedFirst, isTrue);
+        expect(
+          contactsService.incrementMissedCallBadgeCallIds,
+          ['miss-1'],
+          reason: 'the still-owed credit is replayed once on the first heal',
+        );
+        expect(contactsService.clearPendingMissedCallCalls, [channelDid]);
+
+        // The marker is now cleared and the episode id stays recorded as
+        // credited, so a later reconcile must not re-credit — the durable
+        // derived-owed state, not the in-memory dedup set (empty after a
+        // restart), is what prevents a double count.
+        final healedSecond = await manager.reconcilePendingMissedCall();
+        expect(healedSecond, isFalse);
+        expect(
+          contactsService.incrementMissedCallBadgeCallIds,
+          ['miss-1'],
+          reason: 'no second credit after the marker is cleared',
+        );
+      },
+    );
+  });
 }
 
 Ref _createTestRef(

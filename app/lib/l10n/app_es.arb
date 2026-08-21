@@ -558,6 +558,7 @@
 	"callChatItemTapToReturn": "Toca para volver",
 	"callChatItemMissed": "Perdida",
 	"callChatItemNotAnswered": "Sin respuesta",
+	"callChatItemDeclined": "Rechazada",
 	"callChatItemGroupOngoingVideo": "Videollamada en curso ({count})",
 	"callChatItemGroupOngoingAudio": "Llamada de audio en curso ({count})",
 	"callChatItemYouLeft": "Saliste",

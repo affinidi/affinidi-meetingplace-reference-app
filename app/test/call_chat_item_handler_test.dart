@@ -421,7 +421,7 @@ void main() {
     );
 
     test(
-      'caller cancel before answer writes declined with no duration',
+      'caller cancel before answer writes missed with no duration',
       () async {
         final calls =
             <({String messageId, CallStatus status, Duration? duration})>[];
@@ -443,9 +443,9 @@ void main() {
         );
         await Future<void>.delayed(const Duration(milliseconds: 50));
 
-        final declined = calls.where((c) => c.status == CallStatus.declined);
-        expect(declined, hasLength(1));
-        expect(declined.single.duration, isNull);
+        final missed = calls.where((c) => c.status == CallStatus.missed);
+        expect(missed, hasLength(1));
+        expect(missed.single.duration, isNull);
       },
     );
 
@@ -484,7 +484,7 @@ void main() {
       handler.endCall();
       await Future<void>.delayed(const Duration(milliseconds: 50));
 
-      expect(calls.where((c) => c.status == CallStatus.declined), hasLength(1));
+      expect(calls.where((c) => c.status == CallStatus.missed), hasLength(1));
     });
 
     test('endCall sets callChatItemEnded once the write lands', () async {

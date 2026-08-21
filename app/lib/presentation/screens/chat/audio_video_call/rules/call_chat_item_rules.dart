@@ -14,14 +14,23 @@ import 'call_ui_rules.dart';
 /// Returns the [CallStatus] to persist on the call chat item for a terminal
 /// [CallOutcome].
 ///
-/// [CallOutcome] is the shared, wire-level fact both sides agree on. This is
-/// the single authority for the local "who sees what end state" asymmetry, and
-/// is reused by both individual and group calls:
+/// [CallOutcome] is the shared, wire-level fact both sides agree on. This maps
+/// an outcome resolved from this device's local call session (the call screen's
+/// own terminal write) to the status the transcript persists, and drives the
+/// local "who sees what end state" asymmetry for that path. It is reused by
+/// both individual and group calls:
 ///   - [CallOutcome.ended] → [CallStatus.ended] on both sides
-///   - any unanswered outcome ([CallOutcome.cancelled], [CallOutcome.declined],
-///     [CallOutcome.timedOut]):
-///       - caller ([isFromMe] true) → [CallStatus.declined] ("Not answered")
+///   - [CallOutcome.declined] (the peer actively declined before answering):
+///       - caller ([isFromMe] true) → [CallStatus.declined] ("Declined")
 ///       - recipient ([isFromMe] false) → [CallStatus.missed] ("Missed")
+///   - [CallOutcome.cancelled] or [CallOutcome.timedOut] (no active decline;
+///     the call just went unanswered) → [CallStatus.missed] on both sides
+///
+/// The recipient of an active decline does not reach this mapping: their
+/// item is written directly as [CallStatus.declined] by `IncomingCallService`
+/// from the incoming-call banner, so the [isFromMe] false,
+/// [CallOutcome.declined] branch above only covers a decline that still
+/// resolves through the local session.
 ///
 /// [CallOutcome.ongoing] is not a terminal outcome; it maps defensively to
 /// [CallStatus.inProgress].
@@ -31,9 +40,8 @@ CallStatus resolveEndStatus({
 }) => switch (outcome) {
   CallOutcome.ended => CallStatus.ended,
   CallOutcome.ongoing => CallStatus.inProgress,
-  CallOutcome.cancelled ||
-  CallOutcome.declined ||
-  CallOutcome.timedOut => isFromMe ? CallStatus.declined : CallStatus.missed,
+  CallOutcome.declined => isFromMe ? CallStatus.declined : CallStatus.missed,
+  CallOutcome.cancelled || CallOutcome.timedOut => CallStatus.missed,
 };
 
 /// Resolves the shared [CallOutcome] from this device's local session history.
@@ -251,8 +259,9 @@ String resolveCallChatItemStatusText({
       final dt = callStartedAt ?? clock.now();
       return DateFormat('h:mm a').format(dt.toLocal());
     case CallStatus.missed:
-    case CallStatus.declined:
       return isFromMe ? l10n.callChatItemNotAnswered : l10n.callChatItemMissed;
+    case CallStatus.declined:
+      return l10n.callChatItemDeclined;
   }
 }
 

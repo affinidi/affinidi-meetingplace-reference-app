@@ -46,6 +46,20 @@ part 'contact.g.dart';
 /// - `pendingMissedCallId` - Transport call ID for the missed incoming call
 ///   awaiting reconciliation. Used to match the correct call chat item without
 ///   relying on local wall-clock time.
+/// - `pendingMissedCallMissId` - Per-call episode id used as the missed-call
+///   badge dedup key. Distinct from `pendingMissedCallId` (the transport call
+///   id): the badge is counted per episode, so recovery must replay the credit
+///   under this id, not the transport id. Durable so a badge credit that failed
+///   at record time can be replayed on reconciliation, even after an app
+///   restart. Cleared with the rest of the marker once the item is healed.
+/// - `lastCreditedMissId` - The episode id (`pendingMissedCallMissId`) whose
+///   missed-call badge credit has already landed. Whether a credit is still
+///   owed is *derived*, never stored separately: owed ==
+///   `pendingMissedCallMissId != null && pendingMissedCallMissId !=
+///   lastCreditedMissId`. Recording the credited id in the same write that
+///   increments the badge makes credited-ness monotonic (an id stays credited
+///   once credited), so it cannot desync across a restart the way a mutable
+///   "owed" flag could. Survives marker clears so a re-heal never re-credits.
 /// - `activeIncomingCallId` - Transport call ID for an incoming call whose
 ///   banner is currently (or was last) shown. Set when the banner appears;
 ///   cleared on accept, decline, cancel, timeout, or successful crash-recovery
@@ -75,6 +89,8 @@ class Contact {
     this.missedCallCount = 0,
     this.pendingMissedCallAt,
     this.pendingMissedCallId,
+    this.pendingMissedCallMissId,
+    this.lastCreditedMissId,
     this.activeIncomingCallId,
     this.hasBeenOpened = false,
     this.lastKeepAliveMessage,
@@ -102,6 +118,8 @@ class Contact {
   final int missedCallCount;
   final DateTime? pendingMissedCallAt;
   final String? pendingMissedCallId;
+  final String? pendingMissedCallMissId;
+  final String? lastCreditedMissId;
   final String? activeIncomingCallId;
   final bool hasBeenOpened;
   final DateTime? lastKeepAliveMessage;

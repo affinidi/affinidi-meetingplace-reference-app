@@ -41,6 +41,10 @@ abstract class _$ContactCWProxy {
 
   Contact pendingMissedCallId(String? pendingMissedCallId);
 
+  Contact pendingMissedCallMissId(String? pendingMissedCallMissId);
+
+  Contact lastCreditedMissId(String? lastCreditedMissId);
+
   Contact activeIncomingCallId(String? activeIncomingCallId);
 
   Contact hasBeenOpened(bool hasBeenOpened);
@@ -74,6 +78,8 @@ abstract class _$ContactCWProxy {
     int missedCallCount,
     DateTime? pendingMissedCallAt,
     String? pendingMissedCallId,
+    String? pendingMissedCallMissId,
+    String? lastCreditedMissId,
     String? activeIncomingCallId,
     bool hasBeenOpened,
     DateTime? lastKeepAliveMessage,
@@ -147,6 +153,14 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
       call(pendingMissedCallId: pendingMissedCallId);
 
   @override
+  Contact pendingMissedCallMissId(String? pendingMissedCallMissId) =>
+      call(pendingMissedCallMissId: pendingMissedCallMissId);
+
+  @override
+  Contact lastCreditedMissId(String? lastCreditedMissId) =>
+      call(lastCreditedMissId: lastCreditedMissId);
+
+  @override
   Contact activeIncomingCallId(String? activeIncomingCallId) =>
       call(activeIncomingCallId: activeIncomingCallId);
 
@@ -188,6 +202,8 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
     Object? missedCallCount = const $CopyWithPlaceholder(),
     Object? pendingMissedCallAt = const $CopyWithPlaceholder(),
     Object? pendingMissedCallId = const $CopyWithPlaceholder(),
+    Object? pendingMissedCallMissId = const $CopyWithPlaceholder(),
+    Object? lastCreditedMissId = const $CopyWithPlaceholder(),
     Object? activeIncomingCallId = const $CopyWithPlaceholder(),
     Object? hasBeenOpened = const $CopyWithPlaceholder(),
     Object? lastKeepAliveMessage = const $CopyWithPlaceholder(),
@@ -272,6 +288,15 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
           ? _value.pendingMissedCallId
           // ignore: cast_nullable_to_non_nullable
           : pendingMissedCallId as String?,
+      pendingMissedCallMissId:
+          pendingMissedCallMissId == const $CopyWithPlaceholder()
+          ? _value.pendingMissedCallMissId
+          // ignore: cast_nullable_to_non_nullable
+          : pendingMissedCallMissId as String?,
+      lastCreditedMissId: lastCreditedMissId == const $CopyWithPlaceholder()
+          ? _value.lastCreditedMissId
+          // ignore: cast_nullable_to_non_nullable
+          : lastCreditedMissId as String?,
       activeIncomingCallId: activeIncomingCallId == const $CopyWithPlaceholder()
           ? _value.activeIncomingCallId
           // ignore: cast_nullable_to_non_nullable
