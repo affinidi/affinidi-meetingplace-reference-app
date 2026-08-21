@@ -176,12 +176,9 @@ class IncomingCallService extends _$IncomingCallService
     _startRingTimer(event.callId);
   }
 
-  /// Redacts this device's own outgoing call item for [callId] after losing a
-  /// call glare against [contactId] (both sides dialled each other
-  /// simultaneously). The loser's outgoing item is a real, synced chat
-  /// message keyed by its own callId; left alone it renders as a permanent
-  /// duplicate call-history entry once the winning call (a different callId)
-  /// proceeds.
+  /// Redacts this device's own outgoing call item for [callId] with
+  /// [contactId] after a lost call glare, so it doesn't linger once the
+  /// winning call proceeds.
   Future<void> _redactSupersededOutgoingCall(
     String contactId, {
     required String callId,

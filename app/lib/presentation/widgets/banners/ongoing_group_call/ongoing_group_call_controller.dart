@@ -60,7 +60,18 @@ Stream<OngoingGroupCallBannerData?> ongoingGroupCallBanner(
   };
 
   final sdk = await ref.watch(meetingPlaceSdkProvider.future);
-  final chatSession = ref.read(chatSessionServiceProvider(channelDid).notifier);
+  final chatSession = ref.watch(
+    chatSessionServiceProvider(channelDid).notifier,
+  );
+
+  final resolvedMediaTypes = <String, CallMediaType>{};
+  Future<CallMediaType?> resolveMediaType(String callId) async {
+    final cached = resolvedMediaTypes[callId];
+    if (cached != null) return cached;
+    final resolved = await chatSession.resolveCallMediaType(callId);
+    if (resolved != null) resolvedMediaTypes[callId] = resolved;
+    return resolved;
+  }
 
   yield* sdk
       .watchOngoingGroupCall(groupChannelDid: channelDid)
@@ -69,26 +80,20 @@ Stream<OngoingGroupCallBannerData?> ongoingGroupCallBanner(
           ongoing: ongoing,
           memberCards: memberCards,
           cacheManager: cacheManager,
-          chatSession: chatSession,
+          resolveMediaType: resolveMediaType,
         ),
       )
       .distinct();
 }
 
 /// Maps an [OngoingGroupCall] snapshot to banner data, de-duplicating people by
-/// Matrix user ID and excluding the local user's own memberships.
-///
-/// Resolves the real media type from the call's own chat item rather than
-/// assuming one: a group call can be started as audio-only or video, and a
-/// device that has not joined yet has no session state of its own to read it
-/// from. Falls back to audio-only when it cannot be resolved, so an
-/// unresolved lookup never forces a camera on for what might be an
-/// audio-only call.
+/// Matrix user ID and excluding the local user's own memberships. Falls back to
+/// audio-only when the media type cannot be resolved.
 Future<OngoingGroupCallBannerData?> _toBannerData({
   required OngoingGroupCall? ongoing,
   required Map<String, ContactCard> memberCards,
   required BaseCacheManager cacheManager,
-  required ChatSessionService chatSession,
+  required Future<CallMediaType?> Function(String callId) resolveMediaType,
 }) async {
   if (ongoing == null) return null;
 
@@ -110,7 +115,7 @@ Future<OngoingGroupCallBannerData?> _toBannerData({
   }
 
   if (avatars.isEmpty) return null;
-  final mediaType = await chatSession.resolveCallMediaType(ongoing.callId);
+  final mediaType = await resolveMediaType(ongoing.callId);
   return OngoingGroupCallBannerData(
     participantCount: avatars.length,
     avatars: avatars,
