@@ -242,19 +242,28 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     await joinCall();
   }
 
-  /// Discards a finished call (missed or declined) and places a fresh
-  /// outgoing call. Used by the "Call again" action on the end-call screen.
-  Future<void> restartCall({required bool isAudioOnly}) async {
-    _logger.info('restartCall: isAudioOnly=$isAudioOnly', name: _logKey);
+  /// Discards the finished call and places a fresh outgoing call, used by
+  /// "Call again" and by [acceptRecall] on a peer callback. [asAnswerer]
+  /// seeds `hasHadPeer` so the reused controller skips the "Calling..."
+  /// flash on a callback; defaults to false so "Call again" still shows it.
+  Future<void> restartCall({
+    required bool isAudioOnly,
+    bool asAnswerer = false,
+  }) async {
+    _logger.info(
+      'restartCall: isAudioOnly=$isAudioOnly, asAnswerer=$asAnswerer',
+      name: _logKey,
+    );
     _isMinimizing = false;
     _session = null;
     _sessionHandler?.dispose();
     _sessionHandler = null;
     state = state.copyWith(
       status: AudioVideoCallStatus.idle,
-      hasHadPeer: false,
+      hasHadPeer: asAnswerer,
       participants: [],
       session: null,
+      callDurationSeconds: 0,
       isAudioOnly: isAudioOnly,
       isCameraEnabled: !isAudioOnly,
     );
@@ -271,7 +280,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   Future<void> acceptRecall({required bool isAudioOnly}) async {
     state = state.copyWith(peerIsCallingBack: false);
     _clearIncomingCallState();
-    await restartCall(isAudioOnly: isAudioOnly);
+    await restartCall(isAudioOnly: isAudioOnly, asAnswerer: true);
   }
 
   /// Toggles top-bar and controls-bar visibility (tap-anywhere behaviour).

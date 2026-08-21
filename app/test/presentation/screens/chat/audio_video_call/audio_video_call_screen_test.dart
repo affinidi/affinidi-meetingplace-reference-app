@@ -58,8 +58,10 @@ class _FixedStateController extends AudioVideoCallScreenController {
   Future<void> startCall({bool isAudioOnly = false}) async {}
 
   @override
-  Future<void> restartCall({bool isAudioOnly = false}) async =>
-      restartCallCalls++;
+  Future<void> restartCall({
+    bool isAudioOnly = false,
+    bool asAnswerer = false,
+  }) async => restartCallCalls++;
 
   @override
   Future<void> toggleCamera() async => toggleCameraCalls++;
