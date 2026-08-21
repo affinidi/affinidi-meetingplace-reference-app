@@ -207,6 +207,9 @@ class ContactsService extends _$ContactsService {
           pendingMissedCallId:
               persistedContact?.pendingMissedCallId ??
               current.pendingMissedCallId,
+          pendingMissedCallMissId:
+              persistedContact?.pendingMissedCallMissId ??
+              current.pendingMissedCallMissId,
         );
         await updateContact(updatedContact, preserveBadgeState: false);
       });
@@ -428,19 +431,44 @@ class ContactsService extends _$ContactsService {
     if (persistedContact == null) return contact;
 
     var mergedContact = contact;
-    if (preservePendingMissedCallState &&
-        persistedContact.pendingMissedCallAt != null &&
-        (contact.pendingMissedCallAt == null ||
-            contact.pendingMissedCallId == null)) {
-      _logger.info(
-        '_mergeContactForPersistence: preserving pending missed-call state for '
-        '${contact.id}',
-        name: _logKey,
-      );
-      mergedContact = mergedContact.copyWith(
-        pendingMissedCallAt: persistedContact.pendingMissedCallAt,
-        pendingMissedCallId: persistedContact.pendingMissedCallId,
-      );
+    if (preservePendingMissedCallState) {
+      if (persistedContact.pendingMissedCallAt != null &&
+          (contact.pendingMissedCallAt == null ||
+              contact.pendingMissedCallId == null)) {
+        _logger.info(
+          '_mergeContactForPersistence: preserving pending missed-call state '
+          'for ${contact.id}',
+          name: _logKey,
+        );
+        mergedContact = mergedContact.copyWith(
+          pendingMissedCallAt: persistedContact.pendingMissedCallAt,
+          pendingMissedCallId: persistedContact.pendingMissedCallId,
+          pendingMissedCallMissId: persistedContact.pendingMissedCallMissId,
+        );
+      }
+
+      // Keep the credited-episode marker sticky. Credited-ness is monotonic:
+      // an episode's badge credit is recorded (in `lastCreditedMissId`) by the
+      // same write that bumps the badge, so once recorded it must never be
+      // lost — otherwise the derived "owed" (pendingMissedCallMissId !=
+      // lastCreditedMissId) flips back to owed and a re-heal double-credits.
+      // A concurrent stale write can carry an older `lastCreditedMissId` than
+      // what has already persisted, so if either side credited the episode
+      // that is now pending, keep it credited.
+      final pendingMissId = mergedContact.pendingMissedCallMissId;
+      if (pendingMissId != null &&
+          mergedContact.lastCreditedMissId != pendingMissId &&
+          (persistedContact.lastCreditedMissId == pendingMissId ||
+              contact.lastCreditedMissId == pendingMissId)) {
+        _logger.info(
+          '_mergeContactForPersistence: keeping credited episode '
+          '$pendingMissId for ${contact.id}',
+          name: _logKey,
+        );
+        mergedContact = mergedContact.copyWith(
+          lastCreditedMissId: pendingMissId,
+        );
+      }
     }
 
     if (preserveBadgeState &&
@@ -579,6 +607,9 @@ class ContactsService extends _$ContactsService {
           pendingMissedCallId:
               persistedContact?.pendingMissedCallId ??
               current.pendingMissedCallId,
+          pendingMissedCallMissId:
+              persistedContact?.pendingMissedCallMissId ??
+              current.pendingMissedCallMissId,
         ),
       );
     });
@@ -659,7 +690,7 @@ class ContactsService extends _$ContactsService {
       channelDid,
       () => <String>{},
     );
-    if (!creditedForChannel.add(callId)) {
+    if (creditedForChannel.contains(callId)) {
       _logger.info(
         'incrementMissedCallBadge: already credited ${contact.id} call '
         '$callId this episode, skipping bump',
@@ -669,13 +700,29 @@ class ContactsService extends _$ContactsService {
     }
 
     await _serializeBadgeMutation(() async {
+      // Re-check under serialization so two concurrent bumps for the same id
+      // still credit exactly once: the first to run credits and records the
+      // id, the second sees it recorded and returns.
+      if (creditedForChannel.contains(callId)) return;
       final current = state.getContactByChannelDid(channelDid);
       if (current == null) return;
       final amendedContact = current.copyWith(
         missedCallCount: current.missedCallCount + 1,
         badgeCount: current.badgeCount + 1,
+        // Record the credited episode durably in the SAME write that bumps the
+        // badge, so credited-ness survives a restart and "owed" stays derived
+        // (pendingMissedCallMissId != lastCreditedMissId). Keyed by callId,
+        // which is the episode's missId at every call site.
+        lastCreditedMissId: callId,
       );
       await updateContact(amendedContact, preserveBadgeState: false);
+      // Record the in-memory credit only after the write lands. A failed write
+      // throws before this, leaving the id uncredited so reconciliation can
+      // replay the bump (see MissedCallManager badge recovery). Recording
+      // before the write would poison the dedup set on failure and drop the
+      // credit. The in-memory set is only a same-session concurrency guard;
+      // durable dedup is lastCreditedMissId above.
+      creditedForChannel.add(callId);
     });
   }
 
@@ -685,7 +732,16 @@ class ContactsService extends _$ContactsService {
   ///
   /// Durable on [Contact.pendingMissedCallAt]; cleared by
   /// [clearPendingMissedCall] once the item is healed.
-  Future<void> setPendingMissedCall(String channelDid, {String? callId}) async {
+  ///
+  /// [missId] is the per-call badge dedup key. Whether the badge credit still
+  /// needs to be replayed is derived, not stored: the credit is owed while
+  /// [missId] differs from the contact's `lastCreditedMissId`. Reconciliation
+  /// replays the owed credit (keyed by [missId]) before clearing the marker.
+  Future<void> setPendingMissedCall(
+    String channelDid, {
+    String? callId,
+    String? missId,
+  }) async {
     final contact = await _getPersistedContactByChannelDid(channelDid);
     if (contact == null) {
       _logger.error(
@@ -705,6 +761,7 @@ class ContactsService extends _$ContactsService {
       contact.copyWith(
         pendingMissedCallAt: pendingAt,
         pendingMissedCallId: callId,
+        pendingMissedCallMissId: missId,
       ),
     );
   }
@@ -721,7 +778,14 @@ class ContactsService extends _$ContactsService {
       name: _logKey,
     );
     await updateContact(
-      contact.copyWith(pendingMissedCallAt: null, pendingMissedCallId: null),
+      contact.copyWith(
+        pendingMissedCallAt: null,
+        pendingMissedCallId: null,
+        pendingMissedCallMissId: null,
+        // Leave lastCreditedMissId untouched. It is monotonic per episode, so
+        // keeping it after the marker clears means a late duplicate signal for
+        // the same episode cannot re-credit.
+      ),
       preservePendingMissedCallState: false,
     );
   }
@@ -739,6 +803,22 @@ class ContactsService extends _$ContactsService {
     return (await _getPersistedContactByChannelDid(
       channelDid,
     ))?.pendingMissedCallId;
+  }
+
+  /// Returns the episode id (`pendingMissedCallMissId`) whose missed-call badge
+  /// credit is still owed for [channelDid], or `null` if none is owed.
+  ///
+  /// "Owed" is derived from a single durable snapshot so the decision cannot
+  /// tear across a concurrent write: a credit is owed while the pending
+  /// episode's id has not yet been recorded as credited
+  /// (`pendingMissedCallMissId != lastCreditedMissId`). Callers replay the
+  /// credit keyed by the returned id.
+  Future<String?> owedMissedCallBadgeMissId(String channelDid) async {
+    final contact = await _getPersistedContactByChannelDid(channelDid);
+    final pendingMissId = contact?.pendingMissedCallMissId;
+    if (pendingMissId == null) return null;
+    if (pendingMissId == contact?.lastCreditedMissId) return null;
+    return pendingMissId;
   }
 
   /// Update an existing contact when a group invitation is accepted.

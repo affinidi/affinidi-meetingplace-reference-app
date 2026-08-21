@@ -61,15 +61,32 @@ class FakeContactsService extends ContactsService {
   }) async {
     incrementMissedCallBadgeCalls.add(channelDid);
     incrementMissedCallBadgeCallIds.add(callId);
+    // Model production: the credited episode id is recorded in the same write
+    // that bumps the badge, so a later derived owed-check for that episode
+    // returns not-owed (credited-ness is monotonic).
+    final contact = getContactByChannelDid(channelDid);
+    if (contact == null) return;
+    contacts.removeWhere((c) => c.id == contact.id);
+    contacts.add(contact.copyWith(lastCreditedMissId: callId));
   }
 
   @override
-  Future<void> setPendingMissedCall(String channelDid, {String? callId}) async {
+  Future<void> setPendingMissedCall(
+    String channelDid, {
+    String? callId,
+    String? missId,
+  }) async {
     setPendingMissedCallCalls.add(channelDid);
     final contact = getContactByChannelDid(channelDid);
     if (contact == null) return;
     contacts.removeWhere((c) => c.id == contact.id);
-    contacts.add(contact.copyWith(pendingMissedCallAt: DateTime.now().toUtc()));
+    contacts.add(
+      contact.copyWith(
+        pendingMissedCallAt: DateTime.now().toUtc(),
+        pendingMissedCallId: callId,
+        pendingMissedCallMissId: missId,
+      ),
+    );
   }
 
   @override
@@ -79,7 +96,12 @@ class FakeContactsService extends ContactsService {
     if (contact == null) return;
     contacts.removeWhere((c) => c.id == contact.id);
     contacts.add(
-      contact.copyWith(pendingMissedCallAt: null, pendingMissedCallId: null),
+      // lastCreditedMissId is monotonic, so it is left untouched on clear.
+      contact.copyWith(
+        pendingMissedCallAt: null,
+        pendingMissedCallId: null,
+        pendingMissedCallMissId: null,
+      ),
     );
   }
 
@@ -91,6 +113,15 @@ class FakeContactsService extends ContactsService {
   @override
   Future<String?> getPendingMissedCallId(String channelDid) async {
     return getContactByChannelDid(channelDid)?.pendingMissedCallId;
+  }
+
+  @override
+  Future<String?> owedMissedCallBadgeMissId(String channelDid) async {
+    final contact = getContactByChannelDid(channelDid);
+    final pendingMissId = contact?.pendingMissedCallMissId;
+    if (pendingMissId == null) return null;
+    if (pendingMissId == contact?.lastCreditedMissId) return null;
+    return pendingMissId;
   }
 
   @override

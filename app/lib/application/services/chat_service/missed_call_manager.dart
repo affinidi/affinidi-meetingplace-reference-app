@@ -217,8 +217,39 @@ class MissedCallManager {
     );
     if (!ref.mounted) return;
     if (updated != null) onUpsertChatItem(updated);
+    await _replayPendingBadgeCreditIfNeeded();
     if (!ref.mounted || !clearPendingMarker) return;
     await _clearPendingMissedCall();
+  }
+
+  /// Replays a missed-call badge credit that failed at record time.
+  ///
+  /// Runs when the durable marker still owes a credit — derived, in a single
+  /// snapshot, as `pendingMissedCallMissId != lastCreditedMissId` and returned
+  /// as that episode id by [ContactsService.owedMissedCallBadgeMissId].
+  /// Gating on the durable derived state (not an in-memory or mutable flag)
+  /// means a restart, whose in-memory dedup set is empty, still sees the
+  /// episode as already credited and does not replay it.
+  /// [ContactsService.incrementMissedCallBadge] additionally skips while the
+  /// chat is open and dedups by episode id, and it records the credited id in
+  /// the same write that bumps the badge, so the credit lands exactly once and
+  /// never double-counts.
+  Future<void> _replayPendingBadgeCreditIfNeeded() async {
+    if (!ref.mounted) return;
+    final missId = await _owedMissedCallBadgeMissId();
+    if (missId == null || missId.isEmpty) return;
+    if (!ref.mounted) return;
+    _logger.info(
+      '_healIncomingCallItemMissed: Replaying missed-call badge credit for '
+      '$otherPartyPermanentChannelDid (missId=$missId)',
+      name: _className,
+    );
+    await ref
+        .read(contactsServiceProvider.notifier)
+        .incrementMissedCallBadge(
+          otherPartyPermanentChannelDid,
+          callId: missId,
+        );
   }
 
   Future<DateTime?> _pendingMissedCallAt() {
@@ -231,6 +262,12 @@ class MissedCallManager {
     return ref
         .read(contactsServiceProvider.notifier)
         .getPendingMissedCallId(otherPartyPermanentChannelDid);
+  }
+
+  Future<String?> _owedMissedCallBadgeMissId() {
+    return ref
+        .read(contactsServiceProvider.notifier)
+        .owedMissedCallBadgeMissId(otherPartyPermanentChannelDid);
   }
 
   Future<void> _clearPendingMissedCall() {

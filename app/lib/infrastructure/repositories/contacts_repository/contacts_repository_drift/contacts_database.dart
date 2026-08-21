@@ -51,7 +51,7 @@ class ContactsDatabase extends _$ContactsDatabase {
   ContactsDatabase.withExecutor(super.executor);
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -239,6 +239,32 @@ class ContactsDatabase extends _$ContactsDatabase {
           );
         }
       }
+
+      // Adds pending_missed_call_miss_id (badge dedup key) and
+      // last_credited_miss_id (the episode already credited) so a missed-call
+      // badge credit that failed at record time can be replayed on
+      // reconciliation surviving a restart, while "owed" stays derived
+      // (pending_missed_call_miss_id != last_credited_miss_id) and
+      // credited-ness is monotonic, so a re-heal can never double-credit.
+      if (from < 10) {
+        final result = await customSelect('PRAGMA table_info(contacts)').get();
+        final pendingMissedCallMissIdExists = result.any(
+          (row) => row.data['name'] == 'pending_missed_call_miss_id',
+        );
+        if (!pendingMissedCallMissIdExists) {
+          await customStatement(
+            'ALTER TABLE contacts ADD COLUMN pending_missed_call_miss_id TEXT',
+          );
+        }
+        final lastCreditedMissIdExists = result.any(
+          (row) => row.data['name'] == 'last_credited_miss_id',
+        );
+        if (!lastCreditedMissIdExists) {
+          await customStatement(
+            'ALTER TABLE contacts ADD COLUMN last_credited_miss_id TEXT',
+          );
+        }
+      }
     },
   );
 }
@@ -264,6 +290,8 @@ class Contacts extends Table {
   IntColumn get missedCallCount => integer().clientDefault(() => 0)();
   DateTimeColumn get pendingMissedCallAt => dateTime().nullable()();
   TextColumn get pendingMissedCallId => text().nullable()();
+  TextColumn get pendingMissedCallMissId => text().nullable()();
+  TextColumn get lastCreditedMissId => text().nullable()();
   TextColumn get activeIncomingCallId => text().nullable()();
   BoolColumn get hasBeenOpened => boolean().clientDefault(() => false)();
   DateTimeColumn get lastKeepAliveMessage => dateTime().nullable()();

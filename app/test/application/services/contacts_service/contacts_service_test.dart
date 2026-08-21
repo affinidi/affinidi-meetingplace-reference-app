@@ -606,5 +606,96 @@ void main() {
         reason: 'call-id marker must be cleared together with the timestamp',
       );
     });
+
+    // =====================================================================
+    // Missed-call badge credit recovery — the dedup-ordering (poison) fix and
+    // the chat-open replay skip. Cross-layer recovery cases 1/3/4 live in
+    // missed_call_manager_test.dart (the heal wiring).
+    // =====================================================================
+
+    test(
+      'Case 2 — a chat-open replay of the owed credit is skipped, so opening '
+      'the chat leaves no lingering count',
+      () async {
+        final channelDid = FakeContacts.individualContact.channelDid!;
+        final contact = FakeContacts.individualContact.copyWith(
+          badgeCount: 0,
+          missedCallCount: 0,
+        );
+        final repository = FakeContactsRepository(contacts: [contact]);
+        final container = _makeContainer(repository: repository);
+        addTearDown(container.dispose);
+        final service = container.read(contactsServiceProvider.notifier);
+        service.state = service.state.copyWith(contacts: [contact]);
+        container
+            .read(openChatRegistryProvider.notifier)
+            .markOpened(contact.id);
+
+        int badge() => repository.contacts
+            .firstWhere((c) => c.channelDid == channelDid)
+            .badgeCount;
+
+        // The heal replays the owed credit through incrementMissedCallBadge;
+        // while the chat is open the badge was already zeroed on open, so the
+        // replay must be skipped and add no lingering count.
+        await service.incrementMissedCallBadge(channelDid, callId: 'miss-1');
+
+        expect(
+          badge(),
+          0,
+          reason:
+              'a chat-open replay must be skipped: the user saw the call, the '
+              'badge is already zeroed',
+        );
+      },
+    );
+
+    test(
+      'poison fix — a badge bump whose write fails leaves the id uncredited, '
+      'so a later replay credits exactly once and the success-path dedup holds',
+      () async {
+        final channelDid = FakeContacts.individualContact.channelDid!;
+        final contact = FakeContacts.individualContact.copyWith(
+          badgeCount: 0,
+          missedCallCount: 0,
+        );
+        final repository = FakeContactsRepository(contacts: [contact]);
+        final container = _makeContainer(repository: repository);
+        addTearDown(container.dispose);
+        final service = container.read(contactsServiceProvider.notifier);
+        service.state = service.state.copyWith(contacts: [contact]);
+
+        int badge() => repository.contacts
+            .firstWhere((c) => c.channelDid == channelDid)
+            .badgeCount;
+
+        // Initial bump fails at the write.
+        repository.failUpdateWhen = (_) => true;
+        await expectLater(
+          service.incrementMissedCallBadge(channelDid, callId: 'miss-1'),
+          throwsA(isA<Exception>()),
+        );
+        expect(
+          badge(),
+          0,
+          reason: 'a failed write must not increment the badge',
+        );
+
+        // Recovery replay: the write now succeeds and the credit lands exactly
+        // once — the failed bump did NOT poison the dedup set (the id is
+        // recorded only after the write succeeds).
+        repository.failUpdateWhen = null;
+        await service.incrementMissedCallBadge(channelDid, callId: 'miss-1');
+        expect(
+          badge(),
+          1,
+          reason: 'the replay must credit the previously-failed bump',
+        );
+
+        // Success-path dedup still holds: the same id does not double-count.
+        await service.incrementMissedCallBadge(channelDid, callId: 'miss-1');
+        expect(badge(), 1, reason: 'a credited id must not be counted twice');
+      },
+    );
   });
 }

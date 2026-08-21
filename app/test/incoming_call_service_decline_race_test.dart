@@ -54,8 +54,16 @@ class _RaceContactsService extends FakeContactsService {
   Future<void> Function()? onAfterSetPending;
 
   @override
-  Future<void> setPendingMissedCall(String channelDid, {String? callId}) async {
-    await super.setPendingMissedCall(channelDid, callId: callId);
+  Future<void> setPendingMissedCall(
+    String channelDid, {
+    String? callId,
+    String? missId,
+  }) async {
+    await super.setPendingMissedCall(
+      channelDid,
+      callId: callId,
+      missId: missId,
+    );
     final hook = onAfterSetPending;
     if (hook != null) await hook();
   }

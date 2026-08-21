@@ -193,6 +193,28 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
         type: DriftSqlType.string,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _pendingMissedCallMissIdMeta =
+      const VerificationMeta('pendingMissedCallMissId');
+  @override
+  late final GeneratedColumn<String> pendingMissedCallMissId =
+      GeneratedColumn<String>(
+        'pending_missed_call_miss_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _lastCreditedMissIdMeta =
+      const VerificationMeta('lastCreditedMissId');
+  @override
+  late final GeneratedColumn<String> lastCreditedMissId =
+      GeneratedColumn<String>(
+        'last_credited_miss_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _activeIncomingCallIdMeta =
       const VerificationMeta('activeIncomingCallId');
   @override
@@ -264,6 +286,8 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
     missedCallCount,
     pendingMissedCallAt,
     pendingMissedCallId,
+    pendingMissedCallMissId,
+    lastCreditedMissId,
     activeIncomingCallId,
     hasBeenOpened,
     lastKeepAliveMessage,
@@ -381,6 +405,24 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
         pendingMissedCallId.isAcceptableOrUnknown(
           data['pending_missed_call_id']!,
           _pendingMissedCallIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('pending_missed_call_miss_id')) {
+      context.handle(
+        _pendingMissedCallMissIdMeta,
+        pendingMissedCallMissId.isAcceptableOrUnknown(
+          data['pending_missed_call_miss_id']!,
+          _pendingMissedCallMissIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_credited_miss_id')) {
+      context.handle(
+        _lastCreditedMissIdMeta,
+        lastCreditedMissId.isAcceptableOrUnknown(
+          data['last_credited_miss_id']!,
+          _lastCreditedMissIdMeta,
         ),
       );
     }
@@ -505,6 +547,14 @@ class $ContactsTable extends Contacts with TableInfo<$ContactsTable, Contact> {
         DriftSqlType.string,
         data['${effectivePrefix}pending_missed_call_id'],
       ),
+      pendingMissedCallMissId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pending_missed_call_miss_id'],
+      ),
+      lastCreditedMissId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_credited_miss_id'],
+      ),
       activeIncomingCallId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}active_incoming_call_id'],
@@ -557,6 +607,8 @@ class Contact extends DataClass implements Insertable<Contact> {
   final int missedCallCount;
   final DateTime? pendingMissedCallAt;
   final String? pendingMissedCallId;
+  final String? pendingMissedCallMissId;
+  final String? lastCreditedMissId;
   final String? activeIncomingCallId;
   final bool hasBeenOpened;
   final DateTime? lastKeepAliveMessage;
@@ -579,6 +631,8 @@ class Contact extends DataClass implements Insertable<Contact> {
     required this.missedCallCount,
     this.pendingMissedCallAt,
     this.pendingMissedCallId,
+    this.pendingMissedCallMissId,
+    this.lastCreditedMissId,
     this.activeIncomingCallId,
     required this.hasBeenOpened,
     this.lastKeepAliveMessage,
@@ -628,6 +682,14 @@ class Contact extends DataClass implements Insertable<Contact> {
     if (!nullToAbsent || pendingMissedCallId != null) {
       map['pending_missed_call_id'] = Variable<String>(pendingMissedCallId);
     }
+    if (!nullToAbsent || pendingMissedCallMissId != null) {
+      map['pending_missed_call_miss_id'] = Variable<String>(
+        pendingMissedCallMissId,
+      );
+    }
+    if (!nullToAbsent || lastCreditedMissId != null) {
+      map['last_credited_miss_id'] = Variable<String>(lastCreditedMissId);
+    }
     if (!nullToAbsent || activeIncomingCallId != null) {
       map['active_incoming_call_id'] = Variable<String>(activeIncomingCallId);
     }
@@ -670,6 +732,12 @@ class Contact extends DataClass implements Insertable<Contact> {
       pendingMissedCallId: pendingMissedCallId == null && nullToAbsent
           ? const Value.absent()
           : Value(pendingMissedCallId),
+      pendingMissedCallMissId: pendingMissedCallMissId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pendingMissedCallMissId),
+      lastCreditedMissId: lastCreditedMissId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastCreditedMissId),
       activeIncomingCallId: activeIncomingCallId == null && nullToAbsent
           ? const Value.absent()
           : Value(activeIncomingCallId),
@@ -712,6 +780,12 @@ class Contact extends DataClass implements Insertable<Contact> {
       pendingMissedCallId: serializer.fromJson<String?>(
         json['pendingMissedCallId'],
       ),
+      pendingMissedCallMissId: serializer.fromJson<String?>(
+        json['pendingMissedCallMissId'],
+      ),
+      lastCreditedMissId: serializer.fromJson<String?>(
+        json['lastCreditedMissId'],
+      ),
       activeIncomingCallId: serializer.fromJson<String?>(
         json['activeIncomingCallId'],
       ),
@@ -745,6 +819,10 @@ class Contact extends DataClass implements Insertable<Contact> {
       'missedCallCount': serializer.toJson<int>(missedCallCount),
       'pendingMissedCallAt': serializer.toJson<DateTime?>(pendingMissedCallAt),
       'pendingMissedCallId': serializer.toJson<String?>(pendingMissedCallId),
+      'pendingMissedCallMissId': serializer.toJson<String?>(
+        pendingMissedCallMissId,
+      ),
+      'lastCreditedMissId': serializer.toJson<String?>(lastCreditedMissId),
       'activeIncomingCallId': serializer.toJson<String?>(activeIncomingCallId),
       'hasBeenOpened': serializer.toJson<bool>(hasBeenOpened),
       'lastKeepAliveMessage': serializer.toJson<DateTime?>(
@@ -774,6 +852,8 @@ class Contact extends DataClass implements Insertable<Contact> {
     int? missedCallCount,
     Value<DateTime?> pendingMissedCallAt = const Value.absent(),
     Value<String?> pendingMissedCallId = const Value.absent(),
+    Value<String?> pendingMissedCallMissId = const Value.absent(),
+    Value<String?> lastCreditedMissId = const Value.absent(),
     Value<String?> activeIncomingCallId = const Value.absent(),
     bool? hasBeenOpened,
     Value<DateTime?> lastKeepAliveMessage = const Value.absent(),
@@ -802,6 +882,12 @@ class Contact extends DataClass implements Insertable<Contact> {
     pendingMissedCallId: pendingMissedCallId.present
         ? pendingMissedCallId.value
         : this.pendingMissedCallId,
+    pendingMissedCallMissId: pendingMissedCallMissId.present
+        ? pendingMissedCallMissId.value
+        : this.pendingMissedCallMissId,
+    lastCreditedMissId: lastCreditedMissId.present
+        ? lastCreditedMissId.value
+        : this.lastCreditedMissId,
     activeIncomingCallId: activeIncomingCallId.present
         ? activeIncomingCallId.value
         : this.activeIncomingCallId,
@@ -851,6 +937,12 @@ class Contact extends DataClass implements Insertable<Contact> {
       pendingMissedCallId: data.pendingMissedCallId.present
           ? data.pendingMissedCallId.value
           : this.pendingMissedCallId,
+      pendingMissedCallMissId: data.pendingMissedCallMissId.present
+          ? data.pendingMissedCallMissId.value
+          : this.pendingMissedCallMissId,
+      lastCreditedMissId: data.lastCreditedMissId.present
+          ? data.lastCreditedMissId.value
+          : this.lastCreditedMissId,
       activeIncomingCallId: data.activeIncomingCallId.present
           ? data.activeIncomingCallId.value
           : this.activeIncomingCallId,
@@ -886,6 +978,8 @@ class Contact extends DataClass implements Insertable<Contact> {
           ..write('missedCallCount: $missedCallCount, ')
           ..write('pendingMissedCallAt: $pendingMissedCallAt, ')
           ..write('pendingMissedCallId: $pendingMissedCallId, ')
+          ..write('pendingMissedCallMissId: $pendingMissedCallMissId, ')
+          ..write('lastCreditedMissId: $lastCreditedMissId, ')
           ..write('activeIncomingCallId: $activeIncomingCallId, ')
           ..write('hasBeenOpened: $hasBeenOpened, ')
           ..write('lastKeepAliveMessage: $lastKeepAliveMessage, ')
@@ -913,6 +1007,8 @@ class Contact extends DataClass implements Insertable<Contact> {
     missedCallCount,
     pendingMissedCallAt,
     pendingMissedCallId,
+    pendingMissedCallMissId,
+    lastCreditedMissId,
     activeIncomingCallId,
     hasBeenOpened,
     lastKeepAliveMessage,
@@ -939,6 +1035,8 @@ class Contact extends DataClass implements Insertable<Contact> {
           other.missedCallCount == this.missedCallCount &&
           other.pendingMissedCallAt == this.pendingMissedCallAt &&
           other.pendingMissedCallId == this.pendingMissedCallId &&
+          other.pendingMissedCallMissId == this.pendingMissedCallMissId &&
+          other.lastCreditedMissId == this.lastCreditedMissId &&
           other.activeIncomingCallId == this.activeIncomingCallId &&
           other.hasBeenOpened == this.hasBeenOpened &&
           other.lastKeepAliveMessage == this.lastKeepAliveMessage &&
@@ -964,6 +1062,8 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
   final Value<int> missedCallCount;
   final Value<DateTime?> pendingMissedCallAt;
   final Value<String?> pendingMissedCallId;
+  final Value<String?> pendingMissedCallMissId;
+  final Value<String?> lastCreditedMissId;
   final Value<String?> activeIncomingCallId;
   final Value<bool> hasBeenOpened;
   final Value<DateTime?> lastKeepAliveMessage;
@@ -987,6 +1087,8 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     this.missedCallCount = const Value.absent(),
     this.pendingMissedCallAt = const Value.absent(),
     this.pendingMissedCallId = const Value.absent(),
+    this.pendingMissedCallMissId = const Value.absent(),
+    this.lastCreditedMissId = const Value.absent(),
     this.activeIncomingCallId = const Value.absent(),
     this.hasBeenOpened = const Value.absent(),
     this.lastKeepAliveMessage = const Value.absent(),
@@ -1011,6 +1113,8 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     this.missedCallCount = const Value.absent(),
     this.pendingMissedCallAt = const Value.absent(),
     this.pendingMissedCallId = const Value.absent(),
+    this.pendingMissedCallMissId = const Value.absent(),
+    this.lastCreditedMissId = const Value.absent(),
     this.activeIncomingCallId = const Value.absent(),
     this.hasBeenOpened = const Value.absent(),
     this.lastKeepAliveMessage = const Value.absent(),
@@ -1040,6 +1144,8 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     Expression<int>? missedCallCount,
     Expression<DateTime>? pendingMissedCallAt,
     Expression<String>? pendingMissedCallId,
+    Expression<String>? pendingMissedCallMissId,
+    Expression<String>? lastCreditedMissId,
     Expression<String>? activeIncomingCallId,
     Expression<bool>? hasBeenOpened,
     Expression<DateTime>? lastKeepAliveMessage,
@@ -1068,6 +1174,10 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
         'pending_missed_call_at': pendingMissedCallAt,
       if (pendingMissedCallId != null)
         'pending_missed_call_id': pendingMissedCallId,
+      if (pendingMissedCallMissId != null)
+        'pending_missed_call_miss_id': pendingMissedCallMissId,
+      if (lastCreditedMissId != null)
+        'last_credited_miss_id': lastCreditedMissId,
       if (activeIncomingCallId != null)
         'active_incoming_call_id': activeIncomingCallId,
       if (hasBeenOpened != null) 'has_been_opened': hasBeenOpened,
@@ -1097,6 +1207,8 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
     Value<int>? missedCallCount,
     Value<DateTime?>? pendingMissedCallAt,
     Value<String?>? pendingMissedCallId,
+    Value<String?>? pendingMissedCallMissId,
+    Value<String?>? lastCreditedMissId,
     Value<String?>? activeIncomingCallId,
     Value<bool>? hasBeenOpened,
     Value<DateTime?>? lastKeepAliveMessage,
@@ -1122,6 +1234,9 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
       missedCallCount: missedCallCount ?? this.missedCallCount,
       pendingMissedCallAt: pendingMissedCallAt ?? this.pendingMissedCallAt,
       pendingMissedCallId: pendingMissedCallId ?? this.pendingMissedCallId,
+      pendingMissedCallMissId:
+          pendingMissedCallMissId ?? this.pendingMissedCallMissId,
+      lastCreditedMissId: lastCreditedMissId ?? this.lastCreditedMissId,
       activeIncomingCallId: activeIncomingCallId ?? this.activeIncomingCallId,
       hasBeenOpened: hasBeenOpened ?? this.hasBeenOpened,
       lastKeepAliveMessage: lastKeepAliveMessage ?? this.lastKeepAliveMessage,
@@ -1199,6 +1314,14 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
         pendingMissedCallId.value,
       );
     }
+    if (pendingMissedCallMissId.present) {
+      map['pending_missed_call_miss_id'] = Variable<String>(
+        pendingMissedCallMissId.value,
+      );
+    }
+    if (lastCreditedMissId.present) {
+      map['last_credited_miss_id'] = Variable<String>(lastCreditedMissId.value);
+    }
     if (activeIncomingCallId.present) {
       map['active_incoming_call_id'] = Variable<String>(
         activeIncomingCallId.value,
@@ -1243,6 +1366,8 @@ class ContactsCompanion extends UpdateCompanion<Contact> {
           ..write('missedCallCount: $missedCallCount, ')
           ..write('pendingMissedCallAt: $pendingMissedCallAt, ')
           ..write('pendingMissedCallId: $pendingMissedCallId, ')
+          ..write('pendingMissedCallMissId: $pendingMissedCallMissId, ')
+          ..write('lastCreditedMissId: $lastCreditedMissId, ')
           ..write('activeIncomingCallId: $activeIncomingCallId, ')
           ..write('hasBeenOpened: $hasBeenOpened, ')
           ..write('lastKeepAliveMessage: $lastKeepAliveMessage, ')
@@ -1698,6 +1823,8 @@ typedef $$ContactsTableCreateCompanionBuilder =
       Value<int> missedCallCount,
       Value<DateTime?> pendingMissedCallAt,
       Value<String?> pendingMissedCallId,
+      Value<String?> pendingMissedCallMissId,
+      Value<String?> lastCreditedMissId,
       Value<String?> activeIncomingCallId,
       Value<bool> hasBeenOpened,
       Value<DateTime?> lastKeepAliveMessage,
@@ -1723,6 +1850,8 @@ typedef $$ContactsTableUpdateCompanionBuilder =
       Value<int> missedCallCount,
       Value<DateTime?> pendingMissedCallAt,
       Value<String?> pendingMissedCallId,
+      Value<String?> pendingMissedCallMissId,
+      Value<String?> lastCreditedMissId,
       Value<String?> activeIncomingCallId,
       Value<bool> hasBeenOpened,
       Value<DateTime?> lastKeepAliveMessage,
@@ -1852,6 +1981,16 @@ class $$ContactsTableFilterComposer
 
   ColumnFilters<String> get pendingMissedCallId => $composableBuilder(
     column: $table.pendingMissedCallId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get pendingMissedCallMissId => $composableBuilder(
+    column: $table.pendingMissedCallMissId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastCreditedMissId => $composableBuilder(
+    column: $table.lastCreditedMissId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1995,6 +2134,16 @@ class $$ContactsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get pendingMissedCallMissId => $composableBuilder(
+    column: $table.pendingMissedCallMissId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastCreditedMissId => $composableBuilder(
+    column: $table.lastCreditedMissId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get activeIncomingCallId => $composableBuilder(
     column: $table.activeIncomingCallId,
     builder: (column) => ColumnOrderings(column),
@@ -2096,6 +2245,16 @@ class $$ContactsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get pendingMissedCallMissId => $composableBuilder(
+    column: $table.pendingMissedCallMissId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get lastCreditedMissId => $composableBuilder(
+    column: $table.lastCreditedMissId,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get activeIncomingCallId => $composableBuilder(
     column: $table.activeIncomingCallId,
     builder: (column) => column,
@@ -2187,6 +2346,8 @@ class $$ContactsTableTableManager
                 Value<int> missedCallCount = const Value.absent(),
                 Value<DateTime?> pendingMissedCallAt = const Value.absent(),
                 Value<String?> pendingMissedCallId = const Value.absent(),
+                Value<String?> pendingMissedCallMissId = const Value.absent(),
+                Value<String?> lastCreditedMissId = const Value.absent(),
                 Value<String?> activeIncomingCallId = const Value.absent(),
                 Value<bool> hasBeenOpened = const Value.absent(),
                 Value<DateTime?> lastKeepAliveMessage = const Value.absent(),
@@ -2210,6 +2371,8 @@ class $$ContactsTableTableManager
                 missedCallCount: missedCallCount,
                 pendingMissedCallAt: pendingMissedCallAt,
                 pendingMissedCallId: pendingMissedCallId,
+                pendingMissedCallMissId: pendingMissedCallMissId,
+                lastCreditedMissId: lastCreditedMissId,
                 activeIncomingCallId: activeIncomingCallId,
                 hasBeenOpened: hasBeenOpened,
                 lastKeepAliveMessage: lastKeepAliveMessage,
@@ -2235,6 +2398,8 @@ class $$ContactsTableTableManager
                 Value<int> missedCallCount = const Value.absent(),
                 Value<DateTime?> pendingMissedCallAt = const Value.absent(),
                 Value<String?> pendingMissedCallId = const Value.absent(),
+                Value<String?> pendingMissedCallMissId = const Value.absent(),
+                Value<String?> lastCreditedMissId = const Value.absent(),
                 Value<String?> activeIncomingCallId = const Value.absent(),
                 Value<bool> hasBeenOpened = const Value.absent(),
                 Value<DateTime?> lastKeepAliveMessage = const Value.absent(),
@@ -2258,6 +2423,8 @@ class $$ContactsTableTableManager
                 missedCallCount: missedCallCount,
                 pendingMissedCallAt: pendingMissedCallAt,
                 pendingMissedCallId: pendingMissedCallId,
+                pendingMissedCallMissId: pendingMissedCallMissId,
+                lastCreditedMissId: lastCreditedMissId,
                 activeIncomingCallId: activeIncomingCallId,
                 hasBeenOpened: hasBeenOpened,
                 lastKeepAliveMessage: lastKeepAliveMessage,

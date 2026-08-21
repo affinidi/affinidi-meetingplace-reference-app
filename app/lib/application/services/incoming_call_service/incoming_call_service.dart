@@ -355,6 +355,12 @@ class IncomingCallService extends _$IncomingCallService
     String? callId,
     String? missId,
   }) async {
+    // A failed bump leaves the episode's id uncredited on the durable marker
+    // (lastCreditedMissId stays behind pendingMissedCallMissId), so the derived
+    // "owed" stays true and reconciliation replays the credit; otherwise the
+    // unread count would stay permanently short by one. No flag to track: owed
+    // is derived from the durable marker, and a successful bump records the
+    // credited id in the same write.
     if (missId != null) {
       try {
         await ref
@@ -395,7 +401,7 @@ class IncomingCallService extends _$IncomingCallService
       try {
         await ref
             .read(contactsServiceProvider.notifier)
-            .setPendingMissedCall(contactId, callId: callId);
+            .setPendingMissedCall(contactId, callId: callId, missId: missId);
       } catch (e, stackTrace) {
         _logger.error(
           status == CallStatus.declined
