@@ -144,6 +144,58 @@ class CallChatItemManager {
     }
   }
 
+  /// Returns every stale incoming call item (status `calling`/`ringing`)
+  /// created no later than [notAfter], excluding any item whose call id equals
+  /// [excludeCallId].
+  ///
+  /// Used by reconciliation to heal every orphaned item, not just the marked
+  /// one, since back-to-back missed calls overwrite the single-slot marker.
+  /// [excludeCallId] protects a currently-ringing call from being healed.
+  ///
+  /// A null [notAfter] returns every stale incoming item with no upper time
+  /// bound. Used by the chat-open reconcile, which has no marker to bound by.
+  Future<List<Message>> resolveStaleIncomingCallItemsBefore(
+    DateTime? notAfter, {
+    String? excludeCallId,
+  }) async {
+    const label = 'resolveStaleIncomingCallItemsBefore';
+    await ensureInitialized();
+    final chatSdk = getChatSdk();
+    if (chatSdk == null) {
+      logger.warning('$label: chat SDK unavailable', name: _logKey);
+      return const [];
+    }
+    try {
+      final items = await chatSdk.messages;
+      final boundUtc = notAfter?.toUtc();
+      final hasExclude = excludeCallId != null && excludeCallId.isNotEmpty;
+      final matches = items.whereType<Message>().where((message) {
+        if (boundUtc != null && message.dateCreated.toUtc().isAfter(boundUtc)) {
+          return false;
+        }
+        if (!isStaleIncomingCall(message)) return false;
+        if (!hasExclude) return true;
+        final attachment = message.attachments.firstWhereOrNull(
+          CallMetadata.isCall,
+        );
+        final callId = attachment == null
+            ? null
+            : CallMetadata.maybeOf(attachment)?.callId;
+        return callId != excludeCallId;
+      }).toList();
+      logger.info('$label: ${matches.length} stale item(s)', name: _logKey);
+      return matches;
+    } catch (e, stackTrace) {
+      logger.error(
+        '$label failed',
+        error: e,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+      return const [];
+    }
+  }
+
   /// Finds the latest unsettled call item from [fromMe] direction, preferring
   /// exact callId match when [callId] is provided.
   Future<String?> _resolveCallChatItemId({
@@ -377,6 +429,18 @@ class CallChatItemManager {
           name: _logKey,
         );
         return null;
+      }
+      // Only converge a call this device took part in (in progress or ended
+      // locally). An unanswered terminal or an item that never connected here
+      // must not be forced to ended, which would fabricate a completed call.
+      if (existing.status != CallStatus.inProgress &&
+          existing.status != CallStatus.ended) {
+        logger.info(
+          'reconcileCallOutcome: $messageId is ${existing.status}, not a '
+          'participated call; preserving status',
+          name: _logKey,
+        );
+        return item;
       }
       final convergedParticipation = existing.participation?.copyWith(
         selfLeftBeforeEnd: false,

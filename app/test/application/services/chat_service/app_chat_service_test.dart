@@ -13,6 +13,7 @@ import 'package:mpx_flutter_reference_app/application/services/chat_service/chat
 import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service_state.dart';
+import 'package:mpx_flutter_reference_app/application/services/incoming_call_service/incoming_call_notifier.dart';
 import 'package:mpx_flutter_reference_app/application/services/network_connectivity_service/network_connectivity_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/network_connectivity_service/network_connectivity_service_state.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact.dart';
@@ -1111,11 +1112,12 @@ void main() {
       required String messageId,
       required bool isFromMe,
       required CallStatus status,
+      DateTime? dateCreated,
     }) => Message(
       chatId: 'fake-chat-id',
       messageId: messageId,
       value: '',
-      dateCreated: DateTime.now(),
+      dateCreated: dateCreated ?? DateTime.now(),
       status: ChatItemStatus.confirmed,
       isFromMe: isFromMe,
       senderDid: isFromMe ? 'me' : channelDid,
@@ -1370,7 +1372,24 @@ void main() {
         ),
       ];
 
+      // The call is genuinely still ringing while the chat opens, so the
+      // chat-open unmarked sweep must not heal it prematurely.
+      container
+          .read(incomingCallProvider.notifier)
+          .set(
+            IncomingAudioVideoCallEvent(
+              callId: 'incoming-call-id',
+              callerPermanentChannelDid: channelDid,
+              otherPartyPermanentChannelDid: channelDid,
+              mediaType: CallMediaType.video,
+              invitedAt: DateTime.now(),
+            ),
+          );
       await chatService.startChatSession();
+
+      // The call ends unanswered: the ring clears and the miss handler marks
+      // the durable marker before the explicit reconciliation call below.
+      container.read(incomingCallProvider.notifier).clear();
       await fakeContactsService.setPendingMissedCall(channelDid);
       final healed = await chatService.markCallAsMissed();
 
@@ -1426,6 +1445,58 @@ void main() {
           await fakeContactsService.getPendingMissedCallAt(channelDid),
           isNotNull,
         );
+      },
+    );
+
+    test(
+      'startChatSession heals an unmarked stale incoming call item older than '
+      'the ring window (trailing missed call with no marker)',
+      () async {
+        fakeContactsService.setContacts([FakeContacts.individualContact]);
+        fakeChatSdk.sessionMessages = [
+          callMessage(
+            messageId: 'trailing-missed',
+            isFromMe: false,
+            status: CallStatus.calling,
+            dateCreated: DateTime.now().toUtc().subtract(
+              const Duration(minutes: 2),
+            ),
+          ),
+        ];
+
+        await chatService.startChatSession();
+        await pumpEventQueue();
+
+        expect(fakeChatSdk.updateMessageCalls, hasLength(1));
+        final updated = fakeChatSdk.updateMessageCalls.single;
+        expect(updated.messageId, 'trailing-missed');
+        final call = CallMetadata.maybeOf(
+          updated.attachments.firstWhere(CallMetadata.isCall),
+        );
+        expect(call?.status, CallStatus.missed);
+      },
+    );
+
+    test(
+      'startChatSession does NOT heal an unmarked stale incoming call item '
+      'younger than the ring window (protects a live call arriving pre-ring)',
+      () async {
+        fakeContactsService.setContacts([FakeContacts.individualContact]);
+        fakeChatSdk.sessionMessages = [
+          callMessage(
+            messageId: 'young-live-call',
+            isFromMe: false,
+            status: CallStatus.calling,
+            dateCreated: DateTime.now().toUtc().subtract(
+              const Duration(seconds: 5),
+            ),
+          ),
+        ];
+
+        await chatService.startChatSession();
+        await pumpEventQueue();
+
+        expect(fakeChatSdk.updateMessageCalls, isEmpty);
       },
     );
 

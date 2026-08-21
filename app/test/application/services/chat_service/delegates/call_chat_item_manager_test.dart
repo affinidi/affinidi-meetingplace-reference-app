@@ -251,6 +251,146 @@ void main() {
 
       expect(item?.messageId, 'target-ringing');
     });
+
+    test('resolveStaleIncomingCallItemsBefore returns every stale incoming '
+        'item created at or before the cutoff', () async {
+      final cutoff = DateTime(2026, 6, 29, 11);
+      fakeChatSdk.sessionMessages = [
+        callMessage(
+          messageId: 'orphan-calling',
+          isFromMe: false,
+          status: CallStatus.calling,
+          dateCreated: DateTime(2026, 6, 29, 9),
+          callId: 'call-a',
+        ),
+        callMessage(
+          messageId: 'orphan-ringing',
+          isFromMe: false,
+          status: CallStatus.ringing,
+          dateCreated: DateTime(2026, 6, 29, 10),
+          callId: 'call-b',
+        ),
+        callMessage(
+          messageId: 'at-cutoff',
+          isFromMe: false,
+          status: CallStatus.ringing,
+          dateCreated: cutoff,
+          callId: 'call-c',
+        ),
+      ];
+
+      final items = await manager.resolveStaleIncomingCallItemsBefore(cutoff);
+
+      expect(
+        items.map((m) => m.messageId),
+        unorderedEquals(['orphan-calling', 'orphan-ringing', 'at-cutoff']),
+      );
+    });
+
+    test('resolveStaleIncomingCallItemsBefore excludes items created after '
+        'the cutoff', () async {
+      final cutoff = DateTime(2026, 6, 29, 11);
+      fakeChatSdk.sessionMessages = [
+        callMessage(
+          messageId: 'newer-ringing',
+          isFromMe: false,
+          status: CallStatus.ringing,
+          dateCreated: DateTime(2026, 6, 29, 12),
+          callId: 'call-a',
+        ),
+      ];
+
+      final items = await manager.resolveStaleIncomingCallItemsBefore(cutoff);
+
+      expect(items, isEmpty);
+    });
+
+    test('resolveStaleIncomingCallItemsBefore excludes non-stale items '
+        '(terminal status or from-me)', () async {
+      final cutoff = DateTime(2026, 6, 29, 11);
+      fakeChatSdk.sessionMessages = [
+        callMessage(
+          messageId: 'settled-incoming',
+          isFromMe: false,
+          status: CallStatus.missed,
+          dateCreated: DateTime(2026, 6, 29, 9),
+          callId: 'call-a',
+        ),
+        callMessage(
+          messageId: 'own-outgoing',
+          isFromMe: true,
+          status: CallStatus.calling,
+          dateCreated: DateTime(2026, 6, 29, 9),
+          callId: 'call-b',
+        ),
+      ];
+
+      final items = await manager.resolveStaleIncomingCallItemsBefore(cutoff);
+
+      expect(items, isEmpty);
+    });
+
+    test('resolveStaleIncomingCallItemsBefore with a null notAfter returns '
+        'every stale incoming item with no upper time bound', () async {
+      fakeChatSdk.sessionMessages = [
+        callMessage(
+          messageId: 'far-future-stale',
+          isFromMe: false,
+          status: CallStatus.ringing,
+          dateCreated: DateTime(2099, 1, 1),
+          callId: 'call-a',
+        ),
+        callMessage(
+          messageId: 'settled-incoming',
+          isFromMe: false,
+          status: CallStatus.missed,
+          dateCreated: DateTime(2026, 6, 29, 9),
+          callId: 'call-b',
+        ),
+        callMessage(
+          messageId: 'excluded-live',
+          isFromMe: false,
+          status: CallStatus.ringing,
+          dateCreated: DateTime(2026, 6, 29, 10),
+          callId: 'call-c',
+        ),
+      ];
+
+      final items = await manager.resolveStaleIncomingCallItemsBefore(
+        null,
+        excludeCallId: 'call-c',
+      );
+
+      expect(items.map((m) => m.messageId), ['far-future-stale']);
+    });
+
+    test('resolveStaleIncomingCallItemsBefore excludes the item whose callId '
+        'matches excludeCallId', () async {
+      final cutoff = DateTime(2026, 6, 29, 11);
+      fakeChatSdk.sessionMessages = [
+        callMessage(
+          messageId: 'stale-orphan',
+          isFromMe: false,
+          status: CallStatus.calling,
+          dateCreated: DateTime(2026, 6, 29, 9),
+          callId: 'call-a',
+        ),
+        callMessage(
+          messageId: 'stale-live',
+          isFromMe: false,
+          status: CallStatus.ringing,
+          dateCreated: DateTime(2026, 6, 29, 10),
+          callId: 'call-b',
+        ),
+      ];
+
+      final items = await manager.resolveStaleIncomingCallItemsBefore(
+        cutoff,
+        excludeCallId: 'call-b',
+      );
+
+      expect(items.map((m) => m.messageId), ['stale-orphan']);
+    });
   });
 
   group('CallChatItemManager outcome reconciliation', () {
@@ -407,6 +547,29 @@ void main() {
         final metadata = CallMetadata.maybeOf(updated!.attachments.single);
 
         expect(metadata?.durationMs, 4242);
+      },
+    );
+
+    test(
+      'reconcileCallOutcome never overwrites an unanswered missed call item',
+      () async {
+        fakeChatSdk.sessionMessages = [
+          callMessage(
+            messageId: 'msg-missed',
+            isFromMe: false,
+            status: CallStatus.missed,
+            callId: 'target-call',
+          ),
+        ];
+
+        final updated = await manager.reconcileCallOutcome(
+          'msg-missed',
+          duration: const Duration(minutes: 5),
+        );
+
+        final metadata = CallMetadata.maybeOf(updated!.attachments.single);
+        expect(metadata?.status, CallStatus.missed);
+        expect(metadata?.durationMs, isNull);
       },
     );
   });

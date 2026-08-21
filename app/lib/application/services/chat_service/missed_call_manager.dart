@@ -1,7 +1,9 @@
+import 'package:clock/clock.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 
+import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../contacts_service/contacts_service.dart';
@@ -31,16 +33,14 @@ class MissedCallManager {
 
   AppLogger get _logger => ref.read(appLoggerProvider);
 
-  /// Reconciles the durable missed-call marker against chat history.
+  /// Reconciles stale incoming call items to `missed`.
   ///
-  /// Runs at chat open and after a marker is written. Resolves the incoming
-  /// call item the marker points at and settles it:
-  /// - not synced yet: keeps the marker so the stream can heal it on arrival.
-  /// - stale (still calling/ringing): heals it to missed and clears the marker.
-  /// - already terminal: clears the marker, nothing left to heal.
-  ///
-  /// Skipped while a call is ringing. Returns true only when it heals an item.
-  Future<bool> reconcilePendingMissedCall() async {
+  /// Heals every stale incoming call item up to the sweep bound.
+  /// When [sweepUnmarked] is true (chat-open only), sweeps all unmarked stale
+  /// items.
+  /// Skipped while a call is ringing. Returns true only when at least one
+  /// item was healed.
+  Future<bool> reconcilePendingMissedCall({bool sweepUnmarked = false}) async {
     const methodName = 'reconcilePendingMissedCall';
     if (!ref.mounted) return false;
     final pendingCallId = await _pendingMissedCallId();
@@ -53,33 +53,20 @@ class MissedCallManager {
     }
 
     final pendingAt = await _pendingMissedCallAt();
-    if (pendingAt == null) {
+    if (pendingAt == null && !sweepUnmarked) {
       _logger.info('$methodName: Skip, no pending marker', name: _className);
       return false;
     }
 
-    final item = await callChatItemManager.resolveIncomingCallItemBefore(
-      pendingAt,
-      callId: pendingCallId,
+    final healedAny = await _healStaleItemsUpTo(
+      _resolveSweepBound(pendingAt, sweepUnmarked),
+      excludeCallId: _activeRingCallId(),
     );
-    if (item == null) {
-      _logger.info(
-        '$methodName: Item not synced yet, keeping marker',
-        name: _className,
-      );
-      return false;
-    }
-    if (!callChatItemManager.isStaleIncomingCall(item)) {
-      _logger.info(
-        '$methodName: Item already settled, clearing marker',
-        name: _className,
-      );
-      await _clearPendingMissedCall();
-      return false;
-    }
-
-    await _healIncomingCallItemMissed(item.messageId, clearPendingMarker: true);
-    return true;
+    return await _settlePendingMarker(
+      pendingAt,
+      pendingCallId,
+      healedAny: healedAny,
+    );
   }
 
   /// Heals [message] to `missed` when a stale incoming call item arrives via
@@ -122,17 +109,96 @@ class MissedCallManager {
     );
   }
 
+  /// CallId of a call currently ringing for this contact, to exclude from
+  /// healing.
+  String? _activeRingCallId() => _ringEventForContact()?.callId;
+
+  /// Bounds the sweep to [pendingAt], or no later than the ring timeout when
+  /// [sweepUnmarked].
+  DateTime? _resolveSweepBound(DateTime? pendingAt, bool sweepUnmarked) {
+    if (!sweepUnmarked) return pendingAt;
+    return _mostRecent(
+      pendingAt,
+      clock.now().toUtc().subtract(
+        ref.read(environmentProvider).callRingTimeout,
+      ),
+    );
+  }
+
+  /// Heals every stale incoming call item up to [sweepBound], excluding
+  /// [excludeCallId]. Returns true if at least one item was healed.
+  Future<bool> _healStaleItemsUpTo(
+    DateTime? sweepBound, {
+    required String? excludeCallId,
+  }) async {
+    final staleItems = await callChatItemManager
+        .resolveStaleIncomingCallItemsBefore(
+          sweepBound,
+          excludeCallId: excludeCallId,
+        );
+    var healedAny = false;
+    for (final item in staleItems) {
+      if (!ref.mounted) return healedAny;
+      await _healIncomingCallItemMissed(
+        item.messageId,
+        clearPendingMarker: false,
+      );
+      healedAny = true;
+    }
+    return healedAny;
+  }
+
+  /// Settles the marker after healing: keeps it if the marked item hasn't
+  /// synced yet, or if a null-callId match can't be trusted; otherwise
+  /// clears it. Returns [healedAny] unchanged.
+  Future<bool> _settlePendingMarker(
+    DateTime? pendingAt,
+    String? pendingCallId, {
+    required bool healedAny,
+  }) async {
+    const methodName = 'reconcilePendingMissedCall';
+    if (pendingAt == null) return healedAny;
+    if (!ref.mounted) return healedAny;
+    final markedItem = await callChatItemManager.resolveIncomingCallItemBefore(
+      pendingAt,
+      callId: pendingCallId,
+    );
+    if (markedItem == null) {
+      _logger.info(
+        '$methodName: Marked item not synced yet, keeping marker',
+        name: _className,
+      );
+      return healedAny;
+    }
+    final hasPendingCallId = pendingCallId != null && pendingCallId.isNotEmpty;
+    if (!hasPendingCallId && !healedAny) {
+      return healedAny;
+    }
+    await _clearPendingMissedCall();
+    return healedAny;
+  }
+
   /// Returns true if a call for this contact is currently ringing.
   bool _isRingingForContact({String? callId}) {
-    final ringingEvent = ref.read(incomingCallProvider).eventOrNull;
+    final ringingEvent = _ringEventForContact();
     if (ringingEvent == null) return false;
-    if (ringingEvent.otherPartyPermanentChannelDid !=
-        otherPartyPermanentChannelDid) {
-      return false;
-    }
     if (callId == null || callId.isEmpty) return true;
     return ringingEvent.callId == callId;
   }
+
+  /// The ringing event, if the current ring is for this contact.
+  IncomingAudioVideoCallEvent? _ringEventForContact() {
+    final ringingEvent = ref.read(incomingCallProvider).eventOrNull;
+    return (ringingEvent != null &&
+            ringingEvent.otherPartyPermanentChannelDid ==
+                otherPartyPermanentChannelDid)
+        ? ringingEvent
+        : null;
+  }
+
+  /// Returns the later of two instants. A null [a] yields [b].
+  DateTime _mostRecent(DateTime? a, DateTime b) =>
+      (a != null && a.toUtc().isAfter(b)) ? a : b;
 
   /// Updates a stale incoming call item to missed.
   Future<void> _healIncomingCallItemMissed(
