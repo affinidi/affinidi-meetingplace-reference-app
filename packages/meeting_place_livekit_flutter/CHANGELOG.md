@@ -1,3 +1,7 @@
+## 0.0.1-dev.10
+
+ - **PERF**: load only call messages for the call log (#327).
+
 ## 0.0.1-dev.9
 
  - **FIX**: correct call status sync and end-of-call handling on both sides (#306).
