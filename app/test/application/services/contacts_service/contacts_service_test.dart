@@ -698,4 +698,112 @@ void main() {
       },
     );
   });
+
+  group('ContactsService superseded-call marker', () {
+    Contact contactWith({List<String> supersededCallIds = const []}) => Contact(
+      id: FakeContacts.individualContact.id,
+      channelDid: FakeChannels.individualChannel.otherPartyPermanentChannelDid,
+      channelDidSha256: FakeContacts.individualContact.channelDidSha256,
+      offerLink: FakeContacts.individualContact.offerLink,
+      card: FakeContacts.individualContact.card,
+      dateAdded: FakeContacts.individualContact.dateAdded,
+      type: FakeContacts.individualContact.type,
+      status: FakeContacts.individualContact.status,
+      mediatorDid: FakeContacts.individualContact.mediatorDid,
+      origin: FakeContacts.individualContact.origin,
+      category: FakeContacts.individualContact.category,
+      supersededCallIds: supersededCallIds,
+    );
+
+    test('addSupersededCallId persists ids durably, appends and dedups; '
+        'getSupersededCallIds reads them back', () async {
+      final channelDid =
+          FakeChannels.individualChannel.otherPartyPermanentChannelDid!;
+      final repository = FakeContactsRepository(contacts: [contactWith()]);
+      final container = _makeContainer(repository: repository);
+      addTearDown(container.dispose);
+      final service = container.read(contactsServiceProvider.notifier);
+
+      await service.addSupersededCallId(channelDid, 'call-a');
+      await service.addSupersededCallId(channelDid, 'own-item');
+      // Duplicate and empty are ignored.
+      await service.addSupersededCallId(channelDid, 'call-a');
+      await service.addSupersededCallId(channelDid, '');
+
+      expect(await service.getSupersededCallIds(channelDid), {
+        'call-a',
+        'own-item',
+      });
+      expect(
+        repository.contacts
+            .firstWhere((c) => c.channelDid == channelDid)
+            .supersededCallIds,
+        ['call-a', 'own-item'],
+      );
+    });
+
+    test('a stale channel-activity write does not drop the persisted '
+        'superseded set', () async {
+      final channel = FakeChannels.individualChannel;
+      final channelDid = channel.otherPartyPermanentChannelDid!;
+      final repository = FakeContactsRepository(
+        contacts: [
+          contactWith(supersededCallIds: ['call-a']),
+        ],
+      );
+      final sdk = FakeMeetingPlaceSDK(channels: {channelDid: channel});
+      final container = _makeContainer(repository: repository, sdk: sdk);
+      addTearDown(container.dispose);
+
+      // Seed provider state with a stale snapshot that has lost the set.
+      final service = container.read(contactsServiceProvider.notifier);
+      service.state = service.state.copyWith(contacts: [contactWith()]);
+
+      await service.updateContactFromChannelActivity(channel);
+
+      expect(
+        repository.contacts
+            .firstWhere((c) => c.channelDid == channelDid)
+            .supersededCallIds,
+        ['call-a'],
+        reason:
+            'the append-only superseded set must survive a contact update '
+            'that uses a stale in-memory snapshot',
+      );
+    });
+
+    test('a preservePendingMissedCallState:false write still unions the '
+        'persisted superseded set (clearPendingMissedCall race)', () async {
+      final channelDid =
+          FakeChannels.individualChannel.otherPartyPermanentChannelDid!;
+      // The durable set was concurrently extended to {call-a, call-b} after
+      // the clear flow captured its older {call-a}-only snapshot.
+      final repository = FakeContactsRepository(
+        contacts: [
+          contactWith(supersededCallIds: ['call-a', 'call-b']),
+        ],
+      );
+      final container = _makeContainer(repository: repository);
+      addTearDown(container.dispose);
+      final service = container.read(contactsServiceProvider.notifier);
+
+      // clearPendingMissedCall writes its stale {call-a} snapshot with
+      // preservePendingMissedCallState: false — the union must still run.
+      await service.updateContact(
+        contactWith(supersededCallIds: ['call-a']),
+        preservePendingMissedCallState: false,
+      );
+
+      expect(
+        repository.contacts
+            .firstWhere((c) => c.channelDid == channelDid)
+            .supersededCallIds,
+        containsAll(['call-a', 'call-b']),
+        reason:
+            'a write with preservePendingMissedCallState: false must still '
+            'union the durable superseded set, or a concurrently-added id is '
+            'lost after restart',
+      );
+    });
+  });
 }

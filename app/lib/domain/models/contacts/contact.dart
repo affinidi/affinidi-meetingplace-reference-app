@@ -65,6 +65,13 @@ part 'contact.g.dart';
 ///   cleared on accept, decline, cancel, timeout, or successful crash-recovery
 ///   heal. Used to reconstruct the missed-call marker if the app crashes while
 ///   the banner is visible before `_markCallAsMissed` runs.
+/// - `supersededCallIds` - Ids of this device's own outgoing calls lost to
+///   glare (the peer's simultaneous call won): each call's transport call id
+///   and, once known, its local chat-item id. Their history rows are hidden so
+///   one connected call shows exactly one entry, even when the redaction cannot
+///   be delivered or leaves a tombstone (whose call id is wiped, hence the
+///   chat-item id). Append-only and durable, so the row stays hidden across
+///   restart and re-sync.
 /// - `lastKeepAliveMessage` - Timestamp of the last keep-alive message received
 ///   (used to show liveness).
 @CopyWith()
@@ -92,6 +99,7 @@ class Contact {
     this.pendingMissedCallMissId,
     this.lastCreditedMissId,
     this.activeIncomingCallId,
+    this.supersededCallIds = const [],
     this.hasBeenOpened = false,
     this.lastKeepAliveMessage,
     this.notificationBannerDismissed = false,
@@ -121,6 +129,7 @@ class Contact {
   final String? pendingMissedCallMissId;
   final String? lastCreditedMissId;
   final String? activeIncomingCallId;
+  final List<String> supersededCallIds;
   final bool hasBeenOpened;
   final DateTime? lastKeepAliveMessage;
   final bool notificationBannerDismissed;

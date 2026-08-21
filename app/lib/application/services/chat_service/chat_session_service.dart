@@ -95,6 +95,10 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   late CallChatItemManager _callChatItemManager;
   MissedCallManager? _missedCallManager;
 
+  /// In-memory mirror of the durable superseded-call ids, hidden from the
+  /// timeline on every add path so a glare-lost call shows no duplicate entry.
+  final Set<String> _supersededCallIds = {};
+
   TimedAction? _presenceTimedAction;
   final Map<String, TypingTimer> _typingTimedActions = {};
   static const _oneToOneTypingKey = '_one_to_one_';
@@ -157,6 +161,9 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       ensureInitialized: _ensureChatSdkInitialized,
       getChatSdk: () => _chatSDK,
       logger: _logger,
+      markSupersededOutgoingCallId: (callId) => ref
+          .read(contactsServiceProvider.notifier)
+          .addSupersededCallId(channelDid, callId),
     );
     _groupManager = ChatGroupManager(ref: ref);
     _setupChatProtocolRouter();
@@ -329,6 +336,12 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       final chatSession = await _chatSDK!.startChatSession();
       _chatId = chatSession.id;
 
+      _supersededCallIds.addAll(
+        await ref
+            .read(contactsServiceProvider.notifier)
+            .getSupersededCallIds(_otherPartyPermanentChannelDid),
+      );
+
       final dbMessageIds = {
         EncryptionNotice().messageId,
         for (final m in chatSession.messages) m.messageId,
@@ -343,7 +356,12 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
         ...replayMessages,
       ].sortedBy((item) => item.dateCreated).reversed.toList();
 
-      final messages = _appendDerivedZkpNotices(baseMessages);
+      final messages = _appendDerivedZkpNotices(
+        CallChatItemManager.hideSupersededCallItems(
+          baseMessages,
+          _supersededCallIds,
+        ),
+      );
       state = state.copyWith(messages: messages, isInitialized: true);
       await _flushBufferedOutboundMessages();
 
@@ -806,6 +824,16 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
   @override
   void upsertChatItem(ChatItem item) {
+    // Drop a call item lost to glare on every add path — including a
+    // not-yet-delivered item that syncs in via the stream after load — so the
+    // superseded duplicate never reaches the timeline.
+    if (CallChatItemManager.isSupersededCallItem(item, _supersededCallIds)) {
+      _logger.info(
+        'upsertChatItem: Hiding superseded call item ${item.messageId}',
+        name: _logKey,
+      );
+      return;
+    }
     final existing = state.messages;
     final idx = _indexOfChatItem(existing, item);
     if (idx != -1 && _shouldKeepExistingChatItem(existing[idx], item)) {
@@ -1150,8 +1178,27 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   }
 
   @override
-  Future<void> redactSupersededOutgoingCall(String callId) =>
-      _callChatItemManager.redactSupersededOutgoingCall(callId);
+  Future<void> redactSupersededOutgoingCall(String callId) async {
+    await _callChatItemManager.redactSupersededOutgoingCall(callId);
+    if (callId.isEmpty) return;
+    // Refresh the in-memory mirror from the durable store: the manager records
+    // both the call id and, when found, the item's chat-item id (so a redaction
+    // tombstone that loses its call id is still hidden). Then drop any now-
+    // hidden row already on the timeline, so the winning call shows a single
+    // entry whether or not the item had synced when the glare loss arrived.
+    _supersededCallIds.addAll(
+      await ref
+          .read(contactsServiceProvider.notifier)
+          .getSupersededCallIds(_otherPartyPermanentChannelDid),
+    );
+    final filtered = CallChatItemManager.hideSupersededCallItems(
+      state.messages,
+      _supersededCallIds,
+    );
+    if (filtered.length != state.messages.length) {
+      state = state.copyWith(messages: filtered);
+    }
+  }
 
   void _removeChatItem(ChatItem item) {
     final messages = state.messages

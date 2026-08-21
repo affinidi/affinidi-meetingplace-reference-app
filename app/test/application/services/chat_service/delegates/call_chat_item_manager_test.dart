@@ -948,4 +948,275 @@ void main() {
       expect(resolved, isNull);
     });
   });
+
+  group('redactSupersededOutgoingCall hides the glare-lost call', () {
+    late FakeChatSdk fakeChatSdk;
+    late Set<String> recorded;
+    late CallChatItemManager manager;
+
+    setUp(() {
+      fakeChatSdk = FakeChatSdk();
+      recorded = <String>{};
+      manager = CallChatItemManager(
+        ensureInitialized: () async {},
+        getChatSdk: () => fakeChatSdk,
+        logger: FakeAppLogger(),
+        markSupersededOutgoingCallId: (id) async => recorded.add(id),
+      );
+    });
+
+    Message callItem({
+      required String messageId,
+      required bool isFromMe,
+      required CallStatus status,
+      required String callId,
+      String? transportId,
+      int? durationMs,
+    }) => Message(
+      chatId: 'fake-chat-id',
+      messageId: messageId,
+      value: '',
+      dateCreated: DateTime.now(),
+      status: ChatItemStatus.sent,
+      isFromMe: isFromMe,
+      senderDid: isFromMe ? 'me' : 'peer',
+      transportId: transportId,
+      attachments: [
+        CallMetadata.buildAttachment(
+          id: const Uuid().v4(),
+          mediaType: CallMediaType.video,
+          status: status,
+          callId: callId,
+          durationMs: durationMs,
+        ),
+      ],
+    );
+
+    bool showsCall(Iterable<ChatItem> items, String callId) =>
+        items.whereType<Message>().any(
+          (m) => m.attachments.any(
+            (a) =>
+                CallMetadata.isCall(a) &&
+                CallMetadata.maybeOf(a)?.callId == callId,
+          ),
+        );
+
+    // Rebuilds the durable set from what was recorded, dropping any in-memory
+    // state, to prove the winning-only view survives an app restart / re-sync.
+    Set<String> afterRestart() => {...recorded};
+
+    test('delete succeeds but leaves a tombstone row: still present after the '
+        'redaction, then hidden by the durable filter, winner kept, survives '
+        'restart', () async {
+      final lost = callItem(
+        messageId: 'own-lost',
+        isFromMe: true,
+        status: CallStatus.calling,
+        callId: 'call-a',
+        transportId: 'evt-a',
+      );
+      final winner = callItem(
+        messageId: 'winner-incoming',
+        isFromMe: false,
+        status: CallStatus.ringing,
+        callId: 'call-b',
+      );
+      fakeChatSdk.sessionMessages = [lost, winner];
+
+      await manager.redactSupersededOutgoingCall('call-a');
+
+      // RED: the redaction ran but the row survives as a tombstone — delete
+      // alone does not remove the duplicate from history.
+      expect(fakeChatSdk.deleteMessageCalls, hasLength(1));
+      expect(lost.isDeleted, isTrue);
+      expect(await fakeChatSdk.messages, contains(lost));
+
+      // GREEN: both ids were recorded durably; the filter hides the tombstone
+      // (its call id was wiped, matched by chat-item id) and keeps the winner.
+      expect(recorded, containsAll(<String>['call-a', 'own-lost']));
+      final visible = CallChatItemManager.hideSupersededCallItems(
+        await fakeChatSdk.messages,
+        recorded,
+      );
+      expect(visible, contains(winner));
+      expect(visible, isNot(contains(lost)));
+
+      // Survives restart: rebuild the set from the durable record only.
+      final restored = CallChatItemManager.hideSupersededCallItems(
+        await fakeChatSdk.messages,
+        afterRestart(),
+      );
+      expect(restored, contains(winner));
+      expect(restored, isNot(contains(lost)));
+    });
+
+    test('delete throws because the item has not been delivered: full call '
+        'item survives, then hidden by the durable filter, winner kept, '
+        'survives restart', () async {
+      final lost = callItem(
+        messageId: 'own-lost',
+        isFromMe: true,
+        status: CallStatus.calling,
+        callId: 'call-a',
+        // No transportId: not yet delivered, so the redaction cannot be sent.
+      );
+      final winner = callItem(
+        messageId: 'winner-incoming',
+        isFromMe: false,
+        status: CallStatus.ringing,
+        callId: 'call-b',
+      );
+      fakeChatSdk.sessionMessages = [lost, winner];
+
+      // Must not throw: the redaction failure is swallowed.
+      await manager.redactSupersededOutgoingCall('call-a');
+
+      // RED: delete was attempted and threw; the full, un-redacted call item
+      // still shows in history.
+      expect(fakeChatSdk.deleteMessageCalls, hasLength(1));
+      expect(lost.isDeleted, isFalse);
+      expect(showsCall(await fakeChatSdk.messages, 'call-a'), isTrue);
+
+      // GREEN: the call id was recorded durably; the filter hides the intact
+      // item by call id and keeps the winner.
+      expect(recorded, contains('call-a'));
+      final visible = CallChatItemManager.hideSupersededCallItems(
+        await fakeChatSdk.messages,
+        recorded,
+      );
+      expect(showsCall(visible, 'call-a'), isFalse);
+      expect(showsCall(visible, 'call-b'), isTrue);
+
+      // Survives restart: rebuild the set from the durable record only.
+      final restored = CallChatItemManager.hideSupersededCallItems(
+        await fakeChatSdk.messages,
+        afterRestart(),
+      );
+      expect(showsCall(restored, 'call-a'), isFalse);
+      expect(showsCall(restored, 'call-b'), isTrue);
+    });
+
+    test('records the call id even when the item has not synced yet, so it is '
+        'hidden once it arrives via the stream', () async {
+      // The glare loss signal arrives before this device\'s own outgoing item
+      // has synced: getCallChatItemByCallId finds nothing.
+      fakeChatSdk.sessionMessages = [];
+
+      await manager.redactSupersededOutgoingCall('call-a');
+
+      expect(fakeChatSdk.deleteMessageCalls, isEmpty);
+      expect(recorded, contains('call-a'));
+
+      // The item later syncs in with its call id intact; the filter hides it.
+      final late = callItem(
+        messageId: 'own-lost',
+        isFromMe: true,
+        status: CallStatus.declined,
+        callId: 'call-a',
+        transportId: 'evt-a',
+      );
+      expect(
+        CallChatItemManager.isSupersededCallItem(late, afterRestart()),
+        isTrue,
+      );
+    });
+
+    test(
+      'refuses to redact a connected in-progress call: not deleted, not '
+      'marked, and absent from the superseded set even after restart',
+      () async {
+        final connected = callItem(
+          messageId: 'own-connected',
+          isFromMe: true,
+          status: CallStatus.inProgress,
+          callId: 'call-a',
+          transportId: 'evt-a',
+        );
+        final winner = callItem(
+          messageId: 'winner-incoming',
+          isFromMe: false,
+          status: CallStatus.ringing,
+          callId: 'call-b',
+        );
+        fakeChatSdk.sessionMessages = [connected, winner];
+
+        await manager.redactSupersededOutgoingCall('call-a');
+
+        expect(fakeChatSdk.deleteMessageCalls, isEmpty);
+        expect(connected.isDeleted, isFalse);
+        expect(recorded, isNot(contains('call-a')));
+        expect(recorded, isNot(contains('own-connected')));
+        expect(
+          CallChatItemManager.isSupersededCallItem(connected, afterRestart()),
+          isFalse,
+        );
+      },
+    );
+
+    test('does not hide unrelated calls or calls with an empty call id', () {
+      final other = callItem(
+        messageId: 'other',
+        isFromMe: true,
+        status: CallStatus.ended,
+        callId: 'call-z',
+        durationMs: 42000,
+      );
+      final emptyId = callItem(
+        messageId: 'empty',
+        isFromMe: false,
+        status: CallStatus.missed,
+        callId: '',
+      );
+      final visible = CallChatItemManager.hideSupersededCallItems(
+        [other, emptyId],
+        {'call-a', 'own-lost'},
+      );
+      expect(visible, containsAll(<ChatItem>[other, emptyId]));
+    });
+
+    test('mid-call reconnect where the lookup throws: the connected call id is '
+        'not marked, the live connected call is not hidden, and no delete '
+        'is attempted', () async {
+      // restartedOwnCallId names this device's own connected call on a
+      // mid-call peer reconnect; the lookup throws transiently.
+      final throwingChatSdk = _ThrowingLookupChatSdk();
+      final localRecorded = <String>{};
+      final localManager = CallChatItemManager(
+        ensureInitialized: () async {},
+        getChatSdk: () => throwingChatSdk,
+        logger: FakeAppLogger(),
+        markSupersededOutgoingCallId: (id) async => localRecorded.add(id),
+      );
+
+      // Must not throw: the lookup failure is swallowed.
+      await localManager.redactSupersededOutgoingCall('call-a');
+
+      // The lookup carries no information about whether the call connected,
+      // so on that uncertainty the call id must not be marked and no delete
+      // is attempted.
+      expect(throwingChatSdk.deleteMessageCalls, isEmpty);
+      expect(localRecorded, isNot(contains('call-a')));
+
+      // A live connected call carrying call-a stays visible after restart.
+      final connected = callItem(
+        messageId: 'own-connected',
+        isFromMe: true,
+        status: CallStatus.inProgress,
+        callId: 'call-a',
+        transportId: 'evt-a',
+      );
+      expect(
+        CallChatItemManager.isSupersededCallItem(connected, {...localRecorded}),
+        isFalse,
+      );
+    });
+  });
+}
+
+/// A [FakeChatSdk] whose call-item lookup throws, simulating a transient SDK
+/// failure during a mid-call reconnect redact.
+class _ThrowingLookupChatSdk extends FakeChatSdk {
+  @override
+  Future<ChatItem?> getCallChatItemByCallId(String callId) async =>
+      throw StateError('Simulated lookup failure');
 }

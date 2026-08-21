@@ -8,6 +8,7 @@ import '../../../domain/models/contacts/contact.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/chat_repository_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
+import '../chat_service/delegates/call_chat_item_manager.dart';
 import '../contacts_service/contacts_service.dart';
 
 part 'call_log_service.g.dart';
@@ -54,9 +55,12 @@ Future<List<CallLogEntry>> callLogEntries(Ref ref) async {
         otherPartyDid: otherPartyDid,
       );
 
-      final messages = await chatRepository.listMessagesByMediaKind(
-        chatId,
-        mediaKind: CallMetadata.callKind,
+      final messages = CallChatItemManager.hideSupersededCallItems(
+        await chatRepository.listMessagesByMediaKind(
+          chatId,
+          mediaKind: CallMetadata.callKind,
+        ),
+        contact.supersededCallIds.toSet(),
       );
       for (final item in messages) {
         if (item is! chat.Message) continue;

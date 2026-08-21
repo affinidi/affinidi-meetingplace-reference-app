@@ -66,6 +66,11 @@ class ContactsRepositoryDrift implements ContactsRepository {
               pendingMissedCallId: Value(contact.pendingMissedCallId),
               pendingMissedCallMissId: Value(contact.pendingMissedCallMissId),
               lastCreditedMissId: Value(contact.lastCreditedMissId),
+              supersededCallIds: Value(
+                _ContactMapper._encodeSupersededCallIds(
+                  contact.supersededCallIds,
+                ),
+              ),
               activeIncomingCallId: Value(contact.activeIncomingCallId),
               hasBeenOpened: Value(contact.hasBeenOpened),
               lastKeepAliveMessage: Value(contact.lastKeepAliveMessage),
@@ -167,6 +172,9 @@ class ContactsRepositoryDrift implements ContactsRepository {
           pendingMissedCallId: Value(contact.pendingMissedCallId),
           pendingMissedCallMissId: Value(contact.pendingMissedCallMissId),
           lastCreditedMissId: Value(contact.lastCreditedMissId),
+          supersededCallIds: Value(
+            _ContactMapper._encodeSupersededCallIds(contact.supersededCallIds),
+          ),
           activeIncomingCallId: Value(contact.activeIncomingCallId),
           hasBeenOpened: Value(contact.hasBeenOpened),
           lastKeepAliveMessage: Value(contact.lastKeepAliveMessage),
@@ -202,6 +210,16 @@ db.ContactCardsCompanion _buildContactCardCompanion({
 }
 
 class _ContactMapper {
+  static String? _encodeSupersededCallIds(List<String> callIds) =>
+      callIds.isEmpty ? null : jsonEncode(callIds);
+
+  static List<String> _decodeSupersededCallIds(String? stored) {
+    if (stored == null || stored.isEmpty) return const [];
+    final decoded = jsonDecode(stored);
+    if (decoded is! List) return const [];
+    return decoded.whereType<String>().toList();
+  }
+
   static model.Contact fromDatabaseRecords(
     db.Contact contact,
     db.ContactCard contactCard,
@@ -235,6 +253,7 @@ class _ContactMapper {
       pendingMissedCallId: contact.pendingMissedCallId,
       pendingMissedCallMissId: contact.pendingMissedCallMissId,
       lastCreditedMissId: contact.lastCreditedMissId,
+      supersededCallIds: _decodeSupersededCallIds(contact.supersededCallIds),
       activeIncomingCallId: contact.activeIncomingCallId,
       hasBeenOpened: contact.hasBeenOpened,
       channelDid: contact.channelDid,

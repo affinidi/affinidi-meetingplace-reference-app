@@ -51,7 +51,7 @@ class ContactsDatabase extends _$ContactsDatabase {
   ContactsDatabase.withExecutor(super.executor);
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -265,6 +265,19 @@ class ContactsDatabase extends _$ContactsDatabase {
           );
         }
       }
+
+      // Adds superseded_call_ids to hide glare-lost own calls from history.
+      if (from < 11) {
+        final result = await customSelect('PRAGMA table_info(contacts)').get();
+        final supersededCallIdsExists = result.any(
+          (row) => row.data['name'] == 'superseded_call_ids',
+        );
+        if (!supersededCallIdsExists) {
+          await customStatement(
+            'ALTER TABLE contacts ADD COLUMN superseded_call_ids TEXT',
+          );
+        }
+      }
     },
   );
 }
@@ -292,6 +305,7 @@ class Contacts extends Table {
   TextColumn get pendingMissedCallId => text().nullable()();
   TextColumn get pendingMissedCallMissId => text().nullable()();
   TextColumn get lastCreditedMissId => text().nullable()();
+  TextColumn get supersededCallIds => text().nullable()();
   TextColumn get activeIncomingCallId => text().nullable()();
   BoolColumn get hasBeenOpened => boolean().clientDefault(() => false)();
   DateTimeColumn get lastKeepAliveMessage => dateTime().nullable()();

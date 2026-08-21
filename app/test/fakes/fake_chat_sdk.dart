@@ -850,6 +850,23 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
 
   final List<Message> updateMessageCalls = [];
 
+  /// Mirrors the real transport: a message that has not yet been delivered has
+  /// no `transportId`, so its redaction cannot be sent and `deleteMessage`
+  /// throws. A delivered message is tombstoned in place via `clearContent`
+  /// (content wiped, `isDeleted` set) — the row survives, it does not leave the
+  /// timeline.
+  @override
+  Future<void> deleteMessage(Message message, {bool localOnly = false}) async {
+    deleteMessageCalls.add({'message': message, 'localOnly': localOnly});
+    if (!localOnly && message.transportId == null) {
+      throw StateError('Cannot redact a message with no transportId');
+    }
+    message
+      ..isDeleted = !localOnly
+      ..isDeletedLocally = localOnly
+      ..clearContent();
+  }
+
   @override
   Future<ChatItem?> getMessageById(String id) async => sessionMessages
       ?.whereType<Message>()

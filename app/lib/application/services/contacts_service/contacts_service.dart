@@ -425,12 +425,33 @@ class ContactsService extends _$ContactsService {
   }) async {
     final channelDid = contact.channelDid;
     if (channelDid == null) return contact;
-    if (!preservePendingMissedCallState && !preserveBadgeState) return contact;
 
     final persistedContact = await _getPersistedContactByChannelDid(channelDid);
     if (persistedContact == null) return contact;
 
     var mergedContact = contact;
+
+    // Union the superseded-call set. It is append-only and durable, so a
+    // concurrent stale write (e.g. a contact-card refresh) that carries an
+    // older, shorter set must never drop an id already persisted, or the
+    // glare-lost call would resurface in history.
+    final persistedSuperseded = persistedContact.supersededCallIds;
+    if (persistedSuperseded.isNotEmpty) {
+      final union = <String>{
+        ...persistedSuperseded,
+        ...mergedContact.supersededCallIds,
+      };
+      if (union.length != mergedContact.supersededCallIds.length) {
+        mergedContact = mergedContact.copyWith(
+          supersededCallIds: union.toList(),
+        );
+      }
+    }
+
+    if (!preservePendingMissedCallState && !preserveBadgeState) {
+      return mergedContact;
+    }
+
     if (preservePendingMissedCallState) {
       if (persistedContact.pendingMissedCallAt != null &&
           (contact.pendingMissedCallAt == null ||
@@ -819,6 +840,42 @@ class ContactsService extends _$ContactsService {
     if (pendingMissId == null) return null;
     if (pendingMissId == contact?.lastCreditedMissId) return null;
     return pendingMissId;
+  }
+
+  /// Durably records [id] as identifying this device's own outgoing call for
+  /// [channelDid] that lost a glare, so its history row is hidden even if the
+  /// redaction cannot be delivered or leaves a tombstone. [id] is the transport
+  /// call id, or the item's local chat-item id (recorded once known, to also
+  /// hide the redaction tombstone whose call id has been wiped). The set is
+  /// append-only; a no-op when [id] is empty or already recorded.
+  Future<void> addSupersededCallId(String channelDid, String id) async {
+    if (id.isEmpty) return;
+    final contact = await _getPersistedContactByChannelDid(channelDid);
+    if (contact == null) {
+      _logger.error(
+        'addSupersededCallId: CRITICAL — no contact exists for $channelDid; '
+        'superseded id $id cannot be recorded and its item may show as a '
+        'duplicate.',
+        name: _logKey,
+      );
+      return;
+    }
+    if (contact.supersededCallIds.contains(id)) return;
+    _logger.info(
+      'addSupersededCallId: Hiding superseded id $id for ${contact.id}',
+      name: _logKey,
+    );
+    await updateContact(
+      contact.copyWith(supersededCallIds: [...contact.supersededCallIds, id]),
+    );
+  }
+
+  /// Returns the durable set of ids (transport call id and local chat-item id)
+  /// of superseded (glare-lost) calls for [channelDid] whose history rows must
+  /// be hidden.
+  Future<Set<String>> getSupersededCallIds(String channelDid) async {
+    final contact = await _getPersistedContactByChannelDid(channelDid);
+    return contact?.supersededCallIds.toSet() ?? const {};
   }
 
   /// Update an existing contact when a group invitation is accepted.

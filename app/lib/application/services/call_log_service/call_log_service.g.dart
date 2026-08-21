@@ -11,11 +11,13 @@ part of 'call_log_service.dart';
 /// Aggregates past calls across all contacts' chats for the Call log screen.
 ///
 /// For each contact, resolves its chat via `getChannelByOtherPartyPermanentDid`
-/// and `Chat.deriveId`, fetches its messages via [chat.ChatRepository.listMessages],
-/// filters to messages carrying [CallMetadata] (`CallMetadata.isCall`), maps
-/// each to a [CallLogEntry], and returns the combined list sorted
-/// most-recent-first. Contacts whose channel or chat cannot be resolved are
-/// skipped.
+/// and `Chat.deriveId`, fetches its call-only messages via
+/// `chat.ChatRepository.listMessagesByMediaKind`, filters to messages
+/// carrying [CallMetadata] (`CallMetadata.isCall`), maps each to a
+/// [CallLogEntry], and returns the combined list sorted most-recent-first.
+/// Contacts whose channel or chat cannot be resolved are skipped, as are
+/// contacts whose message history fails to load (logged, not rethrown), so
+/// one bad chat cannot fail the whole Call log.
 
 @ProviderFor(callLogEntries)
 const callLogEntriesProvider = CallLogEntriesProvider._();
@@ -23,11 +25,13 @@ const callLogEntriesProvider = CallLogEntriesProvider._();
 /// Aggregates past calls across all contacts' chats for the Call log screen.
 ///
 /// For each contact, resolves its chat via `getChannelByOtherPartyPermanentDid`
-/// and `Chat.deriveId`, fetches its messages via [chat.ChatRepository.listMessages],
-/// filters to messages carrying [CallMetadata] (`CallMetadata.isCall`), maps
-/// each to a [CallLogEntry], and returns the combined list sorted
-/// most-recent-first. Contacts whose channel or chat cannot be resolved are
-/// skipped.
+/// and `Chat.deriveId`, fetches its call-only messages via
+/// `chat.ChatRepository.listMessagesByMediaKind`, filters to messages
+/// carrying [CallMetadata] (`CallMetadata.isCall`), maps each to a
+/// [CallLogEntry], and returns the combined list sorted most-recent-first.
+/// Contacts whose channel or chat cannot be resolved are skipped, as are
+/// contacts whose message history fails to load (logged, not rethrown), so
+/// one bad chat cannot fail the whole Call log.
 
 final class CallLogEntriesProvider
     extends
@@ -42,11 +46,13 @@ final class CallLogEntriesProvider
   /// Aggregates past calls across all contacts' chats for the Call log screen.
   ///
   /// For each contact, resolves its chat via `getChannelByOtherPartyPermanentDid`
-  /// and `Chat.deriveId`, fetches its messages via [chat.ChatRepository.listMessages],
-  /// filters to messages carrying [CallMetadata] (`CallMetadata.isCall`), maps
-  /// each to a [CallLogEntry], and returns the combined list sorted
-  /// most-recent-first. Contacts whose channel or chat cannot be resolved are
-  /// skipped.
+  /// and `Chat.deriveId`, fetches its call-only messages via
+  /// `chat.ChatRepository.listMessagesByMediaKind`, filters to messages
+  /// carrying [CallMetadata] (`CallMetadata.isCall`), maps each to a
+  /// [CallLogEntry], and returns the combined list sorted most-recent-first.
+  /// Contacts whose channel or chat cannot be resolved are skipped, as are
+  /// contacts whose message history fails to load (logged, not rethrown), so
+  /// one bad chat cannot fail the whole Call log.
   const CallLogEntriesProvider._()
     : super(
         from: null,
@@ -73,4 +79,4 @@ final class CallLogEntriesProvider
   }
 }
 
-String _$callLogEntriesHash() => r'e10679a5143820841d965f6b014a17ca588dd020';
+String _$callLogEntriesHash() => r'f333079ccdb64a5d564b86d68bccb5da54ee710f';

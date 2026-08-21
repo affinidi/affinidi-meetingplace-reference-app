@@ -116,6 +116,24 @@ class FakeContactsService extends ContactsService {
   }
 
   @override
+  Future<void> addSupersededCallId(String channelDid, String id) async {
+    if (id.isEmpty) return;
+    final contact = getContactByChannelDid(channelDid);
+    if (contact == null) return;
+    if (contact.supersededCallIds.contains(id)) return;
+    contacts.removeWhere((c) => c.id == contact.id);
+    contacts.add(
+      contact.copyWith(supersededCallIds: [...contact.supersededCallIds, id]),
+    );
+  }
+
+  @override
+  Future<Set<String>> getSupersededCallIds(String channelDid) async {
+    return getContactByChannelDid(channelDid)?.supersededCallIds.toSet() ??
+        const {};
+  }
+
+  @override
   Future<String?> owedMissedCallBadgeMissId(String channelDid) async {
     final contact = getContactByChannelDid(channelDid);
     final pendingMissId = contact?.pendingMissedCallMissId;

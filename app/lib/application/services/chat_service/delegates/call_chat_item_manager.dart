@@ -13,6 +13,7 @@ class CallChatItemManager {
     required this.ensureInitialized,
     required this.getChatSdk,
     required this.logger,
+    this.markSupersededOutgoingCallId,
   });
 
   static const _resolveCallChatItemRetryDelay = Duration(milliseconds: 50);
@@ -22,6 +23,40 @@ class CallChatItemManager {
   final Future<void> Function() ensureInitialized;
   final MeetingPlaceChatSDK? Function() getChatSdk;
   final AppLogger logger;
+
+  /// Durably records a glare-lost outgoing call id so its chat item can be
+  /// hidden from history even if the redaction below never lands.
+  final Future<void> Function(String callId)? markSupersededOutgoingCallId;
+
+  /// Whether [item] is the history row of a glare-lost call that must be
+  /// hidden. [supersededIds] holds each lost call's transport call id and, once
+  /// known, its local chat-item id. Matching the chat-item id also hides the
+  /// tombstone a successful redaction leaves behind, whose call attachment (and
+  /// thus its call id) has been wiped by `clearContent`. A call item with an
+  /// empty call id is never hidden by call id, so a single missing id cannot
+  /// suppress unrelated calls.
+  static bool isSupersededCallItem(ChatItem item, Set<String> supersededIds) {
+    if (supersededIds.isEmpty) return false;
+    if (item is! Message) return false;
+    if (supersededIds.contains(item.messageId)) return true;
+    final attachment = item.attachments.firstWhereOrNull(CallMetadata.isCall);
+    if (attachment == null) return false;
+    final callId = CallMetadata.maybeOf(attachment)?.callId;
+    if (callId == null || callId.isEmpty) return false;
+    return supersededIds.contains(callId);
+  }
+
+  /// Returns [items] with every superseded (glare-lost) call row removed.
+  /// Non-call items and calls not in [supersededIds] are preserved.
+  static List<ChatItem> hideSupersededCallItems(
+    Iterable<ChatItem> items,
+    Set<String> supersededIds,
+  ) {
+    if (supersededIds.isEmpty) return items.toList();
+    return items
+        .where((item) => !isSupersededCallItem(item, supersededIds))
+        .toList();
+  }
 
   /// Sends an outgoing call message with the specified [mediaType].
   /// Returns the message ID on success, or `null` if send failed.
@@ -448,26 +483,34 @@ class CallChatItemManager {
     }
   }
 
-  /// Wire-deletes this device's own outgoing call item for [callId] after a
-  /// lost call glare. No-ops when no item carries [callId], it isn't this
-  /// device's own item, it is already deleted, or the call already connected.
+  /// Hides this device's own outgoing call item for [callId] after a lost
+  /// call glare.
+  ///
+  /// [callId] is the transport `restartedOwnCallId`, which names a glare-lost
+  /// outgoing call OR, on a mid-call peer reconnect, this device's own
+  /// connected call. Marking it superseded is what durably hides the row, so
+  /// it must never mark a connected call. Marking is therefore per-branch,
+  /// below the connected guard: mark when no item carries [callId] yet (a
+  /// genuine loser not yet synced — a connected call always has a synced item);
+  /// mark [callId] and the local item id on the delete path (the item id keeps
+  /// the tombstone hidden after `clearContent` wipes the call id). A connected
+  /// item (status `inProgress`, or a non-zero duration) is left untouched, and
+  /// so is a peer item or a call the SDK cannot yet resolve. The wire-delete is
+  /// best-effort so the peer also drops the item.
   Future<void> redactSupersededOutgoingCall(String callId) async {
     const label = 'redactSupersededOutgoingCall';
+    if (callId.isEmpty) return;
     await ensureInitialized();
     final chatSdk = getChatSdk();
     if (chatSdk is! MeetingPlaceMatrixChatSDK) {
       logger.warning('$label: chat SDK unavailable', name: _logKey);
       return;
     }
-    if (callId.isEmpty) return;
     try {
       final match = await chatSdk.getCallChatItemByCallId(callId);
       if (match is! Message) {
         logger.info('$label: no call item for callId $callId', name: _logKey);
-        return;
-      }
-      if (match.isDeleted || match.isDeletedLocally) {
-        logger.info('$label: $callId already deleted', name: _logKey);
+        await markSupersededOutgoingCallId?.call(callId);
         return;
       }
       if (!match.isFromMe) {
@@ -483,11 +526,19 @@ class CallChatItemManager {
       final call = callAttachment == null
           ? null
           : CallMetadata.maybeOf(callAttachment);
-      if (call != null && (call.durationMs ?? 0) > 0) {
+      if (call != null &&
+          (call.status == CallStatus.inProgress ||
+              (call.durationMs ?? 0) > 0)) {
         logger.warning(
           '$label: $callId already connected, refusing to redact',
           name: _logKey,
         );
+        return;
+      }
+      await markSupersededOutgoingCallId?.call(callId);
+      await markSupersededOutgoingCallId?.call(match.messageId);
+      if (match.isDeleted || match.isDeletedLocally) {
+        logger.info('$label: $callId already deleted', name: _logKey);
         return;
       }
       await chatSdk.deleteMessage(match);

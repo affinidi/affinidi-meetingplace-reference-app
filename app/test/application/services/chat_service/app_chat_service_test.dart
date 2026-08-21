@@ -454,6 +454,71 @@ void main() {
       await chatService.updateGroupContactPendingStatus(testContact, group);
       expect(true, isTrue);
     });
+
+    Message callItem({required String messageId, required String callId}) =>
+        Message(
+          chatId: 'fake-chat-id',
+          messageId: messageId,
+          value: '',
+          dateCreated: DateTime.now(),
+          status: ChatItemStatus.confirmed,
+          isFromMe: true,
+          senderDid: 'me',
+          attachments: [
+            CallMetadata.buildAttachment(
+              id: 'att-$messageId',
+              mediaType: CallMediaType.video,
+              status: CallStatus.ended,
+              callId: callId,
+            ),
+          ],
+        );
+
+    test('hides a durably superseded call item at session load', () async {
+      const supersededCallId = 'glare-lost-call';
+      await fakeContactsService.addSupersededCallId(
+        channelDid,
+        supersededCallId,
+      );
+      fakeChatSdk.sessionMessages = [
+        callItem(messageId: 'superseded-msg', callId: supersededCallId),
+        callItem(messageId: 'winner-msg', callId: 'glare-won-call'),
+      ];
+
+      await chatService.startChatSession();
+
+      final ids = container
+          .read(chatSessionServiceProvider(channelDid))
+          .messages
+          .map((m) => m.messageId)
+          .toList();
+      expect(ids, contains('winner-msg'));
+      expect(ids, isNot(contains('superseded-msg')));
+    });
+
+    test('drops a superseded call item arriving via the stream', () async {
+      const supersededCallId = 'glare-lost-call';
+      await fakeContactsService.addSupersededCallId(
+        channelDid,
+        supersededCallId,
+      );
+      await chatService.startChatSession();
+
+      chatService.upsertChatItem(
+        callItem(messageId: 'late-superseded', callId: supersededCallId),
+      );
+      chatService.upsertChatItem(
+        callItem(messageId: 'late-winner', callId: 'glare-won-call'),
+      );
+
+      final ids = container
+          .read(chatSessionServiceProvider(channelDid))
+          .messages
+          .map((m) => m.messageId)
+          .toList();
+      expect(ids, contains('late-winner'));
+      expect(ids, isNot(contains('late-superseded')));
+    });
   });
 
   group('ChatSessionService - State Emissions', () {

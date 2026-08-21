@@ -47,6 +47,8 @@ abstract class _$ContactCWProxy {
 
   Contact activeIncomingCallId(String? activeIncomingCallId);
 
+  Contact supersededCallIds(List<String> supersededCallIds);
+
   Contact hasBeenOpened(bool hasBeenOpened);
 
   Contact lastKeepAliveMessage(DateTime? lastKeepAliveMessage);
@@ -81,6 +83,7 @@ abstract class _$ContactCWProxy {
     String? pendingMissedCallMissId,
     String? lastCreditedMissId,
     String? activeIncomingCallId,
+    List<String> supersededCallIds,
     bool hasBeenOpened,
     DateTime? lastKeepAliveMessage,
     bool notificationBannerDismissed,
@@ -165,6 +168,10 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
       call(activeIncomingCallId: activeIncomingCallId);
 
   @override
+  Contact supersededCallIds(List<String> supersededCallIds) =>
+      call(supersededCallIds: supersededCallIds);
+
+  @override
   Contact hasBeenOpened(bool hasBeenOpened) =>
       call(hasBeenOpened: hasBeenOpened);
 
@@ -205,6 +212,7 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
     Object? pendingMissedCallMissId = const $CopyWithPlaceholder(),
     Object? lastCreditedMissId = const $CopyWithPlaceholder(),
     Object? activeIncomingCallId = const $CopyWithPlaceholder(),
+    Object? supersededCallIds = const $CopyWithPlaceholder(),
     Object? hasBeenOpened = const $CopyWithPlaceholder(),
     Object? lastKeepAliveMessage = const $CopyWithPlaceholder(),
     Object? notificationBannerDismissed = const $CopyWithPlaceholder(),
@@ -301,6 +309,12 @@ class _$ContactCWProxyImpl implements _$ContactCWProxy {
           ? _value.activeIncomingCallId
           // ignore: cast_nullable_to_non_nullable
           : activeIncomingCallId as String?,
+      supersededCallIds:
+          supersededCallIds == const $CopyWithPlaceholder() ||
+              supersededCallIds == null
+          ? _value.supersededCallIds
+          // ignore: cast_nullable_to_non_nullable
+          : supersededCallIds as List<String>,
       hasBeenOpened:
           hasBeenOpened == const $CopyWithPlaceholder() || hasBeenOpened == null
           ? _value.hasBeenOpened
