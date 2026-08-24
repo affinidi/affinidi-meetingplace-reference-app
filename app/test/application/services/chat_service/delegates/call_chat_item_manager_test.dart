@@ -593,6 +593,54 @@ void main() {
         expect(metadata?.durationMs, isNull);
       },
     );
+
+    test('a straggler in-progress updateCallChatItem never regresses a '
+        'reconciled ended outcome or its longer duration', () async {
+      final item = callMessage(
+        messageId: 'msg-cross',
+        isFromMe: true,
+        status: CallStatus.inProgress,
+        callId: 'room@1',
+        durationMs: 1000,
+      );
+      fakeChatSdk.sessionMessages = [item];
+
+      await manager.reconcileCallOutcome(
+        'msg-cross',
+        duration: const Duration(minutes: 5),
+      );
+      await manager.updateCallChatItem(
+        'msg-cross',
+        status: CallStatus.inProgress,
+        duration: const Duration(seconds: 29),
+      );
+
+      final metadata = CallMetadata.maybeOf(item.attachments.single);
+      expect(metadata?.status, CallStatus.ended);
+      expect(metadata?.durationMs, const Duration(minutes: 5).inMilliseconds);
+    });
+
+    test('updateCallChatItem applies a normal forward transition: terminal '
+        'status and longer duration advance', () async {
+      final item = callMessage(
+        messageId: 'msg-fwd',
+        isFromMe: true,
+        status: CallStatus.inProgress,
+        callId: 'room@1',
+        durationMs: 1000,
+      );
+      fakeChatSdk.sessionMessages = [item];
+
+      await manager.updateCallChatItem(
+        'msg-fwd',
+        status: CallStatus.ended,
+        duration: const Duration(seconds: 5),
+      );
+
+      final metadata = CallMetadata.maybeOf(item.attachments.single);
+      expect(metadata?.status, CallStatus.ended);
+      expect(metadata?.durationMs, const Duration(seconds: 5).inMilliseconds);
+    });
   });
 
   group('CallChatItemManager.sendOutgoingCallMessage', () {

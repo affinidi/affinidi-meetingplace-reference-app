@@ -28,6 +28,13 @@ class CallChatItemManager {
   /// hidden from history even if the redaction below never lands.
   final Future<void> Function(String callId)? markSupersededOutgoingCallId;
 
+  /// Whether [status] is a settled call outcome that must never regress to a
+  /// non-terminal status on a later out-of-order write.
+  static bool _isTerminalStatus(CallStatus status) =>
+      status == CallStatus.ended ||
+      status == CallStatus.missed ||
+      status == CallStatus.declined;
+
   /// Whether [item] is the history row of a glare-lost call that must be
   /// hidden. [supersededIds] holds each lost call's transport call id and, once
   /// known, its local chat-item id. Matching the chat-item id also hides the
@@ -384,11 +391,21 @@ class CallChatItemManager {
         );
         return null;
       }
+      final incomingDurationMs = duration?.inMilliseconds;
+      final existingDurationMs = existing.durationMs;
+      final resolvedDurationMs =
+          (incomingDurationMs == null || existingDurationMs == null)
+          ? incomingDurationMs ?? existingDurationMs
+          : math.max(existingDurationMs, incomingDurationMs);
+      final resolvedStatus =
+          _isTerminalStatus(existing.status) && !_isTerminalStatus(status)
+          ? existing.status
+          : status;
       final updated = CallMetadata.buildAttachment(
         mediaType: existing.mediaType,
-        status: status,
+        status: resolvedStatus,
         callId: existing.callId,
-        durationMs: duration?.inMilliseconds ?? existing.durationMs,
+        durationMs: resolvedDurationMs,
         participation: participation ?? existing.participation,
         id: callAttachment!.id,
       );
@@ -398,7 +415,7 @@ class CallChatItemManager {
       ];
       await chatSdk.updateMessage(item);
       logger.info(
-        'updateCallChatItem: $messageId -> ${status.name}',
+        'updateCallChatItem: $messageId -> ${resolvedStatus.name}',
         name: _logKey,
       );
       return item;
