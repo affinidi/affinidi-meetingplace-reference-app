@@ -448,8 +448,20 @@ class CallChatItemManager {
   }
 
   /// Resolves the media type of the call item carrying [callId], or `null`
-  /// when no item carries it or the chat SDK is unavailable.
-  Future<CallMediaType?> resolveCallMediaType(String callId) async {
+  /// when no item carries it or the chat SDK is unavailable. Retries a bounded
+  /// number of times while the item is unresolved so a call item that syncs
+  /// after the banner first reads it still resolves to its true media type,
+  /// mirroring [_resolveCallChatItemId].
+  Future<CallMediaType?> resolveCallMediaType(String callId) =>
+      _resolveCallMediaType(
+        callId: callId,
+        attemptsRemaining: _resolveCallChatItemMaxAttempts,
+      );
+
+  Future<CallMediaType?> _resolveCallMediaType({
+    required String callId,
+    required int attemptsRemaining,
+  }) async {
     const label = 'resolveCallMediaType';
     await ensureInitialized();
     final chatSdk = getChatSdk();
@@ -460,16 +472,23 @@ class CallChatItemManager {
     if (callId.isEmpty) return null;
     try {
       final match = await chatSdk.getCallChatItemByCallId(callId);
-      if (match is! Message) {
-        logger.info('$label: no call item for callId $callId', name: _logKey);
-        return null;
-      }
-      final attachment = match.attachments.firstWhereOrNull(
-        CallMetadata.isCall,
-      );
+      final attachment = match is Message
+          ? match.attachments.firstWhereOrNull(CallMetadata.isCall)
+          : null;
       final mediaType = attachment == null
           ? null
           : CallMetadata.maybeOf(attachment)?.mediaType;
+      if (mediaType == null) {
+        if (attemptsRemaining <= 0) {
+          logger.info('$label: no call item for callId $callId', name: _logKey);
+          return null;
+        }
+        await Future<void>.delayed(_resolveCallChatItemRetryDelay);
+        return _resolveCallMediaType(
+          callId: callId,
+          attemptsRemaining: attemptsRemaining - 1,
+        );
+      }
       logger.info('$label: $mediaType', name: _logKey);
       return mediaType;
     } catch (e, stackTrace) {

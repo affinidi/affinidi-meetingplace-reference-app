@@ -1211,6 +1211,63 @@ void main() {
       );
     });
   });
+
+  group('CallChatItemManager.resolveCallMediaType', () {
+    late FakeChatSdk fakeChatSdk;
+    late CallChatItemManager manager;
+
+    setUp(() {
+      fakeChatSdk = FakeChatSdk();
+      manager = CallChatItemManager(
+        ensureInitialized: () async {},
+        getChatSdk: () => fakeChatSdk,
+        logger: FakeAppLogger(),
+      );
+    });
+
+    Message videoCallItem(String callId) => Message(
+      chatId: 'fake-chat-id',
+      messageId: 'call-item',
+      value: '',
+      dateCreated: DateTime.now(),
+      status: ChatItemStatus.confirmed,
+      isFromMe: true,
+      senderDid: 'me',
+      attachments: [
+        CallMetadata.buildAttachment(
+          id: const Uuid().v4(),
+          mediaType: CallMediaType.video,
+          status: CallStatus.calling,
+          callId: callId,
+        ),
+      ],
+    );
+
+    test('waits for a late-syncing call item and resolves its media type '
+        'without a new participant snapshot', () {
+      fakeAsync((async) {
+        fakeChatSdk.sessionMessages = [];
+
+        CallMediaType? resolved;
+        var completed = false;
+        unawaited(
+          manager.resolveCallMediaType('call-a').then((value) {
+            resolved = value;
+            completed = true;
+          }),
+        );
+
+        async.flushMicrotasks();
+        expect(completed, isFalse);
+
+        fakeChatSdk.sessionMessages = [videoCallItem('call-a')];
+        async.elapse(const Duration(milliseconds: 50));
+        async.flushMicrotasks();
+
+        expect(resolved, CallMediaType.video);
+      });
+    });
+  });
 }
 
 /// A [FakeChatSdk] whose call-item lookup throws, simulating a transient SDK
