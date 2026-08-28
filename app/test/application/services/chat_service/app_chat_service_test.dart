@@ -27,9 +27,11 @@ import 'package:mpx_flutter_reference_app/infrastructure/providers/chat_sdk_prov
 import 'package:mpx_flutter_reference_app/infrastructure/providers/credentials_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/r_cards_repository_provider.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/shared_preferences_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/vrc_repository_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/secure_storage/secure_storage.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ssi/ssi.dart';
 import 'package:uuid/uuid.dart';
 
@@ -1104,6 +1106,7 @@ void main() {
     late FakeMeetingPlaceSDK fakeCoreSdk;
     late FakeChatSdk fakeChatSdk;
     late FakeContactsService fakeContactsService;
+    late SharedPreferences sharedPreferences;
 
     final testContact = FakeContacts.individualContact;
     final channelDid = testContact.channelDid!;
@@ -1113,6 +1116,7 @@ void main() {
       required bool isFromMe,
       required CallStatus status,
       DateTime? dateCreated,
+      String callId = '',
     }) => Message(
       chatId: 'fake-chat-id',
       messageId: messageId,
@@ -1126,12 +1130,14 @@ void main() {
           id: const Uuid().v4(),
           mediaType: CallMediaType.video,
           status: status,
-          callId: '',
+          callId: callId,
         ),
       ],
     );
 
     setUp(() async {
+      SharedPreferences.setMockInitialValues({});
+      sharedPreferences = await SharedPreferences.getInstance();
       fakeCoreSdk = FakeMeetingPlaceSDK(
         channels: {channelDid: FakeChannels.individualChannel},
       );
@@ -1143,6 +1149,7 @@ void main() {
           meetingPlaceSdkProvider.overrideWith((ref) async => fakeCoreSdk),
           chatSdkProvider.overrideWith((ref, channel) async => fakeChatSdk),
           contactsServiceProvider.overrideWith(() => fakeContactsService),
+          sharedPreferencesProvider.overrideWithValue(sharedPreferences),
           environmentProvider.overrideWithValue(FakeEnvironment()),
           appBadgeServiceProvider.overrideWith((ref) => FakeAppBadgeService()),
           rCardsRepositoryProvider.overrideWith(
@@ -1301,6 +1308,101 @@ void main() {
         CallStatus.declined,
       );
     });
+
+    test('upsertChatItem keeps a locally deleted call item deleted when a '
+        'later call update arrives', () async {
+      ChatServiceState currentState() =>
+          container.read(chatSessionServiceProvider(channelDid));
+
+      final deleted = callMessage(
+        messageId: 'call-msg-deleted',
+        isFromMe: true,
+        status: CallStatus.calling,
+      )..isDeletedLocally = true;
+      final lateUpdate = callMessage(
+        messageId: 'call-msg-deleted',
+        isFromMe: true,
+        status: CallStatus.ended,
+      );
+
+      chatService.upsertChatItem(deleted);
+      chatService.upsertChatItem(lateUpdate);
+
+      final messages = currentState().messages.whereType<Message>().toList();
+      expect(messages, hasLength(1));
+      expect(messages.single.isDeletedLocally, isTrue);
+      expect(messages.single.attachments, deleted.attachments);
+    });
+
+    test(
+      'redactSupersededOutgoingCall hides an intact call item after restart',
+      () async {
+        ChatServiceState currentState() =>
+            container.read(chatSessionServiceProvider(channelDid));
+
+        final lost = callMessage(
+          messageId: 'call-msg-lost',
+          isFromMe: true,
+          status: CallStatus.calling,
+          callId: 'call-lost',
+        );
+        fakeChatSdk.sessionMessages = [lost];
+
+        await chatService.startChatSession();
+        expect(currentState().messages.whereType<Message>(), hasLength(1));
+
+        final hidden = await chatService.redactSupersededOutgoingCall(
+          'call-lost',
+        );
+
+        expect(hidden, isTrue);
+        expect(fakeChatSdk.deleteMessageCalls, isEmpty);
+        expect(lost.isDeleted, isFalse);
+        expect(lost.isDeletedLocally, isFalse);
+        expect(lost.attachments, isNotEmpty);
+        expect(currentState().messages.whereType<Message>(), isEmpty);
+
+        await chatService.pauseChat();
+        container.dispose();
+        container = ProviderContainer(
+          overrides: [
+            meetingPlaceSdkProvider.overrideWith((ref) async => fakeCoreSdk),
+            chatSdkProvider.overrideWith((ref, channel) async => fakeChatSdk),
+            contactsServiceProvider.overrideWith(FakeContactsService.new),
+            sharedPreferencesProvider.overrideWithValue(sharedPreferences),
+            environmentProvider.overrideWithValue(FakeEnvironment()),
+            appBadgeServiceProvider.overrideWith(
+              (ref) => FakeAppBadgeService(),
+            ),
+            rCardsRepositoryProvider.overrideWith(
+              (ref) async => FakeNoOpRCardRepository(),
+            ),
+            vrcRepositoryProvider.overrideWith(
+              (ref) async => FakeNoOpVrcRepository(),
+            ),
+            secureStorageProvider.overrideWith(
+              (ref) async => FakeSecureStorage(),
+            ),
+            networkConnectivityServiceProvider.overrideWith(
+              _FakeNetworkConnectivityService.new,
+            ),
+          ],
+        );
+        container.listen(
+          chatSessionServiceProvider(channelDid),
+          (previous, value) {},
+          fireImmediately: true,
+        );
+        chatService = container.read(
+          chatSessionServiceProvider(channelDid).notifier,
+        );
+
+        await chatService.startChatSession();
+
+        expect(currentState().messages.whereType<Message>(), isEmpty);
+        expect(lost.attachments, isNotEmpty);
+      },
+    );
 
     test('resolveOutgoingCallChatItemId returns null when only terminal or '
         'incoming call items exist', () async {

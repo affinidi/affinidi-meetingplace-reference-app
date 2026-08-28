@@ -33,6 +33,7 @@ import '../../../infrastructure/providers/app_badge_provider.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/chat_sdk_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
+import '../../../infrastructure/providers/shared_preferences_provider.dart';
 import '../../../infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
 import '../contacts_service/contacts_service.dart';
 import '../identities_service/identities_service.dart';
@@ -69,6 +70,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   static const _maxTypingMembersVisible = 4;
   // Grace period to avoid blinking of presence indicator
   static const _presenceGracePeriodSeconds = 1;
+  static const _hiddenSupersededCallIdsPrefix = 'hiddenSupersededCallIds';
 
   // Serializes session lifecycle (init/teardown) per channel across notifier
   // instances. ref.onDispose is `void`, so a freshly-built notifier needs a
@@ -100,6 +102,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   static const _oneToOneTypingKey = '_one_to_one_';
   final List<_BufferedOutboundMessage> _bufferedOutboundMessages = [];
   Future<void>? _bufferFlushInFlight;
+  final Set<String> _hiddenSupersededCallIds = {};
 
   @override
   int get secondsToShowChatActivityIndicator =>
@@ -328,6 +331,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     try {
       final chatSession = await _chatSDK!.startChatSession();
       _chatId = chatSession.id;
+      await _loadHiddenSupersededCallIds();
 
       final dbMessageIds = {
         EncryptionNotice().messageId,
@@ -337,11 +341,12 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
           .where((m) => !dbMessageIds.contains(m.messageId))
           .toList();
 
-      final baseMessages = [
-        EncryptionNotice(),
-        ...chatSession.messages,
-        ...replayMessages,
-      ].sortedBy((item) => item.dateCreated).reversed.toList();
+      final baseMessages =
+          [EncryptionNotice(), ...chatSession.messages, ...replayMessages]
+              .where((item) => !_isHiddenSupersededCallItem(item))
+              .sortedBy((item) => item.dateCreated)
+              .reversed
+              .toList();
 
       final messages = _appendDerivedZkpNotices(baseMessages);
       state = state.copyWith(messages: messages, isInitialized: true);
@@ -806,6 +811,8 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
   @override
   void upsertChatItem(ChatItem item) {
+    if (_isHiddenSupersededCallItem(item)) return;
+
     final existing = state.messages;
     final idx = _indexOfChatItem(existing, item);
     if (idx != -1 && _shouldKeepExistingChatItem(existing[idx], item)) {
@@ -910,12 +917,22 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   bool _shouldKeepExistingChatItem(ChatItem existing, ChatItem next) {
     if (existing is! Message || next is! Message) return false;
 
+    if ((existing.isDeleted || existing.isDeletedLocally) &&
+        existing.messageId == next.messageId) {
+      return true;
+    }
+
     final existingCall = _callMetadataOf(existing);
     final nextCall = _callMetadataOf(next);
     if (existingCall == null || nextCall == null) return false;
 
     return _isFinalCallStatus(existingCall.status) &&
         !_isFinalCallStatus(nextCall.status);
+  }
+
+  bool _isCallItemForCallId(ChatItem item, String callId) {
+    if (callId.isEmpty || item is! Message) return false;
+    return _callMetadataOf(item)?.callId == callId;
   }
 
   /// Returns the call metadata attachment carried by [message], if any.
@@ -1115,6 +1132,10 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       _callChatItemManager.resolveOutgoingCallChatItemId(callId: callId);
 
   @override
+  Future<CallMediaType?> resolveCallMediaType(String callId) =>
+      _callChatItemManager.resolveCallMediaType(callId);
+
+  @override
   Future<bool> markCallAsMissed({String? callId}) {
     if (_chatId == null || _missedCallManager == null) {
       return Future.value(false);
@@ -1143,6 +1164,65 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       participation: participation,
     );
     if (updated != null) upsertChatItem(updated);
+  }
+
+  @override
+  Future<bool> redactSupersededOutgoingCall(String callId) async {
+    final redacted = await _callChatItemManager.redactSupersededOutgoingCall(
+      callId,
+    );
+    if (!redacted) return false;
+    await _hideSupersededCallId(callId);
+
+    final messages = state.messages
+        .where((item) => !_isCallItemForCallId(item, callId))
+        .toList(growable: false);
+    if (messages.length != state.messages.length) {
+      state = state.copyWith(messages: messages);
+    }
+    return true;
+  }
+
+  String get _hiddenSupersededCallIdsKey =>
+      '$_hiddenSupersededCallIdsPrefix.$_otherPartyPermanentChannelDid';
+
+  Future<void> _loadHiddenSupersededCallIds() async {
+    try {
+      final values = ref
+          .read(sharedPreferencesProvider)
+          .getStringList(_hiddenSupersededCallIdsKey);
+      _hiddenSupersededCallIds
+        ..clear()
+        ..addAll(values ?? const []);
+    } catch (e, stackTrace) {
+      _logger.warning(
+        'Unable to load hidden superseded call ids: $e\n$stackTrace',
+        name: _logKey,
+      );
+    }
+  }
+
+  Future<void> _hideSupersededCallId(String callId) async {
+    if (callId.isEmpty || !_hiddenSupersededCallIds.add(callId)) return;
+    try {
+      await ref
+          .read(sharedPreferencesProvider)
+          .setStringList(
+            _hiddenSupersededCallIdsKey,
+            _hiddenSupersededCallIds.toList(growable: false),
+          );
+    } catch (e, stackTrace) {
+      _logger.warning(
+        'Unable to persist hidden superseded call id: $e\n$stackTrace',
+        name: _logKey,
+      );
+    }
+  }
+
+  bool _isHiddenSupersededCallItem(ChatItem item) {
+    if (_hiddenSupersededCallIds.isEmpty || item is! Message) return false;
+    final callId = _callMetadataOf(item)?.callId;
+    return callId != null && _hiddenSupersededCallIds.contains(callId);
   }
 
   void _removeChatItem(ChatItem item) {

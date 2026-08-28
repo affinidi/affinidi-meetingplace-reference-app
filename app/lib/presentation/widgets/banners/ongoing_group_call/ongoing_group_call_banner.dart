@@ -58,7 +58,10 @@ class OngoingGroupCallBanner extends ConsumerWidget {
     return OngoingGroupCallBannerView(
       data: data,
       onJoin: () => context.push(
-        AudioVideoCallRoute(contactId: contactId, isAudioOnly: true).location,
+        AudioVideoCallRoute(
+          contactId: contactId,
+          isAudioOnly: data.isAudioOnly,
+        ).location,
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
@@ -21,6 +22,11 @@ class CallChatItemManager {
   final Future<void> Function() ensureInitialized;
   final MeetingPlaceChatSDK? Function() getChatSdk;
   final AppLogger logger;
+
+  static bool _isTerminalStatus(CallStatus status) =>
+      status == CallStatus.ended ||
+      status == CallStatus.missed ||
+      status == CallStatus.declined;
 
   /// Sends an outgoing call message with the specified [mediaType].
   /// Returns the message ID on success, or `null` if send failed.
@@ -328,6 +334,13 @@ class CallChatItemManager {
         );
         return null;
       }
+      if (item.isDeleted || item.isDeletedLocally) {
+        logger.info(
+          'updateCallChatItem: $messageId already deleted, skipping',
+          name: _logKey,
+        );
+        return null;
+      }
       final callAttachment = item.attachments.firstWhereOrNull(
         CallMetadata.isCall,
       );
@@ -341,11 +354,21 @@ class CallChatItemManager {
         );
         return null;
       }
+      final incomingDurationMs = duration?.inMilliseconds;
+      final existingDurationMs = existing.durationMs;
+      final resolvedDurationMs =
+          (incomingDurationMs == null || existingDurationMs == null)
+          ? incomingDurationMs ?? existingDurationMs
+          : math.max(existingDurationMs, incomingDurationMs);
+      final resolvedStatus =
+          _isTerminalStatus(existing.status) && !_isTerminalStatus(status)
+          ? existing.status
+          : status;
       final updated = CallMetadata.buildAttachment(
         mediaType: existing.mediaType,
-        status: status,
+        status: resolvedStatus,
         callId: existing.callId,
-        durationMs: duration?.inMilliseconds ?? existing.durationMs,
+        durationMs: resolvedDurationMs,
         participation: participation ?? existing.participation,
         id: callAttachment!.id,
       );
@@ -355,7 +378,7 @@ class CallChatItemManager {
       ];
       await chatSdk.updateMessage(item);
       logger.info(
-        'updateCallChatItem: $messageId -> ${status.name}',
+        'updateCallChatItem: $messageId -> ${resolvedStatus.name}',
         name: _logKey,
       );
       return item;
@@ -391,6 +414,10 @@ class CallChatItemManager {
         logger.info('$label: no call item for callId $callId', name: _logKey);
         return null;
       }
+      if (match is Message && (match.isDeleted || match.isDeletedLocally)) {
+        logger.info('$label: $callId already deleted', name: _logKey);
+        return null;
+      }
       logger.info('$label: ${match.messageId}', name: _logKey);
       return match.messageId;
     } catch (e, stackTrace) {
@@ -404,12 +431,126 @@ class CallChatItemManager {
     }
   }
 
-  /// Reconciles the call item [messageId] to `ended` with the authoritative
-  /// [duration] from a transport-delivered outcome. Clears
-  /// `selfLeftBeforeEnd` on any group participation so a participant who left
-  /// early converges on the full call duration and the "You left" label is
-  /// replaced by the standard duration label. Returns the updated [Message] for
-  /// an immediate UI refresh, or `null` when the item is missing or not a call.
+  Future<CallMediaType?> resolveCallMediaType(String callId) =>
+      _resolveCallMediaType(
+        callId: callId,
+        attemptsRemaining: _resolveCallChatItemMaxAttempts,
+      );
+
+  Future<CallMediaType?> _resolveCallMediaType({
+    required String callId,
+    required int attemptsRemaining,
+  }) async {
+    const label = 'resolveCallMediaType';
+    await ensureInitialized();
+    final chatSdk = getChatSdk();
+    if (chatSdk is! MeetingPlaceMatrixChatSDK) {
+      logger.warning('$label: chat SDK unavailable', name: _logKey);
+      return null;
+    }
+    if (callId.isEmpty) return null;
+    try {
+      final match = await chatSdk.getCallChatItemByCallId(callId);
+      final attachment =
+          match is Message && !match.isDeleted && !match.isDeletedLocally
+          ? match.attachments.firstWhereOrNull(CallMetadata.isCall)
+          : null;
+      final mediaType = attachment == null
+          ? null
+          : CallMetadata.maybeOf(attachment)?.mediaType;
+      if (mediaType == null) {
+        if (attemptsRemaining <= 0) {
+          logger.info('$label: no call item for callId $callId', name: _logKey);
+          return null;
+        }
+        await Future<void>.delayed(_resolveCallChatItemRetryDelay);
+        return _resolveCallMediaType(
+          callId: callId,
+          attemptsRemaining: attemptsRemaining - 1,
+        );
+      }
+      logger.info('$label: $mediaType', name: _logKey);
+      return mediaType;
+    } catch (e, stackTrace) {
+      logger.error(
+        '$label failed',
+        error: e,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+      return null;
+    }
+  }
+
+  Future<bool> redactSupersededOutgoingCall(String callId) =>
+      _redactSupersededOutgoingCall(
+        callId: callId,
+        attemptsRemaining: _resolveCallChatItemMaxAttempts,
+      );
+
+  Future<bool> _redactSupersededOutgoingCall({
+    required String callId,
+    required int attemptsRemaining,
+  }) async {
+    const label = 'redactSupersededOutgoingCall';
+    if (callId.isEmpty) return false;
+    await ensureInitialized();
+    final chatSdk = getChatSdk();
+    if (chatSdk is! MeetingPlaceMatrixChatSDK) {
+      logger.warning('$label: chat SDK unavailable', name: _logKey);
+      return false;
+    }
+    try {
+      final match = await chatSdk.getCallChatItemByCallId(callId);
+      if (match == null) {
+        if (attemptsRemaining <= 0) {
+          logger.info('$label: no call item for callId $callId', name: _logKey);
+          return false;
+        }
+        await Future<void>.delayed(_resolveCallChatItemRetryDelay);
+        return _redactSupersededOutgoingCall(
+          callId: callId,
+          attemptsRemaining: attemptsRemaining - 1,
+        );
+      }
+      if (match is! Message || !match.isFromMe) {
+        logger.warning(
+          '$label: $callId is not this device\'s own item, skipping',
+          name: _logKey,
+        );
+        return false;
+      }
+      if (match.isDeleted || match.isDeletedLocally) return true;
+
+      final callAttachment = match.attachments.firstWhereOrNull(
+        CallMetadata.isCall,
+      );
+      final call = callAttachment == null
+          ? null
+          : CallMetadata.maybeOf(callAttachment);
+      if (call != null &&
+          (call.status == CallStatus.inProgress ||
+              (call.durationMs ?? 0) > 0)) {
+        logger.warning(
+          '$label: $callId already connected, refusing to redact',
+          name: _logKey,
+        );
+        return false;
+      }
+
+      logger.info('$label: resolved $callId for local hiding', name: _logKey);
+      return true;
+    } catch (e, stackTrace) {
+      logger.error(
+        '$label failed',
+        error: e,
+        stackTrace: stackTrace,
+        name: _logKey,
+      );
+      return false;
+    }
+  }
+
   Future<Message?> reconcileCallOutcome(
     String messageId, {
     Duration? duration,
@@ -428,6 +569,13 @@ class CallChatItemManager {
       if (item is! Message) {
         logger.warning(
           'reconcileCallOutcome: message $messageId not found',
+          name: _logKey,
+        );
+        return null;
+      }
+      if (item.isDeleted || item.isDeletedLocally) {
+        logger.info(
+          'reconcileCallOutcome: $messageId already deleted, skipping',
           name: _logKey,
         );
         return null;
@@ -457,15 +605,18 @@ class CallChatItemManager {
         );
         return item;
       }
-      final convergedParticipation = existing.participation?.copyWith(
-        selfLeftBeforeEnd: false,
-      );
+      final incomingDurationMs = duration?.inMilliseconds;
+      final existingDurationMs = existing.durationMs;
+      final resolvedDurationMs =
+          (incomingDurationMs == null || existingDurationMs == null)
+          ? incomingDurationMs ?? existingDurationMs
+          : math.max(existingDurationMs, incomingDurationMs);
       final updated = CallMetadata.buildAttachment(
         mediaType: existing.mediaType,
         status: CallStatus.ended,
         callId: existing.callId,
-        durationMs: duration?.inMilliseconds ?? existing.durationMs,
-        participation: convergedParticipation,
+        durationMs: resolvedDurationMs,
+        participation: existing.participation,
         id: callAttachment!.id,
       );
       item.attachments = [

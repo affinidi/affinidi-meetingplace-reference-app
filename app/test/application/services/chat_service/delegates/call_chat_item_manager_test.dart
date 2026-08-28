@@ -501,7 +501,7 @@ void main() {
     );
 
     test(
-      'reconcileCallOutcome clears selfLeftBeforeEnd and writes full duration',
+      'reconcileCallOutcome keeps selfLeftBeforeEnd and writes full duration',
       () async {
         fakeChatSdk.sessionMessages = [
           callMessage(
@@ -526,9 +526,47 @@ void main() {
         final metadata = CallMetadata.maybeOf(updated!.attachments.single);
         expect(metadata?.status, CallStatus.ended);
         expect(metadata?.durationMs, const Duration(minutes: 5).inMilliseconds);
-        expect(metadata?.participation?.selfLeftBeforeEnd, isFalse);
+        expect(metadata?.participation?.selfLeftBeforeEnd, isTrue);
       },
     );
+
+    test('reconcileCallOutcome keeps the longer existing duration', () async {
+      fakeChatSdk.sessionMessages = [
+        callMessage(
+          messageId: 'msg-longer',
+          isFromMe: true,
+          status: CallStatus.ended,
+          callId: 'target-call',
+          durationMs: const Duration(minutes: 5).inMilliseconds,
+        ),
+      ];
+
+      final updated = await manager.reconcileCallOutcome(
+        'msg-longer',
+        duration: const Duration(minutes: 3),
+      );
+
+      final metadata = CallMetadata.maybeOf(updated!.attachments.single);
+      expect(metadata?.durationMs, const Duration(minutes: 5).inMilliseconds);
+    });
+
+    test('reconcileCallOutcome skips locally deleted call items', () async {
+      final deleted = callMessage(
+        messageId: 'msg-deleted',
+        isFromMe: true,
+        status: CallStatus.inProgress,
+        callId: 'target-call',
+      )..isDeletedLocally = true;
+      fakeChatSdk.sessionMessages = [deleted];
+
+      final updated = await manager.reconcileCallOutcome(
+        'msg-deleted',
+        duration: const Duration(minutes: 3),
+      );
+
+      expect(updated, isNull);
+      expect(fakeChatSdk.updateMessageCalls, isEmpty);
+    });
 
     test(
       'reconcileCallOutcome keeps existing duration when none is provided',
@@ -760,9 +798,38 @@ void main() {
         reason: 'updateCallChatItem should return null when SDK unavailable',
       );
     });
+
+    test('skips locally deleted call items', () async {
+      final deleted = Message(
+        chatId: 'fake-chat-id',
+        messageId: 'deleted-message',
+        value: '',
+        dateCreated: DateTime.now(),
+        status: ChatItemStatus.sent,
+        isFromMe: true,
+        senderDid: 'fake-sender-did',
+        attachments: [
+          CallMetadata.buildAttachment(
+            mediaType: CallMediaType.audio,
+            status: CallStatus.calling,
+            callId: 'test-call-id',
+            id: 'call-attachment-id',
+          ),
+        ],
+      )..isDeletedLocally = true;
+      fakeChatSdk.sessionMessages = [deleted];
+
+      final updated = await manager.updateCallChatItem(
+        'deleted-message',
+        status: CallStatus.ended,
+      );
+
+      expect(updated, isNull);
+      expect(fakeChatSdk.updateMessageCalls, isEmpty);
+    });
   });
 
-  group('reconcileCallOutcome converges early leavers to the duration', () {
+  group('reconcileCallOutcome preserves early leavers\' "you left" label', () {
     late FakeChatSdk fakeChatSdk;
     late CallChatItemManager manager;
 
@@ -799,7 +866,7 @@ void main() {
       ],
     );
 
-    test('clears selfLeftBeforeEnd and writes the full duration', () async {
+    test('keeps selfLeftBeforeEnd and writes the longer duration', () async {
       fakeChatSdk.sessionMessages = [groupCallItem(selfLeftBeforeEnd: true)];
 
       final updated = await manager.reconcileCallOutcome(
@@ -812,7 +879,7 @@ void main() {
       final call = CallMetadata.maybeOf(attachment)!;
       expect(call.status, CallStatus.ended);
       expect(call.durationMs, const Duration(seconds: 25).inMilliseconds);
-      expect(call.participation?.selfLeftBeforeEnd, isFalse);
+      expect(call.participation?.selfLeftBeforeEnd, isTrue);
       expect(call.participation?.participantCount, 1);
     });
 
@@ -925,6 +992,178 @@ void main() {
       final resolved = await manager.resolveCallItemIdForOutcome('');
 
       expect(resolved, isNull);
+    });
+  });
+
+  group('CallChatItemManager.resolveCallMediaType', () {
+    late FakeChatSdk fakeChatSdk;
+    late CallChatItemManager manager;
+
+    setUp(() {
+      fakeChatSdk = FakeChatSdk();
+      manager = CallChatItemManager(
+        ensureInitialized: () async {},
+        getChatSdk: () => fakeChatSdk,
+        logger: FakeAppLogger(),
+      );
+    });
+
+    Message callItem({
+      required String messageId,
+      required CallMediaType mediaType,
+      required String callId,
+    }) => Message(
+      chatId: 'fake-chat-id',
+      messageId: messageId,
+      value: '',
+      dateCreated: DateTime.now(),
+      status: ChatItemStatus.sent,
+      isFromMe: true,
+      senderDid: 'me',
+      attachments: [
+        CallMetadata.buildAttachment(
+          mediaType: mediaType,
+          status: CallStatus.calling,
+          callId: callId,
+          id: const Uuid().v4(),
+        ),
+      ],
+    );
+
+    test('resolves the exact call media type', () async {
+      fakeChatSdk.sessionMessages = [
+        callItem(
+          messageId: 'call-item',
+          mediaType: CallMediaType.video,
+          callId: 'call-a',
+        ),
+      ];
+
+      final resolved = await manager.resolveCallMediaType('call-a');
+
+      expect(resolved, CallMediaType.video);
+    });
+
+    test('waits for a late-syncing call item', () {
+      fakeAsync((async) {
+        fakeChatSdk.sessionMessages = [];
+
+        CallMediaType? resolved;
+        unawaited(
+          manager.resolveCallMediaType('call-a').then((value) {
+            resolved = value;
+          }),
+        );
+
+        async.flushMicrotasks();
+        fakeChatSdk.sessionMessages = [
+          callItem(
+            messageId: 'late-call-item',
+            mediaType: CallMediaType.video,
+            callId: 'call-a',
+          ),
+        ];
+        async.elapse(const Duration(milliseconds: 50));
+        async.flushMicrotasks();
+
+        expect(resolved, CallMediaType.video);
+      });
+    });
+  });
+
+  group('redactSupersededOutgoingCall hides glare-lost outgoing items', () {
+    late FakeChatSdk fakeChatSdk;
+    late CallChatItemManager manager;
+
+    setUp(() {
+      fakeChatSdk = FakeChatSdk();
+      manager = CallChatItemManager(
+        ensureInitialized: () async {},
+        getChatSdk: () => fakeChatSdk,
+        logger: FakeAppLogger(),
+      );
+    });
+
+    Message callItem({
+      required String messageId,
+      required bool isFromMe,
+      required CallStatus status,
+      required String callId,
+      String? transportId,
+      int? durationMs,
+    }) => Message(
+      chatId: 'fake-chat-id',
+      messageId: messageId,
+      value: '',
+      dateCreated: DateTime.now(),
+      status: ChatItemStatus.sent,
+      isFromMe: isFromMe,
+      senderDid: isFromMe ? 'me' : 'peer',
+      transportId: transportId,
+      attachments: [
+        CallMetadata.buildAttachment(
+          mediaType: CallMediaType.video,
+          status: status,
+          callId: callId,
+          durationMs: durationMs,
+          id: const Uuid().v4(),
+        ),
+      ],
+    );
+
+    test('accepts a delivered own outgoing loser for local hiding', () async {
+      final lost = callItem(
+        messageId: 'own-lost',
+        isFromMe: true,
+        status: CallStatus.calling,
+        callId: 'call-a',
+        transportId: 'evt-a',
+      );
+      fakeChatSdk.sessionMessages = [lost];
+
+      final redacted = await manager.redactSupersededOutgoingCall('call-a');
+
+      expect(redacted, isTrue);
+      expect(fakeChatSdk.deleteMessageCalls, isEmpty);
+      expect(lost.isDeleted, isFalse);
+      expect(lost.attachments, isNotEmpty);
+    });
+
+    test(
+      'accepts an undelivered own outgoing loser for local hiding',
+      () async {
+        final lost = callItem(
+          messageId: 'own-lost',
+          isFromMe: true,
+          status: CallStatus.calling,
+          callId: 'call-a',
+        );
+        fakeChatSdk.sessionMessages = [lost];
+
+        final redacted = await manager.redactSupersededOutgoingCall('call-a');
+
+        expect(redacted, isTrue);
+        expect(fakeChatSdk.deleteMessageCalls, isEmpty);
+        expect(lost.isDeletedLocally, isFalse);
+        expect(lost.attachments, isNotEmpty);
+      },
+    );
+
+    test('does not redact a connected call carrying the same id', () async {
+      final connected = callItem(
+        messageId: 'own-connected',
+        isFromMe: true,
+        status: CallStatus.inProgress,
+        callId: 'call-a',
+        transportId: 'evt-a',
+      );
+      fakeChatSdk.sessionMessages = [connected];
+
+      final redacted = await manager.redactSupersededOutgoingCall('call-a');
+
+      expect(redacted, isFalse);
+      expect(fakeChatSdk.deleteMessageCalls, isEmpty);
+      expect(connected.isDeleted, isFalse);
     });
   });
 }

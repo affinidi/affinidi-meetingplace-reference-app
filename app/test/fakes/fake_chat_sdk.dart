@@ -862,6 +862,22 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
   }
 
   @override
+  Future<void> deleteMessage(Message message, {bool localOnly = false}) async {
+    deleteMessageCalls.add({'message': message, 'localOnly': localOnly});
+    if (!localOnly && message.transportId == null) {
+      throw StateError(
+        'Cannot delete a message that has not yet been delivered',
+      );
+    }
+    if (localOnly) {
+      message.isDeletedLocally = true;
+    } else {
+      message.isDeleted = true;
+    }
+    message.clearContent();
+  }
+
+  @override
   dynamic noSuchMethod(Invocation invocation) {
     throw UnimplementedError(
       'Method ${invocation.memberName} not implemented in FakeChatSdk',
