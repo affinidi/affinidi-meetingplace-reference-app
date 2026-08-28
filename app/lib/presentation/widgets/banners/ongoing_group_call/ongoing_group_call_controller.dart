@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
@@ -68,7 +70,7 @@ Stream<OngoingGroupCallBannerData?> ongoingGroupCallBanner(
   Future<CallMediaType?> resolveMediaType(String callId) {
     return mediaTypeLookups.putIfAbsent(callId, () async {
       final mediaType = await chatSession.resolveCallMediaType(callId);
-      if (mediaType == null) await mediaTypeLookups.remove(callId);
+      if (mediaType == null) mediaTypeLookups.remove(callId)?.ignore();
       return mediaType;
     });
   }
