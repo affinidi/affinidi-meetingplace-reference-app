@@ -1131,7 +1131,6 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   Future<String?> resolveOutgoingCallChatItemId({String? callId}) =>
       _callChatItemManager.resolveOutgoingCallChatItemId(callId: callId);
 
-  @override
   Future<CallMediaType?> resolveCallMediaType(String callId) =>
       _callChatItemManager.resolveCallMediaType(callId);
 
@@ -1166,7 +1165,6 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
     if (updated != null) upsertChatItem(updated);
   }
 
-  @override
   Future<bool> redactSupersededOutgoingCall(String callId) async {
     final redacted = await _callChatItemManager.redactSupersededOutgoingCall(
       callId,

@@ -131,8 +131,6 @@ abstract class ChatService implements ConciergeMessaging, GroupManaging {
   /// answering.
   Future<bool> markCallAsDeclined({String? callId});
 
-  Future<CallMediaType?> resolveCallMediaType(String callId);
-
   /// Updates the local-only [status] and participation [duration] of a
   /// previously emitted call chat item, in place. Per-side and local-only: it
   /// does not propagate to the other party.
@@ -146,6 +144,4 @@ abstract class ChatService implements ConciergeMessaging, GroupManaging {
     Duration? duration,
     CallParticipation? participation,
   });
-
-  Future<bool> redactSupersededOutgoingCall(String callId);
 }

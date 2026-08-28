@@ -827,6 +827,38 @@ void main() {
       expect(updated, isNull);
       expect(fakeChatSdk.updateMessageCalls, isEmpty);
     });
+
+    test('keeps ended status when a non-terminal update arrives', () async {
+      final ended = Message(
+        chatId: 'fake-chat-id',
+        messageId: 'ended-message',
+        value: '',
+        dateCreated: DateTime.now(),
+        status: ChatItemStatus.sent,
+        isFromMe: true,
+        senderDid: 'fake-sender-did',
+        attachments: [
+          CallMetadata.buildAttachment(
+            mediaType: CallMediaType.audio,
+            status: CallStatus.ended,
+            callId: 'test-call-id',
+            id: 'call-attachment-id',
+          ),
+        ],
+      );
+      fakeChatSdk.sessionMessages = [ended];
+
+      final updated = await manager.updateCallChatItem(
+        'ended-message',
+        status: CallStatus.calling,
+      );
+
+      final call = CallMetadata.maybeOf(
+        updated!.attachments.firstWhere(CallMetadata.isCall),
+      );
+      expect(call?.status, CallStatus.ended);
+      expect(fakeChatSdk.updateMessageCalls, hasLength(1));
+    });
   });
 
   group('reconcileCallOutcome preserves early leavers\' "you left" label', () {
