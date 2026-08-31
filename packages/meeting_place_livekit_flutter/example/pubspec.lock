@@ -742,15 +742,15 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "0.0.1-dev.9"
+    version: "0.0.1-dev.10"
   meeting_place_matrix:
     dependency: transitive
     description:
       name: meeting_place_matrix
-      sha256: "5f8a0456d1231ab8cb727646193f8f724e11ec8c8e098a1ea4211ed7af8d3c9c"
+      sha256: c1f885a4026eebc2bc9ea44605ad54c4cfc2c0160b7ad3f0e8a5dd978d695eba
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev.19"
+    version: "0.0.1-dev.20"
   meeting_place_mediator:
     dependency: transitive
     description:

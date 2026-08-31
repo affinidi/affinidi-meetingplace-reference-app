@@ -102,24 +102,27 @@ Message _callMessage({
   required CallStatus status,
   required DateTime dateCreated,
   int? durationMs,
-}) => Message(
-  chatId: chatId,
-  messageId: messageId,
-  value: '',
-  dateCreated: dateCreated,
-  status: ChatItemStatus.confirmed,
-  isFromMe: isFromMe,
-  senderDid: senderDid,
-  attachments: [
-    CallMetadata.buildAttachment(
-      id: const Uuid().v4(),
-      mediaType: CallMediaType.video,
-      status: status,
-      callId: messageId,
-      durationMs: durationMs,
-    ),
-  ],
-);
+  bool isDeletedLocally = false,
+}) {
+  return Message(
+    chatId: chatId,
+    messageId: messageId,
+    value: '',
+    dateCreated: dateCreated,
+    status: ChatItemStatus.confirmed,
+    isFromMe: isFromMe,
+    senderDid: senderDid,
+    attachments: [
+      CallMetadata.buildAttachment(
+        id: const Uuid().v4(),
+        mediaType: CallMediaType.video,
+        status: status,
+        callId: messageId,
+        durationMs: durationMs,
+      ),
+    ],
+  )..isDeletedLocally = isDeletedLocally;
+}
 
 ProviderContainer _buildContainer({
   required _RecordingChatRepository chatRepository,
@@ -215,5 +218,45 @@ void main() {
       // listMessages) and passes on the new.
       expect(chatRepository.listMessagesCalls, isEmpty);
     });
+
+    test(
+      'skips locally deleted call entries loaded from persisted history',
+      () async {
+        final deletedCall = _callMessage(
+          chatId: expectedChatId,
+          messageId: 'deleted-call',
+          senderDid: channelDid,
+          isFromMe: true,
+          status: CallStatus.calling,
+          dateCreated: DateTime.utc(2026, 1, 2, 9),
+          isDeletedLocally: true,
+        );
+        final keptCall = _callMessage(
+          chatId: expectedChatId,
+          messageId: 'kept-call',
+          senderDid: channelDid,
+          isFromMe: false,
+          status: CallStatus.missed,
+          dateCreated: DateTime.utc(2026, 1, 1, 10),
+        );
+
+        final chatRepository = _RecordingChatRepository([
+          deletedCall,
+          keptCall,
+        ]);
+        final coreSdk = FakeMeetingPlaceSDK(channels: {channelDid: channel});
+        final container = _buildContainer(
+          chatRepository: chatRepository,
+          contacts: [contact],
+          coreSdk: coreSdk,
+        );
+
+        final entries = await container.read(callLogEntriesProvider.future);
+
+        expect(entries, hasLength(1));
+        expect(entries.single.status, CallStatus.missed);
+        expect(entries.single.timestamp, keptCall.dateCreated);
+      },
+    );
   });
 }

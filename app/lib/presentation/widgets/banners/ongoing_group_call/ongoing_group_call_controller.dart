@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../application/services/chat_service/chat_session_service.dart';
 import '../../../../application/services/contacts_service/contacts_service.dart';
 import '../../../../domain/models/contact_card/contact_card.dart';
 import '../../../../infrastructure/extensions/contact_card_extensions.dart';
@@ -59,17 +62,32 @@ Stream<OngoingGroupCallBannerData?> ongoingGroupCallBanner(
   };
 
   final sdk = await ref.watch(meetingPlaceSdkProvider.future);
+  final chatSession = ref.watch(
+    chatSessionServiceProvider(channelDid).notifier,
+  );
 
-  yield* sdk
-      .watchOngoingGroupCall(groupChannelDid: channelDid)
-      .map(
-        (ongoing) => _toBannerData(
-          ongoing: ongoing,
-          memberCards: memberCards,
-          cacheManager: cacheManager,
-        ),
-      )
-      .distinct();
+  final mediaTypeLookups = <String, Future<CallMediaType?>>{};
+  Future<CallMediaType?> resolveMediaType(String callId) {
+    return mediaTypeLookups.putIfAbsent(callId, () async {
+      final mediaType = await chatSession.resolveCallMediaType(callId);
+      if (mediaType == null) mediaTypeLookups.remove(callId)?.ignore();
+      return mediaType;
+    });
+  }
+
+  yield* sdk.watchOngoingGroupCall(groupChannelDid: channelDid).asyncExpand((
+    ongoing,
+  ) async* {
+    final mediaType = ongoing == null
+        ? null
+        : await resolveMediaType(ongoing.callId);
+    yield _toBannerData(
+      ongoing: ongoing,
+      memberCards: memberCards,
+      cacheManager: cacheManager,
+      mediaType: mediaType,
+    );
+  }).distinct();
 }
 
 /// Maps an [OngoingGroupCall] snapshot to banner data, de-duplicating people by
@@ -78,6 +96,7 @@ OngoingGroupCallBannerData? _toBannerData({
   required OngoingGroupCall? ongoing,
   required Map<String, ContactCard> memberCards,
   required BaseCacheManager cacheManager,
+  CallMediaType? mediaType,
 }) {
   if (ongoing == null) return null;
 
@@ -102,5 +121,6 @@ OngoingGroupCallBannerData? _toBannerData({
   return OngoingGroupCallBannerData(
     participantCount: avatars.length,
     avatars: avatars,
+    isAudioOnly: mediaType != CallMediaType.video,
   );
 }

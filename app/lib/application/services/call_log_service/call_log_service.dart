@@ -60,6 +60,7 @@ Future<List<CallLogEntry>> callLogEntries(Ref ref) async {
       );
       for (final item in messages) {
         if (item is! chat.Message) continue;
+        if (item.isDeleted || item.isDeletedLocally) continue;
         for (final attachment in item.attachments) {
           final call = CallMetadata.maybeOf(attachment);
           if (call == null) continue;

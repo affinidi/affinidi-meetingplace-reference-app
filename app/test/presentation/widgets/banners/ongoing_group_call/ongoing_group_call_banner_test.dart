@@ -12,6 +12,7 @@ OngoingGroupCallBannerData _data(int count) => OngoingGroupCallBannerData(
     for (var i = 0; i < count; i++)
       OngoingGroupCallAvatar(id: 'p$i', firstName: 'P$i'),
   ],
+  isAudioOnly: false,
 );
 
 Widget _wrap(Widget child, {double? width}) => MaterialApp(
