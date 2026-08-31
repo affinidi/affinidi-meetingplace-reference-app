@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2026-08-31
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`meeting_place_livekit_flutter` - `v0.0.1-dev.11`](#meeting_place_livekit_flutter---v001-dev11)
+
+---
+
+#### `meeting_place_livekit_flutter` - `v0.0.1-dev.11`
+
+ - **FIX**: correct call history entries and ongoing-call banner (#330).
+
+
 ## 2026-08-21
 
 ### Changes

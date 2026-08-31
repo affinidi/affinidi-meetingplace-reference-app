@@ -1,3 +1,7 @@
+## 0.0.1-dev.11
+
+ - **FIX**: correct call history entries and ongoing-call banner (#330).
+
 ## 0.0.1-dev.10
 
  - **PERF**: load only call messages for the call log (#327).
