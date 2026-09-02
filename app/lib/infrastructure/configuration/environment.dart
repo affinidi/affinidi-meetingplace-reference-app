@@ -98,8 +98,14 @@ class Environment {
     ),
   );
 
+  /// Whether the local biometric/passcode gate is required. The
+  /// `BIOMETRICS_ENABLED` dart-define exists only to let developers skip the
+  /// biometric prompt in local debug builds; it is forced back to `true`
+  /// outside of `kDebugMode` so a misconfigured build pipeline can never ship
+  /// a release/profile build with authentication disabled.
   bool get isBiometricsEnabled =>
-      const bool.fromEnvironment('BIOMETRICS_ENABLED', defaultValue: true);
+      const bool.fromEnvironment('BIOMETRICS_ENABLED', defaultValue: true) ||
+      !kDebugMode;
   bool get zkpEnabled =>
       const bool.fromEnvironment('ZKP_ENABLED', defaultValue: false);
   bool get audioVideoCallsEnabled => const bool.fromEnvironment(
