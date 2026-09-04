@@ -165,7 +165,7 @@ class ControlPlaneService extends _$ControlPlaneService
 
       _lastAttemptedDeviceToken = token;
 
-      _logger.info('Device token received: $token', name: _logKey);
+      _logger.info('Device token received', name: _logKey);
 
       try {
         final sdk = await ref.read(meetingPlaceSdkProvider.future);
