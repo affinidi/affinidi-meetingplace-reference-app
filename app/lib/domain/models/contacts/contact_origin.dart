@@ -21,7 +21,7 @@ enum ContactOrigin {
         return individualOfferPublished;
       case ChannelType.group:
         return groupOfferPublished;
-      case ChannelType.oob:
+      case ChannelType.directConnection:
         return directInteractive;
     }
   }

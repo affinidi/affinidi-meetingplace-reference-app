@@ -19,7 +19,6 @@ class FakeGroups {
           status: sdk.GroupMemberStatus.approved,
           membershipType: sdk.GroupMembershipType.member,
           contactCard: FakeContacts.sdkContactCard,
-          publicKey: 'fake-public-key',
         ),
         sdk.GroupMember(
           did: removableMemberDid,
@@ -37,7 +36,6 @@ class FakeGroups {
               },
             },
           ),
-          publicKey: 'fake-public-key-2',
         ),
         sdk.GroupMember(
           did: adminMemberDid,
@@ -55,11 +53,9 @@ class FakeGroups {
               },
             },
           ),
-          publicKey: 'fake-public-key-3',
         ),
       ],
       created: DateTime.now(),
-      publicKey: 'fake-public-key',
     );
   }
 }

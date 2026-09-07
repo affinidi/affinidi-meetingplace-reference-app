@@ -667,7 +667,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
   Future<void> _loadGroupMemberNames(String offerLink) async {
     try {
       final sdk = await ref.read(meetingPlaceSdkProvider.future);
-      final group = await sdk.getGroupByOfferLink(offerLink);
+      final group = await sdk.findGroupByOfferLink(offerLink);
       if (group == null || _isDisposed) return;
       final contactsState = ref.read(contactsServiceProvider);
       final cards = <String, ContactCard>{...state.memberContactCards};
@@ -710,7 +710,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     core.Group group,
   ) async {
     try {
-      final ownChannel = await sdk.getChannelByOtherPartyPermanentDid(
+      final ownChannel = await sdk.findChannelByOtherPartyPermanentDid(
         _cachedChannelDid ?? group.did,
       );
       final ownDid = ownChannel?.permanentChannelDid;
@@ -763,7 +763,7 @@ class AudioVideoCallScreenController extends _$AudioVideoCallScreenController {
     if (offerLink == null || _isDisposed || !ref.mounted) return;
 
     final sdk = await ref.read(meetingPlaceSdkProvider.future);
-    final group = await sdk.getGroupByOfferLink(offerLink);
+    final group = await sdk.findGroupByOfferLink(offerLink);
     if (group == null || _isDisposed || !ref.mounted) return;
 
     final member = group.members

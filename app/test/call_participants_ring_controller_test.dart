@@ -25,12 +25,12 @@ class _CapturingSdk extends Fake implements MeetingPlaceMatrixSDK {
   final List<_RingCall> calls = [];
 
   @override
-  Future<void> ringGroupMember({
-    required String groupChannelDid,
-    required String memberDid,
-    required CallMediaType mediaType,
-  }) async {
-    calls.add((group: groupChannelDid, member: memberDid, media: mediaType));
+  Future<void> ringGroupMember(RingGroupMemberRequest request) async {
+    calls.add((
+      group: request.groupChannelDid,
+      member: request.memberDid,
+      media: request.mediaType,
+    ));
   }
 }
 

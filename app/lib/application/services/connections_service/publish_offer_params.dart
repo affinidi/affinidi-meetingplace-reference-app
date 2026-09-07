@@ -1,7 +1,7 @@
 import 'package:meeting_place_core/meeting_place_core.dart';
 
-class PublishOfferRequest {
-  const PublishOfferRequest({
+class PublishOfferParams {
+  const PublishOfferParams({
     required this.headline,
     required this.description,
     required this.isGroupOffer,

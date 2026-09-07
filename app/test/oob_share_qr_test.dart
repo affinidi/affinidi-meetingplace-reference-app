@@ -116,7 +116,7 @@ void main() {
             outboundMessageId: 'test-message-id',
             acceptOfferDid: 'test-accept-did',
             permanentChannelDid: 'test-permanent-did',
-            type: ChannelType.oob,
+            type: ChannelType.directConnection,
             contactCard: ContactCard(did: '', type: '', contactInfo: {}),
             isConnectionInitiator: true,
           );
@@ -267,7 +267,7 @@ void main() {
           outboundMessageId: 'test-message-id',
           acceptOfferDid: 'test-accept-did',
           permanentChannelDid: 'test-permanent-did',
-          type: ChannelType.oob,
+          type: ChannelType.directConnection,
           contactCard: ContactCard(did: '', type: '', contactInfo: {}),
           isConnectionInitiator: true,
         );

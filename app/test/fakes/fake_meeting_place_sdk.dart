@@ -119,34 +119,23 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
   }
 
   @override
-  Future<PublishOfferResult<T>> publishOffer<T extends ConnectionOffer>({
-    required String offerName,
-    required ContactCard contactCard,
-    required SDKConnectionOfferType type,
-    required String offerDescription,
-    ChannelTransport transport = ChannelTransport.didcomm,
-    String? customPhrase,
-    DateTime? validUntil,
-    int? maximumUsage,
-    String? mediatorDid,
-    String? metadata,
-    String? externalRef,
-    int? score,
-  }) async {
+  Future<PublishOfferResult<T>> publishOffer<T extends ConnectionOffer>(
+    PublishOfferRequest request,
+  ) async {
     // Record the call parameters
     _publishOfferCalls.add({
-      'offerName': offerName,
-      'contactCard': contactCard.toJson(),
-      'type': type,
-      'offerDescription': offerDescription,
-      'customPhrase': customPhrase,
-      'validUntil': validUntil,
-      'maximumUsage': maximumUsage,
-      'mediatorDid': mediatorDid,
-      'metadata': metadata,
-      'externalRef': externalRef,
-      'score': score,
-      'transport': transport,
+      'offerName': request.offerName,
+      'contactCard': request.contactCard.toJson(),
+      'type': request.type,
+      'offerDescription': request.offerDescription,
+      'customPhrase': request.customMnemonic,
+      'validUntil': request.validUntil,
+      'maximumUsage': request.maximumUsage,
+      'mediatorDid': request.mediatorDid,
+      'metadata': request.metadata,
+      'externalRef': request.externalRef,
+      'score': request.score,
+      'transport': request.transport,
     });
 
     if (_publishOfferException != null) {
@@ -174,20 +163,17 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
   List<Map<String, dynamic>> get acceptOfferCalls => _acceptOfferCalls;
 
   @override
-  Future<AcceptOfferResult<T>> acceptOffer<T extends ConnectionOffer>({
-    required T connectionOffer,
-    required ContactCard contactCard,
-    String? senderInfo,
-    String? externalRef,
-  }) async {
+  Future<AcceptOfferResult<T>> acceptOffer<T extends ConnectionOffer>(
+    AcceptOfferRequest<T> request,
+  ) async {
     _acceptOfferCalls.add({
-      'connectionOffer': connectionOffer,
-      'contactCard': contactCard.toJson(),
-      'senderInfo': senderInfo,
-      'externalRef': externalRef,
+      'connectionOffer': request.connectionOffer,
+      'contactCard': request.contactCard.toJson(),
+      'senderInfo': request.senderInfo,
+      'externalRef': request.externalRef,
     });
 
-    return _FakeAcceptOfferResult<T>(connectionOffer: connectionOffer);
+    return _FakeAcceptOfferResult<T>(connectionOffer: request.connectionOffer);
   }
 
   @override
@@ -199,21 +185,27 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
   }
 
   @override
-  Future<Channel?> getChannelByOtherPartyPermanentDid(String channelDid) async {
+  Future<Channel?> findChannelByOtherPartyPermanentDid(
+    String channelDid,
+  ) async {
     final channel = _channels[channelDid];
     return channel;
   }
 
   @override
-  Future<Channel?> getChannelByDid(String did) async {
-    if (_channels.containsKey(did)) return _channels[did];
+  Future<Channel> getChannelByDid(String did) async {
+    if (_channels.containsKey(did)) return _channels[did]!;
     for (final channel in _channels.values) {
       if (channel.permanentChannelDid == did ||
           channel.otherPartyPermanentChannelDid == did) {
         return channel;
       }
     }
-    return null;
+    throw MeetingPlaceCoreSDKException(
+      message: 'Channel not found for did: $did',
+      code: MeetingPlaceCoreSDKErrorCode.channelNotFound.value,
+      innerException: Exception('Channel not found'),
+    );
   }
 
   @override
@@ -228,25 +220,25 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
   }
 
   @override
-  Future<Group?> getGroupByOfferLink(String offerLink) async {
+  Future<Group?> findGroupByOfferLink(String offerLink) async {
     return _mockGroup;
   }
 
   @override
-  Future<ConnectionOffer?> getConnectionOffer(String offerLink) async {
+  Future<ConnectionOffer?> findConnectionOffer(String offerLink) async {
     return null;
   }
 
   @override
-  Future<Group?> getGroupById(String groupId) async {
+  Future<Group?> findGroupById(String groupId) async {
     if (_mockGroup != null && _mockGroup!.id == groupId) {
       return _mockGroup;
     }
     return null;
   }
 
-  OobStream? _createOobStream;
-  OobStream? _acceptOobStream;
+  CoreSDKStreamSubscription<DirectConnectionStreamData, void>? _createOobStream;
+  CoreSDKStreamSubscription<DirectConnectionStreamData, void>? _acceptOobStream;
 
   final List<Map<String, dynamic>> _createOobFlowCalls = [];
   List<Map<String, dynamic>> get createOobFlowCalls => _createOobFlowCalls;
@@ -263,8 +255,8 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
   /// Simulates a successful OOB connection by emitting channel data
   /// through the create OOB flow stream
   void simulateOobConnectionEstablished(Channel channel) {
-    _createOobStream?.pushEvent(
-      OobStreamData(
+    (_createOobStream as _FakeDirectConnectionStream?)?.pushEvent(
+      DirectConnectionStreamData(
         eventType: EventType.connectionSetup,
         message: PlainTextMessage.fromJson({
           'id': 'fake-message-id',
@@ -280,8 +272,8 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
   /// Simulates a successful OOB connection by emitting channel data
   /// through the accept OOB flow stream
   void simulateOobAcceptConnectionEstablished(Channel channel) {
-    _acceptOobStream?.pushEvent(
-      OobStreamData(
+    (_acceptOobStream as _FakeDirectConnectionStream?)?.pushEvent(
+      DirectConnectionStreamData(
         eventType: EventType.connectionAccepted,
         message: PlainTextMessage.fromJson({
           'id': 'fake-message-id',
@@ -302,19 +294,15 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
   }
 
   @override
-  Future<OobOfferSession> createOobFlow({
-    String? did,
-    required ContactCard contactCard,
-    String? mediatorDid,
-    String? externalRef,
-    String? type,
-  }) async {
+  Future<DirectConnectionOfferSession> createDirectConnection(
+    CreateDirectConnectionRequest request,
+  ) async {
     _createOobFlowCalls.add({
-      'did': did,
-      'contactCard': contactCard,
-      'mediatorDid': mediatorDid,
-      'externalRef': externalRef,
-      'type': type,
+      'did': request.did,
+      'contactCard': request.contactCard,
+      'mediatorDid': request.mediatorDid,
+      'externalRef': request.externalRef,
+      'type': request.type,
     });
 
     if (_createOobFlowException != null) {
@@ -322,43 +310,52 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
     }
 
     final oobUri = Uri.parse('https://example.com/oob?_oob=fake-oob-token');
-    _createOobStream = _FakeOobStream(
+    final stream = _FakeDirectConnectionStream(
       onDispose: () async {
         _createOobStreamDisposals.add(oobUri.toString());
       },
       shouldTimeout: _shouldTimeout,
     );
+    _createOobStream = stream;
 
-    return _FakeOobOfferSession(oobUrl: oobUri, stream: _createOobStream!);
+    final didManager = await getDidManager('fake-offerer-did');
+    return DirectConnectionOfferSession(
+      didManager: didManager,
+      didDocument: await didManager.getDidDocument(),
+      oobInvitationMessage: OobInvitationMessage.create(
+        from: 'fake-offerer-did',
+        type: request.type,
+      ),
+      directConnectionUrl: oobUri,
+      contactCard: request.contactCard,
+      mediatorDid: request.mediatorDid ?? 'fake-mediator-did',
+      stream: stream,
+    );
   }
 
   @override
-  Future<OobAcceptanceSession> acceptOobFlow(
-    Uri oobUri, {
-    List<Attachment>? attachments,
-    required ContactCard contactCard,
-    String? did,
-    String? externalRef,
-    String? type,
-  }) async {
+  Future<DirectConnectionAcceptanceSession> acceptDirectConnection(
+    AcceptDirectConnectionRequest request,
+  ) async {
     _acceptOobFlowCalls.add({
-      'offerLink': oobUri.toString(),
-      'oobUri': oobUri,
-      'contactCard': contactCard,
-      'did': did,
-      'externalRef': externalRef,
+      'offerLink': request.directConnectionUrl.toString(),
+      'oobUri': request.directConnectionUrl,
+      'contactCard': request.contactCard,
+      'did': request.did,
+      'externalRef': request.externalRef,
     });
 
     if (_acceptOobFlowException != null) {
       throw _acceptOobFlowException;
     }
 
-    _acceptOobStream = _FakeOobStream(
+    final stream = _FakeDirectConnectionStream(
       onDispose: () async {
-        _acceptOobStreamDisposals.add(oobUri.toString());
+        _acceptOobStreamDisposals.add(request.directConnectionUrl.toString());
       },
       shouldTimeout: _shouldTimeout,
     );
+    _acceptOobStream = stream;
 
     final fakeChannel = Channel(
       offerLink: 'fake-offer-link',
@@ -368,17 +365,21 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
       outboundMessageId: 'fake-message-id',
       acceptOfferDid: 'fake-accept-did',
       permanentChannelDid: 'fake-permanent-did',
-      type: ChannelType.oob,
-      contactCard: contactCard,
-      externalRef: externalRef,
+      type: ChannelType.directConnection,
+      contactCard: request.contactCard,
+      externalRef: request.externalRef,
       isConnectionInitiator: false,
     );
 
     _acceptOobFlowCalls.last['channel'] = fakeChannel;
 
-    return _FakeOobAcceptanceSession(
-      stream: _acceptOobStream!,
+    final didManager = await getDidManager('fake-permanent-did');
+    return DirectConnectionAcceptanceSession(
       channel: fakeChannel,
+      permanentChannelDidManager: didManager,
+      permanentChannelDidDocument: await didManager.getDidDocument(),
+      mediatorDid: 'fake-mediator-did',
+      stream: stream,
     );
   }
 
@@ -448,13 +449,15 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
       _updateScoreForOffersCalls;
 
   @override
-  Future<UpdateScoreForOffersResult> updateScoreForOffers({
-    required int score,
-    required List<ConnectionOffer> offers,
-  }) async {
-    _updateScoreForOffersCalls.add({'score': score, 'offers': offers});
-    return UpdateScoreForOffersResult(
-      updatedOffers: offers.map((o) => o.mnemonic).toList(),
+  Future<UpdateOffersScoreResult> updateOffersScore(
+    UpdateOffersScoreRequest request,
+  ) async {
+    _updateScoreForOffersCalls.add({
+      'score': request.score,
+      'offers': request.offers,
+    });
+    return UpdateOffersScoreResult(
+      updatedOffers: request.offers.map((o) => o.mnemonic).toList(),
       failedOffers: [],
     );
   }
@@ -464,18 +467,17 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
       _updateLocalConnectionOffersScoreCalls;
 
   @override
-  Future<void> updateLocalConnectionOffersScore({
-    required int score,
-    required List<ConnectionOffer> offers,
-  }) async {
+  Future<void> updateOffersScoreLocally(
+    UpdateOffersScoreRequest request,
+  ) async {
     _updateLocalConnectionOffersScoreCalls.add({
-      'score': score,
-      'offers': offers,
+      'score': request.score,
+      'offers': request.offers,
     });
   }
 
   @override
-  Future<void> closeVdipStream() async {}
+  Future<void> disposeVdipStream() async {}
 
   final List<IncomingMessageSubscription> _subscribeCalls = [];
   List<IncomingMessageSubscription> get subscribeCalls =>
@@ -541,58 +543,18 @@ class _FakeAcceptOfferResult<T extends ConnectionOffer>
   }
 }
 
-class _FakeOobOfferSession implements OobOfferSession {
-  _FakeOobOfferSession({required this.oobUrl, required this.stream});
+class _FakeDirectConnectionStream
+    implements CoreSDKStreamSubscription<DirectConnectionStreamData, void> {
+  _FakeDirectConnectionStream({
+    required this.onDispose,
+    this.shouldTimeout = false,
+  });
+
+  final StreamController<DirectConnectionStreamData> _streamController =
+      StreamController<DirectConnectionStreamData>.broadcast();
 
   @override
-  final Uri oobUrl;
-
-  @override
-  final OobStream stream;
-
-  @override
-  ContactCard get contactCard => throw UnimplementedError();
-
-  @override
-  DidDocument get didDocument => throw UnimplementedError();
-
-  @override
-  DidManager get didManager => throw UnimplementedError();
-
-  @override
-  String get mediatorDid => throw UnimplementedError();
-
-  @override
-  OobInvitationMessage get oobInvitationMessage => throw UnimplementedError();
-}
-
-class _FakeOobAcceptanceSession implements OobAcceptanceSession {
-  _FakeOobAcceptanceSession({required this.channel, required this.stream});
-
-  @override
-  final Channel channel;
-
-  @override
-  final OobStream stream;
-
-  @override
-  String get mediatorDid => throw UnimplementedError();
-
-  @override
-  DidDocument get permanentChannelDidDocument => throw UnimplementedError();
-
-  @override
-  DidManager get permanentChannelDidManager => throw UnimplementedError();
-}
-
-class _FakeOobStream implements OobStream {
-  _FakeOobStream({required this.onDispose, this.shouldTimeout = false});
-
-  final StreamController<OobStreamData> _streamController =
-      StreamController<OobStreamData>.broadcast();
-
-  @override
-  Stream<OobStreamData> get stream => _streamController.stream;
+  Stream<DirectConnectionStreamData> get stream => _streamController.stream;
 
   final Future<void> Function() onDispose;
   final bool shouldTimeout;
@@ -609,8 +571,8 @@ class _FakeOobStream implements OobStream {
   }
 
   @override
-  StreamSubscription<OobStreamData> listen(
-    void Function(OobStreamData data) onData, {
+  StreamSubscription<DirectConnectionStreamData> listen(
+    FutureOr<void> Function(DirectConnectionStreamData data) onData, {
     bool? cancelOnError,
     void Function()? onDone,
     Function? onError,
@@ -624,7 +586,7 @@ class _FakeOobStream implements OobStream {
   }
 
   @override
-  StreamSubscription<OobStreamData> timeout(
+  StreamSubscription<DirectConnectionStreamData> timeout(
     Duration duration,
     void Function()? onTimeout,
   ) {
@@ -636,8 +598,7 @@ class _FakeOobStream implements OobStream {
     return stream.listen((_) {});
   }
 
-  @override
-  void pushEvent(OobStreamData event) {
+  void pushEvent(DirectConnectionStreamData event) {
     _streamController.add(event);
   }
 

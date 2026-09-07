@@ -16,7 +16,7 @@ class ChatGroupManager implements GroupManaging {
   @override
   Future<Group?> refreshGroup(String groupId) async {
     final coreSdk = await _ref.read(meetingPlaceSdkProvider.future);
-    return coreSdk.getGroupById(groupId);
+    return coreSdk.findGroupById(groupId);
   }
 
   @override
@@ -45,6 +45,8 @@ class ChatGroupManager implements GroupManaging {
     required String memberDid,
   }) async {
     final coreSdk = await _ref.read(meetingPlaceSdkProvider.future);
-    await coreSdk.removeMemberFromGroup(groupId: groupId, memberDid: memberDid);
+    await coreSdk.removeMemberFromGroup(
+      RemoveMemberFromGroupRequest(groupId: groupId, memberDid: memberDid),
+    );
   }
 }

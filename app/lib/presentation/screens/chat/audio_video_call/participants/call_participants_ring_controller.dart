@@ -75,9 +75,11 @@ class CallParticipantsRingController extends _$CallParticipantsRingController {
           .read(audioVideoCallScreenControllerProvider(_contactId))
           .isAudioOnly;
       await sdk.ringGroupMember(
-        groupChannelDid: groupChannelDid,
-        memberDid: memberDid,
-        mediaType: isAudioOnly ? CallMediaType.audio : CallMediaType.video,
+        RingGroupMemberRequest(
+          groupChannelDid: groupChannelDid,
+          memberDid: memberDid,
+          mediaType: isAudioOnly ? CallMediaType.audio : CallMediaType.video,
+        ),
       );
     } catch (e, stackTrace) {
       ref

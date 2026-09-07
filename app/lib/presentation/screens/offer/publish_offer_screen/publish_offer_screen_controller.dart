@@ -8,7 +8,7 @@ import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../application/services/connections_service/connections_service.dart';
-import '../../../../application/services/connections_service/publish_offer_request.dart';
+import '../../../../application/services/connections_service/publish_offer_params.dart';
 import '../../../../application/services/identities_service/identities_service.dart';
 import '../../../../application/services/mediator_service/mediator_service.dart';
 import '../../../../application/services/settings_service/settings_service.dart';
@@ -353,7 +353,7 @@ class PublishOfferScreenController extends _$PublishOfferScreenController {
           : formData.copyWith(expiryDate: null);
       final updatedFormData = normalizedFormData.copyWith(score: vrcCount);
 
-      final request = PublishOfferRequest(
+      final request = PublishOfferParams(
         headline: updatedFormData.headline,
         description: updatedFormData.description,
         isGroupOffer: updatedFormData.isGroupOffer,
