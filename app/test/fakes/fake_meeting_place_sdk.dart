@@ -519,7 +519,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
   void simulateChannelActivity(Channel channel) {
     _controlPlaneEventStreamManager.add(
       ControlPlaneStreamEvent(
-        type: ControlPlaneEventType.ChannelActivity,
+        type: ControlPlaneEventType.channelActivity,
         channel: channel,
       ),
     );

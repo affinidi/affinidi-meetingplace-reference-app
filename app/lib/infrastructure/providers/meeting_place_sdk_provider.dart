@@ -89,7 +89,7 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceMatrixSDK>(
             VdipClient.requestIssuanceMessageType,
             VdipClient.issuedCredentialMessageType,
           ],
-          onBuildAttachments:
+          onBuildConnectionMessageAttachments:
               (
                 Channel channel,
                 Future<DidManager> Function(String did) getDidManager,
