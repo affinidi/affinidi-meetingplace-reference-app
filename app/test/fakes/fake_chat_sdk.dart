@@ -718,7 +718,7 @@ class FakeChatSdk implements MeetingPlaceMatrixChatSDK {
       sessionMessages ?? const <ChatItem>[];
 
   @override
-  Future<ChatItem?> getCallChatItemByCallId(String callId) async {
+  Future<ChatItem?> findCallChatItemByCallId(String callId) async {
     if (callId.isEmpty) return null;
     final items = await messages;
     Message? outgoing;

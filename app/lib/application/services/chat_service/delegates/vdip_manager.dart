@@ -73,7 +73,7 @@ class VdipManager {
   /// found or the other-party DID is absent.
   Future<({Channel channel, String otherPartyDid})?> _resolveChannel() async {
     final coreSdk = await _ref.read(meetingPlaceSdkProvider.future);
-    final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
+    final channel = await coreSdk.findChannelByOtherPartyPermanentDid(
       _otherPartyPermanentDid,
     );
     if (channel == null) return null;
@@ -216,12 +216,14 @@ class VdipManager {
   ) async {
     final messages = _getMessages();
     final outcome = await credentialsSdk.handleReceivedVrcRequest(
-      permanentChannelDid: _otherPartyPermanentDid,
-      request: request,
-      hasVrcExchangeInitiated: messages.hasVrcExchangeInitiated,
-      isConnectionInitiator: channel.isConnectionInitiator,
-      issuerDid: messages.vrcInitiatorIdentityDid,
-      issuerName: messages.vrcInitiatorIdentityName,
+      ReceivedVrcRequestParams(
+        permanentChannelDid: _otherPartyPermanentDid,
+        request: request,
+        hasVrcExchangeInitiated: messages.hasVrcExchangeInitiated,
+        isConnectionInitiator: channel.isConnectionInitiator,
+        issuerDid: messages.vrcInitiatorIdentityDid,
+        issuerName: messages.vrcInitiatorIdentityName,
+      ),
     );
 
     switch (outcome) {
@@ -273,16 +275,18 @@ class VdipManager {
     final messages = _getMessages();
 
     final outcome = await credentialsSdk.handleReceivedVrc(
-      permanentChannelDid: _otherPartyPermanentDid,
-      vcBlob: vcBlob,
-      exchangeState: VrcExchangeState(
-        hasVrcExchangeInitiated: messages.hasVrcExchangeInitiated,
-        hasVrcRequestReceived: messages.hasVrcRequestReceived,
-        hasVrcExchangeCompleted: messages.hasVrcExchangeCompleted,
-        isConnectionInitiator: _isConnectionInitiator,
+      ReceivedVrcParams(
+        permanentChannelDid: _otherPartyPermanentDid,
+        vcBlob: vcBlob,
+        exchangeState: VrcExchangeState(
+          hasVrcExchangeInitiated: messages.hasVrcExchangeInitiated,
+          hasVrcRequestReceived: messages.hasVrcRequestReceived,
+          hasVrcExchangeCompleted: messages.hasVrcExchangeCompleted,
+          isConnectionInitiator: _isConnectionInitiator,
+        ),
+        issuerDid: messages.vrcInitiatorIdentityDid,
+        issuerName: messages.vrcInitiatorIdentityName,
       ),
-      issuerDid: messages.vrcInitiatorIdentityDid,
-      issuerName: messages.vrcInitiatorIdentityName,
     );
 
     switch (outcome) {

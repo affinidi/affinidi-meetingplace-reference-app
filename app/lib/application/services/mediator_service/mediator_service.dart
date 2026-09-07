@@ -189,7 +189,7 @@ class MediatorService extends _$MediatorService {
       }
 
       final sdk = await ref.read(meetingPlaceSdkProvider.future);
-      final value = await sdk.getMediatorDidFromUrl(url);
+      final value = await sdk.findMediatorDidFromUrl(url);
 
       _logger.info(
         'Resolved mediator DID: $value for URL: $url',

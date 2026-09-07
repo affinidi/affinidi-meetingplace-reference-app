@@ -273,14 +273,14 @@ class CallLifecycleHandler {
     return false;
   }
 
-  MatrixSDKException? _extractMatrixSdkException(Object error) {
-    if (error is MatrixSDKException) {
+  MeetingPlaceMatrixSDKException? _extractMatrixSdkException(Object error) {
+    if (error is MeetingPlaceMatrixSDKException) {
       return error;
     }
 
     if (error is MeetingPlaceLiveKitCallOperationException &&
-        error.innerException is MatrixSDKException) {
-      return error.innerException! as MatrixSDKException;
+        error.innerException is MeetingPlaceMatrixSDKException) {
+      return error.innerException! as MeetingPlaceMatrixSDKException;
     }
 
     return null;

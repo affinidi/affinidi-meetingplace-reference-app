@@ -151,7 +151,6 @@ sdk.GroupMember _member(String did, String photoBase64) => sdk.GroupMember(
       'photo': photoBase64,
     },
   ),
-  publicKey: 'public-key-$did',
 );
 
 sdk.Group _groupWith(List<sdk.GroupMember> members) => sdk.Group(
@@ -160,7 +159,6 @@ sdk.Group _groupWith(List<sdk.GroupMember> members) => sdk.Group(
   offerLink: FakeContacts.groupContact.offerLink,
   members: members,
   created: DateTime(2025, 1, 1),
-  publicKey: 'fake-public-key',
 );
 
 void main() {

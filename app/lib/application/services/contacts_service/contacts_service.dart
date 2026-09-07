@@ -379,7 +379,7 @@ class ContactsService extends _$ContactsService {
 
   Future<void> _leaveChat(Contact contact) async {
     final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
-    final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
+    final channel = await coreSdk.findChannelByOtherPartyPermanentDid(
       contact.channelDid!,
     );
     if (channel == null) {
@@ -573,7 +573,7 @@ class ContactsService extends _$ContactsService {
     if (state.getContactByChannelDid(channelDid) == null) return;
     final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
     if (!ref.mounted) return;
-    final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
+    final channel = await coreSdk.findChannelByOtherPartyPermanentDid(
       channelDid,
     );
     if (channel == null || !ref.mounted) return;
@@ -628,7 +628,7 @@ class ContactsService extends _$ContactsService {
     }
 
     final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
-    final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
+    final channel = await coreSdk.findChannelByOtherPartyPermanentDid(
       channelDid,
     );
 

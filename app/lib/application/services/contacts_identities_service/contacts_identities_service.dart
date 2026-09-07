@@ -57,7 +57,7 @@ class ContactsIdentitiesService {
   Future<String?> _resolveIdentityIdForContact(Contact contact) async {
     if (contact.channelDid != null) {
       final coreSdk = await _ref.read(meetingPlaceSdkProvider.future);
-      final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
+      final channel = await coreSdk.findChannelByOtherPartyPermanentDid(
         contact.channelDid!,
       );
       final channelIdentityId = channel?.externalRef;

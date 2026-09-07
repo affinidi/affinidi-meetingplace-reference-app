@@ -409,7 +409,7 @@ class CallChatItemManager {
     }
     if (callId.isEmpty) return null;
     try {
-      final match = await chatSdk.getCallChatItemByCallId(callId);
+      final match = await chatSdk.findCallChatItemByCallId(callId);
       if (match == null) {
         logger.info('$label: no call item for callId $callId', name: _logKey);
         return null;
@@ -450,7 +450,7 @@ class CallChatItemManager {
     }
     if (callId.isEmpty) return null;
     try {
-      final match = await chatSdk.getCallChatItemByCallId(callId);
+      final match = await chatSdk.findCallChatItemByCallId(callId);
       final attachment =
           match is Message && !match.isDeleted && !match.isDeletedLocally
           ? match.attachments.firstWhereOrNull(CallMetadata.isCall)
@@ -501,7 +501,7 @@ class CallChatItemManager {
       return false;
     }
     try {
-      final match = await chatSdk.getCallChatItemByCallId(callId);
+      final match = await chatSdk.findCallChatItemByCallId(callId);
       if (match == null) {
         if (attemptsRemaining <= 0) {
           logger.info('$label: no call item for callId $callId', name: _logKey);

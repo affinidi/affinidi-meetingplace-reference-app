@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 import 'package:mpx_flutter_reference_app/application/services/chat_service/delegates/vdip_manager.dart'
     show VdipManager;
@@ -92,14 +91,9 @@ class StubVdipCredentialsSdk extends MeetingPlaceCredentialsSDK {
   RCard? consumePendingRCard(String senderDid) => null;
 
   @override
-  Future<VrcRequestProcessingResult> handleReceivedVrcRequest({
-    required String permanentChannelDid,
-    required VrcRequest request,
-    required bool hasVrcExchangeInitiated,
-    required bool isConnectionInitiator,
-    String? issuerDid,
-    String? issuerName,
-  }) async {
+  Future<VrcRequestProcessingResult> handleReceivedVrcRequest(
+    ReceivedVrcRequestParams params,
+  ) async {
     try {
       return nextRequestResult;
     } finally {
@@ -108,15 +102,11 @@ class StubVdipCredentialsSdk extends MeetingPlaceCredentialsSDK {
   }
 
   @override
-  Future<VrcProcessingResult> handleReceivedVrc({
-    required String permanentChannelDid,
-    required String vcBlob,
-    required VrcExchangeState exchangeState,
-    String? issuerDid,
-    String? issuerName,
-  }) async {
+  Future<VrcProcessingResult> handleReceivedVrc(
+    ReceivedVrcParams params,
+  ) async {
     try {
-      handledVrcExchangeStates.add(exchangeState);
+      handledVrcExchangeStates.add(params.exchangeState);
       if (handledVrcExchangeStates.length == 1) {
         firstVrcHandlerStarted?.complete();
         await allowFirstVrcHandlerToContinue?.future;
@@ -149,10 +139,11 @@ class StubVdipCredentialsSdk extends MeetingPlaceCredentialsSDK {
     pendingHandlers.removeAt(0).complete();
   }
 
+  @override
   Future<void> dispose() async {
     await _requestCtrl.close();
     await _vrcCtrl.close();
-    await closeCredentialStreams();
+    await super.dispose();
   }
 }
 
@@ -185,19 +176,14 @@ class StubRCardCredentialsSdk extends MeetingPlaceCredentialsSDK {
   }
 
   @override
-  Future<RCard> sendRCard({
-    required Channel channel,
-    required String subjectDid,
-    required RCardSubject card,
-    required DidManager issuerDidManager,
-  }) async {
+  Future<RCard> sendRCard(SendRCardRequest request) async {
     return RCard(
-      subjectDid: subjectDid,
+      subjectDid: request.subjectDid,
       vcBlob: jsonEncode({
         'id': 'urn:stub-rcard',
         'type': ['VerifiableCredential'],
       }),
-      issuerDid: channel.permanentChannelDid ?? 'did:key:issuer',
+      issuerDid: request.channel.permanentChannelDid ?? 'did:key:issuer',
       version: RCardConstants.receivedRCardVersion,
       issuanceDate: DateTime.now(),
       receivedAt: DateTime.now(),
@@ -230,9 +216,10 @@ class StubRCardCredentialsSdk extends MeetingPlaceCredentialsSDK {
     );
   }
 
+  @override
   Future<void> dispose() async {
     await _rCardsCtrl.close();
-    await closeCredentialStreams();
+    await super.dispose();
   }
 }
 
@@ -395,6 +382,6 @@ class FakeCredentialsSdk extends MeetingPlaceCredentialsSDK {
   Future<void> close() async {
     await _controller.close();
     await _channelController.close();
-    await closeCredentialStreams();
+    await super.dispose();
   }
 }

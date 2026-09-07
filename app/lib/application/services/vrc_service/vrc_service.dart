@@ -50,9 +50,11 @@ class VrcService extends _$VrcService {
     final credentialsSdk = await ref.read(credentialsSdkProvider.future);
     try {
       await credentialsSdk.storeVrc(
-        vcBlob: rawVc,
-        referenceId: referenceId,
-        verifiedAt: DateTime.now(),
+        StoreVrcRequest(
+          vcBlob: rawVc,
+          referenceId: referenceId,
+          verifiedAt: DateTime.now(),
+        ),
       );
       state = (await credentialsSdk.listVrcs()).map(_toVrcCredential).toList();
     } on MeetingPlaceCredentialsSDKException catch (error, stackTrace) {
