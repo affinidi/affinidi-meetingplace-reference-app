@@ -550,6 +550,58 @@ void main() {
       expect(metadata?.durationMs, const Duration(minutes: 5).inMilliseconds);
     });
 
+    test(
+      'reconcileCallOutcome rejects an implausibly long incoming duration',
+      () async {
+        fakeChatSdk.sessionMessages = [
+          callMessage(
+            messageId: 'msg-implausible',
+            isFromMe: true,
+            status: CallStatus.ended,
+            callId: 'target-call',
+            durationMs: const Duration(minutes: 5).inMilliseconds,
+          ),
+        ];
+
+        final updated = await manager.reconcileCallOutcome(
+          'msg-implausible',
+          duration: const Duration(hours: 48),
+        );
+
+        final metadata = CallMetadata.maybeOf(updated!.attachments.single);
+        expect(
+          metadata?.durationMs,
+          const Duration(minutes: 5).inMilliseconds,
+        );
+      },
+    );
+
+    test(
+      'reconcileCallOutcome still merges a plausible incoming duration',
+      () async {
+        fakeChatSdk.sessionMessages = [
+          callMessage(
+            messageId: 'msg-plausible',
+            isFromMe: true,
+            status: CallStatus.ended,
+            callId: 'target-call',
+            durationMs: const Duration(minutes: 5).inMilliseconds,
+          ),
+        ];
+
+        final updated = await manager.reconcileCallOutcome(
+          'msg-plausible',
+          duration: const Duration(hours: 1),
+        );
+
+        final metadata = CallMetadata.maybeOf(updated!.attachments.single);
+        expect(
+          metadata?.durationMs,
+          const Duration(hours: 1).inMilliseconds,
+        );
+      },
+    );
+
     test('reconcileCallOutcome skips locally deleted call items', () async {
       final deleted = callMessage(
         messageId: 'msg-deleted',

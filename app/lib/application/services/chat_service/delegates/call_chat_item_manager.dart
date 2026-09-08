@@ -19,6 +19,10 @@ class CallChatItemManager {
   static const _resolveCallChatItemMaxAttempts = 10;
   static const _logKey = 'CallChatItemManager';
 
+  // Defense-in-depth cap while some devices may still be on an SDK version
+  // whose call start time isn't server-authoritative.
+  static const _maxPlausibleCallDuration = Duration(hours: 24);
+
   final Future<void> Function() ensureInitialized;
   final MeetingPlaceChatSDK? Function() getChatSdk;
   final AppLogger logger;
@@ -584,10 +588,22 @@ class CallChatItemManager {
       }
       final incomingDurationMs = duration?.inMilliseconds;
       final existingDurationMs = existing.durationMs;
+      final sanitizedIncomingDurationMs =
+          (incomingDurationMs != null &&
+              incomingDurationMs > _maxPlausibleCallDuration.inMilliseconds)
+          ? null
+          : incomingDurationMs;
+      if (incomingDurationMs != null && sanitizedIncomingDurationMs == null) {
+        logger.warning(
+          'reconcileCallOutcome: rejected implausible duration '
+          '${incomingDurationMs}ms for $messageId',
+          name: _logKey,
+        );
+      }
       final resolvedDurationMs =
-          (incomingDurationMs == null || existingDurationMs == null)
-          ? incomingDurationMs ?? existingDurationMs
-          : math.max(existingDurationMs, incomingDurationMs);
+          (sanitizedIncomingDurationMs == null || existingDurationMs == null)
+          ? sanitizedIncomingDurationMs ?? existingDurationMs
+          : math.max(existingDurationMs, sanitizedIncomingDurationMs);
       final updated = CallMetadata.buildAttachment(
         mediaType: existing.mediaType,
         status: CallStatus.ended,
