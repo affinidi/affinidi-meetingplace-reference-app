@@ -62,12 +62,8 @@ class _ContactsLayout extends HookConsumerWidget {
         return;
       }
 
-      if ([
-        ContactStatus.active,
-        ContactStatus.approved,
-        ContactStatus.pendingApproval,
-        ContactStatus.pendingInauguration,
-      ].contains(contact.status)) {
+      if (contact.status == ContactStatus.pendingApproval ||
+          contact.status == ContactStatus.pendingInauguration) {
         await ConnectionDetailsRoute(contactId: contact.id).push<void>(context);
         return;
       }
@@ -75,7 +71,7 @@ class _ContactsLayout extends HookConsumerWidget {
 
     Future<void> onContactDoubleTap({required Contact contact}) async {
       if (!context.mounted) return;
-      await ConnectionDetailsRoute(contactId: contact.id).push<void>(context);
+      await onContactTap(contact: contact, isSelected: false);
     }
 
     void onContactLongPress({required Contact contact}) async {
