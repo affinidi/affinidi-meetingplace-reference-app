@@ -108,7 +108,10 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceMatrixSDK>(
                   if (identity == null || identity.did.isEmpty) return null;
 
                   final permanentChannelDid = channel.permanentChannelDid;
-                  if (permanentChannelDid == null) return null;
+                  if (permanentChannelDid == null ||
+                      permanentChannelDid.isEmpty) {
+                    return null;
+                  }
 
                   final didManager = await getDidManager(permanentChannelDid);
 
