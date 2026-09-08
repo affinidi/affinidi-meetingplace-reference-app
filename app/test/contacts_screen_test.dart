@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact_status.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_extensions.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/chat/chat_screen.dart';
 
 import 'fakes/fake_channels.dart';
 import 'fakes/fake_contacts.dart';
@@ -192,6 +193,26 @@ void main() {
 
       await tester.tap(contactWidget);
       await tester.pumpAndSettle();
+    });
+
+    group('and an active contact is tapped twice before navigation', () {
+      testWidgets('it pushes only one chat screen', (tester) async {
+        await navigateToContactsScreen(tester);
+
+        final contactName =
+            FakeContacts.individualContact.displayName ?? 'Contact';
+        final contact = findContactByName(contactName).first;
+        final gestureDetector = tester.widget<GestureDetector>(
+          find.ancestor(of: contact, matching: find.byType(GestureDetector)),
+        );
+
+        gestureDetector.onTap!();
+        await tester.pump();
+        gestureDetector.onTap!();
+        await tester.pumpAndSettle();
+
+        expect(find.byType(ChatScreen, skipOffstage: false), findsOneWidget);
+      });
     });
 
     testWidgets(

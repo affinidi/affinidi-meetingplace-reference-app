@@ -1,8 +1,9 @@
 part of 'contacts_screen.dart';
 
-class _ContactsLayout extends ConsumerWidget {
+class _ContactsLayout extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isChatNavigationInProgress = useRef(false);
     final contacts = ref.watch(
       contactsScreenControllerProvider.select((state) => state.contacts),
     );
@@ -33,13 +34,26 @@ class _ContactsLayout extends ConsumerWidget {
         ),
       );
       if (isChatAvailable) {
+        if (isChatNavigationInProgress.value) return;
+        isChatNavigationInProgress.value = true;
+
         final container = ProviderScope.containerOf(context);
         final provider = chatScreenControllerProvider(contact.id);
         final sub = container.listen(provider, (_, _) {});
         try {
           await ref.read(provider.notifier).initialize();
-          if (!context.mounted) return;
-          unawaited(ChatRoute(contactId: contact.id).push<void>(context));
+          if (!context.mounted) {
+            isChatNavigationInProgress.value = false;
+            return;
+          }
+          unawaited(
+            ChatRoute(contactId: contact.id)
+                .push<void>(context)
+                .whenComplete(() => isChatNavigationInProgress.value = false),
+          );
+        } catch (_) {
+          isChatNavigationInProgress.value = false;
+          rethrow;
         } finally {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             sub.close();
