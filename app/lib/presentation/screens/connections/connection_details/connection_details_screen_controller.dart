@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -24,6 +25,7 @@ import '../../../../navigation/navigator.dart';
 import '../../../widgets/async_loaders/async_loading_controller.dart';
 import '../../../widgets/images/default_profile_image.dart';
 import '../../../widgets/images/group_image.dart';
+import '../../../widgets/snack_bars/error_snack_bar_controller.dart';
 import 'connection_details_screen_state.dart';
 
 part 'connection_details_screen_controller.g.dart';
@@ -34,9 +36,6 @@ class ConnectionDetailsScreenController
   late final displayNameController = TextEditingController();
   static const _logKey = 'CONNX';
   late final _logger = ref.read(appLoggerProvider);
-  late final approveOfferLoadingController = AsyncLoadingController.provider(
-    'approveOfferLoadingController',
-  );
   late final rejectOfferLoadingController = AsyncLoadingController.provider(
     'rejectOfferLoadingController',
   );
@@ -164,41 +163,58 @@ class ConnectionDetailsScreenController
     final currentContact = state.contact;
     if (currentContact == null) return;
 
-    await ref.read(approveOfferLoadingController.notifier).start(() async {
-      final otherPartyPermanentChannelDid = currentContact.channelDid;
-      if (otherPartyPermanentChannelDid == null) {
-        throw AppException(
+    final otherPartyPermanentChannelDid = currentContact.channelDid;
+    final errorSnackBarController = ref.read(errorSnackBarControllerProvider);
+    if (otherPartyPermanentChannelDid == null) {
+      errorSnackBarController.show(
+        AppException(
           '''Unable to approve a contact without the other party permanent channel Did''',
           code: AppExceptionType.missingOtherPartyChannelDid.name,
-        );
-      }
-
-      final initialDisplayName = currentContact.card.displayName;
-      final newDisplayName = displayNameController.text;
-      final displayNameChanged = newDisplayName != initialDisplayName;
-
-      final updatedContact = currentContact.copyWith(
-        status: ContactStatus.pendingInauguration,
-        displayName: displayNameChanged ? newDisplayName : null,
+        ),
+        StackTrace.current,
       );
+      return;
+    }
 
-      await ref
-          .read(connectionsServiceProvider.notifier)
-          .approveConnectionOffer(
-            otherPartyPermanentChannelDid: otherPartyPermanentChannelDid,
-            offerLink: currentContact.offerLink,
-          );
+    final initialDisplayName = currentContact.card.displayName;
+    final newDisplayName = displayNameController.text;
+    final displayNameChanged = newDisplayName != initialDisplayName;
+    final updatedContact = currentContact.copyWith(
+      status: ContactStatus.pendingInauguration,
+      displayName: displayNameChanged ? newDisplayName : null,
+    );
+    final connectionsService = ref.read(connectionsServiceProvider.notifier);
+    final contactsService = ref.read(contactsServiceProvider.notifier);
+    final navigator = ref.read(navigatorProvider);
 
-      await ref
-          .read(contactsServiceProvider.notifier)
-          .updateContact(updatedContact);
+    final approval = connectionsService.approveConnectionOffer(
+      otherPartyPermanentChannelDid: otherPartyPermanentChannelDid,
+      offerLink: currentContact.offerLink,
+    );
+    navigator.pop();
 
-      state = state.copyWith(contact: updatedContact);
+    unawaited(
+      _completeApproval(
+        approval: approval,
+        updatedContact: updatedContact,
+        contactsService: contactsService,
+        errorSnackBarController: errorSnackBarController,
+      ),
+    );
+  }
 
-      await Future(() {
-        ref.read(navigatorProvider).pop();
-      });
-    });
+  Future<void> _completeApproval({
+    required Future<void> approval,
+    required Contact updatedContact,
+    required ContactsService contactsService,
+    required ErrorSnackBarController errorSnackBarController,
+  }) async {
+    try {
+      await approval;
+      await contactsService.updateContact(updatedContact);
+    } catch (error, stackTrace) {
+      errorSnackBarController.show(error, stackTrace);
+    }
   }
 
   Future<void> rejectContact() async {

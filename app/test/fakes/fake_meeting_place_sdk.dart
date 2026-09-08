@@ -20,6 +20,8 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
     this.offerToFind,
     this.findOfferHasError = false,
     this._shouldTimeout = false,
+    this.approveConnectionRequestCompleter,
+    this.approveConnectionRequestError,
   }) : _channels = channels ?? {} {
     if (connectionOffers != null) {
       _allConnectionOffers.addAll(connectionOffers);
@@ -34,6 +36,8 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
   final bool _isPhraseAvailable;
   final bool _shouldTimeout;
   final Map<String, Channel> _channels;
+  final Completer<void>? approveConnectionRequestCompleter;
+  final Object? approveConnectionRequestError;
   @override
   final bool isCallSupported;
 
@@ -234,7 +238,24 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
 
   @override
   Future<ConnectionOffer?> getConnectionOffer(String offerLink) async {
-    return null;
+    return _allConnectionOffers
+        .where((offer) => offer.offerLink == offerLink)
+        .firstOrNull;
+  }
+
+  final List<Channel> approveConnectionRequestCalls = [];
+
+  @override
+  Future<Channel> approveConnectionRequest({
+    required Channel channel,
+    List<Attachment>? attachments,
+  }) async {
+    approveConnectionRequestCalls.add(channel);
+    await approveConnectionRequestCompleter?.future;
+    if (approveConnectionRequestError case final error?) {
+      return Future<Channel>.error(error);
+    }
+    return channel;
   }
 
   @override

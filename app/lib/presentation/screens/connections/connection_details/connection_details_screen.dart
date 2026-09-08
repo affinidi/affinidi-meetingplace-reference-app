@@ -77,12 +77,6 @@ class ConnectionDetailsScreen extends HookConsumerWidget {
         child: Column(
           children: [
             ModalAsyncLoadingStatus(
-              controller.approveOfferLoadingController,
-              loadingMessage: l10n.approving,
-              successMessage: l10n.connectionRequestInProgress,
-              successMessageStyle: LoadingMessageStyle.progress,
-            ),
-            ModalAsyncLoadingStatus(
               controller.rejectOfferLoadingController,
               loadingMessage: l10n.rejecting,
               successMessage: l10n.connectionRequestRejected,
