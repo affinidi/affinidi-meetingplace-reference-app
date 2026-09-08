@@ -187,23 +187,51 @@ class _ConnectionCard extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       spacing: 2,
                       children: [
-                        Text(
-                          name,
-                          style: context.textTheme.labelLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 2,
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                spacing: 2,
+                                children: [
+                                  Text(
+                                    name,
+                                    style: context.textTheme.labelLarge
+                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                  ),
+                                  Text(
+                                    context.l10n.connectionPhrase(
+                                      _connection.mnemonic,
+                                    ),
+                                    style: context.textTheme.labelSmall,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Chip(
+                              label: Text(
+                                _connection.localized(context),
+                                style: context.textTheme.bodySmall?.copyWith(
+                                  color: context.colorScheme.onSurface,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              backgroundColor: _connection.getStatusColor(
+                                context,
+                              ),
+                              visualDensity: VisualDensity.compact,
+                              materialTapTargetSize:
+                                  MaterialTapTargetSize.shrinkWrap,
+                              padding: EdgeInsets.zero,
+                            ),
+                          ],
                         ),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           spacing: 2,
                           children: [
-                            Text(
-                              context.l10n.connectionPhrase(
-                                _connection.mnemonic,
-                              ),
-                              style: context.textTheme.labelSmall,
-                            ),
                             Text(
                               identityText,
                               style: context.textTheme.bodySmall,
@@ -233,23 +261,6 @@ class _ConnectionCard extends ConsumerWidget {
                     ),
                   ),
                 ],
-              ),
-            ),
-            Positioned(
-              top: 8,
-              right: 8,
-              child: Chip(
-                label: Text(
-                  _connection.localized(context),
-                  style: context.textTheme.bodySmall?.copyWith(
-                    color: context.colorScheme.onSurface,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                backgroundColor: _connection.getStatusColor(context),
-                visualDensity: VisualDensity.compact,
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                padding: EdgeInsets.zero,
               ),
             ),
             _ConnectionTrailingWidget(
