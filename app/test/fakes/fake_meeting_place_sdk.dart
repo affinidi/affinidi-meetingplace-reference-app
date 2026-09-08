@@ -20,6 +20,8 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
     this.offerToFind,
     this.findOfferHasError = false,
     this._shouldTimeout = false,
+    this.acceptOfferCompleter,
+    this.acceptOfferError,
     this.approveConnectionRequestCompleter,
     this.approveConnectionRequestError,
     this.returnNullAfterOtherPartyChannelLookups,
@@ -37,6 +39,8 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
   final bool _isPhraseAvailable;
   final bool _shouldTimeout;
   final Map<String, Channel> _channels;
+  final Completer<void>? acceptOfferCompleter;
+  final Object? acceptOfferError;
   final Completer<void>? approveConnectionRequestCompleter;
   final Object? approveConnectionRequestError;
   final int? returnNullAfterOtherPartyChannelLookups;
@@ -193,6 +197,11 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
       'senderInfo': senderInfo,
       'externalRef': externalRef,
     });
+
+    await acceptOfferCompleter?.future;
+    if (acceptOfferError case final error?) {
+      return Future<AcceptOfferResult<T>>.error(error);
+    }
 
     return _FakeAcceptOfferResult<T>(connectionOffer: connectionOffer);
   }
