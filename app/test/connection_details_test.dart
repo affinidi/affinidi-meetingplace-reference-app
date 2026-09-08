@@ -71,6 +71,10 @@ void main() {
         expect(find.text(l10n.connectionDetails), findsNothing);
         expect(find.byType(AlertDialog), findsNothing);
 
+        await pushRoute(tester, '/contacts/${contact.id}/connection-details');
+
+        expect(find.text(l10n.generalApprove), findsNothing);
+
         approvalCompleter.complete();
         await tester.pumpAndSettle();
       },
@@ -105,6 +109,10 @@ void main() {
           find.text(l10n.error('Exception: approval failed')),
           findsOneWidget,
         );
+
+        await pushRoute(tester, '/contacts/${contact.id}/connection-details');
+
+        expect(find.text(l10n.generalApprove), findsOneWidget);
       });
     });
 

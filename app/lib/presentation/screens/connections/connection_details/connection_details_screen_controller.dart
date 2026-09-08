@@ -157,7 +157,10 @@ class ConnectionDetailsScreenController
 
   Future<void> approveContact() async {
     final currentContact = state.contact;
-    if (currentContact == null) return;
+    if (currentContact == null ||
+        currentContact.status != ContactStatus.pendingApproval) {
+      return;
+    }
 
     final otherPartyPermanentChannelDid = currentContact.channelDid;
     final errorSnackBarController = ref.read(errorSnackBarControllerProvider);
@@ -183,6 +186,9 @@ class ConnectionDetailsScreenController
     final contactsService = ref.read(contactsServiceProvider.notifier);
     final navigator = ref.read(navigatorProvider);
 
+    state = state.copyWith(contact: updatedContact);
+    await contactsService.updateContact(updatedContact);
+
     final approval = connectionsService.approveConnectionOffer(
       otherPartyPermanentChannelDid: otherPartyPermanentChannelDid,
       offerLink: currentContact.offerLink,
@@ -192,7 +198,7 @@ class ConnectionDetailsScreenController
     unawaited(
       _completeApproval(
         approval: approval,
-        updatedContact: updatedContact,
+        originalContact: currentContact,
         contactsService: contactsService,
         errorSnackBarController: errorSnackBarController,
       ),
@@ -201,14 +207,15 @@ class ConnectionDetailsScreenController
 
   Future<void> _completeApproval({
     required Future<void> approval,
-    required Contact updatedContact,
+    required Contact originalContact,
     required ContactsService contactsService,
     required ErrorSnackBarController errorSnackBarController,
   }) async {
     try {
       await approval;
-      await contactsService.updateContact(updatedContact);
     } catch (error, stackTrace) {
+      await contactsService.updateContact(originalContact);
+      if (ref.mounted) state = state.copyWith(contact: originalContact);
       errorSnackBarController.show(error, stackTrace);
     }
   }
