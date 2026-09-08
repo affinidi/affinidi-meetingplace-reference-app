@@ -22,6 +22,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
     this._shouldTimeout = false,
     this.approveConnectionRequestCompleter,
     this.approveConnectionRequestError,
+    this.returnNullAfterOtherPartyChannelLookups,
   }) : _channels = channels ?? {} {
     if (connectionOffers != null) {
       _allConnectionOffers.addAll(connectionOffers);
@@ -38,6 +39,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
   final Map<String, Channel> _channels;
   final Completer<void>? approveConnectionRequestCompleter;
   final Object? approveConnectionRequestError;
+  final int? returnNullAfterOtherPartyChannelLookups;
   @override
   final bool isCallSupported;
 
@@ -176,6 +178,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
 
   final List<Map<String, dynamic>> _acceptOfferCalls = [];
   List<Map<String, dynamic>> get acceptOfferCalls => _acceptOfferCalls;
+  int _otherPartyChannelLookupCount = 0;
 
   @override
   Future<AcceptOfferResult<T>> acceptOffer<T extends ConnectionOffer>({
@@ -204,6 +207,11 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
 
   @override
   Future<Channel?> getChannelByOtherPartyPermanentDid(String channelDid) async {
+    _otherPartyChannelLookupCount += 1;
+    if (returnNullAfterOtherPartyChannelLookups case final limit?
+        when _otherPartyChannelLookupCount > limit) {
+      return null;
+    }
     final channel = _channels[channelDid];
     return channel;
   }
@@ -244,6 +252,7 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
   }
 
   final List<Channel> approveConnectionRequestCalls = [];
+  final List<Channel> leaveChannelCalls = [];
 
   @override
   Future<Channel> approveConnectionRequest({
@@ -256,6 +265,11 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
       return Future<Channel>.error(error);
     }
     return channel;
+  }
+
+  @override
+  Future<void> leaveChannel(Channel channel) async {
+    leaveChannelCalls.add(channel);
   }
 
   @override

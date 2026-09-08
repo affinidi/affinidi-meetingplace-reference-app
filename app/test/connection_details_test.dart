@@ -139,6 +139,85 @@ void main() {
     );
   });
 
+  group('When rejecting a pending connection', () {
+    final contact = FakeContacts.pendingContact;
+    final channel = Channel(
+      permanentChannelDid: contact.channelDid!,
+      otherPartyPermanentChannelDid: contact.channelDid!,
+      offerLink: contact.offerLink,
+      contactCard: contact.card.toSdkContactCard(),
+      seqNo: 0,
+      type: ChannelType.individual,
+      publishOfferDid: 'did:key:pending-offer',
+      mediatorDid: contact.mediatorDid,
+      status: ChannelStatus.waitingForApproval,
+      isConnectionInitiator: true,
+    );
+    final offer = ConnectionOffer(
+      offerName: 'Pending Offer',
+      offerLink: contact.offerLink,
+      mnemonic: 'pending-offer-mnemonic',
+      publishOfferDid: 'did:key:pending-offer',
+      mediatorDid: contact.mediatorDid,
+      oobInvitationMessage: '{}',
+      type: ConnectionOfferType.meetingPlaceInvitation,
+      status: ConnectionOfferStatus.published,
+      contactCard: FakeIdentities.primaryIdentity.card.toSdkContactCard(),
+      ownedByMe: true,
+      createdAt: DateTime(2025, 2, 1),
+      offerDescription: 'Pending offer',
+      transport: ChannelTransport.didcomm,
+    );
+
+    testWidgets('it closes without showing a modal or success snack bar', (
+      tester,
+    ) async {
+      await navigateToLocation(
+        tester,
+        '/contacts/${contact.id}/connection-details',
+        identities: [FakeIdentities.primaryIdentity],
+        contacts: [contact],
+        meetingPlaceCoreSDK: FakeMeetingPlaceSDK(
+          channels: {contact.channelDid!: channel},
+          connectionOffers: [offer],
+        ),
+      );
+
+      final l10n = await getL10n();
+      await tester.tap(find.text(l10n.generalReject));
+      await tester.pumpAndSettle();
+
+      expect(find.text(l10n.connectionDetails), findsNothing);
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(find.byType(SnackBar), findsNothing);
+      expect(find.text(l10n.connectionRequestRejected), findsNothing);
+    });
+
+    group('and deletion fails after the details screen closes', () {
+      testWidgets('it shows the error in a snack bar', (tester) async {
+        await navigateToLocation(
+          tester,
+          '/contacts/${contact.id}/connection-details',
+          identities: [FakeIdentities.primaryIdentity],
+          contacts: [contact],
+          meetingPlaceCoreSDK: FakeMeetingPlaceSDK(
+            channels: {contact.channelDid!: channel},
+            connectionOffers: [offer],
+            returnNullAfterOtherPartyChannelLookups: 1,
+          ),
+        );
+
+        final l10n = await getL10n();
+        await tester.tap(find.text(l10n.generalReject));
+        await tester.pumpAndSettle();
+
+        expect(find.text(l10n.connectionDetails), findsNothing);
+        expect(find.byType(SnackBar), findsOneWidget);
+        expect(find.text(l10n.error('missingChannel')), findsOneWidget);
+      });
+    });
+  });
+
   group('Connection details — group remove member', () {
     final groupContact = FakeContacts.groupContact;
 

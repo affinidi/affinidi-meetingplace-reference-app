@@ -22,7 +22,6 @@ import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../../navigation/navigator.dart';
-import '../../../widgets/async_loaders/async_loading_controller.dart';
 import '../../../widgets/images/default_profile_image.dart';
 import '../../../widgets/images/group_image.dart';
 import '../../../widgets/snack_bars/error_snack_bar_controller.dart';
@@ -36,9 +35,6 @@ class ConnectionDetailsScreenController
   late final displayNameController = TextEditingController();
   static const _logKey = 'CONNX';
   late final _logger = ref.read(appLoggerProvider);
-  late final rejectOfferLoadingController = AsyncLoadingController.provider(
-    'rejectOfferLoadingController',
-  );
 
   @override
   ConnectionDetailsScreenState build(String contactId) {
@@ -218,17 +214,33 @@ class ConnectionDetailsScreenController
   }
 
   Future<void> rejectContact() async {
-    await ref.read(rejectOfferLoadingController.notifier).start(() async {
-      final currentContact = state.contact;
-      if (currentContact != null) {
-        await ref.read(contactsServiceProvider.notifier).deleteContacts([
-          currentContact,
-        ]);
-        await Future(() {
-          ref.read(navigatorProvider).pop();
-        });
-      }
-    });
+    final currentContact = state.contact;
+    if (currentContact == null) return;
+
+    final contactsService = ref.read(contactsServiceProvider.notifier);
+    final errorSnackBarController = ref.read(errorSnackBarControllerProvider);
+    final navigator = ref.read(navigatorProvider);
+
+    final rejection = contactsService.deleteContacts([currentContact]);
+    navigator.pop();
+
+    unawaited(
+      _completeRejection(
+        rejection: rejection,
+        errorSnackBarController: errorSnackBarController,
+      ),
+    );
+  }
+
+  Future<void> _completeRejection({
+    required Future<void> rejection,
+    required ErrorSnackBarController errorSnackBarController,
+  }) async {
+    try {
+      await rejection;
+    } catch (error, stackTrace) {
+      errorSnackBarController.show(error, stackTrace);
+    }
   }
 
   void showDeletedMembers(bool val) {
