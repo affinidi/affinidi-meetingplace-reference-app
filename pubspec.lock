@@ -1398,68 +1398,61 @@ packages:
     source: hosted
     version: "8.1.0"
   meeting_place_chat:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "packages/meeting_place_chat"
-      ref: b28e6d895ccb10bb1c1d3d80b13f65ca88f04d42
-      resolved-ref: b28e6d895ccb10bb1c1d3d80b13f65ca88f04d42
-      url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
-    source: git
-    version: "0.0.1-dev.66"
+      name: meeting_place_chat
+      sha256: e04f3b6bcbf560c7162dadaf7d37ab488cd3459240223a0a1b5dc4351e391078
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   meeting_place_control_plane:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "packages/meeting_place_control_plane"
-      ref: b28e6d895ccb10bb1c1d3d80b13f65ca88f04d42
-      resolved-ref: b28e6d895ccb10bb1c1d3d80b13f65ca88f04d42
-      url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
-    source: git
-    version: "0.0.1-dev.27"
+      name: meeting_place_control_plane
+      sha256: "92b14eacbdc65dba8944981bc55bb6fb7173136cfcc0b72473c022a67b4e48f2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   meeting_place_core:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "packages/meeting_place_core"
-      ref: b28e6d895ccb10bb1c1d3d80b13f65ca88f04d42
-      resolved-ref: b28e6d895ccb10bb1c1d3d80b13f65ca88f04d42
-      url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
-    source: git
-    version: "0.0.1-dev.54"
+      name: meeting_place_core
+      sha256: cd7cf56fef8891e4b114a8e44a4dfb17e01e97660650aa9e03a3b9470636f1be
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   meeting_place_credentials:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "packages/meeting_place_credentials"
-      ref: b28e6d895ccb10bb1c1d3d80b13f65ca88f04d42
-      resolved-ref: b28e6d895ccb10bb1c1d3d80b13f65ca88f04d42
-      url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
-    source: git
-    version: "0.0.1-dev.20"
+      name: meeting_place_credentials
+      sha256: ca4a0da006d66357106ab1b52f3abea8bc3d2008f78c6aaa3df5c776bca29fb1
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   meeting_place_drift_repository:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "packages/meeting_place_drift_repository"
-      ref: b28e6d895ccb10bb1c1d3d80b13f65ca88f04d42
-      resolved-ref: b28e6d895ccb10bb1c1d3d80b13f65ca88f04d42
-      url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
-    source: git
-    version: "0.0.1-dev.66"
+      name: meeting_place_drift_repository
+      sha256: f82c3a7d97085216d99725d8c83e34819ec6b977659dc988ebf9a0452c7ea11f
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   meeting_place_matrix:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "packages/meeting_place_matrix"
-      ref: b28e6d895ccb10bb1c1d3d80b13f65ca88f04d42
-      resolved-ref: b28e6d895ccb10bb1c1d3d80b13f65ca88f04d42
-      url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
-    source: git
-    version: "0.0.1-dev.27"
+      name: meeting_place_matrix
+      sha256: "2e0b08d5d99e0d7ca5d750d414358ba9ad6e742c31678880a43d992ea38102fe"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   meeting_place_mediator:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "packages/meeting_place_mediator"
-      ref: b28e6d895ccb10bb1c1d3d80b13f65ca88f04d42
-      resolved-ref: b28e6d895ccb10bb1c1d3d80b13f65ca88f04d42
-      url: "https://github.com/affinidi/affinidi-meetingplace-sdk-dart.git"
-    source: git
-    version: "0.0.1-dev.17"
+      name: meeting_place_mediator
+      sha256: e9212450f01b1dafb5a14d3d0b26b7fe36c6bdc107f958ba583dfb7132c40e76
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   melos:
     dependency: "direct dev"
     description:

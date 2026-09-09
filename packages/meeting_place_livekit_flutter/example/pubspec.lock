@@ -708,34 +708,34 @@ packages:
     dependency: transitive
     description:
       name: meeting_place_chat
-      sha256: "73a58cd4d0cb9d89dd47e18c6cf360f61fffa804012b5f0b88a674d7b6df9c10"
+      sha256: e04f3b6bcbf560c7162dadaf7d37ab488cd3459240223a0a1b5dc4351e391078
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev.60"
+    version: "1.0.0"
   meeting_place_control_plane:
     dependency: transitive
     description:
       name: meeting_place_control_plane
-      sha256: "342f26fdf64b1513c8b510095fd79f445133edbdbc65bf4bdbd3cf63c62b9118"
+      sha256: "92b14eacbdc65dba8944981bc55bb6fb7173136cfcc0b72473c022a67b4e48f2"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev.23"
+    version: "1.0.0"
   meeting_place_core:
     dependency: transitive
     description:
       name: meeting_place_core
-      sha256: "5451d301c40e091b1f83667f5537794292f20683547c745171672c63215cba1e"
+      sha256: cd7cf56fef8891e4b114a8e44a4dfb17e01e97660650aa9e03a3b9470636f1be
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev.49"
+    version: "1.0.0"
   meeting_place_credentials:
     dependency: transitive
     description:
       name: meeting_place_credentials
-      sha256: "4ac0adecfc73faf4cfe2a972e838564b756cd31a6d6073c33aeaf7980e01098a"
+      sha256: ca4a0da006d66357106ab1b52f3abea8bc3d2008f78c6aaa3df5c776bca29fb1
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev.14"
+    version: "1.0.0"
   meeting_place_livekit_flutter:
     dependency: "direct main"
     description:
@@ -747,18 +747,18 @@ packages:
     dependency: transitive
     description:
       name: meeting_place_matrix
-      sha256: c1f885a4026eebc2bc9ea44605ad54c4cfc2c0160b7ad3f0e8a5dd978d695eba
+      sha256: "2e0b08d5d99e0d7ca5d750d414358ba9ad6e742c31678880a43d992ea38102fe"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev.20"
+    version: "1.0.0"
   meeting_place_mediator:
     dependency: transitive
     description:
       name: meeting_place_mediator
-      sha256: "5b38cba1162a88cff8c09eaef4f1edccb64c62e93cf76c929a427814cae36c34"
+      sha256: e9212450f01b1dafb5a14d3d0b26b7fe36c6bdc107f958ba583dfb7132c40e76
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1-dev.16"
+    version: "1.0.0"
   meta:
     dependency: transitive
     description:
@@ -1015,14 +1015,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.0"
-  proxy_recrypt:
-    dependency: transitive
-    description:
-      name: proxy_recrypt
-      sha256: "83518bfcd488f161b5b967ae862454154a166ff3b6e9af532e58d79786175587"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.4"
   pub_semver:
     dependency: transitive
     description:
