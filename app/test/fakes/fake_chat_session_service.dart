@@ -197,15 +197,12 @@ class FakeChatSessionService extends ChatSessionService {
     required int attemptsRemaining,
     void Function()? onAttempt,
   }) async {
-    onAttempt?.call();
-    final messageId = resolve();
-    if (messageId != null || attemptsRemaining <= 0) return messageId;
-    await Future<void>.delayed(_resolveCallItemRetryDelay);
-    return _resolveCallChatItemId(
-      resolve: resolve,
-      attemptsRemaining: attemptsRemaining - 1,
-      onAttempt: onAttempt,
-    );
+    for (var attempt = 0; ; attempt++) {
+      onAttempt?.call();
+      final messageId = resolve();
+      if (messageId != null || attempt >= attemptsRemaining) return messageId;
+      await Future<void>.delayed(_resolveCallItemRetryDelay);
+    }
   }
 
   @override
