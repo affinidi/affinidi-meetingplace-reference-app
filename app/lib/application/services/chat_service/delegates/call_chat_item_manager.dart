@@ -194,40 +194,17 @@ class CallChatItemManager {
     }
   }
 
-  /// Waits for [attempt] to return non-null, reacting to the chat SDK's live
-  /// stream so a just-synced item resolves immediately, with
-  /// [_resolveCallChatItemRetryDelay]/[_resolveCallChatItemMaxAttempts] as a
-  /// polling fallback.
+  /// Calls [attempt] until it returns non-null or
+  /// [_resolveCallChatItemMaxAttempts] retries are exhausted, waiting
+  /// [_resolveCallChatItemRetryDelay] between tries.
   Future<T?> _pollUntilFound<T extends Object>(
     Future<T?> Function() attempt,
   ) async {
-    final immediate = await attempt();
-    if (immediate != null) return immediate;
-
-    final chatStream = await getChatSdk()?.chatStreamSubscription;
-    Completer<void>? wake;
-    final subscription = chatStream?.stream.listen((_) {
-      final pending = wake;
-      if (pending != null && !pending.isCompleted) pending.complete();
-    });
-
-    try {
-      for (var attemptCount = 0; ; attemptCount++) {
-        if (attemptCount >= _resolveCallChatItemMaxAttempts) return null;
-        final pending = Completer<void>();
-        wake = pending;
-        await Future.any([
-          Future<void>.delayed(_resolveCallChatItemRetryDelay),
-          pending.future,
-        ]);
-        final result = await attempt();
-        if (result != null) return result;
-      }
-    } finally {
-      // cancel() on a stream subscription is not guaranteed to resolve
-      // promptly (it may wait on the underlying source); fire-and-forget so
-      // a slow teardown never blocks the result this method already has.
-      unawaited(subscription?.cancel());
+    for (var attemptCount = 0; ; attemptCount++) {
+      final result = await attempt();
+      if (result != null) return result;
+      if (attemptCount >= _resolveCallChatItemMaxAttempts) return null;
+      await Future<void>.delayed(_resolveCallChatItemRetryDelay);
     }
   }
 

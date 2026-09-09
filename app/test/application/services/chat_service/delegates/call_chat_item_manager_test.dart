@@ -1197,5 +1197,32 @@ void main() {
       expect(fakeChatSdk.deleteMessageCalls, isEmpty);
       expect(connected.isDeleted, isFalse);
     });
+
+    test('waits for a late-syncing call item', () {
+      fakeAsync((async) {
+        fakeChatSdk.sessionMessages = [];
+
+        bool? redacted;
+        unawaited(
+          manager.redactSupersededOutgoingCall('call-a').then((value) {
+            redacted = value;
+          }),
+        );
+
+        async.flushMicrotasks();
+        fakeChatSdk.sessionMessages = [
+          callItem(
+            messageId: 'own-lost',
+            isFromMe: true,
+            status: CallStatus.calling,
+            callId: 'call-a',
+          ),
+        ];
+        async.elapse(const Duration(milliseconds: 50));
+        async.flushMicrotasks();
+
+        expect(redacted, isTrue);
+      });
+    });
   });
 }
