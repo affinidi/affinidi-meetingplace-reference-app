@@ -456,9 +456,7 @@ class CallChatItemManager {
   Future<CallMediaType?> resolveCallMediaType(String callId) =>
       _resolveCallMediaType(callId: callId);
 
-  Future<CallMediaType?> _resolveCallMediaType({
-    required String callId,
-  }) async {
+  Future<CallMediaType?> _resolveCallMediaType({required String callId}) async {
     const label = 'resolveCallMediaType';
     await ensureInitialized();
     final chatSdk = getChatSdk();
