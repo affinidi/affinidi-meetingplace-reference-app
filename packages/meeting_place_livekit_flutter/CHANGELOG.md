@@ -1,3 +1,7 @@
+## 1.0.0
+
+ - **CHORE**: Promote to stable version.
+
 ## 0.0.1-dev.12
 
  - **FIX**: Unbounded retry recursion in call chat item (#338).
