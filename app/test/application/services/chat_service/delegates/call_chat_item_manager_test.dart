@@ -569,10 +569,7 @@ void main() {
         );
 
         final metadata = CallMetadata.maybeOf(updated!.attachments.single);
-        expect(
-          metadata?.durationMs,
-          const Duration(minutes: 5).inMilliseconds,
-        );
+        expect(metadata?.durationMs, const Duration(minutes: 5).inMilliseconds);
       },
     );
 
@@ -595,10 +592,7 @@ void main() {
         );
 
         final metadata = CallMetadata.maybeOf(updated!.attachments.single);
-        expect(
-          metadata?.durationMs,
-          const Duration(hours: 1).inMilliseconds,
-        );
+        expect(metadata?.durationMs, const Duration(hours: 1).inMilliseconds);
       },
     );
 
