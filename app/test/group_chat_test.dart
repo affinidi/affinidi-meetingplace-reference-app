@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
+import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card_extensions.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/plugins/audio_attachments_plugin/audio_attachments_plugin.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -1085,11 +1086,9 @@ void main() {
                 status: sdk.GroupMemberStatus.deleted,
                 membershipType: sdk.GroupMembershipType.member,
                 contactCard: FakeContacts.sdkContactCard,
-                publicKey: 'fake-public-key',
               ),
             ],
             created: DateTime.now(),
-            publicKey: 'fake-public-key',
           );
           final coreSdk = FakeMeetingPlaceSDK(
             channels: FakeChannels.allChannels,
@@ -1131,6 +1130,67 @@ void main() {
 
           final input = tester.widget<TextFormField>(findChatMessageInput());
           expect(input.enabled, isNot(false));
+        });
+      });
+
+      group('and a member updates their profile', () {
+        testWidgets('refreshes the group so the new name is shown', (
+          tester,
+        ) async {
+          final contactId = FakeContacts.groupContact.id;
+          final chatSdk = FakeChatSdk();
+          final coreSdk = FakeMeetingPlaceSDK(
+            channels: FakeChannels.allChannels,
+          )..setMockGroup(FakeGroups.approvedGroup());
+
+          await navigateToChat(
+            tester,
+            contactId: contactId,
+            chatSdk: chatSdk,
+            contacts: contacts,
+            meetingPlaceCoreSDK: coreSdk,
+          );
+
+          chatSdk.simulateIncomingTextMessage(
+            text: 'Hello from Bob',
+            recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
+            senderDid: FakeGroups.removableMemberDid,
+          );
+          await tester.pumpAndSettle();
+
+          expect(find.textContaining('Bob Builder'), findsOneWidget);
+
+          final updatedMember = sdk.GroupMember(
+            did: FakeGroups.removableMemberDid,
+            dateAdded: DateTime.now(),
+            status: sdk.GroupMemberStatus.approved,
+            membershipType: sdk.GroupMembershipType.member,
+            contactCard: sdk.ContactCard(
+              did: FakeGroups.removableMemberDid,
+              type: FakeContacts.sdkContactCard.type,
+              contactInfo: {
+                'n': {'given': 'Roberto', 'surname': 'Builder'},
+              },
+            ),
+          );
+          final updatedGroup = FakeGroups.approvedGroup();
+          updatedGroup.members[updatedGroup.members.indexWhere(
+                (m) => m.did == FakeGroups.removableMemberDid,
+              )] =
+              updatedMember;
+          coreSdk.setMockGroup(updatedGroup);
+
+          chatSdk.simulateIncomingContactCardUpdate(
+            contactDid: FakeGroups.removableMemberDid,
+            card: ContactCardUtils.fromSdkContactCard(
+              updatedMember.contactCard,
+            ),
+            recipientDid: FakeChannels.groupChannel.permanentChannelDid!,
+          );
+          await tester.pumpAndSettle();
+
+          expect(find.textContaining('Roberto Builder'), findsOneWidget);
+          expect(find.textContaining('Bob Builder'), findsNothing);
         });
       });
     });

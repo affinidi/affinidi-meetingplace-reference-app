@@ -15,7 +15,7 @@ import '../control_plane_service/control_plane_service.dart';
 import '../identities_service/identities_service.dart';
 import '../vrc_service/vrc_service.dart';
 import 'connections_service_state.dart';
-import 'publish_offer_request.dart';
+import 'publish_offer_params.dart';
 
 part 'connections_service.g.dart';
 
@@ -175,7 +175,7 @@ class ConnectionsService extends _$ConnectionsService {
       final sdk = await ref.read(meetingPlaceSdkProvider.future);
       _logger.info('SDK ready, fetching connection offer', name: _logKey);
 
-      final connectionOffer = await sdk.getConnectionOffer(offerLink);
+      final connectionOffer = await sdk.findConnectionOffer(offerLink);
       if (connectionOffer == null) {
         _logger.error(
           'Connection offer not found for link: $offerLink',
@@ -192,8 +192,13 @@ class ConnectionsService extends _$ConnectionsService {
         name: _logKey,
       );
 
-      final channel = await sdk.getChannelByDid(otherPartyPermanentChannelDid);
-      if (channel == null) {
+      final Channel channel;
+      try {
+        channel = await sdk.getChannelByDid(otherPartyPermanentChannelDid);
+      } on MeetingPlaceCoreSDKException catch (e) {
+        if (e.code != MeetingPlaceCoreSDKErrorCode.channelNotFound.value) {
+          rethrow;
+        }
         _logger.error(
           'Channel not found for DID: $otherPartyPermanentChannelDid',
           name: _logKey,
@@ -212,8 +217,10 @@ class ConnectionsService extends _$ConnectionsService {
       final rCardAttachments = await _buildRCardAttachments(sdk, channel);
 
       await sdk.approveConnectionRequest(
-        channel: channel,
-        attachments: rCardAttachments,
+        ApproveConnectionRequestParams(
+          channel: channel,
+          attachments: rCardAttachments,
+        ),
       );
 
       _logger.info('Connection request approved successfully', name: _logKey);
@@ -257,10 +264,12 @@ class ConnectionsService extends _$ConnectionsService {
   }) async {
     final sdk = await ref.read(meetingPlaceSdkProvider.future);
     await sdk.acceptOffer(
-      connectionOffer: connectionOffer,
-      contactCard: identity.card.toSdkContactCard(),
-      externalRef: identity.id,
-      senderInfo: identity.card.firstName,
+      AcceptOfferRequest(
+        connectionOffer: connectionOffer,
+        contactCard: identity.card.toSdkContactCard(),
+        externalRef: identity.id,
+        senderInfo: identity.card.firstName,
+      ),
     );
     await fetchConnections();
   }
@@ -317,7 +326,7 @@ class ConnectionsService extends _$ConnectionsService {
   /// - `Future<void>` completes when publishing, refresh, and any group
   ///   announcement finish.
   Future<void> publishOffer(
-    PublishOfferRequest data, {
+    PublishOfferParams data, {
     required Identity identity,
   }) async {
     _logger.info('Submitting offer: ${data.headline}', name: _logKey);
@@ -326,19 +335,21 @@ class ConnectionsService extends _$ConnectionsService {
       final isGroupOffer = data.isGroupOffer;
       final sdk = await ref.read(meetingPlaceSdkProvider.future);
       final result = await sdk.publishOffer(
-        offerName: data.headline,
-        contactCard: identity.card.toSdkContactCard(),
-        type: isGroupOffer
-            ? SDKConnectionOfferType.groupInvitation
-            : SDKConnectionOfferType.invitation,
-        offerDescription: data.description,
-        customPhrase: data.customPhrase,
-        validUntil: data.expiryDate,
-        maximumUsage: data.maxUsages,
-        mediatorDid: data.selectedMediatorDid,
-        externalRef: identity.id,
-        score: data.score,
-        transport: isGroupOffer ? ChannelTransport.matrix : data.transport,
+        PublishOfferRequest(
+          offerName: data.headline,
+          contactCard: identity.card.toSdkContactCard(),
+          type: isGroupOffer
+              ? SDKConnectionOfferType.groupInvitation
+              : SDKConnectionOfferType.invitation,
+          offerDescription: data.description,
+          customMnemonic: data.customPhrase,
+          validUntil: data.expiryDate,
+          maximumUsage: data.maxUsages,
+          mediatorDid: data.selectedMediatorDid,
+          externalRef: identity.id,
+          score: data.score,
+          transport: isGroupOffer ? ChannelTransport.matrix : data.transport,
+        ),
       );
 
       _logger.info('Offer registered successfully', name: _logKey);
@@ -391,8 +402,13 @@ class ConnectionsService extends _$ConnectionsService {
       );
     }
     final sdk = await ref.read(meetingPlaceSdkProvider.future);
-    final channel = await sdk.getChannelByDid(groupOwnerDid);
-    if (channel == null) {
+    final Channel channel;
+    try {
+      channel = await sdk.getChannelByDid(groupOwnerDid);
+    } on MeetingPlaceCoreSDKException catch (e) {
+      if (e.code != MeetingPlaceCoreSDKErrorCode.channelNotFound.value) {
+        rethrow;
+      }
       throw AppException(
         '''Could not retrieve the channel associated to the group published offer''',
         code: AppExceptionType.missingChannelForPublishedGroupOffer.name,
@@ -512,16 +528,21 @@ class ConnectionsService extends _$ConnectionsService {
       return null;
     }
 
+    final permanentChannelDid = channel.permanentChannelDid;
+    if (permanentChannelDid == null || permanentChannelDid.isEmpty) {
+      _logger.warning(
+        'Skipping R-Card attachment: channel has no permanentChannelDid',
+        name: _logKey,
+      );
+      return null;
+    }
+
     try {
-      final didManager = await sdk.getDidManager(identity.did);
+      final didManager = await sdk.getDidManager(permanentChannelDid);
       return RCardDIDCommAttachmentBuilder.build(
-        issuerDid: identity.did,
-        card: RCardSubject(
-          firstName: identity.card.firstName,
-          lastName: identity.card.lastName,
-          email: identity.card.email,
-          phone: identity.card.mobile,
-        ),
+        issuerDid: permanentChannelDid,
+        subjectDid: identity.did,
+        card: identity.card.toRCardSubject(),
         issuerDidManager: didManager,
       );
     } catch (error, stackTrace) {
@@ -559,9 +580,8 @@ class ConnectionsService extends _$ConnectionsService {
           .countVrcsByDid(identity.did);
 
       if (publishedOffers.isNotEmpty) {
-        final result = await sdk.updateScoreForOffers(
-          score: score,
-          offers: publishedOffers,
+        final result = await sdk.updateOffersScore(
+          UpdateOffersScoreRequest(score: score, offers: publishedOffers),
         );
 
         if (result.failedOffers.isNotEmpty) {
@@ -578,9 +598,8 @@ class ConnectionsService extends _$ConnectionsService {
       }
 
       if (acceptedOffers.isNotEmpty) {
-        await sdk.updateLocalConnectionOffersScore(
-          score: score,
-          offers: acceptedOffers,
+        await sdk.updateOffersScoreLocally(
+          UpdateOffersScoreRequest(score: score, offers: acceptedOffers),
         );
         _logger.info(
           'Updated local score to $score for ${acceptedOffers.length} '

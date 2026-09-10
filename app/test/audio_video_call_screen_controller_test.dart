@@ -91,7 +91,7 @@ class _FakeMeetingPlaceMatrixSDK extends Fake implements MeetingPlaceMatrixSDK {
   Future<void> leaveCurrentCall() async {}
 
   @override
-  Future<sdk.Group?> getGroupByOfferLink(String offerLink) async => _mockGroup;
+  Future<sdk.Group?> findGroupByOfferLink(String offerLink) async => _mockGroup;
 
   void setMockGroup(sdk.Group group) {
     _mockGroup = group;
@@ -440,7 +440,6 @@ void main() {
               status: sdk.GroupMemberStatus.approved,
               membershipType: sdk.GroupMembershipType.member,
               contactCard: FakeContacts.sdkContactCard,
-              publicKey: 'fake-public-key',
             ),
             sdk.GroupMember(
               did: FakeGroups.removableMemberDid,
@@ -455,7 +454,6 @@ void main() {
                   'photo': 'group-updated-avatar',
                 },
               ),
-              publicKey: 'fake-public-key-2',
             ),
             sdk.GroupMember(
               did: FakeGroups.adminMemberDid,
@@ -472,11 +470,9 @@ void main() {
                   },
                 },
               ),
-              publicKey: 'fake-public-key-3',
             ),
           ],
           created: DateTime.now(),
-          publicKey: 'fake-public-key',
         ),
       );
 

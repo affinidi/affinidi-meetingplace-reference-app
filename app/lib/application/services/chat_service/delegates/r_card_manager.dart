@@ -76,7 +76,7 @@ class RCardManager {
   Future<void> sendRCardFromPlugin(Identity identity) async {
     try {
       final coreSdk = await _ref.read(meetingPlaceSdkProvider.future);
-      final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
+      final channel = await coreSdk.findChannelByOtherPartyPermanentDid(
         _otherPartyPermanentDid,
       );
       if (channel == null) {
@@ -94,10 +94,12 @@ class RCardManager {
       final didManager = await coreSdk.getDidManager(channelDid);
       final credentialsSDK = await _ref.read(credentialsSdkProvider.future);
       final rCard = await credentialsSDK.sendRCard(
-        channel: channel,
-        subjectDid: identity.did,
-        card: identity.card.toRCardSubject(),
-        issuerDidManager: didManager,
+        SendRCardRequest(
+          channel: channel,
+          subjectDid: identity.did,
+          card: identity.card.toRCardSubject(),
+          issuerDidManager: didManager,
+        ),
       );
 
       final vcJson = jsonDecode(rCard.vcBlob) as Map<String, dynamic>;
@@ -122,7 +124,7 @@ class RCardManager {
   Future<void> sendProfileUpdateWithRCard(ConciergeMessage message) async {
     try {
       final coreSdk = await _ref.read(meetingPlaceSdkProvider.future);
-      final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
+      final channel = await coreSdk.findChannelByOtherPartyPermanentDid(
         _otherPartyPermanentDid,
       );
       if (channel == null) return;
@@ -144,10 +146,12 @@ class RCardManager {
       final didManager = await coreSdk.getDidManager(channelDid);
       final credentialsSDK = await _ref.read(credentialsSdkProvider.future);
       final rCard = await credentialsSDK.sendRCard(
-        channel: channel,
-        subjectDid: identity.did,
-        card: identity.card.toRCardSubject(),
-        issuerDidManager: didManager,
+        SendRCardRequest(
+          channel: channel,
+          subjectDid: identity.did,
+          card: identity.card.toRCardSubject(),
+          issuerDidManager: didManager,
+        ),
       );
 
       final confirmedMessage = ConciergeMessage(
@@ -194,7 +198,7 @@ class RCardManager {
       if (chatSdk == null) return;
 
       final coreSdk = await _ref.read(meetingPlaceSdkProvider.future);
-      final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
+      final channel = await coreSdk.findChannelByOtherPartyPermanentDid(
         _otherPartyPermanentDid,
       );
       if (channel == null) return;

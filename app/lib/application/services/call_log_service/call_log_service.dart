@@ -40,7 +40,7 @@ Future<List<CallLogEntry>> callLogEntries(Ref ref) async {
       final channelDid = contact.channelDid;
       if (channelDid == null) continue;
 
-      final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
+      final channel = await coreSdk.findChannelByOtherPartyPermanentDid(
         channelDid,
       );
       final ownDid = channel?.permanentChannelDid;

@@ -33,7 +33,8 @@ class AppController extends _$AppController with WidgetsBindingObserver {
       (prev, next) async {
         if (!next) {
           final sdk = ref.read(credentialsSdkProvider).asData?.value;
-          await sdk?.closeCredentialStreams();
+          await sdk?.dispose();
+          ref.invalidate(credentialsSdkProvider);
           return;
         }
         if (next) {

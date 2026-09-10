@@ -9,7 +9,7 @@ import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 import 'package:meeting_place_core/meeting_place_core.dart' hide ContactCard;
 import 'package:meeting_place_credentials/meeting_place_credentials.dart'
-    show VrcExchangeRole;
+    show RequestVrcExchangeParams, SendVrcRequest, VrcExchangeRole;
 import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:synchronized/synchronized.dart';
@@ -517,7 +517,7 @@ class ChatScreenController extends _$ChatScreenController
     _logger.info('ChannelID: $channelDid', name: _logKey);
 
     final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
-    final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
+    final channel = await coreSdk.findChannelByOtherPartyPermanentDid(
       channelDid,
     );
     if (channel == null) {
@@ -560,8 +560,8 @@ class ChatScreenController extends _$ChatScreenController
     );
 
     if (channel.type == sdk.ChannelType.group) {
-      final group = await coreSdk.getGroupByOfferLink(channel.offerLink);
-      final connection = await coreSdk.getConnectionOffer(channel.offerLink);
+      final group = await coreSdk.findGroupByOfferLink(channel.offerLink);
+      final connection = await coreSdk.findConnectionOffer(channel.offerLink);
       state = state.copyWith(
         group: group,
         offerName: connection?.offerName,
@@ -1128,9 +1128,11 @@ class ChatScreenController extends _$ChatScreenController
         final channelDid = state.contact?.channelDid;
         if (channelDid == null) return;
         await credentialsSdk.requestVrcExchange(
-          channelDid: channelDid,
-          identityDid: identity.did,
-          identityName: identity.card.displayName,
+          RequestVrcExchangeParams(
+            channelDid: channelDid,
+            requesterDid: identity.did,
+            requesterName: identity.card.displayName,
+          ),
         );
         state = state.copyWith(
           shouldShowVrcBanner: false,
@@ -1149,15 +1151,17 @@ class ChatScreenController extends _$ChatScreenController
         final channelDid = state.contact?.channelDid;
         if (channelDid == null) return;
         final sentVcBlob = await credentialsSdk.sendVrc(
-          channelDid: channelDid,
-          issuerDid: identity.did,
-          issuerName: identity.card.displayName,
-          peerDid: peerIdentityDid,
-          peerName: peerIdentityName,
+          SendVrcRequest(
+            channelDid: channelDid,
+            issuerDid: identity.did,
+            issuerName: identity.card.displayName,
+            peerDid: peerIdentityDid,
+            peerName: peerIdentityName,
+          ),
         );
         if (sentVcBlob.isNotEmpty) {
           final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
-          final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
+          final channel = await coreSdk.findChannelByOtherPartyPermanentDid(
             channelDid,
           );
           final senderDid = channel?.permanentChannelDid;

@@ -79,7 +79,7 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceMatrixSDK>(
         logger: logger,
         rtcDelegate: FlutterMatrixRTCDelegate(),
         roomFactory: (_) => FlutterLiveKitRoom(),
-        options: MeetingPlaceMatrixSdkOptions(
+        options: MeetingPlaceMatrixSDKOptions(
           expectedMessageWrappingTypes: const [
             MessageWrappingType.authcryptPlaintext,
             MessageWrappingType.authcryptSignPlaintext,
@@ -89,7 +89,7 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceMatrixSDK>(
             VdipClient.requestIssuanceMessageType,
             VdipClient.issuedCredentialMessageType,
           ],
-          onBuildAttachments:
+          onBuildConnectionMessageAttachments:
               (
                 Channel channel,
                 Future<DidManager> Function(String did) getDidManager,
@@ -107,10 +107,17 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceMatrixSDK>(
                       .getIdentityById(externalRef);
                   if (identity == null || identity.did.isEmpty) return null;
 
-                  final didManager = await getDidManager(identity.did);
+                  final permanentChannelDid = channel.permanentChannelDid;
+                  if (permanentChannelDid == null ||
+                      permanentChannelDid.isEmpty) {
+                    return null;
+                  }
+
+                  final didManager = await getDidManager(permanentChannelDid);
 
                   return RCardDIDCommAttachmentBuilder.build(
-                    issuerDid: identity.did,
+                    issuerDid: permanentChannelDid,
+                    subjectDid: identity.did,
                     card: identity.card.toRCardSubject(),
                     issuerDidManager: didManager,
                   );

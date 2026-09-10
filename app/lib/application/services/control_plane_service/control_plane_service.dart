@@ -221,9 +221,9 @@ class ControlPlaneService extends _$ControlPlaneService
       '${channel.otherPartyPermanentChannelDid}',
       name: _logKey,
     );
-    if ((event.type == ControlPlaneEventType.InvitationAccept &&
+    if ((event.type == ControlPlaneEventType.invitationAccept &&
             channel.status == ChannelStatus.waitingForApproval) ||
-        (event.type == ControlPlaneEventType.InvitationGroupAccept &&
+        (event.type == ControlPlaneEventType.invitationGroupAccept &&
             channel.status == ChannelStatus.inaugurated)) {
       if (channel.type == ChannelType.group) {
         _logger.info(
@@ -243,8 +243,8 @@ class ControlPlaneService extends _$ControlPlaneService
       return;
     }
 
-    if (event.type == ControlPlaneEventType.OfferFinalised ||
-        event.type == ControlPlaneEventType.GroupMembershipFinalised) {
+    if (event.type == ControlPlaneEventType.offerFinalised ||
+        event.type == ControlPlaneEventType.groupMembershipFinalised) {
       if (channel.status == ChannelStatus.inaugurated) {
         _logger.info(
           'Connection offer approved and finalized for channel: '
@@ -266,7 +266,7 @@ class ControlPlaneService extends _$ControlPlaneService
       return;
     }
 
-    if (event.type == ControlPlaneEventType.ChannelActivity) {
+    if (event.type == ControlPlaneEventType.channelActivity) {
       if (channel.status == ChannelStatus.inaugurated) {
         _logger.info(
           'Channel activity detected for inaugurated channel: '

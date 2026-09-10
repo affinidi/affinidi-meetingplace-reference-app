@@ -13,7 +13,7 @@ enum ContactType {
   const ContactType(this.value);
   factory ContactType.from(ChannelType type) {
     switch (type) {
-      case ChannelType.oob:
+      case ChannelType.directConnection:
       case ChannelType.individual:
         return ContactType.individual;
       case ChannelType.group:

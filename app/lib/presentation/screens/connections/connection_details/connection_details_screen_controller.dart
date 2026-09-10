@@ -97,7 +97,7 @@ class ConnectionDetailsScreenController
     _logger.info('ChannelID: $channelDid', name: _logKey);
 
     final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
-    final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
+    final channel = await coreSdk.findChannelByOtherPartyPermanentDid(
       channelDid,
     );
 
@@ -109,7 +109,7 @@ class ConnectionDetailsScreenController
     }
 
     var group = (connection is GroupConnectionOffer)
-        ? await coreSdk.getGroupById(connection.groupId)
+        ? await coreSdk.findGroupById(connection.groupId)
         : null;
 
     final identity = ref

@@ -6,7 +6,7 @@ import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
-import 'package:ssi/ssi.dart' hide KeyPair;
+import 'package:ssi/ssi.dart';
 import 'package:uuid/uuid.dart';
 
 import '../providers/app_logger_provider.dart';
@@ -56,7 +56,6 @@ class SecureStorage implements KeyRepository, KeyStore {
 
   static final _didPrefix = 'did_';
   static final _indexPrefix = 'index_';
-  static final _keyPairIndex = 'keypair_';
 
   /// Retrieves a stored key by [key] identifier.
   ///
@@ -96,7 +95,7 @@ class SecureStorage implements KeyRepository, KeyStore {
   ///
   /// Returns null if no keyId is found for the DID.
   @override
-  Future<String?> getKeyIdByDid({required String did}) =>
+  Future<String?> findKeyIdByDid({required String did}) =>
       _secureStorage.read(key: '$_didPrefix$did');
 
   /// Associates a [keyId] with the given [did].
@@ -218,32 +217,6 @@ class SecureStorage implements KeyRepository, KeyStore {
   String _generateRandomPassphrase([int length = 32]) {
     final bytes = _generateRandomBytes(length);
     return base64Url.encode(bytes);
-  }
-
-  /// Gets a key pair associated with the given [did].
-  ///
-  /// Returns null if no key pair exists for the DID.
-  @override
-  Future<KeyPair?> getKeyPair(String did) async {
-    final value = await _secureStorage.read(key: '$_keyPairIndex$did');
-    if (value == null) return null;
-    return KeyPair.fromJson(jsonDecode(value) as Map<String, dynamic>);
-  }
-
-  /// Saves a key pair for the given [did].
-  @override
-  Future<void> saveKeyPair({
-    required Uint8List privateKeyBytes,
-    required Uint8List publicKeyBytes,
-    required String did,
-  }) {
-    return _secureStorage.write(
-      key: '$_keyPairIndex$did',
-      value: jsonEncode({
-        'privateKeyBytes': privateKeyBytes,
-        'publicKeyBytes': publicKeyBytes,
-      }),
-    );
   }
 
   /// Gets the stored push notification token.

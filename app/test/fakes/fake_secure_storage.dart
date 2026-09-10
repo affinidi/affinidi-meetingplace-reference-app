@@ -1,7 +1,5 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
-import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/secure_storage/secure_storage.dart';
 import 'package:ssi/ssi.dart' show StoredKey;
 
@@ -23,7 +21,6 @@ class FakeSecureStorage extends SecureStorage {
   final bool? _shouldShowMeetingPlaceQR;
   final int? _savingPushTokenDuration;
 
-  static final _keyPairIndex = 'keypair_';
   static final _didPrefix = 'did_';
 
   final Map<String, String> _storedKeys = {};
@@ -94,26 +91,6 @@ class FakeSecureStorage extends SecureStorage {
   @override
   Future<void> set(String key, StoredKey value) async {
     _storedKeys[key] = jsonEncode(value);
-  }
-
-  @override
-  Future<KeyPair?> getKeyPair(String did) async {
-    final value = _storedKeys['$_keyPairIndex$did'];
-    if (value == null) return null;
-    return KeyPair.fromJson(jsonDecode(value) as Map<String, dynamic>);
-  }
-
-  @override
-  Future<void> saveKeyPair({
-    required Uint8List privateKeyBytes,
-    required Uint8List publicKeyBytes,
-    required String did,
-  }) async {
-    _storedKeys['$_keyPairIndex$did'] = jsonEncode({
-      'privateKeyBytes': privateKeyBytes,
-      'publicKeyBytes': publicKeyBytes,
-      'did': did,
-    });
   }
 
   @override

@@ -25,9 +25,9 @@ part 'oob_service.g.dart';
 @riverpod
 class OOBService extends _$OOBService {
   Identity? _currentIdentity;
-  CoreSDKStreamSubscription<OobStreamData, void>?
+  CoreSDKStreamSubscription<DirectConnectionStreamData, void>?
   _acceptOfferStreamSubscription;
-  CoreSDKStreamSubscription<OobStreamData, void>?
+  CoreSDKStreamSubscription<DirectConnectionStreamData, void>?
   _publishOfferStreamSubscription;
   static const _logKey = 'OOBSVC';
   late final AppLogger _logger = ref.read(appLoggerProvider);
@@ -73,10 +73,12 @@ class OOBService extends _$OOBService {
     state = state.copyWith(lastConnectionChannel: null);
     final contactCard = _currentIdentity!.toSdkContactCard();
 
-    final oobOfferSession = await sdk.createOobFlow(
-      contactCard: contactCard,
-      externalRef: _currentIdentity!.id,
-      type: type,
+    final directConnection = await sdk.createDirectConnection(
+      CreateDirectConnectionRequest(
+        contactCard: contactCard,
+        externalRef: _currentIdentity!.id,
+        type: type,
+      ),
     );
 
     if (_publishOfferStreamSubscription != null) {
@@ -84,7 +86,7 @@ class OOBService extends _$OOBService {
       _publishOfferStreamSubscription = null;
     }
 
-    _publishOfferStreamSubscription = oobOfferSession.stream;
+    _publishOfferStreamSubscription = directConnection.stream;
 
     _publishOfferStreamSubscription?.listen((data) async {
       final channel = data.channel;
@@ -92,7 +94,7 @@ class OOBService extends _$OOBService {
       _logger.info('createOobFlow connection established', name: _logKey);
     });
 
-    return oobOfferSession.oobUrl.toString();
+    return directConnection.directConnectionUrl.toString();
   }
 
   /// Accept an OOB flow given its URL and return the created Contact if
@@ -130,11 +132,13 @@ class OOBService extends _$OOBService {
     final acceptedOfferCompleter = Completer<void>();
 
     try {
-      final result = await sdk.acceptOobFlow(
-        oobUri,
-        contactCard: _currentIdentity!.toSdkContactCard(),
-        externalRef: _currentIdentity!.id,
-        type: type,
+      final result = await sdk.acceptDirectConnection(
+        AcceptDirectConnectionRequest(
+          directConnectionUrl: oobUri,
+          contactCard: _currentIdentity!.toSdkContactCard(),
+          externalRef: _currentIdentity!.id,
+          type: type,
+        ),
       );
 
       if (_acceptOfferStreamSubscription != null) {

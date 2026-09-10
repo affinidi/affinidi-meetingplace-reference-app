@@ -252,7 +252,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
       if (!ref.mounted) return;
 
-      final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
+      final channel = await coreSdk.findChannelByOtherPartyPermanentDid(
         _otherPartyPermanentChannelDid,
       );
       if (channel == null) {
@@ -287,7 +287,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       _otherPartyFirstName = initialCard?.firstName;
 
       if (_isGroupChat) {
-        final group = await coreSdk.getGroupByOfferLink(channel.offerLink);
+        final group = await coreSdk.findGroupByOfferLink(channel.offerLink);
         if (!ref.mounted) return;
         if (group != null) {
           state = state.copyWith(group: group);
@@ -710,7 +710,7 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   @override
   Future<void> updateContactSequenceNumber(String channelDid) async {
     final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
-    final channel = await coreSdk.getChannelByOtherPartyPermanentDid(
+    final channel = await coreSdk.findChannelByOtherPartyPermanentDid(
       channelDid,
     );
     if (channel == null) {
