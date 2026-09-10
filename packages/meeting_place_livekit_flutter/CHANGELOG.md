@@ -1,3 +1,7 @@
+## 0.0.1-dev.12
+
+ - **FIX**: Unbounded retry recursion in call chat item (#338).
+
 ## 0.0.1-dev.11
 
  - **FIX**: correct call history entries and ongoing-call banner (#330).
