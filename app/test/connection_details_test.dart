@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card_extensions.dart';
 
 import 'fakes/fake_channels.dart';
 import 'fakes/fake_chat_sdk.dart';
@@ -11,6 +15,217 @@ import 'fakes/fake_meeting_place_sdk.dart';
 import 'utils/app.dart';
 
 void main() {
+  group('When approving a pending connection', () {
+    final contact = FakeContacts.pendingContact;
+    final channel = Channel(
+      permanentChannelDid: contact.channelDid!,
+      otherPartyPermanentChannelDid: contact.channelDid!,
+      offerLink: contact.offerLink,
+      contactCard: contact.card.toSdkContactCard(),
+      seqNo: 0,
+      type: ChannelType.individual,
+      publishOfferDid: 'did:key:pending-offer',
+      mediatorDid: contact.mediatorDid,
+      status: ChannelStatus.waitingForApproval,
+      isConnectionInitiator: true,
+    );
+    final offer = ConnectionOffer(
+      offerName: 'Pending Offer',
+      offerLink: contact.offerLink,
+      mnemonic: 'pending-offer-mnemonic',
+      publishOfferDid: 'did:key:pending-offer',
+      mediatorDid: contact.mediatorDid,
+      oobInvitationMessage: '{}',
+      type: ConnectionOfferType.meetingPlaceInvitation,
+      status: ConnectionOfferStatus.published,
+      contactCard: FakeIdentities.primaryIdentity.card.toSdkContactCard(),
+      ownedByMe: true,
+      createdAt: DateTime(2025, 2, 1),
+      offerDescription: 'Pending offer',
+      transport: ChannelTransport.didcomm,
+    );
+
+    testWidgets(
+      'it closes the details screen while approval is still in progress',
+      (tester) async {
+        final approvalCompleter = Completer<void>();
+        final sdk = FakeMeetingPlaceSDK(
+          channels: {contact.channelDid!: channel},
+          connectionOffers: [offer],
+          approveConnectionRequestCompleter: approvalCompleter,
+        );
+
+        await navigateToLocation(
+          tester,
+          '/contacts/${contact.id}/connection-details',
+          identities: [FakeIdentities.primaryIdentity],
+          contacts: [contact],
+          meetingPlaceCoreSDK: sdk,
+        );
+
+        final l10n = await getL10n();
+        await tester.tap(find.text(l10n.generalApprove));
+        await tester.pumpAndSettle();
+
+        expect(sdk.approveConnectionRequestCalls, [channel]);
+        expect(find.text(l10n.connectionDetails), findsNothing);
+        expect(find.byType(AlertDialog), findsNothing);
+
+        await pushRoute(tester, '/contacts/${contact.id}/connection-details');
+
+        expect(find.text(l10n.generalApprove), findsNothing);
+
+        approvalCompleter.complete();
+        await tester.pumpAndSettle();
+      },
+    );
+
+    group('and approval fails after the details screen closes', () {
+      testWidgets('it shows the error in a snack bar', (tester) async {
+        final approvalCompleter = Completer<void>();
+        final sdk = FakeMeetingPlaceSDK(
+          channels: {contact.channelDid!: channel},
+          connectionOffers: [offer],
+          approveConnectionRequestCompleter: approvalCompleter,
+          approveConnectionRequestError: Exception('approval failed'),
+        );
+
+        await navigateToLocation(
+          tester,
+          '/contacts/${contact.id}/connection-details',
+          identities: [FakeIdentities.primaryIdentity],
+          contacts: [contact],
+          meetingPlaceCoreSDK: sdk,
+        );
+
+        final l10n = await getL10n();
+        await tester.tap(find.text(l10n.generalApprove));
+        await tester.pumpAndSettle();
+        approvalCompleter.complete();
+        await tester.pumpAndSettle();
+
+        expect(find.byType(SnackBar), findsOneWidget);
+        expect(
+          find.text(l10n.error('Exception: approval failed')),
+          findsOneWidget,
+        );
+
+        await pushRoute(tester, '/contacts/${contact.id}/connection-details');
+
+        expect(find.text(l10n.generalApprove), findsOneWidget);
+      });
+    });
+
+    testWidgets(
+      'it persists the pending inauguration status without a success snack bar',
+      (tester) async {
+        final sdk = FakeMeetingPlaceSDK(
+          channels: {contact.channelDid!: channel},
+          connectionOffers: [offer],
+        );
+
+        await navigateToLocation(
+          tester,
+          '/contacts/${contact.id}/connection-details',
+          identities: [FakeIdentities.primaryIdentity],
+          contacts: [contact],
+          meetingPlaceCoreSDK: sdk,
+        );
+
+        final l10n = await getL10n();
+        await tester.tap(find.text(l10n.generalApprove));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(SnackBar), findsNothing);
+        expect(find.text(l10n.connectionRequestInProgress), findsNothing);
+        expect(sdk.approveConnectionRequestCalls, [channel]);
+
+        await pushRoute(tester, '/contacts/${contact.id}/connection-details');
+
+        expect(find.text(l10n.generalApprove), findsNothing);
+      },
+    );
+  });
+
+  group('When rejecting a pending connection', () {
+    final contact = FakeContacts.pendingContact;
+    final channel = Channel(
+      permanentChannelDid: contact.channelDid!,
+      otherPartyPermanentChannelDid: contact.channelDid!,
+      offerLink: contact.offerLink,
+      contactCard: contact.card.toSdkContactCard(),
+      seqNo: 0,
+      type: ChannelType.individual,
+      publishOfferDid: 'did:key:pending-offer',
+      mediatorDid: contact.mediatorDid,
+      status: ChannelStatus.waitingForApproval,
+      isConnectionInitiator: true,
+    );
+    final offer = ConnectionOffer(
+      offerName: 'Pending Offer',
+      offerLink: contact.offerLink,
+      mnemonic: 'pending-offer-mnemonic',
+      publishOfferDid: 'did:key:pending-offer',
+      mediatorDid: contact.mediatorDid,
+      oobInvitationMessage: '{}',
+      type: ConnectionOfferType.meetingPlaceInvitation,
+      status: ConnectionOfferStatus.published,
+      contactCard: FakeIdentities.primaryIdentity.card.toSdkContactCard(),
+      ownedByMe: true,
+      createdAt: DateTime(2025, 2, 1),
+      offerDescription: 'Pending offer',
+      transport: ChannelTransport.didcomm,
+    );
+
+    testWidgets('it closes without showing a modal or success snack bar', (
+      tester,
+    ) async {
+      await navigateToLocation(
+        tester,
+        '/contacts/${contact.id}/connection-details',
+        identities: [FakeIdentities.primaryIdentity],
+        contacts: [contact],
+        meetingPlaceCoreSDK: FakeMeetingPlaceSDK(
+          channels: {contact.channelDid!: channel},
+          connectionOffers: [offer],
+        ),
+      );
+
+      final l10n = await getL10n();
+      await tester.tap(find.text(l10n.generalReject));
+      await tester.pumpAndSettle();
+
+      expect(find.text(l10n.connectionDetails), findsNothing);
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(find.byType(SnackBar), findsNothing);
+      expect(find.text(l10n.connectionRequestRejected), findsNothing);
+    });
+
+    group('and deletion fails after the details screen closes', () {
+      testWidgets('it shows the error in a snack bar', (tester) async {
+        await navigateToLocation(
+          tester,
+          '/contacts/${contact.id}/connection-details',
+          identities: [FakeIdentities.primaryIdentity],
+          contacts: [contact],
+          meetingPlaceCoreSDK: FakeMeetingPlaceSDK(
+            channels: {contact.channelDid!: channel},
+            connectionOffers: [offer],
+            returnNullAfterOtherPartyChannelLookups: 1,
+          ),
+        );
+
+        final l10n = await getL10n();
+        await tester.tap(find.text(l10n.generalReject));
+        await tester.pumpAndSettle();
+
+        expect(find.text(l10n.connectionDetails), findsNothing);
+        expect(find.byType(SnackBar), findsOneWidget);
+        expect(find.text(l10n.error('missingChannel')), findsOneWidget);
+      });
+    });
+  });
+
   group('Connection details — group remove member', () {
     final groupContact = FakeContacts.groupContact;
 

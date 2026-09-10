@@ -15,7 +15,6 @@ import '../../../../infrastructure/extensions/date_time_extensions.dart';
 import '../../../../infrastructure/extensions/did_extensions.dart';
 import '../../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../../widgets/action_button.dart';
-import '../../../widgets/async_loaders/modal_async_loading_status.dart';
 import '../../../widgets/buttons/elevated_loading_button.dart';
 import '../../../widgets/form_rows/form_card.dart';
 import '../../../widgets/form_rows/form_row_icon_title.dart';
@@ -53,7 +52,6 @@ class ConnectionDetailsScreen extends HookConsumerWidget {
     final provider = connectionDetailsScreenControllerProvider(contactId);
     final controller = ref.read(provider.notifier);
     final isGroupChat = ref.watch(provider.isGroupChat);
-    final l10n = context.l10n;
 
     useEffect(() {
       if (!context.mounted) return;
@@ -76,17 +74,6 @@ class ConnectionDetailsScreen extends HookConsumerWidget {
       body: SafeArea(
         child: Column(
           children: [
-            ModalAsyncLoadingStatus(
-              controller.approveOfferLoadingController,
-              loadingMessage: l10n.approving,
-              successMessage: l10n.connectionRequestInProgress,
-              successMessageStyle: LoadingMessageStyle.progress,
-            ),
-            ModalAsyncLoadingStatus(
-              controller.rejectOfferLoadingController,
-              loadingMessage: l10n.rejecting,
-              successMessage: l10n.connectionRequestRejected,
-            ),
             Expanded(
               child: SingleChildScrollView(
                 keyboardDismissBehavior:

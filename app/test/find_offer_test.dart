@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
@@ -218,6 +220,75 @@ void main() {
           expect(calledExternalRef, testIdentity.id);
         },
       );
+
+      testWidgets(
+        'it returns to connections while acceptance is still in progress',
+        (tester) async {
+          final offer = FakeConnectionOffers.testOffer;
+          final acceptanceCompleter = Completer<void>();
+          final fakeSdk = FakeMeetingPlaceSDK(
+            offerToFind: offer,
+            acceptOfferCompleter: acceptanceCompleter,
+          );
+          final l10n = await getL10n();
+
+          await navigateToLocation(
+            tester,
+            location,
+            identities: [testIdentity],
+            mediators: FakeMediators.all,
+            meetingPlaceCoreSDK: fakeSdk,
+          );
+          await tester.enterText(find.byType(TextField), offer.mnemonic);
+          await tapSearchButton(tester, find.text(l10n.generalSearch));
+
+          await tester.tap(find.text(l10n.generalConnect));
+          await tester.pumpAndSettle();
+
+          expect(fakeSdk.acceptOfferCalls, hasLength(1));
+          expect(find.text(l10n.acceptOfferTitle), findsNothing);
+          expect(find.byType(AlertDialog), findsNothing);
+          expect(find.byType(SnackBar), findsNothing);
+
+          acceptanceCompleter.complete();
+          await tester.pumpAndSettle();
+        },
+      );
+
+      group('and acceptance fails after returning to connections', () {
+        testWidgets('it shows the error in a snack bar', (tester) async {
+          final offer = FakeConnectionOffers.testOffer;
+          final acceptanceCompleter = Completer<void>();
+          final fakeSdk = FakeMeetingPlaceSDK(
+            offerToFind: offer,
+            acceptOfferCompleter: acceptanceCompleter,
+            acceptOfferError: Exception('acceptance failed'),
+          );
+          final l10n = await getL10n();
+
+          await navigateToLocation(
+            tester,
+            location,
+            identities: [testIdentity],
+            mediators: FakeMediators.all,
+            meetingPlaceCoreSDK: fakeSdk,
+          );
+          await tester.enterText(find.byType(TextField), offer.mnemonic);
+          await tapSearchButton(tester, find.text(l10n.generalSearch));
+
+          await tester.tap(find.text(l10n.generalConnect));
+          await tester.pumpAndSettle();
+          acceptanceCompleter.complete();
+          await tester.pumpAndSettle();
+
+          expect(find.text(l10n.acceptOfferTitle), findsNothing);
+          expect(find.byType(SnackBar), findsOneWidget);
+          expect(
+            find.text(l10n.error('Exception: acceptance failed')),
+            findsOneWidget,
+          );
+        });
+      });
     });
   });
 }

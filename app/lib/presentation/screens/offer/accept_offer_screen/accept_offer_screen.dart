@@ -7,7 +7,6 @@ import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/extensions/widget_ref_extensions.dart';
 import '../../../../infrastructure/providers/cache_manager_provider.dart';
-import '../../../widgets/async_loaders/modal_async_loading_status.dart';
 import '../../../widgets/contact_card_view.dart';
 import '../../../widgets/form_rows/form_card.dart';
 import '../../../widgets/identity_picker/identity_picker.dart';
@@ -36,7 +35,6 @@ class AcceptOfferScreen extends ConsumerWidget {
       body: SafeArea(
         child: Column(
           children: [
-            _Loader(mnemonic: _mnemonic),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -70,30 +68,6 @@ class AcceptOfferScreen extends ConsumerWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _Loader extends ConsumerWidget {
-  _Loader({required this._mnemonic});
-
-  final String _mnemonic;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final provider = acceptOfferScreenControllerProvider(_mnemonic);
-    final controller = ref.read(provider.notifier);
-    final l10n = context.l10n;
-
-    final alias = ref.watch(
-      provider.select((state) => state.offer?.contactCard.firstName),
-    );
-
-    return ModalAsyncLoadingStatus(
-      controller.acceptOfferLoadingController,
-      loadingMessage: l10n.connecting,
-      successMessage: alias != null ? l10n.requestToConnect(alias) : null,
-      successMessageStyle: LoadingMessageStyle.progress,
     );
   }
 }
@@ -354,10 +328,10 @@ class _ActionBar extends ConsumerWidget {
       context.pop();
     }
 
-    void acceptOffer() async {
+    void acceptOffer() {
       if (!context.mounted) return;
 
-      await controller.acceptOffer();
+      controller.acceptOffer();
     }
 
     return Padding(

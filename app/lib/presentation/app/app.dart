@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../l10n/app_localizations.dart';
 import '../../navigation/router_config_provider.dart';
 import '../themes/app_theme.dart';
+import '../widgets/snack_bars/error_snack_bar_controller.dart';
 import 'app_controller.dart';
 import 'app_header_banner.dart';
 
@@ -23,6 +24,7 @@ class App extends ConsumerWidget {
     ref.read(appControllerProvider);
 
     return MaterialApp.router(
+      scaffoldMessengerKey: scaffoldMessengerKey,
       scrollBehavior: (!kIsWeb && Platform.isMacOS)
           ? const ScrollBehavior().copyWith(
               dragDevices: {

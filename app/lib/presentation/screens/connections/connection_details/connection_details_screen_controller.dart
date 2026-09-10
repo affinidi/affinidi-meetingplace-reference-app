@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -21,9 +22,9 @@ import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../../navigation/navigator.dart';
-import '../../../widgets/async_loaders/async_loading_controller.dart';
 import '../../../widgets/images/default_profile_image.dart';
 import '../../../widgets/images/group_image.dart';
+import '../../../widgets/snack_bars/error_snack_bar_controller.dart';
 import 'connection_details_screen_state.dart';
 
 part 'connection_details_screen_controller.g.dart';
@@ -34,12 +35,6 @@ class ConnectionDetailsScreenController
   late final displayNameController = TextEditingController();
   static const _logKey = 'CONNX';
   late final _logger = ref.read(appLoggerProvider);
-  late final approveOfferLoadingController = AsyncLoadingController.provider(
-    'approveOfferLoadingController',
-  );
-  late final rejectOfferLoadingController = AsyncLoadingController.provider(
-    'rejectOfferLoadingController',
-  );
 
   @override
   ConnectionDetailsScreenState build(String contactId) {
@@ -162,57 +157,97 @@ class ConnectionDetailsScreenController
 
   Future<void> approveContact() async {
     final currentContact = state.contact;
-    if (currentContact == null) return;
+    if (currentContact == null ||
+        currentContact.status != ContactStatus.pendingApproval) {
+      return;
+    }
 
-    await ref.read(approveOfferLoadingController.notifier).start(() async {
-      final otherPartyPermanentChannelDid = currentContact.channelDid;
-      if (otherPartyPermanentChannelDid == null) {
-        throw AppException(
+    final otherPartyPermanentChannelDid = currentContact.channelDid;
+    final errorSnackBarController = ref.read(errorSnackBarControllerProvider);
+    if (otherPartyPermanentChannelDid == null) {
+      errorSnackBarController.show(
+        AppException(
           '''Unable to approve a contact without the other party permanent channel Did''',
           code: AppExceptionType.missingOtherPartyChannelDid.name,
-        );
-      }
-
-      final initialDisplayName = currentContact.card.displayName;
-      final newDisplayName = displayNameController.text;
-      final displayNameChanged = newDisplayName != initialDisplayName;
-
-      final updatedContact = currentContact.copyWith(
-        status: ContactStatus.pendingInauguration,
-        displayName: displayNameChanged ? newDisplayName : null,
+        ),
+        StackTrace.current,
       );
+      return;
+    }
 
-      await ref
-          .read(connectionsServiceProvider.notifier)
-          .approveConnectionOffer(
-            otherPartyPermanentChannelDid: otherPartyPermanentChannelDid,
-            offerLink: currentContact.offerLink,
-          );
+    final initialDisplayName = currentContact.card.displayName;
+    final newDisplayName = displayNameController.text;
+    final displayNameChanged = newDisplayName != initialDisplayName;
+    final updatedContact = currentContact.copyWith(
+      status: ContactStatus.pendingInauguration,
+      displayName: displayNameChanged ? newDisplayName : null,
+    );
+    final connectionsService = ref.read(connectionsServiceProvider.notifier);
+    final contactsService = ref.read(contactsServiceProvider.notifier);
+    final navigator = ref.read(navigatorProvider);
 
-      await ref
-          .read(contactsServiceProvider.notifier)
-          .updateContact(updatedContact);
+    state = state.copyWith(contact: updatedContact);
+    await contactsService.updateContact(updatedContact);
 
-      state = state.copyWith(contact: updatedContact);
+    final approval = connectionsService.approveConnectionOffer(
+      otherPartyPermanentChannelDid: otherPartyPermanentChannelDid,
+      offerLink: currentContact.offerLink,
+    );
+    navigator.pop();
 
-      await Future(() {
-        ref.read(navigatorProvider).pop();
-      });
-    });
+    unawaited(
+      _completeApproval(
+        approval: approval,
+        originalContact: currentContact,
+        contactsService: contactsService,
+        errorSnackBarController: errorSnackBarController,
+      ),
+    );
+  }
+
+  Future<void> _completeApproval({
+    required Future<void> approval,
+    required Contact originalContact,
+    required ContactsService contactsService,
+    required ErrorSnackBarController errorSnackBarController,
+  }) async {
+    try {
+      await approval;
+    } catch (error, stackTrace) {
+      await contactsService.updateContact(originalContact);
+      if (ref.mounted) state = state.copyWith(contact: originalContact);
+      errorSnackBarController.show(error, stackTrace);
+    }
   }
 
   Future<void> rejectContact() async {
-    await ref.read(rejectOfferLoadingController.notifier).start(() async {
-      final currentContact = state.contact;
-      if (currentContact != null) {
-        await ref.read(contactsServiceProvider.notifier).deleteContacts([
-          currentContact,
-        ]);
-        await Future(() {
-          ref.read(navigatorProvider).pop();
-        });
-      }
-    });
+    final currentContact = state.contact;
+    if (currentContact == null) return;
+
+    final contactsService = ref.read(contactsServiceProvider.notifier);
+    final errorSnackBarController = ref.read(errorSnackBarControllerProvider);
+    final navigator = ref.read(navigatorProvider);
+
+    final rejection = contactsService.deleteContacts([currentContact]);
+    navigator.pop();
+
+    unawaited(
+      _completeRejection(
+        rejection: rejection,
+        errorSnackBarController: errorSnackBarController,
+      ),
+    );
+  }
+
+  Future<void> _completeRejection({
+    required Future<void> rejection,
+    required ErrorSnackBarController errorSnackBarController,
+  }) async {
+    try {
+      await rejection;
+    } catch (error, stackTrace) {
+      errorSnackBarController.show(error, stackTrace);
+    }
   }
 
   void showDeletedMembers(bool val) {

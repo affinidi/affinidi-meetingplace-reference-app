@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:mpx_flutter_reference_app/domain/models/contacts/contact.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact_status.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_extensions.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/chat/chat_screen.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/connections/connection_details/connection_details_screen.dart';
 
 import 'fakes/fake_channels.dart';
 import 'fakes/fake_contacts.dart';
@@ -10,19 +13,24 @@ import 'fakes/fake_identities.dart';
 import 'fakes/fake_meeting_place_sdk.dart';
 import 'utils/app.dart';
 
-Future<void> navigateToContactsScreen(WidgetTester tester) async {
+Future<void> navigateToContactsScreen(
+  WidgetTester tester, {
+  List<Contact>? contacts,
+}) async {
   await navigateToLocation(
     tester,
     '/contacts',
     isAuthenticated: true,
     alreadyOnboarded: true,
     identities: [FakeIdentities.primaryIdentity],
-    contacts: [
-      FakeContacts.individualContact,
-      FakeContacts.groupContact,
-      FakeContacts.pendingContact,
-      FakeContacts.oobContact,
-    ],
+    contacts:
+        contacts ??
+        [
+          FakeContacts.individualContact,
+          FakeContacts.groupContact,
+          FakeContacts.pendingContact,
+          FakeContacts.oobContact,
+        ],
   );
   await tester.pumpAndSettle();
 }
@@ -194,6 +202,43 @@ void main() {
       await tester.pumpAndSettle();
     });
 
+    group('and an active contact is tapped twice before navigation', () {
+      testWidgets('it pushes only one chat screen', (tester) async {
+        await navigateToContactsScreen(tester);
+
+        final contactName =
+            FakeContacts.individualContact.displayName ?? 'Contact';
+        final contact = findContactByName(contactName).first;
+        final gestureDetector = tester.widget<GestureDetector>(
+          find.ancestor(of: contact, matching: find.byType(GestureDetector)),
+        );
+
+        gestureDetector.onTap!();
+        await tester.pump();
+        gestureDetector.onTap!();
+        await tester.pumpAndSettle();
+
+        expect(find.byType(ChatScreen, skipOffstage: false), findsOneWidget);
+      });
+    });
+
+    group('and an active contact with an available chat is double tapped', () {
+      testWidgets('it pushes one chat screen', (tester) async {
+        await navigateToContactsScreen(tester);
+
+        final contactName =
+            FakeContacts.individualContact.displayName ?? 'Contact';
+        final contact = findContactByName(contactName).first;
+
+        await tester.tap(contact);
+        await tester.pump(const Duration(milliseconds: 100));
+        await tester.tap(contact);
+        await tester.pumpAndSettle();
+
+        expect(find.byType(ChatScreen, skipOffstage: false), findsOneWidget);
+      });
+    });
+
     testWidgets(
       'should navigate to connection details when tapping pending contact',
       (tester) async {
@@ -202,9 +247,42 @@ void main() {
         final contactName =
             FakeContacts.pendingContact.displayName ?? 'Pending';
         await tester.tap(findContactByName(contactName).first);
+        await tester.pump(const Duration(milliseconds: 400));
         await tester.pumpAndSettle();
+
+        expect(find.byType(ConnectionDetailsScreen), findsOneWidget);
       },
     );
+
+    group('and a contact is pending inauguration', () {
+      final contact = FakeContacts.pendingContact.copyWith(
+        status: ContactStatus.pendingInauguration,
+      );
+
+      testWidgets('it opens connection details when tapped', (tester) async {
+        await navigateToContactsScreen(tester, contacts: [contact]);
+
+        await tester.tap(findContactByName(contact.displayName!).first);
+        await tester.pump(const Duration(milliseconds: 400));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(ConnectionDetailsScreen), findsOneWidget);
+      });
+
+      testWidgets('it opens connection details when double tapped', (
+        tester,
+      ) async {
+        await navigateToContactsScreen(tester, contacts: [contact]);
+
+        final contactFinder = findContactByName(contact.displayName!).first;
+        await tester.tap(contactFinder);
+        await tester.pump(const Duration(milliseconds: 100));
+        await tester.tap(contactFinder);
+        await tester.pumpAndSettle();
+
+        expect(find.byType(ConnectionDetailsScreen), findsOneWidget);
+      });
+    });
 
     testWidgets('should show contact avatar when tapped', (tester) async {
       await navigateToContactsScreen(tester);

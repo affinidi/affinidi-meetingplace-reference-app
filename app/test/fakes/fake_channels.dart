@@ -40,6 +40,22 @@ class FakeChannels {
     );
   }
 
+  static Channel get pendingChannel {
+    final contact = FakeContacts.pendingContact;
+    return Channel(
+      permanentChannelDid: contact.channelDid!,
+      otherPartyPermanentChannelDid: contact.channelDid!,
+      offerLink: contact.offerLink,
+      contactCard: contact.card.toSdkContactCard(),
+      seqNo: 0,
+      type: ChannelType.individual,
+      publishOfferDid: 'did:key:pending-offer',
+      mediatorDid: contact.mediatorDid,
+      status: ChannelStatus.waitingForApproval,
+      isConnectionInitiator: true,
+    );
+  }
+
   static Channel get oobChannel {
     final contact = FakeContacts.oobContact;
     return Channel(
@@ -80,6 +96,7 @@ class FakeChannels {
     return {
       FakeContacts.individualContact.channelDid!: individualChannel,
       FakeContacts.groupContact.channelDid!: groupChannel,
+      FakeContacts.pendingContact.channelDid!: pendingChannel,
       FakeContacts.oobContact.channelDid!: oobChannel,
       FakeContacts.oobContactDismissed.channelDid!: oobChannelDismissed,
     };

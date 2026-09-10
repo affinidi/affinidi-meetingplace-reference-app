@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -8,17 +10,13 @@ import '../../../../infrastructure/exceptions/app_exception.dart';
 import '../../../../infrastructure/exceptions/app_exception_type.dart';
 import '../../../../navigation/navigator.dart';
 import '../../../../navigation/routes/dashboard_routes.dart';
-import '../../../widgets/async_loaders/async_loading_controller.dart';
+import '../../../widgets/snack_bars/error_snack_bar_controller.dart';
 import 'accept_offer_screen_state.dart';
 
 part 'accept_offer_screen_controller.g.dart';
 
 @riverpod
 class AcceptOfferScreenController extends _$AcceptOfferScreenController {
-  late final acceptOfferLoadingController = AsyncLoadingController.provider(
-    'acceptOfferLoadingController',
-  );
-
   @override
   AcceptOfferScreenState build(String mnemonic) {
     ref.listen(
@@ -64,30 +62,57 @@ class AcceptOfferScreenController extends _$AcceptOfferScreenController {
   }
 
   Future<void> acceptOffer() async {
-    await ref.read(acceptOfferLoadingController.notifier).start(() async {
-      final offer = state.offer;
-      if (offer == null) {
-        throw AppException(
+    final errorSnackBarController = ref.read(errorSnackBarControllerProvider);
+    final offer = state.offer;
+    if (offer == null) {
+      errorSnackBarController.show(
+        AppException(
           'Offer is missing, make sure to select an offer first',
           code: AppExceptionType.missingConnectionOffer.name,
-        );
-      }
+        ),
+        StackTrace.current,
+      );
+      return;
+    }
 
-      final selectedIdentity = state.selectedIdentity;
-      if (selectedIdentity == null) {
-        throw AppException(
+    final selectedIdentity = state.selectedIdentity;
+    if (selectedIdentity == null) {
+      errorSnackBarController.show(
+        AppException(
           'You must select an identity',
           code: AppExceptionType.missingIdentity.name,
-        );
-      }
+        ),
+        StackTrace.current,
+      );
+      return;
+    }
 
-      await ref
-          .read(connectionsServiceProvider.notifier)
-          .acceptOffer(offer, identity: selectedIdentity);
-      await Future(() {
-        ref.read(navigatorProvider).go(const ConnectionsRoute().location);
-      });
-    });
+    final connectionsService = ref.read(connectionsServiceProvider.notifier);
+    final navigator = ref.read(navigatorProvider);
+    final acceptance = connectionsService.acceptOffer(
+      offer,
+      identity: selectedIdentity,
+    );
+
+    navigator.go(const ConnectionsRoute().location);
+
+    unawaited(
+      _completeAcceptance(
+        acceptance: acceptance,
+        errorSnackBarController: errorSnackBarController,
+      ),
+    );
+  }
+
+  Future<void> _completeAcceptance({
+    required Future<void> acceptance,
+    required ErrorSnackBarController errorSnackBarController,
+  }) async {
+    try {
+      await acceptance;
+    } catch (error, stackTrace) {
+      errorSnackBarController.show(error, stackTrace);
+    }
   }
 
   void selectIdentity(Identity identity) {
