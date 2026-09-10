@@ -87,20 +87,12 @@ class CallChatItemManager {
   /// Resolves the latest unsettled incoming call item, preferring an exact
   /// callId match when [callId] is provided.
   Future<String?> resolveIncomingCallChatItemId({String? callId}) =>
-      _resolveCallChatItemId(
-        fromMe: false,
-        attemptsRemaining: _resolveCallChatItemMaxAttempts,
-        callId: callId,
-      );
+      _resolveCallChatItemId(fromMe: false, callId: callId);
 
   /// Resolves the latest unsettled outgoing call item, preferring an exact
   /// callId match when [callId] is provided.
   Future<String?> resolveOutgoingCallChatItemId({String? callId}) =>
-      _resolveCallChatItemId(
-        fromMe: true,
-        attemptsRemaining: _resolveCallChatItemMaxAttempts,
-        callId: callId,
-      );
+      _resolveCallChatItemId(fromMe: true, callId: callId);
 
   /// Returns the incoming call item matching [callId]
   /// (or latest by direction when callId absent) created no later than
@@ -202,11 +194,24 @@ class CallChatItemManager {
     }
   }
 
+  /// Calls [attempt] until it returns non-null or
+  /// [_resolveCallChatItemMaxAttempts] retries are exhausted, waiting
+  /// [_resolveCallChatItemRetryDelay] between tries.
+  Future<T?> _pollUntilFound<T extends Object>(
+    Future<T?> Function() attempt,
+  ) async {
+    for (var attemptCount = 0; ; attemptCount++) {
+      final result = await attempt();
+      if (result != null) return result;
+      if (attemptCount >= _resolveCallChatItemMaxAttempts) return null;
+      await Future<void>.delayed(_resolveCallChatItemRetryDelay);
+    }
+  }
+
   /// Finds the latest unsettled call item from [fromMe] direction, preferring
   /// exact callId match when [callId] is provided.
   Future<String?> _resolveCallChatItemId({
     required bool fromMe,
-    required int attemptsRemaining,
     String? callId,
   }) async {
     await ensureInitialized();
@@ -219,38 +224,32 @@ class CallChatItemManager {
       return null;
     }
     try {
-      final items = await chatSdk.messages;
-      final matchCallId = callId != null && callId.isNotEmpty;
-      Message? directionMatch;
-      Message? callIdMatch;
-      for (final message in items.whereType<Message>()) {
-        if (message.isFromMe != fromMe) continue;
-        final attachment = message.attachments.firstWhereOrNull(
-          CallMetadata.isCall,
-        );
-        if (attachment == null) continue;
-        final call = CallMetadata.maybeOf(attachment);
-        if (call == null ||
-            call.status == CallStatus.ended ||
-            call.status == CallStatus.missed ||
-            call.status == CallStatus.declined) {
-          continue;
+      final match = await _pollUntilFound(() async {
+        final items = await chatSdk.messages;
+        final matchCallId = callId != null && callId.isNotEmpty;
+        Message? directionMatch;
+        Message? callIdMatch;
+        for (final message in items.whereType<Message>()) {
+          if (message.isFromMe != fromMe) continue;
+          final attachment = message.attachments.firstWhereOrNull(
+            CallMetadata.isCall,
+          );
+          if (attachment == null) continue;
+          final call = CallMetadata.maybeOf(attachment);
+          if (call == null ||
+              call.status == CallStatus.ended ||
+              call.status == CallStatus.missed ||
+              call.status == CallStatus.declined) {
+            continue;
+          }
+          directionMatch = message;
+          if (matchCallId && call.callId == callId) {
+            callIdMatch = message;
+          }
         }
-        directionMatch = message;
-        if (matchCallId && call.callId == callId) {
-          callIdMatch = message;
-        }
-      }
-      final match = callIdMatch ?? directionMatch;
-      if (match == null) {
-        if (attemptsRemaining <= 0) return null;
-        await Future<void>.delayed(_resolveCallChatItemRetryDelay);
-        return _resolveCallChatItemId(
-          fromMe: fromMe,
-          attemptsRemaining: attemptsRemaining - 1,
-          callId: callId,
-        );
-      }
+        return callIdMatch ?? directionMatch;
+      });
+      if (match == null) return null;
       logger.info('$label: ${match.messageId}', name: _logKey);
       return match.messageId;
     } catch (e, stackTrace) {
@@ -432,15 +431,9 @@ class CallChatItemManager {
   }
 
   Future<CallMediaType?> resolveCallMediaType(String callId) =>
-      _resolveCallMediaType(
-        callId: callId,
-        attemptsRemaining: _resolveCallChatItemMaxAttempts,
-      );
+      _resolveCallMediaType(callId: callId);
 
-  Future<CallMediaType?> _resolveCallMediaType({
-    required String callId,
-    required int attemptsRemaining,
-  }) async {
+  Future<CallMediaType?> _resolveCallMediaType({required String callId}) async {
     const label = 'resolveCallMediaType';
     await ensureInitialized();
     final chatSdk = getChatSdk();
@@ -450,24 +443,19 @@ class CallChatItemManager {
     }
     if (callId.isEmpty) return null;
     try {
-      final match = await chatSdk.getCallChatItemByCallId(callId);
-      final attachment =
-          match is Message && !match.isDeleted && !match.isDeletedLocally
-          ? match.attachments.firstWhereOrNull(CallMetadata.isCall)
-          : null;
-      final mediaType = attachment == null
-          ? null
-          : CallMetadata.maybeOf(attachment)?.mediaType;
+      final mediaType = await _pollUntilFound(() async {
+        final match = await chatSdk.getCallChatItemByCallId(callId);
+        final attachment =
+            match is Message && !match.isDeleted && !match.isDeletedLocally
+            ? match.attachments.firstWhereOrNull(CallMetadata.isCall)
+            : null;
+        return attachment == null
+            ? null
+            : CallMetadata.maybeOf(attachment)?.mediaType;
+      });
       if (mediaType == null) {
-        if (attemptsRemaining <= 0) {
-          logger.info('$label: no call item for callId $callId', name: _logKey);
-          return null;
-        }
-        await Future<void>.delayed(_resolveCallChatItemRetryDelay);
-        return _resolveCallMediaType(
-          callId: callId,
-          attemptsRemaining: attemptsRemaining - 1,
-        );
+        logger.info('$label: no call item for callId $callId', name: _logKey);
+        return null;
       }
       logger.info('$label: $mediaType', name: _logKey);
       return mediaType;
@@ -483,15 +471,9 @@ class CallChatItemManager {
   }
 
   Future<bool> redactSupersededOutgoingCall(String callId) =>
-      _redactSupersededOutgoingCall(
-        callId: callId,
-        attemptsRemaining: _resolveCallChatItemMaxAttempts,
-      );
+      _redactSupersededOutgoingCall(callId: callId);
 
-  Future<bool> _redactSupersededOutgoingCall({
-    required String callId,
-    required int attemptsRemaining,
-  }) async {
+  Future<bool> _redactSupersededOutgoingCall({required String callId}) async {
     const label = 'redactSupersededOutgoingCall';
     if (callId.isEmpty) return false;
     await ensureInitialized();
@@ -501,17 +483,12 @@ class CallChatItemManager {
       return false;
     }
     try {
-      final match = await chatSdk.getCallChatItemByCallId(callId);
+      final match = await _pollUntilFound(
+        () => chatSdk.getCallChatItemByCallId(callId),
+      );
       if (match == null) {
-        if (attemptsRemaining <= 0) {
-          logger.info('$label: no call item for callId $callId', name: _logKey);
-          return false;
-        }
-        await Future<void>.delayed(_resolveCallChatItemRetryDelay);
-        return _redactSupersededOutgoingCall(
-          callId: callId,
-          attemptsRemaining: attemptsRemaining - 1,
-        );
+        logger.info('$label: no call item for callId $callId', name: _logKey);
+        return false;
       }
       if (match is! Message || !match.isFromMe) {
         logger.warning(
