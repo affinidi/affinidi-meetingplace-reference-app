@@ -869,6 +869,47 @@ void main() {
         expect(last.selfLeftBeforeEnd, isTrue);
       });
 
+      test('writes a null duration when leaving a group call early, so the '
+          'own elapsed time never masks the synced final duration', () async {
+        Duration? capturedDuration;
+        final handler = CallChatItemHandler(
+          resolveItemId: ({required bool isCaller, String? callId}) async =>
+              'g-early-leave',
+          updateItem:
+              (
+                _, {
+                required CallStatus status,
+                Duration? duration,
+                CallParticipation? participation,
+              }) async {
+                capturedDuration = duration;
+              },
+          isDisposed: () => false,
+          logger: FakeAppLogger(),
+          isGroupCall: true,
+        );
+
+        final session = MockAudioVideoCallSession();
+        final now = DateTime.now();
+        handler.attach(session);
+
+        await session.emitState(
+          AudioVideoCallState(
+            status: AudioVideoCallStatus.active,
+            participants: [self('did:me'), peer('p1')],
+            ownRole: CallRole.recipient,
+            callId: 'c',
+            callStartedAt: now,
+          ),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+
+        handler.endCall(assumeRole: CallRole.recipient);
+        await handler.endCallWrite;
+
+        expect(capturedDuration, isNull);
+      });
+
       test(
         'records initiator did only when this device is the caller',
         () async {

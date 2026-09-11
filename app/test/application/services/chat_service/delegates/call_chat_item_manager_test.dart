@@ -550,6 +550,52 @@ void main() {
       expect(metadata?.durationMs, const Duration(minutes: 5).inMilliseconds);
     });
 
+    test(
+      'reconcileCallOutcome rejects an implausibly long incoming duration',
+      () async {
+        fakeChatSdk.sessionMessages = [
+          callMessage(
+            messageId: 'msg-implausible',
+            isFromMe: true,
+            status: CallStatus.ended,
+            callId: 'target-call',
+            durationMs: const Duration(minutes: 5).inMilliseconds,
+          ),
+        ];
+
+        final updated = await manager.reconcileCallOutcome(
+          'msg-implausible',
+          duration: const Duration(hours: 48),
+        );
+
+        final metadata = CallMetadata.maybeOf(updated!.attachments.single);
+        expect(metadata?.durationMs, const Duration(minutes: 5).inMilliseconds);
+      },
+    );
+
+    test(
+      'reconcileCallOutcome still merges a plausible incoming duration',
+      () async {
+        fakeChatSdk.sessionMessages = [
+          callMessage(
+            messageId: 'msg-plausible',
+            isFromMe: true,
+            status: CallStatus.ended,
+            callId: 'target-call',
+            durationMs: const Duration(minutes: 5).inMilliseconds,
+          ),
+        ];
+
+        final updated = await manager.reconcileCallOutcome(
+          'msg-plausible',
+          duration: const Duration(hours: 1),
+        );
+
+        final metadata = CallMetadata.maybeOf(updated!.attachments.single);
+        expect(metadata?.durationMs, const Duration(hours: 1).inMilliseconds);
+      },
+    );
+
     test('reconcileCallOutcome skips locally deleted call items', () async {
       final deleted = callMessage(
         messageId: 'msg-deleted',
@@ -610,6 +656,72 @@ void main() {
         expect(metadata?.durationMs, isNull);
       },
     );
+  });
+
+  group('CallChatItemManager concurrent writes to the same item', () {
+    test('serializes updateCallChatItem and reconcileCallOutcome for the same '
+        'messageId so one full read-modify-write cycle completes before the '
+        'other starts its read', () async {
+      final fakeChatSdk = _SlowWriteFakeChatSdk();
+      final manager = CallChatItemManager(
+        ensureInitialized: () async {},
+        getChatSdk: () => fakeChatSdk,
+        logger: FakeAppLogger(),
+      );
+      fakeChatSdk.sessionMessages = [
+        Message(
+          chatId: 'fake-chat-id',
+          messageId: 'msg-race',
+          value: '',
+          dateCreated: DateTime.now(),
+          status: ChatItemStatus.confirmed,
+          isFromMe: true,
+          senderDid: 'me',
+          attachments: [
+            CallMetadata.buildAttachment(
+              id: const Uuid().v4(),
+              mediaType: CallMediaType.video,
+              status: CallStatus.inProgress,
+              callId: 'target-call',
+            ),
+          ],
+        ),
+      ];
+
+      // Delay the first write so its read-modify-write cycle spans the
+      // point where the second call would start. Without per-messageId
+      // serialization, the second call's read would run while the first
+      // call's write is still pending.
+      fakeChatSdk.writeDelayByMessageId['msg-race'] = const Duration(
+        milliseconds: 50,
+      );
+      final firstCall = manager.updateCallChatItem(
+        'msg-race',
+        status: CallStatus.ended,
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      final secondCallReadOrder = fakeChatSdk.readCallOrder.length;
+      final secondCall = manager.reconcileCallOutcome(
+        'msg-race',
+        duration: const Duration(minutes: 2),
+      );
+
+      await Future.wait([firstCall, secondCall]);
+
+      expect(
+        fakeChatSdk.readCallOrder.length,
+        greaterThan(secondCallReadOrder),
+        reason: 'reconcileCallOutcome should have read the message',
+      );
+      expect(
+        fakeChatSdk.readCallOrder[secondCallReadOrder],
+        greaterThanOrEqualTo(fakeChatSdk.writeCallOrder.first),
+        reason:
+            'reconcileCallOutcome must not read msg-race until '
+            'updateCallChatItem\'s write for the same messageId has '
+            'completed, otherwise the two read-modify-write cycles race',
+      );
+    });
   });
 
   group('CallChatItemManager.sendOutgoingCallMessage', () {
@@ -1225,4 +1337,29 @@ void main() {
       });
     });
   });
+}
+
+/// A [FakeChatSdk] that records a global call order for [getMessageById] and
+/// [updateMessage], and can delay a write for a given message id. Lets a test
+/// prove whether two calls for the same messageId ever have their write
+/// pending while the other call's read starts.
+class _SlowWriteFakeChatSdk extends FakeChatSdk {
+  final Map<String, Duration> writeDelayByMessageId = {};
+  final List<int> readCallOrder = [];
+  final List<int> writeCallOrder = [];
+  int _callCounter = 0;
+
+  @override
+  Future<ChatItem?> getMessageById(String id) async {
+    readCallOrder.add(_callCounter++);
+    return super.getMessageById(id);
+  }
+
+  @override
+  Future<void> updateMessage(Message message) async {
+    final delay = writeDelayByMessageId[message.messageId];
+    if (delay != null) await Future<void>.delayed(delay);
+    writeCallOrder.add(_callCounter++);
+    await super.updateMessage(message);
+  }
 }

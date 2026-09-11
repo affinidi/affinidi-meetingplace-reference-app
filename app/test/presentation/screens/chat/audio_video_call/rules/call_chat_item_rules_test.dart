@@ -439,7 +439,24 @@ void main() {
       );
     });
 
-    test('returns you-left label when self left before end', () {
+    test('returns plain you-left label when self left before end and no '
+        'duration has synced yet', () {
+      expect(
+        resolveCallChatItemStatusText(
+          status: CallStatus.ended,
+          isFromMe: true,
+          durationMs: null,
+          callStartedAt: null,
+          l10n: l10n,
+          mediaType: CallMediaType.video,
+          participation: participation(count: 2, selfLeftBeforeEnd: true),
+        ),
+        l10n.callChatItemYouLeft,
+      );
+    });
+
+    test('returns the synced duration once it arrives for an early leaver, '
+        'replacing the you-left label', () {
       expect(
         resolveCallChatItemStatusText(
           status: CallStatus.ended,
@@ -450,7 +467,12 @@ void main() {
           mediaType: CallMediaType.video,
           participation: participation(count: 2, selfLeftBeforeEnd: true),
         ),
-        l10n.callChatItemYouLeft,
+        formatCallDuration(
+          const Duration(milliseconds: 120000),
+          hourFormat: l10n.callDurationHourFormat,
+          minuteFormat: l10n.callDurationMinuteFormat,
+          secondFormat: l10n.callDurationSecondFormat,
+        ),
       );
     });
 

@@ -235,6 +235,7 @@ String resolveCallChatItemStatusText({
     final groupText = _resolveGroupCallStatusText(
       status: status,
       mediaType: mediaType,
+      durationMs: durationMs,
       participation: participation,
       l10n: l10n,
     );
@@ -267,9 +268,14 @@ String resolveCallChatItemStatusText({
 
 /// Group-specific status text, or null when the group call should fall back to
 /// the shared 1:1 wording (e.g. a group call the local party never joined).
+///
+/// A member who left before the call ended sees "You left" until the final
+/// duration has synced from the last member's write to [durationMs], at
+/// which point the duration is shown alongside it.
 String? _resolveGroupCallStatusText({
   required CallStatus status,
   required CallMediaType? mediaType,
+  required int? durationMs,
   required CallParticipation participation,
   required AppLocalizations l10n,
 }) {
@@ -284,7 +290,15 @@ String? _resolveGroupCallStatusText({
           : l10n.callChatItemGroupOngoingVideo(count);
     case CallStatus.ended:
       if (!participation.selfLeftBeforeEnd) return null;
-      return l10n.callChatItemYouLeft;
+      if (durationMs == null || durationMs <= 0) {
+        return l10n.callChatItemYouLeft;
+      }
+      return formatCallDuration(
+        Duration(milliseconds: durationMs),
+        hourFormat: l10n.callDurationHourFormat,
+        minuteFormat: l10n.callDurationMinuteFormat,
+        secondFormat: l10n.callDurationSecondFormat,
+      );
     case CallStatus.missed:
     case CallStatus.declined:
       return null;

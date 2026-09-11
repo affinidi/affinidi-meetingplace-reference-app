@@ -19,9 +19,36 @@ class CallChatItemManager {
   static const _resolveCallChatItemMaxAttempts = 10;
   static const _logKey = 'CallChatItemManager';
 
+  // Defense-in-depth cap while some devices may still be on an SDK version
+  // whose call start time isn't server-authoritative.
+  static const _maxPlausibleCallDuration = Duration(hours: 24);
+
   final Future<void> Function() ensureInitialized;
   final MeetingPlaceChatSDK? Function() getChatSdk;
   final AppLogger logger;
+
+  // Serializes read-modify-write cycles per call chat item so a device's own
+  // status write and an incoming outcome reconciliation for the same item
+  // never read each other's stale state and clobber one another's update.
+  final Map<String, Future<void>> _writeLocksByMessageId = {};
+
+  Future<T> _withMessageLock<T>(
+    String messageId,
+    Future<T> Function() action,
+  ) async {
+    final previous = _writeLocksByMessageId[messageId] ?? Future<void>.value();
+    final completer = Completer<void>();
+    _writeLocksByMessageId[messageId] = completer.future;
+    try {
+      await previous;
+      return await action();
+    } finally {
+      completer.complete();
+      if (identical(_writeLocksByMessageId[messageId], completer.future)) {
+        unawaited(_writeLocksByMessageId.remove(messageId));
+      }
+    }
+  }
 
   static bool _isTerminalStatus(CallStatus status) =>
       status == CallStatus.ended ||
@@ -324,72 +351,74 @@ class CallChatItemManager {
       logger.warning('updateCallChatItem: Chat SDK unavailable', name: _logKey);
       return null;
     }
-    try {
-      final item = await chatSdk.getMessageById(messageId);
-      if (item is! Message) {
-        logger.warning(
-          'updateCallChatItem: message $messageId not found',
-          name: _logKey,
+    return _withMessageLock(messageId, () async {
+      try {
+        final item = await chatSdk.getMessageById(messageId);
+        if (item is! Message) {
+          logger.warning(
+            'updateCallChatItem: message $messageId not found',
+            name: _logKey,
+          );
+          return null;
+        }
+        if (item.isDeleted || item.isDeletedLocally) {
+          logger.info(
+            'updateCallChatItem: $messageId already deleted, skipping',
+            name: _logKey,
+          );
+          return null;
+        }
+        final callAttachment = item.attachments.firstWhereOrNull(
+          CallMetadata.isCall,
         );
-        return null;
-      }
-      if (item.isDeleted || item.isDeletedLocally) {
+        final existing = callAttachment == null
+            ? null
+            : CallMetadata.maybeOf(callAttachment);
+        if (existing == null) {
+          logger.warning(
+            'updateCallChatItem: $messageId is not a call item',
+            name: _logKey,
+          );
+          return null;
+        }
+        final incomingDurationMs = duration?.inMilliseconds;
+        final existingDurationMs = existing.durationMs;
+        final resolvedDurationMs =
+            (incomingDurationMs == null || existingDurationMs == null)
+            ? incomingDurationMs ?? existingDurationMs
+            : math.max(existingDurationMs, incomingDurationMs);
+        final resolvedStatus =
+            _isTerminalStatus(existing.status) && !_isTerminalStatus(status)
+            ? existing.status
+            : status;
+        final updated = CallMetadata.buildAttachment(
+          mediaType: existing.mediaType,
+          status: resolvedStatus,
+          callId: existing.callId,
+          durationMs: resolvedDurationMs,
+          participation: participation ?? existing.participation,
+          id: callAttachment!.id,
+        );
+        item.attachments = [
+          for (final a in item.attachments)
+            if (CallMetadata.isCall(a)) updated else a,
+        ];
+        await chatSdk.updateMessage(item);
         logger.info(
-          'updateCallChatItem: $messageId already deleted, skipping',
+          'updateCallChatItem: $messageId -> ${resolvedStatus.name}',
+          name: _logKey,
+        );
+        return item;
+      } catch (e, stackTrace) {
+        logger.error(
+          'updateCallChatItem failed',
+          error: e,
+          stackTrace: stackTrace,
           name: _logKey,
         );
         return null;
       }
-      final callAttachment = item.attachments.firstWhereOrNull(
-        CallMetadata.isCall,
-      );
-      final existing = callAttachment == null
-          ? null
-          : CallMetadata.maybeOf(callAttachment);
-      if (existing == null) {
-        logger.warning(
-          'updateCallChatItem: $messageId is not a call item',
-          name: _logKey,
-        );
-        return null;
-      }
-      final incomingDurationMs = duration?.inMilliseconds;
-      final existingDurationMs = existing.durationMs;
-      final resolvedDurationMs =
-          (incomingDurationMs == null || existingDurationMs == null)
-          ? incomingDurationMs ?? existingDurationMs
-          : math.max(existingDurationMs, incomingDurationMs);
-      final resolvedStatus =
-          _isTerminalStatus(existing.status) && !_isTerminalStatus(status)
-          ? existing.status
-          : status;
-      final updated = CallMetadata.buildAttachment(
-        mediaType: existing.mediaType,
-        status: resolvedStatus,
-        callId: existing.callId,
-        durationMs: resolvedDurationMs,
-        participation: participation ?? existing.participation,
-        id: callAttachment!.id,
-      );
-      item.attachments = [
-        for (final a in item.attachments)
-          if (CallMetadata.isCall(a)) updated else a,
-      ];
-      await chatSdk.updateMessage(item);
-      logger.info(
-        'updateCallChatItem: $messageId -> ${resolvedStatus.name}',
-        name: _logKey,
-      );
-      return item;
-    } catch (e, stackTrace) {
-      logger.error(
-        'updateCallChatItem failed',
-        error: e,
-        stackTrace: stackTrace,
-        name: _logKey,
-      );
-      return null;
-    }
+    });
   }
 
   /// Resolves this device's own call item for [callId] for outcome
@@ -541,76 +570,91 @@ class CallChatItemManager {
       );
       return null;
     }
-    try {
-      final item = await chatSdk.getMessageById(messageId);
-      if (item is! Message) {
-        logger.warning(
-          'reconcileCallOutcome: message $messageId not found',
-          name: _logKey,
+    return _withMessageLock(messageId, () async {
+      try {
+        final item = await chatSdk.getMessageById(messageId);
+        if (item is! Message) {
+          logger.warning(
+            'reconcileCallOutcome: message $messageId not found',
+            name: _logKey,
+          );
+          return null;
+        }
+        if (item.isDeleted || item.isDeletedLocally) {
+          logger.info(
+            'reconcileCallOutcome: $messageId already deleted, skipping',
+            name: _logKey,
+          );
+          return null;
+        }
+        final callAttachment = item.attachments.firstWhereOrNull(
+          CallMetadata.isCall,
         );
-        return null;
-      }
-      if (item.isDeleted || item.isDeletedLocally) {
-        logger.info(
-          'reconcileCallOutcome: $messageId already deleted, skipping',
-          name: _logKey,
+        final existing = callAttachment == null
+            ? null
+            : CallMetadata.maybeOf(callAttachment);
+        if (existing == null) {
+          logger.warning(
+            'reconcileCallOutcome: $messageId is not a call item',
+            name: _logKey,
+          );
+          return null;
+        }
+        // Only converge a call this device took part in (in progress or
+        // ended locally). An unanswered terminal or an item that never
+        // connected here must not be forced to ended, which would fabricate
+        // a completed call.
+        if (existing.status != CallStatus.inProgress &&
+            existing.status != CallStatus.ended) {
+          logger.info(
+            'reconcileCallOutcome: $messageId is ${existing.status}, not a '
+            'participated call; preserving status',
+            name: _logKey,
+          );
+          return item;
+        }
+        final incomingDurationMs = duration?.inMilliseconds;
+        final existingDurationMs = existing.durationMs;
+        final sanitizedIncomingDurationMs =
+            (incomingDurationMs != null &&
+                incomingDurationMs > _maxPlausibleCallDuration.inMilliseconds)
+            ? null
+            : incomingDurationMs;
+        if (incomingDurationMs != null && sanitizedIncomingDurationMs == null) {
+          logger.warning(
+            'reconcileCallOutcome: rejected implausible duration '
+            '${incomingDurationMs}ms for $messageId',
+            name: _logKey,
+          );
+        }
+        final resolvedDurationMs =
+            (sanitizedIncomingDurationMs == null || existingDurationMs == null)
+            ? sanitizedIncomingDurationMs ?? existingDurationMs
+            : math.max(existingDurationMs, sanitizedIncomingDurationMs);
+        final updated = CallMetadata.buildAttachment(
+          mediaType: existing.mediaType,
+          status: CallStatus.ended,
+          callId: existing.callId,
+          durationMs: resolvedDurationMs,
+          participation: existing.participation,
+          id: callAttachment!.id,
         );
-        return null;
-      }
-      final callAttachment = item.attachments.firstWhereOrNull(
-        CallMetadata.isCall,
-      );
-      final existing = callAttachment == null
-          ? null
-          : CallMetadata.maybeOf(callAttachment);
-      if (existing == null) {
-        logger.warning(
-          'reconcileCallOutcome: $messageId is not a call item',
-          name: _logKey,
-        );
-        return null;
-      }
-      // Only converge a call this device took part in (in progress or ended
-      // locally). An unanswered terminal or an item that never connected here
-      // must not be forced to ended, which would fabricate a completed call.
-      if (existing.status != CallStatus.inProgress &&
-          existing.status != CallStatus.ended) {
-        logger.info(
-          'reconcileCallOutcome: $messageId is ${existing.status}, not a '
-          'participated call; preserving status',
-          name: _logKey,
-        );
+        item.attachments = [
+          for (final a in item.attachments)
+            if (CallMetadata.isCall(a)) updated else a,
+        ];
+        await chatSdk.updateMessage(item);
+        logger.info('reconcileCallOutcome: $messageId -> ended', name: _logKey);
         return item;
+      } catch (e, stackTrace) {
+        logger.error(
+          'reconcileCallOutcome failed',
+          error: e,
+          stackTrace: stackTrace,
+          name: _logKey,
+        );
+        return null;
       }
-      final incomingDurationMs = duration?.inMilliseconds;
-      final existingDurationMs = existing.durationMs;
-      final resolvedDurationMs =
-          (incomingDurationMs == null || existingDurationMs == null)
-          ? incomingDurationMs ?? existingDurationMs
-          : math.max(existingDurationMs, incomingDurationMs);
-      final updated = CallMetadata.buildAttachment(
-        mediaType: existing.mediaType,
-        status: CallStatus.ended,
-        callId: existing.callId,
-        durationMs: resolvedDurationMs,
-        participation: existing.participation,
-        id: callAttachment!.id,
-      );
-      item.attachments = [
-        for (final a in item.attachments)
-          if (CallMetadata.isCall(a)) updated else a,
-      ];
-      await chatSdk.updateMessage(item);
-      logger.info('reconcileCallOutcome: $messageId -> ended', name: _logKey);
-      return item;
-    } catch (e, stackTrace) {
-      logger.error(
-        'reconcileCallOutcome failed',
-        error: e,
-        stackTrace: stackTrace,
-        name: _logKey,
-      );
-      return null;
-    }
+    });
   }
 }

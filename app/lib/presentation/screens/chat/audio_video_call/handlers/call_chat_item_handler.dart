@@ -284,12 +284,16 @@ class CallChatItemHandler {
       return;
     }
     final endStatus = resolveEndStatus(outcome: outcome, isFromMe: isCaller);
+    // An early leaver's own elapsed time isn't the call's real duration —
+    // that only becomes known once the last member leaves and broadcasts
+    // it, so leave it null here and let reconcileCallOutcome fill it in.
+    final leftGroupCallEarly = _isGroupCall && _selfLeftBeforeEnd;
+    final shouldWriteDuration =
+        endStatus == CallStatus.ended && hasHadPeer && !leftGroupCallEarly;
     await _updateItem(
       messageId,
       status: endStatus,
-      duration: (endStatus == CallStatus.ended && hasHadPeer)
-          ? callDuration
-          : null,
+      duration: shouldWriteDuration ? callDuration : null,
       participation: _buildParticipation(),
     );
     _callChatItemEnded = true;
