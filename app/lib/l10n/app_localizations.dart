@@ -3483,6 +3483,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ringing {name}'**
   String callParticipantRingingAction(String name);
+
+  /// No description provided for @linkedVtaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked VTA'**
+  String get linkedVtaTitle;
+
+  /// No description provided for @linkedVtaHelperText.
+  ///
+  /// In en, this message translates to:
+  /// **'Link your Verifiable Trust Agent (VTA) so this phone can approve sign-ins to your communities.'**
+  String get linkedVtaHelperText;
+
+  /// No description provided for @linkedVtaDidLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'VTA DID'**
+  String get linkedVtaDidLabel;
+
+  /// No description provided for @linkedVtaLinkAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Link'**
+  String get linkedVtaLinkAction;
+
+  /// No description provided for @linkedVtaInvalidDid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the DID of your VTA, for example did:webvh:…'**
+  String get linkedVtaInvalidDid;
+
+  /// No description provided for @linkedVtaUnreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'Your VTA couldn\'t be reached.'**
+  String get linkedVtaUnreachable;
+
+  /// No description provided for @linkedVtaGrantInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask the administrator of your VTA to add this phone by running:'**
+  String get linkedVtaGrantInstruction;
+
+  /// No description provided for @linkedVtaCopyCommand.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy command'**
+  String get linkedVtaCopyCommand;
+
+  /// No description provided for @linkedVtaConfirmAction.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ve been added'**
+  String get linkedVtaConfirmAction;
+
+  /// No description provided for @linkedVtaNotGrantedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone hasn\'t been added yet. Try again once your administrator has run the command.'**
+  String get linkedVtaNotGrantedYet;
+
+  /// No description provided for @linkedVtaUnlinkAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlink'**
+  String get linkedVtaUnlinkAction;
+
+  /// Shows the DID of the linked VTA
+  ///
+  /// In en, this message translates to:
+  /// **'Linked to {vtaDid}'**
+  String linkedVtaLinked(String vtaDid);
 }
 
 class _AppLocalizationsDelegate

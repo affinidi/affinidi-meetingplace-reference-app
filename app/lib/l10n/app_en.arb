@@ -2287,5 +2287,25 @@
 				"type": "String"
 			}
 		}
+	},
+	"linkedVtaTitle": "Linked VTA",
+	"linkedVtaHelperText": "Link your Verifiable Trust Agent (VTA) so this phone can approve sign-ins to your communities.",
+	"linkedVtaDidLabel": "VTA DID",
+	"linkedVtaLinkAction": "Link",
+	"linkedVtaInvalidDid": "Enter the DID of your VTA, for example did:webvh:…",
+	"linkedVtaUnreachable": "Your VTA couldn't be reached.",
+	"linkedVtaGrantInstruction": "Ask the administrator of your VTA to add this phone by running:",
+	"linkedVtaCopyCommand": "Copy command",
+	"linkedVtaConfirmAction": "I've been added",
+	"linkedVtaNotGrantedYet": "This phone hasn't been added yet. Try again once your administrator has run the command.",
+	"linkedVtaUnlinkAction": "Unlink",
+	"linkedVtaLinked": "Linked to {vtaDid}",
+	"@linkedVtaLinked": {
+		"description": "Shows the DID of the linked VTA",
+		"placeholders": {
+			"vtaDid": {
+				"type": "String"
+			}
+		}
 	}
 }

@@ -2,10 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
+import '../../../application/services/vtc_service/vtc_service.dart';
 import '../../../domain/models/mediator/mediator_type.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../navigation/routes/route_paths.dart';
@@ -21,6 +24,7 @@ import 'debug/debug_panel.dart';
 import 'settings_screen_controller.dart';
 
 part 'debug_settings_section.dart';
+part 'linked_vta_section.dart';
 part 'meeting_place_control_plane_section.dart';
 part 'server_settings_section.dart';
 part 'version_info.dart';
@@ -40,6 +44,8 @@ class SettingsPanelScrollContent extends StatelessWidget {
           _MeetingPlaceControlPlaneSection(),
           SizedBox(height: 24),
           _ServerSettingsSection(),
+          SizedBox(height: 24),
+          _LinkedVtaSection(),
           SizedBox(height: 24),
           _DebugSettingsSection(),
         ],

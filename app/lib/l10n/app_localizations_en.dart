@@ -2295,4 +2295,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String callParticipantRingingAction(String name) {
     return 'Ringing $name';
   }
+
+  @override
+  String get linkedVtaTitle => 'Linked VTA';
+
+  @override
+  String get linkedVtaHelperText =>
+      'Link your Verifiable Trust Agent (VTA) so this phone can approve sign-ins to your communities.';
+
+  @override
+  String get linkedVtaDidLabel => 'VTA DID';
+
+  @override
+  String get linkedVtaLinkAction => 'Link';
+
+  @override
+  String get linkedVtaInvalidDid =>
+      'Enter the DID of your VTA, for example did:webvh:…';
+
+  @override
+  String get linkedVtaUnreachable => 'Your VTA couldn\'t be reached.';
+
+  @override
+  String get linkedVtaGrantInstruction =>
+      'Ask the administrator of your VTA to add this phone by running:';
+
+  @override
+  String get linkedVtaCopyCommand => 'Copy command';
+
+  @override
+  String get linkedVtaConfirmAction => 'I\'ve been added';
+
+  @override
+  String get linkedVtaNotGrantedYet =>
+      'This phone hasn\'t been added yet. Try again once your administrator has run the command.';
+
+  @override
+  String get linkedVtaUnlinkAction => 'Unlink';
+
+  @override
+  String linkedVtaLinked(String vtaDid) {
+    return 'Linked to $vtaDid';
+  }
 }
