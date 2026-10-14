@@ -3711,6 +3711,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Location: {location}'**
   String vtcSignInLocation(String location);
+
+  /// No description provided for @linkedVtaApprovalKeyFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone couldn\'t set up its sign-in approval key. Make sure Face ID or a fingerprint is set up, then try again.'**
+  String get linkedVtaApprovalKeyFailed;
 }
 
 class _AppLocalizationsDelegate

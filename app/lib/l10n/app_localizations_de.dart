@@ -2541,4 +2541,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String vtcSignInLocation(String location) {
     return 'Location: $location';
   }
+
+  @override
+  String get linkedVtaApprovalKeyFailed =>
+      'This phone couldn\'t set up its sign-in approval key. Make sure Face ID or a fingerprint is set up, then try again.';
 }
