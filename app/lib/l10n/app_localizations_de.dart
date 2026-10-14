@@ -2545,4 +2545,8 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get linkedVtaApprovalKeyFailed =>
       'This phone couldn\'t set up its sign-in approval key. Make sure Face ID or a fingerprint is set up, then try again.';
+
+  @override
+  String get linkedVtaDidNotResolved =>
+      'Your VTA\'s DID couldn\'t be resolved from this phone. Check the DID, and that its host can be reached from this phone over HTTPS.';
 }

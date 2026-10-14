@@ -27,6 +27,7 @@ void main() {
   Future<void> pumpSection(
     WidgetTester tester, {
     UserVerificationKeyStorage? keyStorage,
+    String? vtaDid,
   }) async {
     final service = VtcService(
       sdk: vta.sdk(),
@@ -36,7 +37,7 @@ void main() {
       ),
       platform: 'ios',
     );
-    await tester.runAsync(() => service.startLink(vta.did));
+    await tester.runAsync(() => service.startLink(vtaDid ?? vta.did));
 
     await tester.pumpWidget(
       ProviderScope(
@@ -106,6 +107,17 @@ void main() {
       await tapAdded(tester);
 
       expect(find.text('Linked to ${vta.did}'), findsOneWidget);
+    });
+
+    testWidgets('says when the VTA DID does not resolve', (tester) async {
+      await pumpSection(tester, vtaDid: 'did:webvh:QmMissing:vta.example');
+
+      await tapAdded(tester);
+
+      expect(
+        find.textContaining("Your VTA's DID couldn't be resolved"),
+        findsOneWidget,
+      );
     });
 
     testWidgets('says when the approval key cannot be created', (tester) async {

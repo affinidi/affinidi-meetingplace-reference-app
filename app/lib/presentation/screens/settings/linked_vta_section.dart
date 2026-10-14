@@ -37,7 +37,10 @@ class LinkedVtaSection extends HookConsumerWidget {
         message.value = l10n.linkedVtaInvalidDid;
       } on MeetingPlaceVtcSDKException catch (error, stackTrace) {
         _log(ref, error, stackTrace);
-        message.value = l10n.linkedVtaUnreachable;
+        message.value =
+            error.code == MeetingPlaceVtcSDKErrorCode.didResolutionFailed
+            ? l10n.linkedVtaDidNotResolved
+            : l10n.linkedVtaUnreachable;
       } on Exception catch (error, stackTrace) {
         // E.g. the approval key cannot be created without enrolled biometrics.
         _log(ref, error, stackTrace);

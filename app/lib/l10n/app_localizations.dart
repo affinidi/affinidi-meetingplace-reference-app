@@ -3717,6 +3717,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This phone couldn\'t set up its sign-in approval key. Make sure Face ID or a fingerprint is set up, then try again.'**
   String get linkedVtaApprovalKeyFailed;
+
+  /// No description provided for @linkedVtaDidNotResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Your VTA\'s DID couldn\'t be resolved from this phone. Check the DID, and that its host can be reached from this phone over HTTPS.'**
+  String get linkedVtaDidNotResolved;
 }
 
 class _AppLocalizationsDelegate
