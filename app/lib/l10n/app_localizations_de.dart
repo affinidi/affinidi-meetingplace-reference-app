@@ -2386,4 +2386,159 @@ class AppLocalizationsDe extends AppLocalizations {
   String linkedVtaLinked(String vtaDid) {
     return 'Linked to $vtaDid';
   }
+
+  @override
+  String get vtcSignInMenuTitle => 'Sign in to community';
+
+  @override
+  String get vtcSignInMenuSubtitle =>
+      'Approve a sign-in code from your community\'s website';
+
+  @override
+  String get vtcSignInUseMembership => 'Use this membership';
+
+  @override
+  String get vtcSignInEnterNumber =>
+      'Enter the two-digit number shown in your browser.';
+
+  @override
+  String get vtcSignInNumberLabel => 'Number';
+
+  @override
+  String get vtcSignInContinue => 'Continue';
+
+  @override
+  String get vtcSignInReviewHeading => 'Approve this sign-in?';
+
+  @override
+  String get vtcSignInSameNetwork => 'On the same network as this phone';
+
+  @override
+  String get vtcSignInOtherNetwork => 'On a different network than this phone';
+
+  @override
+  String get vtcSignInReportedNote =>
+      'Reported by the community. Only that one browser session will be signed in.';
+
+  @override
+  String get vtcSignInApprove => 'Approve';
+
+  @override
+  String get vtcSignInDecline => 'Decline';
+
+  @override
+  String get vtcSignInApproved => 'You\'re signed in on that browser.';
+
+  @override
+  String get vtcSignInDeclined => 'The sign-in was declined.';
+
+  @override
+  String get vtcSignInVtaMissing =>
+      'Link your VTA in Settings before signing in to a community.';
+
+  @override
+  String get vtcSignInDone => 'Done';
+
+  @override
+  String vtcSignInFailure(String reason) {
+    String _temp0 = intl.Intl.selectLogic(reason, {
+      'expired': 'This code has expired. Get a new one.',
+      'invalid': 'This code can\'\'t be used.',
+      'update': 'This code needs a newer version of the app.',
+      'unreachable': 'This community can\'\'t be reached from your phone.',
+      'notAMember':
+          'This sign-in code is from a community you haven\'\'t joined.',
+      'noSignIn': 'This community doesn\'\'t offer sign-in from the app.',
+      'alreadyClaimed':
+          'Another device already scanned this code. Refresh the sign-in page and scan the new code.',
+      'notFound':
+          'This sign-in has ended. Refresh the sign-in page and scan the new code.',
+      'refused':
+          'The community didn\'\'t accept this sign-in. Refresh the sign-in page and try again.',
+      'notAnAdmin':
+          'This identity isn\'\'t an administrator of this community.',
+      'badAnswer':
+          'The community\'\'s answer couldn\'\'t be checked, so nothing was signed in.',
+      'badNumber': 'Enter the two digits shown on the sign-in page.',
+      'wrongNumber':
+          'That isn\'\'t the number on the sign-in page. Refresh the page and scan the new code.',
+      'noVaultEntry':
+          'Your VTA isn\'\'t set up to sign in to this community yet.',
+      'notEnrolledDevice':
+          'This phone isn\'\'t registered with your VTA, so it can\'\'t sign in.',
+      'noUvKey':
+          'This phone isn\'\'t set up to approve sign-ins with your VTA yet.',
+      'uvRequired': 'Your VTA needs your approval on this phone to sign in.',
+      'uvCancelled': 'The sign-in wasn\'\'t approved.',
+      'uvKeyLost':
+          'Your Face ID or fingerprints changed, so approving sign-ins must be set up again. Unlink and link your VTA in Settings.',
+      'uvUnavailable': 'This phone couldn\'\'t approve the sign-in.',
+      'grantReplayed':
+          'This approval was already used. Refresh the sign-in page and scan the new code.',
+      'assertionMethodMissing':
+          'Your identity in this community can\'\'t approve sign-ins yet.',
+      'agentRefused': 'Your VTA refused this sign-in.',
+      'agentNeedsUpdate':
+          'Your VTA needs an update before it can sign you in to websites.',
+      'agentUnreachable': 'Your VTA couldn\'\'t be reached.',
+      'other':
+          'The community didn\'\'t accept this sign-in. Refresh the sign-in page and try again.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String vtcSignInLinkProblem(String problem) {
+    String _temp0 = intl.Intl.selectLogic(problem, {
+      'update': 'This code needs a newer version of the app.',
+      'expired': 'This code has expired. Get a new one.',
+      'unreachable': 'This service can\'\'t be reached from your phone.',
+      'other': 'This code can\'\'t be used.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String vtcSignInAudience(String audience) {
+    String _temp0 = intl.Intl.selectLogic(audience, {
+      'admin': 'Operator console',
+      'other': 'Member portal',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String vtcSignInTitle(String community) {
+    return 'Sign in to $community';
+  }
+
+  @override
+  String vtcSignInWebsite(String origin) {
+    return 'Website: $origin';
+  }
+
+  @override
+  String vtcSignInFoundMembership(String community, String persona) {
+    return 'Your membership of $community was found on your VTA. Sign in as $persona?';
+  }
+
+  @override
+  String vtcSignInTimeLeft(int seconds) {
+    return '$seconds s left';
+  }
+
+  @override
+  String vtcSignInAs(String persona) {
+    return 'Signing in as $persona';
+  }
+
+  @override
+  String vtcSignInBrowser(String browser, String os) {
+    return 'Browser: $browser on $os';
+  }
+
+  @override
+  String vtcSignInLocation(String location) {
+    return 'Location: $location';
+  }
 }

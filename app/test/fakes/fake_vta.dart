@@ -27,6 +27,12 @@ class FakeVta implements HttpClientAdapter, DidResolver {
   final Map<String, Map<String, dynamic>> refusals = {};
   final List<Map<String, dynamic>> received = [];
 
+  /// Other DID documents to resolve, such as a community's.
+  final Map<String, DidDocument> otherDocuments = {};
+
+  /// When set, `vault/sign-trust-task` signs as this persona.
+  Ed25519DidKeySigner? persona;
+
   String get did => _key.did;
 
   /// An SDK that reaches only this VTA.
@@ -38,6 +44,7 @@ class FakeVta implements HttpClientAdapter, DidResolver {
   @override
   Future<DidDocument> resolveDid(String did) async {
     if (did == this.did) return document;
+    if (otherDocuments[did] case final other?) return other;
     if (did.startsWith('did:key:')) return DidKey.resolve(did);
     throw StateError('unknown DID');
   }
@@ -57,6 +64,9 @@ class FakeVta implements HttpClientAdapter, DidResolver {
     final type = request['type'] as String;
 
     final payload = switch (type) {
+      VtaTask.signTrustTask when persona != null => {
+        'signedEnvelope': await _signAsPersona(request),
+      },
       VtaTask.challenge => {'sessionId': 's', 'challenge': 'c'},
       VtaTask.authenticate => {
         'tokens': {'accessToken': 'token'},
@@ -78,6 +88,18 @@ class FakeVta implements HttpClientAdapter, DidResolver {
       headers: {
         Headers.contentTypeHeader: [Headers.jsonContentType],
       },
+    );
+  }
+
+  Future<Map<String, dynamic>> _signAsPersona(Map<String, dynamic> request) {
+    final payload = request['payload'] as Map<String, dynamic>;
+    final unsigned = payload['unsignedEnvelope'] as Map<String, dynamic>;
+    return EddsaJcs2022.sign(
+      unsigned,
+      signer: persona!,
+      purpose: unsigned['type'] == OobTask.grant
+          ? ProofPurpose.assertionMethod
+          : ProofPurpose.authentication,
     );
   }
 

@@ -3555,6 +3555,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Linked to {vtaDid}'**
   String linkedVtaLinked(String vtaDid);
+
+  /// No description provided for @vtcSignInMenuTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to community'**
+  String get vtcSignInMenuTitle;
+
+  /// No description provided for @vtcSignInMenuSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve a sign-in code from your community\'s website'**
+  String get vtcSignInMenuSubtitle;
+
+  /// No description provided for @vtcSignInUseMembership.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this membership'**
+  String get vtcSignInUseMembership;
+
+  /// No description provided for @vtcSignInEnterNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the two-digit number shown in your browser.'**
+  String get vtcSignInEnterNumber;
+
+  /// No description provided for @vtcSignInNumberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Number'**
+  String get vtcSignInNumberLabel;
+
+  /// No description provided for @vtcSignInContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get vtcSignInContinue;
+
+  /// No description provided for @vtcSignInReviewHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve this sign-in?'**
+  String get vtcSignInReviewHeading;
+
+  /// No description provided for @vtcSignInSameNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'On the same network as this phone'**
+  String get vtcSignInSameNetwork;
+
+  /// No description provided for @vtcSignInOtherNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'On a different network than this phone'**
+  String get vtcSignInOtherNetwork;
+
+  /// No description provided for @vtcSignInReportedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Reported by the community. Only that one browser session will be signed in.'**
+  String get vtcSignInReportedNote;
+
+  /// No description provided for @vtcSignInApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get vtcSignInApprove;
+
+  /// No description provided for @vtcSignInDecline.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get vtcSignInDecline;
+
+  /// No description provided for @vtcSignInApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re signed in on that browser.'**
+  String get vtcSignInApproved;
+
+  /// No description provided for @vtcSignInDeclined.
+  ///
+  /// In en, this message translates to:
+  /// **'The sign-in was declined.'**
+  String get vtcSignInDeclined;
+
+  /// No description provided for @vtcSignInVtaMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Link your VTA in Settings before signing in to a community.'**
+  String get vtcSignInVtaMissing;
+
+  /// No description provided for @vtcSignInDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get vtcSignInDone;
+
+  /// Why a community sign-in could not go ahead
+  ///
+  /// In en, this message translates to:
+  /// **'{reason, select, expired{This code has expired. Get a new one.} invalid{This code can\'\'t be used.} update{This code needs a newer version of the app.} unreachable{This community can\'\'t be reached from your phone.} notAMember{This sign-in code is from a community you haven\'\'t joined.} noSignIn{This community doesn\'\'t offer sign-in from the app.} alreadyClaimed{Another device already scanned this code. Refresh the sign-in page and scan the new code.} notFound{This sign-in has ended. Refresh the sign-in page and scan the new code.} refused{The community didn\'\'t accept this sign-in. Refresh the sign-in page and try again.} notAnAdmin{This identity isn\'\'t an administrator of this community.} badAnswer{The community\'\'s answer couldn\'\'t be checked, so nothing was signed in.} badNumber{Enter the two digits shown on the sign-in page.} wrongNumber{That isn\'\'t the number on the sign-in page. Refresh the page and scan the new code.} noVaultEntry{Your VTA isn\'\'t set up to sign in to this community yet.} notEnrolledDevice{This phone isn\'\'t registered with your VTA, so it can\'\'t sign in.} noUvKey{This phone isn\'\'t set up to approve sign-ins with your VTA yet.} uvRequired{Your VTA needs your approval on this phone to sign in.} uvCancelled{The sign-in wasn\'\'t approved.} uvKeyLost{Your Face ID or fingerprints changed, so approving sign-ins must be set up again. Unlink and link your VTA in Settings.} uvUnavailable{This phone couldn\'\'t approve the sign-in.} grantReplayed{This approval was already used. Refresh the sign-in page and scan the new code.} assertionMethodMissing{Your identity in this community can\'\'t approve sign-ins yet.} agentRefused{Your VTA refused this sign-in.} agentNeedsUpdate{Your VTA needs an update before it can sign you in to websites.} agentUnreachable{Your VTA couldn\'\'t be reached.} other{The community didn\'\'t accept this sign-in. Refresh the sign-in page and try again.}}'**
+  String vtcSignInFailure(String reason);
+
+  /// Why a scanned code cannot be used
+  ///
+  /// In en, this message translates to:
+  /// **'{problem, select, update{This code needs a newer version of the app.} expired{This code has expired. Get a new one.} unreachable{This service can\'\'t be reached from your phone.} other{This code can\'\'t be used.}}'**
+  String vtcSignInLinkProblem(String problem);
+
+  /// Which page of the community the browser signs in to
+  ///
+  /// In en, this message translates to:
+  /// **'{audience, select, admin{Operator console} other{Member portal}}'**
+  String vtcSignInAudience(String audience);
+
+  /// Heading of a community sign-in
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to {community}'**
+  String vtcSignInTitle(String community);
+
+  /// The website being signed in to
+  ///
+  /// In en, this message translates to:
+  /// **'Website: {origin}'**
+  String vtcSignInWebsite(String origin);
+
+  /// Asks to use a membership found on the VTA
+  ///
+  /// In en, this message translates to:
+  /// **'Your membership of {community} was found on your VTA. Sign in as {persona}?'**
+  String vtcSignInFoundMembership(String community, String persona);
+
+  /// Seconds left to decide on a sign-in
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds} s left'**
+  String vtcSignInTimeLeft(int seconds);
+
+  /// The persona being signed in
+  ///
+  /// In en, this message translates to:
+  /// **'Signing in as {persona}'**
+  String vtcSignInAs(String persona);
+
+  /// The browser asking to sign in, as reported
+  ///
+  /// In en, this message translates to:
+  /// **'Browser: {browser} on {os}'**
+  String vtcSignInBrowser(String browser, String os);
+
+  /// Approximate location of the browser, as reported
+  ///
+  /// In en, this message translates to:
+  /// **'Location: {location}'**
+  String vtcSignInLocation(String location);
 }
 
 class _AppLocalizationsDelegate

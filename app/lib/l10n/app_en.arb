@@ -2307,5 +2307,117 @@
 				"type": "String"
 			}
 		}
+	},
+	"vtcSignInMenuTitle": "Sign in to community",
+	"vtcSignInMenuSubtitle": "Approve a sign-in code from your community's website",
+	"vtcSignInUseMembership": "Use this membership",
+	"vtcSignInEnterNumber": "Enter the two-digit number shown in your browser.",
+	"vtcSignInNumberLabel": "Number",
+	"vtcSignInContinue": "Continue",
+	"vtcSignInReviewHeading": "Approve this sign-in?",
+	"vtcSignInSameNetwork": "On the same network as this phone",
+	"vtcSignInOtherNetwork": "On a different network than this phone",
+	"vtcSignInReportedNote": "Reported by the community. Only that one browser session will be signed in.",
+	"vtcSignInApprove": "Approve",
+	"vtcSignInDecline": "Decline",
+	"vtcSignInApproved": "You're signed in on that browser.",
+	"vtcSignInDeclined": "The sign-in was declined.",
+	"vtcSignInVtaMissing": "Link your VTA in Settings before signing in to a community.",
+	"vtcSignInDone": "Done",
+	"vtcSignInFailure": "{reason, select, expired{This code has expired. Get a new one.} invalid{This code can''t be used.} update{This code needs a newer version of the app.} unreachable{This community can''t be reached from your phone.} notAMember{This sign-in code is from a community you haven''t joined.} noSignIn{This community doesn''t offer sign-in from the app.} alreadyClaimed{Another device already scanned this code. Refresh the sign-in page and scan the new code.} notFound{This sign-in has ended. Refresh the sign-in page and scan the new code.} refused{The community didn''t accept this sign-in. Refresh the sign-in page and try again.} notAnAdmin{This identity isn''t an administrator of this community.} badAnswer{The community''s answer couldn''t be checked, so nothing was signed in.} badNumber{Enter the two digits shown on the sign-in page.} wrongNumber{That isn''t the number on the sign-in page. Refresh the page and scan the new code.} noVaultEntry{Your VTA isn''t set up to sign in to this community yet.} notEnrolledDevice{This phone isn''t registered with your VTA, so it can''t sign in.} noUvKey{This phone isn''t set up to approve sign-ins with your VTA yet.} uvRequired{Your VTA needs your approval on this phone to sign in.} uvCancelled{The sign-in wasn''t approved.} uvKeyLost{Your Face ID or fingerprints changed, so approving sign-ins must be set up again. Unlink and link your VTA in Settings.} uvUnavailable{This phone couldn''t approve the sign-in.} grantReplayed{This approval was already used. Refresh the sign-in page and scan the new code.} assertionMethodMissing{Your identity in this community can''t approve sign-ins yet.} agentRefused{Your VTA refused this sign-in.} agentNeedsUpdate{Your VTA needs an update before it can sign you in to websites.} agentUnreachable{Your VTA couldn''t be reached.} other{The community didn''t accept this sign-in. Refresh the sign-in page and try again.}}",
+	"@vtcSignInFailure": {
+		"description": "Why a community sign-in could not go ahead",
+		"placeholders": {
+			"reason": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcSignInLinkProblem": "{problem, select, update{This code needs a newer version of the app.} expired{This code has expired. Get a new one.} unreachable{This service can''t be reached from your phone.} other{This code can''t be used.}}",
+	"@vtcSignInLinkProblem": {
+		"description": "Why a scanned code cannot be used",
+		"placeholders": {
+			"problem": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcSignInAudience": "{audience, select, admin{Operator console} other{Member portal}}",
+	"@vtcSignInAudience": {
+		"description": "Which page of the community the browser signs in to",
+		"placeholders": {
+			"audience": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcSignInTitle": "Sign in to {community}",
+	"@vtcSignInTitle": {
+		"description": "Heading of a community sign-in",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcSignInWebsite": "Website: {origin}",
+	"@vtcSignInWebsite": {
+		"description": "The website being signed in to",
+		"placeholders": {
+			"origin": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcSignInFoundMembership": "Your membership of {community} was found on your VTA. Sign in as {persona}?",
+	"@vtcSignInFoundMembership": {
+		"description": "Asks to use a membership found on the VTA",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			},
+			"persona": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcSignInTimeLeft": "{seconds} s left",
+	"@vtcSignInTimeLeft": {
+		"description": "Seconds left to decide on a sign-in",
+		"placeholders": {
+			"seconds": {
+				"type": "int"
+			}
+		}
+	},
+	"vtcSignInAs": "Signing in as {persona}",
+	"@vtcSignInAs": {
+		"description": "The persona being signed in",
+		"placeholders": {
+			"persona": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcSignInBrowser": "Browser: {browser} on {os}",
+	"@vtcSignInBrowser": {
+		"description": "The browser asking to sign in, as reported",
+		"placeholders": {
+			"browser": {
+				"type": "String"
+			},
+			"os": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcSignInLocation": "Location: {location}",
+	"@vtcSignInLocation": {
+		"description": "Approximate location of the browser, as reported",
+		"placeholders": {
+			"location": {
+				"type": "String"
+			}
+		}
 	}
 }
