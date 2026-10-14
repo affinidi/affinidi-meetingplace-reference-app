@@ -73,6 +73,10 @@ dependencies:
   meeting_place_livekit_flutter: 
     path: ../packages/meeting_place_livekit_flutter
   meeting_place_matrix: ^1.0.0
+  # Temporary: the package is not published yet. Replace the path with a
+  # version once meeting_place_vtc is on pub.dev.
+  meeting_place_vtc:
+    path: ../../affinidi-meetingplace-sdk-dart/packages/meeting_place_vtc
   mobile_scanner: ^7.2.0
   mpx_app_core:
     path: ../packages/app-core
