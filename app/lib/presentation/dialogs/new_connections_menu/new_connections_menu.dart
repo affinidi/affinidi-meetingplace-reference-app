@@ -4,6 +4,7 @@ import 'package:meeting_place_core/meeting_place_core.dart';
 import '../../../domain/models/identity/identity.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../navigation/routes/dashboard_routes.dart';
+import '../../screens/vtc_join/vtc_join_screen.dart';
 import '../../screens/vtc_sign_in/vtc_sign_in_screen.dart';
 import '../../widgets/bottom_sheet_menu.dart';
 import '../../widgets/connection_success_bottom_sheet.dart';
@@ -90,6 +91,9 @@ class NewConnectionsMenu extends StatelessWidget {
       case NewConnectionsMenuOption.signInToCommunity:
         await VtcSignInScreen.show(context);
         break;
+      case NewConnectionsMenuOption.joinCommunity:
+        await VtcJoinScreen.show(context);
+        break;
     }
   }
 
@@ -97,7 +101,7 @@ class NewConnectionsMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return BottomSheetMenu(
       header: context.l10n.newConnectionsOptionsHeader,
-      itemCount: 5,
+      itemCount: 6,
       itemBuilder: (context, index) {
         switch (index) {
           case 0:
@@ -139,6 +143,19 @@ class NewConnectionsMenu extends StatelessWidget {
               },
             );
           case 4:
+            return MenuOptionTile(
+              assetName: NewConnectionsMenuOption.joinCommunity.assetName,
+              title: context.l10n.vtcJoinMenuTitle,
+              subtitle: context.l10n.vtcJoinMenuSubtitle,
+              onTap: () {
+                if (!context.mounted) return;
+                Navigator.of(
+                  context,
+                  rootNavigator: true,
+                ).pop(NewConnectionsMenuOption.joinCommunity);
+              },
+            );
+          case 5:
             return MenuOptionTile(
               assetName: NewConnectionsMenuOption.signInToCommunity.assetName,
               title: context.l10n.vtcSignInMenuTitle,

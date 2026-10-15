@@ -2421,5 +2421,68 @@
 		}
 	},
 	"linkedVtaApprovalKeyFailed": "This phone couldn't set up its sign-in approval key. Make sure Face ID or a fingerprint is set up, then try again.",
-	"linkedVtaDidNotResolved": "Your VTA's DID couldn't be resolved from this phone. Check the DID, and that its host can be reached from this phone over HTTPS."
+	"linkedVtaDidNotResolved": "Your VTA's DID couldn't be resolved from this phone. Check the DID, and that its host can be reached from this phone over HTTPS.",
+	"vtcJoinMenuTitle": "Join a community",
+	"vtcJoinMenuSubtitle": "Scan a community's code and apply with your VTA",
+	"vtcJoinTitle": "Join {name}?",
+	"@vtcJoinTitle": {
+		"description": "Asks whether to apply to the named community",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinAdmitsAtOnce": "You become a member as soon as you apply.",
+	"vtcJoinReviewed": "The community's administrators review each application.",
+	"vtcJoinPersonaNote": "Your VTA creates a new identity for this community, so other communities can't link you through it.",
+	"vtcJoinCannotApply": "This community only admits people with an invitation, credentials or an in-person check, or asks for details Meeting Place can't send yet.",
+	"vtcJoinAction": "Join",
+	"vtcJoinJoined": "You're a member of {name}.",
+	"@vtcJoinJoined": {
+		"description": "The application to the named community was accepted",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinAlreadyMember": "You're already a member of {name}.",
+	"@vtcJoinAlreadyMember": {
+		"description": "The scanned community is one the member belongs to",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinPending": "Your application to {name} is waiting for the community's decision.",
+	"@vtcJoinPending": {
+		"description": "An application to the named community is open",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinCheckAgain": "Check again",
+	"vtcJoinDenied": "{name} didn't accept your application.",
+	"@vtcJoinDenied": {
+		"description": "The named community turned the application down",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinNeedsMore": "The community needs more than Meeting Place can send, such as credentials.",
+	"vtcJoinFailure": "{reason, select, invalidCode{This isn''t a community''s code.} vtaMissing{Link your VTA in Settings before joining a community.} unreachable{The community can''t be reached from your phone.} noDidHosting{Your VTA has no DID hosting server, so it can''t create an identity the community can find.} notAccepting{This community isn''t accepting applications.} badAnswer{The community''s answer couldn''t be checked, so nothing was recorded.} other{The community or your VTA refused the application.}}",
+	"@vtcJoinFailure": {
+		"description": "Why joining a community could not go ahead",
+		"placeholders": {
+			"reason": {
+				"type": "String"
+			}
+		}
+	}
 }

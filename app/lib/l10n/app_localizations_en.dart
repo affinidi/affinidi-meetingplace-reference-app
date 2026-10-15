@@ -2500,4 +2500,77 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get linkedVtaDidNotResolved =>
       'Your VTA\'s DID couldn\'t be resolved from this phone. Check the DID, and that its host can be reached from this phone over HTTPS.';
+
+  @override
+  String get vtcJoinMenuTitle => 'Join a community';
+
+  @override
+  String get vtcJoinMenuSubtitle =>
+      'Scan a community\'s code and apply with your VTA';
+
+  @override
+  String vtcJoinTitle(String name) {
+    return 'Join $name?';
+  }
+
+  @override
+  String get vtcJoinAdmitsAtOnce => 'You become a member as soon as you apply.';
+
+  @override
+  String get vtcJoinReviewed =>
+      'The community\'s administrators review each application.';
+
+  @override
+  String get vtcJoinPersonaNote =>
+      'Your VTA creates a new identity for this community, so other communities can\'t link you through it.';
+
+  @override
+  String get vtcJoinCannotApply =>
+      'This community only admits people with an invitation, credentials or an in-person check, or asks for details Meeting Place can\'t send yet.';
+
+  @override
+  String get vtcJoinAction => 'Join';
+
+  @override
+  String vtcJoinJoined(String name) {
+    return 'You\'re a member of $name.';
+  }
+
+  @override
+  String vtcJoinAlreadyMember(String name) {
+    return 'You\'re already a member of $name.';
+  }
+
+  @override
+  String vtcJoinPending(String name) {
+    return 'Your application to $name is waiting for the community\'s decision.';
+  }
+
+  @override
+  String get vtcJoinCheckAgain => 'Check again';
+
+  @override
+  String vtcJoinDenied(String name) {
+    return '$name didn\'t accept your application.';
+  }
+
+  @override
+  String get vtcJoinNeedsMore =>
+      'The community needs more than Meeting Place can send, such as credentials.';
+
+  @override
+  String vtcJoinFailure(String reason) {
+    String _temp0 = intl.Intl.selectLogic(reason, {
+      'invalidCode': 'This isn\'\'t a community\'\'s code.',
+      'vtaMissing': 'Link your VTA in Settings before joining a community.',
+      'unreachable': 'The community can\'\'t be reached from your phone.',
+      'noDidHosting':
+          'Your VTA has no DID hosting server, so it can\'\'t create an identity the community can find.',
+      'notAccepting': 'This community isn\'\'t accepting applications.',
+      'badAnswer':
+          'The community\'\'s answer couldn\'\'t be checked, so nothing was recorded.',
+      'other': 'The community or your VTA refused the application.',
+    });
+    return '$_temp0';
+  }
 }

@@ -12,34 +12,52 @@ class _NoCamera extends CameraService {
   CameraServiceState build() => CameraServiceState(isAvailable: false);
 }
 
-void main() {
-  testWidgets('offers signing in to a community', (tester) async {
-    NewConnectionsMenuOption? selection;
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [cameraServiceProvider.overrideWith(_NoCamera.new)],
-        child: MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: Builder(
-            builder: (context) => Scaffold(
-              body: TextButton(
-                onPressed: () async {
-                  selection = await NewConnectionsMenu.show(context: context);
-                },
-                child: const Text('open'),
-              ),
+Future<NewConnectionsMenuOption?> _select(
+  WidgetTester tester,
+  String title,
+) async {
+  NewConnectionsMenuOption? selection;
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [cameraServiceProvider.overrideWith(_NoCamera.new)],
+      child: MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: TextButton(
+              onPressed: () async {
+                selection = await NewConnectionsMenu.show(context: context);
+              },
+              child: const Text('open'),
             ),
           ),
         ),
       ),
+    ),
+  );
+
+  await tester.tap(find.text('open'));
+  await tester.pumpAndSettle();
+  await tester.ensureVisible(find.text(title));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text(title));
+  await tester.pumpAndSettle();
+  return selection;
+}
+
+void main() {
+  testWidgets('offers signing in to a community', (tester) async {
+    expect(
+      await _select(tester, 'Sign in to community'),
+      NewConnectionsMenuOption.signInToCommunity,
     );
+  });
 
-    await tester.tap(find.text('open'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Sign in to community'));
-    await tester.pumpAndSettle();
-
-    expect(selection, NewConnectionsMenuOption.signInToCommunity);
+  testWidgets('offers joining a community', (tester) async {
+    expect(
+      await _select(tester, 'Join a community'),
+      NewConnectionsMenuOption.joinCommunity,
+    );
   });
 }

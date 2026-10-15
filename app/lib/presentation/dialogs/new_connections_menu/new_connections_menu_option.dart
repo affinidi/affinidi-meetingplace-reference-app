@@ -3,7 +3,8 @@ enum NewConnectionsMenuOption {
   scanQRCode(assetName: 'scanqr.png'),
   claimAnOffer(assetName: 'receive.png'),
   publishAnOffer(assetName: 'publish.png'),
-  signInToCommunity(assetName: 'scanqr.png');
+  signInToCommunity(assetName: 'scanqr.png'),
+  joinCommunity(assetName: 'scanqr.png');
 
   const NewConnectionsMenuOption({required this.assetName});
 
