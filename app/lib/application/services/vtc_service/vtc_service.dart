@@ -16,6 +16,12 @@ class InvalidVtaDidException implements Exception {
   const InvalidVtaDidException();
 }
 
+/// Thrown when scanned text is not a community's DID.
+class InvalidCommunityCodeException implements Exception {
+  /// Creates an [InvalidCommunityCodeException].
+  const InvalidCommunityCodeException();
+}
+
 /// Name the phone registers with on the member's VTA.
 const _deviceName = 'Meeting Place';
 
@@ -25,8 +31,9 @@ class VtaNotLinkedException implements Exception {
   const VtaNotLinkedException();
 }
 
-/// Links Meeting Place to the member's VTA, and signs the member in to their
-/// Verifiable Trust Communities' portals.
+/// Links Meeting Place to the member's VTA, joins Verifiable Trust
+/// Communities as personas the VTA holds, and signs the member in to their
+/// communities' portals.
 ///
 /// The link is manual: the phone mints a manager key and shows its DID; the
 /// VTA's administrator grants it; the phone then confirms the grant and
@@ -55,9 +62,7 @@ class VtcService {
   /// Throws [InvalidVtaDidException] when [vtaDid] is not a DID.
   Future<String> startLink(String vtaDid) async {
     final did = vtaDid.trim();
-    if (!did.startsWith('did:') || did.contains(RegExp(r'\s'))) {
-      throw const InvalidVtaDidException();
-    }
+    if (!_isDid(did)) throw const InvalidVtaDidException();
     final manager = _sdk.newManagerKey();
     _client = null;
     await _repository.clear();
@@ -109,21 +114,115 @@ class VtcService {
   /// before any network call.
   OobSignInClient signInClient() => _sdk.signInClient(
     isKnownCommunity: (vtcDid) async =>
-        await _repository.findCommunity(vtcDid) != null,
+        (await _repository.findCommunity(vtcDid))?.isMember ?? false,
   );
 
-  /// The member's recorded membership of [communityDid], or null.
+  /// The member's recorded membership of [communityDid], or null. An
+  /// application is no membership.
   Future<CommunityMembership?> recordedMembership(String communityDid) async {
     final community = await _repository.findCommunity(communityDid);
-    if (community == null) return null;
+    if (community == null || !community.isMember) return null;
     return CommunityMembership(
       communityDid: community.communityDid,
-      persona: VtaPersona(
-        did: community.personaDid,
-        contextId: community.contextId,
-      ),
+      persona: _persona(community),
       name: community.name,
     );
+  }
+
+  /// The member's record of [communityDid]: a membership, an application,
+  /// or null.
+  Future<VtcCommunity?> community(String communityDid) =>
+      _repository.findCommunity(communityDid);
+
+  /// Reads what the community whose DID is [scanned], as its QR code shows
+  /// it, asks of applicants.
+  ///
+  /// Throws [InvalidCommunityCodeException] when [scanned] is not a DID, and
+  /// [MeetingPlaceVtcSDKException] when the community cannot be reached.
+  Future<JoinManifest> readCommunity(String scanned) async {
+    final did = scanned.trim();
+    if (!_isDid(did)) throw const InvalidCommunityCodeException();
+    return _sdk.joinClient().readManifest(did);
+  }
+
+  /// Applies to join [manifest]'s community as a persona of the member's
+  /// VTA, and records the outcome.
+  ///
+  /// The VTA creates the persona on the first application to a community;
+  /// a later one applies as the same persona. Once admitted, the issued
+  /// cards are kept on the VTA, where other apps of the member find them.
+  ///
+  /// Throws [VtaNotLinkedException] when no VTA is linked, and
+  /// [MeetingPlaceVtcSDKException] when the VTA or the community refuses or
+  /// cannot be reached.
+  Future<JoinVerdict> join(JoinManifest manifest) async {
+    final vta = await _grantedVta();
+    var community = await _repository.findCommunity(manifest.communityDid);
+    if (community == null) {
+      final persona = await vta.createPersona(
+        label: manifest.name ?? manifest.communityDid,
+      );
+      community = VtcCommunity(
+        communityDid: manifest.communityDid,
+        personaDid: persona.did,
+        contextId: persona.contextId,
+        name: manifest.name,
+        signingKeyId: persona.signingKeyId,
+        isMember: false,
+      );
+      // Kept before applying, so that a retry applies as the same persona.
+      await _repository.saveCommunity(community);
+    }
+
+    final verdict = await _sdk.joinClient().apply(
+      manifest,
+      agent: vta,
+      persona: await _personaSigner(vta, community),
+    );
+    switch (verdict) {
+      case JoinAdmitted(:final credentials):
+        await _repository.saveCommunity(
+          community.withApplication(isMember: true),
+        );
+        await _keepCards(vta, credentials, community.contextId);
+      case JoinPending(:final requestId):
+        await _repository.saveCommunity(
+          community.withApplication(isMember: false, requestId: requestId),
+        );
+      case JoinDenied() || JoinNeedsMore():
+        await _repository.saveCommunity(
+          community.withApplication(isMember: false),
+        );
+    }
+    return verdict;
+  }
+
+  /// Asks where the open application to [communityDid] stands, and records
+  /// the community's decision once it has made one.
+  ///
+  /// Returns null when no application is open. Throws as [join] does.
+  Future<JoinRequestStatus?> checkApplication(String communityDid) async {
+    final community = await _repository.findCommunity(communityDid);
+    final requestId = community?.joinRequestId;
+    if (community == null || !community.isApplying || requestId == null) {
+      return null;
+    }
+
+    final vta = await _grantedVta();
+    final status = await _sdk.joinClient().status(
+      communityDid,
+      requestId: requestId,
+      agent: vta,
+      persona: await _personaSigner(vta, community),
+    );
+    if (!status.isOpen) {
+      await _repository.saveCommunity(
+        community.withApplication(
+          isMember: status == JoinRequestStatus.approved,
+        ),
+      );
+    }
+    return status;
   }
 
   /// Looks up the member's membership of [communityDid] in the cards backed
@@ -166,6 +265,40 @@ class VtcService {
 
   /// The biometric approval key, as the signer of an approval.
   Future<TrustTaskSigner> approvalSigner() => _userVerificationKey.signer();
+
+  Future<SignInPersona> _personaSigner(VtaClient vta, VtcCommunity community) {
+    return _sdk.personaSigner(
+      vta: vta,
+      communityDid: community.communityDid,
+      persona: _persona(community),
+    );
+  }
+
+  /// Keeps [cards] on the VTA. A card that is not kept is skipped: the
+  /// community holds the membership either way, and only another app of the
+  /// member cannot import it.
+  static Future<void> _keepCards(
+    VtaClient vta,
+    List<Map<String, dynamic>> cards,
+    String contextId,
+  ) async {
+    for (final card in cards) {
+      try {
+        await vta.keepCredential(card, contextId: contextId);
+      } on MeetingPlaceVtcSDKException {
+        continue;
+      }
+    }
+  }
+
+  static VtaPersona _persona(VtcCommunity community) => VtaPersona(
+    did: community.personaDid,
+    contextId: community.contextId,
+    signingKeyId: community.signingKeyId,
+  );
+
+  static bool _isDid(String text) =>
+      text.startsWith('did:') && !text.contains(RegExp(r'\s'));
 
   Future<VtaClient> _grantedVta() async {
     final linkedVta = await _repository.getLinkedVta();

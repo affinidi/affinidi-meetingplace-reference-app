@@ -49,6 +49,22 @@ class FakeVtcNetwork implements HttpClientAdapter {
   int cancels = 0;
   bool approved = false;
 
+  /// The verdict on a join request.
+  Map<String, dynamic> joinVerdict = {
+    'effect': 'allow',
+    'with': {
+      'role': 'member',
+      'vmc': {'id': 'urn:uuid:vmc', 'type': 'MembershipCredential'},
+      'roleVac': {'id': 'urn:uuid:vac', 'type': 'AuthorityCredential'},
+    },
+  };
+
+  /// Where a join request stands.
+  String joinStatus = 'pending';
+
+  /// The join documents the community received.
+  final List<Map<String, dynamic>> joinRequests = [];
+
   /// An SDK that reaches only this network.
   MeetingPlaceVtcSDK sdk() => MeetingPlaceVtcSDK(
     didResolver: vta,
@@ -93,7 +109,22 @@ class FakeVtcNetwork implements HttpClientAdapter {
     };
 
     final Map<String, dynamic> answer;
-    if (type == OobTask.claim) {
+    var purpose = ProofPurpose.assertionMethod;
+    if (type.startsWith('https://trusttasks.org/spec/vtc/join-requests/')) {
+      joinRequests.add(request);
+      purpose = ProofPurpose.authentication;
+      answer = switch (type) {
+        JoinTask.manifest => {
+          'communityDid': fakeVtcDid,
+          'branding': {'displayName': 'Football club'},
+          'criteria': [
+            {'id': 'open', 'admission': 'automatic'},
+          ],
+        },
+        JoinTask.submit => {'requestId': 'request-1', 'verdict': joinVerdict},
+        _ => {'requestId': payload['requestId'], 'status': joinStatus},
+      };
+    } else if (type == OobTask.claim) {
       answer = step1;
     } else if (type == OobTask.prove) {
       final identify = payload['identify'] as Map<String, dynamic>;
@@ -133,7 +164,7 @@ class FakeVtcNetwork implements HttpClientAdapter {
       recipient: request['issuer'] as String,
       threadId: request['id'] as String,
       payload: answer,
-    ).sign(signer, purpose: ProofPurpose.assertionMethod);
+    ).sign(signer, purpose: purpose);
     return signed.toJson();
   }
 
