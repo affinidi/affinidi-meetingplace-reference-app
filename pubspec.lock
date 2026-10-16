@@ -621,10 +621,10 @@ packages:
     dependency: transitive
     description:
       name: didcomm
-      sha256: "3345d647b38a5f031eb23829ee8fd7f4aa195781c6bd46fc8b26f364ad95a8c9"
+      sha256: c6478c14ef87e859c72804d0e04f61db60fdbf5485fedeacc531027ae3815b53
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.4"
+    version: "2.4.0"
   dio:
     dependency: transitive
     description:
@@ -1401,10 +1401,10 @@ packages:
     dependency: transitive
     description:
       name: meeting_place_chat
-      sha256: e04f3b6bcbf560c7162dadaf7d37ab488cd3459240223a0a1b5dc4351e391078
+      sha256: "4525310fe23e642beee178cd6bc0a8fae5ee5420d43891d4f4e28bb559f77780"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0"
+    version: "1.0.3"
   meeting_place_control_plane:
     dependency: transitive
     description:
@@ -1417,42 +1417,42 @@ packages:
     dependency: transitive
     description:
       name: meeting_place_core
-      sha256: cd7cf56fef8891e4b114a8e44a4dfb17e01e97660650aa9e03a3b9470636f1be
+      sha256: "3d1bf83061944a9764cf1c0bbb2839cd6829fa54fbd32bd4ae0086fc8b0f7fb1"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0"
+    version: "1.0.3"
   meeting_place_credentials:
     dependency: transitive
     description:
       name: meeting_place_credentials
-      sha256: ca4a0da006d66357106ab1b52f3abea8bc3d2008f78c6aaa3df5c776bca29fb1
+      sha256: "83fee88cb33e58836a20c18717dcd2721cf6aeeb396dfe414d783911b6470a17"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0"
+    version: "1.0.3"
   meeting_place_drift_repository:
     dependency: transitive
     description:
       name: meeting_place_drift_repository
-      sha256: f82c3a7d97085216d99725d8c83e34819ec6b977659dc988ebf9a0452c7ea11f
+      sha256: df30789028c86c4b36b5a0f2a10ed4c0f6d390af31c7a5984f110bfebe3f3ad8
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0"
+    version: "1.0.3"
   meeting_place_matrix:
     dependency: transitive
     description:
       name: meeting_place_matrix
-      sha256: "2e0b08d5d99e0d7ca5d750d414358ba9ad6e742c31678880a43d992ea38102fe"
+      sha256: "47e925d59b315da9440bef6353e9962cab205e6e3e4fc487c03f2ee7b87c7bda"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0"
+    version: "1.0.3"
   meeting_place_mediator:
     dependency: transitive
     description:
       name: meeting_place_mediator
-      sha256: e9212450f01b1dafb5a14d3d0b26b7fe36c6bdc107f958ba583dfb7132c40e76
+      sha256: "44080e7158b3d9f6cb3a480c8e8384459ba4b29a0690a70e09f6fc9c6955ecda"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0"
+    version: "1.1.0"
   melos:
     dependency: "direct dev"
     description:
