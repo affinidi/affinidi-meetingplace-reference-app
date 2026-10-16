@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2026-10-16
+
+### Changes
+
+---
+
+Packages with breaking changes:
+
+ - There are no breaking changes in this release.
+
+Packages with other changes:
+
+ - [`meeting_place_livekit_flutter` - `v1.0.1`](#meeting_place_livekit_flutter---v101)
+
+---
+
+#### `meeting_place_livekit_flutter` - `v1.0.1`
+
+ - **FIX**: update Meeting Place SDK to latest versions (#339).
+
+
 ## 2026-09-10
 
 ### Changes

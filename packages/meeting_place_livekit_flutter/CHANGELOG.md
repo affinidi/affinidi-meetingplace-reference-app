@@ -1,3 +1,7 @@
+## 1.0.1
+
+ - **FIX**: update Meeting Place SDK to latest versions (#339).
+
 ## 1.0.0
 
  - **CHORE**: Promote to stable version.

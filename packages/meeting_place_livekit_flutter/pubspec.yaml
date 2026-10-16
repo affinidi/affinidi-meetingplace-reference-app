@@ -1,6 +1,6 @@
 name: meeting_place_livekit_flutter
 description: Flutter plugin for real-time audio and video call rendering via LiveKit with Matrix RTC integration.
-version: 1.0.0
+version: 1.0.1
 repository: https://github.com/affinidi/affinidi-meetingplace-reference-app/tree/main/packages/meeting_place_livekit_flutter
 issue_tracker: https://github.com/affinidi/affinidi-meetingplace-reference-app/issues
 
