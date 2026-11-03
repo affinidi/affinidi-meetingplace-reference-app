@@ -161,7 +161,7 @@ class VtcService {
   /// [MeetingPlaceVtcSDKException] when the community cannot be reached.
   Future<JoinManifest> readCommunity(String scanned) async {
     final did = scanned.trim();
-    if (!_isDid(did)) throw const InvalidCommunityCodeException();
+    if (!_isCommunityDid(did)) throw const InvalidCommunityCodeException();
     return _sdk.joinClient().readManifest(did);
   }
 
@@ -319,6 +319,18 @@ class VtcService {
 
   static bool _isDid(String text) =>
       text.startsWith('did:') && !text.contains(RegExp(r'\s'));
+
+  /// A community's DID: a `did:webvh` or `did:web`, the methods a community
+  /// publishes under, in DID syntax.
+  static final _communityDid = RegExp(
+    r'^did:(webvh|web):[A-Za-z0-9._%-]+(:[A-Za-z0-9._%-]+)*$',
+  );
+
+  /// Longest community DID read: a scanned or pasted text is untrusted.
+  static const _maxDidLength = 2048;
+
+  static bool _isCommunityDid(String text) =>
+      text.length <= _maxDidLength && _communityDid.hasMatch(text);
 
   Future<VtaClient> _grantedVta() async {
     final linkedVta = await _repository.getLinkedVta();

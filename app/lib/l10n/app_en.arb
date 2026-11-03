@@ -2441,6 +2441,9 @@
 	},
 	"linkedVtaDidNotResolved": "Your VTA's DID couldn't be resolved from this phone. Check the DID, and that its host can be reached from this phone over HTTPS.",
 	"vtcJoinMenuTitle": "Join a community",
+	"vtcJoinEnterDidLabel": "Or enter the community's DID",
+	"vtcJoinPasteAction": "Paste",
+	"vtcJoinContinueAction": "Continue",
 	"vtcJoinMenuSubtitle": "Scan a community's code and apply with your VTA",
 	"vtcJoinTitle": "Join {name}?",
 	"@vtcJoinTitle": {

@@ -165,12 +165,21 @@ void main() {
     Iterable<Object?> vtaTasks() =>
         network.vta.received.map((request) => request['type']);
 
-    test('refuses a code that is not a DID', () {
-      expect(
-        service.readCommunity('https://community.example'),
-        throwsA(isA<InvalidCommunityCodeException>()),
-      );
-    });
+    for (final (what, code) in [
+      ('a code that is not a DID', 'https://community.example'),
+      ('a DID of a method communities do not use', 'did:key:z6MkhaXgBZD'),
+      ('a DID with a path', 'did:web:community.example/../admin'),
+      ('a DID with spaces inside', 'did:web:community example'),
+      ('a DID with nothing after the method', 'did:webvh:'),
+    ]) {
+      test('refuses $what, before any network call', () {
+        expect(
+          service.readCommunity(code),
+          throwsA(isA<InvalidCommunityCodeException>()),
+        );
+        expect(network.joinRequests, isEmpty);
+      });
+    }
 
     test('joins as a new persona and keeps the cards', () async {
       final manifest = await service.readCommunity(' $fakeVtcDid ');

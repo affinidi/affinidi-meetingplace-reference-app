@@ -2588,6 +2588,15 @@ class AppLocalizationsDe extends AppLocalizations {
   String get vtcJoinMenuTitle => 'Join a community';
 
   @override
+  String get vtcJoinEnterDidLabel => 'Or enter the community\'s DID';
+
+  @override
+  String get vtcJoinPasteAction => 'Paste';
+
+  @override
+  String get vtcJoinContinueAction => 'Continue';
+
+  @override
   String get vtcJoinMenuSubtitle =>
       'Scan a community\'s code and apply with your VTA';
 

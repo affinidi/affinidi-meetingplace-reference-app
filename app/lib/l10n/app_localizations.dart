@@ -3790,6 +3790,24 @@ abstract class AppLocalizations {
   /// **'Join a community'**
   String get vtcJoinMenuTitle;
 
+  /// No description provided for @vtcJoinEnterDidLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Or enter the community\'s DID'**
+  String get vtcJoinEnterDidLabel;
+
+  /// No description provided for @vtcJoinPasteAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste'**
+  String get vtcJoinPasteAction;
+
+  /// No description provided for @vtcJoinContinueAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get vtcJoinContinueAction;
+
   /// No description provided for @vtcJoinMenuSubtitle.
   ///
   /// In en, this message translates to:
