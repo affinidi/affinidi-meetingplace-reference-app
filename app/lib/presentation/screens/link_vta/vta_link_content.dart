@@ -55,6 +55,12 @@ class VtaLinkContent extends HookConsumerWidget {
 
     final failure = vtaLinkFailureText(l10n, screen.failure);
     final message = failure ?? copied.value;
+    final vtaDidCard = _GlassCard(
+      title: l10n.linkedVtaDidLabel,
+      copyLabel: l10n.linkedVtaCopyDid,
+      onCopy: () => copy(state.vtaDid ?? ''),
+      child: _Did(state.vtaDid ?? '', textKey: const Key('linked_vta_did')),
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -81,17 +87,14 @@ class VtaLinkContent extends HookConsumerWidget {
           ],
           VtaLinkStatus.pending => [
             _Title(l10n.linkedVtaPendingTitle),
-            const SizedBox(height: 8),
-            _Subtitle(l10n.linkedVtaPendingFor(state.vtaDid ?? '')),
             const SizedBox(height: 24),
+            vtaDidCard,
+            const SizedBox(height: 12),
             _GlassCard(
               title: l10n.linkedVtaManagerDidLabel,
               copyLabel: l10n.linkedVtaCopyDid,
               onCopy: () => copy(state.managerDid ?? ''),
-              child: SelectableText(
-                state.managerDid ?? '',
-                style: textTheme.bodyMedium?.copyWith(color: Colors.white),
-              ),
+              child: _Did(state.managerDid ?? ''),
             ),
             const SizedBox(height: 12),
             _GlassCard(
@@ -131,8 +134,8 @@ class VtaLinkContent extends HookConsumerWidget {
           ],
           VtaLinkStatus.active => [
             _Title(l10n.linkedVtaTitle),
-            const SizedBox(height: 8),
-            _Subtitle(l10n.linkedVtaLinked(state.vtaDid ?? '')),
+            const SizedBox(height: 24),
+            vtaDidCard,
             const SizedBox(height: 24),
             _WhiteButton(
               label: l10n.linkedVtaUnlinkAction,
@@ -363,6 +366,27 @@ class _GlassCard extends StatelessWidget {
             Padding(padding: const EdgeInsets.only(right: 12), child: child),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// A DID in monospace, so its long identifier reads as one value.
+class _Did extends StatelessWidget {
+  const _Did(this.did, {this.textKey});
+
+  final String did;
+  final Key? textKey;
+
+  @override
+  Widget build(BuildContext context) {
+    return SelectableText(
+      did,
+      key: textKey,
+      style: context.textTheme.bodySmall?.copyWith(
+        color: Colors.white,
+        fontFamily: 'monospace',
+        height: 1.4,
       ),
     );
   }

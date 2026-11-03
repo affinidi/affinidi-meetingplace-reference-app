@@ -2369,11 +2369,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get linkedVtaPendingTitle => 'Add this phone to your VTA';
 
   @override
-  String linkedVtaPendingFor(String vtaDid) {
-    return 'Linking to $vtaDid';
-  }
-
-  @override
   String get linkedVtaManagerDidLabel => 'This phone\'s DID';
 
   @override
@@ -2409,11 +2404,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get linkedVtaUnlinkAction => 'Remove';
-
-  @override
-  String linkedVtaLinked(String vtaDid) {
-    return 'Linked to $vtaDid';
-  }
 
   @override
   String get vtcSignInMenuTitle => 'Sign in to community';
