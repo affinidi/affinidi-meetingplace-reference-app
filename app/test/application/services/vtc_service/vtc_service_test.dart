@@ -224,14 +224,14 @@ void main() {
       await service.join(await service.readCommunity(fakeVtcDid));
 
       expect(
-        await service.checkApplication(fakeVtcDid),
+        (await service.checkApplication(fakeVtcDid))?.status,
         JoinRequestStatus.pending,
       );
       expect((await service.community(fakeVtcDid))?.isApplying, isTrue);
 
       network.joinStatus = 'approved';
       expect(
-        await service.checkApplication(fakeVtcDid),
+        (await service.checkApplication(fakeVtcDid))?.status,
         JoinRequestStatus.approved,
       );
 

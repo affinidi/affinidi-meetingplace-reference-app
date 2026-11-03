@@ -49,15 +49,37 @@ class FakeVtcNetwork implements HttpClientAdapter {
   int cancels = 0;
   bool approved = false;
 
-  /// The verdict on a join request.
+  /// What the community asks of applicants.
+  Map<String, dynamic> joinManifest = {
+    'communityDid': fakeVtcDid,
+    'branding': {'displayName': 'Football club'},
+    'criteria': [
+      {'id': 'open', 'admission': 'automatic', 'requirementsDigest': 'zOpen'},
+    ],
+  };
+
+  /// The verdict on a join request. [applicant] anywhere in it stands for
+  /// the DID that applied.
   Map<String, dynamic> joinVerdict = {
     'effect': 'allow',
     'with': {
       'role': 'member',
-      'vmc': {'id': 'urn:uuid:vmc', 'type': 'MembershipCredential'},
-      'roleVac': {'id': 'urn:uuid:vac', 'type': 'AuthorityCredential'},
+      'vmc': {
+        'id': 'urn:uuid:vmc',
+        'type': ['VerifiableCredential', 'MembershipCredential'],
+        'issuer': fakeVtcDid,
+        'credentialSubject': {'id': applicant},
+      },
+      'roleVac': {
+        'id': 'urn:uuid:vac',
+        'type': ['VerifiableCredential', 'AuthorityCredential'],
+        'issuer': fakeVtcDid,
+      },
     },
   };
+
+  /// Stands for the applicant's DID in [joinVerdict].
+  static const applicant = '<applicant>';
 
   /// Where a join request stands.
   String joinStatus = 'pending';
@@ -114,14 +136,11 @@ class FakeVtcNetwork implements HttpClientAdapter {
       joinRequests.add(request);
       purpose = ProofPurpose.authentication;
       answer = switch (type) {
-        JoinTask.manifest => {
-          'communityDid': fakeVtcDid,
-          'branding': {'displayName': 'Football club'},
-          'criteria': [
-            {'id': 'open', 'admission': 'automatic'},
-          ],
+        JoinTask.manifest => joinManifest,
+        JoinTask.submit => {
+          'requestId': 'request-1',
+          'verdict': _withApplicant(joinVerdict, request['issuer'] as String),
         },
-        JoinTask.submit => {'requestId': 'request-1', 'verdict': joinVerdict},
         _ => {'requestId': payload['requestId'], 'status': joinStatus},
       };
     } else if (type == OobTask.claim) {
@@ -170,6 +189,18 @@ class FakeVtcNetwork implements HttpClientAdapter {
 
   @override
   void close({bool force = false}) {}
+
+  static dynamic _withApplicant(Object? value, String did) => switch (value) {
+    applicant => did,
+    final Map<String, dynamic> map => {
+      for (final MapEntry(:key, :value) in map.entries)
+        key: _withApplicant(value, did),
+    },
+    final List<dynamic> list => [
+      for (final item in list) _withApplicant(item, did),
+    ],
+    _ => value,
+  };
 }
 
 class _VtcSigner implements TrustTaskSigner {

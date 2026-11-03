@@ -221,7 +221,7 @@ class VtcService {
   /// the community's decision once it has made one.
   ///
   /// Returns null when no application is open. Throws as [join] does.
-  Future<JoinRequestStatus?> checkApplication(String communityDid) async {
+  Future<JoinStatus?> checkApplication(String communityDid) async {
     final community = await _repository.findCommunity(communityDid);
     final requestId = community?.joinRequestId;
     if (community == null || !community.isApplying || requestId == null) {
@@ -235,10 +235,10 @@ class VtcService {
       agent: vta,
       persona: await _personaSigner(vta, community),
     );
-    if (!status.isOpen) {
+    if (!status.status.isOpen) {
       await _repository.saveCommunity(
         community.withApplication(
-          isMember: status == JoinRequestStatus.approved,
+          isMember: status.status == JoinRequestStatus.approved,
         ),
       );
     }

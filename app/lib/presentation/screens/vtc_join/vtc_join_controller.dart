@@ -66,7 +66,7 @@ class VtcJoinController extends _$VtcJoinController {
     await _run(() async {
       final status = await _service.checkApplication(manifest.communityDid);
       state = state.copyWith(
-        step: switch (status) {
+        step: switch (status?.status) {
           JoinRequestStatus.approved => VtcJoinStep.joined,
           JoinRequestStatus.pending ||
           JoinRequestStatus.deferred => VtcJoinStep.pending,
