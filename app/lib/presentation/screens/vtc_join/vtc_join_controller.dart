@@ -47,6 +47,13 @@ class VtcJoinController extends _$VtcJoinController {
     return VtcJoinState();
   }
 
+  /// Starts over with another community's code, e.g. after a failure.
+  void restart() {
+    _manifest = null;
+    _personas = const [];
+    state = VtcJoinState();
+  }
+
   /// Reads the scanned community code and what the community asks.
   Future<void> onScanned(String code) async {
     if (state.step != VtcJoinStep.scanning) return;

@@ -3778,11 +3778,23 @@ abstract class AppLocalizations {
   /// **'Join a community'**
   String get vtcJoinMenuTitle;
 
-  /// No description provided for @vtcJoinEnterDidLabel.
+  /// No description provided for @vtcJoinIntroTitle.
   ///
   /// In en, this message translates to:
-  /// **'Or enter the community\'s DID'**
-  String get vtcJoinEnterDidLabel;
+  /// **'Become a member of a community'**
+  String get vtcJoinIntroTitle;
+
+  /// No description provided for @vtcJoinIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan the community\'s QR code, or paste its DID. You see what it asks before anything is sent.'**
+  String get vtcJoinIntro;
+
+  /// No description provided for @vtcJoinDidHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Community DID'**
+  String get vtcJoinDidHint;
 
   /// No description provided for @vtcJoinPasteAction.
   ///
@@ -3933,6 +3945,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'If this is off, Meeting Place takes you out of the directory right after you join.'**
   String get vtcJoinListMeNote;
+
+  /// No description provided for @vtcJoinDirectoryHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Member directory'**
+  String get vtcJoinDirectoryHeading;
+
+  /// No description provided for @vtcJoinIdentityHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Identity on your VTA'**
+  String get vtcJoinIdentityHeading;
 
   /// No description provided for @vtcJoinAction.
   ///

@@ -4,12 +4,18 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
-import '../../dialogs/qr_code_picker/qr_code_picker.dart';
+import '../../widgets/form_rows/form_card.dart';
+import '../../widgets/form_rows/form_row_toggle.dart';
+import '../../widgets/form_rows/label_icon.dart';
+import '../../widgets/offer_banner.dart';
+import '../../widgets/qr/qr_scan_button.dart';
+import '../../widgets/qr/qr_scan_error_view.dart';
 import 'vtc_join_controller.dart';
 import 'vtc_join_state.dart';
 
 /// Joins a community: scan its code or enter its DID, read what it asks,
-/// apply as an identity from the member's VTA.
+/// apply as an identity from the member's VTA. Laid out like finding and
+/// accepting an offer.
 class VtcJoinScreen extends ConsumerWidget {
   const VtcJoinScreen({super.key});
 
@@ -23,33 +29,21 @@ class VtcJoinScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(vtcJoinControllerProvider);
     final controller = ref.read(vtcJoinControllerProvider.notifier);
-
     final l10n = context.l10n;
-    if (state.step == VtcJoinStep.scanning) {
-      return Scaffold(
-        appBar: AppBar(title: Text(l10n.vtcJoinMenuTitle)),
-        body: SafeArea(
-          child: Column(
-            children: [
-              Expanded(child: QrCodePicker(onDetectCode: controller.onScanned)),
-              _EnterDid(onSubmit: controller.onScanned),
-            ],
-          ),
-        ),
-      );
-    }
-
     final name = state.communityName ?? '';
+    final customColors = context.customColors;
+    final colorScheme = context.colorScheme;
     void close() => Navigator.of(context).pop();
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.vtcJoinMenuTitle)),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: Scaffold(
+        appBar: AppBar(title: Text(l10n.vtcJoinMenuTitle)),
+        body: SafeArea(
           child: switch (state.step) {
-            VtcJoinStep.scanning || VtcJoinStep.working => const Center(
-              child: CircularProgressIndicator(),
+            VtcJoinStep.scanning => _EnterCode(onSubmit: controller.onScanned),
+            VtcJoinStep.working => const Center(
+              child: CircularProgressIndicator.adaptive(),
             ),
             VtcJoinStep.review => _Review(
               state: state,
@@ -68,14 +62,14 @@ class VtcJoinScreen extends ConsumerWidget {
               onCancel: close,
             ),
             VtcJoinStep.joined => _Outcome(
+              icon: Icons.verified,
+              color: customColors.success,
               message: state.wasMember
                   ? l10n.vtcJoinAlreadyMember(name)
                   : l10n.vtcJoinJoined(name),
               onDone: close,
-              action: TextButton(
-                style: TextButton.styleFrom(
-                  foregroundColor: context.colorScheme.error,
-                ),
+              secondary: ElevatedButton(
+                style: context.destructiveElevatedButtonStyle,
                 onPressed: () async {
                   if (await _confirmLeave(context, name)) {
                     await controller.leave();
@@ -85,18 +79,24 @@ class VtcJoinScreen extends ConsumerWidget {
               ),
             ),
             VtcJoinStep.left => _Outcome(
+              icon: Icons.logout,
+              color: colorScheme.primary,
               message: l10n.vtcJoinLeft(name),
               onDone: close,
             ),
             VtcJoinStep.pending => _Outcome(
+              icon: Icons.hourglass_top,
+              color: customColors.orange,
               message: l10n.vtcJoinPending(name),
               onDone: close,
-              action: TextButton(
+              secondary: ElevatedButton(
                 onPressed: controller.checkAgain,
                 child: Text(l10n.vtcJoinCheckAgain),
               ),
             ),
             VtcJoinStep.denied => _Outcome(
+              icon: Icons.block,
+              color: colorScheme.error,
               message: switch (state.denialReason) {
                 final reason? => l10n.vtcJoinDeniedWithReason(name, reason),
                 null => l10n.vtcJoinDenied(name),
@@ -104,14 +104,17 @@ class VtcJoinScreen extends ConsumerWidget {
               onDone: close,
             ),
             VtcJoinStep.needsMore => _Outcome(
+              icon: Icons.info_outline,
+              color: colorScheme.secondary,
               message: l10n.vtcJoinNeedsMore,
               onDone: close,
             ),
-            VtcJoinStep.failed => _Outcome(
+            VtcJoinStep.failed => QrScanErrorView(
               message: l10n.vtcJoinFailure(
                 (state.failure ?? VtcJoinFailure.refused).name,
               ),
-              onDone: close,
+              onRetry: controller.restart,
+              onCancel: close,
             ),
           },
         ),
@@ -131,13 +134,14 @@ Future<bool> _confirmLeave(BuildContext context, String name) async {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
-          child: Text(l10n.cancel),
+          child: Text(l10n.generalCancel),
         ),
-        TextButton(
-          style: TextButton.styleFrom(
-            foregroundColor: context.colorScheme.error,
-          ),
+        ElevatedButton(
           onPressed: () => Navigator.of(context).pop(true),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: context.colorScheme.error,
+            foregroundColor: Colors.white,
+          ),
           child: Text(l10n.vtcJoinLeaveAction),
         ),
       ],
@@ -146,10 +150,127 @@ Future<bool> _confirmLeave(BuildContext context, String name) async {
   return confirmed ?? false;
 }
 
-/// Takes a community's DID typed or pasted, for when there is no code to
-/// scan. Read exactly as a scanned code is.
-class _EnterDid extends HookWidget {
-  const _EnterDid({required this.onSubmit});
+/// A step of joining: scrolling [children] under the banner, centred on
+/// wide screens, with [actions] pinned below.
+class _JoinPage extends StatelessWidget {
+  const _JoinPage({required this.children, this.actions = const []});
+
+  static const double _maxWidth = 900;
+
+  final List<Widget> children;
+  final List<Widget> actions;
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    final inset = width > _maxWidth ? (width - _maxWidth) / 2 : 20.0;
+
+    return Column(
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            padding: EdgeInsets.fromLTRB(inset, 0, inset, 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: 20,
+              children: [const OfferBanner(), ...children],
+            ),
+          ),
+        ),
+        if (actions.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+            child: Wrap(
+              alignment: WrapAlignment.center,
+              runSpacing: 12,
+              spacing: 12,
+              children: actions,
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// A step's question, bold and centred as on the offer screens.
+class _Heading extends StatelessWidget {
+  const _Heading(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: context.textTheme.titleLarge?.copyWith(
+        fontWeight: FontWeight.bold,
+      ),
+      textAlign: TextAlign.center,
+    );
+  }
+}
+
+/// A row of a [FormCard]: a coloured label icon, a bold title and an
+/// optional explanation.
+class _InfoRow extends StatelessWidget {
+  const _InfoRow({
+    super.key,
+    required this.icon,
+    required this.iconColor,
+    required this.title,
+    this.subtitle,
+    this.titleStyle,
+    this.onTap,
+  });
+
+  final IconData icon;
+  final Color iconColor;
+  final String title;
+  final String? subtitle;
+  final TextStyle? titleStyle;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      onTap: onTap,
+      leading: LabelIcon(icon: icon, iconColor: iconColor, label: title),
+      title: Text(
+        title,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style:
+            titleStyle ??
+            context.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+      ),
+      subtitle: subtitle == null
+          ? null
+          : Text(subtitle!, style: context.textTheme.bodySmall),
+      trailing: onTap == null ? null : const Icon(Icons.chevron_right),
+    );
+  }
+}
+
+/// A short note under a card, as the offer screens explain their pickers.
+class _Note extends StatelessWidget {
+  const _Note(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Text(text, style: context.textTheme.bodySmall),
+    );
+  }
+}
+
+/// Takes a community's code: scanned with the camera, or its DID typed or
+/// pasted. Both are read the same way.
+class _EnterCode extends HookWidget {
+  const _EnterCode({required this.onSubmit});
 
   final ValueChanged<String> onSubmit;
 
@@ -158,41 +279,56 @@ class _EnterDid extends HookWidget {
     final l10n = context.l10n;
     final field = useTextEditingController();
     useListenable(field);
+    final code = field.text.trim();
 
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              key: const Key('vtc_join_did'),
-              controller: field,
-              decoration: InputDecoration(
-                labelText: l10n.vtcJoinEnterDidLabel,
-                suffixIcon: IconButton(
-                  tooltip: l10n.vtcJoinPasteAction,
-                  icon: const Icon(Icons.content_paste),
-                  onPressed: () async {
-                    final data = await Clipboard.getData(Clipboard.kTextPlain);
-                    if (data?.text case final text?) field.text = text.trim();
-                  },
+    void submit(String text) {
+      FocusManager.instance.primaryFocus?.unfocus();
+      if (text.trim().isNotEmpty) onSubmit(text.trim());
+    }
+
+    return _JoinPage(
+      children: [
+        _Heading(l10n.vtcJoinIntroTitle),
+        Text(l10n.vtcJoinIntro, style: context.textTheme.bodyMedium),
+        Row(
+          spacing: 8,
+          children: [
+            QrScanButton(
+              onScanned: (data) {
+                if (data != null) submit(data);
+              },
+            ),
+            Expanded(
+              child: TextField(
+                key: const Key('vtc_join_did'),
+                controller: field,
+                autocorrect: false,
+                enableSuggestions: false,
+                keyboardType: TextInputType.url,
+                textInputAction: TextInputAction.go,
+                onSubmitted: submit,
+                decoration: context.roundedInputDecoration.copyWith(
+                  hintText: l10n.vtcJoinDidHint,
+                  suffixIcon: IconButton(
+                    tooltip: l10n.vtcJoinPasteAction,
+                    icon: const Icon(Icons.content_paste),
+                    onPressed: () async {
+                      final data = await Clipboard.getData(
+                        Clipboard.kTextPlain,
+                      );
+                      if (data?.text case final text?) field.text = text.trim();
+                    },
+                  ),
                 ),
               ),
-              autocorrect: false,
-              enableSuggestions: false,
-              keyboardType: TextInputType.url,
-              onSubmitted: (text) => onSubmit(text.trim()),
             ),
-          ),
-          const SizedBox(width: 8),
-          FilledButton(
-            onPressed: field.text.trim().isEmpty
-                ? null
-                : () => onSubmit(field.text.trim()),
-            child: Text(l10n.vtcJoinContinueAction),
-          ),
-        ],
-      ),
+          ],
+        ),
+        ElevatedButton(
+          onPressed: code.isEmpty ? null : () => submit(code),
+          child: Text(l10n.vtcJoinContinueAction),
+        ),
+      ],
     );
   }
 }
@@ -215,102 +351,132 @@ class _Review extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final colorScheme = context.colorScheme;
+    final customColors = context.customColors;
     final name = state.communityName ?? '';
-    final small = context.textTheme.bodySmall;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+
+    return _JoinPage(
+      actions: [
+        ElevatedButton(
+          style: context.destructiveElevatedButtonStyle,
+          onPressed: onCancel,
+          child: Text(l10n.generalCancel),
+        ),
+        ElevatedButton(
+          onPressed: state.canApply ? onJoin : null,
+          child: Text(l10n.vtcJoinAction),
+        ),
+      ],
       children: [
-        Expanded(
-          child: ListView(
+        Column(
+          spacing: 8,
+          children: [
+            Text(
+              name,
+              style: context.textTheme.headlineLarge,
+              textAlign: TextAlign.center,
+            ),
+            Text(
+              !state.canApply
+                  ? l10n.vtcJoinNoSupportedWay(name)
+                  : state.admitsAtOnce
+                  ? l10n.vtcJoinAdmitsAtOnce
+                  : l10n.vtcJoinReviewed,
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+        if (state.denialReason case final reason?)
+          ColoredBox(
+            color: colorScheme.errorContainer,
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Text(
+                l10n.vtcJoinLastDenied(reason),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        FormCard(
+          title: l10n.vtcJoinWaysHeading,
+          child: Column(
             children: [
-              Text(
-                l10n.vtcJoinTitle(name),
-                style: context.textTheme.titleLarge,
-              ),
-              if (state.denialReason case final reason?) ...[
-                const SizedBox(height: 8),
-                Text(l10n.vtcJoinLastDenied(reason)),
-              ],
-              const SizedBox(height: 16),
-              Text(
-                l10n.vtcJoinWaysHeading,
-                style: context.textTheme.titleSmall,
-              ),
               for (final way in state.ways)
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(
-                    way.unsupported != null
-                        ? Icons.block
-                        : way.automatic
-                        ? Icons.how_to_reg
-                        : Icons.rate_review,
-                  ),
-                  title: Text(switch (way) {
+                _InfoRow(
+                  icon: way.unsupported != null
+                      ? Icons.block
+                      : way.automatic
+                      ? Icons.how_to_reg
+                      : Icons.rate_review,
+                  iconColor: way.unsupported != null
+                      ? colorScheme.onSurfaceVariant
+                      : way.automatic
+                      ? customColors.success
+                      : customColors.orange,
+                  title: switch (way) {
                     VtcJoinWay(:final unsupported?) =>
                       l10n.vtcJoinWayUnsupported(unsupported.name),
                     VtcJoinWay(automatic: true) => l10n.vtcJoinWayAutomatic,
                     _ => l10n.vtcJoinWayReviewed,
-                  }),
-                  subtitle: way.description == null
-                      ? null
-                      : Text(way.description!),
+                  },
+                  subtitle: way.description,
                 ),
-              const SizedBox(height: 8),
-              if (!state.canApply)
-                Text(l10n.vtcJoinNoSupportedWay(name))
-              else ...[
-                Text(
-                  state.admitsAtOnce
-                      ? l10n.vtcJoinAdmitsAtOnce
-                      : l10n.vtcJoinReviewed,
-                ),
-                if (state.requestedDetails.isNotEmpty) ...[
-                  const SizedBox(height: 16),
-                  Text(
-                    l10n.vtcJoinDetailsHeading,
-                    style: context.textTheme.titleSmall,
-                  ),
-                  for (final detail in state.requestedDetails)
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      dense: true,
-                      title: Text(
-                        detail.required
-                            ? l10n.vtcJoinDetailRequired(detail.type)
-                            : l10n.vtcJoinDetailOptional(detail.type),
-                      ),
-                      subtitle: detail.purpose == null
-                          ? null
-                          : Text(detail.purpose!),
-                    ),
-                  Text(l10n.vtcJoinDetailsNote, style: small),
-                ],
-                const SizedBox(height: 16),
-                if (state.listsNewMembers case final listed?)
-                  Text(
-                    listed
-                        ? l10n.vtcJoinDirectoryListed
-                        : l10n.vtcJoinDirectoryHidden,
-                  ),
-                if (state.listsNewMembers != false)
-                  SwitchListTile(
-                    key: const Key('vtc_join_list_me'),
-                    contentPadding: EdgeInsets.zero,
-                    value: state.listInDirectory,
-                    onChanged: onListInDirectory,
-                    title: Text(l10n.vtcJoinListMe),
-                    subtitle: Text(l10n.vtcJoinListMeNote),
-                  ),
-                const SizedBox(height: 8),
-                Text(l10n.vtcJoinPersonaNote, style: small),
-              ],
             ],
           ),
         ),
+        if (state.canApply && state.requestedDetails.isNotEmpty)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              FormCard(
+                title: l10n.vtcJoinDetailsHeading,
+                child: Column(
+                  children: [
+                    for (final detail in state.requestedDetails)
+                      _InfoRow(
+                        icon: Icons.badge,
+                        iconColor: customColors.purple,
+                        title: detail.required
+                            ? l10n.vtcJoinDetailRequired(detail.type)
+                            : l10n.vtcJoinDetailOptional(detail.type),
+                        subtitle: detail.purpose,
+                      ),
+                  ],
+                ),
+              ),
+              _Note(l10n.vtcJoinDetailsNote),
+            ],
+          ),
         if (state.canApply)
-          FilledButton(onPressed: onJoin, child: Text(l10n.vtcJoinAction)),
-        TextButton(onPressed: onCancel, child: Text(l10n.cancel)),
+          FormCard(
+            title: l10n.vtcJoinDirectoryHeading,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (state.listsNewMembers case final listed?)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                    child: Text(
+                      listed
+                          ? l10n.vtcJoinDirectoryListed
+                          : l10n.vtcJoinDirectoryHidden,
+                      style: context.textTheme.bodySmall,
+                    ),
+                  ),
+                if (state.listsNewMembers != false)
+                  FormRowToggle(
+                    switchKey: const Key('vtc_join_list_me'),
+                    icon: Icons.contacts,
+                    iconColor: colorScheme.secondary,
+                    label: l10n.vtcJoinListMe,
+                    value: state.listInDirectory,
+                    onChanged: onListInDirectory,
+                    helperText: l10n.vtcJoinListMeNote,
+                  ),
+              ],
+            ),
+          ),
+        if (state.canApply) _Note(l10n.vtcJoinPersonaNote),
       ],
     );
   }
@@ -332,35 +498,41 @@ class _ChooseIdentity extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    return _JoinPage(
+      actions: [
+        ElevatedButton(
+          style: context.destructiveElevatedButtonStyle,
+          onPressed: onCancel,
+          child: Text(l10n.generalCancel),
+        ),
+      ],
       children: [
-        Text(l10n.vtcJoinChooseIdentity, style: context.textTheme.titleLarge),
-        const SizedBox(height: 16),
-        Expanded(
-          child: ListView(
+        _Heading(l10n.vtcJoinChooseIdentity),
+        FormCard(
+          title: l10n.vtcJoinIdentityHeading,
+          child: Column(
             children: [
-              ListTile(
+              _InfoRow(
                 key: const Key('vtc_join_new_identity'),
-                leading: const Icon(Icons.person_add),
-                title: Text(l10n.vtcJoinNewIdentity),
-                subtitle: Text(l10n.vtcJoinNewIdentityNote),
+                icon: Icons.person_add,
+                iconColor: context.customColors.success,
+                title: l10n.vtcJoinNewIdentity,
+                subtitle: l10n.vtcJoinNewIdentityNote,
                 onTap: () => onChoose(null),
               ),
               for (final did in state.identityChoices)
-                ListTile(
-                  leading: const Icon(Icons.person),
-                  title: Text(
-                    did,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                _InfoRow(
+                  icon: Icons.person,
+                  iconColor: context.colorScheme.primary,
+                  title: did,
+                  titleStyle: context.textTheme.bodySmall?.copyWith(
+                    fontFamily: 'monospace',
                   ),
                   onTap: () => onChoose(did),
                 ),
             ],
           ),
         ),
-        TextButton(onPressed: onCancel, child: Text(l10n.cancel)),
       ],
     );
   }
@@ -382,53 +554,86 @@ class _ApproveDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          l10n.vtcJoinShareDetails(state.communityName ?? ''),
-          style: context.textTheme.titleLarge,
+    return _JoinPage(
+      actions: [
+        ElevatedButton(
+          style: context.destructiveElevatedButtonStyle,
+          onPressed: onCancel,
+          child: Text(l10n.generalCancel),
         ),
-        const SizedBox(height: 16),
-        Expanded(
-          child: ListView(
+        ElevatedButton(
+          onPressed: onShare,
+          child: Text(l10n.vtcJoinShareAction),
+        ),
+      ],
+      children: [
+        _Heading(l10n.vtcJoinShareDetails(state.communityName ?? '')),
+        FormCard(
+          title: l10n.vtcJoinDetailsHeading,
+          child: Column(
             children: [
               for (final detail in state.details)
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(detail.value),
-                  subtitle: Text(detail.type),
+                _InfoRow(
+                  icon: Icons.badge,
+                  iconColor: context.customColors.purple,
+                  title: detail.value,
+                  subtitle: detail.type,
                 ),
             ],
           ),
         ),
-        FilledButton(onPressed: onShare, child: Text(l10n.vtcJoinShareAction)),
-        TextButton(onPressed: onCancel, child: Text(l10n.cancel)),
       ],
     );
   }
 }
 
+/// How joining ended: an icon in [color], the [message], and Done with an
+/// optional [secondary] action beside it.
 class _Outcome extends StatelessWidget {
-  const _Outcome({required this.message, required this.onDone, this.action});
+  const _Outcome({
+    required this.icon,
+    required this.color,
+    required this.message,
+    required this.onDone,
+    this.secondary,
+  });
 
+  final IconData icon;
+  final Color color;
   final String message;
   final VoidCallback onDone;
-  final Widget? action;
+  final Widget? secondary;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(message, style: context.textTheme.bodyLarge),
-        const Spacer(),
-        ?action,
-        FilledButton(
-          onPressed: onDone,
-          child: Text(context.l10n.vtcSignInDone),
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          spacing: 24,
+          children: [
+            Icon(icon, size: 96, color: color),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: context.textTheme.titleMedium,
+            ),
+            Wrap(
+              alignment: WrapAlignment.center,
+              runSpacing: 12,
+              spacing: 12,
+              children: [
+                ?secondary,
+                ElevatedButton(
+                  onPressed: onDone,
+                  child: Text(context.l10n.generalDone),
+                ),
+              ],
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

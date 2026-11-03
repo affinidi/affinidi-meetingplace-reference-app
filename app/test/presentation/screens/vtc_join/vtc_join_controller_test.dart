@@ -439,6 +439,16 @@ void main() {
       expect(state().failure, VtcJoinFailure.invalidCode);
     });
 
+    test('starts over after a failure', () async {
+      await controller().onScanned('https://example.com');
+
+      controller().restart();
+      await controller().onScanned(fakeVtcDid);
+
+      expect(state().step, VtcJoinStep.review);
+      expect(state().failure, isNull);
+    });
+
     test('says when the VTA cannot publish a persona', () async {
       network.vta.answers[VtaTask.serversList] = {'servers': <Object>[]};
       await controller().onScanned(fakeVtcDid);

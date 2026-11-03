@@ -2528,7 +2528,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vtcJoinMenuTitle => 'Join a community';
 
   @override
-  String get vtcJoinEnterDidLabel => 'Or enter the community\'s DID';
+  String get vtcJoinIntroTitle => 'Become a member of a community';
+
+  @override
+  String get vtcJoinIntro =>
+      'Scan the community\'s QR code, or paste its DID. You see what it asks before anything is sent.';
+
+  @override
+  String get vtcJoinDidHint => 'Community DID';
 
   @override
   String get vtcJoinPasteAction => 'Paste';
@@ -2630,6 +2637,12 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get vtcJoinListMeNote =>
       'If this is off, Meeting Place takes you out of the directory right after you join.';
+
+  @override
+  String get vtcJoinDirectoryHeading => 'Member directory';
+
+  @override
+  String get vtcJoinIdentityHeading => 'Identity on your VTA';
 
   @override
   String get vtcJoinAction => 'Join';
