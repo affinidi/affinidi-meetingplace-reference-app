@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/vtc/user_verification_key.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_controller.dart';
@@ -27,6 +30,12 @@ void main() {
     );
     container.listen(vtcJoinControllerProvider, (_, _) {});
   }
+
+  setUpAll(() {
+    AppLogger.initialize(
+      File('${Directory.systemTemp.path}/vtc_join_controller_test.log'),
+    );
+  });
 
   setUp(() async {
     FlutterSecureStorage.setMockInitialValues({});

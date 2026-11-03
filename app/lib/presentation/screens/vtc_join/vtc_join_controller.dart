@@ -6,12 +6,13 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../application/services/vtc_service/vtc_service.dart';
 import '../../../domain/models/vtc/vtc_community.dart';
+import '../../../infrastructure/providers/app_logger_provider.dart';
 import 'vtc_join_state.dart';
 
 part 'vtc_join_controller.g.dart';
 
 /// Drives joining one community, from its scanned code to the community's
-/// answer. Nothing is logged.
+/// answer. Only a failure's code is logged; never a DID, key or document.
 @riverpod
 class VtcJoinController extends _$VtcJoinController {
   late final VtcService _service = ref.read(vtcServiceProvider);
@@ -257,12 +258,21 @@ class VtcJoinController extends _$VtcJoinController {
       _fail(VtcJoinFailure.invalidCode);
     } on VtaNotLinkedException {
       _fail(VtcJoinFailure.vtaMissing);
-    } on MeetingPlaceVtcSDKException catch (error) {
+    } on MeetingPlaceVtcSDKException catch (error, stackTrace) {
       if (error.refusalCode?.endsWith(':alreadyMember') ?? false) {
         // The community already counts this identity as a member.
         state = state.copyWith(step: VtcJoinStep.joined, wasMember: true);
         return;
       }
+      // The refusal code tells the VTA's refusal from the community's.
+      ref
+          .read(appLoggerProvider)
+          .error(
+            'Joining the community failed: ${error.code.name}'
+            ' ${error.refusalCode ?? ''}',
+            stackTrace: stackTrace,
+            name: 'VtcJoinController',
+          );
       _fail(_failureOf(error));
     }
   }
