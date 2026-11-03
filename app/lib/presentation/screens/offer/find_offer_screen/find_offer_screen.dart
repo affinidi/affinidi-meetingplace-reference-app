@@ -7,13 +7,12 @@ import '../../../../infrastructure/configuration/environment.dart';
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../infrastructure/extensions/string_list_extensions.dart';
 import '../../../../infrastructure/providers/cache_manager_provider.dart';
-import '../../../../infrastructure/services/camera_service/camera_service.dart';
 import '../../../../navigation/navigator.dart';
 import '../../../../navigation/routes/dashboard_routes.dart';
-import '../../../dialogs/qr_code_picker/qr_code_picker.dart';
 import '../../../widgets/async_loaders/modal_async_loading_status.dart';
 import '../../../widgets/identity_picker/identity_picker.dart';
 import '../../../widgets/offer_banner.dart';
+import '../../../widgets/qr/qr_scan_button.dart';
 import 'find_offer_screen_controller.dart';
 
 class FindOfferScreen extends HookConsumerWidget {
@@ -143,7 +142,7 @@ class FindOfferScreen extends HookConsumerWidget {
                 Row(
                   spacing: 8,
                   children: [
-                    _QrButton(onDidReceiveQrData: onDidReceiveQrData),
+                    QrScanButton(onScanned: onDidReceiveQrData),
                     Expanded(
                       child: TextField(
                         textInputAction: TextInputAction.search,
@@ -197,40 +196,6 @@ class FindOfferScreen extends HookConsumerWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _QrButton extends ConsumerWidget {
-  _QrButton({required this._onDidReceiveQrData});
-
-  final void Function(String? data) _onDidReceiveQrData;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isCameraAvailable = ref.watch(
-      cameraServiceProvider.select((state) => state.isAvailable ?? false),
-    );
-
-    return SizedBox(
-      width: 40,
-      height: 40,
-      child: IconButton(
-        padding: EdgeInsets.zero,
-        icon: Icon(
-          Icons.qr_code_scanner,
-          size: 24,
-          color: context.colorScheme.primary,
-        ),
-        onPressed: !isCameraAvailable
-            ? null
-            : () async {
-                if (!context.mounted) return;
-
-                final data = await QrCodePicker.show(context: context);
-                _onDidReceiveQrData(data);
-              },
       ),
     );
   }
