@@ -206,7 +206,7 @@ class _EnterCode extends HookConsumerWidget {
 
 /// What joining means, laid out like a consent screen: who asks, what the
 /// community gets and shows, how to get in, and whether to trust it.
-class _Review extends HookWidget {
+class _Review extends StatelessWidget {
   const _Review({
     required this.state,
     required this.onJoin,
@@ -223,15 +223,9 @@ class _Review extends HookWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final did = state.communityDid ?? '';
-    // The name falls back to the DID, which the card below shows.
+    // The name falls back to the DID, which the profile card shows.
     final name = state.communityName;
     final hasName = name != null && name.isNotEmpty && name != did;
-    final copied = useState<String?>(null);
-
-    Future<void> copyDid() async {
-      await Clipboard.setData(ClipboardData(text: did));
-      copied.value = l10n.copiedToClipboard;
-    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -240,13 +234,8 @@ class _Review extends HookWidget {
         if (state.logoUrl case final logoUrl?) _Logo(logoUrl),
         OnboardingTitle(hasName ? name : l10n.vtcJoinUnnamedCommunity),
         OnboardingSubtitle(l10n.vtcJoinWantsYou),
-        if (state.description case final description?)
-          Text(
-            description,
-            textAlign: TextAlign.center,
-            style: context.textTheme.bodyMedium?.copyWith(color: Colors.white),
-          ),
         Center(child: _Pill(l10n.vtcJoinWithVtaIdentity)),
+        _Profile(state: state),
         if (state.denialReason case final reason?)
           OnboardingMessage(l10n.vtcJoinLastDenied(reason), isError: true),
         if (!state.canApply)
@@ -267,17 +256,6 @@ class _Review extends HookWidget {
           state: state,
           communityName: hasName ? name : l10n.vtcJoinThisCommunity,
         ),
-        GlassCard(
-          title: l10n.vtcJoinDidHint,
-          copyLabel: l10n.linkedVtaCopyDid,
-          onCopy: copyDid,
-          child: MonospaceDid(
-            did,
-            textKey: const Key('vtc_join_community_did'),
-          ),
-        ),
-        if (copied.value case final text?)
-          OnboardingMessage(text, isError: false),
         const SizedBox(height: 12),
         Row(
           spacing: 12,
@@ -298,6 +276,90 @@ class _Review extends HookWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+/// Who the community is: its description, website, contact and DID, which
+/// can be copied.
+class _Profile extends HookWidget {
+  const _Profile({required this.state});
+
+  final VtcJoinState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final did = state.communityDid ?? '';
+    final copied = useState(false);
+
+    Future<void> copyDid() async {
+      await Clipboard.setData(ClipboardData(text: did));
+      copied.value = true;
+    }
+
+    return GlassCard(
+      title: l10n.vtcJoinProfileHeading,
+      child: SelectionArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: 12,
+          children: [
+            if (state.description case final description?)
+              Text(
+                description,
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: Colors.white,
+                ),
+              ),
+            if (state.website case final website?)
+              _Line(
+                icon: Icons.language,
+                title: l10n.vtcJoinWebsite,
+                subtitle: website.toString(),
+              ),
+            if (state.contactEmail case final email?)
+              _Line(
+                icon: Icons.mail_outline,
+                title: l10n.vtcJoinContact,
+                subtitle: email,
+              ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 12,
+              children: [
+                const Icon(Icons.fingerprint, size: 20, color: Colors.white),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 2,
+                    children: [
+                      Text(
+                        l10n.vtcJoinDidHint,
+                        style: context.textTheme.bodyMedium?.copyWith(
+                          color: Colors.white,
+                        ),
+                      ),
+                      MonospaceDid(
+                        did,
+                        textKey: const Key('vtc_join_community_did'),
+                      ),
+                      if (copied.value)
+                        Text(l10n.copiedToClipboard, style: _note(context)),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.copy, size: 18, color: Colors.white),
+                  tooltip: l10n.linkedVtaCopyDid,
+                  visualDensity: VisualDensity.compact,
+                  onPressed: copyDid,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -585,8 +647,8 @@ class _WaysIn extends StatelessWidget {
   }
 }
 
-/// Whether to trust the community: who decides, and its website, contact
-/// and what its governance asserts about personhood.
+/// Whether to trust the community: who decides, and what its governance
+/// asserts about personhood.
 class _Trust extends StatelessWidget {
   const _Trust({required this.state, required this.communityName});
 
@@ -605,18 +667,6 @@ class _Trust extends StatelessWidget {
           spacing: 12,
           children: [
             Text(l10n.vtcJoinTrustNote, style: _note(context)),
-            if (state.website case final website?)
-              _Line(
-                icon: Icons.language,
-                title: l10n.vtcJoinWebsite,
-                subtitle: website.toString(),
-              ),
-            if (state.contactEmail case final email?)
-              _Line(
-                icon: Icons.mail_outline,
-                title: l10n.vtcJoinContact,
-                subtitle: email,
-              ),
             if (personhood?.realHuman ?? false)
               _Line(icon: Icons.person_outline, title: l10n.vtcJoinRealHuman),
             if (personhood?.singleMembership ?? false)

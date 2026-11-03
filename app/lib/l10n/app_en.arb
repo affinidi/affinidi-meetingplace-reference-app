@@ -2473,6 +2473,7 @@
 	"vtcJoinListMe": "List me in the member directory",
 	"vtcJoinListMeNote": "If this is off, Meeting Place takes you out of the directory right after you join.",
 	"vtcJoinIdentityHeading": "Identity on your VTA",
+	"vtcJoinProfileHeading": "About the community",
 	"vtcJoinWebsite": "Website",
 	"vtcJoinContact": "Contact",
 	"vtcJoinRealHuman": "Members must be real people",

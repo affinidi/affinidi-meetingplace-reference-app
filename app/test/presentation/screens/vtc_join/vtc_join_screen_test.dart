@@ -142,12 +142,12 @@ void main() {
       final cards = tester
           .widgetList<GlassCard>(find.byType(GlassCard))
           .map((card) => card.title);
-      expect(cards.take(3), [
+      expect(cards, [
+        'About the community',
         'If you join, Football club can:',
         'Ways in',
         'Make sure you trust Football club',
       ]);
-      expect(cards.last, 'Community DID');
 
       await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
       await settle(tester);
@@ -199,7 +199,22 @@ void main() {
 
       await enterCode(tester, fakeVtcDid);
 
-      expect(find.text('Five-a-side on Sundays.'), findsOneWidget);
+      final profile = find.byWidgetPredicate(
+        (widget) =>
+            widget is GlassCard && widget.title == 'About the community',
+      );
+      for (final text in [
+        'Five-a-side on Sundays.',
+        'https://club.example/',
+        'hello@club.example',
+        fakeVtcDid,
+      ]) {
+        expect(
+          find.descendant(of: profile, matching: find.text(text)),
+          findsOneWidget,
+          reason: text,
+        );
+      }
       expect(find.text('https://club.example/'), findsOneWidget);
       expect(find.text('hello@club.example'), findsOneWidget);
       expect(find.text('Members must be real people'), findsOneWidget);

@@ -2675,6 +2675,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get vtcJoinIdentityHeading => 'Identity on your VTA';
 
   @override
+  String get vtcJoinProfileHeading => 'About the community';
+
+  @override
   String get vtcJoinWebsite => 'Website';
 
   @override

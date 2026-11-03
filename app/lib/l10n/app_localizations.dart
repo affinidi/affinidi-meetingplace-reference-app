@@ -3934,6 +3934,12 @@ abstract class AppLocalizations {
   /// **'Identity on your VTA'**
   String get vtcJoinIdentityHeading;
 
+  /// No description provided for @vtcJoinProfileHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'About the community'**
+  String get vtcJoinProfileHeading;
+
   /// No description provided for @vtcJoinWebsite.
   ///
   /// In en, this message translates to:
