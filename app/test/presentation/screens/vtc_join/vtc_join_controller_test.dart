@@ -448,6 +448,40 @@ void main() {
       expect(state().failure, VtcJoinFailure.noDidHosting);
     });
 
+    test('leaves a joined community', () async {
+      await service.join(await service.readCommunity(fakeVtcDid));
+      await controller().onScanned(fakeVtcDid);
+
+      await controller().leave();
+
+      expect(state().step, VtcJoinStep.left);
+      expect(network.memberRequests.last['type'], MemberTask.selfRemove);
+      expect(await service.community(fakeVtcDid), isNull);
+    });
+
+    test('says when the member is the last administrator', () async {
+      network.leaveRefusal = (409, 'conflict');
+      await service.join(await service.readCommunity(fakeVtcDid));
+      await controller().onScanned(fakeVtcDid);
+
+      await controller().leave();
+
+      expect(state().failure, VtcJoinFailure.lastAdministrator);
+      expect((await service.community(fakeVtcDid))?.isMember, isTrue);
+    });
+
+    test('leaves nothing before the community is joined', () async {
+      await controller().onScanned(fakeVtcDid);
+
+      await controller().leave();
+
+      expect(state().step, VtcJoinStep.review);
+      expect(
+        network.memberRequests.map((r) => r['type']),
+        isNot(contains(MemberTask.selfRemove)),
+      );
+    });
+
     test('says when no VTA is linked', () async {
       await service.unlink();
       await controller().onScanned(fakeVtcDid);

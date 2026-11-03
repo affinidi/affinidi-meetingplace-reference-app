@@ -244,6 +244,27 @@ class VtcJoinController extends _$VtcJoinController {
   static String _shown(Object value) =>
       value is String ? value : jsonEncode(value);
 
+  /// Leaves the community the member belongs to; the screen asks them to
+  /// confirm first.
+  Future<void> leave() async {
+    final manifest = _manifest;
+    if (state.step != VtcJoinStep.joined || manifest == null) return;
+    state = state.copyWith(step: VtcJoinStep.working);
+
+    await _run(() async {
+      try {
+        await _service.leave(manifest.communityDid);
+      } on MeetingPlaceVtcSDKException catch (error) {
+        if (error.httpStatus != _lastAdministratorStatus) rethrow;
+        return _fail(VtcJoinFailure.lastAdministrator);
+      }
+      state = state.copyWith(step: VtcJoinStep.left);
+    });
+  }
+
+  /// How a community refuses the leave of its last administrator.
+  static const _lastAdministratorStatus = 409;
+
   static VtcJoinStep _stepOf(VtcCommunity? community) {
     if (community == null) return VtcJoinStep.review;
     if (community.isMember) return VtcJoinStep.joined;

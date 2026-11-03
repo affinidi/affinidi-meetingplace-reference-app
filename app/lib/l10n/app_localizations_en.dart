@@ -2646,6 +2646,23 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get vtcJoinLeaveAction => 'Leave community';
+
+  @override
+  String vtcJoinLeaveTitle(String name) {
+    return 'Leave $name?';
+  }
+
+  @override
+  String get vtcJoinLeaveMessage =>
+      'The community ends your membership, and your VTA archives your membership card. To come back, you apply again.';
+
+  @override
+  String vtcJoinLeft(String name) {
+    return 'You left $name.';
+  }
+
+  @override
   String vtcJoinPending(String name) {
     return 'Your application to $name is waiting for the community\'s decision.';
   }
@@ -2687,6 +2704,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'notAccepting': 'This community isn\'\'t accepting applications.',
       'badAnswer':
           'The community\'\'s answer couldn\'\'t be checked, so nothing was recorded.',
+      'lastAdministrator':
+          'You\'\'re this community\'\'s last administrator. Make another member an administrator before you leave.',
       'other': 'The community or your VTA refused the application.',
     });
     return '$_temp0';

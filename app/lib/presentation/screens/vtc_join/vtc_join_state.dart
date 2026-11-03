@@ -24,6 +24,9 @@ enum VtcJoinStep {
   /// The member is a member, newly or already.
   joined,
 
+  /// The member left the community.
+  left,
+
   /// An application waits for the community's decision.
   pending,
 
@@ -62,6 +65,9 @@ enum VtcJoinFailure {
 
   /// The VTA holds no value for a detail the community requires.
   detailsMissing,
+
+  /// The member is the community's last administrator, so cannot leave.
+  lastAdministrator,
 
   /// The community or the VTA refused.
   refused,

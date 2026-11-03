@@ -72,6 +72,21 @@ class VtcJoinScreen extends ConsumerWidget {
                   ? l10n.vtcJoinAlreadyMember(name)
                   : l10n.vtcJoinJoined(name),
               onDone: close,
+              action: TextButton(
+                style: TextButton.styleFrom(
+                  foregroundColor: context.colorScheme.error,
+                ),
+                onPressed: () async {
+                  if (await _confirmLeave(context, name)) {
+                    await controller.leave();
+                  }
+                },
+                child: Text(l10n.vtcJoinLeaveAction),
+              ),
+            ),
+            VtcJoinStep.left => _Outcome(
+              message: l10n.vtcJoinLeft(name),
+              onDone: close,
             ),
             VtcJoinStep.pending => _Outcome(
               message: l10n.vtcJoinPending(name),
@@ -103,6 +118,32 @@ class VtcJoinScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// Asks the member to confirm leaving the community [name].
+Future<bool> _confirmLeave(BuildContext context, String name) async {
+  final l10n = context.l10n;
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(l10n.vtcJoinLeaveTitle(name)),
+      content: Text(l10n.vtcJoinLeaveMessage),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(l10n.cancel),
+        ),
+        TextButton(
+          style: TextButton.styleFrom(
+            foregroundColor: context.colorScheme.error,
+          ),
+          onPressed: () => Navigator.of(context).pop(true),
+          child: Text(l10n.vtcJoinLeaveAction),
+        ),
+      ],
+    ),
+  );
+  return confirmed ?? false;
 }
 
 /// Takes a community's DID typed or pasted, for when there is no code to

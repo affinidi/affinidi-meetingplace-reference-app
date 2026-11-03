@@ -3952,6 +3952,30 @@ abstract class AppLocalizations {
   /// **'You\'re already a member of {name}.'**
   String vtcJoinAlreadyMember(String name);
 
+  /// No description provided for @vtcJoinLeaveAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave community'**
+  String get vtcJoinLeaveAction;
+
+  /// Asks the member to confirm leaving a community
+  ///
+  /// In en, this message translates to:
+  /// **'Leave {name}?'**
+  String vtcJoinLeaveTitle(String name);
+
+  /// No description provided for @vtcJoinLeaveMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The community ends your membership, and your VTA archives your membership card. To come back, you apply again.'**
+  String get vtcJoinLeaveMessage;
+
+  /// The member left a community
+  ///
+  /// In en, this message translates to:
+  /// **'You left {name}.'**
+  String vtcJoinLeft(String name);
+
   /// An application to the named community is open
   ///
   /// In en, this message translates to:
@@ -3991,7 +4015,7 @@ abstract class AppLocalizations {
   /// Why joining a community could not go ahead
   ///
   /// In en, this message translates to:
-  /// **'{reason, select, invalidCode{This isn\'\'t a community\'\'s code.} profileMissing{Your VTA has no profile for this identity, so it can\'\'t share the details the community asks for. Set up your profile on your VTA, then try again.} detailsMissing{Your VTA doesn\'\'t hold a detail the community requires, so nothing was sent.} vtaMissing{Link your VTA in Settings before joining a community.} unreachable{The community can\'\'t be reached from your phone.} noDidHosting{Your VTA has no DID hosting server, so it can\'\'t create an identity the community can find.} notAccepting{This community isn\'\'t accepting applications.} badAnswer{The community\'\'s answer couldn\'\'t be checked, so nothing was recorded.} other{The community or your VTA refused the application.}}'**
+  /// **'{reason, select, invalidCode{This isn\'\'t a community\'\'s code.} profileMissing{Your VTA has no profile for this identity, so it can\'\'t share the details the community asks for. Set up your profile on your VTA, then try again.} detailsMissing{Your VTA doesn\'\'t hold a detail the community requires, so nothing was sent.} vtaMissing{Link your VTA in Settings before joining a community.} unreachable{The community can\'\'t be reached from your phone.} noDidHosting{Your VTA has no DID hosting server, so it can\'\'t create an identity the community can find.} notAccepting{This community isn\'\'t accepting applications.} badAnswer{The community\'\'s answer couldn\'\'t be checked, so nothing was recorded.} lastAdministrator{You\'\'re this community\'\'s last administrator. Make another member an administrator before you leave.} other{The community or your VTA refused the application.}}'**
   String vtcJoinFailure(String reason);
 }
 
