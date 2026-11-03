@@ -2572,6 +2572,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vtcJoinNewIdentity => 'A new identity';
 
   @override
+  String get vtcJoinNewIdentityHost => 'Created on your VTA for this community';
+
+  @override
+  String get vtcJoinExistingIdentity => 'Existing identity';
+
+  @override
+  String get vtcJoinUseIdentity => 'Join with this identity';
+
+  @override
+  String vtcJoinIdentityPosition(int position, int total) {
+    return '$position of $total · swipe to see the others';
+  }
+
+  @override
   String get vtcJoinNewIdentityNote =>
       'Recommended: your VTA creates it for this community, so other communities can\'t link you through it.';
 
@@ -2621,9 +2635,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get vtcJoinListMeNote =>
       'If this is off, Meeting Place takes you out of the directory right after you join.';
-
-  @override
-  String get vtcJoinIdentityHeading => 'Identity on your VTA';
 
   @override
   String get vtcJoinProfileHeading => 'About the community';

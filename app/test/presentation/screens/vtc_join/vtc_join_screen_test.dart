@@ -28,6 +28,7 @@ class _NoCamera extends CameraService {
 void main() {
   late FakeVtcNetwork network;
   late VtcService service;
+  late Ed25519DidKeySigner persona;
 
   setUpAll(() {
     AppLogger.initialize(
@@ -38,7 +39,7 @@ void main() {
   setUp(() async {
     FlutterSecureStorage.setMockInitialValues({});
     network = FakeVtcNetwork();
-    final persona = Ed25519DidKeySigner.generate();
+    persona = Ed25519DidKeySigner.generate();
     network.vta
       ..persona = persona
       ..answers[VtaTask.contextsList] = {
@@ -230,6 +231,66 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text(detail), findsOneWidget);
+    });
+
+    group('identity', () {
+      setUp(() {
+        // The VTA already holds one identity, so joining asks which.
+        network.vta.answers[VtaTask.didsList] = {
+          'dids': [
+            {'did': persona.did, 'contextId': 'vta'},
+          ],
+        };
+      });
+
+      Iterable<Object?> vtaTasks() =>
+          network.vta.received.map((request) => request['type']);
+
+      Future<void> reachIdentities(WidgetTester tester) async {
+        await pumpScreen(tester);
+        await enterCode(tester, fakeVtcDid);
+        await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
+        await settle(tester);
+      }
+
+      testWidgets('offers a new identity first, in a deck', (tester) async {
+        await reachIdentities(tester);
+
+        expect(find.text('Join with which identity?'), findsOneWidget);
+        expect(find.byKey(const Key('vtc_join_new_identity')), findsOneWidget);
+        expect(find.text('1 of 2 · swipe to see the others'), findsOneWidget);
+
+        await tapVisible(
+          tester,
+          find.widgetWithText(ElevatedButton, 'Join with this identity'),
+        );
+        await settle(tester);
+
+        expect(find.text("You're a member of Football club."), findsOneWidget);
+        expect(vtaTasks(), contains(VtaTask.didsCreate));
+      });
+
+      testWidgets('joins as the identity swiped to', (tester) async {
+        await reachIdentities(tester);
+
+        await tester.drag(
+          find.byKey(const Key('vtc_join_identities')),
+          const Offset(-500, 0),
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('2 of 2 · swipe to see the others'), findsOneWidget);
+        expect(find.text('Existing identity'), findsOneWidget);
+
+        await tapVisible(
+          tester,
+          find.widgetWithText(ElevatedButton, 'Join with this identity'),
+        );
+        await settle(tester);
+
+        expect(find.text("You're a member of Football club."), findsOneWidget);
+        expect(vtaTasks(), isNot(contains(VtaTask.didsCreate)));
+        expect((await service.community(fakeVtcDid))?.personaDid, persona.did);
+      });
     });
 
     testWidgets('titles a community without a name by what it asks', (

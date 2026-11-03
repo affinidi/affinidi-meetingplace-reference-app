@@ -8,6 +8,7 @@ import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/services/camera_service/camera_service.dart';
 import '../../dialogs/qr_code_picker/qr_code_picker.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
+import '../../widgets/swipeable_cards.dart';
 import 'vtc_join_controller.dart';
 import 'vtc_join_state.dart';
 
@@ -703,42 +704,10 @@ class _Line extends StatelessWidget {
   }
 }
 
-/// A choice in a glass card: [child] beside a white icon, tapped to choose.
-class _Choice extends StatelessWidget {
-  const _Choice({
-    super.key,
-    required this.icon,
-    required this.onTap,
-    required this.child,
-  });
-
-  final IconData icon;
-  final VoidCallback onTap;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(8),
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Row(
-          spacing: 12,
-          children: [
-            Icon(icon, size: 20, color: Colors.white),
-            Expanded(child: child),
-            const Icon(Icons.chevron_right, color: Colors.white),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Which identity on the member's VTA joins: a new one, which no other
-/// community can link to, or one the VTA already holds.
-class _ChooseIdentity extends StatelessWidget {
+/// Which identity on the member's VTA joins, in a deck to swipe through as
+/// MPX picks an identity: a new one first, which no other community can link
+/// to, then those the VTA already holds.
+class _ChooseIdentity extends HookWidget {
   const _ChooseIdentity({
     required this.state,
     required this.onChoose,
@@ -752,45 +721,161 @@ class _ChooseIdentity extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    // Null stands for a new identity.
+    final options = <String?>[null, ...state.identityChoices];
+    final current = useState(0);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: 12,
       children: [
         OnboardingTitle(l10n.vtcJoinChooseIdentity),
-        const SizedBox(height: 12),
-        GlassCard(
-          title: l10n.vtcJoinNewIdentity,
-          child: _Choice(
-            key: const Key('vtc_join_new_identity'),
-            icon: Icons.person_add,
-            onTap: () => onChoose(null),
-            child: Text(l10n.vtcJoinNewIdentityNote, style: _note(context)),
-          ),
+        SwipeableCards<String?>(
+          key: const Key('vtc_join_identities'),
+          items: options,
+          maxWidth: double.infinity,
+          maxHeight: 250,
+          onCardChange: (index) => current.value = index,
+          cardBuilder: (context, did) => _VtaIdentityCard(did: did),
         ),
-        if (state.identityChoices.isNotEmpty)
-          GlassCard(
-            title: l10n.vtcJoinIdentityHeading,
-            child: Column(
-              children: [
-                for (final did in state.identityChoices)
-                  _Choice(
-                    icon: Icons.person,
-                    onTap: () => onChoose(did),
-                    child: Text(
+        if (options.length > 1)
+          Text(
+            l10n.vtcJoinIdentityPosition(current.value + 1, options.length),
+            key: const Key('vtc_join_identity_position'),
+            textAlign: TextAlign.center,
+            style: _note(context),
+          ),
+        const SizedBox(height: 12),
+        OnboardingButton(
+          label: l10n.vtcJoinUseIdentity,
+          onPressed: () => onChoose(options[current.value]),
+        ),
+        OnboardingTextButton(label: l10n.generalCancel, onPressed: onCancel),
+      ],
+    );
+  }
+}
+
+/// A VTA identity as a card in the shape of an MPX identity card, frosted
+/// for the gradient: a header with its title and host, its avatar, and its
+/// DID. A null [did] is the new identity the VTA would create.
+class _VtaIdentityCard extends StatelessWidget {
+  const _VtaIdentityCard({required this.did});
+
+  final String? did;
+
+  static const _radius = Radius.circular(25);
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final textTheme = context.textTheme;
+    final did = this.did;
+
+    return Container(
+      key: did == null ? const Key('vtc_join_new_identity') : null,
+      margin: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Color.alphaBlend(
+          Colors.white.withAlpha(30),
+          context.colorScheme.primary,
+        ),
+        borderRadius: const BorderRadius.all(_radius),
+        border: Border.all(color: Colors.white.withAlpha(90)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(40),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: Colors.white.withAlpha(40),
+              borderRadius: const BorderRadius.only(
+                topLeft: _radius,
+                topRight: _radius,
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+              child: Row(
+                spacing: 12,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 4,
+                      children: [
+                        Text(
+                          did == null
+                              ? l10n.vtcJoinNewIdentity
+                              : l10n.vtcJoinExistingIdentity,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: textTheme.titleMedium?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          did == null
+                              ? l10n.vtcJoinNewIdentityHost
+                              : _host(did),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: textTheme.labelMedium?.copyWith(
+                            color: Colors.white70,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  CircleAvatar(
+                    radius: 24,
+                    backgroundColor: Colors.white.withAlpha(50),
+                    child: Icon(
+                      did == null ? Icons.person_add : Icons.fingerprint,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: did == null
+                  ? Text(l10n.vtcJoinNewIdentityNote, style: _note(context))
+                  : Text(
                       did,
-                      style: context.textTheme.bodySmall?.copyWith(
+                      maxLines: 4,
+                      overflow: TextOverflow.ellipsis,
+                      style: textTheme.bodySmall?.copyWith(
                         color: Colors.white,
                         fontFamily: 'monospace',
                         height: 1.4,
                       ),
                     ),
-                  ),
-              ],
             ),
           ),
-        OnboardingTextButton(label: l10n.generalCancel, onPressed: onCancel),
-      ],
+        ],
+      ),
     );
+  }
+
+  /// Where a `did:webvh` is published, e.g. `vta.example`; else the method.
+  static String _host(String did) {
+    final parts = did.split(':');
+    if (parts.length > 3 && parts[1] == 'webvh') {
+      return Uri.decodeComponent(parts.sublist(3).join('/'));
+    }
+    return parts.length > 1 ? 'did:${parts[1]}' : did;
   }
 }
 

@@ -2444,6 +2444,20 @@
 	},
 	"vtcJoinShareAction": "Share and apply",
 	"vtcJoinNewIdentity": "A new identity",
+	"vtcJoinNewIdentityHost": "Created on your VTA for this community",
+	"vtcJoinExistingIdentity": "Existing identity",
+	"vtcJoinUseIdentity": "Join with this identity",
+	"vtcJoinIdentityPosition": "{position} of {total} · swipe to see the others",
+	"@vtcJoinIdentityPosition": {
+		"placeholders": {
+			"position": {
+				"type": "int"
+			},
+			"total": {
+				"type": "int"
+			}
+		}
+	},
 	"vtcJoinNewIdentityNote": "Recommended: your VTA creates it for this community, so other communities can't link you through it.",
 	"vtcJoinWaysHeading": "Ways in",
 	"vtcJoinWayAutomatic": "You become a member when you apply",
@@ -2472,7 +2486,6 @@
 	"vtcJoinDirectoryHidden": "This community doesn't list new members in its member directory.",
 	"vtcJoinListMe": "List me in the member directory",
 	"vtcJoinListMeNote": "If this is off, Meeting Place takes you out of the directory right after you join.",
-	"vtcJoinIdentityHeading": "Identity on your VTA",
 	"vtcJoinProfileHeading": "About the community",
 	"vtcJoinWebsite": "Website",
 	"vtcJoinContact": "Contact",

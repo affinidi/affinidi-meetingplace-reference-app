@@ -3856,6 +3856,30 @@ abstract class AppLocalizations {
   /// **'A new identity'**
   String get vtcJoinNewIdentity;
 
+  /// No description provided for @vtcJoinNewIdentityHost.
+  ///
+  /// In en, this message translates to:
+  /// **'Created on your VTA for this community'**
+  String get vtcJoinNewIdentityHost;
+
+  /// No description provided for @vtcJoinExistingIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'Existing identity'**
+  String get vtcJoinExistingIdentity;
+
+  /// No description provided for @vtcJoinUseIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'Join with this identity'**
+  String get vtcJoinUseIdentity;
+
+  /// No description provided for @vtcJoinIdentityPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'{position} of {total} · swipe to see the others'**
+  String vtcJoinIdentityPosition(int position, int total);
+
   /// No description provided for @vtcJoinNewIdentityNote.
   ///
   /// In en, this message translates to:
@@ -3927,12 +3951,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'If this is off, Meeting Place takes you out of the directory right after you join.'**
   String get vtcJoinListMeNote;
-
-  /// No description provided for @vtcJoinIdentityHeading.
-  ///
-  /// In en, this message translates to:
-  /// **'Identity on your VTA'**
-  String get vtcJoinIdentityHeading;
 
   /// No description provided for @vtcJoinProfileHeading.
   ///
