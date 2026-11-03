@@ -15,9 +15,11 @@ class VtaLinkPanel extends StatelessWidget {
         radius: 2,
         borderRadius: BorderRadius.circular(16),
       ),
-      child: const Padding(
-        padding: EdgeInsets.all(20),
-        child: VtaLinkContent(),
+      // The settings route has no Scaffold: without a Material, text falls
+      // back to the underlined debug style and buttons have no ink.
+      child: const Material(
+        type: MaterialType.transparency,
+        child: Padding(padding: EdgeInsets.all(20), child: VtaLinkContent()),
       ),
     );
   }
