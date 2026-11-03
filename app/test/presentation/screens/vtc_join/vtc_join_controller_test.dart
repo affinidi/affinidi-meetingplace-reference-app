@@ -263,6 +263,105 @@ void main() {
     });
   });
 
+  group('VtcJoinController admission', () {
+    setUp(() {
+      network.vta.answers[VtaTask.signDocument] = {
+        'document': {
+          'issuer': persona.did,
+          'proof': {'proofPurpose': 'assertionMethod'},
+        },
+      };
+    });
+
+    Iterable<String> memberTasks() =>
+        network.memberRequests.map((r) => r['type'] as String);
+
+    test('confirms the membership and leaves the directory', () async {
+      await controller().onScanned(fakeVtcDid);
+      await controller().join();
+
+      expect(state().step, VtcJoinStep.joined);
+      expect(memberTasks(), [MemberTask.vmc, MemberTask.directoryCardUpdate]);
+      final confirmation = network.memberRequests.first['payload'] as Map;
+      expect(confirmation['requestId'], 'request-1');
+      final community = await service.community(fakeVtcDid);
+      expect(community?.isMember, isTrue);
+      expect(community?.isSettled, isTrue);
+    });
+
+    test('stays in the directory when the member opted in', () async {
+      await controller().onScanned(fakeVtcDid);
+      controller().setListInDirectory(true);
+      await controller().join();
+
+      expect(memberTasks(), [MemberTask.vmc]);
+    });
+
+    test('is a member, still to settle, when confirming fails', () async {
+      network.vta.refusals[VtaTask.signDocument] = {
+        'code': 'keys/sign-document:permissionDenied',
+      };
+      await controller().onScanned(fakeVtcDid);
+      await controller().join();
+
+      expect(state().step, VtcJoinStep.joined);
+      expect(memberTasks(), [MemberTask.directoryCardUpdate]);
+      final community = await service.community(fakeVtcDid);
+      expect(community?.isMember, isTrue);
+      expect(community?.isSettled, isFalse);
+    });
+
+    test("shows the community's reason for a denial", () async {
+      network.joinVerdict = {
+        'effect': 'deny',
+        'with': {'code': 'closed', 'reason': 'Berlin residents only'},
+      };
+      await controller().onScanned(fakeVtcDid);
+      await controller().join();
+
+      expect(state().step, VtcJoinStep.denied);
+      expect(state().denialReason, 'Berlin residents only');
+    });
+
+    test('says when the community already counts the identity', () async {
+      network.joinRefusal = 'vtc/join-requests/submit:alreadyMember';
+      await controller().onScanned(fakeVtcDid);
+      await controller().join();
+
+      expect(state().step, VtcJoinStep.joined);
+      expect(state().wasMember, isTrue);
+    });
+
+    test('does not apply again for a membership the VTA holds', () async {
+      network.vta
+        ..answers[VtaTask.didsList] = {
+          'dids': [
+            {'did': persona.did, 'contextId': 'vta'},
+          ],
+        }
+        ..answers[VtaTask.credentialsQuery] = {
+          'credentials': [
+            {'id': 'card-1'},
+          ],
+        }
+        ..answers[VtaTask.credentialsGet] = {
+          'credential': {
+            'issuer': fakeVtcDid,
+            'credentialSubject': {'id': persona.did},
+          },
+        };
+
+      await controller().onScanned(fakeVtcDid);
+
+      expect(state().step, VtcJoinStep.joined);
+      expect(state().wasMember, isTrue);
+      expect(
+        network.joinRequests.map((r) => r['type']),
+        isNot(contains(JoinTask.submit)),
+      );
+    });
+  });
+
   group('VtcJoinController', () {
     test('joins a community that admits at once', () async {
       await controller().onScanned(fakeVtcDid);

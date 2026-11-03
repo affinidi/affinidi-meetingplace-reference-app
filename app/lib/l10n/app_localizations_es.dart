@@ -2708,6 +2708,11 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String vtcJoinDeniedWithReason(String name, String reason) {
+    return '$name didn\'t accept your application. Its reason: $reason';
+  }
+
+  @override
   String get vtcJoinNeedsMore =>
       'The community needs more than Meeting Place can send, such as credentials.';
 

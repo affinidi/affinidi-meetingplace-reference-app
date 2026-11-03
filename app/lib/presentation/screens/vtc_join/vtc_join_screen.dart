@@ -82,7 +82,10 @@ class VtcJoinScreen extends ConsumerWidget {
               ),
             ),
             VtcJoinStep.denied => _Outcome(
-              message: l10n.vtcJoinDenied(name),
+              message: switch (state.denialReason) {
+                final reason? => l10n.vtcJoinDeniedWithReason(name, reason),
+                null => l10n.vtcJoinDenied(name),
+              },
               onDone: close,
             ),
             VtcJoinStep.needsMore => _Outcome(

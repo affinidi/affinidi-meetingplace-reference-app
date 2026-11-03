@@ -152,6 +152,9 @@ abstract class VtcJoinState with _$VtcJoinState {
 
     /// The profile details the member is asked to approve sharing.
     @Default(<VtcJoinDetail>[]) List<VtcJoinDetail> details,
+
+    /// The community's reason for turning the application down, if given.
+    String? denialReason,
     VtcJoinFailure? failure,
   }) = _VtcJoinState;
 }

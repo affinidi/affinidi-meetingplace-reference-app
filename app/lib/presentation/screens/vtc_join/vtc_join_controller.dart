@@ -34,7 +34,16 @@ class VtcJoinController extends _$VtcJoinController {
     await _run(() async {
       final manifest = await _service.readCommunity(code);
       _manifest = manifest;
-      final community = await _service.community(manifest.communityDid);
+      var community = await _service.community(manifest.communityDid);
+      if (community == null) {
+        // A membership another app of the member holds, backed up to the
+        // VTA: joining again would apply a second time.
+        final backedUp = await _service.importMembership(manifest.communityDid);
+        if (backedUp != null) {
+          await _service.rememberMembership(backedUp);
+          community = await _service.community(manifest.communityDid);
+        }
+      }
       state = state.copyWith(
         step: _stepOf(community),
         communityName:
@@ -130,7 +139,11 @@ class VtcJoinController extends _$VtcJoinController {
     if (manifest.requestedAttributes.isEmpty) {
       return _send(manifest, persona);
     }
-    final identity = await _service.joiningIdentity(manifest, persona: persona);
+    final identity = await _service.joiningIdentity(
+      manifest,
+      persona: persona,
+      listInDirectory: state.listInDirectory,
+    );
     final preview = await _service.previewDetails(manifest, identity);
     final held = {
       for (final claim in preview.claims)
@@ -170,9 +183,11 @@ class VtcJoinController extends _$VtcJoinController {
       manifest,
       persona: persona,
       attributes: attributes,
+      listInDirectory: state.listInDirectory,
     );
     state = state.copyWith(
       details: const [],
+      denialReason: verdict is JoinDenied ? verdict.reason : null,
       step: switch (verdict) {
         JoinAdmitted() => VtcJoinStep.joined,
         JoinPending() => VtcJoinStep.pending,
@@ -221,6 +236,11 @@ class VtcJoinController extends _$VtcJoinController {
     } on VtaNotLinkedException {
       _fail(VtcJoinFailure.vtaMissing);
     } on MeetingPlaceVtcSDKException catch (error) {
+      if (error.refusalCode?.endsWith(':alreadyMember') ?? false) {
+        // The community already counts this identity as a member.
+        state = state.copyWith(step: VtcJoinStep.joined, wasMember: true);
+        return;
+      }
       _fail(_failureOf(error));
     }
   }

@@ -87,6 +87,13 @@ class FakeVtcNetwork implements HttpClientAdapter {
   /// The join documents the community received.
   final List<Map<String, dynamic>> joinRequests = [];
 
+  /// When set, the community refuses a join submit with this code.
+  String? joinRefusal;
+
+  /// The member documents the community received: membership
+  /// confirmations and directory card updates.
+  final List<Map<String, dynamic>> memberRequests = [];
+
   /// An SDK that reaches only this network.
   MeetingPlaceVtcSDK sdk() => MeetingPlaceVtcSDK(
     didResolver: vta,
@@ -132,8 +139,24 @@ class FakeVtcNetwork implements HttpClientAdapter {
 
     final Map<String, dynamic> answer;
     var purpose = ProofPurpose.assertionMethod;
-    if (type.startsWith('https://trusttasks.org/spec/vtc/join-requests/')) {
+    if (type == MemberTask.vmc || type == MemberTask.directoryCardUpdate) {
+      memberRequests.add(request);
+      purpose = ProofPurpose.authentication;
+      answer = type == MemberTask.vmc
+          ? {'memberDid': request['issuer'], 'status': 'stored'}
+          : {'revision': 1};
+    } else if (type.startsWith(
+      'https://trusttasks.org/spec/vtc/join-requests/',
+    )) {
       joinRequests.add(request);
+      if (type == JoinTask.submit && joinRefusal != null) {
+        return {
+          'id': 'urn:uuid:error',
+          'type': 'https://trusttasks.org/spec/trust-task-error/0.1',
+          'issuer': fakeVtcDid,
+          'payload': {'code': joinRefusal},
+        };
+      }
       purpose = ProofPurpose.authentication;
       answer = switch (type) {
         JoinTask.manifest => joinManifest,
