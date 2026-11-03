@@ -2298,15 +2298,6 @@
 	"linkedVtaBadAnswer": "Your VTA's answer couldn't be verified.",
 	"linkedVtaScreenTitle": "Connect your VTA",
 	"linkedVtaPendingTitle": "Add this phone to your VTA",
-	"linkedVtaPendingFor": "Linking to {vtaDid}",
-	"@linkedVtaPendingFor": {
-		"description": "Shows the DID of the VTA being linked",
-		"placeholders": {
-			"vtaDid": {
-				"type": "String"
-			}
-		}
-	},
 	"linkedVtaManagerDidLabel": "This phone's DID",
 	"linkedVtaCopyDid": "Copy DID",
 	"linkedVtaGrantInstruction": "Ask your VTA administrator to grant this DID by running:",
@@ -2318,15 +2309,6 @@
 	"linkedVtaStoppedWaiting": "Stopped checking after 10 minutes.",
 	"linkedVtaCheckAgain": "Check again",
 	"linkedVtaUnlinkAction": "Remove",
-	"linkedVtaLinked": "Linked to {vtaDid}",
-	"@linkedVtaLinked": {
-		"description": "Shows the DID of the linked VTA",
-		"placeholders": {
-			"vtaDid": {
-				"type": "String"
-			}
-		}
-	},
 	"vtcSignInMenuTitle": "Sign in to community",
 	"vtcSignInMenuSubtitle": "Approve a sign-in code from your community's website",
 	"vtcSignInUseMembership": "Use this membership",

@@ -147,7 +147,12 @@ void main() {
       });
       await pumpSection(tester);
 
-      expect(find.text('Linked to ${vta.did}'), findsOneWidget);
+      expect(
+        tester
+            .widget<SelectableText>(find.byKey(const Key('linked_vta_did')))
+            .data,
+        vta.did,
+      );
 
       await tester.tap(find.text('Remove'));
       await settle(tester);

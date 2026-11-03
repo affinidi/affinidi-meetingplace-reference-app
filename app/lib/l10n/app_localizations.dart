@@ -3544,12 +3544,6 @@ abstract class AppLocalizations {
   /// **'Add this phone to your VTA'**
   String get linkedVtaPendingTitle;
 
-  /// Shows the DID of the VTA being linked
-  ///
-  /// In en, this message translates to:
-  /// **'Linking to {vtaDid}'**
-  String linkedVtaPendingFor(String vtaDid);
-
   /// No description provided for @linkedVtaManagerDidLabel.
   ///
   /// In en, this message translates to:
@@ -3615,12 +3609,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove'**
   String get linkedVtaUnlinkAction;
-
-  /// Shows the DID of the linked VTA
-  ///
-  /// In en, this message translates to:
-  /// **'Linked to {vtaDid}'**
-  String linkedVtaLinked(String vtaDid);
 
   /// No description provided for @vtcSignInMenuTitle.
   ///
