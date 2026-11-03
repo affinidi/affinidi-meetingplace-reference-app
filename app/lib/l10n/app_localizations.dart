@@ -3493,7 +3493,7 @@ abstract class AppLocalizations {
   /// No description provided for @linkedVtaHelperText.
   ///
   /// In en, this message translates to:
-  /// **'Link your Verifiable Trust Agent (VTA) so this phone can approve sign-ins to your communities.'**
+  /// **'Link your Verifiable Trust Agent (VTA) so Meeting Place can act for you with it.'**
   String get linkedVtaHelperText;
 
   /// No description provided for @linkedVtaDidLabel.
@@ -3520,34 +3520,100 @@ abstract class AppLocalizations {
   /// **'Your VTA couldn\'t be reached.'**
   String get linkedVtaUnreachable;
 
+  /// No description provided for @linkedVtaAlreadyLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'A VTA is already linked. Remove it before linking another one.'**
+  String get linkedVtaAlreadyLinked;
+
+  /// No description provided for @linkedVtaBadAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Your VTA\'s answer couldn\'t be verified.'**
+  String get linkedVtaBadAnswer;
+
+  /// No description provided for @linkedVtaScreenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect your VTA'**
+  String get linkedVtaScreenTitle;
+
+  /// No description provided for @linkedVtaPendingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add this phone to your VTA'**
+  String get linkedVtaPendingTitle;
+
+  /// Shows the DID of the VTA being linked
+  ///
+  /// In en, this message translates to:
+  /// **'Linking to {vtaDid}'**
+  String linkedVtaPendingFor(String vtaDid);
+
+  /// No description provided for @linkedVtaManagerDidLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone\'s DID'**
+  String get linkedVtaManagerDidLabel;
+
+  /// No description provided for @linkedVtaCopyDid.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy DID'**
+  String get linkedVtaCopyDid;
+
   /// No description provided for @linkedVtaGrantInstruction.
   ///
   /// In en, this message translates to:
-  /// **'Ask the administrator of your VTA to add this phone by running:'**
+  /// **'Ask your VTA administrator to grant this DID by running:'**
   String get linkedVtaGrantInstruction;
+
+  /// No description provided for @linkedVtaGrantWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This makes Meeting Place an administrator of your VTA, able to create and use your identities (persona-holder). Only grant it to a phone you own.'**
+  String get linkedVtaGrantWarning;
 
   /// No description provided for @linkedVtaCopyCommand.
   ///
   /// In en, this message translates to:
-  /// **'Copy command'**
+  /// **'Copy commands'**
   String get linkedVtaCopyCommand;
 
-  /// No description provided for @linkedVtaConfirmAction.
+  /// No description provided for @linkedVtaWaiting.
   ///
   /// In en, this message translates to:
-  /// **'I\'ve been added'**
-  String get linkedVtaConfirmAction;
+  /// **'Waiting for your administrator…'**
+  String get linkedVtaWaiting;
 
-  /// No description provided for @linkedVtaNotGrantedYet.
+  /// No description provided for @linkedVtaWaitingForPersonaHolder.
   ///
   /// In en, this message translates to:
-  /// **'This phone hasn\'t been added yet. Try again once your administrator has run the command.'**
-  String get linkedVtaNotGrantedYet;
+  /// **'Admin role granted. Waiting for the persona-holder capability…'**
+  String get linkedVtaWaitingForPersonaHolder;
+
+  /// No description provided for @linkedVtaStillTrying.
+  ///
+  /// In en, this message translates to:
+  /// **'Your VTA couldn\'t be reached. Still trying…'**
+  String get linkedVtaStillTrying;
+
+  /// No description provided for @linkedVtaStoppedWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Stopped checking after 10 minutes.'**
+  String get linkedVtaStoppedWaiting;
+
+  /// No description provided for @linkedVtaCheckAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Check again'**
+  String get linkedVtaCheckAgain;
 
   /// No description provided for @linkedVtaUnlinkAction.
   ///
   /// In en, this message translates to:
-  /// **'Unlink'**
+  /// **'Remove'**
   String get linkedVtaUnlinkAction;
 
   /// Shows the DID of the linked VTA
@@ -3711,12 +3777,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Location: {location}'**
   String vtcSignInLocation(String location);
-
-  /// No description provided for @linkedVtaApprovalKeyFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'This phone couldn\'t set up its sign-in approval key. Make sure Face ID or a fingerprint is set up, then try again.'**
-  String get linkedVtaApprovalKeyFailed;
 
   /// No description provided for @linkedVtaDidNotResolved.
   ///

@@ -14,6 +14,7 @@ import '../../application/services/network_connectivity_service/network_connecti
 import '../../application/services/r_cards_service/r_card_chat_notifier_service.dart';
 import '../../application/services/settings_service/settings_service.dart';
 import '../../application/services/vrc_service/vrc_service.dart';
+import '../../application/services/vtc_service/vta_link_service.dart';
 import '../../infrastructure/providers/app_badge_provider.dart';
 import '../../infrastructure/providers/credentials_sdk_provider.dart';
 import '../../infrastructure/providers/meeting_place_sdk_provider.dart';
@@ -53,6 +54,14 @@ class AppController extends _$AppController with WidgetsBindingObserver {
 
     ref.read(settingsServiceProvider);
     ref.read(networkConnectivityServiceProvider);
+
+    // A pending VTA link checks for its grant only while the app is shown.
+    final vtaLink = ref.read(vtaLinkServiceProvider.notifier);
+    final lifecycle = AppLifecycleListener(
+      onHide: () => vtaLink.setInBackground(true),
+      onShow: () => vtaLink.setInBackground(false),
+    );
+    ref.onDispose(lifecycle.dispose);
   }
 
   @override

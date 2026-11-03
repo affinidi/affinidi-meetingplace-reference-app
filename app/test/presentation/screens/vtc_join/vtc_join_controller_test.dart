@@ -61,7 +61,7 @@ void main() {
       platform: 'ios',
     );
     await service.startLink(network.vta.did);
-    await service.confirmLink();
+    await service.checkGrant();
     useService();
   });
 

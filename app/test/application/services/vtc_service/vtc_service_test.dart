@@ -26,11 +26,36 @@ void main() {
   });
 
   group('VtcService link', () {
-    test('refuses text that is not a DID', () {
-      expect(
+    test('refuses text that is not a DID, storing nothing', () async {
+      await expectLater(
         service.startLink('my agent'),
         throwsA(isA<InvalidVtaDidException>()),
       );
+      expect(await service.linkedVta(), isNull);
+    });
+
+    test('stores nothing when the VTA DID does not resolve', () async {
+      await expectLater(
+        service.startLink('did:webvh:QmMissing:vta.example'),
+        throwsA(
+          isA<MeetingPlaceVtcSDKException>().having(
+            (e) => e.code,
+            'code',
+            MeetingPlaceVtcSDKErrorCode.didResolutionFailed,
+          ),
+        ),
+      );
+      expect(await service.linkedVta(), isNull);
+    });
+
+    test('stores nothing when the VTA cannot be reached', () async {
+      vta.isDown = true;
+
+      await expectLater(
+        service.startLink(vta.did),
+        throwsA(isA<MeetingPlaceVtcSDKException>()),
+      );
+      expect(await service.linkedVta(), isNull);
     });
 
     test('starts a link with a new manager key', () async {
@@ -41,37 +66,61 @@ void main() {
       expect(await service.managerDid(), managerDid);
       expect(linked?.vtaDid, vta.did);
       expect(linked?.isGranted, isFalse);
+      expect(vta.received.single['type'], VtaTask.challenge);
+    });
+
+    test('links one VTA at a time', () async {
+      await service.startLink(vta.did);
+
+      await expectLater(
+        service.startLink(vta.did),
+        throwsA(isA<VtaAlreadyLinkedException>()),
+      );
     });
 
     test('stays pending while the VTA has not granted the key', () async {
       await service.startLink(vta.did);
       vta.refusals[VtaTask.whoAmI] = {'code': 'auth/whoami:notAuthorized'};
 
-      expect(await service.confirmLink(), isFalse);
+      expect(await service.checkGrant(), isNull);
       expect((await service.linkedVta())?.isGranted, isFalse);
+    });
+
+    test('stays pending until persona-holder is granted too', () async {
+      await service.startLink(vta.did);
+      vta.answers[VtaTask.whoAmI] = {
+        'roles': ['admin'],
+      };
+
+      final access = await service.checkGrant();
+
+      expect(access?.isAdmin, isTrue);
+      expect(access?.isGranted, isFalse);
+      expect((await service.linkedVta())?.isGranted, isFalse);
+    });
+
+    test('becomes active once granted, enrolling no approval key', () async {
+      await service.startLink(vta.did);
+
+      expect((await service.checkGrant())?.isGranted, isTrue);
+
+      expect((await service.linkedVta())?.isGranted, isTrue);
+      expect(
+        vta.received.map((r) => r['type']),
+        isNot(contains(VtaTask.deviceRegister)),
+      );
       expect(keyStorage.did, isNull);
     });
 
-    test('enrols the approval key once the key is granted', () async {
+    test('unlink signs out and forgets the VTA and its key', () async {
       await service.startLink(vta.did);
-
-      expect(await service.confirmLink(), isTrue);
-
-      expect((await service.linkedVta())?.isGranted, isTrue);
-      final register = vta.received.last;
-      expect(register['type'], VtaTask.deviceRegister);
-      final ext = (register['payload'] as Map)['ext'] as Map;
-      expect((ext[uvKeyExtension] as Map)['did'], keyStorage.did);
-      expect((register['payload'] as Map)['platform'], 'ios');
-    });
-
-    test('unlink forgets the VTA and the approval key', () async {
-      await service.startLink(vta.did);
-      await service.confirmLink();
+      await service.checkGrant();
 
       await service.unlink();
 
+      expect(vta.received.last['type'], VtaTask.revokeSession);
       expect(await service.linkedVta(), isNull);
+      expect(await service.managerDid(), isNull);
       expect(keyStorage.did, isNull);
     });
   });
@@ -110,7 +159,7 @@ void main() {
         platform: 'ios',
       );
       await service.startLink(network.vta.did);
-      await service.confirmLink();
+      await service.checkGrant();
     });
 
     Iterable<Object?> vtaTasks() =>

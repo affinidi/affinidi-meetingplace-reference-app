@@ -62,7 +62,7 @@ void main() {
       platform: 'ios',
     );
     await service.startLink(network.vta.did);
-    await service.confirmLink();
+    await service.checkGrant();
 
     container = ProviderContainer(
       overrides: [vtcServiceProvider.overrideWithValue(service)],

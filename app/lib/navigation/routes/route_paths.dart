@@ -46,4 +46,7 @@ class RoutePaths {
 
   // Onboarding
   static const String onboarding = '/onboarding';
+
+  // Linking the member's VTA, before the app is used
+  static const String linkVta = '/link-vta';
 }

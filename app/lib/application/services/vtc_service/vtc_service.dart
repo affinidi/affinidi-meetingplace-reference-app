@@ -16,6 +16,12 @@ class InvalidVtaDidException implements Exception {
   const InvalidVtaDidException();
 }
 
+/// Thrown when a VTA is to be linked while one already is.
+class VtaAlreadyLinkedException implements Exception {
+  /// Creates a [VtaAlreadyLinkedException].
+  const VtaAlreadyLinkedException();
+}
+
 /// Thrown when scanned text is not a community's DID.
 class InvalidCommunityCodeException implements Exception {
   /// Creates an [InvalidCommunityCodeException].
@@ -36,8 +42,8 @@ class VtaNotLinkedException implements Exception {
 /// communities' portals.
 ///
 /// The link is manual: the phone mints a manager key and shows its DID; the
-/// VTA's administrator grants it; the phone then confirms the grant and
-/// enrols its biometric approval key as a device.
+/// VTA's administrator grants it; the phone then checks for the grant. The
+/// biometric approval key is enrolled only when a sign-in first needs it.
 class VtcService {
   /// Creates a [VtcService].
   VtcService({
@@ -59,16 +65,28 @@ class VtcService {
   /// Starts linking the VTA [vtaDid] and returns the manager DID its
   /// administrator must grant.
   ///
-  /// Throws [InvalidVtaDidException] when [vtaDid] is not a DID.
+  /// The link is stored only once [vtaDid] resolves to a VTA that answers
+  /// over HTTPS, at the endpoint its DID document names.
+  ///
+  /// Throws [InvalidVtaDidException] when [vtaDid] is not a DID,
+  /// [VtaAlreadyLinkedException] when a VTA is linked or being linked, and
+  /// [MeetingPlaceVtcSDKException] when the DID does not resolve or the VTA
+  /// cannot be reached.
   Future<String> startLink(String vtaDid) async {
     final did = vtaDid.trim();
     if (!_isDid(did)) throw const InvalidVtaDidException();
+    if (await _repository.getLinkedVta() != null) {
+      throw const VtaAlreadyLinkedException();
+    }
+
     final manager = _sdk.newManagerKey();
-    _client = null;
-    await _repository.clear();
+    final client = _sdk.vtaClient(vtaDid: did, manager: manager);
+    await client.checkReachable();
+
     await _repository.saveLinkedVta(
       LinkedVta(vtaDid: did, managerSeed: manager.seed, isGranted: false),
     );
+    _client = client;
     return manager.did;
   }
 
@@ -79,29 +97,31 @@ class VtcService {
     return Ed25519DidKeySigner.fromSeed(linkedVta.managerSeed).did;
   }
 
-  /// Checks whether the VTA granted the manager key and, once it has,
-  /// enrols the biometric approval key with the VTA.
+  /// Asks the VTA what it grants the manager key, and marks the link active
+  /// once it grants all the phone needs.
   ///
-  /// Returns false while the grant is missing. Throws
-  /// [MeetingPlaceVtcSDKException] when the VTA cannot be reached.
-  Future<bool> confirmLink() async {
+  /// Returns null when no link is pending or the key is not on the VTA's
+  /// access list yet. Throws [MeetingPlaceVtcSDKException] when the VTA
+  /// cannot be reached or its answer does not verify.
+  Future<VtaAccess?> checkGrant() async {
     final linkedVta = await _repository.getLinkedVta();
-    if (linkedVta == null) return false;
+    if (linkedVta == null) return null;
 
-    final vta = _vtaClient(linkedVta);
-    if (!await VtaLink.isGranted(vta)) return false;
-
-    await vta.enrolUserVerificationKey(
-      uvDid: await _userVerificationKey.ensureKey(),
-      displayName: _deviceName,
-      platform: _platform,
-    );
-    await _repository.saveLinkedVta(linkedVta.granted());
-    return true;
+    final access = await VtaLink.access(_vtaClient(linkedVta));
+    if (access != null && access.isGranted && !linkedVta.isGranted) {
+      await _repository.saveLinkedVta(linkedVta.granted());
+    }
+    return access;
   }
 
-  /// Forgets the VTA link, the communities and the approval key.
+  /// Forgets the VTA link, the manager key, the communities and the
+  /// approval key, after ending the manager key's sessions on the VTA.
+  ///
+  /// The VTA keeps the key on its access list: only its administrator can
+  /// remove it.
   Future<void> unlink() async {
+    final linkedVta = await _repository.getLinkedVta();
+    if (linkedVta != null) await _vtaClient(linkedVta).signOut();
     _client = null;
     await _repository.clear();
     await _userVerificationKey.reset();

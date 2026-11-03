@@ -1,11 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
+import 'package:mpx_flutter_reference_app/application/services/vtc_service/vta_link_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
@@ -15,33 +15,27 @@ import 'package:mpx_flutter_reference_app/presentation/screens/settings/linked_v
 
 import '../../../fakes/fake_vta.dart';
 
-class _BrokenKeyStorage extends FakeUserVerificationKeyStorage {
-  @override
-  Future<void> writeSeed(String value) async =>
-      throw PlatformException(code: 'NoBiometrics');
-}
-
 void main() {
   late FakeVta vta;
+  late VtcService service;
 
-  Future<void> pumpSection(
-    WidgetTester tester, {
-    UserVerificationKeyStorage? keyStorage,
-    String? vtaDid,
-  }) async {
-    final service = VtcService(
-      sdk: vta.sdk(),
-      repository: SecureStorageVtcRepository(),
-      userVerificationKey: UserVerificationKey(
-        keyStorage ?? FakeUserVerificationKeyStorage(),
-      ),
-      platform: 'ios',
+  Future<void> settle(WidgetTester tester) async {
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 200)),
     );
-    await tester.runAsync(() => service.startLink(vtaDid ?? vta.did));
+    await tester.pumpAndSettle();
+  }
 
+  Future<void> pumpSection(WidgetTester tester) async {
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [vtcServiceProvider.overrideWithValue(service)],
+        overrides: [
+          vtcServiceProvider.overrideWithValue(service),
+          // Checks only by hand in these tests.
+          vtaLinkTimingProvider.overrideWithValue(
+            const VtaLinkTiming(interval: Duration(hours: 1)),
+          ),
+        ],
         child: MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
@@ -61,16 +55,23 @@ void main() {
       ),
     );
     await tester.tap(find.text('settings'));
-    await tester.runAsync(() => Future<void>.delayed(Duration.zero));
-    await tester.pumpAndSettle();
+    await settle(tester);
   }
 
-  Future<void> tapAdded(WidgetTester tester) async {
-    await tester.tap(find.text("I've been added"));
+  Future<void> link(WidgetTester tester, String did) async {
+    await tester.enterText(find.byKey(const Key('vta_did_field')), did);
+    await tester.tap(find.text('Link'));
+    // Not settled: a pending link shows a spinner while it waits.
     await tester.runAsync(
       () => Future<void>.delayed(const Duration(milliseconds: 200)),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+
+  /// Unmounts the scope, so the link controller stops its timer.
+  Future<void> unmount(WidgetTester tester) async {
+    await tester.pumpWidget(const SizedBox());
   }
 
   setUpAll(() {
@@ -82,53 +83,78 @@ void main() {
   setUp(() {
     FlutterSecureStorage.setMockInitialValues({});
     vta = FakeVta();
+    service = VtcService(
+      sdk: vta.sdk(),
+      repository: SecureStorageVtcRepository(),
+      userVerificationKey: UserVerificationKey(
+        FakeUserVerificationKeyStorage(),
+      ),
+      platform: 'ios',
+    );
   });
 
   group('LinkedVtaSection', () {
-    testWidgets('says inside the drawer when the phone is not added yet', (
-      tester,
-    ) async {
-      vta.refusals[VtaTask.whoAmI] = {'code': 'auth/whoami:notAuthorized'};
+    testWidgets('shows what to grant, and that it waits', (tester) async {
+      vta.answers[VtaTask.whoAmI] = {
+        'roles': ['reader'],
+      };
       await pumpSection(tester);
 
-      await tapAdded(tester);
+      await link(tester, vta.did);
 
+      final managerDid = await tester.runAsync(service.managerDid);
+      final commands = tester
+          .widget<SelectableText>(find.byKey(const Key('vta_grant_commands')))
+          .data;
+      expect(commands, contains('--did $managerDid --role admin'));
       expect(
-        find.textContaining("This phone hasn't been added yet"),
-        findsOneWidget,
+        commands,
+        contains('pnm acl update $managerDid --capabilities persona-holder'),
       );
+      expect(find.text('Waiting for your administrator…'), findsOneWidget);
+      expect(find.textContaining('Only grant it to a phone'), findsOneWidget);
+      await unmount(tester);
     });
 
-    testWidgets('shows the link once the VTA granted the phone', (
+    testWidgets('says inside the drawer when the DID does not resolve', (
       tester,
     ) async {
       await pumpSection(tester);
 
-      await tapAdded(tester);
-
-      expect(find.text('Linked to ${vta.did}'), findsOneWidget);
-    });
-
-    testWidgets('says when the VTA DID does not resolve', (tester) async {
-      await pumpSection(tester, vtaDid: 'did:webvh:QmMissing:vta.example');
-
-      await tapAdded(tester);
+      await link(tester, 'did:webvh:QmMissing:vta.example');
 
       expect(
         find.textContaining("Your VTA's DID couldn't be resolved"),
         findsOneWidget,
       );
+      expect(find.byKey(const Key('vta_did_field')), findsOneWidget);
+      await unmount(tester);
     });
 
-    testWidgets('says when the approval key cannot be created', (tester) async {
-      await pumpSection(tester, keyStorage: _BrokenKeyStorage());
+    testWidgets('says when the text is not a DID', (tester) async {
+      await pumpSection(tester);
 
-      await tapAdded(tester);
+      await link(tester, 'my agent');
 
-      expect(
-        find.textContaining("couldn't set up its sign-in approval key"),
-        findsOneWidget,
-      );
+      expect(find.textContaining('Enter the DID of your VTA'), findsOneWidget);
+      await unmount(tester);
+    });
+
+    testWidgets('shows an active link, and removes it', (tester) async {
+      await tester.runAsync(() async {
+        await service.startLink(vta.did);
+        await service.checkGrant();
+      });
+      await pumpSection(tester);
+
+      expect(find.text('Linked to ${vta.did}'), findsOneWidget);
+
+      await tester.tap(find.text('Remove'));
+      await settle(tester);
+
+      expect(find.byKey(const Key('vta_did_field')), findsOneWidget);
+      expect(await tester.runAsync(service.linkedVta), isNull);
+      await unmount(tester);
     });
   });
 }

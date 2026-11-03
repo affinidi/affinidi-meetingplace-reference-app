@@ -7,8 +7,10 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../application/services/authentication_service/authentication_service.dart';
 import '../application/services/identities_service/identities_service.dart';
 import '../application/services/settings_service/settings_service.dart';
+import '../application/services/vtc_service/vta_link_service.dart';
 import '../presentation/screens/authentication/authentication_screen/authentication_screen.dart';
 import '../presentation/screens/call_log/call_log_screen.dart';
+import '../presentation/screens/link_vta/link_vta_screen.dart';
 import '../presentation/screens/onboarding/onboarding_screen/onboarding_screen.dart';
 import '../presentation/screens/settings/settings_screen.dart';
 import 'routes/app_routes.dart';
@@ -61,6 +63,19 @@ Future<String?> _guard(
     return RoutePaths.onboarding;
   }
 
+  // Prototype: the app is used only once the member's VTA is linked.
+  await ref.read(vtaLinkServiceProvider.notifier).ensureLoaded();
+  final isVtaLinked =
+      ref.read(vtaLinkServiceProvider).status == VtaLinkStatus.active;
+  if (!isVtaLinked) {
+    return state.matchedLocation == RoutePaths.linkVta
+        ? null
+        : RoutePaths.linkVta;
+  }
+  if (state.matchedLocation == RoutePaths.linkVta) {
+    return defaultRoute;
+  }
+
   if (await _shouldRedirectToIdentities(ref)) {
     return RoutePaths.identities;
   }
@@ -106,6 +121,15 @@ class GoRouterRefreshNotifier extends ChangeNotifier {
       },
       fireImmediately: true,
     );
+
+    ref.listen(vtaLinkServiceProvider.select((state) => state.status), (
+      previous,
+      next,
+    ) {
+      if (previous != next) {
+        notifyListeners();
+      }
+    }, fireImmediately: true);
   }
   final Ref ref;
 }
@@ -153,6 +177,11 @@ GoRouter routerConfig(Ref ref) {
         path: RoutePaths.onboarding,
         pageBuilder: (context, state) =>
             const NoTransitionPage(child: OnboardingScreen()),
+      ),
+      GoRoute(
+        path: RoutePaths.linkVta,
+        pageBuilder: (context, state) =>
+            const NoTransitionPage(child: LinkVtaScreen()),
       ),
     ],
   );

@@ -2340,7 +2340,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get linkedVtaHelperText =>
-      'Link your Verifiable Trust Agent (VTA) so this phone can approve sign-ins to your communities.';
+      'Link your Verifiable Trust Agent (VTA) so Meeting Place can act for you with it.';
 
   @override
   String get linkedVtaDidLabel => 'VTA DID';
@@ -2356,21 +2356,59 @@ class AppLocalizationsEs extends AppLocalizations {
   String get linkedVtaUnreachable => 'Your VTA couldn\'t be reached.';
 
   @override
+  String get linkedVtaAlreadyLinked =>
+      'A VTA is already linked. Remove it before linking another one.';
+
+  @override
+  String get linkedVtaBadAnswer => 'Your VTA\'s answer couldn\'t be verified.';
+
+  @override
+  String get linkedVtaScreenTitle => 'Connect your VTA';
+
+  @override
+  String get linkedVtaPendingTitle => 'Add this phone to your VTA';
+
+  @override
+  String linkedVtaPendingFor(String vtaDid) {
+    return 'Linking to $vtaDid';
+  }
+
+  @override
+  String get linkedVtaManagerDidLabel => 'This phone\'s DID';
+
+  @override
+  String get linkedVtaCopyDid => 'Copy DID';
+
+  @override
   String get linkedVtaGrantInstruction =>
-      'Ask the administrator of your VTA to add this phone by running:';
+      'Ask your VTA administrator to grant this DID by running:';
 
   @override
-  String get linkedVtaCopyCommand => 'Copy command';
+  String get linkedVtaGrantWarning =>
+      'This makes Meeting Place an administrator of your VTA, able to create and use your identities (persona-holder). Only grant it to a phone you own.';
 
   @override
-  String get linkedVtaConfirmAction => 'I\'ve been added';
+  String get linkedVtaCopyCommand => 'Copy commands';
 
   @override
-  String get linkedVtaNotGrantedYet =>
-      'This phone hasn\'t been added yet. Try again once your administrator has run the command.';
+  String get linkedVtaWaiting => 'Waiting for your administrator…';
 
   @override
-  String get linkedVtaUnlinkAction => 'Unlink';
+  String get linkedVtaWaitingForPersonaHolder =>
+      'Admin role granted. Waiting for the persona-holder capability…';
+
+  @override
+  String get linkedVtaStillTrying =>
+      'Your VTA couldn\'t be reached. Still trying…';
+
+  @override
+  String get linkedVtaStoppedWaiting => 'Stopped checking after 10 minutes.';
+
+  @override
+  String get linkedVtaCheckAgain => 'Check again';
+
+  @override
+  String get linkedVtaUnlinkAction => 'Remove';
 
   @override
   String linkedVtaLinked(String vtaDid) {
@@ -2531,10 +2569,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String vtcSignInLocation(String location) {
     return 'Location: $location';
   }
-
-  @override
-  String get linkedVtaApprovalKeyFailed =>
-      'This phone couldn\'t set up its sign-in approval key. Make sure Face ID or a fingerprint is set up, then try again.';
 
   @override
   String get linkedVtaDidNotResolved =>

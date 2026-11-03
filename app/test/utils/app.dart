@@ -12,6 +12,7 @@ import 'package:meeting_place_drift_repository/meeting_place_drift_repository.da
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:mpx_flutter_reference_app/application/services/r_cards_service/r_cards_service.dart';
+import 'package:mpx_flutter_reference_app/application/services/vtc_service/vta_link_service.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact.dart';
 import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
 import 'package:mpx_flutter_reference_app/domain/models/mediator/mediator.dart';
@@ -59,6 +60,7 @@ import '../fakes/fake_meeting_place_sdk.dart';
 import '../fakes/fake_permission_service.dart';
 import '../fakes/fake_push_notification_messaging.dart';
 import '../fakes/fake_secure_storage.dart';
+import '../fakes/fake_vta_link_service.dart';
 
 Future<void> startApp(
   WidgetTester tester, {
@@ -261,6 +263,7 @@ Future<void> startApp(
         shareServiceProvider.overrideWith((ref) => shareService),
       if (qrCodeViewFactory != null)
         qrCodeViewFactoryProvider.overrideWith((ref) => qrCodeViewFactory),
+      vtaLinkServiceProvider.overrideWith(FakeVtaLinkService.new),
     ],
     child: data == null
         ? App(locale: locale)

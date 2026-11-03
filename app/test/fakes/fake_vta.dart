@@ -7,6 +7,10 @@ import 'package:mpx_flutter_reference_app/infrastructure/vtc/user_verification_k
 import 'package:ssi/ssi.dart';
 
 /// A member's VTA over the REST binding, answering by task type.
+///
+/// Signs its answers, addressed to the requester and threaded on the
+/// request, as a VTA does. Grants every key admin and `persona-holder`
+/// unless [answers] says otherwise for `whoami`.
 class FakeVta implements HttpClientAdapter, DidResolver {
   FakeVta() {
     document = DidDocument.fromJson(
@@ -19,7 +23,14 @@ class FakeVta implements HttpClientAdapter, DidResolver {
           },
         ],
     );
+    answers[VtaTask.whoAmI] = {
+      'roles': ['admin'],
+      'capabilities': ['persona-holder'],
+    };
   }
+
+  /// When true, every request fails as if the VTA were down.
+  bool isDown = false;
 
   final _key = Ed25519DidKeySigner.generate();
   late final DidDocument document;
@@ -62,6 +73,12 @@ class FakeVta implements HttpClientAdapter, DidResolver {
     final request = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
     received.add(request);
     final type = request['type'] as String;
+    if (isDown) {
+      throw DioException.connectionError(
+        requestOptions: options,
+        reason: 'down',
+      );
+    }
 
     final payload = switch (type) {
       VtaTask.signTrustTask when persona != null => {
@@ -74,14 +91,20 @@ class FakeVta implements HttpClientAdapter, DidResolver {
       _ => answers[type] ?? const <String, dynamic>{},
     };
     final refusal = refusals[type];
-    final answer = {
-      'id': 'urn:uuid:answer',
-      'type': refusal == null
-          ? 'answer'
-          : 'https://trusttasks.org/spec/trust-task-error/0.1',
-      'issuer': did,
-      'payload': refusal ?? payload,
-    };
+    final answer = refusal == null
+        ? (await TrustTaskDocument.create(
+            type: '$type#response',
+            issuer: did,
+            recipient: request['issuer'] as String,
+            threadId: request['id'] as String,
+            payload: payload,
+          ).sign(_key, purpose: ProofPurpose.authentication)).toJson()
+        : {
+            'id': 'urn:uuid:answer',
+            'type': 'https://trusttasks.org/spec/trust-task-error/0.1',
+            'issuer': did,
+            'payload': refusal,
+          };
     return ResponseBody.fromString(
       jsonEncode(answer),
       refusal == null ? 200 : 400,
