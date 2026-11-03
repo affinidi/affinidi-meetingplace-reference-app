@@ -2568,6 +2568,15 @@ class AppLocalizationsEs extends AppLocalizations {
   String get vtcJoinMenuTitle => 'Join a community';
 
   @override
+  String get vtcJoinEnterDidLabel => 'Or enter the community\'s DID';
+
+  @override
+  String get vtcJoinPasteAction => 'Paste';
+
+  @override
+  String get vtcJoinContinueAction => 'Continue';
+
+  @override
   String get vtcJoinMenuSubtitle =>
       'Scan a community\'s code and apply with your VTA';
 
@@ -2585,11 +2594,82 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get vtcJoinPersonaNote =>
-      'Your VTA creates a new identity for this community, so other communities can\'t link you through it.';
+      'Next, you choose which identity on your VTA joins.';
 
   @override
-  String get vtcJoinCannotApply =>
-      'This community only admits people with an invitation, credentials or an in-person check, or asks for details Meeting Place can\'t send yet.';
+  String get vtcJoinChooseIdentity => 'Join with which identity?';
+
+  @override
+  String vtcJoinShareDetails(String name) {
+    return 'Share these details with $name?';
+  }
+
+  @override
+  String get vtcJoinShareAction => 'Share and apply';
+
+  @override
+  String get vtcJoinNewIdentity => 'A new identity';
+
+  @override
+  String get vtcJoinNewIdentityNote =>
+      'Recommended: your VTA creates it for this community, so other communities can\'t link you through it.';
+
+  @override
+  String get vtcJoinWaysHeading => 'Ways in';
+
+  @override
+  String get vtcJoinWayAutomatic => 'You become a member when you apply';
+
+  @override
+  String get vtcJoinWayReviewed => 'The administrators review your application';
+
+  @override
+  String vtcJoinWayUnsupported(String reason) {
+    String _temp0 = intl.Intl.selectLogic(reason, {
+      'invitation': 'Not supported yet: needs an invitation',
+      'credentials': 'Not supported yet: needs credentials',
+      'vetting': 'Not supported yet: needs an in-person check',
+      'other': 'Not supported yet',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String vtcJoinNoSupportedWay(String name) {
+    return 'Meeting Place doesn\'t support any way into $name yet, so you can\'t apply from here.';
+  }
+
+  @override
+  String get vtcJoinDetailsHeading => 'Profile details the community asks for';
+
+  @override
+  String vtcJoinDetailRequired(String type) {
+    return '$type (required)';
+  }
+
+  @override
+  String vtcJoinDetailOptional(String type) {
+    return '$type (optional)';
+  }
+
+  @override
+  String get vtcJoinDetailsNote =>
+      'You see the values from your VTA and approve sharing them before anything is sent.';
+
+  @override
+  String get vtcJoinDirectoryListed =>
+      'This community lists new members in its member directory.';
+
+  @override
+  String get vtcJoinDirectoryHidden =>
+      'This community doesn\'t list new members in its member directory.';
+
+  @override
+  String get vtcJoinListMe => 'List me in the member directory';
+
+  @override
+  String get vtcJoinListMeNote =>
+      'If this is off, Meeting Place takes you out of the directory right after you join.';
 
   @override
   String get vtcJoinAction => 'Join';
@@ -2602,6 +2682,23 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String vtcJoinAlreadyMember(String name) {
     return 'You\'re already a member of $name.';
+  }
+
+  @override
+  String get vtcJoinLeaveAction => 'Leave community';
+
+  @override
+  String vtcJoinLeaveTitle(String name) {
+    return 'Leave $name?';
+  }
+
+  @override
+  String get vtcJoinLeaveMessage =>
+      'The community ends your membership, and your VTA archives your membership card. To come back, you apply again.';
+
+  @override
+  String vtcJoinLeft(String name) {
+    return 'You left $name.';
   }
 
   @override
@@ -2618,6 +2715,16 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String vtcJoinLastDenied(String reason) {
+    return 'Your last application was turned down. The community\'s reason: $reason';
+  }
+
+  @override
+  String vtcJoinDeniedWithReason(String name, String reason) {
+    return '$name didn\'t accept your application. Its reason: $reason';
+  }
+
+  @override
   String get vtcJoinNeedsMore =>
       'The community needs more than Meeting Place can send, such as credentials.';
 
@@ -2625,6 +2732,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String vtcJoinFailure(String reason) {
     String _temp0 = intl.Intl.selectLogic(reason, {
       'invalidCode': 'This isn\'\'t a community\'\'s code.',
+      'profileMissing':
+          'Your VTA has no profile for this identity, so it can\'\'t share the details the community asks for. Set up your profile on your VTA, then try again.',
+      'detailsMissing':
+          'Your VTA doesn\'\'t hold a detail the community requires, so nothing was sent.',
       'vtaMissing': 'Link your VTA in Settings before joining a community.',
       'unreachable': 'The community can\'\'t be reached from your phone.',
       'noDidHosting':
@@ -2632,6 +2743,8 @@ class AppLocalizationsEs extends AppLocalizations {
       'notAccepting': 'This community isn\'\'t accepting applications.',
       'badAnswer':
           'The community\'\'s answer couldn\'\'t be checked, so nothing was recorded.',
+      'lastAdministrator':
+          'You\'\'re this community\'\'s last administrator. Make another member an administrator before you leave.',
       'other': 'The community or your VTA refused the application.',
     });
     return '$_temp0';

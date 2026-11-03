@@ -161,55 +161,58 @@ class VtcService {
   /// [MeetingPlaceVtcSDKException] when the community cannot be reached.
   Future<JoinManifest> readCommunity(String scanned) async {
     final did = scanned.trim();
-    if (!_isDid(did)) throw const InvalidCommunityCodeException();
+    if (!_isCommunityDid(did)) throw const InvalidCommunityCodeException();
     return _sdk.joinClient().readManifest(did);
   }
 
   /// Applies to join [manifest]'s community as a persona of the member's
   /// VTA, and records the outcome.
   ///
-  /// The VTA creates the persona on the first application to a community;
-  /// a later one applies as the same persona. Once admitted, the issued
-  /// cards are kept on the VTA, where other apps of the member find them.
+  /// The first application to a community is made as [persona], one of
+  /// [vtaPersonas], or else as a new persona the VTA creates; a later one
+  /// applies as the same persona. Once admitted, the issued cards are kept
+  /// on the VTA, where other apps of the member find them.
   ///
   /// Throws [VtaNotLinkedException] when no VTA is linked, and
   /// [MeetingPlaceVtcSDKException] when the VTA or the community refuses or
   /// cannot be reached.
-  Future<JoinVerdict> join(JoinManifest manifest) async {
+  ///
+  /// Once admitted, the membership is confirmed back to the community and,
+  /// unless [listInDirectory], the member's directory card is withdrawn.
+  /// Both are retried by [checkApplication] until they succeed.
+  Future<JoinVerdict> join(
+    JoinManifest manifest, {
+    VtaPersona? persona,
+    List<JoinAttribute> attributes = const [],
+    bool listInDirectory = false,
+  }) async {
     final vta = await _grantedVta();
-    var community = await _repository.findCommunity(manifest.communityDid);
-    if (community == null) {
-      final persona = await vta.createPersona(
-        label: manifest.name ?? manifest.communityDid,
-      );
-      community = VtcCommunity(
-        communityDid: manifest.communityDid,
-        personaDid: persona.did,
-        contextId: persona.contextId,
-        name: manifest.name,
-        signingKeyId: persona.signingKeyId,
-        isMember: false,
-      );
-      // Kept before applying, so that a retry applies as the same persona.
-      await _repository.saveCommunity(community);
-    }
+    await joiningIdentity(
+      manifest,
+      persona: persona,
+      listInDirectory: listInDirectory,
+    );
+    final community = (await _repository.findCommunity(manifest.communityDid))!;
 
     final verdict = await _sdk.joinClient().apply(
       manifest,
       agent: vta,
       persona: await _personaSigner(vta, community),
+      attributes: attributes,
     );
     switch (verdict) {
-      case JoinAdmitted(:final credentials):
-        await _repository.saveCommunity(
-          community.withApplication(isMember: true),
-        );
+      case JoinAdmitted(:final credentials, :final membershipCard):
+        final member = community.withApplication(isMember: true);
+        await _repository.saveCommunity(member);
         await _keepCards(vta, credentials, community.contextId);
+        await _settle(vta, member, membershipCard, verdict.requestId);
       case JoinPending(:final requestId):
         await _repository.saveCommunity(
           community.withApplication(isMember: false, requestId: requestId),
         );
-      case JoinDenied() || JoinNeedsMore():
+      case JoinDenied(:final reason):
+        await _repository.saveCommunity(community.rejected(reason));
+      case JoinNeedsMore():
         await _repository.saveCommunity(
           community.withApplication(isMember: false),
         );
@@ -217,16 +220,124 @@ class VtcService {
     return verdict;
   }
 
+  /// The identity that applies to [manifest]'s community: the one recorded
+  /// for it, else [persona], else a new persona the VTA creates. Recorded
+  /// before anything is sent, so a retry applies as the same identity.
+  ///
+  /// Throws as [join] does.
+  Future<VtaPersona> joiningIdentity(
+    JoinManifest manifest, {
+    VtaPersona? persona,
+    bool listInDirectory = false,
+  }) async {
+    final recorded = await _repository.findCommunity(manifest.communityDid);
+    if (recorded != null) {
+      await _repository.saveCommunity(
+        recorded.withDirectoryChoice(listInDirectory: listInDirectory),
+      );
+      return _persona(recorded);
+    }
+
+    final vta = await _grantedVta();
+    persona ??= await vta.createPersona(
+      label: manifest.name ?? manifest.communityDid,
+    );
+    await _repository.saveCommunity(
+      VtcCommunity(
+        communityDid: manifest.communityDid,
+        personaDid: persona.did,
+        contextId: persona.contextId,
+        name: manifest.name,
+        signingKeyId: persona.signingKeyId,
+        isMember: false,
+        listInDirectory: listInDirectory,
+      ),
+    );
+    return persona;
+  }
+
+  /// Completes [member]'s admission on the community's side: confirms the
+  /// membership with [membershipCard], the card the community issued, and,
+  /// unless the member opted in, withdraws their directory card. Records
+  /// whether both succeeded; neither failure undoes the membership.
+  Future<void> _settle(
+    VtaClient vta,
+    VtcCommunity member,
+    Map<String, dynamic>? membershipCard,
+    String? requestId,
+  ) async {
+    var settled = membershipCard != null;
+    final signer = await _personaSigner(vta, member);
+    final client = _sdk.joinClient();
+    if (membershipCard != null) {
+      try {
+        await client.confirmMembership(
+          member.communityDid,
+          agent: vta,
+          persona: _persona(member),
+          signer: signer,
+          communityCard: membershipCard,
+          requestId: requestId,
+        );
+      } on MeetingPlaceVtcSDKException {
+        settled = false;
+      }
+    }
+    if (!member.listInDirectory) {
+      try {
+        await client.hideDirectoryCard(
+          member.communityDid,
+          agent: vta,
+          persona: signer,
+        );
+      } on MeetingPlaceVtcSDKException {
+        settled = false;
+      }
+    }
+    await _repository.saveCommunity(member.settled(settled));
+  }
+
+  /// Previews what the VTA would disclose about [persona] for the profile
+  /// details [manifest]'s community asks for. Nothing leaves the VTA.
+  ///
+  /// Throws [MeetingPlaceVtcSDKException] refused with `notBound` when the
+  /// persona has no profile on the VTA.
+  Future<DisclosurePreview> previewDetails(
+    JoinManifest manifest,
+    VtaPersona persona,
+  ) async {
+    final vta = await _grantedVta();
+    return vta.previewDisclosure(
+      persona: persona,
+      verifierDid: manifest.communityDid,
+      requestedClaims: [
+        for (final detail in manifest.requestedAttributes) detail.type,
+      ],
+    );
+  }
+
+  /// Discloses the preview [previewId] the member approved, through the
+  /// VTA, which records the disclosure.
+  Future<void> shareDetails(VtaPersona persona, String previewId) async {
+    final vta = await _grantedVta();
+    await vta.presentDisclosure(persona: persona, previewId: previewId);
+  }
+
   /// Asks where the open application to [communityDid] stands, and records
-  /// the community's decision once it has made one.
+  /// the community's decision once it has made one: an approval as a
+  /// membership, completed as [join] completes one, a rejection with the
+  /// community's reason. Also completes an admission still to settle.
   ///
   /// Returns null when no application is open. Throws as [join] does.
-  Future<JoinRequestStatus?> checkApplication(String communityDid) async {
+  Future<JoinStatus?> checkApplication(String communityDid) async {
     final community = await _repository.findCommunity(communityDid);
-    final requestId = community?.joinRequestId;
-    if (community == null || !community.isApplying || requestId == null) {
+    if (community == null) return null;
+    if (community.isMember && !community.isSettled) {
+      await _settleFromVta(await _grantedVta(), community, requestId: null);
       return null;
     }
+    final requestId = community.joinRequestId;
+    if (!community.isApplying || requestId == null) return null;
 
     final vta = await _grantedVta();
     final status = await _sdk.joinClient().status(
@@ -235,14 +346,96 @@ class VtcService {
       agent: vta,
       persona: await _personaSigner(vta, community),
     );
-    if (!status.isOpen) {
-      await _repository.saveCommunity(
-        community.withApplication(
-          isMember: status == JoinRequestStatus.approved,
-        ),
-      );
+    switch (status.status) {
+      case JoinRequestStatus.approved:
+        final member = community.withApplication(isMember: true);
+        await _repository.saveCommunity(member);
+        await _settleFromVta(vta, member, requestId: requestId);
+      case JoinRequestStatus.rejected || JoinRequestStatus.withdrawn:
+        await _repository.saveCommunity(community.rejected(status.reason));
+      case JoinRequestStatus.pending || JoinRequestStatus.deferred:
+        break;
     }
     return status;
+  }
+
+  /// Checks every open application and completes every admission still to
+  /// settle, e.g. when the app comes to the foreground: a community decides
+  /// on its own time. A community that cannot be reached is left for the
+  /// next check. Does nothing while no VTA is linked.
+  Future<void> checkApplications() async {
+    final linkedVta = await _repository.getLinkedVta();
+    if (linkedVta == null || !linkedVta.isGranted) return;
+    for (final community in await _repository.communities()) {
+      if (!community.isApplying &&
+          (!community.isMember || community.isSettled)) {
+        continue;
+      }
+      try {
+        await checkApplication(community.communityDid);
+      } on MeetingPlaceVtcSDKException {
+        continue;
+      }
+    }
+  }
+
+  /// Completes [member]'s admission with the membership card the community
+  /// delivered to their VTA. When the VTA holds none yet, asks the
+  /// community to deliver it again and leaves the admission to settle at
+  /// the next check.
+  Future<void> _settleFromVta(
+    VtaClient vta,
+    VtcCommunity member, {
+    required String? requestId,
+  }) async {
+    final card = await _sdk
+        .communityImport(vta)
+        .membershipCard(member.communityDid, personaDid: member.personaDid);
+    if (card == null) {
+      if (requestId != null) {
+        await _sdk.joinClient().status(
+          member.communityDid,
+          requestId: requestId,
+          agent: vta,
+          persona: await _personaSigner(vta, member),
+          resendCredentials: true,
+        );
+      }
+      await _repository.saveCommunity(member.settled(false));
+      return;
+    }
+    await _settle(vta, member, card, requestId);
+  }
+
+  /// Leaves [communityDid] as the persona the member joined it with: the
+  /// community ends the membership, the VTA archives its membership cards,
+  /// and this phone forgets the community. Does nothing for a community
+  /// this phone does not know.
+  ///
+  /// A community that already counts the persona as no member is forgotten
+  /// all the same. Throws [VtaNotLinkedException] when no VTA is linked, and
+  /// [MeetingPlaceVtcSDKException] when the VTA or the community refuses or
+  /// cannot be reached, e.g. with HTTP status 409 when the persona is the
+  /// community's last administrator; the community is then kept.
+  Future<void> leave(String communityDid) async {
+    final community = await _repository.findCommunity(communityDid);
+    if (community == null) return;
+
+    final vta = await _grantedVta();
+    try {
+      await _sdk.joinClient().leave(
+        communityDid,
+        agent: vta,
+        persona: await _personaSigner(vta, community),
+      );
+    } on MeetingPlaceVtcSDKException catch (error) {
+      if (!(error.refusalCode?.endsWith(':notMember') ?? false)) rethrow;
+    }
+    // Else the VTA backup would offer the membership back on the next scan.
+    await _sdk
+        .communityImport(vta)
+        .archiveMembershipCards(communityDid, personaDid: community.personaDid);
+    await _repository.removeCommunity(communityDid);
   }
 
   /// Looks up the member's membership of [communityDid] in the cards backed
@@ -264,6 +457,14 @@ class VtcService {
         name: membership.name,
       ),
     );
+  }
+
+  /// The identities the member's VTA holds, to choose one to join with.
+  ///
+  /// Throws [VtaNotLinkedException] when no VTA is linked.
+  Future<List<VtaPersona>> vtaPersonas() async {
+    final vta = await _grantedVta();
+    return vta.listPersonas();
   }
 
   /// The member's VTA as the agent that signs as their persona.
@@ -319,6 +520,18 @@ class VtcService {
 
   static bool _isDid(String text) =>
       text.startsWith('did:') && !text.contains(RegExp(r'\s'));
+
+  /// A community's DID: a `did:webvh` or `did:web`, the methods a community
+  /// publishes under, in DID syntax.
+  static final _communityDid = RegExp(
+    r'^did:(webvh|web):[A-Za-z0-9._%-]+(:[A-Za-z0-9._%-]+)*$',
+  );
+
+  /// Longest community DID read: a scanned or pasted text is untrusted.
+  static const _maxDidLength = 2048;
+
+  static bool _isCommunityDid(String text) =>
+      text.length <= _maxDidLength && _communityDid.hasMatch(text);
 
   Future<VtaClient> _grantedVta() async {
     final linkedVta = await _repository.getLinkedVta();

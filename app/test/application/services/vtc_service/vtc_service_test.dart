@@ -165,12 +165,21 @@ void main() {
     Iterable<Object?> vtaTasks() =>
         network.vta.received.map((request) => request['type']);
 
-    test('refuses a code that is not a DID', () {
-      expect(
-        service.readCommunity('https://community.example'),
-        throwsA(isA<InvalidCommunityCodeException>()),
-      );
-    });
+    for (final (what, code) in [
+      ('a code that is not a DID', 'https://community.example'),
+      ('a DID of a method communities do not use', 'did:key:z6MkhaXgBZD'),
+      ('a DID with a path', 'did:web:community.example/../admin'),
+      ('a DID with spaces inside', 'did:web:community example'),
+      ('a DID with nothing after the method', 'did:webvh:'),
+    ]) {
+      test('refuses $what, before any network call', () {
+        expect(
+          service.readCommunity(code),
+          throwsA(isA<InvalidCommunityCodeException>()),
+        );
+        expect(network.joinRequests, isEmpty);
+      });
+    }
 
     test('joins as a new persona and keeps the cards', () async {
       final manifest = await service.readCommunity(' $fakeVtcDid ');
@@ -224,19 +233,82 @@ void main() {
       await service.join(await service.readCommunity(fakeVtcDid));
 
       expect(
-        await service.checkApplication(fakeVtcDid),
+        (await service.checkApplication(fakeVtcDid))?.status,
         JoinRequestStatus.pending,
       );
       expect((await service.community(fakeVtcDid))?.isApplying, isTrue);
 
       network.joinStatus = 'approved';
       expect(
-        await service.checkApplication(fakeVtcDid),
+        (await service.checkApplication(fakeVtcDid))?.status,
         JoinRequestStatus.approved,
       );
 
+      final member = await service.community(fakeVtcDid);
+      expect(member?.isMember, isTrue);
+      // The VTA holds no card yet: the community is asked to deliver it
+      // again, and the admission waits to be settled.
+      expect(network.joinRequests.last['payload'], {
+        'requestId': 'request-1',
+        'resendCredentials': true,
+      });
+      expect(member?.isSettled, isFalse);
+    });
+
+    test('settles a later approval with the card on the VTA', () async {
+      network.vta
+        ..answers[VtaTask.credentialsQuery] = {
+          'credentials': [
+            {'id': 'card-1'},
+          ],
+        }
+        ..answers[VtaTask.credentialsGet] = {
+          'credential': {
+            'id': 'urn:uuid:vmc',
+            'issuer': fakeVtcDid,
+            'credentialSubject': {'id': persona.did},
+          },
+        }
+        ..answers[VtaTask.signDocument] = {
+          'document': {
+            'issuer': persona.did,
+            'proof': {'proofPurpose': 'assertionMethod'},
+          },
+        };
+      network.joinVerdict = {'effect': 'refer'};
+      await service.join(await service.readCommunity(fakeVtcDid));
+      network.joinStatus = 'approved';
+
+      await service.checkApplication(fakeVtcDid);
+
+      expect(network.memberRequests.map((r) => r['type']), [
+        MemberTask.vmc,
+        MemberTask.directoryCardUpdate,
+      ]);
+      expect((await service.community(fakeVtcDid))?.isSettled, isTrue);
+    });
+
+    test('keeps the reason a rejection gives', () async {
+      network.joinVerdict = {'effect': 'refer'};
+      await service.join(await service.readCommunity(fakeVtcDid));
+      network.joinStatus = 'rejected';
+      network.joinRejectionReason = 'Members only';
+
+      await service.checkApplication(fakeVtcDid);
+
+      final community = await service.community(fakeVtcDid);
+      expect(community?.isApplying, isFalse);
+      expect(community?.rejectionReason, 'Members only');
+    });
+
+    test('checks every open application when asked', () async {
+      network.joinVerdict = {'effect': 'refer'};
+      await service.join(await service.readCommunity(fakeVtcDid));
+      network.joinStatus = 'approved';
+
+      await service.checkApplications();
+
       expect((await service.community(fakeVtcDid))?.isMember, isTrue);
-      expect(network.joinRequests.last['payload'], {'requestId': 'request-1'});
     });
 
     test('closes a rejected application', () async {
@@ -268,6 +340,71 @@ void main() {
         hasLength(1),
       );
       expect((await service.community(fakeVtcDid))?.isMember, isTrue);
+    });
+
+    group('leave', () {
+      setUp(() async {
+        await service.join(await service.readCommunity(fakeVtcDid));
+        network.vta
+          ..answers[VtaTask.credentialsQuery] = {
+            'credentials': [
+              {'id': 'card-1'},
+            ],
+          }
+          ..answers[VtaTask.credentialsGet] = {
+            'credential': {
+              'issuer': fakeVtcDid,
+              'credentialSubject': {'id': persona.did},
+            },
+          };
+      });
+
+      List<Map<String, dynamic>> archived() => [
+        for (final request in network.vta.received)
+          if (request['type'] == VtaTask.credentialsArchive)
+            request['payload'] as Map<String, dynamic>,
+      ];
+
+      test('leaves as the persona, archives its card and forgets it', () async {
+        await service.leave(fakeVtcDid);
+
+        final leave = network.memberRequests.last;
+        expect(leave['type'], MemberTask.selfRemove);
+        expect(leave['issuer'], persona.did);
+        expect(archived(), [
+          {'id': 'card-1'},
+        ]);
+        expect(await service.community(fakeVtcDid), isNull);
+      });
+
+      test(
+        'forgets a community that counts the persona as no member',
+        () async {
+          network.leaveRefusal = (404, 'vtc/members/self-remove:notMember');
+
+          await service.leave(fakeVtcDid);
+
+          expect(archived(), hasLength(1));
+          expect(await service.community(fakeVtcDid), isNull);
+        },
+      );
+
+      test('keeps the community when it refuses the leave', () async {
+        network.leaveRefusal = (409, 'conflict');
+
+        await expectLater(
+          service.leave(fakeVtcDid),
+          throwsA(
+            isA<MeetingPlaceVtcSDKException>().having(
+              (e) => e.httpStatus,
+              'httpStatus',
+              409,
+            ),
+          ),
+        );
+        expect(archived(), isEmpty);
+        expect((await service.community(fakeVtcDid))?.isMember, isTrue);
+      });
     });
   });
 }

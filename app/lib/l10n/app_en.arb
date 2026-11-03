@@ -2423,6 +2423,9 @@
 	},
 	"linkedVtaDidNotResolved": "Your VTA's DID couldn't be resolved from this phone. Check the DID, and that its host can be reached from this phone over HTTPS.",
 	"vtcJoinMenuTitle": "Join a community",
+	"vtcJoinEnterDidLabel": "Or enter the community's DID",
+	"vtcJoinPasteAction": "Paste",
+	"vtcJoinContinueAction": "Continue",
 	"vtcJoinMenuSubtitle": "Scan a community's code and apply with your VTA",
 	"vtcJoinTitle": "Join {name}?",
 	"@vtcJoinTitle": {
@@ -2435,8 +2438,65 @@
 	},
 	"vtcJoinAdmitsAtOnce": "You become a member as soon as you apply.",
 	"vtcJoinReviewed": "The community's administrators review each application.",
-	"vtcJoinPersonaNote": "Your VTA creates a new identity for this community, so other communities can't link you through it.",
-	"vtcJoinCannotApply": "This community only admits people with an invitation, credentials or an in-person check, or asks for details Meeting Place can't send yet.",
+	"vtcJoinPersonaNote": "Next, you choose which identity on your VTA joins.",
+	"vtcJoinChooseIdentity": "Join with which identity?",
+	"vtcJoinShareDetails": "Share these details with {name}?",
+	"@vtcJoinShareDetails": {
+		"description": "Asks to approve sharing the listed profile details with the community",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinShareAction": "Share and apply",
+	"vtcJoinNewIdentity": "A new identity",
+	"vtcJoinNewIdentityNote": "Recommended: your VTA creates it for this community, so other communities can't link you through it.",
+	"vtcJoinWaysHeading": "Ways in",
+	"vtcJoinWayAutomatic": "You become a member when you apply",
+	"vtcJoinWayReviewed": "The administrators review your application",
+	"vtcJoinWayUnsupported": "{reason, select, invitation{Not supported yet: needs an invitation} credentials{Not supported yet: needs credentials} vetting{Not supported yet: needs an in-person check} other{Not supported yet}}",
+	"@vtcJoinWayUnsupported": {
+		"description": "A way into a community this app cannot apply under yet",
+		"placeholders": {
+			"reason": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinNoSupportedWay": "Meeting Place doesn't support any way into {name} yet, so you can't apply from here.",
+	"@vtcJoinNoSupportedWay": {
+		"description": "No way into the community is supported; nothing is sent",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinDetailsHeading": "Profile details the community asks for",
+	"vtcJoinDetailRequired": "{type} (required)",
+	"@vtcJoinDetailRequired": {
+		"description": "A profile detail the community requires",
+		"placeholders": {
+			"type": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinDetailOptional": "{type} (optional)",
+	"@vtcJoinDetailOptional": {
+		"description": "A profile detail the community asks for but does not require",
+		"placeholders": {
+			"type": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinDetailsNote": "You see the values from your VTA and approve sharing them before anything is sent.",
+	"vtcJoinDirectoryListed": "This community lists new members in its member directory.",
+	"vtcJoinDirectoryHidden": "This community doesn't list new members in its member directory.",
+	"vtcJoinListMe": "List me in the member directory",
+	"vtcJoinListMeNote": "If this is off, Meeting Place takes you out of the directory right after you join.",
 	"vtcJoinAction": "Join",
 	"vtcJoinJoined": "You're a member of {name}.",
 	"@vtcJoinJoined": {
@@ -2450,6 +2510,26 @@
 	"vtcJoinAlreadyMember": "You're already a member of {name}.",
 	"@vtcJoinAlreadyMember": {
 		"description": "The scanned community is one the member belongs to",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinLeaveAction": "Leave community",
+	"vtcJoinLeaveTitle": "Leave {name}?",
+	"@vtcJoinLeaveTitle": {
+		"description": "Asks the member to confirm leaving a community",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinLeaveMessage": "The community ends your membership, and your VTA archives your membership card. To come back, you apply again.",
+	"vtcJoinLeft": "You left {name}.",
+	"@vtcJoinLeft": {
+		"description": "The member left a community",
 		"placeholders": {
 			"name": {
 				"type": "String"
@@ -2475,8 +2555,29 @@
 			}
 		}
 	},
+	"vtcJoinLastDenied": "Your last application was turned down. The community's reason: {reason}",
+	"@vtcJoinLastDenied": {
+		"description": "The community's reason for turning down the member's previous application",
+		"placeholders": {
+			"reason": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinDeniedWithReason": "{name} didn't accept your application. Its reason: {reason}",
+	"@vtcJoinDeniedWithReason": {
+		"description": "The named community turned the application down and said why, in its own words",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			},
+			"reason": {
+				"type": "String"
+			}
+		}
+	},
 	"vtcJoinNeedsMore": "The community needs more than Meeting Place can send, such as credentials.",
-	"vtcJoinFailure": "{reason, select, invalidCode{This isn''t a community''s code.} vtaMissing{Link your VTA in Settings before joining a community.} unreachable{The community can''t be reached from your phone.} noDidHosting{Your VTA has no DID hosting server, so it can''t create an identity the community can find.} notAccepting{This community isn''t accepting applications.} badAnswer{The community''s answer couldn''t be checked, so nothing was recorded.} other{The community or your VTA refused the application.}}",
+	"vtcJoinFailure": "{reason, select, invalidCode{This isn''t a community''s code.} profileMissing{Your VTA has no profile for this identity, so it can''t share the details the community asks for. Set up your profile on your VTA, then try again.} detailsMissing{Your VTA doesn''t hold a detail the community requires, so nothing was sent.} vtaMissing{Link your VTA in Settings before joining a community.} unreachable{The community can''t be reached from your phone.} noDidHosting{Your VTA has no DID hosting server, so it can''t create an identity the community can find.} notAccepting{This community isn''t accepting applications.} badAnswer{The community''s answer couldn''t be checked, so nothing was recorded.} lastAdministrator{You''re this community''s last administrator. Make another member an administrator before you leave.} other{The community or your VTA refused the application.}}",
 	"@vtcJoinFailure": {
 		"description": "Why joining a community could not go ahead",
 		"placeholders": {

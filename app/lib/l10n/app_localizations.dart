@@ -3778,6 +3778,24 @@ abstract class AppLocalizations {
   /// **'Join a community'**
   String get vtcJoinMenuTitle;
 
+  /// No description provided for @vtcJoinEnterDidLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Or enter the community\'s DID'**
+  String get vtcJoinEnterDidLabel;
+
+  /// No description provided for @vtcJoinPasteAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste'**
+  String get vtcJoinPasteAction;
+
+  /// No description provided for @vtcJoinContinueAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get vtcJoinContinueAction;
+
   /// No description provided for @vtcJoinMenuSubtitle.
   ///
   /// In en, this message translates to:
@@ -3805,14 +3823,116 @@ abstract class AppLocalizations {
   /// No description provided for @vtcJoinPersonaNote.
   ///
   /// In en, this message translates to:
-  /// **'Your VTA creates a new identity for this community, so other communities can\'t link you through it.'**
+  /// **'Next, you choose which identity on your VTA joins.'**
   String get vtcJoinPersonaNote;
 
-  /// No description provided for @vtcJoinCannotApply.
+  /// No description provided for @vtcJoinChooseIdentity.
   ///
   /// In en, this message translates to:
-  /// **'This community only admits people with an invitation, credentials or an in-person check, or asks for details Meeting Place can\'t send yet.'**
-  String get vtcJoinCannotApply;
+  /// **'Join with which identity?'**
+  String get vtcJoinChooseIdentity;
+
+  /// Asks to approve sharing the listed profile details with the community
+  ///
+  /// In en, this message translates to:
+  /// **'Share these details with {name}?'**
+  String vtcJoinShareDetails(String name);
+
+  /// No description provided for @vtcJoinShareAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Share and apply'**
+  String get vtcJoinShareAction;
+
+  /// No description provided for @vtcJoinNewIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'A new identity'**
+  String get vtcJoinNewIdentity;
+
+  /// No description provided for @vtcJoinNewIdentityNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended: your VTA creates it for this community, so other communities can\'t link you through it.'**
+  String get vtcJoinNewIdentityNote;
+
+  /// No description provided for @vtcJoinWaysHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Ways in'**
+  String get vtcJoinWaysHeading;
+
+  /// No description provided for @vtcJoinWayAutomatic.
+  ///
+  /// In en, this message translates to:
+  /// **'You become a member when you apply'**
+  String get vtcJoinWayAutomatic;
+
+  /// No description provided for @vtcJoinWayReviewed.
+  ///
+  /// In en, this message translates to:
+  /// **'The administrators review your application'**
+  String get vtcJoinWayReviewed;
+
+  /// A way into a community this app cannot apply under yet
+  ///
+  /// In en, this message translates to:
+  /// **'{reason, select, invitation{Not supported yet: needs an invitation} credentials{Not supported yet: needs credentials} vetting{Not supported yet: needs an in-person check} other{Not supported yet}}'**
+  String vtcJoinWayUnsupported(String reason);
+
+  /// No way into the community is supported; nothing is sent
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting Place doesn\'t support any way into {name} yet, so you can\'t apply from here.'**
+  String vtcJoinNoSupportedWay(String name);
+
+  /// No description provided for @vtcJoinDetailsHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile details the community asks for'**
+  String get vtcJoinDetailsHeading;
+
+  /// A profile detail the community requires
+  ///
+  /// In en, this message translates to:
+  /// **'{type} (required)'**
+  String vtcJoinDetailRequired(String type);
+
+  /// A profile detail the community asks for but does not require
+  ///
+  /// In en, this message translates to:
+  /// **'{type} (optional)'**
+  String vtcJoinDetailOptional(String type);
+
+  /// No description provided for @vtcJoinDetailsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'You see the values from your VTA and approve sharing them before anything is sent.'**
+  String get vtcJoinDetailsNote;
+
+  /// No description provided for @vtcJoinDirectoryListed.
+  ///
+  /// In en, this message translates to:
+  /// **'This community lists new members in its member directory.'**
+  String get vtcJoinDirectoryListed;
+
+  /// No description provided for @vtcJoinDirectoryHidden.
+  ///
+  /// In en, this message translates to:
+  /// **'This community doesn\'t list new members in its member directory.'**
+  String get vtcJoinDirectoryHidden;
+
+  /// No description provided for @vtcJoinListMe.
+  ///
+  /// In en, this message translates to:
+  /// **'List me in the member directory'**
+  String get vtcJoinListMe;
+
+  /// No description provided for @vtcJoinListMeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'If this is off, Meeting Place takes you out of the directory right after you join.'**
+  String get vtcJoinListMeNote;
 
   /// No description provided for @vtcJoinAction.
   ///
@@ -3832,6 +3952,30 @@ abstract class AppLocalizations {
   /// **'You\'re already a member of {name}.'**
   String vtcJoinAlreadyMember(String name);
 
+  /// No description provided for @vtcJoinLeaveAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave community'**
+  String get vtcJoinLeaveAction;
+
+  /// Asks the member to confirm leaving a community
+  ///
+  /// In en, this message translates to:
+  /// **'Leave {name}?'**
+  String vtcJoinLeaveTitle(String name);
+
+  /// No description provided for @vtcJoinLeaveMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The community ends your membership, and your VTA archives your membership card. To come back, you apply again.'**
+  String get vtcJoinLeaveMessage;
+
+  /// The member left a community
+  ///
+  /// In en, this message translates to:
+  /// **'You left {name}.'**
+  String vtcJoinLeft(String name);
+
   /// An application to the named community is open
   ///
   /// In en, this message translates to:
@@ -3850,6 +3994,18 @@ abstract class AppLocalizations {
   /// **'{name} didn\'t accept your application.'**
   String vtcJoinDenied(String name);
 
+  /// The community's reason for turning down the member's previous application
+  ///
+  /// In en, this message translates to:
+  /// **'Your last application was turned down. The community\'s reason: {reason}'**
+  String vtcJoinLastDenied(String reason);
+
+  /// The named community turned the application down and said why, in its own words
+  ///
+  /// In en, this message translates to:
+  /// **'{name} didn\'t accept your application. Its reason: {reason}'**
+  String vtcJoinDeniedWithReason(String name, String reason);
+
   /// No description provided for @vtcJoinNeedsMore.
   ///
   /// In en, this message translates to:
@@ -3859,7 +4015,7 @@ abstract class AppLocalizations {
   /// Why joining a community could not go ahead
   ///
   /// In en, this message translates to:
-  /// **'{reason, select, invalidCode{This isn\'\'t a community\'\'s code.} vtaMissing{Link your VTA in Settings before joining a community.} unreachable{The community can\'\'t be reached from your phone.} noDidHosting{Your VTA has no DID hosting server, so it can\'\'t create an identity the community can find.} notAccepting{This community isn\'\'t accepting applications.} badAnswer{The community\'\'s answer couldn\'\'t be checked, so nothing was recorded.} other{The community or your VTA refused the application.}}'**
+  /// **'{reason, select, invalidCode{This isn\'\'t a community\'\'s code.} profileMissing{Your VTA has no profile for this identity, so it can\'\'t share the details the community asks for. Set up your profile on your VTA, then try again.} detailsMissing{Your VTA doesn\'\'t hold a detail the community requires, so nothing was sent.} vtaMissing{Link your VTA in Settings before joining a community.} unreachable{The community can\'\'t be reached from your phone.} noDidHosting{Your VTA has no DID hosting server, so it can\'\'t create an identity the community can find.} notAccepting{This community isn\'\'t accepting applications.} badAnswer{The community\'\'s answer couldn\'\'t be checked, so nothing was recorded.} lastAdministrator{You\'\'re this community\'\'s last administrator. Make another member an administrator before you leave.} other{The community or your VTA refused the application.}}'**
   String vtcJoinFailure(String reason);
 }
 

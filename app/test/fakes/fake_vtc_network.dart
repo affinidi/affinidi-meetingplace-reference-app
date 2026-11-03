@@ -49,21 +49,56 @@ class FakeVtcNetwork implements HttpClientAdapter {
   int cancels = 0;
   bool approved = false;
 
-  /// The verdict on a join request.
+  /// What the community asks of applicants.
+  Map<String, dynamic> joinManifest = {
+    'communityDid': fakeVtcDid,
+    'branding': {'displayName': 'Football club'},
+    'criteria': [
+      {'id': 'open', 'admission': 'automatic', 'requirementsDigest': 'zOpen'},
+    ],
+  };
+
+  /// The verdict on a join request. [applicant] anywhere in it stands for
+  /// the DID that applied.
   Map<String, dynamic> joinVerdict = {
     'effect': 'allow',
     'with': {
       'role': 'member',
-      'vmc': {'id': 'urn:uuid:vmc', 'type': 'MembershipCredential'},
-      'roleVac': {'id': 'urn:uuid:vac', 'type': 'AuthorityCredential'},
+      'vmc': {
+        'id': 'urn:uuid:vmc',
+        'type': ['VerifiableCredential', 'MembershipCredential'],
+        'issuer': fakeVtcDid,
+        'credentialSubject': {'id': applicant},
+      },
+      'roleVac': {
+        'id': 'urn:uuid:vac',
+        'type': ['VerifiableCredential', 'AuthorityCredential'],
+        'issuer': fakeVtcDid,
+      },
     },
   };
+
+  /// Stands for the applicant's DID in [joinVerdict].
+  static const applicant = '<applicant>';
 
   /// Where a join request stands.
   String joinStatus = 'pending';
 
+  /// The reason a rejected request's status gives.
+  String? joinRejectionReason;
+
   /// The join documents the community received.
   final List<Map<String, dynamic>> joinRequests = [];
+
+  /// When set, the community refuses a join submit with this code.
+  String? joinRefusal;
+
+  /// When set, the community refuses a leave with this HTTP status and code.
+  (int, String)? leaveRefusal;
+
+  /// The member documents the community received: membership
+  /// confirmations, directory card updates and leaves.
+  final List<Map<String, dynamic>> memberRequests = [];
 
   /// An SDK that reaches only this network.
   MeetingPlaceVtcSDK sdk() => MeetingPlaceVtcSDK(
@@ -85,6 +120,22 @@ class FakeVtcNetwork implements HttpClientAdapter {
       bytes.addAll(chunk);
     }
     final request = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
+    if (request['type'] == MemberTask.selfRemove && leaveRefusal != null) {
+      memberRequests.add(request);
+      final (status, code) = leaveRefusal!;
+      return ResponseBody.fromString(
+        jsonEncode({
+          'id': 'urn:uuid:error',
+          'type': 'https://trusttasks.org/spec/trust-task-error/0.1',
+          'issuer': fakeVtcDid,
+          'payload': {'code': code},
+        }),
+        status,
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType],
+        },
+      );
+    }
     return ResponseBody.fromString(
       jsonEncode(await _answer(request)),
       200,
@@ -110,19 +161,44 @@ class FakeVtcNetwork implements HttpClientAdapter {
 
     final Map<String, dynamic> answer;
     var purpose = ProofPurpose.assertionMethod;
-    if (type.startsWith('https://trusttasks.org/spec/vtc/join-requests/')) {
-      joinRequests.add(request);
+    if (type == MemberTask.vmc ||
+        type == MemberTask.directoryCardUpdate ||
+        type == MemberTask.selfRemove) {
+      memberRequests.add(request);
       purpose = ProofPurpose.authentication;
       answer = switch (type) {
-        JoinTask.manifest => {
-          'communityDid': fakeVtcDid,
-          'branding': {'displayName': 'Football club'},
-          'criteria': [
-            {'id': 'open', 'admission': 'automatic'},
-          ],
+        MemberTask.vmc => {'memberDid': request['issuer'], 'status': 'stored'},
+        MemberTask.selfRemove => {
+          'did': request['issuer'],
+          'disposition': 'tombstone',
+          'removed': true,
         },
-        JoinTask.submit => {'requestId': 'request-1', 'verdict': joinVerdict},
-        _ => {'requestId': payload['requestId'], 'status': joinStatus},
+        _ => {'revision': 1},
+      };
+    } else if (type.startsWith(
+      'https://trusttasks.org/spec/vtc/join-requests/',
+    )) {
+      joinRequests.add(request);
+      if (type == JoinTask.submit && joinRefusal != null) {
+        return {
+          'id': 'urn:uuid:error',
+          'type': 'https://trusttasks.org/spec/trust-task-error/0.1',
+          'issuer': fakeVtcDid,
+          'payload': {'code': joinRefusal},
+        };
+      }
+      purpose = ProofPurpose.authentication;
+      answer = switch (type) {
+        JoinTask.manifest => joinManifest,
+        JoinTask.submit => {
+          'requestId': 'request-1',
+          'verdict': _withApplicant(joinVerdict, request['issuer'] as String),
+        },
+        _ => {
+          'requestId': payload['requestId'],
+          'status': joinStatus,
+          'reason': ?joinRejectionReason,
+        },
       };
     } else if (type == OobTask.claim) {
       answer = step1;
@@ -170,6 +246,18 @@ class FakeVtcNetwork implements HttpClientAdapter {
 
   @override
   void close({bool force = false}) {}
+
+  static dynamic _withApplicant(Object? value, String did) => switch (value) {
+    applicant => did,
+    final Map<String, dynamic> map => {
+      for (final MapEntry(:key, :value) in map.entries)
+        key: _withApplicant(value, did),
+    },
+    final List<dynamic> list => [
+      for (final item in list) _withApplicant(item, did),
+    ],
+    _ => value,
+  };
 }
 
 class _VtcSigner implements TrustTaskSigner {

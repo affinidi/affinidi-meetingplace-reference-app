@@ -18,6 +18,7 @@ void main() {
   late FakeVtcNetwork network;
   late VtcService service;
   late ProviderContainer container;
+  late Ed25519DidKeySigner persona;
 
   VtcJoinController controller() =>
       container.read(vtcJoinControllerProvider.notifier);
@@ -39,7 +40,7 @@ void main() {
   setUp(() async {
     FlutterSecureStorage.setMockInitialValues({});
     network = FakeVtcNetwork();
-    final persona = Ed25519DidKeySigner.generate();
+    persona = Ed25519DidKeySigner.generate();
     network.vta
       ..persona = persona
       ..answers[VtaTask.contextsList] = {
@@ -75,6 +76,315 @@ void main() {
   });
 
   tearDown(() => container.dispose());
+
+  group('VtcJoinController review', () {
+    test('shows each way in, the details asked and the directory', () async {
+      network.joinManifest = {
+        ...network.joinManifest,
+        'criteria': [
+          {
+            'id': 'invited',
+            'admission': 'automatic',
+            'requirementsDigest': 'zInvited',
+            'invitationRequired': true,
+          },
+          {
+            'id': 'open',
+            'admission': 'review',
+            'requirementsDigest': 'zOpen',
+            'description': 'Anyone in Berlin',
+          },
+        ],
+        'requestedAttributes': [
+          {'type': 'name', 'purpose': 'To greet you'},
+        ],
+        'directoryDisclosure': {
+          'newCard': {'listing': 'listed', 'search': 'byName'},
+        },
+      };
+
+      await controller().onScanned(fakeVtcDid);
+
+      final [invited, open] = state().ways;
+      expect(invited.unsupported, VtcJoinUnsupported.invitation);
+      expect(open.unsupported, isNull);
+      expect(open.automatic, isFalse);
+      expect(open.description, 'Anyone in Berlin');
+      expect(state().canApply, isTrue);
+      expect(state().admitsAtOnce, isFalse);
+      expect(state().requestedDetails.single.type, 'name');
+      expect(state().listsNewMembers, isTrue);
+      expect(state().listInDirectory, isFalse, reason: 'off by default');
+
+      controller().setListInDirectory(true);
+      expect(state().listInDirectory, isTrue);
+    });
+
+    test('sends nothing when no way in is supported', () async {
+      network.joinManifest = {
+        ...network.joinManifest,
+        'criteria': [
+          {
+            'id': 'vetted',
+            'admission': 'review',
+            'requirementsDigest': 'zVetted',
+            'vetting': <String, dynamic>{},
+          },
+        ],
+      };
+
+      await controller().onScanned(fakeVtcDid);
+      await controller().join();
+
+      expect(state().ways.single.unsupported, VtcJoinUnsupported.vetting);
+      expect(state().canApply, isFalse);
+      expect(state().step, VtcJoinStep.review);
+      expect(
+        network.joinRequests.map((r) => r['type']),
+        isNot(contains(JoinTask.submit)),
+      );
+    });
+  });
+
+  group('VtcJoinController identity', () {
+    void vtaHoldsPersona() {
+      network.vta.answers[VtaTask.didsList] = {
+        'dids': [
+          {'did': persona.did, 'contextId': 'vta'},
+        ],
+      };
+    }
+
+    bool createdPersona() =>
+        network.vta.received.any((r) => r['type'] == VtaTask.didsCreate);
+
+    test('joins as an identity the VTA already holds', () async {
+      vtaHoldsPersona();
+      await controller().onScanned(fakeVtcDid);
+
+      await controller().join();
+      expect(state().step, VtcJoinStep.chooseIdentity);
+      expect(state().identityChoices, [persona.did]);
+
+      await controller().useIdentity(persona.did);
+
+      expect(state().step, VtcJoinStep.joined);
+      expect(createdPersona(), isFalse);
+      final submit = network.joinRequests.lastWhere(
+        (r) => r['type'] == JoinTask.submit,
+      );
+      expect(submit['issuer'], persona.did);
+    });
+
+    test('joins as a new identity when chosen', () async {
+      vtaHoldsPersona();
+      await controller().onScanned(fakeVtcDid);
+      await controller().join();
+
+      await controller().useIdentity(null);
+
+      expect(state().step, VtcJoinStep.joined);
+      expect(createdPersona(), isTrue);
+    });
+
+    test('ignores an identity the VTA did not offer', () async {
+      vtaHoldsPersona();
+      await controller().onScanned(fakeVtcDid);
+      await controller().join();
+
+      await controller().useIdentity('did:webvh:QmOther:host.example');
+
+      expect(state().step, VtcJoinStep.chooseIdentity);
+      expect(
+        network.joinRequests.map((r) => r['type']),
+        isNot(contains(JoinTask.submit)),
+      );
+    });
+  });
+
+  group('VtcJoinController details', () {
+    setUp(() {
+      network.joinManifest = {
+        ...network.joinManifest,
+        'requestedAttributes': [
+          {'type': 'name'},
+          {'type': 'email', 'required': false},
+        ],
+      };
+    });
+
+    Iterable<Map<String, dynamic>> submits() =>
+        network.joinRequests.where((r) => r['type'] == JoinTask.submit);
+
+    test('shares only the approved details, through the VTA', () async {
+      network.vta.answers[VtaTask.disclosurePreview] = {
+        'previewId': 'preview-1',
+        'claims': [
+          {'type': 'name', 'value': 'Sam'},
+          {'type': 'phone', 'value': '+49 30 1234'},
+        ],
+      };
+      await controller().onScanned(fakeVtcDid);
+      await controller().join();
+
+      expect(state().step, VtcJoinStep.approveDetails);
+      expect(state().details.map((d) => (d.type, d.value)), [('name', 'Sam')]);
+      expect(submits(), isEmpty, reason: 'nothing sent before approval');
+
+      await controller().approveDetails();
+
+      expect(state().step, VtcJoinStep.joined);
+      final present = network.vta.received.lastWhere(
+        (r) => r['type'] == VtaTask.disclosurePresent,
+      );
+      expect((present['payload'] as Map)['previewId'], 'preview-1');
+      expect((submits().single['payload'] as Map)['attributes'], [
+        {'type': 'name', 'value': 'Sam'},
+      ]);
+    });
+
+    test('sends nothing when the VTA lacks a required detail', () async {
+      network.vta.answers[VtaTask.disclosurePreview] = {
+        'previewId': 'preview-1',
+        'claims': [
+          {'type': 'email', 'value': 'sam@example.com'},
+        ],
+      };
+      await controller().onScanned(fakeVtcDid);
+
+      await controller().join();
+
+      expect(state().step, VtcJoinStep.failed);
+      expect(state().failure, VtcJoinFailure.detailsMissing);
+      expect(submits(), isEmpty);
+    });
+
+    test('says when the identity has no profile on the VTA', () async {
+      network.vta.refusals[VtaTask.disclosurePreview] = {
+        'code': 'persona/disclosure/preview:notBound',
+      };
+      await controller().onScanned(fakeVtcDid);
+
+      await controller().join();
+
+      expect(state().failure, VtcJoinFailure.profileMissing);
+      expect(submits(), isEmpty);
+    });
+  });
+
+  group('VtcJoinController admission', () {
+    setUp(() {
+      network.vta.answers[VtaTask.signDocument] = {
+        'document': {
+          'issuer': persona.did,
+          'proof': {'proofPurpose': 'assertionMethod'},
+        },
+      };
+    });
+
+    Iterable<String> memberTasks() =>
+        network.memberRequests.map((r) => r['type'] as String);
+
+    test('confirms the membership and leaves the directory', () async {
+      await controller().onScanned(fakeVtcDid);
+      await controller().join();
+
+      expect(state().step, VtcJoinStep.joined);
+      expect(memberTasks(), [MemberTask.vmc, MemberTask.directoryCardUpdate]);
+      final confirmation = network.memberRequests.first['payload'] as Map;
+      expect(confirmation['requestId'], 'request-1');
+      final community = await service.community(fakeVtcDid);
+      expect(community?.isMember, isTrue);
+      expect(community?.isSettled, isTrue);
+    });
+
+    test('stays in the directory when the member opted in', () async {
+      await controller().onScanned(fakeVtcDid);
+      controller().setListInDirectory(true);
+      await controller().join();
+
+      expect(memberTasks(), [MemberTask.vmc]);
+    });
+
+    test('is a member, still to settle, when confirming fails', () async {
+      network.vta.refusals[VtaTask.signDocument] = {
+        'code': 'keys/sign-document:permissionDenied',
+      };
+      await controller().onScanned(fakeVtcDid);
+      await controller().join();
+
+      expect(state().step, VtcJoinStep.joined);
+      expect(memberTasks(), [MemberTask.directoryCardUpdate]);
+      final community = await service.community(fakeVtcDid);
+      expect(community?.isMember, isTrue);
+      expect(community?.isSettled, isFalse);
+    });
+
+    test("shows the community's reason for a denial", () async {
+      network.joinVerdict = {
+        'effect': 'deny',
+        'with': {'code': 'closed', 'reason': 'Berlin residents only'},
+      };
+      await controller().onScanned(fakeVtcDid);
+      await controller().join();
+
+      expect(state().step, VtcJoinStep.denied);
+      expect(state().denialReason, 'Berlin residents only');
+    });
+
+    test('shows the reason of a rejection found later', () async {
+      network.joinVerdict = {'effect': 'refer'};
+      await controller().onScanned(fakeVtcDid);
+      await controller().join();
+      expect(state().step, VtcJoinStep.pending);
+
+      network
+        ..joinStatus = 'rejected'
+        ..joinRejectionReason = 'Members only';
+      await controller().checkAgain();
+
+      expect(state().step, VtcJoinStep.denied);
+      expect(state().denialReason, 'Members only');
+    });
+
+    test('says when the community already counts the identity', () async {
+      network.joinRefusal = 'vtc/join-requests/submit:alreadyMember';
+      await controller().onScanned(fakeVtcDid);
+      await controller().join();
+
+      expect(state().step, VtcJoinStep.joined);
+      expect(state().wasMember, isTrue);
+    });
+
+    test('does not apply again for a membership the VTA holds', () async {
+      network.vta
+        ..answers[VtaTask.didsList] = {
+          'dids': [
+            {'did': persona.did, 'contextId': 'vta'},
+          ],
+        }
+        ..answers[VtaTask.credentialsQuery] = {
+          'credentials': [
+            {'id': 'card-1'},
+          ],
+        }
+        ..answers[VtaTask.credentialsGet] = {
+          'credential': {
+            'issuer': fakeVtcDid,
+            'credentialSubject': {'id': persona.did},
+          },
+        };
+
+      await controller().onScanned(fakeVtcDid);
+
+      expect(state().step, VtcJoinStep.joined);
+      expect(state().wasMember, isTrue);
+      expect(
+        network.joinRequests.map((r) => r['type']),
+        isNot(contains(JoinTask.submit)),
+      );
+    });
+  });
 
   group('VtcJoinController', () {
     test('joins a community that admits at once', () async {
@@ -136,6 +446,40 @@ void main() {
       await controller().join();
 
       expect(state().failure, VtcJoinFailure.noDidHosting);
+    });
+
+    test('leaves a joined community', () async {
+      await service.join(await service.readCommunity(fakeVtcDid));
+      await controller().onScanned(fakeVtcDid);
+
+      await controller().leave();
+
+      expect(state().step, VtcJoinStep.left);
+      expect(network.memberRequests.last['type'], MemberTask.selfRemove);
+      expect(await service.community(fakeVtcDid), isNull);
+    });
+
+    test('says when the member is the last administrator', () async {
+      network.leaveRefusal = (409, 'conflict');
+      await service.join(await service.readCommunity(fakeVtcDid));
+      await controller().onScanned(fakeVtcDid);
+
+      await controller().leave();
+
+      expect(state().failure, VtcJoinFailure.lastAdministrator);
+      expect((await service.community(fakeVtcDid))?.isMember, isTrue);
+    });
+
+    test('leaves nothing before the community is joined', () async {
+      await controller().onScanned(fakeVtcDid);
+
+      await controller().leave();
+
+      expect(state().step, VtcJoinStep.review);
+      expect(
+        network.memberRequests.map((r) => r['type']),
+        isNot(contains(MemberTask.selfRemove)),
+      );
     });
 
     test('says when no VTA is linked', () async {
