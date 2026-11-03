@@ -2503,6 +2503,44 @@
 	"vtcJoinListMeNote": "If this is off, Meeting Place takes you out of the directory right after you join.",
 	"vtcJoinDirectoryHeading": "Member directory",
 	"vtcJoinIdentityHeading": "Identity on your VTA",
+	"vtcJoinAboutHeading": "About",
+	"vtcJoinWebsite": "Website",
+	"vtcJoinContact": "Contact",
+	"vtcJoinRealHuman": "Members must be real people",
+	"vtcJoinSingleMembership": "One membership per person",
+	"vtcJoinGovernance": "Governance framework",
+	"vtcJoinDisclosureHeading": "What the member directory shows about you",
+	"vtcJoinAudience": "{audience, select, admins{the administrators} groups{your groups} connections{your connections} members{all members} public{anyone} other{some people}}",
+	"@vtcJoinAudience": {
+		"placeholders": {
+			"audience": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinFieldSeenBy": "Seen by {audience}",
+	"@vtcJoinFieldSeenBy": {
+		"placeholders": {
+			"audience": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinFieldSeenByUpTo": "Seen by {audience} at first; you can share it up to {ceiling}",
+	"@vtcJoinFieldSeenByUpTo": {
+		"placeholders": {
+			"audience": {
+				"type": "String"
+			},
+			"ceiling": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinFieldSetByAdmins": "Set by the administrators; you can't change it",
+	"vtcJoinMembershipDid": "Your membership DID",
+	"vtcJoinAdminNotes": "Administrators keep notes about members. No other member sees them, and you can ask for yours.",
+	"vtcJoinExternalCards": "You may publish your card beyond the community, if you choose to.",
 	"vtcJoinAction": "Join",
 	"vtcJoinJoined": "You're a member of {name}.",
 	"@vtcJoinJoined": {

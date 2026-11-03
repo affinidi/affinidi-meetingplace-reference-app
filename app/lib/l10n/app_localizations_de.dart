@@ -2700,6 +2700,66 @@ class AppLocalizationsDe extends AppLocalizations {
   String get vtcJoinIdentityHeading => 'Identity on your VTA';
 
   @override
+  String get vtcJoinAboutHeading => 'About';
+
+  @override
+  String get vtcJoinWebsite => 'Website';
+
+  @override
+  String get vtcJoinContact => 'Contact';
+
+  @override
+  String get vtcJoinRealHuman => 'Members must be real people';
+
+  @override
+  String get vtcJoinSingleMembership => 'One membership per person';
+
+  @override
+  String get vtcJoinGovernance => 'Governance framework';
+
+  @override
+  String get vtcJoinDisclosureHeading =>
+      'What the member directory shows about you';
+
+  @override
+  String vtcJoinAudience(String audience) {
+    String _temp0 = intl.Intl.selectLogic(audience, {
+      'admins': 'the administrators',
+      'groups': 'your groups',
+      'connections': 'your connections',
+      'members': 'all members',
+      'public': 'anyone',
+      'other': 'some people',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String vtcJoinFieldSeenBy(String audience) {
+    return 'Seen by $audience';
+  }
+
+  @override
+  String vtcJoinFieldSeenByUpTo(String audience, String ceiling) {
+    return 'Seen by $audience at first; you can share it up to $ceiling';
+  }
+
+  @override
+  String get vtcJoinFieldSetByAdmins =>
+      'Set by the administrators; you can\'t change it';
+
+  @override
+  String get vtcJoinMembershipDid => 'Your membership DID';
+
+  @override
+  String get vtcJoinAdminNotes =>
+      'Administrators keep notes about members. No other member sees them, and you can ask for yours.';
+
+  @override
+  String get vtcJoinExternalCards =>
+      'You may publish your card beyond the community, if you choose to.';
+
+  @override
   String get vtcJoinAction => 'Join';
 
   @override

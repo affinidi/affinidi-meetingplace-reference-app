@@ -141,7 +141,7 @@ void main() {
       final cards = tester
           .widgetList<GlassCard>(find.byType(GlassCard))
           .map((card) => card.title);
-      expect(cards.first, 'Ways in');
+      expect(cards.take(2), ['About', 'Ways in']);
       expect(cards.last, 'Community DID');
 
       await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
@@ -164,6 +164,55 @@ void main() {
       await settle(tester);
       expect(find.text('You left Football club.'), findsOneWidget);
       expect(await service.community(fakeVtcDid), isNull);
+    });
+
+    testWidgets('shows the profile and what the directory shows', (
+      tester,
+    ) async {
+      network.joinManifest = {
+        ...network.joinManifest,
+        'directoryDisclosure': {
+          'fields': [
+            {
+              'key': 'role',
+              'label': 'Role',
+              'type': 'text',
+              'source': 'admin',
+              'ceiling': 'members',
+              'defaultVisibility': 'admins',
+              'searchable': false,
+            },
+          ],
+          'newCard': {'listing': 'listed', 'search': 'byName'},
+          'membershipIdentifiers': 'admins',
+          'adminNotes': true,
+          'externalCards': false,
+          'statementDigest': 'zDigest',
+        },
+      };
+      await pumpScreen(tester);
+
+      await enterCode(tester, fakeVtcDid);
+
+      expect(find.text('Five-a-side on Sundays.'), findsOneWidget);
+      expect(find.text('About'), findsOneWidget);
+      expect(find.text('https://club.example/'), findsOneWidget);
+      expect(find.text('hello@club.example'), findsOneWidget);
+      expect(find.text('Members must be real people'), findsOneWidget);
+      expect(find.text('One membership per person'), findsOneWidget);
+      expect(
+        find.text('What the member directory shows about you'),
+        findsOneWidget,
+      );
+      expect(
+        find.text(
+          'Seen by the administrators at first; you can share it up to '
+          "all members\nSet by the administrators; you can't change it",
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Seen by the administrators'), findsOneWidget);
+      expect(find.textContaining('Administrators keep notes'), findsOneWidget);
     });
 
     testWidgets('titles a community without a name by what it asks', (

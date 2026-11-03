@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/services/camera_service/camera_service.dart';
@@ -234,6 +235,7 @@ class _Review extends HookWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: 12,
       children: [
+        if (state.logoUrl case final logoUrl?) _Logo(logoUrl),
         // The name falls back to the DID, which the card below shows.
         OnboardingTitle(
           name.isEmpty || name == did
@@ -247,9 +249,12 @@ class _Review extends HookWidget {
               ? l10n.vtcJoinAdmitsAtOnce
               : l10n.vtcJoinReviewed,
         ),
+        if (state.description case final description?)
+          OnboardingSubtitle(description),
         const SizedBox(height: 4),
         if (state.denialReason case final reason?)
           OnboardingMessage(l10n.vtcJoinLastDenied(reason), isError: true),
+        _About(state: state),
         GlassCard(
           title: l10n.vtcJoinWaysHeading,
           child: Column(
@@ -336,6 +341,9 @@ class _Review extends HookWidget {
               ],
             ),
           ),
+        if (state.directoryDisclosure case final disclosure?
+            when state.canApply)
+          _DirectoryDisclosure(disclosure),
         if (state.canApply)
           Text(
             l10n.vtcJoinPersonaNote,
@@ -360,6 +368,139 @@ class _Review extends HookWidget {
         ),
         OnboardingTextButton(label: l10n.generalCancel, onPressed: onCancel),
       ],
+    );
+  }
+}
+
+/// The community's logo above the title; nothing while it cannot load.
+class _Logo extends StatelessWidget {
+  const _Logo(this.url);
+
+  final Uri url;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Image.network(
+          url.toString(),
+          key: const Key('vtc_join_logo'),
+          height: 64,
+          fit: BoxFit.contain,
+          errorBuilder: (_, _, _) => const SizedBox.shrink(),
+        ),
+      ),
+    );
+  }
+}
+
+/// The community's website, contact and what its governance asserts about
+/// personhood; nothing when it publishes none of them.
+class _About extends StatelessWidget {
+  const _About({required this.state});
+
+  final VtcJoinState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final personhood = state.personhood;
+    final lines = [
+      if (state.website case final website?)
+        _Line(
+          icon: Icons.language,
+          title: l10n.vtcJoinWebsite,
+          subtitle: website.toString(),
+        ),
+      if (state.contactEmail case final email?)
+        _Line(
+          icon: Icons.mail_outline,
+          title: l10n.vtcJoinContact,
+          subtitle: email,
+        ),
+      if (personhood?.realHuman ?? false)
+        _Line(icon: Icons.person_outline, title: l10n.vtcJoinRealHuman),
+      if (personhood?.singleMembership ?? false)
+        _Line(
+          icon: Icons.looks_one_outlined,
+          title: l10n.vtcJoinSingleMembership,
+        ),
+      if (personhood?.governanceFrameworkUrl case final framework?)
+        _Line(
+          icon: Icons.gavel,
+          title: l10n.vtcJoinGovernance,
+          subtitle: framework.toString(),
+        ),
+    ];
+    if (lines.isEmpty) return const SizedBox.shrink();
+    return GlassCard(
+      title: l10n.vtcJoinAboutHeading,
+      child: SelectionArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: 12,
+          children: lines,
+        ),
+      ),
+    );
+  }
+}
+
+/// What the community's member directory would show about the member, field
+/// by field, before they apply.
+class _DirectoryDisclosure extends StatelessWidget {
+  const _DirectoryDisclosure(this.disclosure);
+
+  final DirectoryDisclosure disclosure;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    String audience(DirectoryAudience audience) =>
+        l10n.vtcJoinAudience(audience.name);
+
+    return GlassCard(
+      title: l10n.vtcJoinDisclosureHeading,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 12,
+        children: [
+          for (final field in disclosure.fields)
+            _Line(
+              icon: field.source == DirectoryFieldSource.admin
+                  ? Icons.admin_panel_settings_outlined
+                  : Icons.visibility_outlined,
+              title: field.label,
+              subtitle: [
+                ?field.description,
+                if (field.defaultVisibility == field.ceiling)
+                  l10n.vtcJoinFieldSeenBy(audience(field.ceiling))
+                else
+                  l10n.vtcJoinFieldSeenByUpTo(
+                    audience(field.defaultVisibility),
+                    audience(field.ceiling),
+                  ),
+                if (field.source == DirectoryFieldSource.admin)
+                  l10n.vtcJoinFieldSetByAdmins,
+              ].join('\n'),
+            ),
+          _Line(
+            icon: Icons.fingerprint,
+            title: l10n.vtcJoinMembershipDid,
+            subtitle: l10n.vtcJoinFieldSeenBy(
+              audience(disclosure.membershipIdentifiers),
+            ),
+          ),
+          if (disclosure.adminNotes)
+            _Line(
+              icon: Icons.sticky_note_2_outlined,
+              title: l10n.vtcJoinAdminNotes,
+            ),
+          if (disclosure.externalCards)
+            _Line(icon: Icons.public, title: l10n.vtcJoinExternalCards),
+        ],
+      ),
     );
   }
 }

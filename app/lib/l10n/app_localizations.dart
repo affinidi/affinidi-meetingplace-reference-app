@@ -3970,6 +3970,90 @@ abstract class AppLocalizations {
   /// **'Identity on your VTA'**
   String get vtcJoinIdentityHeading;
 
+  /// No description provided for @vtcJoinAboutHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get vtcJoinAboutHeading;
+
+  /// No description provided for @vtcJoinWebsite.
+  ///
+  /// In en, this message translates to:
+  /// **'Website'**
+  String get vtcJoinWebsite;
+
+  /// No description provided for @vtcJoinContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact'**
+  String get vtcJoinContact;
+
+  /// No description provided for @vtcJoinRealHuman.
+  ///
+  /// In en, this message translates to:
+  /// **'Members must be real people'**
+  String get vtcJoinRealHuman;
+
+  /// No description provided for @vtcJoinSingleMembership.
+  ///
+  /// In en, this message translates to:
+  /// **'One membership per person'**
+  String get vtcJoinSingleMembership;
+
+  /// No description provided for @vtcJoinGovernance.
+  ///
+  /// In en, this message translates to:
+  /// **'Governance framework'**
+  String get vtcJoinGovernance;
+
+  /// No description provided for @vtcJoinDisclosureHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'What the member directory shows about you'**
+  String get vtcJoinDisclosureHeading;
+
+  /// No description provided for @vtcJoinAudience.
+  ///
+  /// In en, this message translates to:
+  /// **'{audience, select, admins{the administrators} groups{your groups} connections{your connections} members{all members} public{anyone} other{some people}}'**
+  String vtcJoinAudience(String audience);
+
+  /// No description provided for @vtcJoinFieldSeenBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Seen by {audience}'**
+  String vtcJoinFieldSeenBy(String audience);
+
+  /// No description provided for @vtcJoinFieldSeenByUpTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Seen by {audience} at first; you can share it up to {ceiling}'**
+  String vtcJoinFieldSeenByUpTo(String audience, String ceiling);
+
+  /// No description provided for @vtcJoinFieldSetByAdmins.
+  ///
+  /// In en, this message translates to:
+  /// **'Set by the administrators; you can\'t change it'**
+  String get vtcJoinFieldSetByAdmins;
+
+  /// No description provided for @vtcJoinMembershipDid.
+  ///
+  /// In en, this message translates to:
+  /// **'Your membership DID'**
+  String get vtcJoinMembershipDid;
+
+  /// No description provided for @vtcJoinAdminNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Administrators keep notes about members. No other member sees them, and you can ask for yours.'**
+  String get vtcJoinAdminNotes;
+
+  /// No description provided for @vtcJoinExternalCards.
+  ///
+  /// In en, this message translates to:
+  /// **'You may publish your card beyond the community, if you choose to.'**
+  String get vtcJoinExternalCards;
+
   /// No description provided for @vtcJoinAction.
   ///
   /// In en, this message translates to:
