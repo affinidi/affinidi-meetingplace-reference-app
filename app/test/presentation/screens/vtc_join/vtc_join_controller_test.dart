@@ -193,6 +193,76 @@ void main() {
     });
   });
 
+  group('VtcJoinController details', () {
+    setUp(() {
+      network.joinManifest = {
+        ...network.joinManifest,
+        'requestedAttributes': [
+          {'type': 'name'},
+          {'type': 'email', 'required': false},
+        ],
+      };
+    });
+
+    Iterable<Map<String, dynamic>> submits() =>
+        network.joinRequests.where((r) => r['type'] == JoinTask.submit);
+
+    test('shares only the approved details, through the VTA', () async {
+      network.vta.answers[VtaTask.disclosurePreview] = {
+        'previewId': 'preview-1',
+        'claims': [
+          {'type': 'name', 'value': 'Sam'},
+          {'type': 'phone', 'value': '+49 30 1234'},
+        ],
+      };
+      await controller().onScanned(fakeVtcDid);
+      await controller().join();
+
+      expect(state().step, VtcJoinStep.approveDetails);
+      expect(state().details.map((d) => (d.type, d.value)), [('name', 'Sam')]);
+      expect(submits(), isEmpty, reason: 'nothing sent before approval');
+
+      await controller().approveDetails();
+
+      expect(state().step, VtcJoinStep.joined);
+      final present = network.vta.received.lastWhere(
+        (r) => r['type'] == VtaTask.disclosurePresent,
+      );
+      expect((present['payload'] as Map)['previewId'], 'preview-1');
+      expect((submits().single['payload'] as Map)['attributes'], [
+        {'type': 'name', 'value': 'Sam'},
+      ]);
+    });
+
+    test('sends nothing when the VTA lacks a required detail', () async {
+      network.vta.answers[VtaTask.disclosurePreview] = {
+        'previewId': 'preview-1',
+        'claims': [
+          {'type': 'email', 'value': 'sam@example.com'},
+        ],
+      };
+      await controller().onScanned(fakeVtcDid);
+
+      await controller().join();
+
+      expect(state().step, VtcJoinStep.failed);
+      expect(state().failure, VtcJoinFailure.detailsMissing);
+      expect(submits(), isEmpty);
+    });
+
+    test('says when the identity has no profile on the VTA', () async {
+      network.vta.refusals[VtaTask.disclosurePreview] = {
+        'code': 'persona/disclosure/preview:notBound',
+      };
+      await controller().onScanned(fakeVtcDid);
+
+      await controller().join();
+
+      expect(state().failure, VtcJoinFailure.profileMissing);
+      expect(submits(), isEmpty);
+    });
+  });
+
   group('VtcJoinController', () {
     test('joins a community that admits at once', () async {
       await controller().onScanned(fakeVtcDid);

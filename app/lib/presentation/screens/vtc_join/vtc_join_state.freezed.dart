@@ -20,7 +20,8 @@ mixin _$VtcJoinState {
 /// when it does not say.
  bool? get listsNewMembers;/// Whether the member opted in to the member directory. Off by default.
  bool get listInDirectory;/// The identities on the member's VTA to join with, as DIDs.
- List<String> get identityChoices; VtcJoinFailure? get failure;
+ List<String> get identityChoices;/// The profile details the member is asked to approve sharing.
+ List<VtcJoinDetail> get details; VtcJoinFailure? get failure;
 /// Create a copy of VtcJoinState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -31,16 +32,16 @@ $VtcJoinStateCopyWith<VtcJoinState> get copyWith => _$VtcJoinStateCopyWithImpl<V
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is VtcJoinState&&(identical(other.step, step) || other.step == step)&&(identical(other.communityName, communityName) || other.communityName == communityName)&&(identical(other.canApply, canApply) || other.canApply == canApply)&&(identical(other.admitsAtOnce, admitsAtOnce) || other.admitsAtOnce == admitsAtOnce)&&(identical(other.wasMember, wasMember) || other.wasMember == wasMember)&&const DeepCollectionEquality().equals(other.ways, ways)&&const DeepCollectionEquality().equals(other.requestedDetails, requestedDetails)&&(identical(other.listsNewMembers, listsNewMembers) || other.listsNewMembers == listsNewMembers)&&(identical(other.listInDirectory, listInDirectory) || other.listInDirectory == listInDirectory)&&const DeepCollectionEquality().equals(other.identityChoices, identityChoices)&&(identical(other.failure, failure) || other.failure == failure));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is VtcJoinState&&(identical(other.step, step) || other.step == step)&&(identical(other.communityName, communityName) || other.communityName == communityName)&&(identical(other.canApply, canApply) || other.canApply == canApply)&&(identical(other.admitsAtOnce, admitsAtOnce) || other.admitsAtOnce == admitsAtOnce)&&(identical(other.wasMember, wasMember) || other.wasMember == wasMember)&&const DeepCollectionEquality().equals(other.ways, ways)&&const DeepCollectionEquality().equals(other.requestedDetails, requestedDetails)&&(identical(other.listsNewMembers, listsNewMembers) || other.listsNewMembers == listsNewMembers)&&(identical(other.listInDirectory, listInDirectory) || other.listInDirectory == listInDirectory)&&const DeepCollectionEquality().equals(other.identityChoices, identityChoices)&&const DeepCollectionEquality().equals(other.details, details)&&(identical(other.failure, failure) || other.failure == failure));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,step,communityName,canApply,admitsAtOnce,wasMember,const DeepCollectionEquality().hash(ways),const DeepCollectionEquality().hash(requestedDetails),listsNewMembers,listInDirectory,const DeepCollectionEquality().hash(identityChoices),failure);
+int get hashCode => Object.hash(runtimeType,step,communityName,canApply,admitsAtOnce,wasMember,const DeepCollectionEquality().hash(ways),const DeepCollectionEquality().hash(requestedDetails),listsNewMembers,listInDirectory,const DeepCollectionEquality().hash(identityChoices),const DeepCollectionEquality().hash(details),failure);
 
 @override
 String toString() {
-  return 'VtcJoinState(step: $step, communityName: $communityName, canApply: $canApply, admitsAtOnce: $admitsAtOnce, wasMember: $wasMember, ways: $ways, requestedDetails: $requestedDetails, listsNewMembers: $listsNewMembers, listInDirectory: $listInDirectory, identityChoices: $identityChoices, failure: $failure)';
+  return 'VtcJoinState(step: $step, communityName: $communityName, canApply: $canApply, admitsAtOnce: $admitsAtOnce, wasMember: $wasMember, ways: $ways, requestedDetails: $requestedDetails, listsNewMembers: $listsNewMembers, listInDirectory: $listInDirectory, identityChoices: $identityChoices, details: $details, failure: $failure)';
 }
 
 
@@ -51,7 +52,7 @@ abstract mixin class $VtcJoinStateCopyWith<$Res>  {
   factory $VtcJoinStateCopyWith(VtcJoinState value, $Res Function(VtcJoinState) _then) = _$VtcJoinStateCopyWithImpl;
 @useResult
 $Res call({
- VtcJoinStep step, String? communityName, bool canApply, bool admitsAtOnce, bool wasMember, List<VtcJoinWay> ways, List<JoinAttributeRequest> requestedDetails, bool? listsNewMembers, bool listInDirectory, List<String> identityChoices, VtcJoinFailure? failure
+ VtcJoinStep step, String? communityName, bool canApply, bool admitsAtOnce, bool wasMember, List<VtcJoinWay> ways, List<JoinAttributeRequest> requestedDetails, bool? listsNewMembers, bool listInDirectory, List<String> identityChoices, List<VtcJoinDetail> details, VtcJoinFailure? failure
 });
 
 
@@ -68,7 +69,7 @@ class _$VtcJoinStateCopyWithImpl<$Res>
 
 /// Create a copy of VtcJoinState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? step = null,Object? communityName = freezed,Object? canApply = null,Object? admitsAtOnce = null,Object? wasMember = null,Object? ways = null,Object? requestedDetails = null,Object? listsNewMembers = freezed,Object? listInDirectory = null,Object? identityChoices = null,Object? failure = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? step = null,Object? communityName = freezed,Object? canApply = null,Object? admitsAtOnce = null,Object? wasMember = null,Object? ways = null,Object? requestedDetails = null,Object? listsNewMembers = freezed,Object? listInDirectory = null,Object? identityChoices = null,Object? details = null,Object? failure = freezed,}) {
   return _then(_self.copyWith(
 step: null == step ? _self.step : step // ignore: cast_nullable_to_non_nullable
 as VtcJoinStep,communityName: freezed == communityName ? _self.communityName : communityName // ignore: cast_nullable_to_non_nullable
@@ -80,7 +81,8 @@ as List<VtcJoinWay>,requestedDetails: null == requestedDetails ? _self.requested
 as List<JoinAttributeRequest>,listsNewMembers: freezed == listsNewMembers ? _self.listsNewMembers : listsNewMembers // ignore: cast_nullable_to_non_nullable
 as bool?,listInDirectory: null == listInDirectory ? _self.listInDirectory : listInDirectory // ignore: cast_nullable_to_non_nullable
 as bool,identityChoices: null == identityChoices ? _self.identityChoices : identityChoices // ignore: cast_nullable_to_non_nullable
-as List<String>,failure: freezed == failure ? _self.failure : failure // ignore: cast_nullable_to_non_nullable
+as List<String>,details: null == details ? _self.details : details // ignore: cast_nullable_to_non_nullable
+as List<VtcJoinDetail>,failure: freezed == failure ? _self.failure : failure // ignore: cast_nullable_to_non_nullable
 as VtcJoinFailure?,
   ));
 }
@@ -166,10 +168,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( VtcJoinStep step,  String? communityName,  bool canApply,  bool admitsAtOnce,  bool wasMember,  List<VtcJoinWay> ways,  List<JoinAttributeRequest> requestedDetails,  bool? listsNewMembers,  bool listInDirectory,  List<String> identityChoices,  VtcJoinFailure? failure)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( VtcJoinStep step,  String? communityName,  bool canApply,  bool admitsAtOnce,  bool wasMember,  List<VtcJoinWay> ways,  List<JoinAttributeRequest> requestedDetails,  bool? listsNewMembers,  bool listInDirectory,  List<String> identityChoices,  List<VtcJoinDetail> details,  VtcJoinFailure? failure)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _VtcJoinState() when $default != null:
-return $default(_that.step,_that.communityName,_that.canApply,_that.admitsAtOnce,_that.wasMember,_that.ways,_that.requestedDetails,_that.listsNewMembers,_that.listInDirectory,_that.identityChoices,_that.failure);case _:
+return $default(_that.step,_that.communityName,_that.canApply,_that.admitsAtOnce,_that.wasMember,_that.ways,_that.requestedDetails,_that.listsNewMembers,_that.listInDirectory,_that.identityChoices,_that.details,_that.failure);case _:
   return orElse();
 
 }
@@ -187,10 +189,10 @@ return $default(_that.step,_that.communityName,_that.canApply,_that.admitsAtOnce
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( VtcJoinStep step,  String? communityName,  bool canApply,  bool admitsAtOnce,  bool wasMember,  List<VtcJoinWay> ways,  List<JoinAttributeRequest> requestedDetails,  bool? listsNewMembers,  bool listInDirectory,  List<String> identityChoices,  VtcJoinFailure? failure)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( VtcJoinStep step,  String? communityName,  bool canApply,  bool admitsAtOnce,  bool wasMember,  List<VtcJoinWay> ways,  List<JoinAttributeRequest> requestedDetails,  bool? listsNewMembers,  bool listInDirectory,  List<String> identityChoices,  List<VtcJoinDetail> details,  VtcJoinFailure? failure)  $default,) {final _that = this;
 switch (_that) {
 case _VtcJoinState():
-return $default(_that.step,_that.communityName,_that.canApply,_that.admitsAtOnce,_that.wasMember,_that.ways,_that.requestedDetails,_that.listsNewMembers,_that.listInDirectory,_that.identityChoices,_that.failure);case _:
+return $default(_that.step,_that.communityName,_that.canApply,_that.admitsAtOnce,_that.wasMember,_that.ways,_that.requestedDetails,_that.listsNewMembers,_that.listInDirectory,_that.identityChoices,_that.details,_that.failure);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -207,10 +209,10 @@ return $default(_that.step,_that.communityName,_that.canApply,_that.admitsAtOnce
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( VtcJoinStep step,  String? communityName,  bool canApply,  bool admitsAtOnce,  bool wasMember,  List<VtcJoinWay> ways,  List<JoinAttributeRequest> requestedDetails,  bool? listsNewMembers,  bool listInDirectory,  List<String> identityChoices,  VtcJoinFailure? failure)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( VtcJoinStep step,  String? communityName,  bool canApply,  bool admitsAtOnce,  bool wasMember,  List<VtcJoinWay> ways,  List<JoinAttributeRequest> requestedDetails,  bool? listsNewMembers,  bool listInDirectory,  List<String> identityChoices,  List<VtcJoinDetail> details,  VtcJoinFailure? failure)?  $default,) {final _that = this;
 switch (_that) {
 case _VtcJoinState() when $default != null:
-return $default(_that.step,_that.communityName,_that.canApply,_that.admitsAtOnce,_that.wasMember,_that.ways,_that.requestedDetails,_that.listsNewMembers,_that.listInDirectory,_that.identityChoices,_that.failure);case _:
+return $default(_that.step,_that.communityName,_that.canApply,_that.admitsAtOnce,_that.wasMember,_that.ways,_that.requestedDetails,_that.listsNewMembers,_that.listInDirectory,_that.identityChoices,_that.details,_that.failure);case _:
   return null;
 
 }
@@ -222,7 +224,7 @@ return $default(_that.step,_that.communityName,_that.canApply,_that.admitsAtOnce
 
 
 class _VtcJoinState implements VtcJoinState {
-   _VtcJoinState({this.step = VtcJoinStep.scanning, this.communityName, this.canApply = false, this.admitsAtOnce = false, this.wasMember = false, final  List<VtcJoinWay> ways = const <VtcJoinWay>[], final  List<JoinAttributeRequest> requestedDetails = const <JoinAttributeRequest>[], this.listsNewMembers, this.listInDirectory = false, final  List<String> identityChoices = const <String>[], this.failure}): _ways = ways,_requestedDetails = requestedDetails,_identityChoices = identityChoices;
+   _VtcJoinState({this.step = VtcJoinStep.scanning, this.communityName, this.canApply = false, this.admitsAtOnce = false, this.wasMember = false, final  List<VtcJoinWay> ways = const <VtcJoinWay>[], final  List<JoinAttributeRequest> requestedDetails = const <JoinAttributeRequest>[], this.listsNewMembers, this.listInDirectory = false, final  List<String> identityChoices = const <String>[], final  List<VtcJoinDetail> details = const <VtcJoinDetail>[], this.failure}): _ways = ways,_requestedDetails = requestedDetails,_identityChoices = identityChoices,_details = details;
   
 
 @override@JsonKey() final  VtcJoinStep step;
@@ -262,6 +264,15 @@ class _VtcJoinState implements VtcJoinState {
   return EqualUnmodifiableListView(_identityChoices);
 }
 
+/// The profile details the member is asked to approve sharing.
+ final  List<VtcJoinDetail> _details;
+/// The profile details the member is asked to approve sharing.
+@override@JsonKey() List<VtcJoinDetail> get details {
+  if (_details is EqualUnmodifiableListView) return _details;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_details);
+}
+
 @override final  VtcJoinFailure? failure;
 
 /// Create a copy of VtcJoinState
@@ -274,16 +285,16 @@ _$VtcJoinStateCopyWith<_VtcJoinState> get copyWith => __$VtcJoinStateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _VtcJoinState&&(identical(other.step, step) || other.step == step)&&(identical(other.communityName, communityName) || other.communityName == communityName)&&(identical(other.canApply, canApply) || other.canApply == canApply)&&(identical(other.admitsAtOnce, admitsAtOnce) || other.admitsAtOnce == admitsAtOnce)&&(identical(other.wasMember, wasMember) || other.wasMember == wasMember)&&const DeepCollectionEquality().equals(other._ways, _ways)&&const DeepCollectionEquality().equals(other._requestedDetails, _requestedDetails)&&(identical(other.listsNewMembers, listsNewMembers) || other.listsNewMembers == listsNewMembers)&&(identical(other.listInDirectory, listInDirectory) || other.listInDirectory == listInDirectory)&&const DeepCollectionEquality().equals(other._identityChoices, _identityChoices)&&(identical(other.failure, failure) || other.failure == failure));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _VtcJoinState&&(identical(other.step, step) || other.step == step)&&(identical(other.communityName, communityName) || other.communityName == communityName)&&(identical(other.canApply, canApply) || other.canApply == canApply)&&(identical(other.admitsAtOnce, admitsAtOnce) || other.admitsAtOnce == admitsAtOnce)&&(identical(other.wasMember, wasMember) || other.wasMember == wasMember)&&const DeepCollectionEquality().equals(other._ways, _ways)&&const DeepCollectionEquality().equals(other._requestedDetails, _requestedDetails)&&(identical(other.listsNewMembers, listsNewMembers) || other.listsNewMembers == listsNewMembers)&&(identical(other.listInDirectory, listInDirectory) || other.listInDirectory == listInDirectory)&&const DeepCollectionEquality().equals(other._identityChoices, _identityChoices)&&const DeepCollectionEquality().equals(other._details, _details)&&(identical(other.failure, failure) || other.failure == failure));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,step,communityName,canApply,admitsAtOnce,wasMember,const DeepCollectionEquality().hash(_ways),const DeepCollectionEquality().hash(_requestedDetails),listsNewMembers,listInDirectory,const DeepCollectionEquality().hash(_identityChoices),failure);
+int get hashCode => Object.hash(runtimeType,step,communityName,canApply,admitsAtOnce,wasMember,const DeepCollectionEquality().hash(_ways),const DeepCollectionEquality().hash(_requestedDetails),listsNewMembers,listInDirectory,const DeepCollectionEquality().hash(_identityChoices),const DeepCollectionEquality().hash(_details),failure);
 
 @override
 String toString() {
-  return 'VtcJoinState(step: $step, communityName: $communityName, canApply: $canApply, admitsAtOnce: $admitsAtOnce, wasMember: $wasMember, ways: $ways, requestedDetails: $requestedDetails, listsNewMembers: $listsNewMembers, listInDirectory: $listInDirectory, identityChoices: $identityChoices, failure: $failure)';
+  return 'VtcJoinState(step: $step, communityName: $communityName, canApply: $canApply, admitsAtOnce: $admitsAtOnce, wasMember: $wasMember, ways: $ways, requestedDetails: $requestedDetails, listsNewMembers: $listsNewMembers, listInDirectory: $listInDirectory, identityChoices: $identityChoices, details: $details, failure: $failure)';
 }
 
 
@@ -294,7 +305,7 @@ abstract mixin class _$VtcJoinStateCopyWith<$Res> implements $VtcJoinStateCopyWi
   factory _$VtcJoinStateCopyWith(_VtcJoinState value, $Res Function(_VtcJoinState) _then) = __$VtcJoinStateCopyWithImpl;
 @override @useResult
 $Res call({
- VtcJoinStep step, String? communityName, bool canApply, bool admitsAtOnce, bool wasMember, List<VtcJoinWay> ways, List<JoinAttributeRequest> requestedDetails, bool? listsNewMembers, bool listInDirectory, List<String> identityChoices, VtcJoinFailure? failure
+ VtcJoinStep step, String? communityName, bool canApply, bool admitsAtOnce, bool wasMember, List<VtcJoinWay> ways, List<JoinAttributeRequest> requestedDetails, bool? listsNewMembers, bool listInDirectory, List<String> identityChoices, List<VtcJoinDetail> details, VtcJoinFailure? failure
 });
 
 
@@ -311,7 +322,7 @@ class __$VtcJoinStateCopyWithImpl<$Res>
 
 /// Create a copy of VtcJoinState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? step = null,Object? communityName = freezed,Object? canApply = null,Object? admitsAtOnce = null,Object? wasMember = null,Object? ways = null,Object? requestedDetails = null,Object? listsNewMembers = freezed,Object? listInDirectory = null,Object? identityChoices = null,Object? failure = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? step = null,Object? communityName = freezed,Object? canApply = null,Object? admitsAtOnce = null,Object? wasMember = null,Object? ways = null,Object? requestedDetails = null,Object? listsNewMembers = freezed,Object? listInDirectory = null,Object? identityChoices = null,Object? details = null,Object? failure = freezed,}) {
   return _then(_VtcJoinState(
 step: null == step ? _self.step : step // ignore: cast_nullable_to_non_nullable
 as VtcJoinStep,communityName: freezed == communityName ? _self.communityName : communityName // ignore: cast_nullable_to_non_nullable
@@ -323,7 +334,8 @@ as List<VtcJoinWay>,requestedDetails: null == requestedDetails ? _self._requeste
 as List<JoinAttributeRequest>,listsNewMembers: freezed == listsNewMembers ? _self.listsNewMembers : listsNewMembers // ignore: cast_nullable_to_non_nullable
 as bool?,listInDirectory: null == listInDirectory ? _self.listInDirectory : listInDirectory // ignore: cast_nullable_to_non_nullable
 as bool,identityChoices: null == identityChoices ? _self._identityChoices : identityChoices // ignore: cast_nullable_to_non_nullable
-as List<String>,failure: freezed == failure ? _self.failure : failure // ignore: cast_nullable_to_non_nullable
+as List<String>,details: null == details ? _self._details : details // ignore: cast_nullable_to_non_nullable
+as List<VtcJoinDetail>,failure: freezed == failure ? _self.failure : failure // ignore: cast_nullable_to_non_nullable
 as VtcJoinFailure?,
   ));
 }

@@ -3844,6 +3844,18 @@ abstract class AppLocalizations {
   /// **'Join with which identity?'**
   String get vtcJoinChooseIdentity;
 
+  /// Asks to approve sharing the listed profile details with the community
+  ///
+  /// In en, this message translates to:
+  /// **'Share these details with {name}?'**
+  String vtcJoinShareDetails(String name);
+
+  /// No description provided for @vtcJoinShareAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Share and apply'**
+  String get vtcJoinShareAction;
+
   /// No description provided for @vtcJoinNewIdentity.
   ///
   /// In en, this message translates to:
@@ -3979,7 +3991,7 @@ abstract class AppLocalizations {
   /// Why joining a community could not go ahead
   ///
   /// In en, this message translates to:
-  /// **'{reason, select, invalidCode{This isn\'\'t a community\'\'s code.} vtaMissing{Link your VTA in Settings before joining a community.} unreachable{The community can\'\'t be reached from your phone.} noDidHosting{Your VTA has no DID hosting server, so it can\'\'t create an identity the community can find.} notAccepting{This community isn\'\'t accepting applications.} badAnswer{The community\'\'s answer couldn\'\'t be checked, so nothing was recorded.} other{The community or your VTA refused the application.}}'**
+  /// **'{reason, select, invalidCode{This isn\'\'t a community\'\'s code.} profileMissing{Your VTA has no profile for this identity, so it can\'\'t share the details the community asks for. Set up your profile on your VTA, then try again.} detailsMissing{Your VTA doesn\'\'t hold a detail the community requires, so nothing was sent.} vtaMissing{Link your VTA in Settings before joining a community.} unreachable{The community can\'\'t be reached from your phone.} noDidHosting{Your VTA has no DID hosting server, so it can\'\'t create an identity the community can find.} notAccepting{This community isn\'\'t accepting applications.} badAnswer{The community\'\'s answer couldn\'\'t be checked, so nothing was recorded.} other{The community or your VTA refused the application.}}'**
   String vtcJoinFailure(String reason);
 }
 

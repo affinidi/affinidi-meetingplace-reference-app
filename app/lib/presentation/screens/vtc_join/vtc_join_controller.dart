@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -15,6 +17,11 @@ class VtcJoinController extends _$VtcJoinController {
 
   JoinManifest? _manifest;
   List<VtaPersona> _personas = const [];
+
+  /// The identity whose details await approval, and what the VTA would
+  /// disclose. Kept in memory only.
+  VtaPersona? _identity;
+  DisclosurePreview? _preview;
 
   @override
   VtcJoinState build() => VtcJoinState();
@@ -89,9 +96,83 @@ class VtcJoinController extends _$VtcJoinController {
     await _run(() => _apply(manifest, persona: persona));
   }
 
+  /// Shares the profile details the member approved, through the VTA, and
+  /// applies with them.
+  Future<void> approveDetails() async {
+    final manifest = _manifest;
+    final identity = _identity;
+    final preview = _preview;
+    if (state.step != VtcJoinStep.approveDetails ||
+        manifest == null ||
+        identity == null ||
+        preview == null) {
+      return;
+    }
+    state = state.copyWith(step: VtcJoinStep.working);
+
+    await _run(() async {
+      await _service.shareDetails(identity, preview.previewId);
+      await _send(
+        manifest,
+        identity,
+        attributes: [
+          for (final claim in preview.claims)
+            if (claim.value case final Object value)
+              JoinAttribute(type: claim.type, value: value),
+        ],
+      );
+    });
+  }
+
+  /// Applies, first asking the member to approve the profile details the
+  /// community asks for, when it asks for any.
   Future<void> _apply(JoinManifest manifest, {VtaPersona? persona}) async {
-    final verdict = await _service.join(manifest, persona: persona);
+    if (manifest.requestedAttributes.isEmpty) {
+      return _send(manifest, persona);
+    }
+    final identity = await _service.joiningIdentity(manifest, persona: persona);
+    final preview = await _service.previewDetails(manifest, identity);
+    final held = {
+      for (final claim in preview.claims)
+        if (claim.value != null) claim.type: claim.value!,
+    };
+    if (manifest.requestedAttributes.any(
+      (detail) => detail.required && !held.containsKey(detail.type),
+    )) {
+      return _fail(VtcJoinFailure.detailsMissing);
+    }
+    _identity = identity;
+    _preview = DisclosurePreview(
+      previewId: preview.previewId,
+      // Only what the community asked for, and only what the VTA holds.
+      claims: [
+        for (final detail in manifest.requestedAttributes)
+          if (held[detail.type] case final Object value)
+            DisclosedClaim(type: detail.type, value: value),
+      ],
+    );
     state = state.copyWith(
+      step: VtcJoinStep.approveDetails,
+      details: [
+        for (final claim in _preview!.claims)
+          VtcJoinDetail(type: claim.type, value: _shown(claim.value!)),
+      ],
+    );
+  }
+
+  Future<void> _send(
+    JoinManifest manifest,
+    VtaPersona? persona, {
+    List<JoinAttribute> attributes = const [],
+  }) async {
+    _preview = null;
+    final verdict = await _service.join(
+      manifest,
+      persona: persona,
+      attributes: attributes,
+    );
+    state = state.copyWith(
+      details: const [],
       step: switch (verdict) {
         JoinAdmitted() => VtcJoinStep.joined,
         JoinPending() => VtcJoinStep.pending,
@@ -121,6 +202,9 @@ class VtcJoinController extends _$VtcJoinController {
       );
     });
   }
+
+  static String _shown(Object value) =>
+      value is String ? value : jsonEncode(value);
 
   static VtcJoinStep _stepOf(VtcCommunity? community) {
     if (community == null) return VtcJoinStep.review;
@@ -152,6 +236,9 @@ class VtcJoinController extends _$VtcJoinController {
       MeetingPlaceVtcSDKErrorCode.refused
           when error.refusalCode?.endsWith(':notAccepting') ?? false =>
         VtcJoinFailure.notAccepting,
+      MeetingPlaceVtcSDKErrorCode.refused
+          when error.refusalCode == 'notBound' =>
+        VtcJoinFailure.profileMissing,
       MeetingPlaceVtcSDKErrorCode.refused => VtcJoinFailure.refused,
       MeetingPlaceVtcSDKErrorCode.invalidDocument ||
       MeetingPlaceVtcSDKErrorCode.invalidProof => VtcJoinFailure.badAnswer,

@@ -62,6 +62,11 @@ class VtcJoinScreen extends ConsumerWidget {
               onChoose: controller.useIdentity,
               onCancel: close,
             ),
+            VtcJoinStep.approveDetails => _ApproveDetails(
+              state: state,
+              onShare: controller.approveDetails,
+              onCancel: close,
+            ),
             VtcJoinStep.joined => _Outcome(
               message: state.wasMember
                   ? l10n.vtcJoinAlreadyMember(name)
@@ -307,6 +312,49 @@ class _ChooseIdentity extends StatelessWidget {
             ],
           ),
         ),
+        TextButton(onPressed: onCancel, child: Text(l10n.cancel)),
+      ],
+    );
+  }
+}
+
+/// The profile details the community asks for, as the VTA would disclose
+/// them; nothing is shared until the member approves.
+class _ApproveDetails extends StatelessWidget {
+  const _ApproveDetails({
+    required this.state,
+    required this.onShare,
+    required this.onCancel,
+  });
+
+  final VtcJoinState state;
+  final VoidCallback onShare;
+  final VoidCallback onCancel;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          l10n.vtcJoinShareDetails(state.communityName ?? ''),
+          style: context.textTheme.titleLarge,
+        ),
+        const SizedBox(height: 16),
+        Expanded(
+          child: ListView(
+            children: [
+              for (final detail in state.details)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(detail.value),
+                  subtitle: Text(detail.type),
+                ),
+            ],
+          ),
+        ),
+        FilledButton(onPressed: onShare, child: Text(l10n.vtcJoinShareAction)),
         TextButton(onPressed: onCancel, child: Text(l10n.cancel)),
       ],
     );

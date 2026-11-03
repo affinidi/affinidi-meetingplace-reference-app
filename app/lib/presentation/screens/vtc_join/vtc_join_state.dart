@@ -17,6 +17,10 @@ enum VtcJoinStep {
   /// The member chooses which identity on their VTA joins.
   chooseIdentity,
 
+  /// The member approves sharing the profile details the community asks
+  /// for, as their VTA holds them.
+  approveDetails,
+
   /// The member is a member, newly or already.
   joined,
 
@@ -53,6 +57,12 @@ enum VtcJoinFailure {
   /// An answer did not check out.
   badAnswer,
 
+  /// The identity has no profile on the VTA to take the details from.
+  profileMissing,
+
+  /// The VTA holds no value for a detail the community requires.
+  detailsMissing,
+
   /// The community or the VTA refused.
   refused,
 }
@@ -67,6 +77,19 @@ enum VtcJoinUnsupported {
 
   /// It asks for an in-person check.
   vetting,
+}
+
+/// A profile detail the member approves sharing, as the VTA would disclose
+/// it. Kept in memory only.
+class VtcJoinDetail {
+  /// Creates a [VtcJoinDetail].
+  const VtcJoinDetail({required this.type, required this.value});
+
+  /// The claim type, e.g. `name`.
+  final String type;
+
+  /// The value, as shown to the member.
+  final String value;
 }
 
 /// One way into a community, as the review shows it.
@@ -126,6 +149,9 @@ abstract class VtcJoinState with _$VtcJoinState {
 
     /// The identities on the member's VTA to join with, as DIDs.
     @Default(<String>[]) List<String> identityChoices,
+
+    /// The profile details the member is asked to approve sharing.
+    @Default(<VtcJoinDetail>[]) List<VtcJoinDetail> details,
     VtcJoinFailure? failure,
   }) = _VtcJoinState;
 }

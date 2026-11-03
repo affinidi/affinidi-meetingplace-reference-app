@@ -2610,6 +2610,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get vtcJoinChooseIdentity => 'Join with which identity?';
 
   @override
+  String vtcJoinShareDetails(String name) {
+    return 'Share these details with $name?';
+  }
+
+  @override
+  String get vtcJoinShareAction => 'Share and apply';
+
+  @override
   String get vtcJoinNewIdentity => 'A new identity';
 
   @override
@@ -2707,6 +2715,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String vtcJoinFailure(String reason) {
     String _temp0 = intl.Intl.selectLogic(reason, {
       'invalidCode': 'This isn\'\'t a community\'\'s code.',
+      'profileMissing':
+          'Your VTA has no profile for this identity, so it can\'\'t share the details the community asks for. Set up your profile on your VTA, then try again.',
+      'detailsMissing':
+          'Your VTA doesn\'\'t hold a detail the community requires, so nothing was sent.',
       'vtaMissing': 'Link your VTA in Settings before joining a community.',
       'unreachable': 'The community can\'\'t be reached from your phone.',
       'noDidHosting':

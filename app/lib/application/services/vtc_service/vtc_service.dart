@@ -176,29 +176,20 @@ class VtcService {
   /// Throws [VtaNotLinkedException] when no VTA is linked, and
   /// [MeetingPlaceVtcSDKException] when the VTA or the community refuses or
   /// cannot be reached.
-  Future<JoinVerdict> join(JoinManifest manifest, {VtaPersona? persona}) async {
+  Future<JoinVerdict> join(
+    JoinManifest manifest, {
+    VtaPersona? persona,
+    List<JoinAttribute> attributes = const [],
+  }) async {
     final vta = await _grantedVta();
-    var community = await _repository.findCommunity(manifest.communityDid);
-    if (community == null) {
-      persona ??= await vta.createPersona(
-        label: manifest.name ?? manifest.communityDid,
-      );
-      community = VtcCommunity(
-        communityDid: manifest.communityDid,
-        personaDid: persona.did,
-        contextId: persona.contextId,
-        name: manifest.name,
-        signingKeyId: persona.signingKeyId,
-        isMember: false,
-      );
-      // Kept before applying, so that a retry applies as the same persona.
-      await _repository.saveCommunity(community);
-    }
+    await joiningIdentity(manifest, persona: persona);
+    final community = (await _repository.findCommunity(manifest.communityDid))!;
 
     final verdict = await _sdk.joinClient().apply(
       manifest,
       agent: vta,
       persona: await _personaSigner(vta, community),
+      attributes: attributes,
     );
     switch (verdict) {
       case JoinAdmitted(:final credentials):
@@ -216,6 +207,61 @@ class VtcService {
         );
     }
     return verdict;
+  }
+
+  /// The identity that applies to [manifest]'s community: the one recorded
+  /// for it, else [persona], else a new persona the VTA creates. Recorded
+  /// before anything is sent, so a retry applies as the same identity.
+  ///
+  /// Throws as [join] does.
+  Future<VtaPersona> joiningIdentity(
+    JoinManifest manifest, {
+    VtaPersona? persona,
+  }) async {
+    final recorded = await _repository.findCommunity(manifest.communityDid);
+    if (recorded != null) return _persona(recorded);
+
+    final vta = await _grantedVta();
+    persona ??= await vta.createPersona(
+      label: manifest.name ?? manifest.communityDid,
+    );
+    await _repository.saveCommunity(
+      VtcCommunity(
+        communityDid: manifest.communityDid,
+        personaDid: persona.did,
+        contextId: persona.contextId,
+        name: manifest.name,
+        signingKeyId: persona.signingKeyId,
+        isMember: false,
+      ),
+    );
+    return persona;
+  }
+
+  /// Previews what the VTA would disclose about [persona] for the profile
+  /// details [manifest]'s community asks for. Nothing leaves the VTA.
+  ///
+  /// Throws [MeetingPlaceVtcSDKException] refused with `notBound` when the
+  /// persona has no profile on the VTA.
+  Future<DisclosurePreview> previewDetails(
+    JoinManifest manifest,
+    VtaPersona persona,
+  ) async {
+    final vta = await _grantedVta();
+    return vta.previewDisclosure(
+      persona: persona,
+      verifierDid: manifest.communityDid,
+      requestedClaims: [
+        for (final detail in manifest.requestedAttributes) detail.type,
+      ],
+    );
+  }
+
+  /// Discloses the preview [previewId] the member approved, through the
+  /// VTA, which records the disclosure.
+  Future<void> shareDetails(VtaPersona persona, String previewId) async {
+    final vta = await _grantedVta();
+    await vta.presentDisclosure(persona: persona, previewId: previewId);
   }
 
   /// Asks where the open application to [communityDid] stands, and records
