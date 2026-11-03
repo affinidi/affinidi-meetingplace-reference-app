@@ -84,6 +84,9 @@ class FakeVtcNetwork implements HttpClientAdapter {
   /// Where a join request stands.
   String joinStatus = 'pending';
 
+  /// The reason a rejected request's status gives.
+  String? joinRejectionReason;
+
   /// The join documents the community received.
   final List<Map<String, dynamic>> joinRequests = [];
 
@@ -164,7 +167,11 @@ class FakeVtcNetwork implements HttpClientAdapter {
           'requestId': 'request-1',
           'verdict': _withApplicant(joinVerdict, request['issuer'] as String),
         },
-        _ => {'requestId': payload['requestId'], 'status': joinStatus},
+        _ => {
+          'requestId': payload['requestId'],
+          'status': joinStatus,
+          'reason': ?joinRejectionReason,
+        },
       };
     } else if (type == OobTask.claim) {
       answer = step1;

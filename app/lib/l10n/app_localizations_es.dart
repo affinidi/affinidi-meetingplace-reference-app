@@ -2708,6 +2708,11 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String vtcJoinLastDenied(String reason) {
+    return 'Your last application was turned down. The community\'s reason: $reason';
+  }
+
+  @override
   String vtcJoinDeniedWithReason(String name, String reason) {
     return '$name didn\'t accept your application. Its reason: $reason';
   }

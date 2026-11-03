@@ -244,8 +244,71 @@ void main() {
         JoinRequestStatus.approved,
       );
 
+      final member = await service.community(fakeVtcDid);
+      expect(member?.isMember, isTrue);
+      // The VTA holds no card yet: the community is asked to deliver it
+      // again, and the admission waits to be settled.
+      expect(network.joinRequests.last['payload'], {
+        'requestId': 'request-1',
+        'resendCredentials': true,
+      });
+      expect(member?.isSettled, isFalse);
+    });
+
+    test('settles a later approval with the card on the VTA', () async {
+      network.vta
+        ..answers[VtaTask.credentialsQuery] = {
+          'credentials': [
+            {'id': 'card-1'},
+          ],
+        }
+        ..answers[VtaTask.credentialsGet] = {
+          'credential': {
+            'id': 'urn:uuid:vmc',
+            'issuer': fakeVtcDid,
+            'credentialSubject': {'id': persona.did},
+          },
+        }
+        ..answers[VtaTask.signDocument] = {
+          'document': {
+            'issuer': persona.did,
+            'proof': {'proofPurpose': 'assertionMethod'},
+          },
+        };
+      network.joinVerdict = {'effect': 'refer'};
+      await service.join(await service.readCommunity(fakeVtcDid));
+      network.joinStatus = 'approved';
+
+      await service.checkApplication(fakeVtcDid);
+
+      expect(network.memberRequests.map((r) => r['type']), [
+        MemberTask.vmc,
+        MemberTask.directoryCardUpdate,
+      ]);
+      expect((await service.community(fakeVtcDid))?.isSettled, isTrue);
+    });
+
+    test('keeps the reason a rejection gives', () async {
+      network.joinVerdict = {'effect': 'refer'};
+      await service.join(await service.readCommunity(fakeVtcDid));
+      network.joinStatus = 'rejected';
+      network.joinRejectionReason = 'Members only';
+
+      await service.checkApplication(fakeVtcDid);
+
+      final community = await service.community(fakeVtcDid);
+      expect(community?.isApplying, isFalse);
+      expect(community?.rejectionReason, 'Members only');
+    });
+
+    test('checks every open application when asked', () async {
+      network.joinVerdict = {'effect': 'refer'};
+      await service.join(await service.readCommunity(fakeVtcDid));
+      network.joinStatus = 'approved';
+
+      await service.checkApplications();
+
       expect((await service.community(fakeVtcDid))?.isMember, isTrue);
-      expect(network.joinRequests.last['payload'], {'requestId': 'request-1'});
     });
 
     test('closes a rejected application', () async {

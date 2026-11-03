@@ -2553,6 +2553,15 @@
 			}
 		}
 	},
+	"vtcJoinLastDenied": "Your last application was turned down. The community's reason: {reason}",
+	"@vtcJoinLastDenied": {
+		"description": "The community's reason for turning down the member's previous application",
+		"placeholders": {
+			"reason": {
+				"type": "String"
+			}
+		}
+	},
 	"vtcJoinDeniedWithReason": "{name} didn't accept your application. Its reason: {reason}",
 	"@vtcJoinDeniedWithReason": {
 		"description": "The named community turned the application down and said why, in its own words",

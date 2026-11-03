@@ -210,7 +210,9 @@ class VtcService {
         await _repository.saveCommunity(
           community.withApplication(isMember: false, requestId: requestId),
         );
-      case JoinDenied() || JoinNeedsMore():
+      case JoinDenied(:final reason):
+        await _repository.saveCommunity(community.rejected(reason));
+      case JoinNeedsMore():
         await _repository.saveCommunity(
           community.withApplication(isMember: false),
         );
@@ -322,15 +324,20 @@ class VtcService {
   }
 
   /// Asks where the open application to [communityDid] stands, and records
-  /// the community's decision once it has made one.
+  /// the community's decision once it has made one: an approval as a
+  /// membership, completed as [join] completes one, a rejection with the
+  /// community's reason. Also completes an admission still to settle.
   ///
   /// Returns null when no application is open. Throws as [join] does.
   Future<JoinStatus?> checkApplication(String communityDid) async {
     final community = await _repository.findCommunity(communityDid);
-    final requestId = community?.joinRequestId;
-    if (community == null || !community.isApplying || requestId == null) {
+    if (community == null) return null;
+    if (community.isMember && !community.isSettled) {
+      await _settleFromVta(await _grantedVta(), community, requestId: null);
       return null;
     }
+    final requestId = community.joinRequestId;
+    if (!community.isApplying || requestId == null) return null;
 
     final vta = await _grantedVta();
     final status = await _sdk.joinClient().status(
@@ -339,14 +346,65 @@ class VtcService {
       agent: vta,
       persona: await _personaSigner(vta, community),
     );
-    if (!status.status.isOpen) {
-      await _repository.saveCommunity(
-        community.withApplication(
-          isMember: status.status == JoinRequestStatus.approved,
-        ),
-      );
+    switch (status.status) {
+      case JoinRequestStatus.approved:
+        final member = community.withApplication(isMember: true);
+        await _repository.saveCommunity(member);
+        await _settleFromVta(vta, member, requestId: requestId);
+      case JoinRequestStatus.rejected || JoinRequestStatus.withdrawn:
+        await _repository.saveCommunity(community.rejected(status.reason));
+      case JoinRequestStatus.pending || JoinRequestStatus.deferred:
+        break;
     }
     return status;
+  }
+
+  /// Checks every open application and completes every admission still to
+  /// settle, e.g. when the app comes to the foreground: a community decides
+  /// on its own time. A community that cannot be reached is left for the
+  /// next check. Does nothing while no VTA is linked.
+  Future<void> checkApplications() async {
+    final linkedVta = await _repository.getLinkedVta();
+    if (linkedVta == null || !linkedVta.isGranted) return;
+    for (final community in await _repository.communities()) {
+      if (!community.isApplying &&
+          (!community.isMember || community.isSettled)) {
+        continue;
+      }
+      try {
+        await checkApplication(community.communityDid);
+      } on MeetingPlaceVtcSDKException {
+        continue;
+      }
+    }
+  }
+
+  /// Completes [member]'s admission with the membership card the community
+  /// delivered to their VTA. When the VTA holds none yet, asks the
+  /// community to deliver it again and leaves the admission to settle at
+  /// the next check.
+  Future<void> _settleFromVta(
+    VtaClient vta,
+    VtcCommunity member, {
+    required String? requestId,
+  }) async {
+    final card = await _sdk
+        .communityImport(vta)
+        .membershipCard(member.communityDid, personaDid: member.personaDid);
+    if (card == null) {
+      if (requestId != null) {
+        await _sdk.joinClient().status(
+          member.communityDid,
+          requestId: requestId,
+          agent: vta,
+          persona: await _personaSigner(vta, member),
+          resendCredentials: true,
+        );
+      }
+      await _repository.saveCommunity(member.settled(false));
+      return;
+    }
+    await _settle(vta, member, card, requestId);
   }
 
   /// Looks up the member's membership of [communityDid] in the cards backed

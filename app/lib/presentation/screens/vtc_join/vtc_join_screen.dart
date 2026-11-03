@@ -186,6 +186,10 @@ class _Review extends StatelessWidget {
                 l10n.vtcJoinTitle(name),
                 style: context.textTheme.titleLarge,
               ),
+              if (state.denialReason case final reason?) ...[
+                const SizedBox(height: 8),
+                Text(l10n.vtcJoinLastDenied(reason)),
+              ],
               const SizedBox(height: 16),
               Text(
                 l10n.vtcJoinWaysHeading,

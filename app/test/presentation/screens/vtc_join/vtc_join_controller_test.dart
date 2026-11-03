@@ -323,6 +323,21 @@ void main() {
       expect(state().denialReason, 'Berlin residents only');
     });
 
+    test('shows the reason of a rejection found later', () async {
+      network.joinVerdict = {'effect': 'refer'};
+      await controller().onScanned(fakeVtcDid);
+      await controller().join();
+      expect(state().step, VtcJoinStep.pending);
+
+      network
+        ..joinStatus = 'rejected'
+        ..joinRejectionReason = 'Members only';
+      await controller().checkAgain();
+
+      expect(state().step, VtcJoinStep.denied);
+      expect(state().denialReason, 'Members only');
+    });
+
     test('says when the community already counts the identity', () async {
       network.joinRefusal = 'vtc/join-requests/submit:alreadyMember';
       await controller().onScanned(fakeVtcDid);

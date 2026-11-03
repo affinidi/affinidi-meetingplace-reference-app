@@ -12,6 +12,7 @@ class VtcCommunity {
     this.joinRequestId,
     this.listInDirectory = true,
     this.isSettled = true,
+    this.rejectionReason,
   });
 
   /// Restores a [VtcCommunity] stored with [toJson].
@@ -29,6 +30,7 @@ class VtcCommunity {
       joinRequestId: json['joinRequestId'] as String?,
       listInDirectory: json['listInDirectory'] as bool? ?? true,
       isSettled: json['isSettled'] as bool? ?? true,
+      rejectionReason: json['rejectionReason'] as String?,
     );
   }
 
@@ -63,6 +65,10 @@ class VtcCommunity {
   /// withdrawn. False until both succeeded; retried until then.
   final bool isSettled;
 
+  /// The community's reason for turning the last application down, in its
+  /// own words, if it gave one. Kept until the next application.
+  final String? rejectionReason;
+
   /// Whether an application is waiting for the community's decision.
   bool get isApplying => !isMember && joinRequestId != null;
 
@@ -77,6 +83,10 @@ class VtcCommunity {
     );
   }
 
+  /// This record with the application turned down, for [reason].
+  VtcCommunity rejected(String? reason) =>
+      _copy(isMember: false, rejectionReason: reason);
+
   /// This record with whether the admission is complete on the community's
   /// side.
   VtcCommunity settled(bool isSettled) => _copy(isSettled: isSettled);
@@ -90,6 +100,7 @@ class VtcCommunity {
     String? joinRequestId,
     bool? isSettled,
     bool? listInDirectory,
+    String? rejectionReason,
   }) {
     return VtcCommunity(
       communityDid: communityDid,
@@ -101,6 +112,10 @@ class VtcCommunity {
       joinRequestId: isMember == null ? this.joinRequestId : joinRequestId,
       listInDirectory: listInDirectory ?? this.listInDirectory,
       isSettled: isSettled ?? this.isSettled,
+      // A new outcome replaces the last rejection.
+      rejectionReason: isMember == null
+          ? this.rejectionReason
+          : rejectionReason,
     );
   }
 
@@ -115,5 +130,6 @@ class VtcCommunity {
     'joinRequestId': ?joinRequestId,
     'listInDirectory': listInDirectory,
     'isSettled': isSettled,
+    'rejectionReason': ?rejectionReason,
   };
 }

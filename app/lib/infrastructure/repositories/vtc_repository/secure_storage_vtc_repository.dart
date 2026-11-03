@@ -45,6 +45,9 @@ class SecureStorageVtcRepository implements VtcRepository {
   }
 
   @override
+  Future<List<VtcCommunity>> communities() => _communities();
+
+  @override
   Future<void> saveCommunity(VtcCommunity community) async {
     final communities = [
       ...(await _communities()).where(

@@ -12,6 +12,9 @@ abstract interface class VtcRepository {
   /// The community with [communityDid], or null when not recorded.
   Future<VtcCommunity?> findCommunity(String communityDid);
 
+  /// Every recorded community.
+  Future<List<VtcCommunity>> communities();
+
   /// Records [community], replacing a record of the same community.
   Future<void> saveCommunity(VtcCommunity community);
 

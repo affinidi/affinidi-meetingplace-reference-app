@@ -15,6 +15,7 @@ import '../../application/services/r_cards_service/r_card_chat_notifier_service.
 import '../../application/services/settings_service/settings_service.dart';
 import '../../application/services/vrc_service/vrc_service.dart';
 import '../../application/services/vtc_service/vta_link_service.dart';
+import '../../application/services/vtc_service/vtc_application_watcher.dart';
 import '../../infrastructure/providers/app_badge_provider.dart';
 import '../../infrastructure/providers/credentials_sdk_provider.dart';
 import '../../infrastructure/providers/meeting_place_sdk_provider.dart';
@@ -42,6 +43,7 @@ class AppController extends _$AppController with WidgetsBindingObserver {
           ref.read(controlPlaneServiceProvider);
           ref.read(rCardChatNotifierServiceProvider);
           ref.read(vrcServiceProvider);
+          ref.read(vtcApplicationWatcherProvider);
           await ref.read(contactsServiceProvider.notifier).ensureInitialized();
           await ref
               .read(connectionsServiceProvider.notifier)

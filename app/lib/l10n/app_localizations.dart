@@ -3982,6 +3982,12 @@ abstract class AppLocalizations {
   /// **'{name} didn\'t accept your application.'**
   String vtcJoinDenied(String name);
 
+  /// The community's reason for turning down the member's previous application
+  ///
+  /// In en, this message translates to:
+  /// **'Your last application was turned down. The community\'s reason: {reason}'**
+  String vtcJoinLastDenied(String reason);
+
   /// The named community turned the application down and said why, in its own words
   ///
   /// In en, this message translates to:

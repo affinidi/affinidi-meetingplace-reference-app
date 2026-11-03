@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
@@ -15,8 +16,12 @@ part 'vtc_join_controller.g.dart';
 class VtcJoinController extends _$VtcJoinController {
   late final VtcService _service = ref.read(vtcServiceProvider);
 
+  /// How often an open application is checked while the screen shows it.
+  static const pendingCheckInterval = Duration(seconds: 30);
+
   JoinManifest? _manifest;
   List<VtaPersona> _personas = const [];
+  Timer? _pendingCheck;
 
   /// The identity whose details await approval, and what the VTA would
   /// disclose. Kept in memory only.
@@ -24,7 +29,22 @@ class VtcJoinController extends _$VtcJoinController {
   DisclosurePreview? _preview;
 
   @override
-  VtcJoinState build() => VtcJoinState();
+  VtcJoinState build() {
+    ref.onDispose(() => _pendingCheck?.cancel());
+    // While an application waits, ask the community again now and then.
+    listenSelf((_, next) {
+      if (next.step == VtcJoinStep.pending) {
+        _pendingCheck ??= Timer.periodic(
+          pendingCheckInterval,
+          (_) => checkAgain(),
+        );
+      } else if (next.step != VtcJoinStep.working) {
+        _pendingCheck?.cancel();
+        _pendingCheck = null;
+      }
+    });
+    return VtcJoinState();
+  }
 
   /// Reads the scanned community code and what the community asks.
   Future<void> onScanned(String code) async {
@@ -56,6 +76,7 @@ class VtcJoinController extends _$VtcJoinController {
         ],
         requestedDetails: manifest.requestedAttributes,
         listsNewMembers: manifest.listsNewMembers,
+        denialReason: community?.rejectionReason,
       );
     });
   }
@@ -206,6 +227,7 @@ class VtcJoinController extends _$VtcJoinController {
     await _run(() async {
       final status = await _service.checkApplication(manifest.communityDid);
       state = state.copyWith(
+        denialReason: status?.reason,
         step: switch (status?.status) {
           JoinRequestStatus.approved => VtcJoinStep.joined,
           JoinRequestStatus.pending ||
