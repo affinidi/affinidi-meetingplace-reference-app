@@ -2600,6 +2600,9 @@ class AppLocalizationsDe extends AppLocalizations {
       'Scan a community\'s code and apply with your VTA';
 
   @override
+  String get vtcJoinTitleUnnamed => 'Join this community?';
+
+  @override
   String vtcJoinTitle(String name) {
     return 'Join $name?';
   }

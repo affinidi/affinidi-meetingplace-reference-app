@@ -234,7 +234,12 @@ class _Review extends HookWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: 12,
       children: [
-        OnboardingTitle(name),
+        // The name falls back to the DID, which the card below shows.
+        OnboardingTitle(
+          name.isEmpty || name == did
+              ? l10n.vtcJoinTitleUnnamed
+              : l10n.vtcJoinTitle(name),
+        ),
         OnboardingSubtitle(
           !state.canApply
               ? l10n.vtcJoinNoSupportedWay(name)
@@ -243,17 +248,6 @@ class _Review extends HookWidget {
               : l10n.vtcJoinReviewed,
         ),
         const SizedBox(height: 4),
-        GlassCard(
-          title: l10n.vtcJoinDidHint,
-          copyLabel: l10n.linkedVtaCopyDid,
-          onCopy: copyDid,
-          child: MonospaceDid(
-            did,
-            textKey: const Key('vtc_join_community_did'),
-          ),
-        ),
-        if (copied.value case final text?)
-          OnboardingMessage(text, isError: false),
         if (state.denialReason case final reason?)
           OnboardingMessage(l10n.vtcJoinLastDenied(reason), isError: true),
         GlassCard(
@@ -348,6 +342,17 @@ class _Review extends HookWidget {
             textAlign: TextAlign.center,
             style: _note(context),
           ),
+        GlassCard(
+          title: l10n.vtcJoinDidHint,
+          copyLabel: l10n.linkedVtaCopyDid,
+          onCopy: copyDid,
+          child: MonospaceDid(
+            did,
+            textKey: const Key('vtc_join_community_did'),
+          ),
+        ),
+        if (copied.value case final text?)
+          OnboardingMessage(text, isError: false),
         const SizedBox(height: 12),
         OnboardingButton(
           label: l10n.vtcJoinAction,

@@ -2430,6 +2430,7 @@
 	"vtcJoinPasteAction": "Paste",
 	"vtcJoinContinueAction": "Continue",
 	"vtcJoinMenuSubtitle": "Scan a community's code and apply with your VTA",
+	"vtcJoinTitleUnnamed": "Join this community?",
 	"vtcJoinTitle": "Join {name}?",
 	"@vtcJoinTitle": {
 		"description": "Asks whether to apply to the named community",

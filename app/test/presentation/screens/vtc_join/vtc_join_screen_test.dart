@@ -14,6 +14,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/vtc/user_verification_k
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
+import 'package:mpx_flutter_reference_app/presentation/widgets/onboarding_style/onboarding_style.dart';
 
 import '../../../fakes/fake_vta.dart';
 import '../../../fakes/fake_vtc_network.dart';
@@ -126,7 +127,7 @@ void main() {
       expect(find.text('Become a member of a community'), findsOneWidget);
 
       await enterCode(tester, fakeVtcDid);
-      expect(find.text('Football club'), findsOneWidget);
+      expect(find.text('Join Football club?'), findsOneWidget);
       expect(find.text('Ways in'), findsOneWidget);
       expect(
         tester
@@ -136,6 +137,12 @@ void main() {
             .data,
         fakeVtcDid,
       );
+
+      final cards = tester
+          .widgetList<GlassCard>(find.byType(GlassCard))
+          .map((card) => card.title);
+      expect(cards.first, 'Ways in');
+      expect(cards.last, 'Community DID');
 
       await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
       await settle(tester);
@@ -157,6 +164,19 @@ void main() {
       await settle(tester);
       expect(find.text('You left Football club.'), findsOneWidget);
       expect(await service.community(fakeVtcDid), isNull);
+    });
+
+    testWidgets('titles a community without a name by what it asks', (
+      tester,
+    ) async {
+      network.joinManifest = {...network.joinManifest}..remove('branding');
+      await pumpScreen(tester);
+
+      await enterCode(tester, fakeVtcDid);
+
+      expect(find.text('Join this community?'), findsOneWidget);
+      // Only in the Community DID card, not as the title.
+      expect(find.text(fakeVtcDid), findsOneWidget);
     });
 
     testWidgets('offers to try again with another code', (tester) async {

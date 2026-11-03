@@ -3820,6 +3820,12 @@ abstract class AppLocalizations {
   /// **'Scan a community\'s code and apply with your VTA'**
   String get vtcJoinMenuSubtitle;
 
+  /// No description provided for @vtcJoinTitleUnnamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Join this community?'**
+  String get vtcJoinTitleUnnamed;
+
   /// Asks whether to apply to the named community
   ///
   /// In en, this message translates to:
