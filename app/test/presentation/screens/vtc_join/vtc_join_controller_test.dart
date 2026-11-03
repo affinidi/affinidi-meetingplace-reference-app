@@ -472,7 +472,6 @@ void main() {
       expect(state().description, 'Five-a-side on Sundays.');
       expect(state().website, Uri.parse('https://club.example/'));
       expect(state().contactEmail, 'hello@club.example');
-      expect(state().personhood?.realHuman, isTrue);
       expect(state().directoryDisclosure?.fields.single.label, 'Name');
       expect(state().directoryDisclosure?.adminNotes, isTrue);
     });
@@ -484,7 +483,7 @@ void main() {
 
       expect(state().step, VtcJoinStep.review);
       expect(state().description, isNull);
-      expect(state().personhood, isNull);
+      expect(state().website, isNull);
     });
 
     test('starts over after a failure', () async {

@@ -252,10 +252,6 @@ class _Review extends StatelessWidget {
             onListInDirectory: onListInDirectory,
           ),
         _WaysIn(state: state),
-        _Trust(
-          state: state,
-          communityName: hasName ? name : l10n.vtcJoinThisCommunity,
-        ),
         const SizedBox(height: 12),
         Row(
           spacing: 12,
@@ -642,46 +638,6 @@ class _WaysIn extends StatelessWidget {
               subtitle: way.description,
             ),
         ],
-      ),
-    );
-  }
-}
-
-/// Whether to trust the community: who decides, and what its governance
-/// asserts about personhood.
-class _Trust extends StatelessWidget {
-  const _Trust({required this.state, required this.communityName});
-
-  final VtcJoinState state;
-  final String communityName;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final personhood = state.personhood;
-    return GlassCard(
-      title: l10n.vtcJoinTrust(communityName),
-      child: SelectionArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: 12,
-          children: [
-            Text(l10n.vtcJoinTrustNote, style: _note(context)),
-            if (personhood?.realHuman ?? false)
-              _Line(icon: Icons.person_outline, title: l10n.vtcJoinRealHuman),
-            if (personhood?.singleMembership ?? false)
-              _Line(
-                icon: Icons.looks_one_outlined,
-                title: l10n.vtcJoinSingleMembership,
-              ),
-            if (personhood?.governanceFrameworkUrl case final framework?)
-              _Line(
-                icon: Icons.gavel,
-                title: l10n.vtcJoinGovernance,
-                subtitle: framework.toString(),
-              ),
-          ],
-        ),
       ),
     );
   }

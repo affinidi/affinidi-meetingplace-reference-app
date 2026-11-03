@@ -149,10 +149,6 @@ abstract class VtcJoinState with _$VtcJoinState {
     Uri? website,
     String? contactEmail,
 
-    /// What the community asserts about its members' personhood, when its
-    /// profile could be read.
-    CommunityPersonhood? personhood,
-
     /// What the community's member directory would disclose about a member,
     /// or null when it offers none.
     DirectoryDisclosure? directoryDisclosure,

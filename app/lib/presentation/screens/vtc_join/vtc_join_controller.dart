@@ -85,7 +85,6 @@ class VtcJoinController extends _$VtcJoinController {
         description: profile?.description,
         website: profile?.website,
         contactEmail: profile?.contactEmail,
-        personhood: profile?.personhood,
         directoryDisclosure: manifest.directoryDisclosure,
         canApply: manifest.canApply,
         admitsAtOnce: manifest.admitsAtOnce,

@@ -2674,15 +2674,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get vtcJoinContact => 'Contact';
 
   @override
-  String get vtcJoinRealHuman => 'Members must be real people';
-
-  @override
-  String get vtcJoinSingleMembership => 'One membership per person';
-
-  @override
-  String get vtcJoinGovernance => 'Governance framework';
-
-  @override
   String vtcJoinAudience(String audience) {
     String _temp0 = intl.Intl.selectLogic(audience, {
       'admins': 'the administrators',
@@ -2750,15 +2741,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String vtcJoinFieldShareUpTo(String audience) {
     return 'you can share it up to $audience';
   }
-
-  @override
-  String vtcJoinTrust(String name) {
-    return 'Make sure you trust $name';
-  }
-
-  @override
-  String get vtcJoinTrustNote =>
-      'Its administrators decide on your application and receive the details you share.';
 
   @override
   String get vtcJoinAction => 'Join';

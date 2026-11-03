@@ -2476,9 +2476,6 @@
 	"vtcJoinProfileHeading": "About the community",
 	"vtcJoinWebsite": "Website",
 	"vtcJoinContact": "Contact",
-	"vtcJoinRealHuman": "Members must be real people",
-	"vtcJoinSingleMembership": "One membership per person",
-	"vtcJoinGovernance": "Governance framework",
 	"vtcJoinAudience": "{audience, select, admins{the administrators} groups{your groups} connections{your connections} members{all members} public{anyone} other{some people}}",
 	"@vtcJoinAudience": {
 		"placeholders": {
@@ -2533,15 +2530,6 @@
 			}
 		}
 	},
-	"vtcJoinTrust": "Make sure you trust {name}",
-	"@vtcJoinTrust": {
-		"placeholders": {
-			"name": {
-				"type": "String"
-			}
-		}
-	},
-	"vtcJoinTrustNote": "Its administrators decide on your application and receive the details you share.",
 	"vtcJoinAction": "Join",
 	"vtcJoinJoined": "You're a member of {name}.",
 	"@vtcJoinJoined": {

@@ -3952,24 +3952,6 @@ abstract class AppLocalizations {
   /// **'Contact'**
   String get vtcJoinContact;
 
-  /// No description provided for @vtcJoinRealHuman.
-  ///
-  /// In en, this message translates to:
-  /// **'Members must be real people'**
-  String get vtcJoinRealHuman;
-
-  /// No description provided for @vtcJoinSingleMembership.
-  ///
-  /// In en, this message translates to:
-  /// **'One membership per person'**
-  String get vtcJoinSingleMembership;
-
-  /// No description provided for @vtcJoinGovernance.
-  ///
-  /// In en, this message translates to:
-  /// **'Governance framework'**
-  String get vtcJoinGovernance;
-
   /// No description provided for @vtcJoinAudience.
   ///
   /// In en, this message translates to:
@@ -4065,18 +4047,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'you can share it up to {audience}'**
   String vtcJoinFieldShareUpTo(String audience);
-
-  /// No description provided for @vtcJoinTrust.
-  ///
-  /// In en, this message translates to:
-  /// **'Make sure you trust {name}'**
-  String vtcJoinTrust(String name);
-
-  /// No description provided for @vtcJoinTrustNote.
-  ///
-  /// In en, this message translates to:
-  /// **'Its administrators decide on your application and receive the details you share.'**
-  String get vtcJoinTrustNote;
 
   /// No description provided for @vtcJoinAction.
   ///

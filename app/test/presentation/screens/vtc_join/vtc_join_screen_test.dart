@@ -146,7 +146,6 @@ void main() {
         'About the community',
         'If you join, Football club can:',
         'Ways in',
-        'Make sure you trust Football club',
       ]);
 
       await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
@@ -217,8 +216,6 @@ void main() {
       }
       expect(find.text('https://club.example/'), findsOneWidget);
       expect(find.text('hello@club.example'), findsOneWidget);
-      expect(find.text('Members must be real people'), findsOneWidget);
-      expect(find.text('One membership per person'), findsOneWidget);
       expect(find.text('Keep notes about you'), findsOneWidget);
 
       // Grouped by who sees it by default, the membership DID among them.
