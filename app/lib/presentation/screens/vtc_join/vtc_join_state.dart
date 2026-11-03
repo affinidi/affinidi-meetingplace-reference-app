@@ -14,6 +14,9 @@ enum VtcJoinStep {
   /// The member reads what the community asks and decides to join.
   review,
 
+  /// The member chooses which identity on their VTA joins.
+  chooseIdentity,
+
   /// The member is a member, newly or already.
   joined,
 
@@ -120,6 +123,9 @@ abstract class VtcJoinState with _$VtcJoinState {
 
     /// Whether the member opted in to the member directory. Off by default.
     @Default(false) bool listInDirectory,
+
+    /// The identities on the member's VTA to join with, as DIDs.
+    @Default(<String>[]) List<String> identityChoices,
     VtcJoinFailure? failure,
   }) = _VtcJoinState;
 }

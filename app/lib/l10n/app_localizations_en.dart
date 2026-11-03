@@ -2565,7 +2565,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vtcJoinPersonaNote =>
-      'Your VTA creates a new identity for this community, so other communities can\'t link you through it.';
+      'Next, you choose which identity on your VTA joins.';
+
+  @override
+  String get vtcJoinChooseIdentity => 'Join with which identity?';
+
+  @override
+  String get vtcJoinNewIdentity => 'A new identity';
+
+  @override
+  String get vtcJoinNewIdentityNote =>
+      'Recommended: your VTA creates it for this community, so other communities can\'t link you through it.';
 
   @override
   String get vtcJoinWaysHeading => 'Ways in';

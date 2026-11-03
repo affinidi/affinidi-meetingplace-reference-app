@@ -3835,8 +3835,26 @@ abstract class AppLocalizations {
   /// No description provided for @vtcJoinPersonaNote.
   ///
   /// In en, this message translates to:
-  /// **'Your VTA creates a new identity for this community, so other communities can\'t link you through it.'**
+  /// **'Next, you choose which identity on your VTA joins.'**
   String get vtcJoinPersonaNote;
+
+  /// No description provided for @vtcJoinChooseIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'Join with which identity?'**
+  String get vtcJoinChooseIdentity;
+
+  /// No description provided for @vtcJoinNewIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'A new identity'**
+  String get vtcJoinNewIdentity;
+
+  /// No description provided for @vtcJoinNewIdentityNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended: your VTA creates it for this community, so other communities can\'t link you through it.'**
+  String get vtcJoinNewIdentityNote;
 
   /// No description provided for @vtcJoinWaysHeading.
   ///

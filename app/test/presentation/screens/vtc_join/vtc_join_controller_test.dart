@@ -15,6 +15,7 @@ void main() {
   late FakeVtcNetwork network;
   late VtcService service;
   late ProviderContainer container;
+  late Ed25519DidKeySigner persona;
 
   VtcJoinController controller() =>
       container.read(vtcJoinControllerProvider.notifier);
@@ -30,7 +31,7 @@ void main() {
   setUp(() async {
     FlutterSecureStorage.setMockInitialValues({});
     network = FakeVtcNetwork();
-    final persona = Ed25519DidKeySigner.generate();
+    persona = Ed25519DidKeySigner.generate();
     network.vta
       ..persona = persona
       ..answers[VtaTask.contextsList] = {
@@ -129,6 +130,62 @@ void main() {
       expect(state().ways.single.unsupported, VtcJoinUnsupported.vetting);
       expect(state().canApply, isFalse);
       expect(state().step, VtcJoinStep.review);
+      expect(
+        network.joinRequests.map((r) => r['type']),
+        isNot(contains(JoinTask.submit)),
+      );
+    });
+  });
+
+  group('VtcJoinController identity', () {
+    void vtaHoldsPersona() {
+      network.vta.answers[VtaTask.didsList] = {
+        'dids': [
+          {'did': persona.did, 'contextId': 'vta'},
+        ],
+      };
+    }
+
+    bool createdPersona() =>
+        network.vta.received.any((r) => r['type'] == VtaTask.didsCreate);
+
+    test('joins as an identity the VTA already holds', () async {
+      vtaHoldsPersona();
+      await controller().onScanned(fakeVtcDid);
+
+      await controller().join();
+      expect(state().step, VtcJoinStep.chooseIdentity);
+      expect(state().identityChoices, [persona.did]);
+
+      await controller().useIdentity(persona.did);
+
+      expect(state().step, VtcJoinStep.joined);
+      expect(createdPersona(), isFalse);
+      final submit = network.joinRequests.lastWhere(
+        (r) => r['type'] == JoinTask.submit,
+      );
+      expect(submit['issuer'], persona.did);
+    });
+
+    test('joins as a new identity when chosen', () async {
+      vtaHoldsPersona();
+      await controller().onScanned(fakeVtcDid);
+      await controller().join();
+
+      await controller().useIdentity(null);
+
+      expect(state().step, VtcJoinStep.joined);
+      expect(createdPersona(), isTrue);
+    });
+
+    test('ignores an identity the VTA did not offer', () async {
+      vtaHoldsPersona();
+      await controller().onScanned(fakeVtcDid);
+      await controller().join();
+
+      await controller().useIdentity('did:webvh:QmOther:host.example');
+
+      expect(state().step, VtcJoinStep.chooseIdentity);
       expect(
         network.joinRequests.map((r) => r['type']),
         isNot(contains(JoinTask.submit)),

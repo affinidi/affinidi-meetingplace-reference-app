@@ -57,6 +57,11 @@ class VtcJoinScreen extends ConsumerWidget {
               onListInDirectory: controller.setListInDirectory,
               onCancel: close,
             ),
+            VtcJoinStep.chooseIdentity => _ChooseIdentity(
+              state: state,
+              onChoose: controller.useIdentity,
+              onCancel: close,
+            ),
             VtcJoinStep.joined => _Outcome(
               message: state.wasMember
                   ? l10n.vtcJoinAlreadyMember(name)
@@ -252,6 +257,56 @@ class _Review extends StatelessWidget {
         ),
         if (state.canApply)
           FilledButton(onPressed: onJoin, child: Text(l10n.vtcJoinAction)),
+        TextButton(onPressed: onCancel, child: Text(l10n.cancel)),
+      ],
+    );
+  }
+}
+
+/// Which identity on the member's VTA joins: a new one, which no other
+/// community can link to, or one the VTA already holds.
+class _ChooseIdentity extends StatelessWidget {
+  const _ChooseIdentity({
+    required this.state,
+    required this.onChoose,
+    required this.onCancel,
+  });
+
+  final VtcJoinState state;
+  final ValueChanged<String?> onChoose;
+  final VoidCallback onCancel;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(l10n.vtcJoinChooseIdentity, style: context.textTheme.titleLarge),
+        const SizedBox(height: 16),
+        Expanded(
+          child: ListView(
+            children: [
+              ListTile(
+                key: const Key('vtc_join_new_identity'),
+                leading: const Icon(Icons.person_add),
+                title: Text(l10n.vtcJoinNewIdentity),
+                subtitle: Text(l10n.vtcJoinNewIdentityNote),
+                onTap: () => onChoose(null),
+              ),
+              for (final did in state.identityChoices)
+                ListTile(
+                  leading: const Icon(Icons.person),
+                  title: Text(
+                    did,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  onTap: () => onChoose(did),
+                ),
+            ],
+          ),
+        ),
         TextButton(onPressed: onCancel, child: Text(l10n.cancel)),
       ],
     );

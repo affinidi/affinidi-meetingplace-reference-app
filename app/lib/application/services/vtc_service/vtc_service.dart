@@ -168,18 +168,19 @@ class VtcService {
   /// Applies to join [manifest]'s community as a persona of the member's
   /// VTA, and records the outcome.
   ///
-  /// The VTA creates the persona on the first application to a community;
-  /// a later one applies as the same persona. Once admitted, the issued
-  /// cards are kept on the VTA, where other apps of the member find them.
+  /// The first application to a community is made as [persona], one of
+  /// [vtaPersonas], or else as a new persona the VTA creates; a later one
+  /// applies as the same persona. Once admitted, the issued cards are kept
+  /// on the VTA, where other apps of the member find them.
   ///
   /// Throws [VtaNotLinkedException] when no VTA is linked, and
   /// [MeetingPlaceVtcSDKException] when the VTA or the community refuses or
   /// cannot be reached.
-  Future<JoinVerdict> join(JoinManifest manifest) async {
+  Future<JoinVerdict> join(JoinManifest manifest, {VtaPersona? persona}) async {
     final vta = await _grantedVta();
     var community = await _repository.findCommunity(manifest.communityDid);
     if (community == null) {
-      final persona = await vta.createPersona(
+      persona ??= await vta.createPersona(
         label: manifest.name ?? manifest.communityDid,
       );
       community = VtcCommunity(
@@ -264,6 +265,14 @@ class VtcService {
         name: membership.name,
       ),
     );
+  }
+
+  /// The identities the member's VTA holds, to choose one to join with.
+  ///
+  /// Throws [VtaNotLinkedException] when no VTA is linked.
+  Future<List<VtaPersona>> vtaPersonas() async {
+    final vta = await _grantedVta();
+    return vta.listPersonas();
   }
 
   /// The member's VTA as the agent that signs as their persona.

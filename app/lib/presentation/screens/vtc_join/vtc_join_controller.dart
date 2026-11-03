@@ -14,6 +14,7 @@ class VtcJoinController extends _$VtcJoinController {
   late final VtcService _service = ref.read(vtcServiceProvider);
 
   JoinManifest? _manifest;
+  List<VtaPersona> _personas = const [];
 
   @override
   VtcJoinState build() => VtcJoinState();
@@ -49,8 +50,11 @@ class VtcJoinController extends _$VtcJoinController {
     state = state.copyWith(listInDirectory: listed);
   }
 
-  /// Applies to join the scanned community, under the first way in this
-  /// app supports. Does nothing when there is none.
+  /// Goes on to apply to the scanned community, under the first way in
+  /// this app supports; does nothing when there is none.
+  ///
+  /// A first application asks which identity on the VTA joins, when the VTA
+  /// holds any; a later one applies as the identity recorded for it.
   Future<void> join() async {
     final manifest = _manifest;
     if (state.step != VtcJoinStep.review ||
@@ -61,16 +65,40 @@ class VtcJoinController extends _$VtcJoinController {
     state = state.copyWith(step: VtcJoinStep.working);
 
     await _run(() async {
-      final verdict = await _service.join(manifest);
+      if (await _service.community(manifest.communityDid) != null) {
+        return _apply(manifest);
+      }
+      _personas = await _service.vtaPersonas();
+      if (_personas.isEmpty) return _apply(manifest);
       state = state.copyWith(
-        step: switch (verdict) {
-          JoinAdmitted() => VtcJoinStep.joined,
-          JoinPending() => VtcJoinStep.pending,
-          JoinDenied() => VtcJoinStep.denied,
-          JoinNeedsMore() => VtcJoinStep.needsMore,
-        },
+        step: VtcJoinStep.chooseIdentity,
+        identityChoices: [for (final persona in _personas) persona.did],
       );
     });
+  }
+
+  /// Joins as the VTA identity [personaDid], or as a new identity when
+  /// null. Only an identity the VTA offered is used.
+  Future<void> useIdentity(String? personaDid) async {
+    final manifest = _manifest;
+    if (state.step != VtcJoinStep.chooseIdentity || manifest == null) return;
+    final persona = _personas.where((p) => p.did == personaDid).firstOrNull;
+    if (personaDid != null && persona == null) return;
+    state = state.copyWith(step: VtcJoinStep.working);
+
+    await _run(() => _apply(manifest, persona: persona));
+  }
+
+  Future<void> _apply(JoinManifest manifest, {VtaPersona? persona}) async {
+    final verdict = await _service.join(manifest, persona: persona);
+    state = state.copyWith(
+      step: switch (verdict) {
+        JoinAdmitted() => VtcJoinStep.joined,
+        JoinPending() => VtcJoinStep.pending,
+        JoinDenied() => VtcJoinStep.denied,
+        JoinNeedsMore() => VtcJoinStep.needsMore,
+      },
+    );
   }
 
   /// Asks the community whether it decided on the open application.
