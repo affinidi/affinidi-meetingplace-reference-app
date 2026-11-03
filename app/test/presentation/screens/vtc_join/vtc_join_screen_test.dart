@@ -127,7 +127,8 @@ void main() {
       expect(find.text('Become a member of a community'), findsOneWidget);
 
       await enterCode(tester, fakeVtcDid);
-      expect(find.text('Join Football club?'), findsOneWidget);
+      expect(find.text('Football club'), findsOneWidget);
+      expect(find.text('wants you to join'), findsOneWidget);
       expect(find.text('Ways in'), findsOneWidget);
       expect(
         tester
@@ -141,7 +142,11 @@ void main() {
       final cards = tester
           .widgetList<GlassCard>(find.byType(GlassCard))
           .map((card) => card.title);
-      expect(cards.take(2), ['About', 'Ways in']);
+      expect(cards.take(3), [
+        'If you join, Football club can:',
+        'Ways in',
+        'Make sure you trust Football club',
+      ]);
       expect(cards.last, 'Community DID');
 
       await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
@@ -195,24 +200,24 @@ void main() {
       await enterCode(tester, fakeVtcDid);
 
       expect(find.text('Five-a-side on Sundays.'), findsOneWidget);
-      expect(find.text('About'), findsOneWidget);
       expect(find.text('https://club.example/'), findsOneWidget);
       expect(find.text('hello@club.example'), findsOneWidget);
       expect(find.text('Members must be real people'), findsOneWidget);
       expect(find.text('One membership per person'), findsOneWidget);
-      expect(
-        find.text('What the member directory shows about you'),
-        findsOneWidget,
-      );
-      expect(
-        find.text(
-          'Seen by the administrators at first; you can share it up to '
-          "all members\nSet by the administrators; you can't change it",
-        ),
-        findsOneWidget,
-      );
-      expect(find.text('Seen by the administrators'), findsOneWidget);
-      expect(find.textContaining('Administrators keep notes'), findsOneWidget);
+      expect(find.text('Keep notes about you'), findsOneWidget);
+
+      // Grouped by who sees it by default, the membership DID among them.
+      const group = 'Show your Role, membership DID to the administrators';
+      expect(find.text(group), findsOneWidget);
+      const detail =
+          'Role · you can share it up to all members · '
+          "Set by the administrators; you can't change it";
+      expect(find.text(detail), findsNothing);
+
+      await tapVisible(tester, find.text(group));
+      await tester.pumpAndSettle();
+
+      expect(find.text(detail), findsOneWidget);
     });
 
     testWidgets('titles a community without a name by what it asks', (
@@ -224,7 +229,7 @@ void main() {
 
       await enterCode(tester, fakeVtcDid);
 
-      expect(find.text('Join this community?'), findsOneWidget);
+      expect(find.text('A community'), findsOneWidget);
       // Only in the Community DID card, not as the title.
       expect(find.text(fakeVtcDid), findsOneWidget);
     });

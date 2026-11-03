@@ -3820,18 +3820,6 @@ abstract class AppLocalizations {
   /// **'Scan a community\'s code and apply with your VTA'**
   String get vtcJoinMenuSubtitle;
 
-  /// No description provided for @vtcJoinTitleUnnamed.
-  ///
-  /// In en, this message translates to:
-  /// **'Join this community?'**
-  String get vtcJoinTitleUnnamed;
-
-  /// Asks whether to apply to the named community
-  ///
-  /// In en, this message translates to:
-  /// **'Join {name}?'**
-  String vtcJoinTitle(String name);
-
   /// No description provided for @vtcJoinAdmitsAtOnce.
   ///
   /// In en, this message translates to:
@@ -3843,12 +3831,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The community\'s administrators review each application.'**
   String get vtcJoinReviewed;
-
-  /// No description provided for @vtcJoinPersonaNote.
-  ///
-  /// In en, this message translates to:
-  /// **'Next, you choose which identity on your VTA joins.'**
-  String get vtcJoinPersonaNote;
 
   /// No description provided for @vtcJoinChooseIdentity.
   ///
@@ -3916,18 +3898,6 @@ abstract class AppLocalizations {
   /// **'Profile details the community asks for'**
   String get vtcJoinDetailsHeading;
 
-  /// A profile detail the community requires
-  ///
-  /// In en, this message translates to:
-  /// **'{type} (required)'**
-  String vtcJoinDetailRequired(String type);
-
-  /// A profile detail the community asks for but does not require
-  ///
-  /// In en, this message translates to:
-  /// **'{type} (optional)'**
-  String vtcJoinDetailOptional(String type);
-
   /// No description provided for @vtcJoinDetailsNote.
   ///
   /// In en, this message translates to:
@@ -3958,23 +3928,11 @@ abstract class AppLocalizations {
   /// **'If this is off, Meeting Place takes you out of the directory right after you join.'**
   String get vtcJoinListMeNote;
 
-  /// No description provided for @vtcJoinDirectoryHeading.
-  ///
-  /// In en, this message translates to:
-  /// **'Member directory'**
-  String get vtcJoinDirectoryHeading;
-
   /// No description provided for @vtcJoinIdentityHeading.
   ///
   /// In en, this message translates to:
   /// **'Identity on your VTA'**
   String get vtcJoinIdentityHeading;
-
-  /// No description provided for @vtcJoinAboutHeading.
-  ///
-  /// In en, this message translates to:
-  /// **'About'**
-  String get vtcJoinAboutHeading;
 
   /// No description provided for @vtcJoinWebsite.
   ///
@@ -4006,29 +3964,11 @@ abstract class AppLocalizations {
   /// **'Governance framework'**
   String get vtcJoinGovernance;
 
-  /// No description provided for @vtcJoinDisclosureHeading.
-  ///
-  /// In en, this message translates to:
-  /// **'What the member directory shows about you'**
-  String get vtcJoinDisclosureHeading;
-
   /// No description provided for @vtcJoinAudience.
   ///
   /// In en, this message translates to:
   /// **'{audience, select, admins{the administrators} groups{your groups} connections{your connections} members{all members} public{anyone} other{some people}}'**
   String vtcJoinAudience(String audience);
-
-  /// No description provided for @vtcJoinFieldSeenBy.
-  ///
-  /// In en, this message translates to:
-  /// **'Seen by {audience}'**
-  String vtcJoinFieldSeenBy(String audience);
-
-  /// No description provided for @vtcJoinFieldSeenByUpTo.
-  ///
-  /// In en, this message translates to:
-  /// **'Seen by {audience} at first; you can share it up to {ceiling}'**
-  String vtcJoinFieldSeenByUpTo(String audience, String ceiling);
 
   /// No description provided for @vtcJoinFieldSetByAdmins.
   ///
@@ -4036,23 +3976,101 @@ abstract class AppLocalizations {
   /// **'Set by the administrators; you can\'t change it'**
   String get vtcJoinFieldSetByAdmins;
 
-  /// No description provided for @vtcJoinMembershipDid.
-  ///
-  /// In en, this message translates to:
-  /// **'Your membership DID'**
-  String get vtcJoinMembershipDid;
-
-  /// No description provided for @vtcJoinAdminNotes.
-  ///
-  /// In en, this message translates to:
-  /// **'Administrators keep notes about members. No other member sees them, and you can ask for yours.'**
-  String get vtcJoinAdminNotes;
-
   /// No description provided for @vtcJoinExternalCards.
   ///
   /// In en, this message translates to:
   /// **'You may publish your card beyond the community, if you choose to.'**
   String get vtcJoinExternalCards;
+
+  /// No description provided for @vtcJoinUnnamedCommunity.
+  ///
+  /// In en, this message translates to:
+  /// **'A community'**
+  String get vtcJoinUnnamedCommunity;
+
+  /// No description provided for @vtcJoinThisCommunity.
+  ///
+  /// In en, this message translates to:
+  /// **'this community'**
+  String get vtcJoinThisCommunity;
+
+  /// No description provided for @vtcJoinWantsYou.
+  ///
+  /// In en, this message translates to:
+  /// **'wants you to join'**
+  String get vtcJoinWantsYou;
+
+  /// No description provided for @vtcJoinWithVtaIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'With an identity from your VTA'**
+  String get vtcJoinWithVtaIdentity;
+
+  /// No description provided for @vtcJoinConsentHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'If you join, {name} can:'**
+  String vtcJoinConsentHeading(String name);
+
+  /// No description provided for @vtcJoinReceivesDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive your {type}'**
+  String vtcJoinReceivesDetail(String type);
+
+  /// No description provided for @vtcJoinDetailRequiredNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Required to apply'**
+  String get vtcJoinDetailRequiredNote;
+
+  /// No description provided for @vtcJoinDetailOptionalNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get vtcJoinDetailOptionalNote;
+
+  /// No description provided for @vtcJoinShowsTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Show your {fields} to {audience}'**
+  String vtcJoinShowsTo(String fields, String audience);
+
+  /// No description provided for @vtcJoinMembershipDidField.
+  ///
+  /// In en, this message translates to:
+  /// **'membership DID'**
+  String get vtcJoinMembershipDidField;
+
+  /// No description provided for @vtcJoinKeepsNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep notes about you'**
+  String get vtcJoinKeepsNotes;
+
+  /// No description provided for @vtcJoinAdminNotesDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'No other member sees them, and you can ask for yours.'**
+  String get vtcJoinAdminNotesDetail;
+
+  /// No description provided for @vtcJoinFieldShareUpTo.
+  ///
+  /// In en, this message translates to:
+  /// **'you can share it up to {audience}'**
+  String vtcJoinFieldShareUpTo(String audience);
+
+  /// No description provided for @vtcJoinTrust.
+  ///
+  /// In en, this message translates to:
+  /// **'Make sure you trust {name}'**
+  String vtcJoinTrust(String name);
+
+  /// No description provided for @vtcJoinTrustNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Its administrators decide on your application and receive the details you share.'**
+  String get vtcJoinTrustNote;
 
   /// No description provided for @vtcJoinAction.
   ///

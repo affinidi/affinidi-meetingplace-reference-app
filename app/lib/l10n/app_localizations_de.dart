@@ -2600,23 +2600,11 @@ class AppLocalizationsDe extends AppLocalizations {
       'Scan a community\'s code and apply with your VTA';
 
   @override
-  String get vtcJoinTitleUnnamed => 'Join this community?';
-
-  @override
-  String vtcJoinTitle(String name) {
-    return 'Join $name?';
-  }
-
-  @override
   String get vtcJoinAdmitsAtOnce => 'You become a member as soon as you apply.';
 
   @override
   String get vtcJoinReviewed =>
       'The community\'s administrators review each application.';
-
-  @override
-  String get vtcJoinPersonaNote =>
-      'Next, you choose which identity on your VTA joins.';
 
   @override
   String get vtcJoinChooseIdentity => 'Join with which identity?';
@@ -2665,16 +2653,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get vtcJoinDetailsHeading => 'Profile details the community asks for';
 
   @override
-  String vtcJoinDetailRequired(String type) {
-    return '$type (required)';
-  }
-
-  @override
-  String vtcJoinDetailOptional(String type) {
-    return '$type (optional)';
-  }
-
-  @override
   String get vtcJoinDetailsNote =>
       'You see the values from your VTA and approve sharing them before anything is sent.';
 
@@ -2694,13 +2672,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'If this is off, Meeting Place takes you out of the directory right after you join.';
 
   @override
-  String get vtcJoinDirectoryHeading => 'Member directory';
-
-  @override
   String get vtcJoinIdentityHeading => 'Identity on your VTA';
-
-  @override
-  String get vtcJoinAboutHeading => 'About';
 
   @override
   String get vtcJoinWebsite => 'Website';
@@ -2718,10 +2690,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get vtcJoinGovernance => 'Governance framework';
 
   @override
-  String get vtcJoinDisclosureHeading =>
-      'What the member directory shows about you';
-
-  @override
   String vtcJoinAudience(String audience) {
     String _temp0 = intl.Intl.selectLogic(audience, {
       'admins': 'the administrators',
@@ -2735,29 +2703,69 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String vtcJoinFieldSeenBy(String audience) {
-    return 'Seen by $audience';
-  }
-
-  @override
-  String vtcJoinFieldSeenByUpTo(String audience, String ceiling) {
-    return 'Seen by $audience at first; you can share it up to $ceiling';
-  }
-
-  @override
   String get vtcJoinFieldSetByAdmins =>
       'Set by the administrators; you can\'t change it';
 
   @override
-  String get vtcJoinMembershipDid => 'Your membership DID';
-
-  @override
-  String get vtcJoinAdminNotes =>
-      'Administrators keep notes about members. No other member sees them, and you can ask for yours.';
-
-  @override
   String get vtcJoinExternalCards =>
       'You may publish your card beyond the community, if you choose to.';
+
+  @override
+  String get vtcJoinUnnamedCommunity => 'A community';
+
+  @override
+  String get vtcJoinThisCommunity => 'this community';
+
+  @override
+  String get vtcJoinWantsYou => 'wants you to join';
+
+  @override
+  String get vtcJoinWithVtaIdentity => 'With an identity from your VTA';
+
+  @override
+  String vtcJoinConsentHeading(String name) {
+    return 'If you join, $name can:';
+  }
+
+  @override
+  String vtcJoinReceivesDetail(String type) {
+    return 'Receive your $type';
+  }
+
+  @override
+  String get vtcJoinDetailRequiredNote => 'Required to apply';
+
+  @override
+  String get vtcJoinDetailOptionalNote => 'Optional';
+
+  @override
+  String vtcJoinShowsTo(String fields, String audience) {
+    return 'Show your $fields to $audience';
+  }
+
+  @override
+  String get vtcJoinMembershipDidField => 'membership DID';
+
+  @override
+  String get vtcJoinKeepsNotes => 'Keep notes about you';
+
+  @override
+  String get vtcJoinAdminNotesDetail =>
+      'No other member sees them, and you can ask for yours.';
+
+  @override
+  String vtcJoinFieldShareUpTo(String audience) {
+    return 'you can share it up to $audience';
+  }
+
+  @override
+  String vtcJoinTrust(String name) {
+    return 'Make sure you trust $name';
+  }
+
+  @override
+  String get vtcJoinTrustNote =>
+      'Its administrators decide on your application and receive the details you share.';
 
   @override
   String get vtcJoinAction => 'Join';

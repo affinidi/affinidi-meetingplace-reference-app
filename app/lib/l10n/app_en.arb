@@ -2430,19 +2430,8 @@
 	"vtcJoinPasteAction": "Paste",
 	"vtcJoinContinueAction": "Continue",
 	"vtcJoinMenuSubtitle": "Scan a community's code and apply with your VTA",
-	"vtcJoinTitleUnnamed": "Join this community?",
-	"vtcJoinTitle": "Join {name}?",
-	"@vtcJoinTitle": {
-		"description": "Asks whether to apply to the named community",
-		"placeholders": {
-			"name": {
-				"type": "String"
-			}
-		}
-	},
 	"vtcJoinAdmitsAtOnce": "You become a member as soon as you apply.",
 	"vtcJoinReviewed": "The community's administrators review each application.",
-	"vtcJoinPersonaNote": "Next, you choose which identity on your VTA joins.",
 	"vtcJoinChooseIdentity": "Join with which identity?",
 	"vtcJoinShareDetails": "Share these details with {name}?",
 	"@vtcJoinShareDetails": {
@@ -2478,38 +2467,17 @@
 		}
 	},
 	"vtcJoinDetailsHeading": "Profile details the community asks for",
-	"vtcJoinDetailRequired": "{type} (required)",
-	"@vtcJoinDetailRequired": {
-		"description": "A profile detail the community requires",
-		"placeholders": {
-			"type": {
-				"type": "String"
-			}
-		}
-	},
-	"vtcJoinDetailOptional": "{type} (optional)",
-	"@vtcJoinDetailOptional": {
-		"description": "A profile detail the community asks for but does not require",
-		"placeholders": {
-			"type": {
-				"type": "String"
-			}
-		}
-	},
 	"vtcJoinDetailsNote": "You see the values from your VTA and approve sharing them before anything is sent.",
 	"vtcJoinDirectoryListed": "This community lists new members in its member directory.",
 	"vtcJoinDirectoryHidden": "This community doesn't list new members in its member directory.",
 	"vtcJoinListMe": "List me in the member directory",
 	"vtcJoinListMeNote": "If this is off, Meeting Place takes you out of the directory right after you join.",
-	"vtcJoinDirectoryHeading": "Member directory",
 	"vtcJoinIdentityHeading": "Identity on your VTA",
-	"vtcJoinAboutHeading": "About",
 	"vtcJoinWebsite": "Website",
 	"vtcJoinContact": "Contact",
 	"vtcJoinRealHuman": "Members must be real people",
 	"vtcJoinSingleMembership": "One membership per person",
 	"vtcJoinGovernance": "Governance framework",
-	"vtcJoinDisclosureHeading": "What the member directory shows about you",
 	"vtcJoinAudience": "{audience, select, admins{the administrators} groups{your groups} connections{your connections} members{all members} public{anyone} other{some people}}",
 	"@vtcJoinAudience": {
 		"placeholders": {
@@ -2518,29 +2486,61 @@
 			}
 		}
 	},
-	"vtcJoinFieldSeenBy": "Seen by {audience}",
-	"@vtcJoinFieldSeenBy": {
+	"vtcJoinFieldSetByAdmins": "Set by the administrators; you can't change it",
+	"vtcJoinExternalCards": "You may publish your card beyond the community, if you choose to.",
+	"vtcJoinUnnamedCommunity": "A community",
+	"vtcJoinThisCommunity": "this community",
+	"vtcJoinWantsYou": "wants you to join",
+	"vtcJoinWithVtaIdentity": "With an identity from your VTA",
+	"vtcJoinConsentHeading": "If you join, {name} can:",
+	"@vtcJoinConsentHeading": {
 		"placeholders": {
-			"audience": {
+			"name": {
 				"type": "String"
 			}
 		}
 	},
-	"vtcJoinFieldSeenByUpTo": "Seen by {audience} at first; you can share it up to {ceiling}",
-	"@vtcJoinFieldSeenByUpTo": {
+	"vtcJoinReceivesDetail": "Receive your {type}",
+	"@vtcJoinReceivesDetail": {
 		"placeholders": {
-			"audience": {
+			"type": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinDetailRequiredNote": "Required to apply",
+	"vtcJoinDetailOptionalNote": "Optional",
+	"vtcJoinShowsTo": "Show your {fields} to {audience}",
+	"@vtcJoinShowsTo": {
+		"placeholders": {
+			"fields": {
 				"type": "String"
 			},
-			"ceiling": {
+			"audience": {
 				"type": "String"
 			}
 		}
 	},
-	"vtcJoinFieldSetByAdmins": "Set by the administrators; you can't change it",
-	"vtcJoinMembershipDid": "Your membership DID",
-	"vtcJoinAdminNotes": "Administrators keep notes about members. No other member sees them, and you can ask for yours.",
-	"vtcJoinExternalCards": "You may publish your card beyond the community, if you choose to.",
+	"vtcJoinMembershipDidField": "membership DID",
+	"vtcJoinKeepsNotes": "Keep notes about you",
+	"vtcJoinAdminNotesDetail": "No other member sees them, and you can ask for yours.",
+	"vtcJoinFieldShareUpTo": "you can share it up to {audience}",
+	"@vtcJoinFieldShareUpTo": {
+		"placeholders": {
+			"audience": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinTrust": "Make sure you trust {name}",
+	"@vtcJoinTrust": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinTrustNote": "Its administrators decide on your application and receive the details you share.",
 	"vtcJoinAction": "Join",
 	"vtcJoinJoined": "You're a member of {name}.",
 	"@vtcJoinJoined": {

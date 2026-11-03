@@ -13,7 +13,7 @@ import 'vtc_join_state.dart';
 
 /// Joins a community: scan its code or enter its DID, read what it asks,
 /// apply as an identity from the member's VTA. In the look of linking the
-/// VTA, each thing the community asks in its own card.
+/// VTA, the review laid out like a consent screen.
 class VtcJoinScreen extends ConsumerWidget {
   const VtcJoinScreen({super.key});
 
@@ -204,8 +204,8 @@ class _EnterCode extends HookConsumerWidget {
   }
 }
 
-/// What the community asks, each in its own card, before the member
-/// commits to anything.
+/// What joining means, laid out like a consent screen: who asks, what the
+/// community gets and shows, how to get in, and whether to trust it.
 class _Review extends HookWidget {
   const _Review({
     required this.state,
@@ -222,8 +222,10 @@ class _Review extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final name = state.communityName ?? '';
     final did = state.communityDid ?? '';
+    // The name falls back to the DID, which the card below shows.
+    final name = state.communityName;
+    final hasName = name != null && name.isNotEmpty && name != did;
     final copied = useState<String?>(null);
 
     Future<void> copyDid() async {
@@ -236,120 +238,35 @@ class _Review extends HookWidget {
       spacing: 12,
       children: [
         if (state.logoUrl case final logoUrl?) _Logo(logoUrl),
-        // The name falls back to the DID, which the card below shows.
-        OnboardingTitle(
-          name.isEmpty || name == did
-              ? l10n.vtcJoinTitleUnnamed
-              : l10n.vtcJoinTitle(name),
-        ),
-        OnboardingSubtitle(
-          !state.canApply
-              ? l10n.vtcJoinNoSupportedWay(name)
-              : state.admitsAtOnce
-              ? l10n.vtcJoinAdmitsAtOnce
-              : l10n.vtcJoinReviewed,
-        ),
+        OnboardingTitle(hasName ? name : l10n.vtcJoinUnnamedCommunity),
+        OnboardingSubtitle(l10n.vtcJoinWantsYou),
         if (state.description case final description?)
-          OnboardingSubtitle(description),
-        const SizedBox(height: 4),
+          Text(
+            description,
+            textAlign: TextAlign.center,
+            style: context.textTheme.bodyMedium?.copyWith(color: Colors.white),
+          ),
+        Center(child: _Pill(l10n.vtcJoinWithVtaIdentity)),
         if (state.denialReason case final reason?)
           OnboardingMessage(l10n.vtcJoinLastDenied(reason), isError: true),
-        _About(state: state),
-        GlassCard(
-          title: l10n.vtcJoinWaysHeading,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: 12,
-            children: [
-              for (final way in state.ways)
-                _Line(
-                  icon: way.unsupported != null
-                      ? Icons.block
-                      : way.automatic
-                      ? Icons.how_to_reg
-                      : Icons.rate_review,
-                  title: switch (way) {
-                    VtcJoinWay(:final unsupported?) =>
-                      l10n.vtcJoinWayUnsupported(unsupported.name),
-                    VtcJoinWay(automatic: true) => l10n.vtcJoinWayAutomatic,
-                    _ => l10n.vtcJoinWayReviewed,
-                  },
-                  subtitle: way.description,
-                ),
-            ],
+        if (!state.canApply)
+          OnboardingMessage(
+            l10n.vtcJoinNoSupportedWay(
+              hasName ? name : l10n.vtcJoinThisCommunity,
+            ),
+            isError: false,
+          )
+        else
+          _Consent(
+            state: state,
+            communityName: hasName ? name : l10n.vtcJoinThisCommunity,
+            onListInDirectory: onListInDirectory,
           ),
+        _WaysIn(state: state),
+        _Trust(
+          state: state,
+          communityName: hasName ? name : l10n.vtcJoinThisCommunity,
         ),
-        if (state.canApply && state.requestedDetails.isNotEmpty)
-          GlassCard(
-            title: l10n.vtcJoinDetailsHeading,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              spacing: 12,
-              children: [
-                for (final detail in state.requestedDetails)
-                  _Line(
-                    icon: Icons.badge,
-                    title: detail.required
-                        ? l10n.vtcJoinDetailRequired(detail.type)
-                        : l10n.vtcJoinDetailOptional(detail.type),
-                    subtitle: detail.purpose,
-                  ),
-                Text(l10n.vtcJoinDetailsNote, style: _note(context)),
-              ],
-            ),
-          ),
-        if (state.canApply)
-          GlassCard(
-            title: l10n.vtcJoinDirectoryHeading,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (state.listsNewMembers case final listed?)
-                  Text(
-                    listed
-                        ? l10n.vtcJoinDirectoryListed
-                        : l10n.vtcJoinDirectoryHidden,
-                    style: _note(context),
-                  ),
-                if (state.listsNewMembers != false)
-                  // A Row, not a SwitchListTile: the onboarding layout
-                  // measures intrinsic heights, which a ListTile misreports.
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          spacing: 2,
-                          children: [
-                            Text(
-                              l10n.vtcJoinListMe,
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                            Text(l10n.vtcJoinListMeNote, style: _note(context)),
-                          ],
-                        ),
-                      ),
-                      Switch.adaptive(
-                        key: const Key('vtc_join_list_me'),
-                        value: state.listInDirectory,
-                        onChanged: onListInDirectory,
-                        activeTrackColor: Colors.white,
-                        activeThumbColor: context.colorScheme.primary,
-                      ),
-                    ],
-                  ),
-              ],
-            ),
-          ),
-        if (state.directoryDisclosure case final disclosure?
-            when state.canApply)
-          _DirectoryDisclosure(disclosure),
-        if (state.canApply)
-          Text(
-            l10n.vtcJoinPersonaNote,
-            textAlign: TextAlign.center,
-            style: _note(context),
-          ),
         GlassCard(
           title: l10n.vtcJoinDidHint,
           copyLabel: l10n.linkedVtaCopyDid,
@@ -362,12 +279,360 @@ class _Review extends HookWidget {
         if (copied.value case final text?)
           OnboardingMessage(text, isError: false),
         const SizedBox(height: 12),
-        OnboardingButton(
-          label: l10n.vtcJoinAction,
-          onPressed: state.canApply ? onJoin : null,
+        Row(
+          spacing: 12,
+          children: [
+            Expanded(
+              child: OnboardingButton(
+                label: l10n.generalCancel,
+                isOutlined: true,
+                onPressed: onCancel,
+              ),
+            ),
+            Expanded(
+              child: OnboardingButton(
+                label: l10n.vtcJoinAction,
+                onPressed: state.canApply ? onJoin : null,
+              ),
+            ),
+          ],
         ),
-        OnboardingTextButton(label: l10n.generalCancel, onPressed: onCancel),
       ],
+    );
+  }
+}
+
+/// A rounded, frosted label, such as which identity joins.
+class _Pill extends StatelessWidget {
+  const _Pill(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Colors.white.withAlpha(25),
+        border: Border.all(color: Colors.white.withAlpha(76)),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          spacing: 6,
+          children: [
+            const Icon(Icons.account_circle, size: 18, color: Colors.white),
+            Flexible(
+              child: Text(
+                text,
+                style: context.textTheme.bodySmall?.copyWith(
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// What the community gets and shows once the member joins, one line each,
+/// with the member directory's switch below.
+class _Consent extends StatelessWidget {
+  const _Consent({
+    required this.state,
+    required this.communityName,
+    required this.onListInDirectory,
+  });
+
+  final VtcJoinState state;
+  final String communityName;
+  final ValueChanged<bool> onListInDirectory;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final disclosure = state.directoryDisclosure;
+    final items = [
+      for (final detail in state.requestedDetails)
+        _ConsentItem(
+          icon: Icons.badge_outlined,
+          title: l10n.vtcJoinReceivesDetail(detail.type),
+          details: [
+            ?detail.purpose,
+            detail.required
+                ? l10n.vtcJoinDetailRequiredNote
+                : l10n.vtcJoinDetailOptionalNote,
+            l10n.vtcJoinDetailsNote,
+          ],
+        ),
+      if (disclosure != null) ..._audienceItems(context, disclosure),
+      if (disclosure?.adminNotes ?? false)
+        _ConsentItem(
+          icon: Icons.sticky_note_2_outlined,
+          title: l10n.vtcJoinKeepsNotes,
+          details: [l10n.vtcJoinAdminNotesDetail],
+        ),
+    ];
+
+    return GlassCard(
+      title: l10n.vtcJoinConsentHeading(communityName),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final item in items) ...[item, const _Divider()],
+          if (state.listsNewMembers case final listed?)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                listed
+                    ? l10n.vtcJoinDirectoryListed
+                    : l10n.vtcJoinDirectoryHidden,
+                style: _note(context),
+              ),
+            ),
+          if (state.listsNewMembers != false)
+            // A Row, not a SwitchListTile: the onboarding layout measures
+            // intrinsic heights, which a ListTile misreports.
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 2,
+                    children: [
+                      Text(
+                        l10n.vtcJoinListMe,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      Text(l10n.vtcJoinListMeNote, style: _note(context)),
+                      if (disclosure?.externalCards ?? false)
+                        Text(l10n.vtcJoinExternalCards, style: _note(context)),
+                    ],
+                  ),
+                ),
+                Switch.adaptive(
+                  key: const Key('vtc_join_list_me'),
+                  value: state.listInDirectory,
+                  onChanged: onListInDirectory,
+                  activeTrackColor: Colors.white,
+                  activeThumbColor: context.colorScheme.primary,
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// One line per audience, widest first: which directory values reach it
+  /// by default, the membership DID among them.
+  static List<Widget> _audienceItems(
+    BuildContext context,
+    DirectoryDisclosure disclosure,
+  ) {
+    final l10n = context.l10n;
+    String audience(DirectoryAudience audience) =>
+        l10n.vtcJoinAudience(audience.name);
+
+    return [
+      for (final group in DirectoryAudience.values.reversed)
+        if ([
+              for (final field in disclosure.fields)
+                if (field.defaultVisibility == group) field,
+            ]
+            case final fields
+            when fields.isNotEmpty || disclosure.membershipIdentifiers == group)
+          _ConsentItem(
+            icon: group == DirectoryAudience.admins
+                ? Icons.admin_panel_settings_outlined
+                : Icons.visibility_outlined,
+            title: l10n.vtcJoinShowsTo(
+              [
+                for (final field in fields) field.label,
+                if (disclosure.membershipIdentifiers == group)
+                  l10n.vtcJoinMembershipDidField,
+              ].join(', '),
+              audience(group),
+            ),
+            details: [
+              for (final field in fields)
+                [
+                  field.label,
+                  ?field.description,
+                  if (field.ceiling != field.defaultVisibility)
+                    l10n.vtcJoinFieldShareUpTo(audience(field.ceiling)),
+                  if (field.source == DirectoryFieldSource.admin)
+                    l10n.vtcJoinFieldSetByAdmins,
+                ].join(' · '),
+            ],
+          ),
+    ];
+  }
+}
+
+/// A thin rule between the lines of a list on the gradient.
+class _Divider extends StatelessWidget {
+  const _Divider();
+
+  @override
+  Widget build(BuildContext context) => ColoredBox(
+    color: Colors.white.withAlpha(40),
+    child: const SizedBox(height: 1),
+  );
+}
+
+/// One thing joining allows: an icon and a title, and [details] shown on
+/// tap, as a consent screen explains a permission.
+class _ConsentItem extends HookWidget {
+  const _ConsentItem({
+    required this.icon,
+    required this.title,
+    this.details = const [],
+  });
+
+  final IconData icon;
+  final String title;
+  final List<String> details;
+
+  @override
+  Widget build(BuildContext context) {
+    final expanded = useState(false);
+    final canExpand = details.isNotEmpty;
+
+    return InkWell(
+      onTap: canExpand ? () => expanded.value = !expanded.value : null,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 12,
+          children: [
+            Icon(icon, size: 20, color: Colors.white),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 4,
+                children: [
+                  Text(
+                    title,
+                    style: context.textTheme.bodyMedium?.copyWith(
+                      color: Colors.white,
+                    ),
+                  ),
+                  if (expanded.value)
+                    for (final detail in details)
+                      Text(detail, style: _note(context)),
+                ],
+              ),
+            ),
+            if (canExpand)
+              Icon(
+                expanded.value ? Icons.expand_less : Icons.expand_more,
+                color: Colors.white,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// How to get in: what admission takes, and each way in the community
+/// offers.
+class _WaysIn extends StatelessWidget {
+  const _WaysIn({required this.state});
+
+  final VtcJoinState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return GlassCard(
+      title: l10n.vtcJoinWaysHeading,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 12,
+        children: [
+          if (state.canApply)
+            Text(
+              state.admitsAtOnce
+                  ? l10n.vtcJoinAdmitsAtOnce
+                  : l10n.vtcJoinReviewed,
+              style: _note(context),
+            ),
+          for (final way in state.ways)
+            _Line(
+              icon: way.unsupported != null
+                  ? Icons.block
+                  : way.automatic
+                  ? Icons.how_to_reg
+                  : Icons.rate_review,
+              title: switch (way) {
+                VtcJoinWay(:final unsupported?) => l10n.vtcJoinWayUnsupported(
+                  unsupported.name,
+                ),
+                VtcJoinWay(automatic: true) => l10n.vtcJoinWayAutomatic,
+                _ => l10n.vtcJoinWayReviewed,
+              },
+              subtitle: way.description,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Whether to trust the community: who decides, and its website, contact
+/// and what its governance asserts about personhood.
+class _Trust extends StatelessWidget {
+  const _Trust({required this.state, required this.communityName});
+
+  final VtcJoinState state;
+  final String communityName;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final personhood = state.personhood;
+    return GlassCard(
+      title: l10n.vtcJoinTrust(communityName),
+      child: SelectionArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: 12,
+          children: [
+            Text(l10n.vtcJoinTrustNote, style: _note(context)),
+            if (state.website case final website?)
+              _Line(
+                icon: Icons.language,
+                title: l10n.vtcJoinWebsite,
+                subtitle: website.toString(),
+              ),
+            if (state.contactEmail case final email?)
+              _Line(
+                icon: Icons.mail_outline,
+                title: l10n.vtcJoinContact,
+                subtitle: email,
+              ),
+            if (personhood?.realHuman ?? false)
+              _Line(icon: Icons.person_outline, title: l10n.vtcJoinRealHuman),
+            if (personhood?.singleMembership ?? false)
+              _Line(
+                icon: Icons.looks_one_outlined,
+                title: l10n.vtcJoinSingleMembership,
+              ),
+            if (personhood?.governanceFrameworkUrl case final framework?)
+              _Line(
+                icon: Icons.gavel,
+                title: l10n.vtcJoinGovernance,
+                subtitle: framework.toString(),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -390,116 +655,6 @@ class _Logo extends StatelessWidget {
           fit: BoxFit.contain,
           errorBuilder: (_, _, _) => const SizedBox.shrink(),
         ),
-      ),
-    );
-  }
-}
-
-/// The community's website, contact and what its governance asserts about
-/// personhood; nothing when it publishes none of them.
-class _About extends StatelessWidget {
-  const _About({required this.state});
-
-  final VtcJoinState state;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final personhood = state.personhood;
-    final lines = [
-      if (state.website case final website?)
-        _Line(
-          icon: Icons.language,
-          title: l10n.vtcJoinWebsite,
-          subtitle: website.toString(),
-        ),
-      if (state.contactEmail case final email?)
-        _Line(
-          icon: Icons.mail_outline,
-          title: l10n.vtcJoinContact,
-          subtitle: email,
-        ),
-      if (personhood?.realHuman ?? false)
-        _Line(icon: Icons.person_outline, title: l10n.vtcJoinRealHuman),
-      if (personhood?.singleMembership ?? false)
-        _Line(
-          icon: Icons.looks_one_outlined,
-          title: l10n.vtcJoinSingleMembership,
-        ),
-      if (personhood?.governanceFrameworkUrl case final framework?)
-        _Line(
-          icon: Icons.gavel,
-          title: l10n.vtcJoinGovernance,
-          subtitle: framework.toString(),
-        ),
-    ];
-    if (lines.isEmpty) return const SizedBox.shrink();
-    return GlassCard(
-      title: l10n.vtcJoinAboutHeading,
-      child: SelectionArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: 12,
-          children: lines,
-        ),
-      ),
-    );
-  }
-}
-
-/// What the community's member directory would show about the member, field
-/// by field, before they apply.
-class _DirectoryDisclosure extends StatelessWidget {
-  const _DirectoryDisclosure(this.disclosure);
-
-  final DirectoryDisclosure disclosure;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    String audience(DirectoryAudience audience) =>
-        l10n.vtcJoinAudience(audience.name);
-
-    return GlassCard(
-      title: l10n.vtcJoinDisclosureHeading,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: 12,
-        children: [
-          for (final field in disclosure.fields)
-            _Line(
-              icon: field.source == DirectoryFieldSource.admin
-                  ? Icons.admin_panel_settings_outlined
-                  : Icons.visibility_outlined,
-              title: field.label,
-              subtitle: [
-                ?field.description,
-                if (field.defaultVisibility == field.ceiling)
-                  l10n.vtcJoinFieldSeenBy(audience(field.ceiling))
-                else
-                  l10n.vtcJoinFieldSeenByUpTo(
-                    audience(field.defaultVisibility),
-                    audience(field.ceiling),
-                  ),
-                if (field.source == DirectoryFieldSource.admin)
-                  l10n.vtcJoinFieldSetByAdmins,
-              ].join('\n'),
-            ),
-          _Line(
-            icon: Icons.fingerprint,
-            title: l10n.vtcJoinMembershipDid,
-            subtitle: l10n.vtcJoinFieldSeenBy(
-              audience(disclosure.membershipIdentifiers),
-            ),
-          ),
-          if (disclosure.adminNotes)
-            _Line(
-              icon: Icons.sticky_note_2_outlined,
-              title: l10n.vtcJoinAdminNotes,
-            ),
-          if (disclosure.externalCards)
-            _Line(icon: Icons.public, title: l10n.vtcJoinExternalCards),
-        ],
       ),
     );
   }
