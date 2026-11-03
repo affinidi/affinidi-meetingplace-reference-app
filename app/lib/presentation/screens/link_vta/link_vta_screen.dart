@@ -23,9 +23,7 @@ class LinkVtaScreen extends ConsumerWidget {
     return _OnboardingLayout(
       // Spin while the router leaves, rather than flash the linked state.
       child: isActive
-          ? const Center(
-              child: CircularProgressIndicator(color: Colors.white),
-            )
+          ? const Center(child: CircularProgressIndicator(color: Colors.white))
           : const VtaLinkContent(),
     );
   }
