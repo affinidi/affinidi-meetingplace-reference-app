@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 part 'vtc_join_state.freezed.dart';
 
@@ -53,6 +54,50 @@ enum VtcJoinFailure {
   refused,
 }
 
+/// Why this app cannot apply under a way into a community yet.
+enum VtcJoinUnsupported {
+  /// Only invited applicants meet it.
+  invitation,
+
+  /// It asks for credentials.
+  credentials,
+
+  /// It asks for an in-person check.
+  vetting,
+}
+
+/// One way into a community, as the review shows it.
+class VtcJoinWay {
+  /// Creates a [VtcJoinWay].
+  const VtcJoinWay({
+    required this.automatic,
+    this.description,
+    this.unsupported,
+  });
+
+  /// Reads the way [criterion] describes.
+  factory VtcJoinWay.of(JoinCriterion criterion) => VtcJoinWay(
+    automatic: criterion.admission == JoinAdmission.automatic,
+    description: criterion.description,
+    unsupported: criterion.invitationRequired
+        ? VtcJoinUnsupported.invitation
+        : criterion.asksForCredentials
+        ? VtcJoinUnsupported.credentials
+        : criterion.asksForVetting
+        ? VtcJoinUnsupported.vetting
+        : null,
+  );
+
+  /// Whether meeting it admits at once, rather than after review.
+  final bool automatic;
+
+  /// The community's own words for it, if any.
+  final String? description;
+
+  /// Why this app cannot apply under it, or null when it can.
+  final VtcJoinUnsupported? unsupported;
+}
+
 @Freezed(fromJson: false, toJson: false)
 abstract class VtcJoinState with _$VtcJoinState {
   factory VtcJoinState({
@@ -61,6 +106,20 @@ abstract class VtcJoinState with _$VtcJoinState {
     @Default(false) bool canApply,
     @Default(false) bool admitsAtOnce,
     @Default(false) bool wasMember,
+
+    /// The ways into the community, in its order.
+    @Default(<VtcJoinWay>[]) List<VtcJoinWay> ways,
+
+    /// The profile details the community asks for.
+    @Default(<JoinAttributeRequest>[])
+    List<JoinAttributeRequest> requestedDetails,
+
+    /// Whether the community lists new members in its directory, or null
+    /// when it does not say.
+    bool? listsNewMembers,
+
+    /// Whether the member opted in to the member directory. Off by default.
+    @Default(false) bool listInDirectory,
     VtcJoinFailure? failure,
   }) = _VtcJoinState;
 }

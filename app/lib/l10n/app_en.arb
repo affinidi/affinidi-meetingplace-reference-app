@@ -2457,7 +2457,51 @@
 	"vtcJoinAdmitsAtOnce": "You become a member as soon as you apply.",
 	"vtcJoinReviewed": "The community's administrators review each application.",
 	"vtcJoinPersonaNote": "Your VTA creates a new identity for this community, so other communities can't link you through it.",
-	"vtcJoinCannotApply": "This community only admits people with an invitation, credentials or an in-person check, or asks for details Meeting Place can't send yet.",
+	"vtcJoinWaysHeading": "Ways in",
+	"vtcJoinWayAutomatic": "You become a member when you apply",
+	"vtcJoinWayReviewed": "The administrators review your application",
+	"vtcJoinWayUnsupported": "{reason, select, invitation{Not supported yet: needs an invitation} credentials{Not supported yet: needs credentials} vetting{Not supported yet: needs an in-person check} other{Not supported yet}}",
+	"@vtcJoinWayUnsupported": {
+		"description": "A way into a community this app cannot apply under yet",
+		"placeholders": {
+			"reason": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinNoSupportedWay": "Meeting Place doesn't support any way into {name} yet, so you can't apply from here.",
+	"@vtcJoinNoSupportedWay": {
+		"description": "No way into the community is supported; nothing is sent",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinDetailsHeading": "Profile details the community asks for",
+	"vtcJoinDetailRequired": "{type} (required)",
+	"@vtcJoinDetailRequired": {
+		"description": "A profile detail the community requires",
+		"placeholders": {
+			"type": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinDetailOptional": "{type} (optional)",
+	"@vtcJoinDetailOptional": {
+		"description": "A profile detail the community asks for but does not require",
+		"placeholders": {
+			"type": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinDetailsNote": "You see the values from your VTA and approve sharing them before anything is sent.",
+	"vtcJoinDirectoryListed": "This community lists new members in its member directory.",
+	"vtcJoinDirectoryHidden": "This community doesn't list new members in its member directory.",
+	"vtcJoinListMe": "List me in the member directory",
+	"vtcJoinListMeNote": "If this is off, Meeting Place takes you out of the directory right after you join.",
 	"vtcJoinAction": "Join",
 	"vtcJoinJoined": "You're a member of {name}.",
 	"@vtcJoinJoined": {

@@ -34,14 +34,30 @@ class VtcJoinController extends _$VtcJoinController {
         canApply: manifest.canApply,
         admitsAtOnce: manifest.admitsAtOnce,
         wasMember: community?.isMember ?? false,
+        ways: [
+          for (final criterion in manifest.criteria) VtcJoinWay.of(criterion),
+        ],
+        requestedDetails: manifest.requestedAttributes,
+        listsNewMembers: manifest.listsNewMembers,
       );
     });
   }
 
-  /// Applies to join the scanned community.
+  /// Sets whether the member opts in to the community's member directory.
+  void setListInDirectory(bool listed) {
+    if (state.step != VtcJoinStep.review) return;
+    state = state.copyWith(listInDirectory: listed);
+  }
+
+  /// Applies to join the scanned community, under the first way in this
+  /// app supports. Does nothing when there is none.
   Future<void> join() async {
     final manifest = _manifest;
-    if (state.step != VtcJoinStep.review || manifest == null) return;
+    if (state.step != VtcJoinStep.review ||
+        manifest == null ||
+        !manifest.canApply) {
+      return;
+    }
     state = state.copyWith(step: VtcJoinStep.working);
 
     await _run(() async {

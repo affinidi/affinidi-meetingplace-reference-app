@@ -2617,8 +2617,61 @@ class AppLocalizationsDe extends AppLocalizations {
       'Your VTA creates a new identity for this community, so other communities can\'t link you through it.';
 
   @override
-  String get vtcJoinCannotApply =>
-      'This community only admits people with an invitation, credentials or an in-person check, or asks for details Meeting Place can\'t send yet.';
+  String get vtcJoinWaysHeading => 'Ways in';
+
+  @override
+  String get vtcJoinWayAutomatic => 'You become a member when you apply';
+
+  @override
+  String get vtcJoinWayReviewed => 'The administrators review your application';
+
+  @override
+  String vtcJoinWayUnsupported(String reason) {
+    String _temp0 = intl.Intl.selectLogic(reason, {
+      'invitation': 'Not supported yet: needs an invitation',
+      'credentials': 'Not supported yet: needs credentials',
+      'vetting': 'Not supported yet: needs an in-person check',
+      'other': 'Not supported yet',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String vtcJoinNoSupportedWay(String name) {
+    return 'Meeting Place doesn\'t support any way into $name yet, so you can\'t apply from here.';
+  }
+
+  @override
+  String get vtcJoinDetailsHeading => 'Profile details the community asks for';
+
+  @override
+  String vtcJoinDetailRequired(String type) {
+    return '$type (required)';
+  }
+
+  @override
+  String vtcJoinDetailOptional(String type) {
+    return '$type (optional)';
+  }
+
+  @override
+  String get vtcJoinDetailsNote =>
+      'You see the values from your VTA and approve sharing them before anything is sent.';
+
+  @override
+  String get vtcJoinDirectoryListed =>
+      'This community lists new members in its member directory.';
+
+  @override
+  String get vtcJoinDirectoryHidden =>
+      'This community doesn\'t list new members in its member directory.';
+
+  @override
+  String get vtcJoinListMe => 'List me in the member directory';
+
+  @override
+  String get vtcJoinListMeNote =>
+      'If this is off, Meeting Place takes you out of the directory right after you join.';
 
   @override
   String get vtcJoinAction => 'Join';

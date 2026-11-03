@@ -67,6 +67,75 @@ void main() {
 
   tearDown(() => container.dispose());
 
+  group('VtcJoinController review', () {
+    test('shows each way in, the details asked and the directory', () async {
+      network.joinManifest = {
+        ...network.joinManifest,
+        'criteria': [
+          {
+            'id': 'invited',
+            'admission': 'automatic',
+            'requirementsDigest': 'zInvited',
+            'invitationRequired': true,
+          },
+          {
+            'id': 'open',
+            'admission': 'review',
+            'requirementsDigest': 'zOpen',
+            'description': 'Anyone in Berlin',
+          },
+        ],
+        'requestedAttributes': [
+          {'type': 'name', 'purpose': 'To greet you'},
+        ],
+        'directoryDisclosure': {
+          'newCard': {'listing': 'listed', 'search': 'byName'},
+        },
+      };
+
+      await controller().onScanned(fakeVtcDid);
+
+      final [invited, open] = state().ways;
+      expect(invited.unsupported, VtcJoinUnsupported.invitation);
+      expect(open.unsupported, isNull);
+      expect(open.automatic, isFalse);
+      expect(open.description, 'Anyone in Berlin');
+      expect(state().canApply, isTrue);
+      expect(state().admitsAtOnce, isFalse);
+      expect(state().requestedDetails.single.type, 'name');
+      expect(state().listsNewMembers, isTrue);
+      expect(state().listInDirectory, isFalse, reason: 'off by default');
+
+      controller().setListInDirectory(true);
+      expect(state().listInDirectory, isTrue);
+    });
+
+    test('sends nothing when no way in is supported', () async {
+      network.joinManifest = {
+        ...network.joinManifest,
+        'criteria': [
+          {
+            'id': 'vetted',
+            'admission': 'review',
+            'requirementsDigest': 'zVetted',
+            'vetting': <String, dynamic>{},
+          },
+        ],
+      };
+
+      await controller().onScanned(fakeVtcDid);
+      await controller().join();
+
+      expect(state().ways.single.unsupported, VtcJoinUnsupported.vetting);
+      expect(state().canApply, isFalse);
+      expect(state().step, VtcJoinStep.review);
+      expect(
+        network.joinRequests.map((r) => r['type']),
+        isNot(contains(JoinTask.submit)),
+      );
+    });
+  });
+
   group('VtcJoinController', () {
     test('joins a community that admits at once', () async {
       await controller().onScanned(fakeVtcDid);

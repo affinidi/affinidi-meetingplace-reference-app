@@ -54,6 +54,7 @@ class VtcJoinScreen extends ConsumerWidget {
             VtcJoinStep.review => _Review(
               state: state,
               onJoin: controller.join,
+              onListInDirectory: controller.setListInDirectory,
               onCancel: close,
             ),
             VtcJoinStep.joined => _Outcome(
@@ -142,39 +143,113 @@ class _EnterDid extends HookWidget {
   }
 }
 
+/// What the community asks, in plain words, before the member commits to
+/// anything.
 class _Review extends StatelessWidget {
   const _Review({
     required this.state,
     required this.onJoin,
+    required this.onListInDirectory,
     required this.onCancel,
   });
 
   final VtcJoinState state;
   final VoidCallback onJoin;
+  final ValueChanged<bool> onListInDirectory;
   final VoidCallback onCancel;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final name = state.communityName ?? '';
+    final small = context.textTheme.bodySmall;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          l10n.vtcJoinTitle(state.communityName ?? ''),
-          style: context.textTheme.titleLarge,
-        ),
-        const SizedBox(height: 16),
-        if (state.canApply) ...[
-          Text(
-            state.admitsAtOnce
-                ? l10n.vtcJoinAdmitsAtOnce
-                : l10n.vtcJoinReviewed,
+        Expanded(
+          child: ListView(
+            children: [
+              Text(
+                l10n.vtcJoinTitle(name),
+                style: context.textTheme.titleLarge,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                l10n.vtcJoinWaysHeading,
+                style: context.textTheme.titleSmall,
+              ),
+              for (final way in state.ways)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(
+                    way.unsupported != null
+                        ? Icons.block
+                        : way.automatic
+                        ? Icons.how_to_reg
+                        : Icons.rate_review,
+                  ),
+                  title: Text(switch (way) {
+                    VtcJoinWay(:final unsupported?) =>
+                      l10n.vtcJoinWayUnsupported(unsupported.name),
+                    VtcJoinWay(automatic: true) => l10n.vtcJoinWayAutomatic,
+                    _ => l10n.vtcJoinWayReviewed,
+                  }),
+                  subtitle: way.description == null
+                      ? null
+                      : Text(way.description!),
+                ),
+              const SizedBox(height: 8),
+              if (!state.canApply)
+                Text(l10n.vtcJoinNoSupportedWay(name))
+              else ...[
+                Text(
+                  state.admitsAtOnce
+                      ? l10n.vtcJoinAdmitsAtOnce
+                      : l10n.vtcJoinReviewed,
+                ),
+                if (state.requestedDetails.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    l10n.vtcJoinDetailsHeading,
+                    style: context.textTheme.titleSmall,
+                  ),
+                  for (final detail in state.requestedDetails)
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                      title: Text(
+                        detail.required
+                            ? l10n.vtcJoinDetailRequired(detail.type)
+                            : l10n.vtcJoinDetailOptional(detail.type),
+                      ),
+                      subtitle: detail.purpose == null
+                          ? null
+                          : Text(detail.purpose!),
+                    ),
+                  Text(l10n.vtcJoinDetailsNote, style: small),
+                ],
+                const SizedBox(height: 16),
+                if (state.listsNewMembers case final listed?)
+                  Text(
+                    listed
+                        ? l10n.vtcJoinDirectoryListed
+                        : l10n.vtcJoinDirectoryHidden,
+                  ),
+                if (state.listsNewMembers != false)
+                  SwitchListTile(
+                    key: const Key('vtc_join_list_me'),
+                    contentPadding: EdgeInsets.zero,
+                    value: state.listInDirectory,
+                    onChanged: onListInDirectory,
+                    title: Text(l10n.vtcJoinListMe),
+                    subtitle: Text(l10n.vtcJoinListMeNote),
+                  ),
+                const SizedBox(height: 8),
+                Text(l10n.vtcJoinPersonaNote, style: small),
+              ],
+            ],
           ),
-          const SizedBox(height: 8),
-          Text(l10n.vtcJoinPersonaNote, style: context.textTheme.bodySmall),
-        ] else
-          Text(l10n.vtcJoinCannotApply),
-        const Spacer(),
+        ),
         if (state.canApply)
           FilledButton(onPressed: onJoin, child: Text(l10n.vtcJoinAction)),
         TextButton(onPressed: onCancel, child: Text(l10n.cancel)),

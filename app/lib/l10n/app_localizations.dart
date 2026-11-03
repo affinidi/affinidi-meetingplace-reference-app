@@ -3838,11 +3838,83 @@ abstract class AppLocalizations {
   /// **'Your VTA creates a new identity for this community, so other communities can\'t link you through it.'**
   String get vtcJoinPersonaNote;
 
-  /// No description provided for @vtcJoinCannotApply.
+  /// No description provided for @vtcJoinWaysHeading.
   ///
   /// In en, this message translates to:
-  /// **'This community only admits people with an invitation, credentials or an in-person check, or asks for details Meeting Place can\'t send yet.'**
-  String get vtcJoinCannotApply;
+  /// **'Ways in'**
+  String get vtcJoinWaysHeading;
+
+  /// No description provided for @vtcJoinWayAutomatic.
+  ///
+  /// In en, this message translates to:
+  /// **'You become a member when you apply'**
+  String get vtcJoinWayAutomatic;
+
+  /// No description provided for @vtcJoinWayReviewed.
+  ///
+  /// In en, this message translates to:
+  /// **'The administrators review your application'**
+  String get vtcJoinWayReviewed;
+
+  /// A way into a community this app cannot apply under yet
+  ///
+  /// In en, this message translates to:
+  /// **'{reason, select, invitation{Not supported yet: needs an invitation} credentials{Not supported yet: needs credentials} vetting{Not supported yet: needs an in-person check} other{Not supported yet}}'**
+  String vtcJoinWayUnsupported(String reason);
+
+  /// No way into the community is supported; nothing is sent
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting Place doesn\'t support any way into {name} yet, so you can\'t apply from here.'**
+  String vtcJoinNoSupportedWay(String name);
+
+  /// No description provided for @vtcJoinDetailsHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile details the community asks for'**
+  String get vtcJoinDetailsHeading;
+
+  /// A profile detail the community requires
+  ///
+  /// In en, this message translates to:
+  /// **'{type} (required)'**
+  String vtcJoinDetailRequired(String type);
+
+  /// A profile detail the community asks for but does not require
+  ///
+  /// In en, this message translates to:
+  /// **'{type} (optional)'**
+  String vtcJoinDetailOptional(String type);
+
+  /// No description provided for @vtcJoinDetailsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'You see the values from your VTA and approve sharing them before anything is sent.'**
+  String get vtcJoinDetailsNote;
+
+  /// No description provided for @vtcJoinDirectoryListed.
+  ///
+  /// In en, this message translates to:
+  /// **'This community lists new members in its member directory.'**
+  String get vtcJoinDirectoryListed;
+
+  /// No description provided for @vtcJoinDirectoryHidden.
+  ///
+  /// In en, this message translates to:
+  /// **'This community doesn\'t list new members in its member directory.'**
+  String get vtcJoinDirectoryHidden;
+
+  /// No description provided for @vtcJoinListMe.
+  ///
+  /// In en, this message translates to:
+  /// **'List me in the member directory'**
+  String get vtcJoinListMe;
+
+  /// No description provided for @vtcJoinListMeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'If this is off, Meeting Place takes you out of the directory right after you join.'**
+  String get vtcJoinListMeNote;
 
   /// No description provided for @vtcJoinAction.
   ///
