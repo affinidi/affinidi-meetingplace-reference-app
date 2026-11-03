@@ -2587,6 +2587,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get vtcJoinDidHint => 'Community DID';
 
   @override
+  String get vtcJoinScanAction => 'Scan QR code';
+
+  @override
   String get vtcJoinPasteAction => 'Paste';
 
   @override

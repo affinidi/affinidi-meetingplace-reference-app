@@ -134,6 +134,9 @@ class VtcJoinWay {
 abstract class VtcJoinState with _$VtcJoinState {
   factory VtcJoinState({
     @Default(VtcJoinStep.scanning) VtcJoinStep step,
+
+    /// The scanned community's DID, once its code was read.
+    String? communityDid,
     String? communityName,
     @Default(false) bool canApply,
     @Default(false) bool admitsAtOnce,

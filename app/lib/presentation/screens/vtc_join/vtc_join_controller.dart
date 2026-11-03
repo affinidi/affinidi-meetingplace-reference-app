@@ -74,6 +74,7 @@ class VtcJoinController extends _$VtcJoinController {
       }
       state = state.copyWith(
         step: _stepOf(community),
+        communityDid: manifest.communityDid,
         communityName:
             manifest.name ?? community?.name ?? manifest.communityDid,
         canApply: manifest.canApply,

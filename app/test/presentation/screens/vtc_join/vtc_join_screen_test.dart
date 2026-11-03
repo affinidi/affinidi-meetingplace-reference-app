@@ -100,10 +100,23 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  /// Taps [finder] once it is scrolled into view.
+  Future<void> tapVisible(WidgetTester tester, Finder finder) async {
+    await tester.ensureVisible(finder);
+    await tester.pumpAndSettle();
+    await tester.tap(finder);
+  }
+
   Future<void> enterCode(WidgetTester tester, String code) async {
-    await tester.enterText(find.byKey(const Key('vtc_join_did')), code);
+    await tester.enterText(
+      find.descendant(
+        of: find.byKey(const Key('vtc_join_did')),
+        matching: find.byType(EditableText),
+      ),
+      code,
+    );
     await tester.pump();
-    await tester.tap(find.text('Continue'));
+    await tapVisible(tester, find.text('Continue'));
     await settle(tester);
   }
 
@@ -115,12 +128,23 @@ void main() {
       await enterCode(tester, fakeVtcDid);
       expect(find.text('Football club'), findsOneWidget);
       expect(find.text('Ways in'), findsOneWidget);
+      expect(
+        tester
+            .widget<SelectableText>(
+              find.byKey(const Key('vtc_join_community_did')),
+            )
+            .data,
+        fakeVtcDid,
+      );
 
-      await tester.tap(find.widgetWithText(ElevatedButton, 'Join'));
+      await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
       await settle(tester);
       expect(find.text("You're a member of Football club."), findsOneWidget);
 
-      await tester.tap(find.widgetWithText(ElevatedButton, 'Leave community'));
+      await tapVisible(
+        tester,
+        find.widgetWithText(OutlinedButton, 'Leave community'),
+      );
       await tester.pumpAndSettle();
       expect(find.text('Leave Football club?'), findsOneWidget);
 
@@ -141,7 +165,7 @@ void main() {
       await enterCode(tester, 'https://example.com');
       expect(find.textContaining("isn't a community's code"), findsOneWidget);
 
-      await tester.tap(find.text('Retry'));
+      await tapVisible(tester, find.text('Retry'));
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('vtc_join_did')), findsOneWidget);
     });

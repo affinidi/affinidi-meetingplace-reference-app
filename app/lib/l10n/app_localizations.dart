@@ -3796,6 +3796,12 @@ abstract class AppLocalizations {
   /// **'Community DID'**
   String get vtcJoinDidHint;
 
+  /// No description provided for @vtcJoinScanAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan QR code'**
+  String get vtcJoinScanAction;
+
   /// No description provided for @vtcJoinPasteAction.
   ///
   /// In en, this message translates to:

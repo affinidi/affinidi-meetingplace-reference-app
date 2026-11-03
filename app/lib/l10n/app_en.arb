@@ -2426,6 +2426,7 @@
 	"vtcJoinIntroTitle": "Become a member of a community",
 	"vtcJoinIntro": "Scan the community's QR code, or paste its DID. You see what it asks before anything is sent.",
 	"vtcJoinDidHint": "Community DID",
+	"vtcJoinScanAction": "Scan QR code",
 	"vtcJoinPasteAction": "Paste",
 	"vtcJoinContinueAction": "Continue",
 	"vtcJoinMenuSubtitle": "Scan a community's code and apply with your VTA",
