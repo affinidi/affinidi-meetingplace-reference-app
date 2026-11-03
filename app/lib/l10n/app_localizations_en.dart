@@ -2422,46 +2422,45 @@ class AppLocalizationsEn extends AppLocalizations {
   String vtcSignInFailure(String reason) {
     String _temp0 = intl.Intl.selectLogic(reason, {
       'expired': 'This code has expired. Get a new one.',
-      'invalid': 'This code can\'\'t be used.',
+      'invalid': 'This code can\'t be used.',
       'update': 'This code needs a newer version of the app.',
-      'unreachable': 'This community can\'\'t be reached from your phone.',
+      'unreachable': 'This community can\'t be reached from your phone.',
       'notAMember':
-          'This sign-in code is from a community you haven\'\'t joined.',
-      'noSignIn': 'This community doesn\'\'t offer sign-in from the app.',
+          'This sign-in code is from a community you haven\'t joined.',
+      'noSignIn': 'This community doesn\'t offer sign-in from the app.',
       'alreadyClaimed':
           'Another device already scanned this code. Refresh the sign-in page and scan the new code.',
       'notFound':
           'This sign-in has ended. Refresh the sign-in page and scan the new code.',
       'refused':
-          'The community didn\'\'t accept this sign-in. Refresh the sign-in page and try again.',
-      'notAnAdmin':
-          'This identity isn\'\'t an administrator of this community.',
+          'The community didn\'t accept this sign-in. Refresh the sign-in page and try again.',
+      'notAnAdmin': 'This identity isn\'t an administrator of this community.',
       'badAnswer':
-          'The community\'\'s answer couldn\'\'t be checked, so nothing was signed in.',
+          'The community\'s answer couldn\'t be checked, so nothing was signed in.',
       'badNumber': 'Enter the two digits shown on the sign-in page.',
       'wrongNumber':
-          'That isn\'\'t the number on the sign-in page. Refresh the page and scan the new code.',
+          'That isn\'t the number on the sign-in page. Refresh the page and scan the new code.',
       'noVaultEntry':
-          'Your VTA isn\'\'t set up to sign in to this community yet.',
+          'Your VTA isn\'t set up to sign in to this community yet.',
       'notEnrolledDevice':
-          'This phone isn\'\'t registered with your VTA, so it can\'\'t sign in.',
+          'This phone isn\'t registered with your VTA, so it can\'t sign in.',
       'noUvKey':
-          'This phone isn\'\'t set up to approve sign-ins with your VTA yet.',
+          'This phone isn\'t set up to approve sign-ins with your VTA yet.',
       'uvRequired': 'Your VTA needs your approval on this phone to sign in.',
-      'uvCancelled': 'The sign-in wasn\'\'t approved.',
+      'uvCancelled': 'The sign-in wasn\'t approved.',
       'uvKeyLost':
           'Your Face ID or fingerprints changed, so approving sign-ins must be set up again. Unlink and link your VTA in Settings.',
-      'uvUnavailable': 'This phone couldn\'\'t approve the sign-in.',
+      'uvUnavailable': 'This phone couldn\'t approve the sign-in.',
       'grantReplayed':
           'This approval was already used. Refresh the sign-in page and scan the new code.',
       'assertionMethodMissing':
-          'Your identity in this community can\'\'t approve sign-ins yet.',
+          'Your identity in this community can\'t approve sign-ins yet.',
       'agentRefused': 'Your VTA refused this sign-in.',
       'agentNeedsUpdate':
           'Your VTA needs an update before it can sign you in to websites.',
-      'agentUnreachable': 'Your VTA couldn\'\'t be reached.',
+      'agentUnreachable': 'Your VTA couldn\'t be reached.',
       'other':
-          'The community didn\'\'t accept this sign-in. Refresh the sign-in page and try again.',
+          'The community didn\'t accept this sign-in. Refresh the sign-in page and try again.',
     });
     return '$_temp0';
   }
@@ -2471,8 +2470,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.selectLogic(problem, {
       'update': 'This code needs a newer version of the app.',
       'expired': 'This code has expired. Get a new one.',
-      'unreachable': 'This service can\'\'t be reached from your phone.',
-      'other': 'This code can\'\'t be used.',
+      'unreachable': 'This service can\'t be reached from your phone.',
+      'other': 'This code can\'t be used.',
     });
     return '$_temp0';
   }
@@ -2692,20 +2691,20 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String vtcJoinFailure(String reason) {
     String _temp0 = intl.Intl.selectLogic(reason, {
-      'invalidCode': 'This isn\'\'t a community\'\'s code.',
+      'invalidCode': 'This isn\'t a community\'s code.',
       'profileMissing':
-          'Your VTA has no profile for this identity, so it can\'\'t share the details the community asks for. Set up your profile on your VTA, then try again.',
+          'Your VTA has no profile for this identity, so it can\'t share the details the community asks for. Set up your profile on your VTA, then try again.',
       'detailsMissing':
-          'Your VTA doesn\'\'t hold a detail the community requires, so nothing was sent.',
+          'Your VTA doesn\'t hold a detail the community requires, so nothing was sent.',
       'vtaMissing': 'Link your VTA in Settings before joining a community.',
-      'unreachable': 'The community can\'\'t be reached from your phone.',
+      'unreachable': 'The community can\'t be reached from your phone.',
       'noDidHosting':
-          'Your VTA has no DID hosting server, so it can\'\'t create an identity the community can find.',
-      'notAccepting': 'This community isn\'\'t accepting applications.',
+          'Your VTA has no DID hosting server, so it can\'t create an identity the community can find.',
+      'notAccepting': 'This community isn\'t accepting applications.',
       'badAnswer':
-          'The community\'\'s answer couldn\'\'t be checked, so nothing was recorded.',
+          'The community\'s answer couldn\'t be checked, so nothing was recorded.',
       'lastAdministrator':
-          'You\'\'re this community\'\'s last administrator. Make another member an administrator before you leave.',
+          'You\'re this community\'s last administrator. Make another member an administrator before you leave.',
       'other': 'The community or your VTA refused the application.',
     });
     return '$_temp0';
