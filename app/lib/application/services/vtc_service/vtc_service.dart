@@ -165,6 +165,14 @@ class VtcService {
     return _sdk.joinClient().readManifest(did);
   }
 
+  /// Reads what the community [communityDid] publishes about itself. It is
+  /// unsigned, so it is shown and never decides anything.
+  ///
+  /// Throws [MeetingPlaceVtcSDKException] when the community publishes none
+  /// or cannot be reached.
+  Future<CommunityProfile> readProfile(String communityDid) =>
+      _sdk.joinClient().readProfile(communityDid);
+
   /// Applies to join [manifest]'s community as a persona of the member's
   /// VTA, and records the outcome.
   ///

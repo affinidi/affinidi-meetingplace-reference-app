@@ -62,6 +62,7 @@ class VtcJoinController extends _$VtcJoinController {
     await _run(() async {
       final manifest = await _service.readCommunity(code);
       _manifest = manifest;
+      final profile = await _profileOf(manifest.communityDid);
       var community = await _service.community(manifest.communityDid);
       if (community == null) {
         // A membership another app of the member holds, backed up to the
@@ -76,7 +77,16 @@ class VtcJoinController extends _$VtcJoinController {
         step: _stepOf(community),
         communityDid: manifest.communityDid,
         communityName:
-            manifest.name ?? community?.name ?? manifest.communityDid,
+            manifest.name ??
+            profile?.name ??
+            community?.name ??
+            manifest.communityDid,
+        logoUrl: manifest.logoUrl ?? profile?.logoUrl,
+        description: profile?.description,
+        website: profile?.website,
+        contactEmail: profile?.contactEmail,
+        personhood: profile?.personhood,
+        directoryDisclosure: manifest.directoryDisclosure,
         canApply: manifest.canApply,
         admitsAtOnce: manifest.admitsAtOnce,
         wasMember: community?.isMember ?? false,
@@ -88,6 +98,16 @@ class VtcJoinController extends _$VtcJoinController {
         denialReason: community?.rejectionReason,
       );
     });
+  }
+
+  /// The community's public profile, or null when it publishes none or it
+  /// cannot be read: joining never depends on it.
+  Future<CommunityProfile?> _profileOf(String communityDid) async {
+    try {
+      return await _service.readProfile(communityDid);
+    } on MeetingPlaceVtcSDKException {
+      return null;
+    }
   }
 
   /// Sets whether the member opts in to the community's member directory.

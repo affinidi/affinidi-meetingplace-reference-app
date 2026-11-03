@@ -439,6 +439,54 @@ void main() {
       expect(state().failure, VtcJoinFailure.invalidCode);
     });
 
+    test('shows what the community publishes about itself', () async {
+      network.joinManifest = {
+        ...network.joinManifest,
+        'branding': {
+          'displayName': 'Football club',
+          'logoUrl': 'https://club.example/logo.png',
+        },
+        'directoryDisclosure': {
+          'fields': [
+            {
+              'key': 'name',
+              'label': 'Name',
+              'type': 'text',
+              'source': 'member',
+              'ceiling': 'members',
+              'defaultVisibility': 'members',
+              'searchable': true,
+            },
+          ],
+          'newCard': {'listing': 'listed', 'search': 'byName'},
+          'membershipIdentifiers': 'admins',
+          'adminNotes': true,
+          'externalCards': false,
+          'statementDigest': 'zDigest',
+        },
+      };
+
+      await controller().onScanned(fakeVtcDid);
+
+      expect(state().logoUrl, Uri.parse('https://club.example/logo.png'));
+      expect(state().description, 'Five-a-side on Sundays.');
+      expect(state().website, Uri.parse('https://club.example/'));
+      expect(state().contactEmail, 'hello@club.example');
+      expect(state().personhood?.realHuman, isTrue);
+      expect(state().directoryDisclosure?.fields.single.label, 'Name');
+      expect(state().directoryDisclosure?.adminNotes, isTrue);
+    });
+
+    test('reviews a community that publishes no profile', () async {
+      network.publicProfile = null;
+
+      await controller().onScanned(fakeVtcDid);
+
+      expect(state().step, VtcJoinStep.review);
+      expect(state().description, isNull);
+      expect(state().personhood, isNull);
+    });
+
     test('starts over after a failure', () async {
       await controller().onScanned('https://example.com');
 

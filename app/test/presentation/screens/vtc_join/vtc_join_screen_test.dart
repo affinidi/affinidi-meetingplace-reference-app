@@ -170,6 +170,7 @@ void main() {
       tester,
     ) async {
       network.joinManifest = {...network.joinManifest}..remove('branding');
+      network.publicProfile = null;
       await pumpScreen(tester);
 
       await enterCode(tester, fakeVtcDid);

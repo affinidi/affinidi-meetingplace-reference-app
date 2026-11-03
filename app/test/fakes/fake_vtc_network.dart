@@ -93,6 +93,16 @@ class FakeVtcNetwork implements HttpClientAdapter {
   /// When set, the community refuses a join submit with this code.
   String? joinRefusal;
 
+  /// What `GET <base>/community/public-profile` answers, or null for a 404.
+  Map<String, dynamic>? publicProfile = {
+    'communityDid': fakeVtcDid,
+    'name': 'Football club',
+    'description': 'Five-a-side on Sundays.',
+    'publicUrl': 'https://club.example/',
+    'contactEmail': 'hello@club.example',
+    'personhood': {'realHuman': true, 'singleMembership': true},
+  };
+
   /// When set, the community refuses a leave with this HTTP status and code.
   (int, String)? leaveRefusal;
 
@@ -114,6 +124,18 @@ class FakeVtcNetwork implements HttpClientAdapter {
   ) async {
     if (options.uri.host != 'community.example') {
       return vta.fetch(options, requestStream, cancelFuture);
+    }
+    if (options.method == 'GET') {
+      final profile = options.uri.path.endsWith('/community/public-profile')
+          ? publicProfile
+          : null;
+      return ResponseBody.fromString(
+        jsonEncode(profile ?? {'error': 'not found'}),
+        profile == null ? 404 : 200,
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType],
+        },
+      );
     }
     final bytes = <int>[];
     await for (final chunk in requestStream!) {

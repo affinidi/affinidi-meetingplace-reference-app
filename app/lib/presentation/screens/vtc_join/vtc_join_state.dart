@@ -138,6 +138,24 @@ abstract class VtcJoinState with _$VtcJoinState {
     /// The scanned community's DID, once its code was read.
     String? communityDid,
     String? communityName,
+
+    /// The community's logo, from its manifest or else its profile.
+    Uri? logoUrl,
+
+    /// What the community is about, from its profile.
+    String? description,
+
+    /// The community's website and contact address, from its profile.
+    Uri? website,
+    String? contactEmail,
+
+    /// What the community asserts about its members' personhood, when its
+    /// profile could be read.
+    CommunityPersonhood? personhood,
+
+    /// What the community's member directory would disclose about a member,
+    /// or null when it offers none.
+    DirectoryDisclosure? directoryDisclosure,
     @Default(false) bool canApply,
     @Default(false) bool admitsAtOnce,
     @Default(false) bool wasMember,
