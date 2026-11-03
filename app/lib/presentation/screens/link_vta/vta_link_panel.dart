@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../widgets/onboarding_style/onboarding_style.dart';
 import 'vta_link_content.dart';
 
 /// The linking steps on the blue of onboarding, as a card that fits the
@@ -10,7 +11,7 @@ class VtaLinkPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: vtaLinkGradient(
+      decoration: onboardingGradient(
         context,
         radius: 2,
         borderRadius: BorderRadius.circular(16),
