@@ -407,6 +407,37 @@ class VtcService {
     await _settle(vta, member, card, requestId);
   }
 
+  /// Leaves [communityDid] as the persona the member joined it with: the
+  /// community ends the membership, the VTA archives its membership cards,
+  /// and this phone forgets the community. Does nothing for a community
+  /// this phone does not know.
+  ///
+  /// A community that already counts the persona as no member is forgotten
+  /// all the same. Throws [VtaNotLinkedException] when no VTA is linked, and
+  /// [MeetingPlaceVtcSDKException] when the VTA or the community refuses or
+  /// cannot be reached, e.g. with HTTP status 409 when the persona is the
+  /// community's last administrator; the community is then kept.
+  Future<void> leave(String communityDid) async {
+    final community = await _repository.findCommunity(communityDid);
+    if (community == null) return;
+
+    final vta = await _grantedVta();
+    try {
+      await _sdk.joinClient().leave(
+        communityDid,
+        agent: vta,
+        persona: await _personaSigner(vta, community),
+      );
+    } on MeetingPlaceVtcSDKException catch (error) {
+      if (!(error.refusalCode?.endsWith(':notMember') ?? false)) rethrow;
+    }
+    // Else the VTA backup would offer the membership back on the next scan.
+    await _sdk
+        .communityImport(vta)
+        .archiveMembershipCards(communityDid, personaDid: community.personaDid);
+    await _repository.removeCommunity(communityDid);
+  }
+
   /// Looks up the member's membership of [communityDid] in the cards backed
   /// up to their VTA, without recording it.
   ///

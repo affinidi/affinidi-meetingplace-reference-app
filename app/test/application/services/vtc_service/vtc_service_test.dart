@@ -341,5 +341,70 @@ void main() {
       );
       expect((await service.community(fakeVtcDid))?.isMember, isTrue);
     });
+
+    group('leave', () {
+      setUp(() async {
+        await service.join(await service.readCommunity(fakeVtcDid));
+        network.vta
+          ..answers[VtaTask.credentialsQuery] = {
+            'credentials': [
+              {'id': 'card-1'},
+            ],
+          }
+          ..answers[VtaTask.credentialsGet] = {
+            'credential': {
+              'issuer': fakeVtcDid,
+              'credentialSubject': {'id': persona.did},
+            },
+          };
+      });
+
+      List<Map<String, dynamic>> archived() => [
+        for (final request in network.vta.received)
+          if (request['type'] == VtaTask.credentialsArchive)
+            request['payload'] as Map<String, dynamic>,
+      ];
+
+      test('leaves as the persona, archives its card and forgets it', () async {
+        await service.leave(fakeVtcDid);
+
+        final leave = network.memberRequests.last;
+        expect(leave['type'], MemberTask.selfRemove);
+        expect(leave['issuer'], persona.did);
+        expect(archived(), [
+          {'id': 'card-1'},
+        ]);
+        expect(await service.community(fakeVtcDid), isNull);
+      });
+
+      test(
+        'forgets a community that counts the persona as no member',
+        () async {
+          network.leaveRefusal = (404, 'vtc/members/self-remove:notMember');
+
+          await service.leave(fakeVtcDid);
+
+          expect(archived(), hasLength(1));
+          expect(await service.community(fakeVtcDid), isNull);
+        },
+      );
+
+      test('keeps the community when it refuses the leave', () async {
+        network.leaveRefusal = (409, 'conflict');
+
+        await expectLater(
+          service.leave(fakeVtcDid),
+          throwsA(
+            isA<MeetingPlaceVtcSDKException>().having(
+              (e) => e.httpStatus,
+              'httpStatus',
+              409,
+            ),
+          ),
+        );
+        expect(archived(), isEmpty);
+        expect((await service.community(fakeVtcDid))?.isMember, isTrue);
+      });
+    });
   });
 }

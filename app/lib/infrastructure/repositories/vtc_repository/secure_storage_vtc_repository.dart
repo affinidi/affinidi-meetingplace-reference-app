@@ -49,16 +49,15 @@ class SecureStorageVtcRepository implements VtcRepository {
 
   @override
   Future<void> saveCommunity(VtcCommunity community) async {
-    final communities = [
-      ...(await _communities()).where(
-        (stored) => stored.communityDid != community.communityDid,
-      ),
+    await _saveCommunities([
+      ...await _othersThan(community.communityDid),
       community,
-    ];
-    await _storage.write(
-      key: _communitiesKey,
-      value: jsonEncode([for (final c in communities) c.toJson()]),
-    );
+    ]);
+  }
+
+  @override
+  Future<void> removeCommunity(String communityDid) async {
+    await _saveCommunities(await _othersThan(communityDid));
   }
 
   @override
@@ -66,6 +65,18 @@ class SecureStorageVtcRepository implements VtcRepository {
     await _storage.delete(key: _linkedVtaKey);
     await _storage.delete(key: _communitiesKey);
   }
+
+  Future<List<VtcCommunity>> _othersThan(String communityDid) async => [
+    ...(await _communities()).where(
+      (stored) => stored.communityDid != communityDid,
+    ),
+  ];
+
+  Future<void> _saveCommunities(List<VtcCommunity> communities) =>
+      _storage.write(
+        key: _communitiesKey,
+        value: jsonEncode([for (final c in communities) c.toJson()]),
+      );
 
   Future<List<VtcCommunity>> _communities() async {
     final json = await _storage.read(key: _communitiesKey);

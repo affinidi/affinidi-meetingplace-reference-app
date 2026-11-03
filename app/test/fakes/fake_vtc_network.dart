@@ -93,8 +93,11 @@ class FakeVtcNetwork implements HttpClientAdapter {
   /// When set, the community refuses a join submit with this code.
   String? joinRefusal;
 
+  /// When set, the community refuses a leave with this HTTP status and code.
+  (int, String)? leaveRefusal;
+
   /// The member documents the community received: membership
-  /// confirmations and directory card updates.
+  /// confirmations, directory card updates and leaves.
   final List<Map<String, dynamic>> memberRequests = [];
 
   /// An SDK that reaches only this network.
@@ -117,6 +120,22 @@ class FakeVtcNetwork implements HttpClientAdapter {
       bytes.addAll(chunk);
     }
     final request = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
+    if (request['type'] == MemberTask.selfRemove && leaveRefusal != null) {
+      memberRequests.add(request);
+      final (status, code) = leaveRefusal!;
+      return ResponseBody.fromString(
+        jsonEncode({
+          'id': 'urn:uuid:error',
+          'type': 'https://trusttasks.org/spec/trust-task-error/0.1',
+          'issuer': fakeVtcDid,
+          'payload': {'code': code},
+        }),
+        status,
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType],
+        },
+      );
+    }
     return ResponseBody.fromString(
       jsonEncode(await _answer(request)),
       200,
@@ -142,12 +161,20 @@ class FakeVtcNetwork implements HttpClientAdapter {
 
     final Map<String, dynamic> answer;
     var purpose = ProofPurpose.assertionMethod;
-    if (type == MemberTask.vmc || type == MemberTask.directoryCardUpdate) {
+    if (type == MemberTask.vmc ||
+        type == MemberTask.directoryCardUpdate ||
+        type == MemberTask.selfRemove) {
       memberRequests.add(request);
       purpose = ProofPurpose.authentication;
-      answer = type == MemberTask.vmc
-          ? {'memberDid': request['issuer'], 'status': 'stored'}
-          : {'revision': 1};
+      answer = switch (type) {
+        MemberTask.vmc => {'memberDid': request['issuer'], 'status': 'stored'},
+        MemberTask.selfRemove => {
+          'did': request['issuer'],
+          'disposition': 'tombstone',
+          'removed': true,
+        },
+        _ => {'revision': 1},
+      };
     } else if (type.startsWith(
       'https://trusttasks.org/spec/vtc/join-requests/',
     )) {
