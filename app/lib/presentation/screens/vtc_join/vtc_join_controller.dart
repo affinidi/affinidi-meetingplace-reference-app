@@ -35,10 +35,10 @@ class VtcJoinController extends _$VtcJoinController {
   /// the member's identities holds for it: by criterion id, then by DID.
   Map<String, Map<String, HeldCredential>> _holders = const {};
 
-  /// The credential awaiting approval to present, the subject claims that
-  /// discloses, and the application it completes. Kept in memory only.
-  HeldCredential? _sharing;
-  List<String> _sharedClaims = const [];
+  /// The credential awaiting approval to present, who presents it, and the
+  /// application it completes. Kept in memory only.
+  Map<String, dynamic>? _sharing;
+  String? _holderDid;
   VtaPersona? _applicant;
   List<JoinAttribute> _attributes = const [];
 
@@ -291,19 +291,14 @@ class VtcJoinController extends _$VtcJoinController {
     }
     state = state.copyWith(step: VtcJoinStep.working);
 
-    await _run(() async {
-      final presentation = await _service.presentCredential(
-        manifest,
-        sharing.id,
-        _sharedClaims,
-      );
-      await _send(
+    await _run(
+      () => _send(
         manifest,
         _applicant,
         attributes: _attributes,
-        presentation: presentation,
-      );
-    });
+        presentation: joinPresentation(sharing, holderDid: _holderDid!),
+      ),
+    );
   }
 
   /// Applies, first asking the member to approve the profile details the
@@ -373,13 +368,11 @@ class VtcJoinController extends _$VtcJoinController {
           if (key is String && key != 'id' && value != null)
             key: value as Object,
     };
-    // A credential that discloses nothing about its subject but who they
-    // are cannot be presented by naming its claims.
-    if (held == null || claims.isEmpty) {
+    if (held == null || credential == null) {
       return _fail(VtcJoinFailure.credentialMissing);
     }
-    _sharing = held;
-    _sharedClaims = [...claims.keys];
+    _sharing = credential;
+    _holderDid = applicant;
     _applicant = persona;
     _attributes = attributes;
     state = state.copyWith(

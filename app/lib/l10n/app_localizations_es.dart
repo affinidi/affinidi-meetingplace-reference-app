@@ -2698,7 +2698,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get vtcJoinCredentialNote =>
-      'Your VTA presents the whole credential, signed as this identity, and records that you shared it.';
+      'The whole credential goes with your application, which this identity signs.';
 
   @override
   String get vtcJoinNewIdentity => 'A new identity';

@@ -336,16 +336,6 @@ void main() {
           'credentialSubject': {'id': persona.did, 'memberOf': 'Chess club'},
         },
       };
-      network.vta.answers[VtaTask.credentialsPresent] = {
-        'presentation': {
-          'type': ['VerifiablePresentation'],
-          'holder': persona.did,
-          'verifiableCredential': [
-            {'id': 'urn:uuid:card'},
-          ],
-        },
-        'disclosed': ['memberOf'],
-      };
     });
 
     Iterable<Map<String, dynamic>> submits() =>
@@ -400,27 +390,26 @@ void main() {
       expect(shared.issuerDid, 'did:web:chess.example');
       expect(shared.claims.single.type, 'memberOf');
       expect(shared.claims.single.value, 'Chess club');
+      expect(submits(), isEmpty, reason: 'nothing sent before approval');
+
+      await controller().approveCredential();
+
+      // The VTA keeps consent receipts for did:key subjects only, so the
+      // presentation is made here, of the credential as the VTA holds it.
       expect(
         network.vta.received.where(
           (r) => r['type'] == VtaTask.credentialsPresent,
         ),
         isEmpty,
-        reason: 'nothing presented before approval',
       );
-
-      await controller().approveCredential();
-
-      final present =
-          network.vta.received.lastWhere(
-                (r) => r['type'] == VtaTask.credentialsPresent,
-              )['payload']
-              as Map;
-      expect(present['id'], 'card-1');
-      expect(present['claims'], ['memberOf']);
-      expect(present['audience'], fakeVtcDid);
       final payload = submits().single['payload'] as Map;
       expect(payload['criterion'], 'zMembers');
-      expect((payload['vp'] as Map)['holder'], persona.did);
+      final vp = payload['vp'] as Map;
+      expect(vp['holder'], persona.did);
+      expect(
+        ((vp['verifiableCredential'] as List).single as Map)['id'],
+        'urn:uuid:card',
+      );
       expect(state().step, VtcJoinStep.joined);
     });
   });

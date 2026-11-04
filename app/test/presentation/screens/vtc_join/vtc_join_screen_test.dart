@@ -594,16 +594,6 @@ void main() {
             'credentialSubject': {'id': persona.did, 'memberOf': 'Chess club'},
           },
         };
-        network.vta.answers[VtaTask.credentialsPresent] = {
-          'presentation': {
-            'type': ['VerifiablePresentation'],
-            'holder': persona.did,
-            'verifiableCredential': [
-              {'id': 'urn:uuid:card'},
-            ],
-          },
-          'disclosed': ['memberOf'],
-        };
       });
 
       Future<void> reachIdentities(WidgetTester tester) async {

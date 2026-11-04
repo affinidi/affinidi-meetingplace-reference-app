@@ -3997,7 +3997,7 @@ abstract class AppLocalizations {
   /// No description provided for @vtcJoinCredentialNote.
   ///
   /// In en, this message translates to:
-  /// **'Your VTA presents the whole credential, signed as this identity, and records that you shared it.'**
+  /// **'The whole credential goes with your application, which this identity signs.'**
   String get vtcJoinCredentialNote;
 
   /// No description provided for @vtcJoinNewIdentity.

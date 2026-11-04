@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../../domain/models/vtc/linked_vta.dart';
 import '../../../domain/models/vtc/mock_credential_template.dart';
@@ -233,7 +232,7 @@ class VtcService {
   ///
   /// The application is made under [criterion], or else the first way in
   /// this app supports, with [presentation] when the criterion asks for a
-  /// credential (see [presentCredential]).
+  /// credential (see [joinPresentation]).
   ///
   /// The first application to a community is made as [persona], one of
   /// [vtaPersonas], or else as a new persona the VTA creates; a later one
@@ -424,26 +423,6 @@ class VtcService {
   /// what presenting it discloses. Nothing leaves the VTA.
   Future<Map<String, dynamic>?> heldCredential(String id) async =>
       (await _grantedVta()).credential(id);
-
-  /// Presents the held credential [id] to [manifest]'s community,
-  /// disclosing its subject claims [claims]: the VTA signs it as the
-  /// credential's subject and records the disclosure. Returns the
-  /// presentation, for [join].
-  Future<Map<String, dynamic>> presentCredential(
-    JoinManifest manifest,
-    String id,
-    List<String> claims,
-  ) async {
-    final vta = await _grantedVta();
-    final presented = await vta.presentCredential(
-      id: id,
-      claims: claims,
-      audience: manifest.communityDid,
-      nonce: const Uuid().v4(),
-      purpose: 'join',
-    );
-    return presented.presentation;
-  }
 
   /// Issues the test credential [template] to the identity [personaDid] and
   /// keeps it on the VTA in that identity's context [contextId], where a way
@@ -794,3 +773,23 @@ final vtcServiceProvider = Provider<VtcService>(
 bool isMetByOneCredential(JoinCriterion criterion) =>
     criterion.asksOnlyForCredentials &&
     criterion.credentials!.typeAlternatives.length == 1;
+
+/// A presentation of [credential] by [holderDid], the identity applying, to
+/// send with an application to a community.
+///
+/// Built here rather than by the VTA's `vault/credentials/present`: the VTA
+/// records each presentation in a consent receipt whose subject must be a
+/// `did:key`, so it refuses to present a credential made out to an MPX
+/// identity, a `did:webvh` persona. The community checks the credential's
+/// own proof and that its subject is the applicant, and the application
+/// carrying this is signed by that identity, so nothing is lost on the
+/// community's side; the VTA keeps no record of the disclosure.
+Map<String, dynamic> joinPresentation(
+  Map<String, dynamic> credential, {
+  required String holderDid,
+}) => {
+  '@context': ['https://www.w3.org/ns/credentials/v2'],
+  'type': ['VerifiablePresentation'],
+  'holder': holderDid,
+  'verifiableCredential': [credential],
+};

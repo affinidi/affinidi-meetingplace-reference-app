@@ -2494,7 +2494,7 @@
 	},
 	"vtcJoinCredentialIssuer": "Issued by",
 	"vtcJoinCredentialClaimsHeading": "What presenting it shows",
-	"vtcJoinCredentialNote": "Your VTA presents the whole credential, signed as this identity, and records that you shared it.",
+	"vtcJoinCredentialNote": "The whole credential goes with your application, which this identity signs.",
 	"vtcJoinNewIdentity": "A new identity",
 	"vtcJoinNewIdentityHost": "Created on your VTA for this community",
 	"vtcJoinExistingIdentity": "Existing identity",

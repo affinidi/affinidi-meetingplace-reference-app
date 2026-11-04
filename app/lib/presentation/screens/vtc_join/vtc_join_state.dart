@@ -132,7 +132,8 @@ class VtcJoinCredential {
   /// The DID that issued it, when it says.
   final String? issuerDid;
 
-  /// Every subject claim presenting it discloses.
+  /// Every subject claim presenting it discloses: the whole credential is
+  /// sent.
   final List<VtcJoinDetail> claims;
 }
 
