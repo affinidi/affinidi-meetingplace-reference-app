@@ -530,6 +530,54 @@ void main() {
       expect(state().deferred, isFalse);
     });
 
+    test('checks a waiting application without a spinner', () async {
+      network.joinVerdict = {'effect': 'refer'};
+      await controller().onScanned(fakeVtcDid);
+      await controller().join();
+      final steps = <VtcJoinStep>[];
+      container.listen(
+        vtcJoinControllerProvider,
+        (_, next) => steps.add(next.step),
+      );
+
+      await controller().checkAgain();
+
+      expect(steps, isNot(contains(VtcJoinStep.working)));
+      expect(state().step, VtcJoinStep.pending);
+    });
+
+    test('keeps waiting when a check fails', () async {
+      network.joinVerdict = {'effect': 'refer'};
+      await controller().onScanned(fakeVtcDid);
+      await controller().join();
+
+      // An answer the app cannot read, as from a community in trouble.
+      network.joinStatus = 'lost';
+      await controller().checkAgain();
+      expect(state().step, VtcJoinStep.pending);
+      expect(state().lastCheckedAt, isNull);
+
+      network.joinStatus = 'approved';
+      await controller().checkAgain();
+      expect(state().step, VtcJoinStep.joined);
+    });
+
+    test('runs one check at a time', () async {
+      network.joinVerdict = {'effect': 'refer'};
+      await controller().onScanned(fakeVtcDid);
+      await controller().join();
+      final sent = network.joinRequests.length;
+
+      await Future.wait([controller().checkAgain(), controller().checkAgain()]);
+
+      expect(
+        network.joinRequests
+            .skip(sent)
+            .where((r) => r['type'] == JoinTask.status),
+        hasLength(1),
+      );
+    });
+
     test('shows a denial', () async {
       network.joinVerdict = {'effect': 'deny'};
       await controller().onScanned(fakeVtcDid);

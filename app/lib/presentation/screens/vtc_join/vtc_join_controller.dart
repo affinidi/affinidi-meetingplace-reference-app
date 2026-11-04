@@ -20,11 +20,15 @@ class VtcJoinController extends _$VtcJoinController {
   late final VtcService _service = ref.read(vtcServiceProvider);
 
   /// How often an open application is checked while the screen shows it.
-  static const pendingCheckInterval = Duration(seconds: 30);
+  static const pendingCheckInterval = Duration(seconds: 5);
 
   JoinManifest? _manifest;
   List<VtaPersona> _personas = const [];
   Timer? _pendingCheck;
+
+  /// Whether a check of the open application is under way: a check can
+  /// take longer than [pendingCheckInterval], and checks do not overlap.
+  bool _checking = false;
 
   /// The identity whose details await approval, and what the VTA would
   /// disclose. Kept in memory only.
@@ -41,7 +45,7 @@ class VtcJoinController extends _$VtcJoinController {
           pendingCheckInterval,
           (_) => checkAgain(),
         );
-      } else if (next.step != VtcJoinStep.working) {
+      } else {
         _pendingCheck?.cancel();
         _pendingCheck = null;
       }
@@ -286,14 +290,19 @@ class VtcJoinController extends _$VtcJoinController {
     );
   }
 
-  /// Asks the community whether it decided on the open application.
+  /// Asks the community whether it decided on the open application. The
+  /// screen stays as it is while it asks, and a check that fails leaves the
+  /// application waiting for the next one.
   Future<void> checkAgain() async {
     final manifest = _manifest;
-    if (state.step != VtcJoinStep.pending || manifest == null) return;
-    state = state.copyWith(step: VtcJoinStep.working);
-
-    await _run(() async {
+    if (state.step != VtcJoinStep.pending || manifest == null || _checking) {
+      return;
+    }
+    _checking = true;
+    try {
       final status = await _service.checkApplication(manifest.communityDid);
+      // The member may have moved on while the community answered.
+      if (state.step != VtcJoinStep.pending) return;
       state = state.copyWith(
         denialReason: status?.reason,
         deferred: status?.status == JoinRequestStatus.deferred,
@@ -307,7 +316,14 @@ class VtcJoinController extends _$VtcJoinController {
           null => VtcJoinStep.review,
         },
       );
-    });
+    } on MeetingPlaceVtcSDKException {
+      // Not logged: at this pace an unreachable community would flood the
+      // log. The next check tries again.
+    } on VtaNotLinkedException {
+      _fail(VtcJoinFailure.vtaMissing);
+    } finally {
+      _checking = false;
+    }
   }
 
   static String _shown(Object value) =>
