@@ -147,22 +147,36 @@ class _TemplateCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final colorScheme = context.colorScheme;
     final textTheme = context.textTheme;
+    final onCard = colorScheme.onSurface;
+    // As the call log's cards: the theme's own card colour is light, under
+    // light text.
     return Card(
       key: Key('mock_credential_${template.id}'),
+      color: colorScheme.inverseSurface.withValues(alpha: 0.5),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 6,
           children: [
-            Text(template.title, style: textTheme.titleMedium),
+            Text(
+              template.title,
+              style: textTheme.titleMedium?.copyWith(color: onCard),
+            ),
             Text(
               template.type,
-              style: textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
+              style: textTheme.bodySmall?.copyWith(
+                color: onCard,
+                fontFamily: 'monospace',
+              ),
             ),
             for (final MapEntry(:key, :value) in template.claims.entries)
-              Text('$key: $value', style: textTheme.bodyMedium),
+              Text(
+                '$key: $value',
+                style: textTheme.bodyMedium?.copyWith(color: onCard),
+              ),
             if (holders.isNotEmpty)
               Wrap(
                 spacing: 6,
@@ -201,6 +215,8 @@ Future<Identity?> _chooseIdentity(
   List<Identity> identities,
 ) => showModalBottomSheet<Identity>(
   context: context,
+  // As the app's other sheets: the default one is light, under light text.
+  backgroundColor: context.colorScheme.inverseSurface,
   builder: (context) => SafeArea(
     child: Column(
       mainAxisSize: MainAxisSize.min,
