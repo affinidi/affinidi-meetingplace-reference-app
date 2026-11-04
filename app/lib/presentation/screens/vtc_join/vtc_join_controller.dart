@@ -42,19 +42,33 @@ class VtcJoinController extends _$VtcJoinController {
   VtaPersona? _applicant;
   List<JoinAttribute> _attributes = const [];
 
+  /// Whether the membership card is being read; reads do not overlap.
+  bool _readingCard = false;
+
   @override
   VtcJoinState build() {
     ref.onDispose(() => _pendingCheck?.cancel());
-    // While an application waits, ask the community again now and then.
-    listenSelf((_, next) {
-      if (next.step == VtcJoinStep.pending) {
+    // While an application waits, or a new member's card has yet to reach
+    // their VTA, ask again now and then.
+    listenSelf((previous, next) {
+      final waiting =
+          next.step == VtcJoinStep.pending ||
+          (next.step == VtcJoinStep.joined && next.membershipCard == null);
+      if (waiting) {
         _pendingCheck ??= Timer.periodic(
           pendingCheckInterval,
-          (_) => checkAgain(),
+          // The step as it is at each tick, not as it was when set.
+          (_) => state.step == VtcJoinStep.pending
+              ? checkAgain()
+              : readMembershipCard(),
         );
       } else {
         _pendingCheck?.cancel();
         _pendingCheck = null;
+      }
+      if (next.step == VtcJoinStep.joined &&
+          previous?.step != VtcJoinStep.joined) {
+        unawaited(readMembershipCard());
       }
     });
     return VtcJoinState();
@@ -456,6 +470,35 @@ class VtcJoinController extends _$VtcJoinController {
       _fail(VtcJoinFailure.vtaMissing);
     } finally {
       state = state.copyWith(checking: false);
+    }
+  }
+
+  /// Reads the member's card for the joined screen from their VTA, which
+  /// the community delivers it to; an approval already asked for it again
+  /// when the VTA held none. Only reads, and quietly: a read that finds no
+  /// card or fails waits for the next.
+  Future<void> readMembershipCard() async {
+    final manifest = _manifest;
+    if (state.step != VtcJoinStep.joined ||
+        manifest == null ||
+        state.membershipCard != null ||
+        _readingCard) {
+      return;
+    }
+    _readingCard = true;
+    try {
+      final card = await _service.membershipCard(manifest.communityDid);
+      // The screen may have closed, or moved on, while the VTA answered.
+      if (!ref.mounted) return;
+      if (card != null && state.step == VtcJoinStep.joined) {
+        state = state.copyWith(membershipCard: card);
+      }
+    } on MeetingPlaceVtcSDKException {
+      // The next read tries again.
+    } on VtaNotLinkedException {
+      // Nothing to read from; the membership stands all the same.
+    } finally {
+      _readingCard = false;
     }
   }
 

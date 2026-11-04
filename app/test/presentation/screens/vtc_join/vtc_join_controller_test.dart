@@ -780,6 +780,70 @@ void main() {
       expect(state().denialReason, 'Members only');
     });
 
+    group('membership card', () {
+      void vtaHoldsCard() => network.vta
+        ..answers[VtaTask.credentialsQuery] = {
+          'credentials': [
+            {'id': 'card-1'},
+          ],
+        }
+        ..answers[VtaTask.credentialsGet] = {
+          'credential': {
+            'id': 'urn:uuid:vmc',
+            'type': ['VerifiableCredential', 'MembershipCredential'],
+            'issuer': fakeVtcDid,
+            'credentialSubject': {'id': persona.did},
+          },
+        };
+
+      /// Lets the read the joined step starts finish.
+      Future<void> readDone() async {
+        for (var i = 0; i < 50 && state().membershipCard == null; i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 10));
+        }
+      }
+
+      test('is shown once the administrators approved', () async {
+        network.joinVerdict = {'effect': 'refer'};
+        await controller().onScanned(fakeVtcDid);
+        await controller().join();
+        vtaHoldsCard();
+
+        network.joinStatus = 'approved';
+        await controller().checkAgain();
+        expect(state().step, VtcJoinStep.joined);
+        await readDone();
+
+        expect(state().membershipCard?.issuer, fakeVtcDid);
+        expect(state().membershipCard?.memberDid, persona.did);
+      });
+
+      test('is read again until the VTA holds it', () async {
+        network.joinVerdict = {'effect': 'refer'};
+        await controller().onScanned(fakeVtcDid);
+        await controller().join();
+        network.joinStatus = 'approved';
+        await controller().checkAgain();
+        await readDone();
+        expect(state().membershipCard, isNull);
+
+        vtaHoldsCard();
+        await controller().readMembershipCard();
+
+        expect(state().membershipCard?.memberDid, persona.did);
+      });
+
+      test('is shown for an admission at once', () async {
+        vtaHoldsCard();
+        await controller().onScanned(fakeVtcDid);
+        await controller().join();
+        expect(state().step, VtcJoinStep.joined);
+        await readDone();
+
+        expect(state().membershipCard?.issuer, fakeVtcDid);
+      });
+    });
+
     test('shows a denial', () async {
       network.joinVerdict = {'effect': 'deny'};
       await controller().onScanned(fakeVtcDid);

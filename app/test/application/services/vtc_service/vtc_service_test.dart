@@ -316,6 +316,43 @@ void main() {
       expect((await service.community(fakeVtcDid))?.isSettled, isTrue);
     });
 
+    test('reads the membership card the VTA holds', () async {
+      await service.join(
+        await service.readCommunity(fakeVtcDid),
+        persona: joinAs,
+      );
+      expect(await service.membershipCard(fakeVtcDid), isNull);
+
+      network.vta
+        ..answers[VtaTask.credentialsQuery] = {
+          'credentials': [
+            {'id': 'card-1'},
+          ],
+        }
+        ..answers[VtaTask.credentialsGet] = {
+          'credential': {
+            'id': 'urn:uuid:vmc',
+            'type': ['VerifiableCredential', 'MembershipCredential'],
+            'issuer': fakeVtcDid,
+            'credentialSubject': {'id': persona.did},
+          },
+        };
+
+      final card = await service.membershipCard(fakeVtcDid);
+      expect(card?.issuer, fakeVtcDid);
+      expect(card?.memberDid, persona.did);
+    });
+
+    test('reads no card while the application waits', () async {
+      network.joinVerdict = {'effect': 'refer'};
+      await service.join(
+        await service.readCommunity(fakeVtcDid),
+        persona: joinAs,
+      );
+
+      expect(await service.membershipCard(fakeVtcDid), isNull);
+    });
+
     test('keeps the reason a rejection gives', () async {
       network.joinVerdict = {'effect': 'refer'};
       await service.join(await service.readCommunity(fakeVtcDid));

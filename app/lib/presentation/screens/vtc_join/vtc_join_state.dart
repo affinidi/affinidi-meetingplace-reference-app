@@ -3,6 +3,7 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../application/services/vtc_service/vtc_service.dart';
 import '../../../domain/models/identity/identity.dart';
+import '../../../domain/models/vtc/vtc_membership_card.dart';
 
 part 'vtc_join_state.freezed.dart';
 
@@ -278,6 +279,10 @@ abstract class VtcJoinState with _$VtcJoinState {
     /// Whether this phone is asking the community about the open
     /// application right now.
     @Default(false) bool checking,
+
+    /// The membership card the community issued, once the member's VTA
+    /// holds it.
+    VtcMembershipCard? membershipCard,
 
     /// When this phone last asked the community about the open application.
     DateTime? lastCheckedAt,

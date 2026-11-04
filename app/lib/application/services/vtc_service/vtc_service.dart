@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import '../../../domain/models/vtc/linked_vta.dart';
 import '../../../domain/models/vtc/mock_credential_template.dart';
 import '../../../domain/models/vtc/vtc_community.dart';
+import '../../../domain/models/vtc/vtc_membership_card.dart';
 import '../../../domain/repositories/vtc_repository.dart';
 import '../../../infrastructure/providers/vtc_sdk_provider.dart';
 import '../../../infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
@@ -644,6 +645,22 @@ class VtcService {
         .communityImport(vta)
         .archiveMembershipCards(communityDid, personaDid: community.personaDid);
     await _repository.removeCommunity(communityDid);
+  }
+
+  /// The membership card [communityDid] issued to the member's persona
+  /// there, as their VTA keeps it, or null when this phone knows no such
+  /// membership or the VTA holds no card yet, e.g. while the community has
+  /// still to deliver it.
+  ///
+  /// Throws [VtaNotLinkedException] when no VTA is linked, and
+  /// [MeetingPlaceVtcSDKException] when the VTA cannot be reached.
+  Future<VtcMembershipCard?> membershipCard(String communityDid) async {
+    final community = await _repository.findCommunity(communityDid);
+    if (community == null || !community.isMember) return null;
+    final card = await _sdk
+        .communityImport(await _grantedVta())
+        .membershipCard(communityDid, personaDid: community.personaDid);
+    return card == null ? null : VtcMembershipCard.fromCredential(card);
   }
 
   /// Looks up the member's membership of [communityDid] in the cards backed
