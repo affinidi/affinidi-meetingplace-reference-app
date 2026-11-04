@@ -2779,6 +2779,22 @@
 	"@vtcJoinTrailCheckAnswerKey": {
 		"description": "Label of the community's key that signed its answer to the last status request"
 	},
+	"vtcJoinTrailShowDocument": "Show the signed document",
+	"@vtcJoinTrailShowDocument": {
+		"description": "Tooltip of the icon that shows a trail step's signed Trust Task document as JSON"
+	},
+	"vtcJoinTrailSubmitDocument": "Your signed application",
+	"@vtcJoinTrailSubmitDocument": {
+		"description": "Title of the dialog showing the application document the VTA signed"
+	},
+	"vtcJoinTrailAnswerDocument": "The community's signed answer",
+	"@vtcJoinTrailAnswerDocument": {
+		"description": "Title of the dialog showing the community's signed answer to the application"
+	},
+	"vtcJoinTrailCheckDocument": "The community's last signed answer",
+	"@vtcJoinTrailCheckDocument": {
+		"description": "Title of the dialog showing the community's signed answer to the last status check"
+	},
 	"vtcJoinTrailAnsweredBy": "Answered by",
 	"@vtcJoinTrailAnsweredBy": {
 		"description": "Label of the DID that signed the community's answer"

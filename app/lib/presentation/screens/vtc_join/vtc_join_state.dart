@@ -200,8 +200,9 @@ abstract class VtcJoinState with _$VtcJoinState {
     @Default(<VtcJoinDetail>[]) List<VtcJoinDetail> details,
 
     /// The open application as the VTA signed it and the community answered
-    /// it, or null when this phone did not send it.
-    TrustTaskReceipt? submitReceipt,
+    /// it, both documents as they were on the wire, or null when this phone
+    /// did not send it.
+    TrustTaskExchange? submitExchange,
 
     /// The community's id of the open application, if known.
     String? requestId,
@@ -212,8 +213,9 @@ abstract class VtcJoinState with _$VtcJoinState {
     /// When this phone last asked the community about the open application.
     DateTime? lastCheckedAt,
 
-    /// The last signed status request and the community's verified answer.
-    TrustTaskReceipt? lastCheckReceipt,
+    /// The last signed status request and the community's verified answer,
+    /// as they were on the wire.
+    TrustTaskExchange? lastCheckExchange,
 
     /// The community's reason for turning the application down, if given.
     String? denialReason,

@@ -5,18 +5,20 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
+import 'vtc_join_json_dialog.dart';
 
 /// Where an open application stands, drawn as the path it took: signed by
 /// the member's VTA as their identity in the community, sent from this
 /// phone and answered by the community, now with its administrators, and
 /// the membership card still to come. Each step opens to the proof behind
-/// it, as [receipt] and [lastCheck] hold it.
+/// it, and shows its signed document in full, as [submit] and [lastCheck]
+/// hold them.
 class VtcJoinTrail extends StatelessWidget {
   const VtcJoinTrail({
     super.key,
     required this.communityName,
     required this.autoCheckInterval,
-    this.receipt,
+    this.submit,
     this.requestId,
     this.deferred = false,
     this.lastCheckedAt,
@@ -27,7 +29,7 @@ class VtcJoinTrail extends StatelessWidget {
 
   /// The signed application and the community's verified answer, or null
   /// when this phone has no receipt for it.
-  final TrustTaskReceipt? receipt;
+  final TrustTaskExchange? submit;
 
   /// The community's id of the application, if known.
   final String? requestId;
@@ -39,7 +41,7 @@ class VtcJoinTrail extends StatelessWidget {
   final DateTime? lastCheckedAt;
 
   /// The last signed status request and the community's verified answer.
-  final TrustTaskReceipt? lastCheck;
+  final TrustTaskExchange? lastCheck;
 
   /// How often the screen asks the community again.
   final Duration autoCheckInterval;
@@ -47,8 +49,8 @@ class VtcJoinTrail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final receipt = this.receipt;
-    final lastCheck = this.lastCheck;
+    final receipt = submit?.receipt;
+    final lastCheck = this.lastCheck?.receipt;
     final locale = l10n.localeName;
     String time(DateTime at) =>
         DateFormat.yMMMd(locale).add_Hm().format(at.toLocal());
@@ -100,6 +102,9 @@ class VtcJoinTrail extends StatelessWidget {
               ),
             ],
           ],
+          document: submit?.request.toJson(),
+          documentTitle: l10n.vtcJoinTrailSubmitDocument,
+          documentKey: const Key('vtc_join_trail_vta_document'),
         ),
         _Step(
           key: const Key('vtc_join_trail_community'),
@@ -116,6 +121,10 @@ class VtcJoinTrail extends StatelessWidget {
                 receipt.answeredBy,
                 isId: true,
               ),
+              if (receipt.answerType case final type?)
+                _Detail(l10n.vtcJoinTrailTask, type),
+              if (receipt.answerDocumentId case final id?)
+                _Detail(l10n.vtcJoinTrailDocument, id, isId: true),
               if (receipt.answeredAt case final at?)
                 _Detail(l10n.vtcJoinTrailAnsweredAt, time(at)),
               ...proof(
@@ -128,6 +137,9 @@ class VtcJoinTrail extends StatelessWidget {
             if (requestId case final id?)
               _Detail(l10n.vtcJoinTrailRequestId, id, isId: true),
           ],
+          document: submit?.answer.toJson(),
+          documentTitle: l10n.vtcJoinTrailAnswerDocument,
+          documentKey: const Key('vtc_join_trail_community_document'),
         ),
         _Step(
           key: const Key('vtc_join_trail_review'),
@@ -151,6 +163,9 @@ class VtcJoinTrail extends StatelessWidget {
                 _Detail(l10n.vtcJoinTrailCheckAnswerKey, key, isId: true),
             ],
           ],
+          document: this.lastCheck?.answer.toJson(),
+          documentTitle: l10n.vtcJoinTrailCheckDocument,
+          documentKey: const Key('vtc_join_trail_review_document'),
         ),
         _Step(
           key: const Key('vtc_join_trail_card'),
@@ -180,8 +195,9 @@ class _Detail {
   final bool isId;
 }
 
-/// A step of the trail: a marker on the line, a title and summary, and its
-/// [details] shown on tap.
+/// A step of the trail: a marker on the line, a title and summary, its
+/// [details] shown on tap, and its signed [document], if any, behind an
+/// icon.
 class _Step extends HookWidget {
   const _Step({
     super.key,
@@ -190,6 +206,9 @@ class _Step extends HookWidget {
     required this.title,
     required this.summary,
     this.details = const [],
+    this.document,
+    this.documentTitle = '',
+    this.documentKey,
     this.isLast = false,
   });
 
@@ -198,6 +217,11 @@ class _Step extends HookWidget {
   final String title;
   final String summary;
   final List<_Detail> details;
+
+  /// The signed document behind the step, as it was on the wire.
+  final Map<String, dynamic>? document;
+  final String documentTitle;
+  final Key? documentKey;
   final bool isLast;
 
   static const _markerSize = 32.0;
@@ -207,6 +231,7 @@ class _Step extends HookWidget {
   Widget build(BuildContext context) {
     final expanded = useState(false);
     final canExpand = details.isNotEmpty;
+    final document = this.document;
     final foreground = stage == _Stage.next ? Colors.white54 : Colors.white;
 
     return InkWell(
@@ -266,6 +291,18 @@ class _Step extends HookWidget {
                 ),
               ),
             ),
+            if (document != null)
+              IconButton(
+                key: documentKey,
+                icon: const Icon(Icons.data_object, color: Colors.white),
+                tooltip: context.l10n.vtcJoinTrailShowDocument,
+                visualDensity: VisualDensity.compact,
+                onPressed: () => showVtcJoinJson(
+                  context,
+                  title: documentTitle,
+                  json: document,
+                ),
+              ),
             if (canExpand)
               Padding(
                 padding: const EdgeInsets.only(top: 4),

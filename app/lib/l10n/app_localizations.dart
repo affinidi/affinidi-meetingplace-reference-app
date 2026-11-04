@@ -4420,6 +4420,30 @@ abstract class AppLocalizations {
   /// **'Key that signed the last answer'**
   String get vtcJoinTrailCheckAnswerKey;
 
+  /// Tooltip of the icon that shows a trail step's signed Trust Task document as JSON
+  ///
+  /// In en, this message translates to:
+  /// **'Show the signed document'**
+  String get vtcJoinTrailShowDocument;
+
+  /// Title of the dialog showing the application document the VTA signed
+  ///
+  /// In en, this message translates to:
+  /// **'Your signed application'**
+  String get vtcJoinTrailSubmitDocument;
+
+  /// Title of the dialog showing the community's signed answer to the application
+  ///
+  /// In en, this message translates to:
+  /// **'The community\'s signed answer'**
+  String get vtcJoinTrailAnswerDocument;
+
+  /// Title of the dialog showing the community's signed answer to the last status check
+  ///
+  /// In en, this message translates to:
+  /// **'The community\'s last signed answer'**
+  String get vtcJoinTrailCheckDocument;
+
   /// Label of the DID that signed the community's answer
   ///
   /// In en, this message translates to:

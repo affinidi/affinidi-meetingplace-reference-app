@@ -2974,6 +2974,18 @@ class AppLocalizationsDe extends AppLocalizations {
   String get vtcJoinTrailCheckAnswerKey => 'Key that signed the last answer';
 
   @override
+  String get vtcJoinTrailShowDocument => 'Show the signed document';
+
+  @override
+  String get vtcJoinTrailSubmitDocument => 'Your signed application';
+
+  @override
+  String get vtcJoinTrailAnswerDocument => 'The community\'s signed answer';
+
+  @override
+  String get vtcJoinTrailCheckDocument => 'The community\'s last signed answer';
+
+  @override
   String get vtcJoinTrailAnsweredBy => 'Answered by';
 
   @override

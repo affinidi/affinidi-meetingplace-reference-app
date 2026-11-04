@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
@@ -6,39 +8,79 @@ import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 
 void main() {
-  final receipt = TrustTaskReceipt(
-    type: JoinTask.submit,
-    documentId: 'urn:uuid:submit',
-    signer: 'did:webvh:persona',
-    answeredBy: 'did:webvh:community',
-    cryptosuite: 'eddsa-jcs-2022',
-    verificationMethod: 'did:webvh:persona#key-0',
-    proofPurpose: 'authentication',
-    signedAt: DateTime.utc(2026, 11, 4, 10, 12),
-    answeredAt: DateTime.utc(2026, 11, 4, 10, 13),
-    answerCryptosuite: 'eddsa-jcs-2022',
-    answerVerificationMethod: 'did:webvh:community#key-0',
-    answerProofPurpose: 'authentication',
-    answerSignedAt: DateTime.utc(2026, 11, 4, 10, 13),
+  Map<String, dynamic> proof(String key, String created) => {
+    'type': 'DataIntegrityProof',
+    'cryptosuite': 'eddsa-jcs-2022',
+    'verificationMethod': key,
+    'proofPurpose': 'authentication',
+    'created': created,
+    'proofValue': 'zSignature',
+  };
+
+  TrustTaskExchange exchange({
+    required String type,
+    required String id,
+    required Map<String, dynamic> payload,
+    required Map<String, dynamic> answer,
+    required String signedAt,
+    required String answeredAt,
+    String answerKey = 'did:webvh:community#key-0',
+  }) => TrustTaskExchange(
+    request: TrustTaskDocument.fromJson({
+      'id': id,
+      'type': type,
+      'issuer': 'did:webvh:persona',
+      'recipient': 'did:webvh:community',
+      'issuedAt': signedAt,
+      'payload': payload,
+      'proof': proof('did:webvh:persona#key-0', signedAt),
+    }),
+    answer: TrustTaskDocument.fromJson({
+      'id': '$id-answer',
+      'type': '$type#response',
+      'issuer': 'did:webvh:community',
+      'recipient': 'did:webvh:persona',
+      'threadId': id,
+      'issuedAt': answeredAt,
+      'payload': answer,
+      'proof': proof(answerKey, answeredAt),
+    }),
   );
 
-  final lastCheck = TrustTaskReceipt(
+  final submit = exchange(
+    type: JoinTask.submit,
+    id: 'urn:uuid:submit',
+    payload: {
+      'criterion': 'z1',
+      'attributes': [
+        {'type': 'name', 'value': 'Alice'},
+      ],
+    },
+    answer: {
+      'requestId': 'request-1',
+      'verdict': {'effect': 'refer', 'with': <String, dynamic>{}},
+    },
+    signedAt: '2026-11-04T10:12:00Z',
+    answeredAt: '2026-11-04T10:13:00Z',
+  );
+
+  final lastCheck = exchange(
     type: JoinTask.status,
-    documentId: 'urn:uuid:status',
-    signer: 'did:webvh:persona',
-    answeredBy: 'did:webvh:community',
-    signedAt: DateTime.utc(2026, 11, 4, 10, 14),
-    answeredAt: DateTime.utc(2026, 11, 4, 10, 14),
-    answerVerificationMethod: 'did:webvh:community#key-1',
+    id: 'urn:uuid:status',
+    payload: {'requestId': 'request-1'},
+    answer: {'requestId': 'request-1', 'status': 'pending'},
+    signedAt: '2026-11-04T10:14:00Z',
+    answeredAt: '2026-11-04T10:14:00Z',
+    answerKey: 'did:webvh:community#key-1',
   );
 
   Future<void> pumpTrail(
     WidgetTester tester, {
-    TrustTaskReceipt? receipt,
+    TrustTaskExchange? submit,
     String? requestId,
     bool deferred = false,
     DateTime? lastCheckedAt,
-    TrustTaskReceipt? lastCheck,
+    TrustTaskExchange? lastCheck,
   }) {
     return tester.pumpWidget(
       MaterialApp(
@@ -49,7 +91,7 @@ void main() {
           body: SingleChildScrollView(
             child: VtcJoinTrail(
               communityName: 'Football club',
-              receipt: receipt,
+              submit: submit,
               requestId: requestId,
               deferred: deferred,
               lastCheckedAt: lastCheckedAt,
@@ -64,7 +106,7 @@ void main() {
 
   group('VtcJoinTrail', () {
     testWidgets('draws each step, the card still to come', (tester) async {
-      await pumpTrail(tester, receipt: receipt);
+      await pumpTrail(tester, submit: submit);
 
       expect(find.text('Signed by your VTA'), findsOneWidget);
       expect(
@@ -89,7 +131,7 @@ void main() {
     testWidgets('opens a step to the proof behind it', (tester) async {
       await pumpTrail(
         tester,
-        receipt: receipt,
+        submit: submit,
         requestId: 'request-1',
         lastCheckedAt: DateTime(2026, 11, 4, 10, 14),
         lastCheck: lastCheck,
@@ -111,6 +153,11 @@ void main() {
       expect(find.text('did:webvh:community'), findsOneWidget);
       expect(find.text('Answered at'), findsOneWidget);
       expect(find.text('request-1'), findsOneWidget);
+      // The answer's Trust Task, as for the VTA's.
+      expect(find.text('${JoinTask.submit}#response'), findsOneWidget);
+      expect(find.text('urn:uuid:submit-answer'), findsOneWidget);
+      expect(find.text('Trust Task'), findsNWidgets(2));
+      expect(find.text('Document id'), findsNWidgets(2));
       // The answer's proof, as for the VTA's signature.
       expect(find.text('did:webvh:community#key-0'), findsOneWidget);
       expect(find.text('Cryptosuite'), findsNWidgets(2));
@@ -128,10 +175,46 @@ void main() {
       expect(find.text('did:webvh:community#key-1'), findsOneWidget);
     });
 
+    testWidgets('shows each signed document in full', (tester) async {
+      await pumpTrail(tester, submit: submit, lastCheck: lastCheck);
+
+      await tester.tap(find.byKey(const Key('vtc_join_trail_vta_document')));
+      await tester.pumpAndSettle();
+      expect(find.text('Your signed application'), findsOneWidget);
+      final shown = tester
+          .widget<SelectableText>(
+            find.descendant(
+              of: find.byType(AlertDialog),
+              matching: find.byType(SelectableText),
+            ),
+          )
+          .data!;
+      expect(jsonDecode(shown), submit.request.toJson());
+      await tester.tap(find.text('Close'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(
+        find.byKey(const Key('vtc_join_trail_community_document')),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text("The community's signed answer"), findsOneWidget);
+      expect(find.textContaining('"effect": "refer"'), findsOneWidget);
+      await tester.tap(find.text('Close'));
+      await tester.pumpAndSettle();
+
+      final review = find.byKey(const Key('vtc_join_trail_review_document'));
+      await tester.ensureVisible(review);
+      await tester.pumpAndSettle();
+      await tester.tap(review);
+      await tester.pumpAndSettle();
+      expect(find.text("The community's last signed answer"), findsOneWidget);
+      expect(find.textContaining('"status": "pending"'), findsOneWidget);
+    });
+
     testWidgets('says when the administrators put it off', (tester) async {
       await pumpTrail(
         tester,
-        receipt: receipt,
+        submit: submit,
         deferred: true,
         lastCheckedAt: DateTime(2026, 11, 4, 10, 14),
       );
@@ -151,8 +234,9 @@ void main() {
         find.text('Sent earlier; this phone keeps no receipt for it'),
         findsOneWidget,
       );
-      // Nothing to open.
+      // Nothing to open or show.
       expect(find.byIcon(Icons.expand_more), findsNothing);
+      expect(find.byIcon(Icons.data_object), findsNothing);
     });
   });
 }

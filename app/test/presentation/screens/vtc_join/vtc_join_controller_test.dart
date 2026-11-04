@@ -509,9 +509,9 @@ void main() {
       await controller().onScanned(fakeVtcDid);
       await controller().join();
 
-      expect(state().submitReceipt?.type, JoinTask.submit);
-      expect(state().submitReceipt?.signer, persona.did);
-      expect(state().submitReceipt?.answeredBy, fakeVtcDid);
+      expect(state().submitExchange?.receipt.type, JoinTask.submit);
+      expect(state().submitExchange?.receipt.signer, persona.did);
+      expect(state().submitExchange?.receipt.answeredBy, fakeVtcDid);
       expect(state().requestId, 'request-1');
       expect(state().lastCheckedAt, isNull);
 
@@ -520,7 +520,7 @@ void main() {
       useService();
       await controller().onScanned(fakeVtcDid);
       expect(state().step, VtcJoinStep.pending);
-      expect(state().submitReceipt?.type, JoinTask.submit);
+      expect(state().submitExchange?.receipt.type, JoinTask.submit);
     });
 
     test('says when the administrators put the application off', () async {
@@ -533,8 +533,8 @@ void main() {
       expect(state().step, VtcJoinStep.pending);
       expect(state().deferred, isTrue);
       expect(state().lastCheckedAt, isNotNull);
-      expect(state().lastCheckReceipt?.type, JoinTask.status);
-      expect(state().lastCheckReceipt?.answeredBy, fakeVtcDid);
+      expect(state().lastCheckExchange?.receipt.type, JoinTask.status);
+      expect(state().lastCheckExchange?.receipt.answeredBy, fakeVtcDid);
 
       network.joinStatus = 'pending';
       await controller().checkAgain();
@@ -598,9 +598,9 @@ void main() {
       await controller().withdraw();
 
       expect(state().step, VtcJoinStep.withdrawn);
-      expect(state().submitReceipt, isNull);
+      expect(state().submitExchange, isNull);
       expect(state().requestId, isNull);
-      expect(state().lastCheckReceipt, isNull);
+      expect(state().lastCheckExchange, isNull);
       expect(network.joinRequests.last['type'], JoinTask.withdraw);
 
       controller().applyAgain();
@@ -608,7 +608,7 @@ void main() {
 
       await controller().join();
       expect(state().step, VtcJoinStep.pending);
-      expect(state().submitReceipt?.type, JoinTask.submit);
+      expect(state().submitExchange?.receipt.type, JoinTask.submit);
       expect(
         network.joinRequests.where((r) => r['type'] == JoinTask.submit),
         hasLength(2),

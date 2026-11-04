@@ -103,7 +103,7 @@ class VtcJoinController extends _$VtcJoinController {
         manifest: manifest.document,
         requestedDetails: manifest.requestedAttributes,
         listsNewMembers: manifest.listsNewMembers,
-        submitReceipt: community?.submitReceipt,
+        submitExchange: community?.submitExchange,
         requestId: community?.joinRequestId,
         denialReason: community?.rejectionReason,
       );
@@ -280,13 +280,13 @@ class VtcJoinController extends _$VtcJoinController {
       attributes: attributes,
       listInDirectory: state.listInDirectory,
     );
-    // The receipt as recorded: an application already open keeps its own.
+    // The documents as recorded: an application already open keeps its own.
     final recorded = verdict is JoinPending
         ? await _service.community(manifest.communityDid)
         : null;
     state = state.copyWith(
       details: const [],
-      submitReceipt: recorded?.submitReceipt,
+      submitExchange: recorded?.submitExchange,
       requestId: recorded?.joinRequestId,
       denialReason: verdict is JoinDenied ? verdict.reason : null,
       step: switch (verdict) {
@@ -315,7 +315,7 @@ class VtcJoinController extends _$VtcJoinController {
         denialReason: status?.reason,
         deferred: status?.status == JoinRequestStatus.deferred,
         lastCheckedAt: DateTime.now(),
-        lastCheckReceipt: status?.receipt,
+        lastCheckExchange: status?.exchange,
         step: switch (status?.status) {
           JoinRequestStatus.approved => VtcJoinStep.joined,
           JoinRequestStatus.pending ||
@@ -361,11 +361,11 @@ class VtcJoinController extends _$VtcJoinController {
       }
       state = state.copyWith(
         step: VtcJoinStep.withdrawn,
-        submitReceipt: null,
+        submitExchange: null,
         requestId: null,
         deferred: false,
         lastCheckedAt: null,
-        lastCheckReceipt: null,
+        lastCheckExchange: null,
       );
     });
   }

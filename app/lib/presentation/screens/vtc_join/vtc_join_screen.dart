@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -15,6 +14,7 @@ import '../../widgets/onboarding_style/onboarding_style.dart';
 import '../../widgets/swipeable_cards.dart';
 import '../../widgets/vta_identity_card.dart';
 import 'vtc_join_controller.dart';
+import 'vtc_join_json_dialog.dart';
 import 'vtc_join_state.dart';
 import 'vtc_join_trail.dart';
 
@@ -170,36 +170,16 @@ Future<bool> _confirm(
   return confirmed ?? false;
 }
 
-/// Shows the community's join manifest as it sent it. Plain text only: the
-/// community writes it.
+/// Shows the community's join manifest as it sent it.
 Future<void> _showManifest(
   BuildContext context,
   Map<String, dynamic> manifest,
-) {
-  final l10n = context.l10n;
-  return showDialog<void>(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: Text(l10n.vtcJoinManifestHeading),
-      content: SingleChildScrollView(
-        child: SelectableText(
-          const JsonEncoder.withIndent('  ').convert(manifest),
-          key: const Key('vtc_join_manifest_json'),
-          style: context.textTheme.bodySmall?.copyWith(
-            fontFamily: 'monospace',
-            height: 1.4,
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(l10n.generalClose),
-        ),
-      ],
-    ),
-  );
-}
+) => showVtcJoinJson(
+  context,
+  title: context.l10n.vtcJoinManifestHeading,
+  json: manifest,
+  textKey: const Key('vtc_join_manifest_json'),
+);
 
 /// Takes a community's code: its DID typed or pasted, or its QR code
 /// scanned. Both are read the same way.
@@ -1004,11 +984,11 @@ class _Pending extends StatelessWidget {
           title: l10n.vtcJoinTrailHeading,
           child: VtcJoinTrail(
             communityName: name,
-            receipt: state.submitReceipt,
+            submit: state.submitExchange,
             requestId: state.requestId,
             deferred: state.deferred,
             lastCheckedAt: state.lastCheckedAt,
-            lastCheck: state.lastCheckReceipt,
+            lastCheck: state.lastCheckExchange,
             autoCheckInterval: VtcJoinController.pendingCheckInterval,
           ),
         ),
