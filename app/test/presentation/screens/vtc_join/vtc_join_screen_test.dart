@@ -324,15 +324,36 @@ void main() {
       // Grouped by who sees it by default, the membership ID among them.
       const group = 'Show your Role and membership ID to the administrators';
       expect(find.text(group), findsOneWidget);
-      const detail =
-          'Role · you can share it up to all members · '
-          "Set by the administrators; you can't change it";
-      expect(find.text(detail), findsNothing);
+      const seenBy = 'Seen by: the administrators';
+      expect(find.text(seenBy), findsNothing);
 
       await tapVisible(tester, find.text(group));
       await tester.pumpAndSettle();
 
-      expect(find.text(detail), findsOneWidget);
+      for (final text in [
+        'Role',
+        seenBy,
+        'You can widen to: all members',
+        'Set by admins',
+      ]) {
+        expect(find.text(text), findsOneWidget, reason: text);
+      }
+    });
+
+    testWidgets('offers no wider audience than a field allows', (tester) async {
+      network.joinManifest = {
+        ...network.joinManifest,
+        'directoryDisclosure': _disclosure([_field('Team', 'members')]),
+      };
+      await pumpScreen(tester);
+      await enterCode(tester, fakeVtcDid);
+
+      await tapVisible(tester, find.text('Show your Team to all members'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Seen by: all members'), findsOneWidget);
+      expect(find.textContaining('You can widen to'), findsNothing);
+      expect(find.text('Set by admins'), findsNothing);
     });
 
     testWidgets('names the details the community asks for', (tester) async {

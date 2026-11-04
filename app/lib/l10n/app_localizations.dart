@@ -4021,7 +4021,7 @@ abstract class AppLocalizations {
   /// No description provided for @vtcJoinFieldSetByAdmins.
   ///
   /// In en, this message translates to:
-  /// **'Set by the administrators; you can\'t change it'**
+  /// **'Set by admins'**
   String get vtcJoinFieldSetByAdmins;
 
   /// No description provided for @vtcJoinExternalCards.
@@ -4180,11 +4180,17 @@ abstract class AppLocalizations {
   /// **'No other member sees them, and you can ask for yours.'**
   String get vtcJoinAdminNotesDetail;
 
-  /// No description provided for @vtcJoinFieldShareUpTo.
+  /// Who sees a directory field once the member joins
   ///
   /// In en, this message translates to:
-  /// **'you can share it up to {audience}'**
-  String vtcJoinFieldShareUpTo(String audience);
+  /// **'Seen by: {audience}'**
+  String vtcJoinFieldSeenBy(String audience);
+
+  /// The widest audience the member may later show a directory field to
+  ///
+  /// In en, this message translates to:
+  /// **'You can widen to: {audience}'**
+  String vtcJoinFieldWidenTo(String audience);
 
   /// No description provided for @vtcJoinAction.
   ///

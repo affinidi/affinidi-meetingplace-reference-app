@@ -2499,7 +2499,7 @@
 			}
 		}
 	},
-	"vtcJoinFieldSetByAdmins": "Set by the administrators; you can't change it",
+	"vtcJoinFieldSetByAdmins": "Set by admins",
 	"vtcJoinExternalCards": "You may publish your card beyond the community, if you choose to.",
 	"vtcJoinUnnamedCommunity": "A community",
 	"vtcJoinThisCommunity": "this community",
@@ -2561,8 +2561,18 @@
 	},
 	"vtcJoinKeepsNotes": "Keep notes about you",
 	"vtcJoinAdminNotesDetail": "No other member sees them, and you can ask for yours.",
-	"vtcJoinFieldShareUpTo": "you can share it up to {audience}",
-	"@vtcJoinFieldShareUpTo": {
+	"vtcJoinFieldSeenBy": "Seen by: {audience}",
+	"@vtcJoinFieldSeenBy": {
+		"description": "Who sees a directory field once the member joins",
+		"placeholders": {
+			"audience": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinFieldWidenTo": "You can widen to: {audience}",
+	"@vtcJoinFieldWidenTo": {
+		"description": "The widest audience the member may later show a directory field to",
 		"placeholders": {
 			"audience": {
 				"type": "String"

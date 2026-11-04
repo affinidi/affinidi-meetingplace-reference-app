@@ -483,14 +483,17 @@ class _Consent extends StatelessWidget {
           subtitle: detail.required
               ? l10n.vtcJoinDetailRequiredNote
               : l10n.vtcJoinDetailOptionalNote,
-          details: [?detail.purpose, l10n.vtcJoinDetailsNote],
+          details: [
+            if (detail.purpose case final purpose?) _Note(purpose),
+            _Note(l10n.vtcJoinDetailsNote),
+          ],
         ),
       if (disclosure != null) ..._audienceItems(context, disclosure),
       if (disclosure?.adminNotes ?? false)
         _ConsentItem(
           icon: Icons.sticky_note_2_outlined,
           title: l10n.vtcJoinKeepsNotes,
-          details: [l10n.vtcJoinAdminNotesDetail],
+          details: [_Note(l10n.vtcJoinAdminNotesDetail)],
         ),
     ];
 
@@ -588,14 +591,7 @@ class _Consent extends StatelessWidget {
             ),
             details: [
               for (final field in fields)
-                [
-                  field.label,
-                  ?field.description,
-                  if (field.ceiling != field.defaultVisibility)
-                    l10n.vtcJoinFieldShareUpTo(audience(field.ceiling)),
-                  if (field.source == DirectoryFieldSource.admin)
-                    l10n.vtcJoinFieldSetByAdmins,
-                ].join(' · '),
+                _FieldDetail(field: field, audience: audience),
             ],
           ),
     ];
@@ -629,6 +625,85 @@ String _listOf(AppLocalizations l10n, List<String> items) => switch (items) {
   _ => items.join(),
 };
 
+/// A line of small print under a consent line.
+class _Note extends StatelessWidget {
+  const _Note(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) =>
+      Text(text, style: onboardingNote(context));
+}
+
+/// One directory field under a consent line: its label, who sees it once
+/// the member joins and, when wider, who the member may show it to later.
+class _FieldDetail extends StatelessWidget {
+  const _FieldDetail({required this.field, required this.audience});
+
+  final DirectoryField field;
+
+  /// What an audience is called.
+  final String Function(DirectoryAudience) audience;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 2,
+        children: [
+          Row(
+            spacing: 8,
+            children: [
+              Expanded(
+                child: Text(
+                  field.label,
+                  style: context.textTheme.bodyMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              if (field.source == DirectoryFieldSource.admin)
+                _Tag(l10n.vtcJoinFieldSetByAdmins),
+            ],
+          ),
+          if (field.description case final description?) _Note(description),
+          _Note(l10n.vtcJoinFieldSeenBy(audience(field.defaultVisibility))),
+          if (field.ceiling != field.defaultVisibility)
+            _Note(l10n.vtcJoinFieldWidenTo(audience(field.ceiling))),
+        ],
+      ),
+    );
+  }
+}
+
+/// A small label on the gradient, as [_Pill] but without an icon.
+class _Tag extends StatelessWidget {
+  const _Tag(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: BoxDecoration(
+      color: Colors.white.withAlpha(25),
+      border: Border.all(color: Colors.white.withAlpha(76)),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      child: Text(
+        text,
+        style: context.textTheme.labelSmall?.copyWith(color: Colors.white),
+      ),
+    ),
+  );
+}
+
 /// A thin rule between the lines of a list on the gradient.
 class _Divider extends StatelessWidget {
   const _Divider();
@@ -658,7 +733,7 @@ class _ConsentItem extends HookWidget {
   final Color? iconColor;
   final String title;
   final String? subtitle;
-  final List<String> details;
+  final List<Widget> details;
 
   @override
   Widget build(BuildContext context) {
@@ -691,9 +766,7 @@ class _ConsentItem extends HookWidget {
                     ),
                     if (subtitle case final subtitle?)
                       Text(subtitle, style: onboardingNote(context)),
-                    if (expanded.value)
-                      for (final detail in details)
-                        Text(detail, style: onboardingNote(context)),
+                    if (expanded.value) ...details,
                   ],
                 ),
               ),

@@ -2681,8 +2681,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get vtcJoinFieldSetByAdmins =>
-      'Set by the administrators; you can\'t change it';
+  String get vtcJoinFieldSetByAdmins => 'Set by admins';
 
   @override
   String get vtcJoinExternalCards =>
@@ -2773,8 +2772,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'No other member sees them, and you can ask for yours.';
 
   @override
-  String vtcJoinFieldShareUpTo(String audience) {
-    return 'you can share it up to $audience';
+  String vtcJoinFieldSeenBy(String audience) {
+    return 'Seen by: $audience';
+  }
+
+  @override
+  String vtcJoinFieldWidenTo(String audience) {
+    return 'You can widen to: $audience';
   }
 
   @override
