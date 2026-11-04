@@ -16,6 +16,7 @@ import '../../widgets/swipeable_cards.dart';
 import '../../widgets/vta_identity_card.dart';
 import 'vtc_join_controller.dart';
 import 'vtc_join_state.dart';
+import 'vtc_join_trail.dart';
 
 /// Joins a community: scan its code or enter its DID, read what it asks,
 /// apply as an identity from the member's VTA. In the look of linking the
@@ -80,15 +81,10 @@ class VtcJoinScreen extends ConsumerWidget {
           message: l10n.vtcJoinLeft(name),
           onDone: close,
         ),
-        VtcJoinStep.pending => _Outcome(
-          icon: Icons.hourglass_top,
-          message: l10n.vtcJoinPending(name),
+        VtcJoinStep.pending => _Pending(
+          state: state,
+          onCheckAgain: controller.checkAgain,
           onDone: close,
-          secondary: OnboardingButton(
-            label: l10n.vtcJoinCheckAgain,
-            isOutlined: true,
-            onPressed: controller.checkAgain,
-          ),
         ),
         VtcJoinStep.denied => _Outcome(
           icon: Icons.block,
@@ -901,6 +897,52 @@ class _ApproveDetails extends StatelessWidget {
         const SizedBox(height: 12),
         OnboardingButton(label: l10n.vtcJoinShareAction, onPressed: onShare),
         OnboardingTextButton(label: l10n.generalCancel, onPressed: onCancel),
+      ],
+    );
+  }
+}
+
+/// An application waiting for the community: who it went to, the path it
+/// took as a trail of signed steps, then Done and Check again.
+class _Pending extends StatelessWidget {
+  const _Pending({
+    required this.state,
+    required this.onCheckAgain,
+    required this.onDone,
+  });
+
+  final VtcJoinState state;
+  final VoidCallback onCheckAgain;
+  final VoidCallback onDone;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final name = state.communityName ?? '';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 12,
+      children: [
+        if (state.logoUrl case final logoUrl?) _Logo(logoUrl),
+        OnboardingTitle(name),
+        OnboardingSubtitle(l10n.vtcJoinPending(name)),
+        GlassCard(
+          title: l10n.vtcJoinTrailHeading,
+          child: VtcJoinTrail(
+            communityName: name,
+            receipt: state.submitReceipt,
+            deferred: state.deferred,
+            lastCheckedAt: state.lastCheckedAt,
+            autoCheckInterval: VtcJoinController.pendingCheckInterval,
+          ),
+        ),
+        const SizedBox(height: 12),
+        OnboardingButton(label: l10n.generalDone, onPressed: onDone),
+        OnboardingButton(
+          label: l10n.vtcJoinCheckAgain,
+          isOutlined: true,
+          onPressed: onCheckAgain,
+        ),
       ],
     );
   }

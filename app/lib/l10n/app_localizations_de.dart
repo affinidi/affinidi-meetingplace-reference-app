@@ -2824,6 +2824,76 @@ class AppLocalizationsDe extends AppLocalizations {
   String get vtcJoinCheckAgain => 'Check again';
 
   @override
+  String get vtcJoinTrailHeading => 'Your application';
+
+  @override
+  String get vtcJoinTrailPhone => 'Sent from this phone';
+
+  @override
+  String vtcJoinTrailPhoneSummary(String name) {
+    return 'As your identity in $name';
+  }
+
+  @override
+  String get vtcJoinTrailVta => 'Signed by your VTA';
+
+  @override
+  String vtcJoinTrailVtaSummary(String cryptosuite, String time) {
+    return '$cryptosuite · $time';
+  }
+
+  @override
+  String vtcJoinTrailCommunity(String name) {
+    return 'Answered by $name';
+  }
+
+  @override
+  String get vtcJoinTrailCommunitySummary =>
+      'Its answer is signed, and the signature checked out';
+
+  @override
+  String get vtcJoinTrailNoReceipt =>
+      'Sent earlier; this phone keeps no receipt for it';
+
+  @override
+  String get vtcJoinTrailReview => 'Waiting for the administrators';
+
+  @override
+  String get vtcJoinTrailDeferred => 'Put off by the administrators for now';
+
+  @override
+  String vtcJoinTrailLastChecked(String time) {
+    return 'Last checked at $time';
+  }
+
+  @override
+  String vtcJoinTrailAutoCheck(int seconds) {
+    return 'Checked again every $seconds seconds while this screen is open';
+  }
+
+  @override
+  String get vtcJoinTrailCard => 'Membership card';
+
+  @override
+  String get vtcJoinTrailCardSummary =>
+      'Issued once you\'re admitted, and kept on your VTA';
+
+  @override
+  String get vtcJoinTrailIdentity => 'Identity';
+
+  @override
+  String get vtcJoinTrailTask => 'Trust Task';
+
+  @override
+  String get vtcJoinTrailKey => 'Signing key';
+
+  @override
+  String get vtcJoinTrailAnsweredBy => 'Answered by';
+
+  @override
+  String get vtcJoinTrailAnsweredAt => 'Answered at';
+
+  @override
   String vtcJoinDenied(String name) {
     return '$name didn\'t accept your application.';
   }

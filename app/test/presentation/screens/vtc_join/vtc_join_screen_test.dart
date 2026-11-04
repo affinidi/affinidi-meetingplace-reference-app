@@ -17,6 +17,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/services/camera_service
 import 'package:mpx_flutter_reference_app/infrastructure/vtc/user_verification_key.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_screen.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_trail.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/onboarding_style/onboarding_style.dart';
 
@@ -187,6 +188,39 @@ void main() {
       await settle(tester);
       expect(find.text('You left Football club.'), findsOneWidget);
       expect(await service.community(fakeVtcDid), isNull);
+    });
+
+    testWidgets('shows the signed trail of a waiting application', (
+      tester,
+    ) async {
+      network.joinVerdict = {'effect': 'refer'};
+      await pumpScreen(tester);
+      await enterCode(tester, fakeVtcDid);
+      await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
+      await settle(tester);
+
+      expect(
+        find.text(
+          "Your application to Football club is waiting for the community's"
+          ' decision.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.byType(VtcJoinTrail), findsOneWidget);
+      expect(find.text('Answered by Football club'), findsOneWidget);
+      expect(find.textContaining('eddsa-jcs-2022'), findsOneWidget);
+
+      network.joinStatus = 'deferred';
+      await tapVisible(
+        tester,
+        find.widgetWithText(OutlinedButton, 'Check again'),
+      );
+      await settle(tester);
+      expect(
+        find.text('Put off by the administrators for now'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Last checked at'), findsOneWidget);
     });
 
     testWidgets('shows the profile and what the directory shows', (

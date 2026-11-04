@@ -4162,6 +4162,120 @@ abstract class AppLocalizations {
   /// **'Check again'**
   String get vtcJoinCheckAgain;
 
+  /// Heading of the card that shows the path an open application took
+  ///
+  /// In en, this message translates to:
+  /// **'Your application'**
+  String get vtcJoinTrailHeading;
+
+  /// Trail step: the member applied from this phone
+  ///
+  /// In en, this message translates to:
+  /// **'Sent from this phone'**
+  String get vtcJoinTrailPhone;
+
+  /// Trail step summary: the identity the member applied as
+  ///
+  /// In en, this message translates to:
+  /// **'As your identity in {name}'**
+  String vtcJoinTrailPhoneSummary(String name);
+
+  /// Trail step: the member's VTA signed the application
+  ///
+  /// In en, this message translates to:
+  /// **'Signed by your VTA'**
+  String get vtcJoinTrailVta;
+
+  /// Trail step summary: how and when the VTA signed
+  ///
+  /// In en, this message translates to:
+  /// **'{cryptosuite} · {time}'**
+  String vtcJoinTrailVtaSummary(String cryptosuite, String time);
+
+  /// Trail step: the named community answered the application
+  ///
+  /// In en, this message translates to:
+  /// **'Answered by {name}'**
+  String vtcJoinTrailCommunity(String name);
+
+  /// Trail step summary: the community's answer was verified
+  ///
+  /// In en, this message translates to:
+  /// **'Its answer is signed, and the signature checked out'**
+  String get vtcJoinTrailCommunitySummary;
+
+  /// Trail step summary when the application was sent before receipts were kept
+  ///
+  /// In en, this message translates to:
+  /// **'Sent earlier; this phone keeps no receipt for it'**
+  String get vtcJoinTrailNoReceipt;
+
+  /// Trail step: the application waits for the community's administrators
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the administrators'**
+  String get vtcJoinTrailReview;
+
+  /// Trail step: the administrators deferred the application; it stays open
+  ///
+  /// In en, this message translates to:
+  /// **'Put off by the administrators for now'**
+  String get vtcJoinTrailDeferred;
+
+  /// Trail step summary: when the app last asked the community
+  ///
+  /// In en, this message translates to:
+  /// **'Last checked at {time}'**
+  String vtcJoinTrailLastChecked(String time);
+
+  /// Trail step summary: how often the app asks the community
+  ///
+  /// In en, this message translates to:
+  /// **'Checked again every {seconds} seconds while this screen is open'**
+  String vtcJoinTrailAutoCheck(int seconds);
+
+  /// Trail step still to come: the membership card
+  ///
+  /// In en, this message translates to:
+  /// **'Membership card'**
+  String get vtcJoinTrailCard;
+
+  /// Trail step summary: when the membership card comes and where it is kept
+  ///
+  /// In en, this message translates to:
+  /// **'Issued once you\'re admitted, and kept on your VTA'**
+  String get vtcJoinTrailCardSummary;
+
+  /// Label of the DID the member applied as
+  ///
+  /// In en, this message translates to:
+  /// **'Identity'**
+  String get vtcJoinTrailIdentity;
+
+  /// Label of the Trust Task type of the signed application
+  ///
+  /// In en, this message translates to:
+  /// **'Trust Task'**
+  String get vtcJoinTrailTask;
+
+  /// Label of the key that signed the application
+  ///
+  /// In en, this message translates to:
+  /// **'Signing key'**
+  String get vtcJoinTrailKey;
+
+  /// Label of the DID that signed the community's answer
+  ///
+  /// In en, this message translates to:
+  /// **'Answered by'**
+  String get vtcJoinTrailAnsweredBy;
+
+  /// Label of when the community answered
+  ///
+  /// In en, this message translates to:
+  /// **'Answered at'**
+  String get vtcJoinTrailAnsweredAt;
+
   /// The named community turned the application down
   ///
   /// In en, this message translates to:

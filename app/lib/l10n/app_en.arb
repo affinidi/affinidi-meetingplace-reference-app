@@ -2594,6 +2594,110 @@
 		}
 	},
 	"vtcJoinCheckAgain": "Check again",
+	"vtcJoinTrailHeading": "Your application",
+	"@vtcJoinTrailHeading": {
+		"description": "Heading of the card that shows the path an open application took"
+	},
+	"vtcJoinTrailPhone": "Sent from this phone",
+	"@vtcJoinTrailPhone": {
+		"description": "Trail step: the member applied from this phone"
+	},
+	"vtcJoinTrailPhoneSummary": "As your identity in {name}",
+	"@vtcJoinTrailPhoneSummary": {
+		"description": "Trail step summary: the identity the member applied as",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinTrailVta": "Signed by your VTA",
+	"@vtcJoinTrailVta": {
+		"description": "Trail step: the member's VTA signed the application"
+	},
+	"vtcJoinTrailVtaSummary": "{cryptosuite} · {time}",
+	"@vtcJoinTrailVtaSummary": {
+		"description": "Trail step summary: how and when the VTA signed",
+		"placeholders": {
+			"cryptosuite": {
+				"type": "String"
+			},
+			"time": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinTrailCommunity": "Answered by {name}",
+	"@vtcJoinTrailCommunity": {
+		"description": "Trail step: the named community answered the application",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinTrailCommunitySummary": "Its answer is signed, and the signature checked out",
+	"@vtcJoinTrailCommunitySummary": {
+		"description": "Trail step summary: the community's answer was verified"
+	},
+	"vtcJoinTrailNoReceipt": "Sent earlier; this phone keeps no receipt for it",
+	"@vtcJoinTrailNoReceipt": {
+		"description": "Trail step summary when the application was sent before receipts were kept"
+	},
+	"vtcJoinTrailReview": "Waiting for the administrators",
+	"@vtcJoinTrailReview": {
+		"description": "Trail step: the application waits for the community's administrators"
+	},
+	"vtcJoinTrailDeferred": "Put off by the administrators for now",
+	"@vtcJoinTrailDeferred": {
+		"description": "Trail step: the administrators deferred the application; it stays open"
+	},
+	"vtcJoinTrailLastChecked": "Last checked at {time}",
+	"@vtcJoinTrailLastChecked": {
+		"description": "Trail step summary: when the app last asked the community",
+		"placeholders": {
+			"time": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinTrailAutoCheck": "Checked again every {seconds} seconds while this screen is open",
+	"@vtcJoinTrailAutoCheck": {
+		"description": "Trail step summary: how often the app asks the community",
+		"placeholders": {
+			"seconds": {
+				"type": "int"
+			}
+		}
+	},
+	"vtcJoinTrailCard": "Membership card",
+	"@vtcJoinTrailCard": {
+		"description": "Trail step still to come: the membership card"
+	},
+	"vtcJoinTrailCardSummary": "Issued once you're admitted, and kept on your VTA",
+	"@vtcJoinTrailCardSummary": {
+		"description": "Trail step summary: when the membership card comes and where it is kept"
+	},
+	"vtcJoinTrailIdentity": "Identity",
+	"@vtcJoinTrailIdentity": {
+		"description": "Label of the DID the member applied as"
+	},
+	"vtcJoinTrailTask": "Trust Task",
+	"@vtcJoinTrailTask": {
+		"description": "Label of the Trust Task type of the signed application"
+	},
+	"vtcJoinTrailKey": "Signing key",
+	"@vtcJoinTrailKey": {
+		"description": "Label of the key that signed the application"
+	},
+	"vtcJoinTrailAnsweredBy": "Answered by",
+	"@vtcJoinTrailAnsweredBy": {
+		"description": "Label of the DID that signed the community's answer"
+	},
+	"vtcJoinTrailAnsweredAt": "Answered at",
+	"@vtcJoinTrailAnsweredAt": {
+		"description": "Label of when the community answered"
+	},
 	"vtcJoinDenied": "{name} didn't accept your application.",
 	"@vtcJoinDenied": {
 		"description": "The named community turned the application down",
