@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
@@ -100,10 +101,8 @@ void main() {
       expect(controller.calls, ['approve', 'decline']);
     });
 
-    testWidgets('takes two digits and shows a bad number in place', (
-      tester,
-    ) async {
-      final controller = await pumpScreen(
+    testWidgets('shows a bad number in place', (tester) async {
+      await pumpScreen(
         tester,
         VtcSignInState(
           step: VtcSignInStep.number,
@@ -120,16 +119,77 @@ void main() {
         ),
         findsOneWidget,
       );
+    });
 
-      await tester.enterText(
-        find.descendant(
-          of: find.byKey(const Key('vtc_sign_in_number')),
-          matching: find.byType(EditableText),
-        ),
-        '4a27',
+    group('number', () {
+      Finder digit(int index) => find.descendant(
+        of: find.byKey(Key('vtc_sign_in_digit_$index')),
+        matching: find.byType(EditableText),
       );
-      await tapVisible(tester, find.text('Continue'));
-      expect(controller.calls, ['42']);
+
+      String textOf(WidgetTester tester, int index) =>
+          tester.widget<EditableText>(digit(index)).controller.text;
+
+      Future<_FixedSignIn> pumpNumber(WidgetTester tester) => pumpScreen(
+        tester,
+        VtcSignInState(
+          step: VtcSignInStep.number,
+          communityName: 'Rivendell',
+          decisionDeadline: deadline(),
+        ),
+      );
+
+      testWidgets('takes one digit per box and sends both', (tester) async {
+        final controller = await pumpNumber(tester);
+
+        await tester.enterText(digit(0), '4');
+        await tester.pump();
+        expect(
+          tester.widget<EditableText>(digit(1)).focusNode.hasFocus,
+          isTrue,
+        );
+        await tester.enterText(digit(1), '2');
+        await tester.pump();
+
+        expect(controller.calls, ['42']);
+      });
+
+      testWidgets('spreads pasted digits over the boxes', (tester) async {
+        final controller = await pumpNumber(tester);
+
+        await tester.enterText(digit(0), '4a27');
+        await tester.pump();
+
+        expect(textOf(tester, 0), '4');
+        expect(textOf(tester, 1), '2');
+        expect(controller.calls, ['42']);
+      });
+
+      testWidgets('goes back a box on backspace in an empty one', (
+        tester,
+      ) async {
+        await pumpNumber(tester);
+
+        await tester.enterText(digit(0), '4');
+        await tester.pump();
+        await tester.sendKeyEvent(LogicalKeyboardKey.backspace);
+        await tester.pump();
+
+        expect(textOf(tester, 0), isEmpty);
+        expect(
+          tester.widget<EditableText>(digit(0)).focusNode.hasFocus,
+          isTrue,
+        );
+      });
+
+      testWidgets('sends what is typed on Continue', (tester) async {
+        final controller = await pumpNumber(tester);
+
+        await tester.enterText(digit(0), '7');
+        await tapVisible(tester, find.text('Continue'));
+
+        expect(controller.calls, ['7']);
+      });
     });
 
     testWidgets('shows why it failed as an error on the gradient', (

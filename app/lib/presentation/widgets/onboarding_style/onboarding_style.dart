@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/extensions/color_extensions.dart';
@@ -174,9 +173,6 @@ class OnboardingTextField extends StatelessWidget {
     required this.onSubmitted,
     this.hint,
     this.enabled = true,
-    this.autofocus = false,
-    this.keyboardType = TextInputType.url,
-    this.inputFormatters,
     this.suffixIcon,
   });
 
@@ -184,9 +180,6 @@ class OnboardingTextField extends StatelessWidget {
   final String label;
   final String? hint;
   final bool enabled;
-  final bool autofocus;
-  final TextInputType keyboardType;
-  final List<TextInputFormatter>? inputFormatters;
   final ValueChanged<String> onSubmitted;
   final Widget? suffixIcon;
 
@@ -200,11 +193,9 @@ class OnboardingTextField extends StatelessWidget {
     return TextField(
       controller: controller,
       enabled: enabled,
-      autofocus: autofocus,
       autocorrect: false,
       enableSuggestions: false,
-      keyboardType: keyboardType,
-      inputFormatters: inputFormatters,
+      keyboardType: TextInputType.url,
       textInputAction: TextInputAction.go,
       onSubmitted: onSubmitted,
       style: textTheme.bodyMedium?.copyWith(color: Colors.white),

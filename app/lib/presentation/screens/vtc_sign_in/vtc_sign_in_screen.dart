@@ -199,7 +199,7 @@ class _EnterNumber extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final number = useTextEditingController();
+    final number = useState('');
     final secondsLeft = _useSecondsLeft(state.decisionDeadline, onExpired);
 
     return Column(
@@ -209,17 +209,11 @@ class _EnterNumber extends HookWidget {
         _Heading(state: state),
         const SizedBox(height: 12),
         OnboardingSubtitle(l10n.vtcSignInEnterNumber),
-        OnboardingTextField(
-          key: const Key('vtc_sign_in_number'),
-          controller: number,
+        _DigitBoxes(
+          length: _numberLength,
           label: l10n.vtcSignInNumberLabel,
-          autofocus: true,
-          keyboardType: TextInputType.number,
-          inputFormatters: [
-            FilteringTextInputFormatter.digitsOnly,
-            LengthLimitingTextInputFormatter(_numberLength),
-          ],
-          onSubmitted: onSubmit,
+          onChanged: (digits) => number.value = digits,
+          onCompleted: onSubmit,
         ),
         if (state.failure == SignInFailure.badNumber)
           OnboardingMessage(
@@ -230,10 +224,118 @@ class _EnterNumber extends HookWidget {
         const SizedBox(height: 12),
         OnboardingButton(
           label: l10n.vtcSignInContinue,
-          onPressed: () => onSubmit(number.text),
+          onPressed: () => onSubmit(number.value),
         ),
         OnboardingTextButton(label: l10n.cancel, onPressed: onCancel),
       ],
+    );
+  }
+}
+
+/// One box per digit, as a one-time code is typed: typing moves on to the
+/// next box, backspace in an empty box goes back, and pasted digits fill the
+/// boxes from the one pasted into. Calls [onCompleted] once all are filled.
+class _DigitBoxes extends HookWidget {
+  const _DigitBoxes({
+    required this.length,
+    required this.label,
+    required this.onChanged,
+    required this.onCompleted,
+  });
+
+  final int length;
+
+  /// What the boxes hold, for screen readers.
+  final String label;
+  final ValueChanged<String> onChanged;
+  final ValueChanged<String> onCompleted;
+
+  static const _boxSize = 56.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final fields = [
+      for (var i = 0; i < length; i++) useTextEditingController(),
+    ];
+    final focusNodes = [for (var i = 0; i < length; i++) useFocusNode()];
+
+    String digits() => fields.map((field) => field.text).join();
+
+    void changed(int index, String text) {
+      // Pasted digits spill over into the boxes after this one.
+      for (var i = 0; i < text.length && index + i < length; i++) {
+        fields[index + i].text = text[i];
+      }
+      if (text.isNotEmpty) {
+        final next = index + text.length;
+        if (next < length) {
+          focusNodes[next].requestFocus();
+        } else {
+          focusNodes[index].unfocus();
+        }
+      }
+      final number = digits();
+      onChanged(number);
+      if (number.length == length) onCompleted(number);
+    }
+
+    KeyEventResult backspace(int index, KeyEvent event) {
+      if (index == 0 ||
+          event is KeyUpEvent ||
+          event.logicalKey != LogicalKeyboardKey.backspace ||
+          fields[index].text.isNotEmpty) {
+        return KeyEventResult.ignored;
+      }
+      fields[index - 1].clear();
+      focusNodes[index - 1].requestFocus();
+      onChanged(digits());
+      return KeyEventResult.handled;
+    }
+
+    final textTheme = context.textTheme;
+    OutlineInputBorder border(Color color) => OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(color: color),
+    );
+
+    return Semantics(
+      label: label,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        spacing: 12,
+        children: [
+          for (var i = 0; i < length; i++)
+            SizedBox(
+              width: _boxSize,
+              child: Focus(
+                onKeyEvent: (_, event) => backspace(i, event),
+                child: TextField(
+                  key: Key('vtc_sign_in_digit_$i'),
+                  controller: fields[i],
+                  focusNode: focusNodes[i],
+                  autofocus: i == 0,
+                  keyboardType: TextInputType.number,
+                  textAlign: TextAlign.center,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(length - i),
+                  ],
+                  onChanged: (text) => changed(i, text),
+                  style: textTheme.headlineSmall?.copyWith(color: Colors.white),
+                  cursorColor: Colors.white,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white.withAlpha(25),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                    border: border(Colors.white.withAlpha(76)),
+                    enabledBorder: border(Colors.white.withAlpha(76)),
+                    focusedBorder: border(Colors.white),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
