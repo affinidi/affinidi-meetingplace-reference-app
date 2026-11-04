@@ -654,32 +654,41 @@ class _FieldDetail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final labelStyle = context.textTheme.bodyMedium?.copyWith(
+      color: Colors.white,
+      fontWeight: FontWeight.w500,
+    );
     return Padding(
       padding: const EdgeInsets.only(top: 8),
-      child: Column(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 2,
+        spacing: 8,
         children: [
-          Row(
-            spacing: 8,
-            children: [
-              Expanded(
-                child: Text(
-                  field.label,
-                  style: context.textTheme.bodyMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w500,
-                  ),
+          // Screen readers already read each field as its own line.
+          ExcludeSemantics(child: Text('•', style: labelStyle)),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 2,
+              children: [
+                Row(
+                  spacing: 8,
+                  children: [
+                    Expanded(child: Text(field.label, style: labelStyle)),
+                    if (field.source == DirectoryFieldSource.admin)
+                      _Tag(l10n.vtcJoinFieldSetByAdmins),
+                  ],
                 ),
-              ),
-              if (field.source == DirectoryFieldSource.admin)
-                _Tag(l10n.vtcJoinFieldSetByAdmins),
-            ],
+                if (field.description case final description?)
+                  _Note(description),
+                _Note(
+                  l10n.vtcJoinFieldSeenBy(audience(field.defaultVisibility)),
+                ),
+                if (field.ceiling != field.defaultVisibility)
+                  _Note(l10n.vtcJoinFieldWidenTo(audience(field.ceiling))),
+              ],
+            ),
           ),
-          if (field.description case final description?) _Note(description),
-          _Note(l10n.vtcJoinFieldSeenBy(audience(field.defaultVisibility))),
-          if (field.ceiling != field.defaultVisibility)
-            _Note(l10n.vtcJoinFieldWidenTo(audience(field.ceiling))),
         ],
       ),
     );

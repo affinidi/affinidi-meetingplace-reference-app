@@ -351,6 +351,8 @@ void main() {
       await tapVisible(tester, find.text('Show your Team to all members'));
       await tester.pumpAndSettle();
 
+      // One bullet per field.
+      expect(find.text('•'), findsOneWidget);
       expect(find.text('Seen by: all members'), findsOneWidget);
       expect(find.textContaining('You can widen to'), findsNothing);
       expect(find.text('Set by admins'), findsNothing);
