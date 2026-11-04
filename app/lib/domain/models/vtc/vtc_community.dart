@@ -15,13 +15,15 @@ class VtcCommunity {
     this.listInDirectory = true,
     this.isSettled = true,
     this.rejectionReason,
-    this.submitReceipt,
+    this.submitExchange,
   });
 
   /// Restores a [VtcCommunity] stored with [toJson].
   ///
   /// Records stored before applications were kept are memberships, and
-  /// records stored before admissions were settled need nothing more.
+  /// records stored before admissions were settled need nothing more. An
+  /// application's documents that cannot be read are dropped, never the
+  /// record.
   factory VtcCommunity.fromJson(Map<String, dynamic> json) {
     return VtcCommunity(
       communityDid: json['communityDid'] as String,
@@ -34,13 +36,17 @@ class VtcCommunity {
       listInDirectory: json['listInDirectory'] as bool? ?? true,
       isSettled: json['isSettled'] as bool? ?? true,
       rejectionReason: json['rejectionReason'] as String?,
-      submitReceipt: switch (json['submitReceipt']) {
-        final Map<String, dynamic> receipt => TrustTaskReceipt.fromJson(
-          receipt,
-        ),
-        _ => null,
-      },
+      submitExchange: _exchangeOf(json['submitExchange']),
     );
+  }
+
+  static TrustTaskExchange? _exchangeOf(Object? json) {
+    if (json is! Map<String, dynamic>) return null;
+    try {
+      return TrustTaskExchange.fromJson(json);
+    } on Object {
+      return null;
+    }
   }
 
   /// DID of the community.
@@ -79,25 +85,30 @@ class VtcCommunity {
   final String? rejectionReason;
 
   /// The open application as the VTA signed it and the community answered
-  /// it, if this phone sent it. Proof metadata only, never what was sent.
-  final TrustTaskReceipt? submitReceipt;
+  /// it, both documents as they were on the wire, if this phone sent it.
+  /// They carry what the member disclosed: kept in secure storage only.
+  final TrustTaskExchange? submitExchange;
+
+  /// What [submitExchange] shows, without its payloads.
+  TrustTaskReceipt? get submitReceipt => submitExchange?.receipt;
 
   /// Whether an application is waiting for the community's decision.
   bool get isApplying => !isMember && joinRequestId != null;
 
   /// This record with the application's outcome: a member, or still
-  /// applying under [requestId], as [receipt] shows when this phone sent it,
-  /// or neither. A new member is not settled until [settled] says so.
+  /// applying under [requestId], sent and answered as [exchange] shows when
+  /// this phone sent it, or neither. A new member is not settled until
+  /// [settled] says so.
   VtcCommunity withApplication({
     required bool isMember,
     String? requestId,
-    TrustTaskReceipt? receipt,
+    TrustTaskExchange? exchange,
   }) {
     return _copy(
       isMember: isMember,
       joinRequestId: isMember ? null : requestId,
       isSettled: !isMember || (this.isMember && isSettled),
-      submitReceipt: receipt,
+      submitExchange: exchange,
     );
   }
 
@@ -119,7 +130,7 @@ class VtcCommunity {
     bool? isSettled,
     bool? listInDirectory,
     String? rejectionReason,
-    TrustTaskReceipt? submitReceipt,
+    TrustTaskExchange? submitExchange,
   }) {
     return VtcCommunity(
       communityDid: communityDid,
@@ -135,12 +146,13 @@ class VtcCommunity {
       rejectionReason: isMember == null
           ? this.rejectionReason
           : rejectionReason,
-      // The receipt belongs to the open request: kept while it stays open.
-      submitReceipt: isMember == null
-          ? this.submitReceipt
-          : submitReceipt ??
+      // The documents belong to the open request: kept while it stays open,
+      // dropped once it is decided or withdrawn.
+      submitExchange: isMember == null
+          ? this.submitExchange
+          : submitExchange ??
                 (joinRequestId != null && joinRequestId == this.joinRequestId
-                    ? this.submitReceipt
+                    ? this.submitExchange
                     : null),
     );
   }
@@ -157,6 +169,6 @@ class VtcCommunity {
     'listInDirectory': listInDirectory,
     'isSettled': isSettled,
     'rejectionReason': ?rejectionReason,
-    'submitReceipt': ?submitReceipt?.toJson(),
+    'submitExchange': ?submitExchange?.toJson(),
   };
 }

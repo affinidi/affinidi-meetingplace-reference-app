@@ -245,6 +245,8 @@ void main() {
       expect(community?.submitReceipt?.type, JoinTask.submit);
       expect(community?.submitReceipt?.signer, persona.did);
       expect(community?.submitReceipt?.answeredBy, fakeVtcDid);
+      expect(community?.submitExchange?.request.type, JoinTask.submit);
+      expect(community?.submitExchange?.answer.issuer, fakeVtcDid);
       expect(await service.recordedMembership(fakeVtcDid), isNull);
     });
 
@@ -371,7 +373,7 @@ void main() {
         final community = await service.community(fakeVtcDid);
         expect(community?.isApplying, isFalse);
         expect(community?.isMember, isFalse);
-        expect(community?.submitReceipt, isNull);
+        expect(community?.submitExchange, isNull);
         expect(community?.personaDid, persona.did);
       });
 
