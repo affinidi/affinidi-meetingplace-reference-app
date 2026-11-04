@@ -2560,8 +2560,8 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String vtcSignInFoundMembership(String community, String persona) {
-    return 'Your membership of $community was found on your VTA. Sign in as $persona?';
+  String vtcSignInFoundMembership(String community) {
+    return 'Your membership of $community was found on your VTA. Sign in as this identity?';
   }
 
   @override
@@ -2570,9 +2570,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String vtcSignInAs(String persona) {
-    return 'Signing in as $persona';
-  }
+  String get vtcSignInAs => 'Signing in as';
 
   @override
   String vtcSignInBrowser(String browser, String os) {

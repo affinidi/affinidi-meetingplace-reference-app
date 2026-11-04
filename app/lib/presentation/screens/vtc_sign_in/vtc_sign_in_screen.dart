@@ -6,9 +6,11 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
+import '../../../application/services/identities_service/identities_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../dialogs/qr_code_picker/qr_code_picker.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
+import '../../widgets/vta_identity_card.dart';
 import 'vtc_sign_in_controller.dart';
 import 'vtc_sign_in_state.dart';
 
@@ -122,11 +124,9 @@ class _ConfirmMembership extends StatelessWidget {
       children: [
         OnboardingTitle(l10n.vtcSignInTitle(state.communityName ?? '')),
         OnboardingSubtitle(
-          l10n.vtcSignInFoundMembership(
-            state.communityName ?? '',
-            state.personaDid ?? '',
-          ),
+          l10n.vtcSignInFoundMembership(state.communityName ?? ''),
         ),
+        if (state.personaDid case final did?) _PersonaCard(did),
         const SizedBox(height: 12),
         OnboardingButton(
           label: l10n.vtcSignInUseMembership,
@@ -134,6 +134,32 @@ class _ConfirmMembership extends StatelessWidget {
         ),
         OnboardingTextButton(label: l10n.cancel, onPressed: onCancel),
       ],
+    );
+  }
+}
+
+/// The identity that signs in, as the card joining shows it, named as the
+/// member named it on this phone.
+class _PersonaCard extends ConsumerWidget {
+  const _PersonaCard(this.did);
+
+  final String did;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final name = ref.watch(
+      identitiesServiceProvider.select(
+        (state) => state.identities
+            .where((identity) => identity.did == did)
+            .firstOrNull
+            ?.card
+            .displayName,
+      ),
+    );
+    return VtaIdentityCard(
+      key: const Key('vtc_sign_in_persona'),
+      did: did,
+      name: name,
     );
   }
 }
@@ -365,16 +391,16 @@ class _Review extends HookWidget {
       children: [
         _Heading(state: state),
         const SizedBox(height: 12),
+        if (state.personaDid case final did?) ...[
+          OnboardingSubtitle(l10n.vtcSignInAs),
+          _PersonaCard(did),
+        ],
         GlassCard(
           title: l10n.vtcSignInReviewHeading,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             spacing: 12,
             children: [
-              OnboardingLine(
-                icon: Icons.fingerprint,
-                title: l10n.vtcSignInAs(state.personaDid ?? ''),
-              ),
               if (requester != null) ...[
                 OnboardingLine(
                   icon: Icons.computer,

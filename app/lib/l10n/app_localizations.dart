@@ -3778,11 +3778,11 @@ abstract class AppLocalizations {
   /// **'Website: {origin}'**
   String vtcSignInWebsite(String origin);
 
-  /// Asks to use a membership found on the VTA
+  /// Asks to use a membership found on the VTA, above the identity card it signs in as
   ///
   /// In en, this message translates to:
-  /// **'Your membership of {community} was found on your VTA. Sign in as {persona}?'**
-  String vtcSignInFoundMembership(String community, String persona);
+  /// **'Your membership of {community} was found on your VTA. Sign in as this identity?'**
+  String vtcSignInFoundMembership(String community);
 
   /// Seconds left to decide on a sign-in
   ///
@@ -3790,11 +3790,11 @@ abstract class AppLocalizations {
   /// **'{seconds} s left'**
   String vtcSignInTimeLeft(int seconds);
 
-  /// The persona being signed in
+  /// Heading above the identity card being signed in
   ///
   /// In en, this message translates to:
-  /// **'Signing in as {persona}'**
-  String vtcSignInAs(String persona);
+  /// **'Signing in as'**
+  String get vtcSignInAs;
 
   /// The browser asking to sign in, as reported
   ///

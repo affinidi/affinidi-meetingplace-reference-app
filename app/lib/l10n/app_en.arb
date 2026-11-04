@@ -2377,14 +2377,11 @@
 			}
 		}
 	},
-	"vtcSignInFoundMembership": "Your membership of {community} was found on your VTA. Sign in as {persona}?",
+	"vtcSignInFoundMembership": "Your membership of {community} was found on your VTA. Sign in as this identity?",
 	"@vtcSignInFoundMembership": {
-		"description": "Asks to use a membership found on the VTA",
+		"description": "Asks to use a membership found on the VTA, above the identity card it signs in as",
 		"placeholders": {
 			"community": {
-				"type": "String"
-			},
-			"persona": {
 				"type": "String"
 			}
 		}
@@ -2398,14 +2395,9 @@
 			}
 		}
 	},
-	"vtcSignInAs": "Signing in as {persona}",
+	"vtcSignInAs": "Signing in as",
 	"@vtcSignInAs": {
-		"description": "The persona being signed in",
-		"placeholders": {
-			"persona": {
-				"type": "String"
-			}
-		}
+		"description": "Heading above the identity card being signed in"
 	},
 	"vtcSignInBrowser": "Browser: {browser} on {os}",
 	"@vtcSignInBrowser": {

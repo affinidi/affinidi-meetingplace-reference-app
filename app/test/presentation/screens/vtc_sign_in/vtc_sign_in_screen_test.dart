@@ -3,12 +3,18 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
+import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service.dart';
+import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service_state.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_sign_in/vtc_sign_in_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_sign_in/vtc_sign_in_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_sign_in/vtc_sign_in_state.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/onboarding_style/onboarding_style.dart';
+import 'package:mpx_flutter_reference_app/presentation/widgets/vta_identity_card.dart';
+
+import '../../../fakes/fake_identities.dart';
+import '../../../fakes/fake_identities_service.dart';
 
 /// A sign-in held at one step, recording what the member chose.
 class _FixedSignIn extends VtcSignInController {
@@ -45,7 +51,16 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [vtcSignInControllerProvider.overrideWith(() => controller)],
+        overrides: [
+          vtcSignInControllerProvider.overrideWith(() => controller),
+          identitiesServiceProvider.overrideWith(
+            () => FakeIdentitiesService(
+              IdentitiesServiceState(
+                identities: [FakeIdentities.primaryIdentity],
+              ),
+            ),
+          ),
+        ],
         child: MaterialApp(
           theme: AppTheme.dark,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -76,7 +91,7 @@ void main() {
           step: VtcSignInStep.review,
           communityName: 'Rivendell',
           website: 'https://rivendell.example',
-          personaDid: 'did:key:z6Mk',
+          personaDid: FakeIdentities.primaryIdentity.did,
           decisionDeadline: deadline(),
           requester: const SignInRequester(
             browser: 'Firefox',
@@ -94,11 +109,43 @@ void main() {
         find.widgetWithText(GlassCard, 'Approve this sign-in?'),
         findsOneWidget,
       );
-      expect(find.byType(OnboardingLine), findsNWidgets(4));
+      expect(find.text('Signing in as'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(VtaIdentityCard),
+          matching: find.text('John Doe'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.byType(OnboardingLine), findsNWidgets(3));
 
       await tapVisible(tester, find.text('Approve'));
       await tapVisible(tester, find.text('Decline'));
       expect(controller.calls, ['approve', 'decline']);
+    });
+
+    testWidgets('asks to sign in as the identity card found on the VTA', (
+      tester,
+    ) async {
+      await pumpScreen(
+        tester,
+        VtcSignInState(
+          step: VtcSignInStep.confirmMembership,
+          communityName: 'Rivendell',
+          personaDid: 'did:webvh:abc:vta.example',
+        ),
+      );
+
+      expect(
+        find.text(
+          'Your membership of Rivendell was found on your VTA. '
+          'Sign in as this identity?',
+        ),
+        findsOneWidget,
+      );
+      // An identity not on this phone shows by its DID and host.
+      expect(find.text('did:webvh:abc:vta.example'), findsOneWidget);
+      expect(find.text('vta.example'), findsOneWidget);
     });
 
     testWidgets('shows a bad number in place', (tester) async {
