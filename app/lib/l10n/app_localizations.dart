@@ -4066,6 +4066,78 @@ abstract class AppLocalizations {
   /// **'Receive your {type}'**
   String vtcJoinReceivesDetail(String type);
 
+  /// No description provided for @vtcClaimTypeNameDisplay.
+  ///
+  /// In en, this message translates to:
+  /// **'display name'**
+  String get vtcClaimTypeNameDisplay;
+
+  /// No description provided for @vtcClaimTypeNameGiven.
+  ///
+  /// In en, this message translates to:
+  /// **'first name'**
+  String get vtcClaimTypeNameGiven;
+
+  /// No description provided for @vtcClaimTypeNameFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'last name'**
+  String get vtcClaimTypeNameFamily;
+
+  /// No description provided for @vtcClaimTypeNameLegal.
+  ///
+  /// In en, this message translates to:
+  /// **'legal name'**
+  String get vtcClaimTypeNameLegal;
+
+  /// No description provided for @vtcClaimTypeEmailPersonal.
+  ///
+  /// In en, this message translates to:
+  /// **'personal email'**
+  String get vtcClaimTypeEmailPersonal;
+
+  /// No description provided for @vtcClaimTypeEmailWork.
+  ///
+  /// In en, this message translates to:
+  /// **'work email'**
+  String get vtcClaimTypeEmailWork;
+
+  /// No description provided for @vtcClaimTypePhoneMobile.
+  ///
+  /// In en, this message translates to:
+  /// **'mobile number'**
+  String get vtcClaimTypePhoneMobile;
+
+  /// No description provided for @vtcClaimTypePhoneWork.
+  ///
+  /// In en, this message translates to:
+  /// **'work phone number'**
+  String get vtcClaimTypePhoneWork;
+
+  /// No description provided for @vtcClaimTypeAddressCountry.
+  ///
+  /// In en, this message translates to:
+  /// **'country'**
+  String get vtcClaimTypeAddressCountry;
+
+  /// No description provided for @vtcClaimTypePersonBirthDate.
+  ///
+  /// In en, this message translates to:
+  /// **'date of birth'**
+  String get vtcClaimTypePersonBirthDate;
+
+  /// No description provided for @vtcClaimTypeSkillLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'languages'**
+  String get vtcClaimTypeSkillLanguage;
+
+  /// No description provided for @vtcClaimTypeAccountHandle.
+  ///
+  /// In en, this message translates to:
+  /// **'account handle'**
+  String get vtcClaimTypeAccountHandle;
+
   /// No description provided for @vtcJoinDetailRequiredNote.
   ///
   /// In en, this message translates to:

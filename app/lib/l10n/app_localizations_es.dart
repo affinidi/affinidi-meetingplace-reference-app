@@ -2750,6 +2750,42 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get vtcClaimTypeNameDisplay => 'display name';
+
+  @override
+  String get vtcClaimTypeNameGiven => 'first name';
+
+  @override
+  String get vtcClaimTypeNameFamily => 'last name';
+
+  @override
+  String get vtcClaimTypeNameLegal => 'legal name';
+
+  @override
+  String get vtcClaimTypeEmailPersonal => 'personal email';
+
+  @override
+  String get vtcClaimTypeEmailWork => 'work email';
+
+  @override
+  String get vtcClaimTypePhoneMobile => 'mobile number';
+
+  @override
+  String get vtcClaimTypePhoneWork => 'work phone number';
+
+  @override
+  String get vtcClaimTypeAddressCountry => 'country';
+
+  @override
+  String get vtcClaimTypePersonBirthDate => 'date of birth';
+
+  @override
+  String get vtcClaimTypeSkillLanguage => 'languages';
+
+  @override
+  String get vtcClaimTypeAccountHandle => 'account handle';
+
+  @override
   String get vtcJoinDetailRequiredNote => 'Required to apply';
 
   @override

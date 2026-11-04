@@ -299,6 +299,23 @@ void main() {
       expect(find.text(detail), findsOneWidget);
     });
 
+    testWidgets('names the details the community asks for', (tester) async {
+      network.joinManifest = {
+        ...network.joinManifest,
+        'requestedAttributes': [
+          {'type': 'name.display'},
+          {'type': 'x:shoe.size', 'required': false},
+        ],
+      };
+      await pumpScreen(tester);
+
+      await enterCode(tester, fakeVtcDid);
+
+      expect(find.text('Receive your display name'), findsOneWidget);
+      // A type this app has no name for is shown as is, not left out.
+      expect(find.text('Receive your x:shoe.size'), findsOneWidget);
+    });
+
     group('identity', () {
       setUp(() {
         // The member has one identity on their VTA, so joining asks which.

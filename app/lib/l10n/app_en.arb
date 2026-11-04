@@ -2521,6 +2521,18 @@
 			}
 		}
 	},
+	"vtcClaimTypeNameDisplay": "display name",
+	"vtcClaimTypeNameGiven": "first name",
+	"vtcClaimTypeNameFamily": "last name",
+	"vtcClaimTypeNameLegal": "legal name",
+	"vtcClaimTypeEmailPersonal": "personal email",
+	"vtcClaimTypeEmailWork": "work email",
+	"vtcClaimTypePhoneMobile": "mobile number",
+	"vtcClaimTypePhoneWork": "work phone number",
+	"vtcClaimTypeAddressCountry": "country",
+	"vtcClaimTypePersonBirthDate": "date of birth",
+	"vtcClaimTypeSkillLanguage": "languages",
+	"vtcClaimTypeAccountHandle": "account handle",
 	"vtcJoinDetailRequiredNote": "Required to apply",
 	"vtcJoinDetailOptionalNote": "Optional",
 	"vtcJoinShowsTo": "Show your {fields} to {audience}",
