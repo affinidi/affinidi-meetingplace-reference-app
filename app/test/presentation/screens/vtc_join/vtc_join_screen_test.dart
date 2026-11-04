@@ -237,6 +237,42 @@ void main() {
       expect(find.textContaining('Last checked at'), findsOneWidget);
     });
 
+    testWidgets('withdraws a waiting application, then applies again', (
+      tester,
+    ) async {
+      network.joinVerdict = {'effect': 'refer'};
+      await pumpScreen(tester);
+      await enterCode(tester, fakeVtcDid);
+      await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
+      await settle(tester);
+
+      await tapVisible(tester, find.text('Withdraw application'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Withdraw your application to Football club?'),
+        findsOneWidget,
+      );
+      await tester.tap(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.text('Withdraw application'),
+        ),
+      );
+      await settle(tester);
+      expect(
+        find.text('You withdrew your application to Football club.'),
+        findsOneWidget,
+      );
+
+      await tapVisible(
+        tester,
+        find.widgetWithText(OutlinedButton, 'Apply again'),
+      );
+      await tester.pumpAndSettle();
+      expect(title('Football club'), findsOneWidget);
+      expect(find.widgetWithText(ElevatedButton, 'Join'), findsOneWidget);
+    });
+
     testWidgets('shows the profile and what the directory shows', (
       tester,
     ) async {

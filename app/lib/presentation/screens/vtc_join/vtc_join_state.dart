@@ -32,6 +32,9 @@ enum VtcJoinStep {
   /// An application waits for the community's decision.
   pending,
 
+  /// The member withdrew their application.
+  withdrawn,
+
   /// The community turned the application down.
   denied,
 

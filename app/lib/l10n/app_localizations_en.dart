@@ -2816,6 +2816,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vtcJoinCheckAgain => 'Check again';
 
   @override
+  String get vtcJoinWithdrawAction => 'Withdraw application';
+
+  @override
+  String vtcJoinWithdrawTitle(String name) {
+    return 'Withdraw your application to $name?';
+  }
+
+  @override
+  String get vtcJoinWithdrawMessage =>
+      'The community\'s administrators won\'t decide on it any more. You can apply again afterwards.';
+
+  @override
+  String vtcJoinWithdrawn(String name) {
+    return 'You withdrew your application to $name.';
+  }
+
+  @override
+  String get vtcJoinApplyAgain => 'Apply again';
+
+  @override
   String get vtcJoinTrailHeading => 'Your application';
 
   @override

@@ -589,6 +589,47 @@ void main() {
       );
     });
 
+    test('withdraws a waiting application and applies again', () async {
+      network.joinVerdict = {'effect': 'refer'};
+      await controller().onScanned(fakeVtcDid);
+      await controller().join();
+      await controller().checkAgain();
+
+      await controller().withdraw();
+
+      expect(state().step, VtcJoinStep.withdrawn);
+      expect(state().submitReceipt, isNull);
+      expect(state().requestId, isNull);
+      expect(state().lastCheckReceipt, isNull);
+      expect(network.joinRequests.last['type'], JoinTask.withdraw);
+
+      controller().applyAgain();
+      expect(state().step, VtcJoinStep.review);
+
+      await controller().join();
+      expect(state().step, VtcJoinStep.pending);
+      expect(state().submitReceipt?.type, JoinTask.submit);
+      expect(
+        network.joinRequests.where((r) => r['type'] == JoinTask.submit),
+        hasLength(2),
+      );
+    });
+
+    test('shows the decision when withdrawing too late', () async {
+      network.joinVerdict = {'effect': 'refer'};
+      await controller().onScanned(fakeVtcDid);
+      await controller().join();
+      network
+        ..withdrawRefusal = 'vtc/join-requests/withdraw:alreadyDecided'
+        ..joinStatus = 'rejected'
+        ..joinRejectionReason = 'Members only';
+
+      await controller().withdraw();
+
+      expect(state().step, VtcJoinStep.denied);
+      expect(state().denialReason, 'Members only');
+    });
+
     test('shows a denial', () async {
       network.joinVerdict = {'effect': 'deny'};
       await controller().onScanned(fakeVtcDid);

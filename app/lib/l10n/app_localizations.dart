@@ -4240,6 +4240,36 @@ abstract class AppLocalizations {
   /// **'Check again'**
   String get vtcJoinCheckAgain;
 
+  /// Button that withdraws the open application to a community
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw application'**
+  String get vtcJoinWithdrawAction;
+
+  /// Asks the member to confirm withdrawing their application to a community
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw your application to {name}?'**
+  String vtcJoinWithdrawTitle(String name);
+
+  /// Explains what withdrawing an application does
+  ///
+  /// In en, this message translates to:
+  /// **'The community\'s administrators won\'t decide on it any more. You can apply again afterwards.'**
+  String get vtcJoinWithdrawMessage;
+
+  /// The member withdrew their application to the named community
+  ///
+  /// In en, this message translates to:
+  /// **'You withdrew your application to {name}.'**
+  String vtcJoinWithdrawn(String name);
+
+  /// Button that goes back to the community's requirements to apply again
+  ///
+  /// In en, this message translates to:
+  /// **'Apply again'**
+  String get vtcJoinApplyAgain;
+
   /// Heading of the card that shows the path an open application took
   ///
   /// In en, this message translates to:

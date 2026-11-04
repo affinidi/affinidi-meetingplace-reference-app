@@ -335,6 +335,48 @@ class VtcJoinController extends _$VtcJoinController {
     }
   }
 
+  /// Withdraws the open application; the screen asks the member to confirm
+  /// first. A check under way is then ignored. When the community decided
+  /// already, shows its decision instead.
+  Future<void> withdraw() async {
+    final manifest = _manifest;
+    if (state.step != VtcJoinStep.pending || manifest == null) return;
+    state = state.copyWith(step: VtcJoinStep.working);
+
+    await _run(() async {
+      try {
+        await _service.withdraw(manifest.communityDid);
+      } on MeetingPlaceVtcSDKException catch (error) {
+        if (!(error.refusalCode?.endsWith(':alreadyDecided') ?? false)) {
+          rethrow;
+        }
+        final community = await _service.community(manifest.communityDid);
+        state = state.copyWith(
+          step: (community?.isMember ?? false)
+              ? VtcJoinStep.joined
+              : VtcJoinStep.denied,
+          denialReason: community?.rejectionReason,
+        );
+        return;
+      }
+      state = state.copyWith(
+        step: VtcJoinStep.withdrawn,
+        submitReceipt: null,
+        requestId: null,
+        deferred: false,
+        lastCheckedAt: null,
+        lastCheckReceipt: null,
+      );
+    });
+  }
+
+  /// Goes back to what the community asks, to apply again after
+  /// withdrawing.
+  void applyAgain() {
+    if (state.step != VtcJoinStep.withdrawn) return;
+    state = state.copyWith(step: VtcJoinStep.review);
+  }
+
   static String _shown(Object value) =>
       value is String ? value : jsonEncode(value);
 

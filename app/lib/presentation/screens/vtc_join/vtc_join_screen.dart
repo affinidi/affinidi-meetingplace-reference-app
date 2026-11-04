@@ -70,7 +70,12 @@ class VtcJoinScreen extends ConsumerWidget {
             label: l10n.vtcJoinLeaveAction,
             isOutlined: true,
             onPressed: () async {
-              if (await _confirmLeave(context, name)) {
+              if (await _confirm(
+                context,
+                title: l10n.vtcJoinLeaveTitle(name),
+                message: l10n.vtcJoinLeaveMessage,
+                action: l10n.vtcJoinLeaveAction,
+              )) {
                 await controller.leave();
               }
             },
@@ -84,7 +89,27 @@ class VtcJoinScreen extends ConsumerWidget {
         VtcJoinStep.pending => _Pending(
           state: state,
           onCheckAgain: controller.checkAgain,
+          onWithdraw: () async {
+            if (await _confirm(
+              context,
+              title: l10n.vtcJoinWithdrawTitle(name),
+              message: l10n.vtcJoinWithdrawMessage,
+              action: l10n.vtcJoinWithdrawAction,
+            )) {
+              await controller.withdraw();
+            }
+          },
           onDone: close,
+        ),
+        VtcJoinStep.withdrawn => _Outcome(
+          icon: Icons.undo,
+          message: l10n.vtcJoinWithdrawn(name),
+          onDone: close,
+          secondary: OnboardingButton(
+            label: l10n.vtcJoinApplyAgain,
+            isOutlined: true,
+            onPressed: controller.applyAgain,
+          ),
         ),
         VtcJoinStep.denied => _Outcome(
           icon: Icons.block,
@@ -111,14 +136,21 @@ class VtcJoinScreen extends ConsumerWidget {
   }
 }
 
-/// Asks the member to confirm leaving the community [name].
-Future<bool> _confirmLeave(BuildContext context, String name) async {
+/// Asks the member to confirm a step that cannot be undone, such as
+/// leaving a community, under [title] and [message], with [action] as the
+/// button that goes ahead.
+Future<bool> _confirm(
+  BuildContext context, {
+  required String title,
+  required String message,
+  required String action,
+}) async {
   final l10n = context.l10n;
   final confirmed = await showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
-      title: Text(l10n.vtcJoinLeaveTitle(name)),
-      content: Text(l10n.vtcJoinLeaveMessage),
+      title: Text(title),
+      content: Text(message),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
@@ -130,7 +162,7 @@ Future<bool> _confirmLeave(BuildContext context, String name) async {
             backgroundColor: context.colorScheme.error,
             foregroundColor: Colors.white,
           ),
-          child: Text(l10n.vtcJoinLeaveAction),
+          child: Text(action),
         ),
       ],
     ),
@@ -943,16 +975,18 @@ class _ApproveDetails extends StatelessWidget {
 }
 
 /// An application waiting for the community: who it went to, the path it
-/// took as a trail of signed steps, then Done and Check again.
+/// took as a trail of signed steps, then Done, Check again and Withdraw.
 class _Pending extends StatelessWidget {
   const _Pending({
     required this.state,
     required this.onCheckAgain,
+    required this.onWithdraw,
     required this.onDone,
   });
 
   final VtcJoinState state;
   final VoidCallback onCheckAgain;
+  final VoidCallback onWithdraw;
   final VoidCallback onDone;
 
   @override
@@ -984,6 +1018,10 @@ class _Pending extends StatelessWidget {
           label: l10n.vtcJoinCheckAgain,
           isOutlined: true,
           onPressed: onCheckAgain,
+        ),
+        OnboardingTextButton(
+          label: l10n.vtcJoinWithdrawAction,
+          onPressed: onWithdraw,
         ),
       ],
     );
