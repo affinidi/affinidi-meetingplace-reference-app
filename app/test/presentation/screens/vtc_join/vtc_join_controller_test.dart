@@ -184,13 +184,21 @@ void main() {
         expect(submitted()['criterion'], 'zReviewed');
       });
 
-      test('ignores a way it cannot apply under', () async {
+      test('shows but does not apply under an unsupported way', () async {
         await controller().onScanned(fakeVtcDid);
 
-        controller().chooseWay('invited');
         controller().chooseWay('unknown');
-
         expect(state().chosenWayId, 'open');
+
+        controller().chooseWay('invited');
+        expect(state().chosenWayId, 'invited');
+        await controller().join();
+
+        expect(state().step, VtcJoinStep.review);
+        expect(
+          network.joinRequests.map((r) => r['type']),
+          isNot(contains(JoinTask.submit)),
+        );
       });
     });
 

@@ -308,7 +308,12 @@ class _Review extends StatelessWidget {
             Expanded(
               child: OnboardingButton(
                 label: l10n.vtcJoinAction,
-                onPressed: state.canApply ? onJoin : null,
+                onPressed:
+                    state.ways.any(
+                      (way) => way.id == state.chosenWayId && way.canApply,
+                    )
+                    ? onJoin
+                    : null,
               ),
             ),
           ],
@@ -649,9 +654,9 @@ class _ConsentItem extends HookWidget {
   }
 }
 
-/// How to get in: each way in the community offers and what admission
-/// under it takes. When this app supports more than one, they are a deck to
-/// swipe through, and the member applies under the one on top.
+/// How to get in: each way in the community offers, as a deck to swipe
+/// through, and what admission under it takes. The member applies under the
+/// card on top, when this app supports it.
 class _WaysIn extends StatelessWidget {
   const _WaysIn({required this.state, required this.onChoose});
 
@@ -664,49 +669,40 @@ class _WaysIn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final choices = state.ways.where((way) => way.canApply).toList();
-    final swipeable = choices.length > 1;
-    final chosen = choices.indexWhere((way) => way.id == state.chosenWayId);
+    final ways = state.ways;
+    final top = ways.indexWhere((way) => way.id == state.chosenWayId);
+    final position = top < 0 ? 0 : top;
     return GlassCard(
       title: l10n.vtcJoinWaysHeading,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: 12,
         children: [
-          if (swipeable) ...[
+          if (ways.isNotEmpty)
             SwipeableCards<VtcJoinWay>(
               key: const Key('vtc_join_ways'),
-              items: choices,
+              items: ways,
               maxWidth: double.infinity,
               maxHeight: _deckHeight,
-              initialIndex: chosen < 0 ? 0 : chosen,
-              onCardChange: (index) => onChoose(choices[index].id),
+              initialIndex: position,
+              onCardChange: (index) => onChoose(ways[index].id),
               cardBuilder: (context, way) => _WayCard(way),
             ),
+          if (ways.length > 1)
             Text(
-              l10n.vtcJoinIdentityPosition(
-                (chosen < 0 ? 0 : chosen) + 1,
-                choices.length,
-              ),
+              l10n.vtcJoinIdentityPosition(position + 1, ways.length),
               key: const Key('vtc_join_way_position'),
               textAlign: TextAlign.center,
               style: onboardingNote(context),
             ),
-          ],
-          for (final way in state.ways)
-            if (!swipeable || !way.canApply)
-              OnboardingLine(
-                icon: _iconOf(way),
-                title: _titleOf(l10n, way),
-                subtitle: way.description,
-              ),
         ],
       ),
     );
   }
 }
 
-/// A way in this app can apply under, as a card in the deck of ways in.
+/// A way in, as a card in the deck of ways in: what admission under it
+/// takes, or why this app cannot apply under it yet.
 class _WayCard extends StatelessWidget {
   const _WayCard(this.way);
 

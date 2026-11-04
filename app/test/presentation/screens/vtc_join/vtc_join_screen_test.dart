@@ -121,6 +121,20 @@ void main() {
     (widget) => widget is OnboardingTitle && widget.text == text,
   );
 
+  /// Swipes the deck of ways in on to its next card. A drag spread over
+  /// time swipes the deck rather than the page.
+  Future<void> swipeWays(WidgetTester tester) async {
+    final deck = find.byKey(const Key('vtc_join_ways'));
+    await tester.ensureVisible(deck);
+    await tester.pumpAndSettle();
+    await tester.timedDrag(
+      deck,
+      const Offset(-500, 0),
+      const Duration(milliseconds: 300),
+    );
+    await tester.pumpAndSettle();
+  }
+
   /// Taps [finder] once it is scrolled into view.
   Future<void> tapVisible(WidgetTester tester, Finder finder) async {
     await tester.ensureVisible(finder);
@@ -381,7 +395,7 @@ void main() {
       await enterCode(tester, fakeVtcDid);
 
       final deck = find.byKey(const Key('vtc_join_ways'));
-      expect(find.text('1 of 2 · swipe to see the others'), findsOneWidget);
+      expect(find.text('1 of 3 · swipe to see the others'), findsOneWidget);
       expect(
         find.descendant(
           of: deck,
@@ -389,22 +403,9 @@ void main() {
         ),
         findsOneWidget,
       );
-      // The way this app cannot apply under is listed, not in the deck.
-      expect(
-        find.text('Not supported yet: needs an invitation'),
-        findsOneWidget,
-      );
 
-      await tester.ensureVisible(deck);
-      await tester.pumpAndSettle();
-      // A drag spread over time swipes the deck rather than the page.
-      await tester.timedDrag(
-        deck,
-        const Offset(-500, 0),
-        const Duration(milliseconds: 300),
-      );
-      await tester.pumpAndSettle();
-      expect(find.text('2 of 2 · swipe to see the others'), findsOneWidget);
+      await swipeWays(tester);
+      expect(find.text('2 of 3 · swipe to see the others'), findsOneWidget);
 
       await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
       await settle(tester);
@@ -415,12 +416,48 @@ void main() {
       expect((submit['payload'] as Map)['criterion'], 'zReviewed');
     });
 
-    testWidgets('offers no deck with one way in', (tester) async {
+    testWidgets('cannot join under an unsupported way on top', (tester) async {
+      network.joinManifest = {
+        ...network.joinManifest,
+        'criteria': [
+          {
+            'id': 'open',
+            'admission': 'automatic',
+            'requirementsDigest': 'zOpen',
+          },
+          {
+            'id': 'invited',
+            'admission': 'automatic',
+            'requirementsDigest': 'zInvited',
+            'invitationRequired': true,
+          },
+        ],
+      };
+      await pumpScreen(tester);
+      await enterCode(tester, fakeVtcDid);
+      ElevatedButton join() =>
+          tester.widget(find.widgetWithText(ElevatedButton, 'Join'));
+      expect(join().onPressed, isNotNull);
+
+      await swipeWays(tester);
+
+      expect(find.text('2 of 2 · swipe to see the others'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('vtc_join_ways')),
+          matching: find.text('Not supported yet: needs an invitation'),
+        ),
+        findsOneWidget,
+      );
+      expect(join().onPressed, isNull);
+    });
+
+    testWidgets('shows a single way in as a deck of one', (tester) async {
       await pumpScreen(tester);
       await enterCode(tester, fakeVtcDid);
 
-      expect(find.byKey(const Key('vtc_join_ways')), findsNothing);
-      expect(find.text('You become a member when you apply'), findsOneWidget);
+      expect(find.byKey(const Key('vtc_join_ways')), findsOneWidget);
+      expect(find.byKey(const Key('vtc_join_way_position')), findsNothing);
     });
 
     testWidgets('shows the manifest as sent from the title', (tester) async {
