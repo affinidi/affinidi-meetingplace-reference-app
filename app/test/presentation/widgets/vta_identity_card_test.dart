@@ -6,12 +6,16 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image/image.dart' as img;
+import 'package:meeting_place_vtc/meeting_place_vtc.dart';
+import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contact_card/contact_card.dart';
+import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/cache_manager_provider.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/vta_identity_card.dart';
 
 import '../../fakes/fake_cache_manager.dart';
+import '../../fakes/fake_vta.dart';
 
 const _did = 'did:webvh:QmP:vta.example:ada';
 
@@ -24,6 +28,14 @@ const _card = ContactCard(
   lastName: 'Lovelace',
   email: 'ada@example.com',
   mobile: '+44 20',
+);
+
+Identity _identity(ContactCard card, {bool onVta = false}) => Identity(
+  id: 'id-1',
+  did: card.did,
+  card: card,
+  vtaContextId: onVta ? 'mpx-1' : null,
+  vtaProfileId: onVta ? '01PROFILE' : null,
 );
 
 Future<void> _pump(WidgetTester tester, VtaIdentityCard card) =>
@@ -51,7 +63,10 @@ Finder _glass() => find
 void main() {
   group('VtaIdentityCard', () {
     testWidgets('shows the details its profile holds', (tester) async {
-      await _pump(tester, const VtaIdentityCard(did: _did, card: _card));
+      await _pump(
+        tester,
+        VtaIdentityCard(did: _did, identity: _identity(_card)),
+      );
 
       expect(find.text('Ada L'), findsOneWidget);
       expect(find.text('vta.example/ada'), findsNothing);
@@ -69,7 +84,7 @@ void main() {
         tester,
         VtaIdentityCard(
           did: longDid,
-          card: _card.copyWith(did: longDid),
+          identity: _identity(_card.copyWith(did: longDid)),
         ),
       );
 
@@ -94,7 +109,10 @@ void main() {
     });
 
     testWidgets('centres the picture over the upper edge', (tester) async {
-      await _pump(tester, const VtaIdentityCard(did: _did, card: _card));
+      await _pump(
+        tester,
+        VtaIdentityCard(did: _did, identity: _identity(_card)),
+      );
 
       final avatar = tester.getRect(find.byType(CircleAvatar));
       final glass = tester.getRect(_glass());
@@ -106,7 +124,10 @@ void main() {
     });
 
     testWidgets('blurs what lies behind it, as in a deck', (tester) async {
-      await _pump(tester, const VtaIdentityCard(did: _did, card: _card));
+      await _pump(
+        tester,
+        VtaIdentityCard(did: _did, identity: _identity(_card)),
+      );
 
       final blur = tester.widget<BackdropFilter>(
         find.descendant(
@@ -130,7 +151,7 @@ void main() {
         tester,
         VtaIdentityCard(
           did: 'did:key:z6Mk',
-          card: _card.copyWith(displayName: 'A'),
+          identity: _identity(_card.copyWith(displayName: 'A')),
         ),
       );
 
@@ -145,7 +166,7 @@ void main() {
         tester,
         VtaIdentityCard(
           did: _did,
-          card: _card.copyWith(email: null, mobile: ' '),
+          identity: _identity(_card.copyWith(email: null, mobile: ' ')),
         ),
       );
 
@@ -163,7 +184,7 @@ void main() {
         tester,
         VtaIdentityCard(
           did: _did,
-          card: _card.copyWith(profilePic: picture),
+          identity: _identity(_card.copyWith(profilePic: picture)),
         ),
       );
 
@@ -179,6 +200,83 @@ void main() {
 
       expect(find.text(_did), findsOneWidget);
       expect(find.byIcon(Icons.email_outlined), findsNothing);
+    });
+
+    testWidgets('shows where an identity on the VTA lives, collapsed', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        VtaIdentityCard(did: _did, identity: _identity(_card, onVta: true)),
+      );
+
+      expect(find.text('VTA details'), findsOneWidget);
+      expect(find.text('mpx-1'), findsNothing);
+    });
+
+    testWidgets('leaves out VTA details for an identity not on it', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        VtaIdentityCard(did: _did, identity: _identity(_card)),
+      );
+
+      expect(find.text('VTA details'), findsNothing);
+    });
+
+    testWidgets('scrolls the opened VTA details in a slot of fixed height', (
+      tester,
+    ) async {
+      final vta = FakeVta()
+        ..answers[VtaTask.localProfileGet] = {
+          'profile': {'profileId': '01PROFILE', 'entries': <Object>[]},
+        };
+      final vtc = await tester.runAsync(vta.linkedService);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            cacheManagerProvider.overrideWith((ref) => FakeCacheManager()),
+            vtcServiceProvider.overrideWithValue(vtc!),
+          ],
+          child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: SizedBox(
+                height: 380,
+                child: VtaIdentityCard(
+                  did: _did,
+                  identity: _identity(_card, onVta: true),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(const Key('vta_details_toggle')));
+      // A frame first, so the section listens before the VTA answers.
+      await tester.pump();
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 200)),
+      );
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.byKey(const Key('vta_details_profile')), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.text('01PROFILE'),
+        50,
+        // The card's own; selectable text brings scrollables of its own.
+        scrollable: find
+            .descendant(
+              of: find.byType(VtaIdentityCard),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
+      expect(find.text('01PROFILE'), findsOneWidget);
     });
   });
 }

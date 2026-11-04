@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
-import '../../../domain/models/contact_card/contact_card.dart';
+import '../../../domain/models/identity/identity.dart';
 
 part 'vtc_join_state.freezed.dart';
 
@@ -175,8 +175,8 @@ abstract class VtcJoinState with _$VtcJoinState {
     /// The identities on the member's VTA to join with, as DIDs.
     @Default(<String>[]) List<String> identityChoices,
 
-    /// The profile of each identity in [identityChoices], by its DID.
-    @Default(<String, ContactCard>{}) Map<String, ContactCard> identityCards,
+    /// Each identity in [identityChoices], by its DID.
+    @Default(<String, Identity>{}) Map<String, Identity> identities,
 
     /// The profile details the member is asked to approve sharing.
     @Default(<VtcJoinDetail>[]) List<VtcJoinDetail> details,

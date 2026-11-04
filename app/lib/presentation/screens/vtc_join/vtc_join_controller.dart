@@ -145,9 +145,7 @@ class VtcJoinController extends _$VtcJoinController {
       state = state.copyWith(
         step: VtcJoinStep.chooseIdentity,
         identityChoices: [for (final persona in _personas) persona.did],
-        identityCards: {
-          for (final identity in identities) identity.did: identity.card,
-        },
+        identities: {for (final identity in identities) identity.did: identity},
       );
     });
   }

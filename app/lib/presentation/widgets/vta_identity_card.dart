@@ -3,24 +3,26 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../domain/models/contact_card/contact_card.dart';
+import '../../domain/models/identity/identity.dart';
 import '../../infrastructure/extensions/build_context_extensions.dart';
 import '../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../infrastructure/providers/cache_manager_provider.dart';
 import 'onboarding_style/onboarding_style.dart';
+import 'vta_details.dart';
 
 /// A VTA identity as a card in the shape of an MPX identity card, frosted
 /// glass over the gradient: its picture centred over the card's upper edge,
-/// its name, the details its profile holds, and its full DID as metadata at
-/// the foot. A null [did] is the new identity the VTA would create.
+/// its name, the details its profile holds, its full DID as metadata, and
+/// where it lives on the VTA, collapsed. A null [did] is the new identity
+/// the VTA would create.
 class VtaIdentityCard extends ConsumerWidget {
-  const VtaIdentityCard({super.key, required this.did, this.card});
+  const VtaIdentityCard({super.key, required this.did, this.identity});
 
   final String? did;
 
-  /// The identity's profile, as this phone keeps it in step with the VTA;
-  /// null for an identity this phone does not hold.
-  final ContactCard? card;
+  /// The identity, with its profile as this phone keeps it in step with the
+  /// VTA; null for an identity this phone does not hold.
+  final Identity? identity;
 
   static const _radius = Radius.circular(25);
 
@@ -35,7 +37,8 @@ class VtaIdentityCard extends ConsumerWidget {
     final l10n = context.l10n;
     final textTheme = context.textTheme;
     final did = this.did;
-    final card = this.card;
+    final identity = this.identity;
+    final card = identity?.card;
     final displayName = card?.displayName.trim() ?? '';
     final details = <(IconData, String)>[
       if (card != null) ...[
@@ -77,15 +80,15 @@ class VtaIdentityCard extends ConsumerWidget {
                   borderRadius: const BorderRadius.all(_radius),
                   border: Border.all(color: Colors.white.withAlpha(90)),
                 ),
-                child: Padding(
+                // Sized to its content, or filling a slot such as a card in a
+                // deck, where the opened VTA details scroll.
+                child: SingleChildScrollView(
                   padding: const EdgeInsets.fromLTRB(
                     16,
                     _avatarRadius + 10,
                     16,
                     14,
                   ),
-                  // Sized to its content, or filling a slot such as a card in a
-                  // deck.
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -129,6 +132,18 @@ class VtaIdentityCard extends ConsumerWidget {
                             color: Colors.white.withAlpha(50),
                           ),
                         _DidMetadata(did: did),
+                        if (identity != null && identity.isVtaPersona) ...[
+                          Divider(
+                            height: 12,
+                            color: Colors.white.withAlpha(50),
+                          ),
+                          VtaDetails(
+                            key: ValueKey(identity.id),
+                            contextId: identity.vtaContextId!,
+                            profileId: identity.vtaProfileId!,
+                            color: Colors.white,
+                          ),
+                        ],
                       ],
                     ],
                   ),

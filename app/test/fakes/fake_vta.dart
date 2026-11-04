@@ -2,7 +2,10 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
+import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/vtc/user_verification_key.dart';
 import 'package:ssi/ssi.dart';
 
@@ -45,6 +48,24 @@ class FakeVta implements HttpClientAdapter, DidResolver {
   Ed25519DidKeySigner? persona;
 
   String get did => _key.did;
+
+  /// A [VtcService] linked to this VTA and granted, with what linking sent
+  /// cleared from [received].
+  Future<VtcService> linkedService() async {
+    FlutterSecureStorage.setMockInitialValues({});
+    final service = VtcService(
+      sdk: sdk(),
+      repository: SecureStorageVtcRepository(),
+      userVerificationKey: UserVerificationKey(
+        FakeUserVerificationKeyStorage(),
+      ),
+      platform: 'ios',
+    );
+    await service.startLink(did);
+    await service.checkGrant();
+    received.clear();
+    return service;
+  }
 
   /// An SDK that reaches only this VTA.
   MeetingPlaceVtcSDK sdk() => MeetingPlaceVtcSDK(

@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
-import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
-import 'package:mpx_flutter_reference_app/infrastructure/vtc/user_verification_key.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/vta_details.dart';
 
@@ -37,19 +34,8 @@ void main() {
       .where((type) => type == VtaTask.localProfileGet);
 
   setUp(() async {
-    FlutterSecureStorage.setMockInitialValues({});
     vta = FakeVta()..answers[VtaTask.localProfileGet] = {'profile': document()};
-    vtc = VtcService(
-      sdk: vta.sdk(),
-      repository: SecureStorageVtcRepository(),
-      userVerificationKey: UserVerificationKey(
-        FakeUserVerificationKeyStorage(),
-      ),
-      platform: 'ios',
-    );
-    await vtc.startLink(vta.did);
-    await vtc.checkGrant();
-    vta.received.clear();
+    vtc = await vta.linkedService();
   });
 
   Future<void> pump(WidgetTester tester) => tester.pumpWidget(
