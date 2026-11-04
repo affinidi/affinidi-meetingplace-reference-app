@@ -17,6 +17,7 @@ import 'vtc_join_controller.dart';
 import 'vtc_join_json_dialog.dart';
 import 'vtc_join_state.dart';
 import 'vtc_join_trail.dart';
+import 'vtc_membership_card_view.dart';
 
 /// Joins a community: scan its code or enter its DID, read what it asks,
 /// apply as an identity from the member's VTA. In the look of linking the
@@ -65,13 +66,10 @@ class VtcJoinScreen extends ConsumerWidget {
           onShare: controller.approveCredential,
           onCancel: close,
         ),
-        VtcJoinStep.joined => _Outcome(
-          icon: Icons.verified,
-          message: state.wasMember
-              ? l10n.vtcJoinAlreadyMember(name)
-              : l10n.vtcJoinJoined(name),
+        VtcJoinStep.joined => _Joined(
+          state: state,
           onDone: close,
-          secondary: OnboardingButton(
+          leave: OnboardingButton(
             label: l10n.vtcJoinLeaveAction,
             isOutlined: true,
             onPressed: () async {
@@ -1179,6 +1177,68 @@ class _Pending extends StatelessWidget {
           label: l10n.vtcJoinWithdrawAction,
           onPressed: onWithdraw,
         ),
+      ],
+    );
+  }
+}
+
+/// The member is a member: the community's message, the membership card it
+/// issued — or that it is on its way to the member's VTA — then Done and
+/// [leave].
+class _Joined extends StatelessWidget {
+  const _Joined({
+    required this.state,
+    required this.onDone,
+    required this.leave,
+  });
+
+  final VtcJoinState state;
+  final VoidCallback onDone;
+  final Widget leave;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final name = state.communityName ?? '';
+    final card = state.membershipCard;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 12,
+      children: [
+        const Icon(Icons.verified, size: 72, color: Colors.white),
+        const SizedBox(height: 4),
+        Text(
+          state.wasMember
+              ? l10n.vtcJoinAlreadyMember(name)
+              : l10n.vtcJoinJoined(name),
+          textAlign: TextAlign.center,
+          style: context.textTheme.titleMedium?.copyWith(color: Colors.white),
+        ),
+        const SizedBox(height: 4),
+        if (card != null)
+          VtcMembershipCardView(
+            card: card,
+            communityName: name,
+            logoUrl: state.logoUrl,
+          )
+        else
+          Row(
+            key: const Key('vtc_membership_card_pending'),
+            mainAxisAlignment: MainAxisAlignment.center,
+            spacing: 8,
+            children: [
+              const Icon(Icons.hourglass_top, size: 16, color: Colors.white70),
+              Flexible(
+                child: Text(
+                  l10n.vtcMembershipCardOnItsWay,
+                  style: onboardingNote(context),
+                ),
+              ),
+            ],
+          ),
+        const SizedBox(height: 12),
+        OnboardingButton(label: l10n.generalDone, onPressed: onDone),
+        leave,
       ],
     );
   }

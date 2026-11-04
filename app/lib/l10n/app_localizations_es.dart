@@ -2927,6 +2927,34 @@ class AppLocalizationsEs extends AppLocalizations {
   String get vtcJoinCheckAgain => 'Check again';
 
   @override
+  String get vtcMembershipCardTitle => 'Membership card';
+
+  @override
+  String get vtcMembershipCardShow => 'Show the card';
+
+  @override
+  String get vtcMembershipCardPersonhood => 'Personhood';
+
+  @override
+  String get vtcMembershipCardMember => 'Member';
+
+  @override
+  String get vtcMembershipCardIssuedBy => 'Issued by';
+
+  @override
+  String get vtcMembershipCardValidFrom => 'Valid from';
+
+  @override
+  String get vtcMembershipCardValidUntil => 'Valid until';
+
+  @override
+  String get vtcMembershipCardKept => 'Kept on your VTA';
+
+  @override
+  String get vtcMembershipCardOnItsWay =>
+      'Your membership card is on its way to your VTA';
+
+  @override
   String get vtcJoinWithdrawAction => 'Withdraw application';
 
   @override

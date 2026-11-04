@@ -5,6 +5,7 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
+import 'vtc_detail_line.dart';
 import 'vtc_join_json_dialog.dart';
 
 /// Where an open application stands, drawn as the path it took: signed by
@@ -378,7 +379,12 @@ class _Step extends HookWidget {
                       for (final detail in details)
                         Padding(
                           padding: const EdgeInsets.only(top: _detailSpacing),
-                          child: _DetailLine(detail),
+                          child: VtcDetailLine(
+                            icon: detail.icon,
+                            label: detail.label,
+                            value: detail.value,
+                            isId: detail.isId,
+                          ),
                         ),
                   ],
                 ),
@@ -387,42 +393,6 @@ class _Step extends HookWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-/// A detail of a step: its icon, then its label above its value.
-class _DetailLine extends StatelessWidget {
-  const _DetailLine(this.detail);
-
-  final _Detail detail;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: 8,
-      children: [
-        Icon(detail.icon, size: 16, color: Colors.white70),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 2,
-            children: [
-              Text(detail.label, style: onboardingNote(context)),
-              if (detail.isId)
-                MonospaceDid(detail.value)
-              else
-                SelectableText(
-                  detail.value,
-                  style: context.textTheme.bodySmall?.copyWith(
-                    color: Colors.white,
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }

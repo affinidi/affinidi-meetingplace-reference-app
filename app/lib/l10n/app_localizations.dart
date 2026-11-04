@@ -4354,6 +4354,60 @@ abstract class AppLocalizations {
   /// **'Check again'**
   String get vtcJoinCheckAgain;
 
+  /// Title of the membership card a community issued, shown once the member is admitted
+  ///
+  /// In en, this message translates to:
+  /// **'Membership card'**
+  String get vtcMembershipCardTitle;
+
+  /// Tooltip of the icon that shows the membership card in full
+  ///
+  /// In en, this message translates to:
+  /// **'Show the card'**
+  String get vtcMembershipCardShow;
+
+  /// Chip on the membership card when it states the member proved personhood
+  ///
+  /// In en, this message translates to:
+  /// **'Personhood'**
+  String get vtcMembershipCardPersonhood;
+
+  /// Label of the identity the membership card is about
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get vtcMembershipCardMember;
+
+  /// Label of the community DID that issued the membership card
+  ///
+  /// In en, this message translates to:
+  /// **'Issued by'**
+  String get vtcMembershipCardIssuedBy;
+
+  /// Label of when the membership card starts to hold
+  ///
+  /// In en, this message translates to:
+  /// **'Valid from'**
+  String get vtcMembershipCardValidFrom;
+
+  /// Label of when the membership card stops holding
+  ///
+  /// In en, this message translates to:
+  /// **'Valid until'**
+  String get vtcMembershipCardValidUntil;
+
+  /// Note that the membership card is kept on the member's VTA
+  ///
+  /// In en, this message translates to:
+  /// **'Kept on your VTA'**
+  String get vtcMembershipCardKept;
+
+  /// Shown on the joined screen until the member's VTA holds the membership card
+  ///
+  /// In en, this message translates to:
+  /// **'Your membership card is on its way to your VTA'**
+  String get vtcMembershipCardOnItsWay;
+
   /// Button that withdraws the open application to a community
   ///
   /// In en, this message translates to:

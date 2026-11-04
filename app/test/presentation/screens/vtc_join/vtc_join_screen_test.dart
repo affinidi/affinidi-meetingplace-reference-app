@@ -273,6 +273,87 @@ void main() {
       expect(find.widgetWithText(ElevatedButton, 'Join'), findsOneWidget);
     });
 
+    group('membership card', () {
+      Map<String, dynamic> vtaHoldsCard({bool personhood = false}) {
+        final card = {
+          'id': 'urn:uuid:vmc',
+          'type': [
+            'VerifiableCredential',
+            'MembershipCredential',
+            if (personhood) 'PersonhoodCredential',
+          ],
+          'issuer': fakeVtcDid,
+          'validFrom': '2026-11-04T10:00:00Z',
+          'validUntil': '2027-11-04T10:00:00Z',
+          'credentialSubject': {'id': persona.did},
+        };
+        network.vta
+          ..answers[VtaTask.credentialsQuery] = {
+            'credentials': [
+              {'id': 'card-1'},
+            ],
+          }
+          ..answers[VtaTask.credentialsGet] = {'credential': card};
+        return card;
+      }
+
+      testWidgets('shows the card the community issued', (tester) async {
+        final card = vtaHoldsCard();
+        await pumpScreen(tester);
+        await enterCode(tester, fakeVtcDid);
+        await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
+        await settle(tester);
+
+        expect(find.byKey(const Key('vtc_membership_card')), findsOneWidget);
+        expect(find.text('Membership card'), findsOneWidget);
+        expect(find.text(persona.did), findsOneWidget);
+        expect(find.text('Issued by'), findsOneWidget);
+        expect(find.text('Valid until'), findsOneWidget);
+        expect(find.text('Kept on your VTA'), findsOneWidget);
+        expect(find.text('Personhood'), findsNothing);
+
+        await tapVisible(
+          tester,
+          find.byKey(const Key('vtc_membership_card_document')),
+        );
+        await tester.pumpAndSettle();
+        final shown = tester
+            .widget<SelectableText>(find.byKey(const Key('vtc_join_json')))
+            .textSpan!
+            .toPlainText();
+        expect(jsonDecode(shown), card);
+      });
+
+      testWidgets('says when the card states personhood', (tester) async {
+        vtaHoldsCard(personhood: true);
+        await pumpScreen(tester);
+        await enterCode(tester, fakeVtcDid);
+        await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
+        await settle(tester);
+
+        expect(find.text('Personhood'), findsOneWidget);
+      });
+
+      testWidgets('says the card is on its way until the VTA holds it', (
+        tester,
+      ) async {
+        await pumpScreen(tester);
+        await enterCode(tester, fakeVtcDid);
+        await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
+        await settle(tester);
+
+        expect(find.byKey(const Key('vtc_membership_card')), findsNothing);
+        expect(
+          find.text('Your membership card is on its way to your VTA'),
+          findsOneWidget,
+        );
+        expect(
+          find.widgetWithText(OutlinedButton, 'Leave community'),
+          findsOneWidget,
+        );
+      });
+    });
+
     testWidgets('shows the profile and what the directory shows', (
       tester,
     ) async {

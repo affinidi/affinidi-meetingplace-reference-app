@@ -2674,6 +2674,42 @@
 		}
 	},
 	"vtcJoinCheckAgain": "Check again",
+	"vtcMembershipCardTitle": "Membership card",
+	"@vtcMembershipCardTitle": {
+		"description": "Title of the membership card a community issued, shown once the member is admitted"
+	},
+	"vtcMembershipCardShow": "Show the card",
+	"@vtcMembershipCardShow": {
+		"description": "Tooltip of the icon that shows the membership card in full"
+	},
+	"vtcMembershipCardPersonhood": "Personhood",
+	"@vtcMembershipCardPersonhood": {
+		"description": "Chip on the membership card when it states the member proved personhood"
+	},
+	"vtcMembershipCardMember": "Member",
+	"@vtcMembershipCardMember": {
+		"description": "Label of the identity the membership card is about"
+	},
+	"vtcMembershipCardIssuedBy": "Issued by",
+	"@vtcMembershipCardIssuedBy": {
+		"description": "Label of the community DID that issued the membership card"
+	},
+	"vtcMembershipCardValidFrom": "Valid from",
+	"@vtcMembershipCardValidFrom": {
+		"description": "Label of when the membership card starts to hold"
+	},
+	"vtcMembershipCardValidUntil": "Valid until",
+	"@vtcMembershipCardValidUntil": {
+		"description": "Label of when the membership card stops holding"
+	},
+	"vtcMembershipCardKept": "Kept on your VTA",
+	"@vtcMembershipCardKept": {
+		"description": "Note that the membership card is kept on the member's VTA"
+	},
+	"vtcMembershipCardOnItsWay": "Your membership card is on its way to your VTA",
+	"@vtcMembershipCardOnItsWay": {
+		"description": "Shown on the joined screen until the member's VTA holds the membership card"
+	},
 	"vtcJoinWithdrawAction": "Withdraw application",
 	"@vtcJoinWithdrawAction": {
 		"description": "Button that withdraws the open application to a community"
