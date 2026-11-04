@@ -119,6 +119,7 @@ class FakeVtcNetwork implements HttpClientAdapter {
   MeetingPlaceVtcSDK sdk() => MeetingPlaceVtcSDK(
     didResolver: vta,
     dio: Dio()..httpClientAdapter = this,
+    openVtaMailbox: vta.openMailbox,
   );
 
   @override

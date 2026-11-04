@@ -67,7 +67,7 @@ void main() {
       expect(await service.managerDid(), managerDid);
       expect(linked?.vtaDid, vta.did);
       expect(linked?.isGranted, isFalse);
-      expect(vta.received.single['type'], VtaTask.challenge);
+      expect(vta.received.single['type'], VtaTask.ping);
     });
 
     test('links one VTA at a time', () async {
