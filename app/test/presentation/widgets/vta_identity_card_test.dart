@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -104,15 +105,24 @@ void main() {
       expect(avatar.bottom, lessThan(name.top));
     });
 
-    testWidgets('hides what lies behind it, as in a deck', (tester) async {
+    testWidgets('blurs what lies behind it, as in a deck', (tester) async {
       await _pump(tester, const VtaIdentityCard(did: _did, card: _card));
 
-      final glass = tester.widget<DecoratedBox>(_glass());
-      final decoration = glass.decoration as BoxDecoration;
-      expect(decoration.color, isNull);
-      for (final color in decoration.gradient!.colors) {
-        expect(color.a, 1.0, reason: '$color lets the card behind show');
-      }
+      final blur = tester.widget<BackdropFilter>(
+        find.descendant(
+          of: find.byType(VtaIdentityCard),
+          matching: find.byType(BackdropFilter),
+        ),
+      );
+      expect(blur.filter, ImageFilter.blur(sigmaX: 20, sigmaY: 20));
+      // Clipped to the card, so the blur stops at its rounded edge.
+      expect(
+        find.ancestor(
+          of: find.byType(BackdropFilter),
+          matching: find.byType(ClipRRect),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('spans the card across a short name', (tester) async {

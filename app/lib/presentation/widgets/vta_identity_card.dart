@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -7,8 +9,8 @@ import '../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../infrastructure/providers/cache_manager_provider.dart';
 import 'onboarding_style/onboarding_style.dart';
 
-/// A VTA identity as a card in the shape of an MPX identity card, with a
-/// glass look on the gradient: its picture centred over the card's upper edge,
+/// A VTA identity as a card in the shape of an MPX identity card, frosted
+/// glass over the gradient: its picture centred over the card's upper edge,
 /// its name, the details its profile holds, and its full DID as metadata at
 /// the foot. A null [did] is the new identity the VTA would create.
 class VtaIdentityCard extends ConsumerWidget {
@@ -25,6 +27,8 @@ class VtaIdentityCard extends ConsumerWidget {
   /// The picture straddles the card's upper edge by half its height.
   static const _avatarRadius = 40.0;
   static const _avatarRing = 3.0;
+
+  static const _blurSigma = 20.0;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -54,79 +58,81 @@ class VtaIdentityCard extends ConsumerWidget {
         fit: StackFit.passthrough,
         clipBehavior: Clip.none,
         children: [
-          DecoratedBox(
-            decoration: BoxDecoration(
-              // Glass in look only: the sheen is blended onto the theme
-              // colour rather than let through, so the card behind it in a
-              // deck does not show.
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color.alphaBlend(
-                    Colors.white.withAlpha(60),
-                    context.colorScheme.primary,
+          // Frosted glass: the gradient shows through, blurred enough that
+          // the card stacked behind it in a deck cannot be read.
+          ClipRRect(
+            borderRadius: const BorderRadius.all(_radius),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: _blurSigma, sigmaY: _blurSigma),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.white.withAlpha(60),
+                      Colors.white.withAlpha(25),
+                    ],
                   ),
-                  Color.alphaBlend(
-                    Colors.white.withAlpha(25),
-                    context.colorScheme.primary,
+                  borderRadius: const BorderRadius.all(_radius),
+                  border: Border.all(color: Colors.white.withAlpha(90)),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    16,
+                    _avatarRadius + 10,
+                    16,
+                    14,
                   ),
-                ],
-              ),
-              borderRadius: const BorderRadius.all(_radius),
-              border: Border.all(color: Colors.white.withAlpha(90)),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                16,
-                _avatarRadius + 10,
-                16,
-                14,
-              ),
-              // Sized to its content, or filling a slot such as a card in a
-              // deck.
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                spacing: 6,
-                children: [
-                  Text(
-                    did == null
-                        ? l10n.vtcJoinNewIdentity
-                        : displayName.isNotEmpty
-                        ? displayName
-                        : l10n.vtcJoinExistingIdentity,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: textTheme.titleMedium?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  if (did == null) ...[
-                    Text(
-                      l10n.vtcJoinNewIdentityHost,
-                      textAlign: TextAlign.center,
-                      style: textTheme.labelMedium?.copyWith(
-                        color: Colors.white70,
+                  // Sized to its content, or filling a slot such as a card in a
+                  // deck.
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    spacing: 6,
+                    children: [
+                      Text(
+                        did == null
+                            ? l10n.vtcJoinNewIdentity
+                            : displayName.isNotEmpty
+                            ? displayName
+                            : l10n.vtcJoinExistingIdentity,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: textTheme.titleMedium?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      l10n.vtcJoinNewIdentityNote,
-                      textAlign: TextAlign.center,
-                      style: onboardingNote(context),
-                    ),
-                  ] else ...[
-                    const SizedBox(height: 4),
-                    for (final (icon, value) in details)
-                      _Detail(icon: icon, value: value),
-                    if (details.isNotEmpty)
-                      Divider(height: 12, color: Colors.white.withAlpha(50)),
-                    _DidMetadata(did: did),
-                  ],
-                ],
+                      if (did == null) ...[
+                        Text(
+                          l10n.vtcJoinNewIdentityHost,
+                          textAlign: TextAlign.center,
+                          style: textTheme.labelMedium?.copyWith(
+                            color: Colors.white70,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          l10n.vtcJoinNewIdentityNote,
+                          textAlign: TextAlign.center,
+                          style: onboardingNote(context),
+                        ),
+                      ] else ...[
+                        const SizedBox(height: 4),
+                        for (final (icon, value) in details)
+                          _Detail(icon: icon, value: value),
+                        if (details.isNotEmpty)
+                          Divider(
+                            height: 12,
+                            color: Colors.white.withAlpha(50),
+                          ),
+                        _DidMetadata(did: did),
+                      ],
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
