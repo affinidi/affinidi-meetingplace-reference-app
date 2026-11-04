@@ -102,16 +102,6 @@ class IdentityPicker extends HookWidget {
 
           onSelectedIdentity(identityToSelect);
         },
-        onSwipe: (prev, curr, direction) {
-          if (direction != CardSwiperDirection.bottom) return;
-
-          final identityToDelete = identities[prev];
-          if (identityToDelete.isPrimary || identityToDelete.isPlaceholder) {
-            return;
-          }
-
-          onDeleteIdentity?.call(identityToDelete);
-        },
       ),
     );
   }

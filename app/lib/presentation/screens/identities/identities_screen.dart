@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pie_menu/pie_menu.dart';
@@ -137,11 +136,6 @@ class _IdentityPicker extends ConsumerWidget {
       onPublishOfferForIdentity: (identity) async =>
           await PublishOfferRoute(identityId: identity.id).push<void>(context),
       onSelectedIdentity: controller.setCurrentIdentity,
-      swipeDirection: const AllowedSwipeDirection.only(
-        left: true,
-        right: true,
-        down: true,
-      ),
       cacheManager: cacheManager,
     );
   }
