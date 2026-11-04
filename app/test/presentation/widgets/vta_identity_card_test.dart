@@ -104,6 +104,17 @@ void main() {
       expect(avatar.bottom, lessThan(name.top));
     });
 
+    testWidgets('hides what lies behind it, as in a deck', (tester) async {
+      await _pump(tester, const VtaIdentityCard(did: _did, card: _card));
+
+      final glass = tester.widget<DecoratedBox>(_glass());
+      final decoration = glass.decoration as BoxDecoration;
+      expect(decoration.color, isNull);
+      for (final color in decoration.gradient!.colors) {
+        expect(color.a, 1.0, reason: '$color lets the card behind show');
+      }
+    });
+
     testWidgets('spans the card across a short name', (tester) async {
       await _pump(
         tester,

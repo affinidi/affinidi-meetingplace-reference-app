@@ -7,8 +7,8 @@ import '../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../infrastructure/providers/cache_manager_provider.dart';
 import 'onboarding_style/onboarding_style.dart';
 
-/// A VTA identity as a card in the shape of an MPX identity card, frosted
-/// glass over the gradient: its picture centred over the card's upper edge,
+/// A VTA identity as a card in the shape of an MPX identity card, with a
+/// glass look on the gradient: its picture centred over the card's upper edge,
 /// its name, the details its profile holds, and its full DID as metadata at
 /// the foot. A null [did] is the new identity the VTA would create.
 class VtaIdentityCard extends ConsumerWidget {
@@ -56,7 +56,23 @@ class VtaIdentityCard extends ConsumerWidget {
         children: [
           DecoratedBox(
             decoration: BoxDecoration(
-              color: Colors.white.withAlpha(35),
+              // Glass in look only: the sheen is blended onto the theme
+              // colour rather than let through, so the card behind it in a
+              // deck does not show.
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color.alphaBlend(
+                    Colors.white.withAlpha(60),
+                    context.colorScheme.primary,
+                  ),
+                  Color.alphaBlend(
+                    Colors.white.withAlpha(25),
+                    context.colorScheme.primary,
+                  ),
+                ],
+              ),
               borderRadius: const BorderRadius.all(_radius),
               border: Border.all(color: Colors.white.withAlpha(90)),
             ),
