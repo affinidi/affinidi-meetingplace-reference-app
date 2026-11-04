@@ -136,10 +136,6 @@ Future<bool> _confirmLeave(BuildContext context, String name) async {
   return confirmed ?? false;
 }
 
-/// Small print on the gradient, such as a note under a card.
-TextStyle? _note(BuildContext context) =>
-    context.textTheme.bodySmall?.copyWith(color: Colors.white70);
-
 /// Takes a community's code: its DID typed or pasted, or its QR code
 /// scanned. Both are read the same way.
 class _EnterCode extends HookConsumerWidget {
@@ -310,13 +306,13 @@ class _Profile extends HookWidget {
                 ),
               ),
             if (state.website case final website?)
-              _Line(
+              OnboardingLine(
                 icon: Icons.language,
                 title: l10n.vtcJoinWebsite,
                 subtitle: website.toString(),
               ),
             if (state.contactEmail case final email?)
-              _Line(
+              OnboardingLine(
                 icon: Icons.mail_outline,
                 title: l10n.vtcJoinContact,
                 subtitle: email,
@@ -342,7 +338,10 @@ class _Profile extends HookWidget {
                         textKey: const Key('vtc_join_community_did'),
                       ),
                       if (copied.value)
-                        Text(l10n.copiedToClipboard, style: _note(context)),
+                        Text(
+                          l10n.copiedToClipboard,
+                          style: onboardingNote(context),
+                        ),
                     ],
                   ),
                 ),
@@ -449,7 +448,7 @@ class _Consent extends StatelessWidget {
                 listed
                     ? l10n.vtcJoinDirectoryListed
                     : l10n.vtcJoinDirectoryHidden,
-                style: _note(context),
+                style: onboardingNote(context),
               ),
             ),
           if (state.listsNewMembers != false)
@@ -466,9 +465,15 @@ class _Consent extends StatelessWidget {
                         l10n.vtcJoinListMe,
                         style: const TextStyle(color: Colors.white),
                       ),
-                      Text(l10n.vtcJoinListMeNote, style: _note(context)),
+                      Text(
+                        l10n.vtcJoinListMeNote,
+                        style: onboardingNote(context),
+                      ),
                       if (disclosure?.externalCards ?? false)
-                        Text(l10n.vtcJoinExternalCards, style: _note(context)),
+                        Text(
+                          l10n.vtcJoinExternalCards,
+                          style: onboardingNote(context),
+                        ),
                     ],
                   ),
                 ),
@@ -583,7 +588,7 @@ class _ConsentItem extends HookWidget {
                   ),
                   if (expanded.value)
                     for (final detail in details)
-                      Text(detail, style: _note(context)),
+                      Text(detail, style: onboardingNote(context)),
                 ],
               ),
             ),
@@ -620,10 +625,10 @@ class _WaysIn extends StatelessWidget {
               state.admitsAtOnce
                   ? l10n.vtcJoinAdmitsAtOnce
                   : l10n.vtcJoinReviewed,
-              style: _note(context),
+              style: onboardingNote(context),
             ),
           for (final way in state.ways)
-            _Line(
+            OnboardingLine(
               icon: way.unsupported != null
                   ? Icons.block
                   : way.automatic
@@ -663,43 +668,6 @@ class _Logo extends StatelessWidget {
           errorBuilder: (_, _, _) => const SizedBox.shrink(),
         ),
       ),
-    );
-  }
-}
-
-/// A line in a glass card: a white icon, a title, and an optional
-/// explanation.
-class _Line extends StatelessWidget {
-  const _Line({required this.icon, required this.title, this.subtitle});
-
-  final IconData icon;
-  final String title;
-  final String? subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: 12,
-      children: [
-        Icon(icon, size: 20, color: Colors.white),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 2,
-            children: [
-              Text(
-                title,
-                style: context.textTheme.bodyMedium?.copyWith(
-                  color: Colors.white,
-                ),
-              ),
-              if (subtitle case final subtitle?)
-                Text(subtitle, style: _note(context)),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }
@@ -744,7 +712,7 @@ class _ChooseIdentity extends HookWidget {
             l10n.vtcJoinIdentityPosition(current.value + 1, options.length),
             key: const Key('vtc_join_identity_position'),
             textAlign: TextAlign.center,
-            style: _note(context),
+            style: onboardingNote(context),
           ),
         const SizedBox(height: 12),
         OnboardingButton(
@@ -855,7 +823,10 @@ class _VtaIdentityCard extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: did == null
-                  ? Text(l10n.vtcJoinNewIdentityNote, style: _note(context))
+                  ? Text(
+                      l10n.vtcJoinNewIdentityNote,
+                      style: onboardingNote(context),
+                    )
                   : Text(
                       did,
                       maxLines: 4,
@@ -912,7 +883,7 @@ class _ApproveDetails extends StatelessWidget {
             spacing: 12,
             children: [
               for (final detail in state.details)
-                _Line(
+                OnboardingLine(
                   icon: Icons.badge,
                   title: detail.value,
                   subtitle: detail.type,

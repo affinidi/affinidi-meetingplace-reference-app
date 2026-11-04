@@ -353,6 +353,52 @@ class GlassCard extends StatelessWidget {
   }
 }
 
+/// Small print on the gradient, such as a note under a card.
+TextStyle? onboardingNote(BuildContext context) =>
+    context.textTheme.bodySmall?.copyWith(color: Colors.white70);
+
+/// A line in a glass card: a white icon, a title, and an optional
+/// explanation.
+class OnboardingLine extends StatelessWidget {
+  const OnboardingLine({
+    super.key,
+    required this.icon,
+    required this.title,
+    this.subtitle,
+  });
+
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 12,
+      children: [
+        Icon(icon, size: 20, color: Colors.white),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 2,
+            children: [
+              Text(
+                title,
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: Colors.white,
+                ),
+              ),
+              if (subtitle case final subtitle?)
+                Text(subtitle, style: onboardingNote(context)),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 /// A DID in monospace, so its long identifier reads as one value.
 class MonospaceDid extends StatelessWidget {
   const MonospaceDid(this.did, {super.key, this.textKey});
