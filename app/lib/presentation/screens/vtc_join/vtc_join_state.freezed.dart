@@ -244,8 +244,8 @@ return $default(_that.step,_that.communityDid,_that.communityName,_that.logoUrl,
 /// @nodoc
 
 
-class _VtcJoinState extends VtcJoinState {
-   _VtcJoinState({this.step = VtcJoinStep.scanning, this.communityDid, this.communityName, this.logoUrl, this.description, this.website, this.contactEmail, this.directoryDisclosure, this.canApply = false, this.wasMember = false, final  List<VtcJoinWay> ways = const <VtcJoinWay>[], this.chosenWayId, final  Map<String, dynamic> manifest = const <String, dynamic>{}, final  List<JoinAttributeRequest> requestedDetails = const <JoinAttributeRequest>[], this.listsNewMembers, this.listInDirectory = false, final  List<String> identityChoices = const <String>[], final  Map<String, Identity> identities = const <String, Identity>{}, final  List<VtcJoinDetail> details = const <VtcJoinDetail>[], this.denialReason, this.failure}): _ways = ways,_manifest = manifest,_requestedDetails = requestedDetails,_identityChoices = identityChoices,_identities = identities,_details = details,super._();
+class _VtcJoinState implements VtcJoinState {
+   _VtcJoinState({this.step = VtcJoinStep.scanning, this.communityDid, this.communityName, this.logoUrl, this.description, this.website, this.contactEmail, this.directoryDisclosure, this.canApply = false, this.wasMember = false, final  List<VtcJoinWay> ways = const <VtcJoinWay>[], this.chosenWayId, final  Map<String, dynamic> manifest = const <String, dynamic>{}, final  List<JoinAttributeRequest> requestedDetails = const <JoinAttributeRequest>[], this.listsNewMembers, this.listInDirectory = false, final  List<String> identityChoices = const <String>[], final  Map<String, Identity> identities = const <String, Identity>{}, final  List<VtcJoinDetail> details = const <VtcJoinDetail>[], this.denialReason, this.failure}): _ways = ways,_manifest = manifest,_requestedDetails = requestedDetails,_identityChoices = identityChoices,_identities = identities,_details = details;
   
 
 @override@JsonKey() final  VtcJoinStep step;

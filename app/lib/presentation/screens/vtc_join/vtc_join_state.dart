@@ -142,8 +142,6 @@ class VtcJoinWay {
 
 @Freezed(fromJson: false, toJson: false)
 abstract class VtcJoinState with _$VtcJoinState {
-  VtcJoinState._();
-
   factory VtcJoinState({
     @Default(VtcJoinStep.scanning) VtcJoinStep step,
 
@@ -202,11 +200,4 @@ abstract class VtcJoinState with _$VtcJoinState {
     String? denialReason,
     VtcJoinFailure? failure,
   }) = _VtcJoinState;
-
-  /// The way in the member applies under, or null when there is none.
-  VtcJoinWay? get chosenWay =>
-      ways.where((way) => way.id == chosenWayId).firstOrNull;
-
-  /// Whether applying under [chosenWay] admits at once.
-  bool get admitsAtOnce => chosenWay?.automatic ?? false;
 }

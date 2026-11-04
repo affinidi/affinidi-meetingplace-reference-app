@@ -355,20 +355,12 @@ void main() {
       expect(chosen('open'), isTrue);
       expect(chosen('reviewed'), isFalse);
       expect(find.byKey(const Key('vtc_join_way_invited')), findsNothing);
-      expect(
-        find.text('You become a member as soon as you apply.'),
-        findsOneWidget,
-      );
 
       await tapVisible(tester, find.text('For clubs from abroad'));
       await tester.pumpAndSettle();
 
       expect(chosen('reviewed'), isTrue);
       expect(chosen('open'), isFalse);
-      expect(
-        find.text("The community's administrators review each application."),
-        findsOneWidget,
-      );
     });
 
     testWidgets('offers no choice with one way in', (tester) async {

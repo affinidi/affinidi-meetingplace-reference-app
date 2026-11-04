@@ -651,9 +651,9 @@ class _ConsentItem extends HookWidget {
   }
 }
 
-/// How to get in: what admission under the chosen way takes, and each way
-/// in the community offers. When this app supports more than one, the
-/// member chooses which to apply under.
+/// How to get in: each way in the community offers and what admission
+/// under it takes. When this app supports more than one, the member chooses
+/// which to apply under.
 class _WaysIn extends StatelessWidget {
   const _WaysIn({required this.state, required this.onChoose});
 
@@ -670,13 +670,6 @@ class _WaysIn extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: 12,
         children: [
-          if (state.canApply)
-            Text(
-              state.admitsAtOnce
-                  ? l10n.vtcJoinAdmitsAtOnce
-                  : l10n.vtcJoinReviewed,
-              style: onboardingNote(context),
-            ),
           for (final way in state.ways)
             _Way(
               way: way,

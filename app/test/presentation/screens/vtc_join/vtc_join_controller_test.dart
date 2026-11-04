@@ -125,7 +125,7 @@ void main() {
       expect(open.automatic, isFalse);
       expect(open.description, 'Anyone in Berlin');
       expect(state().canApply, isTrue);
-      expect(state().admitsAtOnce, isFalse);
+      expect(state().chosenWayId, 'open');
       expect(state().requestedDetails.single.type, 'name');
       expect(state().listsNewMembers, isTrue);
       expect(state().listInDirectory, isFalse, reason: 'off by default');
@@ -168,7 +168,6 @@ void main() {
       test('applies under the first supported way unless told', () async {
         await controller().onScanned(fakeVtcDid);
         expect(state().chosenWayId, 'open');
-        expect(state().admitsAtOnce, isTrue);
 
         await controller().join();
 
@@ -180,7 +179,6 @@ void main() {
 
         controller().chooseWay('reviewed');
         expect(state().chosenWayId, 'reviewed');
-        expect(state().admitsAtOnce, isFalse);
         await controller().join();
 
         expect(submitted()['criterion'], 'zReviewed');
@@ -467,7 +465,7 @@ void main() {
       expect(state().step, VtcJoinStep.review);
       expect(state().communityName, 'Football club');
       expect(state().canApply, isTrue);
-      expect(state().admitsAtOnce, isTrue);
+      expect(state().chosenWayId, 'open');
 
       await controller().join();
 

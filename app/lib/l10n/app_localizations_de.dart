@@ -2623,13 +2623,6 @@ class AppLocalizationsDe extends AppLocalizations {
       'Scan a community\'s code and apply with your VTA';
 
   @override
-  String get vtcJoinAdmitsAtOnce => 'You become a member as soon as you apply.';
-
-  @override
-  String get vtcJoinReviewed =>
-      'The community\'s administrators review each application.';
-
-  @override
   String get vtcJoinChooseIdentity => 'Join with which identity?';
 
   @override

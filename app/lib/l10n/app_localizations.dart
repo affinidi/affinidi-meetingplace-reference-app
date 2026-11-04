@@ -3862,18 +3862,6 @@ abstract class AppLocalizations {
   /// **'Scan a community\'s code and apply with your VTA'**
   String get vtcJoinMenuSubtitle;
 
-  /// No description provided for @vtcJoinAdmitsAtOnce.
-  ///
-  /// In en, this message translates to:
-  /// **'You become a member as soon as you apply.'**
-  String get vtcJoinAdmitsAtOnce;
-
-  /// No description provided for @vtcJoinReviewed.
-  ///
-  /// In en, this message translates to:
-  /// **'The community\'s administrators review each application.'**
-  String get vtcJoinReviewed;
-
   /// No description provided for @vtcJoinChooseIdentity.
   ///
   /// In en, this message translates to:

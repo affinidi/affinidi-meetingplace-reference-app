@@ -2429,8 +2429,6 @@
 	"vtcJoinPasteAction": "Paste",
 	"vtcJoinContinueAction": "Continue",
 	"vtcJoinMenuSubtitle": "Scan a community's code and apply with your VTA",
-	"vtcJoinAdmitsAtOnce": "You become a member as soon as you apply.",
-	"vtcJoinReviewed": "The community's administrators review each application.",
 	"vtcJoinChooseIdentity": "Join with which identity?",
 	"vtcJoinShareDetails": "Share these details with {name}?",
 	"@vtcJoinShareDetails": {
