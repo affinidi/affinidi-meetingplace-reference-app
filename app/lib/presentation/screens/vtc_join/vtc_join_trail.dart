@@ -19,6 +19,7 @@ class VtcJoinTrail extends StatelessWidget {
     required this.communityName,
     required this.autoCheckInterval,
     this.submit,
+    this.receipt,
     this.requestId,
     this.deferred = false,
     this.lastCheckedAt,
@@ -30,6 +31,10 @@ class VtcJoinTrail extends StatelessWidget {
   /// The signed application and the community's verified answer, or null
   /// when this phone has no receipt for it.
   final TrustTaskExchange? submit;
+
+  /// What shows the application was signed and answered when this phone
+  /// keeps no documents for it, only the receipt.
+  final TrustTaskReceipt? receipt;
 
   /// The community's id of the application, if known.
   final String? requestId;
@@ -49,7 +54,7 @@ class VtcJoinTrail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final receipt = submit?.receipt;
+    final receipt = submit?.receipt ?? this.receipt;
     final lastCheck = this.lastCheck?.receipt;
     final locale = l10n.localeName;
     String time(DateTime at) =>

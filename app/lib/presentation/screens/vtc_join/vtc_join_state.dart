@@ -265,6 +265,10 @@ abstract class VtcJoinState with _$VtcJoinState {
     /// did not send it.
     TrustTaskExchange? submitExchange,
 
+    /// What shows the open application was signed and answered: from
+    /// [submitExchange], or recorded without the documents.
+    TrustTaskReceipt? submitReceipt,
+
     /// The community's id of the open application, if known.
     String? requestId,
 

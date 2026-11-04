@@ -77,6 +77,7 @@ void main() {
   Future<void> pumpTrail(
     WidgetTester tester, {
     TrustTaskExchange? submit,
+    TrustTaskReceipt? receipt,
     String? requestId,
     bool deferred = false,
     DateTime? lastCheckedAt,
@@ -92,6 +93,7 @@ void main() {
             child: VtcJoinTrail(
               communityName: 'Football club',
               submit: submit,
+              receipt: receipt,
               requestId: requestId,
               deferred: deferred,
               lastCheckedAt: lastCheckedAt,
@@ -209,6 +211,21 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text("The community's last signed answer"), findsOneWidget);
       expect(find.textContaining('"status": "pending"'), findsOneWidget);
+    });
+
+    testWidgets('shows a receipt kept without its documents', (tester) async {
+      await pumpTrail(tester, receipt: submit.receipt);
+
+      expect(find.textContaining('eddsa-jcs-2022 · '), findsOneWidget);
+      expect(
+        find.text('Passed to its administrators · its signed answer verified'),
+        findsOneWidget,
+      );
+      await tester.tap(find.byKey(const Key('vtc_join_trail_vta')));
+      await tester.pumpAndSettle();
+      expect(find.text('urn:uuid:submit'), findsOneWidget);
+      // No documents to show.
+      expect(find.byIcon(Icons.data_object), findsNothing);
     });
 
     testWidgets('says when the administrators put it off', (tester) async {

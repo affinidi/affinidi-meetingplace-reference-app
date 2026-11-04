@@ -16,7 +16,8 @@ class VtcCommunity {
     this.isSettled = true,
     this.rejectionReason,
     this.submitExchange,
-  });
+    TrustTaskReceipt? submitReceipt,
+  }) : _storedReceipt = submitReceipt;
 
   /// Restores a [VtcCommunity] stored with [toJson].
   ///
@@ -37,7 +38,17 @@ class VtcCommunity {
       isSettled: json['isSettled'] as bool? ?? true,
       rejectionReason: json['rejectionReason'] as String?,
       submitExchange: _exchangeOf(json['submitExchange']),
+      submitReceipt: _receiptOf(json['submitReceipt']),
     );
+  }
+
+  static TrustTaskReceipt? _receiptOf(Object? json) {
+    if (json is! Map<String, dynamic>) return null;
+    try {
+      return TrustTaskReceipt.fromJson(json);
+    } on Object {
+      return null;
+    }
   }
 
   static TrustTaskExchange? _exchangeOf(Object? json) {
@@ -89,8 +100,13 @@ class VtcCommunity {
   /// They carry what the member disclosed: kept in secure storage only.
   final TrustTaskExchange? submitExchange;
 
-  /// What [submitExchange] shows, without its payloads.
-  TrustTaskReceipt? get submitReceipt => submitExchange?.receipt;
+  /// What [submitExchange] shows, without its payloads; for an application
+  /// recorded before the documents were kept, the receipt recorded then.
+  TrustTaskReceipt? get submitReceipt =>
+      submitExchange?.receipt ?? _storedReceipt;
+
+  /// A receipt recorded without its documents.
+  final TrustTaskReceipt? _storedReceipt;
 
   /// Whether an application is waiting for the community's decision.
   bool get isApplying => !isMember && joinRequestId != null;
@@ -132,6 +148,11 @@ class VtcCommunity {
     String? rejectionReason,
     TrustTaskExchange? submitExchange,
   }) {
+    // What shows the open request belongs to it: kept while it stays open,
+    // dropped once it is decided or withdrawn.
+    final sameRequest =
+        isMember == null ||
+        (joinRequestId != null && joinRequestId == this.joinRequestId);
     return VtcCommunity(
       communityDid: communityDid,
       personaDid: personaDid,
@@ -146,14 +167,11 @@ class VtcCommunity {
       rejectionReason: isMember == null
           ? this.rejectionReason
           : rejectionReason,
-      // The documents belong to the open request: kept while it stays open,
-      // dropped once it is decided or withdrawn.
-      submitExchange: isMember == null
-          ? this.submitExchange
-          : submitExchange ??
-                (joinRequestId != null && joinRequestId == this.joinRequestId
-                    ? this.submitExchange
-                    : null),
+      submitExchange:
+          submitExchange ?? (sameRequest ? this.submitExchange : null),
+      submitReceipt: submitExchange == null && sameRequest
+          ? _storedReceipt
+          : null,
     );
   }
 
@@ -170,5 +188,6 @@ class VtcCommunity {
     'isSettled': isSettled,
     'rejectionReason': ?rejectionReason,
     'submitExchange': ?submitExchange?.toJson(),
+    if (submitExchange == null) 'submitReceipt': ?_storedReceipt?.toJson(),
   };
 }

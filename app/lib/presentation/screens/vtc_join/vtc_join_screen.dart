@@ -1150,6 +1150,7 @@ class _Pending extends StatelessWidget {
           child: VtcJoinTrail(
             communityName: name,
             submit: state.submitExchange,
+            receipt: state.submitReceipt,
             requestId: state.requestId,
             deferred: state.deferred,
             lastCheckedAt: state.lastCheckedAt,

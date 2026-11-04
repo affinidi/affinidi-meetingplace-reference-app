@@ -50,6 +50,21 @@ void main() {
       expect(VtcCommunity.fromJson(json).submitExchange, isNull);
     });
 
+    test('falls back to a receipt recorded without documents', () {
+      final json = applying.toJson()
+        ..remove('submitExchange')
+        ..['submitReceipt'] = exchange.receipt.toJson();
+
+      final restored = VtcCommunity.fromJson(json);
+
+      expect(restored.submitExchange, isNull);
+      expect(restored.submitReceipt?.toJson(), exchange.receipt.toJson());
+      // Kept through rewrites while the request stays open.
+      final rewritten = VtcCommunity.fromJson(restored.settled(false).toJson());
+      expect(rewritten.submitReceipt?.type, JoinTask.submit);
+      expect(restored.rejected(null).submitReceipt, isNull);
+    });
+
     test('is dropped when unreadable, the record kept', () {
       final json = applying.toJson()
         ..['submitExchange'] = {'request': 'garbled'};
