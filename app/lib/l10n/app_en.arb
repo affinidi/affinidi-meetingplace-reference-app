@@ -2773,10 +2773,6 @@
 	"@vtcJoinTrailKey": {
 		"description": "Label of the key that signed the application"
 	},
-	"vtcJoinTrailDocument": "Document id",
-	"@vtcJoinTrailDocument": {
-		"description": "Label of the id of the signed application document"
-	},
 	"vtcJoinTrailCryptosuite": "Cryptosuite",
 	"@vtcJoinTrailCryptosuite": {
 		"description": "Label of the cryptosuite the application was signed with"

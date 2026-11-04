@@ -114,12 +114,6 @@ class VtcJoinTrail extends StatelessWidget {
                 l10n.vtcJoinTrailTask,
                 receipt.type,
               ),
-              _Detail(
-                Icons.description_outlined,
-                l10n.vtcJoinTrailDocument,
-                receipt.documentId,
-                isId: true,
-              ),
               ...proof(
                 cryptosuite: receipt.cryptosuite,
                 key: receipt.verificationMethod,
@@ -150,13 +144,6 @@ class VtcJoinTrail extends StatelessWidget {
               ),
               if (receipt.answerType case final type?)
                 _Detail(Icons.assignment_outlined, l10n.vtcJoinTrailTask, type),
-              if (receipt.answerDocumentId case final id?)
-                _Detail(
-                  Icons.description_outlined,
-                  l10n.vtcJoinTrailDocument,
-                  id,
-                  isId: true,
-                ),
               if (receipt.answeredAt case final at?)
                 _Detail(Icons.schedule, l10n.vtcJoinTrailAnsweredAt, time(at)),
               ...proof(

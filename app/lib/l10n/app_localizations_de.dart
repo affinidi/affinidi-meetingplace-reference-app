@@ -2973,9 +2973,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get vtcJoinTrailKey => 'Signing key';
 
   @override
-  String get vtcJoinTrailDocument => 'Document id';
-
-  @override
   String get vtcJoinTrailCryptosuite => 'Cryptosuite';
 
   @override

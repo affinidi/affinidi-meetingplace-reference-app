@@ -148,7 +148,7 @@ void main() {
       expect(find.byIcon(Icons.fingerprint), findsOneWidget);
       expect(find.byIcon(Icons.assignment_outlined), findsOneWidget);
       expect(find.byIcon(Icons.key_outlined), findsOneWidget);
-      expect(find.text('urn:uuid:submit'), findsOneWidget);
+      expect(find.text('Document id'), findsNothing);
       expect(find.text('Cryptosuite'), findsOneWidget);
       expect(find.text('did:webvh:persona#key-0'), findsOneWidget);
       expect(find.text('Signed at'), findsOneWidget);
@@ -161,9 +161,8 @@ void main() {
       expect(find.text('request-1'), findsOneWidget);
       // The answer's Trust Task, as for the VTA's.
       expect(find.text('${JoinTask.submit}#response'), findsOneWidget);
-      expect(find.text('urn:uuid:submit-answer'), findsOneWidget);
       expect(find.text('Trust Task'), findsNWidgets(2));
-      expect(find.text('Document id'), findsNWidgets(2));
+      expect(find.text('Document id'), findsNothing);
       // The answer's proof, as for the VTA's signature.
       expect(find.text('did:webvh:community#key-0'), findsOneWidget);
       expect(find.text('Cryptosuite'), findsNWidgets(2));
@@ -245,7 +244,7 @@ void main() {
       );
       await tester.tap(find.byKey(const Key('vtc_join_trail_vta')));
       await tester.pumpAndSettle();
-      expect(find.text('urn:uuid:submit'), findsOneWidget);
+      expect(find.text(JoinTask.submit), findsOneWidget);
       // No documents to show.
       expect(find.byIcon(Icons.receipt_long_outlined), findsNothing);
     });

@@ -4408,12 +4408,6 @@ abstract class AppLocalizations {
   /// **'Signing key'**
   String get vtcJoinTrailKey;
 
-  /// Label of the id of the signed application document
-  ///
-  /// In en, this message translates to:
-  /// **'Document id'**
-  String get vtcJoinTrailDocument;
-
   /// Label of the cryptosuite the application was signed with
   ///
   /// In en, this message translates to:
