@@ -557,9 +557,15 @@ class _Consent extends StatelessWidget {
             case final fields
             when fields.isNotEmpty || disclosure.membershipIdentifiers == group)
           _ConsentItem(
-            icon: group == DirectoryAudience.admins
-                ? Icons.admin_panel_settings_outlined
-                : Icons.visibility_outlined,
+            icon: switch (group) {
+              DirectoryAudience.admins => Icons.admin_panel_settings_outlined,
+              DirectoryAudience.public => Icons.public,
+              _ => Icons.visibility_outlined,
+            },
+            // Anyone, not only members, sees these: worth a second look.
+            iconColor: group == DirectoryAudience.public
+                ? context.customColors.warning
+                : null,
             title: l10n.vtcJoinShowsTo(
               [
                 for (final field in fields) field.label,
@@ -620,11 +626,15 @@ class _ConsentItem extends HookWidget {
   const _ConsentItem({
     required this.icon,
     required this.title,
+    this.iconColor,
     this.subtitle,
     this.details = const [],
   });
 
   final IconData icon;
+
+  /// Tints the icon, white when null.
+  final Color? iconColor;
   final String title;
   final String? subtitle;
   final List<String> details;
@@ -642,7 +652,7 @@ class _ConsentItem extends HookWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 12,
           children: [
-            Icon(icon, size: 20, color: Colors.white),
+            Icon(icon, size: 20, color: iconColor ?? Colors.white),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

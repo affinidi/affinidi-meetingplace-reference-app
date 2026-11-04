@@ -340,6 +340,22 @@ void main() {
       expect(find.text('To greet you'), findsOneWidget);
     });
 
+    testWidgets('flags what anyone sees', (tester) async {
+      network.joinManifest = {
+        ...network.joinManifest,
+        'directoryDisclosure': _disclosure([
+          _field('Nickname', 'public'),
+          _field('Team', 'members'),
+        ]),
+      };
+      await pumpScreen(tester);
+
+      await enterCode(tester, fakeVtcDid);
+
+      expect(find.text('Show your Nickname to anyone'), findsOneWidget);
+      expect(find.byIcon(Icons.public), findsOneWidget);
+    });
+
     group('identity', () {
       setUp(() {
         // The member has one identity on their VTA, so joining asks which.
@@ -566,3 +582,24 @@ Identity _vtaIdentity(String did, String name) =>
       vtaContextId: 'vta',
       vtaProfileId: '01PROFILE',
     );
+
+/// A directory disclosure of [fields], with nothing else shown.
+Map<String, dynamic> _disclosure(List<Map<String, dynamic>> fields) => {
+  'fields': fields,
+  'newCard': {'listing': 'listed', 'search': 'byName'},
+  'membershipIdentifiers': 'admins',
+  'adminNotes': false,
+  'externalCards': false,
+  'statementDigest': 'zDigest',
+};
+
+/// A directory field the member fills in, shown to [visibility] by default.
+Map<String, dynamic> _field(String label, String visibility) => {
+  'key': label.toLowerCase(),
+  'label': label,
+  'type': 'text',
+  'source': 'member',
+  'ceiling': visibility,
+  'defaultVisibility': visibility,
+  'searchable': false,
+};
