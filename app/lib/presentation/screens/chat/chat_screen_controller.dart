@@ -38,6 +38,7 @@ import '../../../infrastructure/providers/available_attachment_plugins_provider.
 import '../../../infrastructure/providers/credentials_sdk_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/services/unsent_messages_service/unsent_messages_service.dart';
+import '../../../infrastructure/vtc/vta_connection_keys.dart';
 import '../../effects/screen_effect.dart';
 import '../../validators/max_length_validator_type.dart';
 import '../../widgets/async_loaders/async_loading_controller.dart';
@@ -243,7 +244,7 @@ class ChatScreenController extends _$ChatScreenController
         _rCardPluginSubscription = rCardPlugin?.onRCardFromAttachment.listen((
           identity,
         ) {
-          unawaited(_chatService?.sendRCardFromPlugin(identity));
+          unawaited(_sendRCard(identity));
         });
       }
     }
@@ -926,6 +927,22 @@ class ChatScreenController extends _$ChatScreenController
   /// temporary UI effects or notifications after they have been handled.
   void clearEffect() {
     _chatService?.clearEffect();
+  }
+
+  /// Forgets the signing error once it is shown.
+  void clearSigningError() {
+    if (state.signingErrorCode != null) {
+      state = state.copyWith(signingErrorCode: null);
+    }
+  }
+
+  Future<void> _sendRCard(Identity identity) async {
+    try {
+      await _chatService?.sendRCardFromPlugin(identity);
+    } on VtaSigningUnavailableException catch (error) {
+      if (!ref.mounted) return;
+      state = state.copyWith(signingErrorCode: error.code);
+    }
   }
 
   void _showActivity() {

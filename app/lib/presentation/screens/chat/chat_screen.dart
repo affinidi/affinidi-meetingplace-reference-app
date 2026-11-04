@@ -179,6 +179,21 @@ class ChatScreen extends HookConsumerWidget {
     ref.listen(
       chatScreenControllerProvider(
         _contactId,
+      ).select((s) => s.signingErrorCode),
+      (_, code) {
+        if (code == null) return;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(context.l10n.error(code))));
+        ref
+            .read(chatScreenControllerProvider(_contactId).notifier)
+            .clearSigningError();
+      },
+    );
+
+    ref.listen(
+      chatScreenControllerProvider(
+        _contactId,
       ).select((s) => s.shouldStartVrcExchangeFromAttachment),
       (_, shouldStart) {
         if (!shouldStart) return;

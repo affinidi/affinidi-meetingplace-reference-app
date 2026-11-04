@@ -191,6 +191,27 @@ class VtcService {
     profileId: profileId,
   );
 
+  /// Creates a key on the member's VTA that signs credentials as one
+  /// connection DID. Its private key never leaves the VTA.
+  ///
+  /// Throws [VtaNotLinkedException] when no VTA is linked, and
+  /// [MeetingPlaceVtcSDKException] when the VTA refuses or cannot be
+  /// reached.
+  Future<VtaSigningKey> createConnectionKey() async =>
+      (await _grantedVta()).createConnectionKey();
+
+  /// Has the member's VTA sign [document] with the connection key [keyId],
+  /// as the DID the document names as its issuer. Throws as
+  /// [createConnectionKey] does.
+  Future<Map<String, dynamic>> signConnectionDocument(
+    Map<String, dynamic> document, {
+    required String keyId,
+  }) async => (await _grantedVta()).signDocument(
+    keyId: keyId,
+    document: document,
+    purpose: 'assertionMethod',
+  );
+
   /// Reads scanned [text] as a trigger link, offline.
   TriggerLinkResult readLink(String text) => _sdk.readTriggerLink(text);
 

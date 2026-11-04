@@ -12,6 +12,7 @@ mixin AsyncLoadingStatusErrorLocalizer {
     final innerException = exception.innerException;
     return switch (innerException) {
       MissingDeviceException _ => 'missingDeviceToken',
+      AppException(:final code) => code,
       _ => exception.code,
     };
   }

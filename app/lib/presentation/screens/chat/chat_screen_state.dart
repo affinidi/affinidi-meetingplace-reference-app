@@ -38,6 +38,10 @@ abstract class ChatScreenState with _$ChatScreenState {
     @Default(false) bool shouldStartVrcExchangeFromAttachment,
     chat.TransportCapabilities? capabilities,
     @Default(false) bool isCallSupported,
+
+    /// Error code of the last signature the member's VTA could not make,
+    /// until it is shown.
+    String? signingErrorCode,
   }) = _ChatScreenState;
 
   bool get hasPendingVrcConcierge => messages.any(

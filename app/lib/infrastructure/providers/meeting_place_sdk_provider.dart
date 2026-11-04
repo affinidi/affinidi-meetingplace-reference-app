@@ -9,9 +9,11 @@ import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:ssi/ssi.dart';
 import '../../application/services/identities_service/identities_service.dart';
 import '../../application/services/settings_service/settings_service.dart';
+import '../../application/services/vtc_service/vtc_service.dart';
 import '../configuration/environment.dart';
 import '../extensions/contact_card_extensions.dart';
 import '../secure_storage/secure_storage.dart';
+import '../vtc/vta_connection_keys.dart';
 import 'app_logger_provider.dart';
 import 'channel_repository_provider.dart';
 import 'connection_offer_repository_provider.dart';
@@ -79,6 +81,9 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceMatrixSDK>(
         logger: logger,
         rtcDelegate: FlutterMatrixRTCDelegate(),
         roomFactory: (_) => FlutterLiveKitRoom(),
+        // Connection DIDs sign credentials with keys held on the member's
+        // VTA; DIDComm keys stay on this device.
+        externalSigningKeys: VtaConnectionKeys(ref.read(vtcServiceProvider)),
         options: MeetingPlaceMatrixSDKOptions(
           expectedMessageWrappingTypes: const [
             MessageWrappingType.authcryptPlaintext,

@@ -11,6 +11,7 @@ import '../../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../../infrastructure/providers/chat_repository_provider.dart';
 import '../../../../infrastructure/providers/credentials_sdk_provider.dart';
 import '../../../../infrastructure/providers/meeting_place_sdk_provider.dart';
+import '../../../../infrastructure/vtc/vta_connection_keys.dart';
 import '../../identities_service/identities_service.dart';
 
 /// Manages outgoing and incoming R-Card operations for a single chat channel.
@@ -73,6 +74,9 @@ class RCardManager {
 
   /// Sends an R-Card from the given [identity] and posts the issued credential
   /// into the chat as an outgoing attachment.
+  ///
+  /// Throws [VtaSigningUnavailableException] when the member's VTA cannot
+  /// sign the R-Card; logs any other failure.
   Future<void> sendRCardFromPlugin(Identity identity) async {
     try {
       final coreSdk = await _ref.read(meetingPlaceSdkProvider.future);
@@ -108,6 +112,12 @@ class RCardManager {
         attachments: attachments.map((a) => a.toChatAttachment()).toList(),
         senderDid: channelDid,
       );
+    } on VtaSigningUnavailableException catch (error) {
+      _logger.warning(
+        'Failed to send R-Card from plugin: ${error.code}',
+        name: _logKey,
+      );
+      rethrow;
     } catch (error, stackTrace) {
       _logger.error(
         'Failed to send R-Card from plugin',
