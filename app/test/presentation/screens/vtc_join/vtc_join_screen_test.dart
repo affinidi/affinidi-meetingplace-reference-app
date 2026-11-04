@@ -115,6 +115,11 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  /// The screen's title reading [text]; its manifest icon sits inside it.
+  Finder title(String text) => find.byWidgetPredicate(
+    (widget) => widget is OnboardingTitle && widget.text == text,
+  );
+
   /// Taps [finder] once it is scrolled into view.
   Future<void> tapVisible(WidgetTester tester, Finder finder) async {
     await tester.ensureVisible(finder);
@@ -141,7 +146,7 @@ void main() {
       expect(find.text('Become a member of a community'), findsOneWidget);
 
       await enterCode(tester, fakeVtcDid);
-      expect(find.text('Football club'), findsOneWidget);
+      expect(title('Football club'), findsOneWidget);
       expect(find.text('wants you to join'), findsOneWidget);
       expect(find.text('Ways in'), findsOneWidget);
       expect(
@@ -374,9 +379,7 @@ void main() {
       expect(find.byIcon(Icons.radio_button_unchecked), findsNothing);
     });
 
-    testWidgets('shows the manifest as sent, collapsed at first', (
-      tester,
-    ) async {
+    testWidgets('shows the manifest as sent from the title', (tester) async {
       network.joinManifest = {
         ...network.joinManifest,
         'criteria': [
@@ -388,15 +391,19 @@ void main() {
       await enterCode(tester, fakeVtcDid);
 
       final json = find.byKey(const Key('vtc_join_manifest_json'));
-      expect(find.text('Manifest'), findsOneWidget);
       expect(json, findsNothing);
 
-      await tapVisible(tester, find.text('Manifest'));
+      await tapVisible(tester, find.byTooltip("Show the community's manifest"));
       await tester.pumpAndSettle();
 
+      expect(find.text('Manifest'), findsOneWidget);
       final shown = tester.widget<SelectableText>(json).data!;
       expect(jsonDecode(shown), network.joinManifest);
       expect(shown, contains('"unreadable"'));
+
+      await tester.tap(find.text('Close'));
+      await tester.pumpAndSettle();
+      expect(json, findsNothing);
     });
 
     testWidgets('titles a community without a name by what it asks', (
@@ -408,7 +415,7 @@ void main() {
 
       await enterCode(tester, fakeVtcDid);
 
-      expect(find.text('A community'), findsOneWidget);
+      expect(title('A community'), findsOneWidget);
       // Only in the Community DID card, not as the title.
       expect(find.text(fakeVtcDid), findsOneWidget);
     });

@@ -3934,11 +3934,17 @@ abstract class AppLocalizations {
   /// **'Ways in'**
   String get vtcJoinWaysHeading;
 
-  /// Heading of the collapsed section showing the community's join manifest as it sent it
+  /// Title of the dialog showing the community's join manifest as it sent it
   ///
   /// In en, this message translates to:
   /// **'Manifest'**
   String get vtcJoinManifestHeading;
+
+  /// No description provided for @vtcJoinShowManifest.
+  ///
+  /// In en, this message translates to:
+  /// **'Show the community\'s manifest'**
+  String get vtcJoinShowManifest;
 
   /// No description provided for @vtcJoinWayAutomatic.
   ///

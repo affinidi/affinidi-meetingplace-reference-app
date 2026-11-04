@@ -2658,6 +2658,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get vtcJoinManifestHeading => 'Manifest';
 
   @override
+  String get vtcJoinShowManifest => 'Show the community\'s manifest';
+
+  @override
   String get vtcJoinWayAutomatic => 'You become a member when you apply';
 
   @override

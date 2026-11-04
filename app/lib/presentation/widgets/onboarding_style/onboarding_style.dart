@@ -122,14 +122,29 @@ class OnboardingLayout extends StatelessWidget {
 
 /// A step's heading, white and bold on the gradient.
 class OnboardingTitle extends StatelessWidget {
-  const OnboardingTitle(this.text, {super.key});
+  const OnboardingTitle(this.text, {super.key, this.trailing});
 
   final String text;
 
+  /// Shown after the last word, such as an icon button.
+  final Widget? trailing;
+
   @override
   Widget build(BuildContext context) {
-    return Text(
-      text,
+    return Text.rich(
+      TextSpan(
+        text: text,
+        children: [
+          if (trailing case final trailing?)
+            WidgetSpan(
+              alignment: PlaceholderAlignment.middle,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 4),
+                child: trailing,
+              ),
+            ),
+        ],
+      ),
       textAlign: TextAlign.center,
       style: context.textTheme.headlineMedium?.copyWith(
         color: Colors.white,

@@ -2461,8 +2461,9 @@
 	"vtcJoinWaysHeading": "Ways in",
 	"vtcJoinManifestHeading": "Manifest",
 	"@vtcJoinManifestHeading": {
-		"description": "Heading of the collapsed section showing the community's join manifest as it sent it"
+		"description": "Title of the dialog showing the community's join manifest as it sent it"
 	},
+	"vtcJoinShowManifest": "Show the community's manifest",
 	"vtcJoinWayAutomatic": "You become a member when you apply",
 	"vtcJoinWayReviewed": "The administrators review your application",
 	"vtcJoinWayUnsupported": "{reason, select, invitation{Not supported yet: needs an invitation} credentials{Not supported yet: needs credentials} vetting{Not supported yet: needs an in-person check} other{Not supported yet}}",

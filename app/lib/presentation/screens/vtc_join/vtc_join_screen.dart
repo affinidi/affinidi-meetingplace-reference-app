@@ -140,6 +140,37 @@ Future<bool> _confirmLeave(BuildContext context, String name) async {
   return confirmed ?? false;
 }
 
+/// Shows the community's join manifest as it sent it. Plain text only: the
+/// community writes it.
+Future<void> _showManifest(
+  BuildContext context,
+  Map<String, dynamic> manifest,
+) {
+  final l10n = context.l10n;
+  return showDialog<void>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(l10n.vtcJoinManifestHeading),
+      content: SingleChildScrollView(
+        child: SelectableText(
+          const JsonEncoder.withIndent('  ').convert(manifest),
+          key: const Key('vtc_join_manifest_json'),
+          style: context.textTheme.bodySmall?.copyWith(
+            fontFamily: 'monospace',
+            height: 1.4,
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.generalClose),
+        ),
+      ],
+    ),
+  );
+}
+
 /// Takes a community's code: its DID typed or pasted, or its QR code
 /// scanned. Both are read the same way.
 class _EnterCode extends HookConsumerWidget {
@@ -235,7 +266,17 @@ class _Review extends StatelessWidget {
       spacing: 12,
       children: [
         if (state.logoUrl case final logoUrl?) _Logo(logoUrl),
-        OnboardingTitle(hasName ? name : l10n.vtcJoinUnnamedCommunity),
+        OnboardingTitle(
+          hasName ? name : l10n.vtcJoinUnnamedCommunity,
+          trailing: state.manifest.isEmpty
+              ? null
+              : IconButton(
+                  key: const Key('vtc_join_manifest'),
+                  icon: const Icon(Icons.data_object, color: Colors.white),
+                  tooltip: l10n.vtcJoinShowManifest,
+                  onPressed: () => _showManifest(context, state.manifest),
+                ),
+        ),
         OnboardingSubtitle(l10n.vtcJoinWantsYou),
         Center(child: _Pill(l10n.vtcJoinWithVtaIdentity)),
         _Profile(state: state),
@@ -255,7 +296,6 @@ class _Review extends StatelessWidget {
             onListInDirectory: onListInDirectory,
           ),
         _WaysIn(state: state, onChoose: onChooseWay),
-        if (state.manifest.isNotEmpty) _Manifest(state.manifest),
         const SizedBox(height: 12),
         Row(
           spacing: 12,
@@ -693,55 +733,6 @@ class _Way extends StatelessWidget {
         onTap: onChoose,
         borderRadius: BorderRadius.circular(8),
         child: line,
-      ),
-    );
-  }
-}
-
-/// The community's join manifest as it sent it, collapsed until the member
-/// opens it. Shown as plain text only: the community writes it.
-class _Manifest extends StatelessWidget {
-  const _Manifest(this.manifest);
-
-  final Map<String, dynamic> manifest;
-
-  @override
-  Widget build(BuildContext context) {
-    // A Material of the glass cards' tint, on which the tile paints.
-    return Material(
-      color: Colors.white.withAlpha(25),
-      borderRadius: BorderRadius.circular(16),
-      clipBehavior: Clip.antiAlias,
-      child: Theme(
-        // No divider lines around the open section.
-        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-        child: ExpansionTile(
-          key: const Key('vtc_join_manifest'),
-          tilePadding: const EdgeInsets.symmetric(horizontal: 20),
-          childrenPadding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-          iconColor: Colors.white,
-          collapsedIconColor: Colors.white,
-          expandedAlignment: Alignment.centerLeft,
-          title: Text(
-            context.l10n.vtcJoinManifestHeading,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 15,
-            ),
-          ),
-          children: [
-            SelectableText(
-              const JsonEncoder.withIndent('  ').convert(manifest),
-              key: const Key('vtc_join_manifest_json'),
-              style: context.textTheme.bodySmall?.copyWith(
-                color: Colors.white,
-                fontFamily: 'monospace',
-                height: 1.4,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
