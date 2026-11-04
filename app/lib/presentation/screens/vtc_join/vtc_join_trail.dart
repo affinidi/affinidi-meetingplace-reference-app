@@ -10,15 +10,17 @@ import '../../widgets/onboarding_style/onboarding_style.dart';
 /// the member's VTA as their identity in the community, sent from this
 /// phone and answered by the community, now with its administrators, and
 /// the membership card still to come. Each step opens to the proof behind
-/// it, as [receipt] holds it.
+/// it, as [receipt] and [lastCheck] hold it.
 class VtcJoinTrail extends StatelessWidget {
   const VtcJoinTrail({
     super.key,
     required this.communityName,
     required this.autoCheckInterval,
     this.receipt,
+    this.requestId,
     this.deferred = false,
     this.lastCheckedAt,
+    this.lastCheck,
   });
 
   final String communityName;
@@ -27,11 +29,17 @@ class VtcJoinTrail extends StatelessWidget {
   /// when this phone has no receipt for it.
   final TrustTaskReceipt? receipt;
 
+  /// The community's id of the application, if known.
+  final String? requestId;
+
   /// Whether the administrators put the application off.
   final bool deferred;
 
   /// When this phone last asked the community, if it has since applying.
   final DateTime? lastCheckedAt;
+
+  /// The last signed status request and the community's verified answer.
+  final TrustTaskReceipt? lastCheck;
 
   /// How often the screen asks the community again.
   final Duration autoCheckInterval;
@@ -40,6 +48,7 @@ class VtcJoinTrail extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final receipt = this.receipt;
+    final lastCheck = this.lastCheck;
     final locale = l10n.localeName;
     String time(DateTime at) =>
         DateFormat.yMMMd(locale).add_Hm().format(at.toLocal());
@@ -63,10 +72,19 @@ class VtcJoinTrail extends StatelessWidget {
           },
           details: [
             if (receipt != null) ...[
-              _Detail(l10n.vtcJoinTrailIdentity, receipt.signer, isDid: true),
+              _Detail(l10n.vtcJoinTrailIdentity, receipt.signer, isId: true),
               _Detail(l10n.vtcJoinTrailTask, receipt.type),
+              _Detail(
+                l10n.vtcJoinTrailDocument,
+                receipt.documentId,
+                isId: true,
+              ),
+              if (receipt.cryptosuite case final cryptosuite?)
+                _Detail(l10n.vtcJoinTrailCryptosuite, cryptosuite),
               if (receipt.verificationMethod case final key?)
-                _Detail(l10n.vtcJoinTrailKey, key, isDid: true),
+                _Detail(l10n.vtcJoinTrailKey, key, isId: true),
+              if (receipt.signedAt case final at?)
+                _Detail(l10n.vtcJoinTrailSignedAt, time(at)),
             ],
           ],
         ),
@@ -83,11 +101,13 @@ class VtcJoinTrail extends StatelessWidget {
               _Detail(
                 l10n.vtcJoinTrailAnsweredBy,
                 receipt.answeredBy,
-                isDid: true,
+                isId: true,
               ),
               if (receipt.answeredAt case final at?)
                 _Detail(l10n.vtcJoinTrailAnsweredAt, time(at)),
             ],
+            if (requestId case final id?)
+              _Detail(l10n.vtcJoinTrailRequestId, id, isId: true),
           ],
         ),
         _Step(
@@ -101,6 +121,15 @@ class VtcJoinTrail extends StatelessWidget {
             ),
             null => l10n.vtcJoinTrailAutoCheck(autoCheckInterval.inSeconds),
           },
+          details: [
+            if (lastCheck != null) ...[
+              _Detail(l10n.vtcJoinTrailCheckTask, lastCheck.type),
+              if (lastCheck.signedAt case final at?)
+                _Detail(l10n.vtcJoinTrailCheckSignedAt, time(at)),
+              if (lastCheck.answeredAt case final at?)
+                _Detail(l10n.vtcJoinTrailCheckAnsweredAt, time(at)),
+            ],
+          ],
         ),
         _Step(
           key: const Key('vtc_join_trail_card'),
@@ -120,13 +149,14 @@ enum _Stage { done, current, next }
 
 /// One technical fact behind a step, such as the key that signed.
 class _Detail {
-  const _Detail(this.label, this.value, {this.isDid = false});
+  const _Detail(this.label, this.value, {this.isId = false});
 
   final String label;
   final String value;
 
-  /// Whether [value] is a DID or DID URL, shown in monospace.
-  final bool isDid;
+  /// Whether [value] is an identifier, such as a DID, a DID URL or a
+  /// document id, shown in monospace.
+  final bool isId;
 }
 
 /// A step of the trail: a marker on the line, a title and summary, and its
@@ -201,7 +231,7 @@ class _Step extends HookWidget {
                     if (expanded.value)
                       for (final detail in details) ...[
                         Text(detail.label, style: onboardingNote(context)),
-                        if (detail.isDid)
+                        if (detail.isId)
                           MonospaceDid(detail.value)
                         else
                           SelectableText(

@@ -504,6 +504,7 @@ void main() {
       expect(state().submitReceipt?.type, JoinTask.submit);
       expect(state().submitReceipt?.signer, persona.did);
       expect(state().submitReceipt?.answeredBy, fakeVtcDid);
+      expect(state().requestId, 'request-1');
       expect(state().lastCheckedAt, isNull);
 
       // Reopened later, the screen shows the same application.
@@ -524,6 +525,8 @@ void main() {
       expect(state().step, VtcJoinStep.pending);
       expect(state().deferred, isTrue);
       expect(state().lastCheckedAt, isNotNull);
+      expect(state().lastCheckReceipt?.type, JoinTask.status);
+      expect(state().lastCheckReceipt?.answeredBy, fakeVtcDid);
 
       network.joinStatus = 'pending';
       await controller().checkAgain();

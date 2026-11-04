@@ -2689,6 +2689,34 @@
 	"@vtcJoinTrailKey": {
 		"description": "Label of the key that signed the application"
 	},
+	"vtcJoinTrailDocument": "Document id",
+	"@vtcJoinTrailDocument": {
+		"description": "Label of the id of the signed application document"
+	},
+	"vtcJoinTrailCryptosuite": "Cryptosuite",
+	"@vtcJoinTrailCryptosuite": {
+		"description": "Label of the cryptosuite the application was signed with"
+	},
+	"vtcJoinTrailSignedAt": "Signed at",
+	"@vtcJoinTrailSignedAt": {
+		"description": "Label of when the VTA signed the application"
+	},
+	"vtcJoinTrailRequestId": "Request id at the community",
+	"@vtcJoinTrailRequestId": {
+		"description": "Label of the community's id of the application"
+	},
+	"vtcJoinTrailCheckTask": "Last check",
+	"@vtcJoinTrailCheckTask": {
+		"description": "Label of the Trust Task type of the last signed status request"
+	},
+	"vtcJoinTrailCheckSignedAt": "Last check signed by your VTA at",
+	"@vtcJoinTrailCheckSignedAt": {
+		"description": "Label of when the VTA signed the last status request"
+	},
+	"vtcJoinTrailCheckAnsweredAt": "Last check answered and verified at",
+	"@vtcJoinTrailCheckAnsweredAt": {
+		"description": "Label of when the community answered the last status request, whose signature was verified"
+	},
 	"vtcJoinTrailAnsweredBy": "Answered by",
 	"@vtcJoinTrailAnsweredBy": {
 		"description": "Label of the DID that signed the community's answer"

@@ -4258,6 +4258,48 @@ abstract class AppLocalizations {
   /// **'Signing key'**
   String get vtcJoinTrailKey;
 
+  /// Label of the id of the signed application document
+  ///
+  /// In en, this message translates to:
+  /// **'Document id'**
+  String get vtcJoinTrailDocument;
+
+  /// Label of the cryptosuite the application was signed with
+  ///
+  /// In en, this message translates to:
+  /// **'Cryptosuite'**
+  String get vtcJoinTrailCryptosuite;
+
+  /// Label of when the VTA signed the application
+  ///
+  /// In en, this message translates to:
+  /// **'Signed at'**
+  String get vtcJoinTrailSignedAt;
+
+  /// Label of the community's id of the application
+  ///
+  /// In en, this message translates to:
+  /// **'Request id at the community'**
+  String get vtcJoinTrailRequestId;
+
+  /// Label of the Trust Task type of the last signed status request
+  ///
+  /// In en, this message translates to:
+  /// **'Last check'**
+  String get vtcJoinTrailCheckTask;
+
+  /// Label of when the VTA signed the last status request
+  ///
+  /// In en, this message translates to:
+  /// **'Last check signed by your VTA at'**
+  String get vtcJoinTrailCheckSignedAt;
+
+  /// Label of when the community answered the last status request, whose signature was verified
+  ///
+  /// In en, this message translates to:
+  /// **'Last check answered and verified at'**
+  String get vtcJoinTrailCheckAnsweredAt;
+
   /// Label of the DID that signed the community's answer
   ///
   /// In en, this message translates to:

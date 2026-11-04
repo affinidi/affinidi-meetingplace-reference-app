@@ -2875,6 +2875,28 @@ class AppLocalizationsEs extends AppLocalizations {
   String get vtcJoinTrailKey => 'Signing key';
 
   @override
+  String get vtcJoinTrailDocument => 'Document id';
+
+  @override
+  String get vtcJoinTrailCryptosuite => 'Cryptosuite';
+
+  @override
+  String get vtcJoinTrailSignedAt => 'Signed at';
+
+  @override
+  String get vtcJoinTrailRequestId => 'Request id at the community';
+
+  @override
+  String get vtcJoinTrailCheckTask => 'Last check';
+
+  @override
+  String get vtcJoinTrailCheckSignedAt => 'Last check signed by your VTA at';
+
+  @override
+  String get vtcJoinTrailCheckAnsweredAt =>
+      'Last check answered and verified at';
+
+  @override
   String get vtcJoinTrailAnsweredBy => 'Answered by';
 
   @override

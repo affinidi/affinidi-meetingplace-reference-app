@@ -200,11 +200,17 @@ abstract class VtcJoinState with _$VtcJoinState {
     /// it, or null when this phone did not send it.
     TrustTaskReceipt? submitReceipt,
 
+    /// The community's id of the open application, if known.
+    String? requestId,
+
     /// Whether the community's administrators put the open application off.
     @Default(false) bool deferred,
 
     /// When this phone last asked the community about the open application.
     DateTime? lastCheckedAt,
+
+    /// The last signed status request and the community's verified answer.
+    TrustTaskReceipt? lastCheckReceipt,
 
     /// The community's reason for turning the application down, if given.
     String? denialReason,

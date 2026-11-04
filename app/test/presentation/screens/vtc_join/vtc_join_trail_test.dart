@@ -17,11 +17,22 @@ void main() {
     answeredAt: DateTime.utc(2026, 11, 4, 10, 13),
   );
 
+  final lastCheck = TrustTaskReceipt(
+    type: JoinTask.status,
+    documentId: 'urn:uuid:status',
+    signer: 'did:webvh:persona',
+    answeredBy: 'did:webvh:community',
+    signedAt: DateTime.utc(2026, 11, 4, 10, 14),
+    answeredAt: DateTime.utc(2026, 11, 4, 10, 14),
+  );
+
   Future<void> pumpTrail(
     WidgetTester tester, {
     TrustTaskReceipt? receipt,
+    String? requestId,
     bool deferred = false,
     DateTime? lastCheckedAt,
+    TrustTaskReceipt? lastCheck,
   }) {
     return tester.pumpWidget(
       MaterialApp(
@@ -33,8 +44,10 @@ void main() {
             child: VtcJoinTrail(
               communityName: 'Football club',
               receipt: receipt,
+              requestId: requestId,
               deferred: deferred,
               lastCheckedAt: lastCheckedAt,
+              lastCheck: lastCheck,
               autoCheckInterval: const Duration(seconds: 30),
             ),
           ),
@@ -68,18 +81,35 @@ void main() {
     });
 
     testWidgets('opens a step to the proof behind it', (tester) async {
-      await pumpTrail(tester, receipt: receipt);
+      await pumpTrail(
+        tester,
+        receipt: receipt,
+        requestId: 'request-1',
+        lastCheckedAt: DateTime(2026, 11, 4, 10, 14),
+        lastCheck: lastCheck,
+      );
       expect(find.text(JoinTask.submit), findsNothing);
 
       await tester.tap(find.byKey(const Key('vtc_join_trail_vta')));
       await tester.pumpAndSettle();
       expect(find.text('did:webvh:persona'), findsOneWidget);
       expect(find.text(JoinTask.submit), findsOneWidget);
+      expect(find.text('urn:uuid:submit'), findsOneWidget);
+      expect(find.text('Cryptosuite'), findsOneWidget);
       expect(find.text('did:webvh:persona#key-0'), findsOneWidget);
+      expect(find.text('Signed at'), findsOneWidget);
 
       await tester.tap(find.byKey(const Key('vtc_join_trail_community')));
       await tester.pumpAndSettle();
       expect(find.text('did:webvh:community'), findsOneWidget);
+      expect(find.text('Answered at'), findsOneWidget);
+      expect(find.text('request-1'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('vtc_join_trail_review')));
+      await tester.pumpAndSettle();
+      expect(find.text(JoinTask.status), findsOneWidget);
+      expect(find.text('Last check signed by your VTA at'), findsOneWidget);
+      expect(find.text('Last check answered and verified at'), findsOneWidget);
     });
 
     testWidgets('says when the administrators put it off', (tester) async {

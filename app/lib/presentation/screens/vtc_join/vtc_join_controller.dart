@@ -102,6 +102,7 @@ class VtcJoinController extends _$VtcJoinController {
         requestedDetails: manifest.requestedAttributes,
         listsNewMembers: manifest.listsNewMembers,
         submitReceipt: community?.submitReceipt,
+        requestId: community?.joinRequestId,
         denialReason: community?.rejectionReason,
       );
     });
@@ -280,6 +281,7 @@ class VtcJoinController extends _$VtcJoinController {
     state = state.copyWith(
       details: const [],
       submitReceipt: recorded?.submitReceipt,
+      requestId: recorded?.joinRequestId,
       denialReason: verdict is JoinDenied ? verdict.reason : null,
       step: switch (verdict) {
         JoinAdmitted() => VtcJoinStep.joined,
@@ -307,6 +309,7 @@ class VtcJoinController extends _$VtcJoinController {
         denialReason: status?.reason,
         deferred: status?.status == JoinRequestStatus.deferred,
         lastCheckedAt: DateTime.now(),
+        lastCheckReceipt: status?.receipt,
         step: switch (status?.status) {
           JoinRequestStatus.approved => VtcJoinStep.joined,
           JoinRequestStatus.pending ||
