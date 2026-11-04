@@ -2626,13 +2626,13 @@
 			}
 		}
 	},
-	"vtcJoinTrailCommunitySummary": "Sent from this phone; the community's signed answer checked out",
+	"vtcJoinTrailCommunitySummary": "Passed to its administrators · its signed answer verified",
 	"@vtcJoinTrailCommunitySummary": {
-		"description": "Trail step summary: the phone sent the signed application and verified the community's answer"
+		"description": "Trail step summary: the community referred the application to its administrators, and the phone verified the signature of its answer"
 	},
-	"vtcJoinTrailCommunity": "Answered by {name}",
+	"vtcJoinTrailCommunity": "Received by {name}",
 	"@vtcJoinTrailCommunity": {
-		"description": "Trail step: the named community answered the application",
+		"description": "Trail step: the phone sent the signed application and the named community received it",
 		"placeholders": {
 			"name": {
 				"type": "String"

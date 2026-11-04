@@ -207,7 +207,7 @@ void main() {
         findsOneWidget,
       );
       expect(find.byType(VtcJoinTrail), findsOneWidget);
-      expect(find.text('Answered by Football club'), findsOneWidget);
+      expect(find.text('Received by Football club'), findsOneWidget);
       expect(find.textContaining('eddsa-jcs-2022'), findsOneWidget);
 
       network.joinStatus = 'deferred';

@@ -2841,11 +2841,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get vtcJoinTrailCommunitySummary =>
-      'Sent from this phone; the community\'s signed answer checked out';
+      'Passed to its administrators · its signed answer verified';
 
   @override
   String vtcJoinTrailCommunity(String name) {
-    return 'Answered by $name';
+    return 'Received by $name';
   }
 
   @override

@@ -4186,16 +4186,16 @@ abstract class AppLocalizations {
   /// **'As your identity in {name} · {cryptosuite} · {time}'**
   String vtcJoinTrailVtaSummary(String name, String cryptosuite, String time);
 
-  /// Trail step summary: the phone sent the signed application and verified the community's answer
+  /// Trail step summary: the community referred the application to its administrators, and the phone verified the signature of its answer
   ///
   /// In en, this message translates to:
-  /// **'Sent from this phone; the community\'s signed answer checked out'**
+  /// **'Passed to its administrators · its signed answer verified'**
   String get vtcJoinTrailCommunitySummary;
 
-  /// Trail step: the named community answered the application
+  /// Trail step: the phone sent the signed application and the named community received it
   ///
   /// In en, this message translates to:
-  /// **'Answered by {name}'**
+  /// **'Received by {name}'**
   String vtcJoinTrailCommunity(String name);
 
   /// Trail step summary when the application was sent before receipts were kept

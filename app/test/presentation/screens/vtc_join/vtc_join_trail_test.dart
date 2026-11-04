@@ -54,11 +54,9 @@ void main() {
         ),
         findsOneWidget,
       );
-      expect(find.text('Answered by Football club'), findsOneWidget);
+      expect(find.text('Received by Football club'), findsOneWidget);
       expect(
-        find.text(
-          "Sent from this phone; the community's signed answer checked out",
-        ),
+        find.text('Passed to its administrators · its signed answer verified'),
         findsOneWidget,
       );
       expect(find.text('Waiting for the administrators'), findsOneWidget);
