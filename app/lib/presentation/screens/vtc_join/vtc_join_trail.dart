@@ -52,6 +52,19 @@ class VtcJoinTrail extends StatelessWidget {
     final locale = l10n.localeName;
     String time(DateTime at) =>
         DateFormat.yMMMd(locale).add_Hm().format(at.toLocal());
+    // How a document was signed, as far as its proof says.
+    List<_Detail> proof({
+      String? cryptosuite,
+      String? key,
+      String? purpose,
+      DateTime? signedAt,
+    }) => [
+      if (cryptosuite != null)
+        _Detail(l10n.vtcJoinTrailCryptosuite, cryptosuite),
+      if (key != null) _Detail(l10n.vtcJoinTrailKey, key, isId: true),
+      if (purpose != null) _Detail(l10n.vtcJoinTrailProofPurpose, purpose),
+      if (signedAt != null) _Detail(l10n.vtcJoinTrailSignedAt, time(signedAt)),
+    ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -79,12 +92,12 @@ class VtcJoinTrail extends StatelessWidget {
                 receipt.documentId,
                 isId: true,
               ),
-              if (receipt.cryptosuite case final cryptosuite?)
-                _Detail(l10n.vtcJoinTrailCryptosuite, cryptosuite),
-              if (receipt.verificationMethod case final key?)
-                _Detail(l10n.vtcJoinTrailKey, key, isId: true),
-              if (receipt.signedAt case final at?)
-                _Detail(l10n.vtcJoinTrailSignedAt, time(at)),
+              ...proof(
+                cryptosuite: receipt.cryptosuite,
+                key: receipt.verificationMethod,
+                purpose: receipt.proofPurpose,
+                signedAt: receipt.signedAt,
+              ),
             ],
           ],
         ),
@@ -105,6 +118,12 @@ class VtcJoinTrail extends StatelessWidget {
               ),
               if (receipt.answeredAt case final at?)
                 _Detail(l10n.vtcJoinTrailAnsweredAt, time(at)),
+              ...proof(
+                cryptosuite: receipt.answerCryptosuite,
+                key: receipt.answerVerificationMethod,
+                purpose: receipt.answerProofPurpose,
+                signedAt: receipt.answerSignedAt,
+              ),
             ],
             if (requestId case final id?)
               _Detail(l10n.vtcJoinTrailRequestId, id, isId: true),
@@ -128,6 +147,8 @@ class VtcJoinTrail extends StatelessWidget {
                 _Detail(l10n.vtcJoinTrailCheckSignedAt, time(at)),
               if (lastCheck.answeredAt case final at?)
                 _Detail(l10n.vtcJoinTrailCheckAnsweredAt, time(at)),
+              if (lastCheck.answerVerificationMethod case final key?)
+                _Detail(l10n.vtcJoinTrailCheckAnswerKey, key, isId: true),
             ],
           ],
         ),

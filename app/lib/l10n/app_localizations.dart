@@ -4300,6 +4300,18 @@ abstract class AppLocalizations {
   /// **'Last check answered and verified at'**
   String get vtcJoinTrailCheckAnsweredAt;
 
+  /// Label of what a signature's proof is for, e.g. authentication
+  ///
+  /// In en, this message translates to:
+  /// **'Proof purpose'**
+  String get vtcJoinTrailProofPurpose;
+
+  /// Label of the community's key that signed its answer to the last status request
+  ///
+  /// In en, this message translates to:
+  /// **'Key that signed the last answer'**
+  String get vtcJoinTrailCheckAnswerKey;
+
   /// Label of the DID that signed the community's answer
   ///
   /// In en, this message translates to:

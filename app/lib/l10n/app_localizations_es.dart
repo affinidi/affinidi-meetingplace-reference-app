@@ -2897,6 +2897,12 @@ class AppLocalizationsEs extends AppLocalizations {
       'Last check answered and verified at';
 
   @override
+  String get vtcJoinTrailProofPurpose => 'Proof purpose';
+
+  @override
+  String get vtcJoinTrailCheckAnswerKey => 'Key that signed the last answer';
+
+  @override
   String get vtcJoinTrailAnsweredBy => 'Answered by';
 
   @override

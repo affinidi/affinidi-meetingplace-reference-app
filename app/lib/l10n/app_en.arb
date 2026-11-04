@@ -2717,6 +2717,14 @@
 	"@vtcJoinTrailCheckAnsweredAt": {
 		"description": "Label of when the community answered the last status request, whose signature was verified"
 	},
+	"vtcJoinTrailProofPurpose": "Proof purpose",
+	"@vtcJoinTrailProofPurpose": {
+		"description": "Label of what a signature's proof is for, e.g. authentication"
+	},
+	"vtcJoinTrailCheckAnswerKey": "Key that signed the last answer",
+	"@vtcJoinTrailCheckAnswerKey": {
+		"description": "Label of the community's key that signed its answer to the last status request"
+	},
 	"vtcJoinTrailAnsweredBy": "Answered by",
 	"@vtcJoinTrailAnsweredBy": {
 		"description": "Label of the DID that signed the community's answer"
