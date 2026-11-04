@@ -25,7 +25,10 @@ class MockCredentialsScreen extends ConsumerWidget {
     Future<void> importFor(MockCredentialTemplate template) async {
       final identity = await _chooseIdentity(context, state.identities);
       if (identity == null) return;
-      final outcome = await controller.import(template.id, identity.did);
+      final (:outcome, :reason) = await controller.import(
+        template.id,
+        identity.did,
+      );
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -34,6 +37,8 @@ class MockCredentialsScreen extends ConsumerWidget {
               _nameOf(context, identity),
             ),
             MockCredentialImport.notKept => l10n.mockCredentialsNotKept,
+            MockCredentialImport.failed when reason != null =>
+              l10n.mockCredentialsRefused(reason),
             MockCredentialImport.failed => l10n.mockCredentialsImportFailed,
           }),
         ),

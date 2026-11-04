@@ -3946,6 +3946,12 @@ abstract class AppLocalizations {
   /// **'The credential couldn\'t be imported: your VTA refused it or can\'t be reached.'**
   String get mockCredentialsImportFailed;
 
+  /// No description provided for @mockCredentialsRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'Your VTA refused the credential: {reason}'**
+  String mockCredentialsRefused(String reason);
+
   /// No description provided for @mockCredentialsNoIdentities.
   ///
   /// In en, this message translates to:

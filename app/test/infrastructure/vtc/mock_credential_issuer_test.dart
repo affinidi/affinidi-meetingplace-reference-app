@@ -19,7 +19,7 @@ void main() {
 
   test('issues a credential its issuer signed for the subject', () async {
     final issuer = MockCredentialIssuer();
-    final now = DateTime.utc(2026, 11, 4);
+    final now = DateTime.utc(2026, 11, 4, 0, 5);
 
     final credential = await issuer.issue(
       template,
@@ -39,8 +39,10 @@ void main() {
       'id': subject,
       ...template.claims,
     });
+    // Dated a little early, for verifiers whose clock is behind.
     expect(credential['validFrom'], '2026-11-04T00:00:00Z');
     expect(credential['validUntil'], '2027-11-04T00:00:00Z');
+    expect((credential['proof'] as Map)['created'], '2026-11-04T00:00:00Z');
   });
 
   test('keeps one issuer across instances', () async {

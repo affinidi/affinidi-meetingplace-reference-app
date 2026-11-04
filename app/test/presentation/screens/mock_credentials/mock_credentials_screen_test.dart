@@ -140,6 +140,31 @@ void main() {
     expect(credential['type'], ['VerifiableCredential', 'EmployeeCredential']);
   });
 
+  testWidgets("says why the VTA refused a credential", (tester) async {
+    vta.refusals[VtaTask.credentialsReceive] = {
+      'code':
+          'https://trusttasks.org/spec/trust-task-error/0.1#malformedRequest',
+      'message': 'credential is not yet valid',
+    };
+    await pumpScreen(tester);
+
+    await tester.tap(
+      find.descendant(
+        of: find.byKey(const Key('mock_credential_employee')),
+        matching: find.text('Import'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(ListTile, 'Bo'));
+    await settle(tester);
+
+    expect(
+      find.text('Your VTA refused the credential: credential is not yet valid'),
+      findsOneWidget,
+    );
+    expect(find.text('Held by Bo'), findsNothing);
+  });
+
   testWidgets('cannot import without an identity on the VTA', (tester) async {
     identities = IdentitiesServiceState();
     await pumpScreen(tester);

@@ -35,6 +35,10 @@ class MockCredentialIssuer {
   /// How long an issued credential is valid.
   static const validity = Duration(days: 365);
 
+  /// How far before now a credential is dated, so a verifier whose clock is
+  /// behind this phone's does not find it not yet valid.
+  static const clockSkew = Duration(minutes: 5);
+
   final FlutterSecureStorage _storage;
   Ed25519DidKeySigner? _key;
 
@@ -50,7 +54,7 @@ class MockCredentialIssuer {
     DateTime? now,
   }) async {
     final signer = await _signer();
-    final issuedAt = (now ?? DateTime.now()).toUtc();
+    final issuedAt = (now ?? DateTime.now()).toUtc().subtract(clockSkew);
     // One name per template and subject, so the id is stable.
     final name = 'mpx-mock-credential:${template.id}:$subjectDid';
     final credential = <String, dynamic>{

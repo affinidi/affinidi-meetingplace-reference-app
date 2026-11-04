@@ -2626,6 +2626,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'The credential couldn\'t be imported: your VTA refused it or can\'t be reached.';
 
   @override
+  String mockCredentialsRefused(String reason) {
+    return 'Your VTA refused the credential: $reason';
+  }
+
+  @override
   String get mockCredentialsNoIdentities =>
       'Create an identity on your VTA to import a credential for it.';
 

@@ -55,8 +55,13 @@ class MockCredentialsController extends _$MockCredentialsController {
   }
 
   /// Imports the test credential [templateId] for the identity [did], one
-  /// of the member's VTA identities.
-  Future<MockCredentialImport> import(String templateId, String did) async {
+  /// of the member's VTA identities. A refusal comes with the VTA's reason,
+  /// when it gives one, to show the member: this is a tool for testing.
+  Future<({MockCredentialImport outcome, String? reason})> import(
+    String templateId,
+    String did,
+  ) async {
+    const failed = (outcome: MockCredentialImport.failed, reason: null);
     final template = mockCredentialTemplates
         .where((template) => template.id == templateId)
         .firstOrNull;
@@ -64,7 +69,7 @@ class MockCredentialsController extends _$MockCredentialsController {
         .where((identity) => identity.did == did)
         .firstOrNull;
     if (template == null || identity == null || state.importing != null) {
-      return MockCredentialImport.failed;
+      return failed;
     }
     state = state.copyWith(importing: templateId);
     try {
@@ -73,7 +78,7 @@ class MockCredentialsController extends _$MockCredentialsController {
         personaDid: did,
         contextId: identity.vtaContextId!,
       );
-      if (!ref.mounted) return MockCredentialImport.failed;
+      if (!ref.mounted) return failed;
       state = state.copyWith(
         importing: null,
         holders: kept
@@ -83,15 +88,32 @@ class MockCredentialsController extends _$MockCredentialsController {
               }
             : state.holders,
       );
-      return kept
-          ? MockCredentialImport.imported
-          : MockCredentialImport.notKept;
+      return (
+        outcome: kept
+            ? MockCredentialImport.imported
+            : MockCredentialImport.notKept,
+        reason: null,
+      );
     } on Exception catch (error) {
       _log(error);
       if (ref.mounted) state = state.copyWith(importing: null);
-      return MockCredentialImport.failed;
+      return (
+        outcome: MockCredentialImport.failed,
+        reason: error is MeetingPlaceVtcSDKException
+            ? _reasonOf(error.errorPayload)
+            : null,
+      );
     }
   }
+
+  /// The reason a Trust Task error gives: its `message`, else its
+  /// `details.reason`.
+  static String? _reasonOf(Map<String, dynamic>? error) => switch (error) {
+    {'message': final String message} when message.isNotEmpty => message,
+    {'details': {'reason': final String reason}} when reason.isNotEmpty =>
+      reason,
+    _ => null,
+  };
 
   void _log(Object error) {
     final code = error is MeetingPlaceVtcSDKException

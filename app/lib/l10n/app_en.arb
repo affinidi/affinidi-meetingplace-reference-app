@@ -2465,6 +2465,14 @@
 	},
 	"mockCredentialsNotKept": "Your VTA took the credential but doesn't keep it as valid.",
 	"mockCredentialsImportFailed": "The credential couldn't be imported: your VTA refused it or can't be reached.",
+	"mockCredentialsRefused": "Your VTA refused the credential: {reason}",
+	"@mockCredentialsRefused": {
+		"placeholders": {
+			"reason": {
+				"type": "String"
+			}
+		}
+	},
 	"mockCredentialsNoIdentities": "Create an identity on your VTA to import a credential for it.",
 	"mockCredentialsVtaMissing": "Link your VTA in Settings to import test credentials.",
 	"mockCredentialsUnreachable": "Your VTA can't be reached.",
