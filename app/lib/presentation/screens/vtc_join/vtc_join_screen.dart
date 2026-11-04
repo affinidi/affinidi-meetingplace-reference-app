@@ -644,40 +644,45 @@ class _ConsentItem extends HookWidget {
     final expanded = useState(false);
     final canExpand = details.isNotEmpty;
 
-    return InkWell(
-      onTap: canExpand ? () => expanded.value = !expanded.value : null,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 12,
-          children: [
-            Icon(icon, size: 20, color: iconColor ?? Colors.white),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 4,
-                children: [
-                  Text(
-                    title,
-                    style: context.textTheme.bodyMedium?.copyWith(
-                      color: Colors.white,
+    // Tells screen readers the line opens, as the chevron tells the eye.
+    return Semantics(
+      button: canExpand,
+      expanded: canExpand ? expanded.value : null,
+      child: InkWell(
+        onTap: canExpand ? () => expanded.value = !expanded.value : null,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 12,
+            children: [
+              Icon(icon, size: 20, color: iconColor ?? Colors.white),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 4,
+                  children: [
+                    Text(
+                      title,
+                      style: context.textTheme.bodyMedium?.copyWith(
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
-                  if (subtitle case final subtitle?)
-                    Text(subtitle, style: onboardingNote(context)),
-                  if (expanded.value)
-                    for (final detail in details)
-                      Text(detail, style: onboardingNote(context)),
-                ],
+                    if (subtitle case final subtitle?)
+                      Text(subtitle, style: onboardingNote(context)),
+                    if (expanded.value)
+                      for (final detail in details)
+                        Text(detail, style: onboardingNote(context)),
+                  ],
+                ),
               ),
-            ),
-            if (canExpand)
-              Icon(
-                expanded.value ? Icons.expand_less : Icons.expand_more,
-                color: Colors.white,
-              ),
-          ],
+              if (canExpand)
+                Icon(
+                  expanded.value ? Icons.expand_less : Icons.expand_more,
+                  color: Colors.white,
+                ),
+            ],
+          ),
         ),
       ),
     );

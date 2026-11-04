@@ -356,6 +356,31 @@ void main() {
       expect(find.byIcon(Icons.public), findsOneWidget);
     });
 
+    testWidgets('tells screen readers a consent line opens', (tester) async {
+      final semantics = tester.ensureSemantics();
+      network.joinManifest = {
+        ...network.joinManifest,
+        'requestedAttributes': [
+          {'type': 'name.display'},
+        ],
+      };
+      await pumpScreen(tester);
+      await enterCode(tester, fakeVtcDid);
+
+      final line = find.text('Receive your display name');
+      expect(
+        tester.getSemantics(line),
+        isSemantics(isButton: true, hasExpandedState: true),
+      );
+      expect(tester.getSemantics(line), isSemantics(isExpanded: false));
+
+      await tapVisible(tester, line);
+      await tester.pumpAndSettle();
+
+      expect(tester.getSemantics(line), isSemantics(isExpanded: true));
+      semantics.dispose();
+    });
+
     group('identity', () {
       setUp(() {
         // The member has one identity on their VTA, so joining asks which.
