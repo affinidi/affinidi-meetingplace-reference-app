@@ -320,7 +320,7 @@ void main() {
       });
     });
 
-    testWidgets('lets the member choose among the ways in', (tester) async {
+    testWidgets('swipes to the way in to apply under', (tester) async {
       network.joinManifest = {
         ...network.joinManifest,
         'criteria': [
@@ -346,29 +346,47 @@ void main() {
       await pumpScreen(tester);
       await enterCode(tester, fakeVtcDid);
 
-      bool chosen(String id) => tester.any(
+      final deck = find.byKey(const Key('vtc_join_ways'));
+      expect(find.text('1 of 2 · swipe to see the others'), findsOneWidget);
+      expect(
         find.descendant(
-          of: find.byKey(Key('vtc_join_way_$id')),
-          matching: find.byIcon(Icons.radio_button_checked),
+          of: deck,
+          matching: find.text('You become a member when you apply'),
         ),
+        findsOneWidget,
       );
-      expect(chosen('open'), isTrue);
-      expect(chosen('reviewed'), isFalse);
-      expect(find.byKey(const Key('vtc_join_way_invited')), findsNothing);
+      // The way this app cannot apply under is listed, not in the deck.
+      expect(
+        find.text('Not supported yet: needs an invitation'),
+        findsOneWidget,
+      );
 
-      await tapVisible(tester, find.text('For clubs from abroad'));
+      await tester.ensureVisible(deck);
       await tester.pumpAndSettle();
+      // A drag spread over time swipes the deck rather than the page.
+      await tester.timedDrag(
+        deck,
+        const Offset(-500, 0),
+        const Duration(milliseconds: 300),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('2 of 2 · swipe to see the others'), findsOneWidget);
 
-      expect(chosen('reviewed'), isTrue);
-      expect(chosen('open'), isFalse);
+      await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
+      await settle(tester);
+
+      final submit = network.joinRequests.lastWhere(
+        (r) => r['type'] == JoinTask.submit,
+      );
+      expect((submit['payload'] as Map)['criterion'], 'zReviewed');
     });
 
-    testWidgets('offers no choice with one way in', (tester) async {
+    testWidgets('offers no deck with one way in', (tester) async {
       await pumpScreen(tester);
       await enterCode(tester, fakeVtcDid);
 
-      expect(find.byIcon(Icons.radio_button_checked), findsNothing);
-      expect(find.byIcon(Icons.radio_button_unchecked), findsNothing);
+      expect(find.byKey(const Key('vtc_join_ways')), findsNothing);
+      expect(find.text('You become a member when you apply'), findsOneWidget);
     });
 
     testWidgets('shows the manifest as sent from the title', (tester) async {

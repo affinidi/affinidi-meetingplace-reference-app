@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,6 +9,7 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/services/camera_service/camera_service.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../dialogs/qr_code_picker/qr_code_picker.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import '../../widgets/swipeable_cards.dart';
@@ -652,84 +654,131 @@ class _ConsentItem extends HookWidget {
 }
 
 /// How to get in: each way in the community offers and what admission
-/// under it takes. When this app supports more than one, the member chooses
-/// which to apply under.
+/// under it takes. When this app supports more than one, they are a deck to
+/// swipe through, and the member applies under the one on top.
 class _WaysIn extends StatelessWidget {
   const _WaysIn({required this.state, required this.onChoose});
 
   final VtcJoinState state;
   final ValueChanged<String> onChoose;
 
+  /// Room for a way's icon, title and a few lines of the community's words.
+  static const _deckHeight = 180.0;
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final choosable = state.ways.where((way) => way.canApply).length > 1;
+    final choices = state.ways.where((way) => way.canApply).toList();
+    final swipeable = choices.length > 1;
+    final chosen = choices.indexWhere((way) => way.id == state.chosenWayId);
     return GlassCard(
       title: l10n.vtcJoinWaysHeading,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: 12,
         children: [
-          for (final way in state.ways)
-            _Way(
-              way: way,
-              chosen: way.id == state.chosenWayId,
-              onChoose: choosable && way.canApply
-                  ? () => onChoose(way.id)
-                  : null,
+          if (swipeable) ...[
+            SwipeableCards<VtcJoinWay>(
+              key: const Key('vtc_join_ways'),
+              items: choices,
+              maxWidth: double.infinity,
+              maxHeight: _deckHeight,
+              initialIndex: chosen < 0 ? 0 : chosen,
+              onCardChange: (index) => onChoose(choices[index].id),
+              cardBuilder: (context, way) => _WayCard(way),
             ),
+            Text(
+              l10n.vtcJoinIdentityPosition(
+                (chosen < 0 ? 0 : chosen) + 1,
+                choices.length,
+              ),
+              key: const Key('vtc_join_way_position'),
+              textAlign: TextAlign.center,
+              style: onboardingNote(context),
+            ),
+          ],
+          for (final way in state.ways)
+            if (!swipeable || !way.canApply)
+              OnboardingLine(
+                icon: _iconOf(way),
+                title: _titleOf(l10n, way),
+                subtitle: way.description,
+              ),
         ],
       ),
     );
   }
 }
 
-/// One way in: what admission under it takes and the community's words for
-/// it. With [onChoose], a choice among the ways in, marked when [chosen].
-class _Way extends StatelessWidget {
-  const _Way({required this.way, required this.chosen, this.onChoose});
+/// A way in this app can apply under, as a card in the deck of ways in.
+class _WayCard extends StatelessWidget {
+  const _WayCard(this.way);
 
   final VtcJoinWay way;
-  final bool chosen;
-  final VoidCallback? onChoose;
+
+  static const _radius = BorderRadius.all(Radius.circular(20));
+
+  /// Blurs the card stacked behind, as the identity deck does.
+  static const _blurSigma = 20.0;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final onChoose = this.onChoose;
-    final line = OnboardingLine(
-      icon: onChoose != null
-          ? chosen
-                ? Icons.radio_button_checked
-                : Icons.radio_button_unchecked
-          : way.unsupported != null
-          ? Icons.block
-          : way.automatic
-          ? Icons.how_to_reg
-          : Icons.rate_review,
-      title: switch (way) {
-        VtcJoinWay(:final unsupported?) => l10n.vtcJoinWayUnsupported(
-          unsupported.name,
+    return ClipRRect(
+      borderRadius: _radius,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: _blurSigma, sigmaY: _blurSigma),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Colors.white.withAlpha(60), Colors.white.withAlpha(25)],
+            ),
+            borderRadius: _radius,
+            border: Border.all(color: Colors.white.withAlpha(90)),
+          ),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              spacing: 8,
+              children: [
+                Icon(_iconOf(way), size: 28, color: Colors.white),
+                Text(
+                  _titleOf(context.l10n, way),
+                  textAlign: TextAlign.center,
+                  style: context.textTheme.titleSmall?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                if (way.description case final description?)
+                  Text(
+                    description,
+                    textAlign: TextAlign.center,
+                    style: onboardingNote(context),
+                  ),
+              ],
+            ),
+          ),
         ),
-        VtcJoinWay(automatic: true) => l10n.vtcJoinWayAutomatic,
-        _ => l10n.vtcJoinWayReviewed,
-      },
-      subtitle: way.description,
-    );
-    if (onChoose == null) return line;
-    return Semantics(
-      key: Key('vtc_join_way_${way.id}'),
-      button: true,
-      inMutuallyExclusiveGroup: true,
-      selected: chosen,
-      child: InkWell(
-        onTap: onChoose,
-        borderRadius: BorderRadius.circular(8),
-        child: line,
       ),
     );
   }
 }
+
+IconData _iconOf(VtcJoinWay way) => way.unsupported != null
+    ? Icons.block
+    : way.automatic
+    ? Icons.how_to_reg
+    : Icons.rate_review;
+
+String _titleOf(AppLocalizations l10n, VtcJoinWay way) => switch (way) {
+  VtcJoinWay(:final unsupported?) => l10n.vtcJoinWayUnsupported(
+    unsupported.name,
+  ),
+  VtcJoinWay(automatic: true) => l10n.vtcJoinWayAutomatic,
+  _ => l10n.vtcJoinWayReviewed,
+};
 
 /// The community's logo above the title; nothing while it cannot load.
 class _Logo extends StatelessWidget {
