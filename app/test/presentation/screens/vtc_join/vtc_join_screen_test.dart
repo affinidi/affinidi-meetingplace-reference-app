@@ -286,7 +286,7 @@ void main() {
       expect(find.text('Keep notes about you'), findsOneWidget);
 
       // Grouped by who sees it by default, the membership ID among them.
-      const group = 'Show your Role, membership ID to the administrators';
+      const group = 'Show your Role and membership ID to the administrators';
       expect(find.text(group), findsOneWidget);
       const detail =
           'Role · you can share it up to all members · '
@@ -354,6 +354,27 @@ void main() {
 
       expect(find.text('Show your Nickname to anyone'), findsOneWidget);
       expect(find.byIcon(Icons.public), findsOneWidget);
+    });
+
+    testWidgets('lists the fields an audience sees as a sentence', (
+      tester,
+    ) async {
+      network.joinManifest = {
+        ...network.joinManifest,
+        'directoryDisclosure': _disclosure([
+          _field('Nickname', 'members'),
+          _field('Team', 'members'),
+          _field('Position', 'members'),
+        ]),
+      };
+      await pumpScreen(tester);
+
+      await enterCode(tester, fakeVtcDid);
+
+      expect(
+        find.text('Show your Nickname, Team and Position to all members'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('tells screen readers a consent line opens', (tester) async {

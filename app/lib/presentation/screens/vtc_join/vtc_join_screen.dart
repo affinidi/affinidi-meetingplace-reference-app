@@ -567,11 +567,11 @@ class _Consent extends StatelessWidget {
                 ? context.customColors.warning
                 : null,
             title: l10n.vtcJoinShowsTo(
-              [
+              _listOf(l10n, [
                 for (final field in fields) field.label,
                 if (disclosure.membershipIdentifiers == group)
                   l10n.vtcJoinMembershipDidField,
-              ].join(', '),
+              ]),
               audience(group),
             ),
             details: [
@@ -606,6 +606,15 @@ String _claimTypeLabel(AppLocalizations l10n, String type) => switch (type) {
   'skill.language' => l10n.vtcClaimTypeSkillLanguage,
   'account.handle' => l10n.vtcClaimTypeAccountHandle,
   _ => type,
+};
+
+/// [items] as a sentence would list them: "a, b and c".
+String _listOf(AppLocalizations l10n, List<String> items) => switch (items) {
+  [...final rest, final last] when rest.isNotEmpty => l10n.vtcJoinListAnd(
+    rest.join(', '),
+    last,
+  ),
+  _ => items.join(),
 };
 
 /// A thin rule between the lines of a list on the gradient.

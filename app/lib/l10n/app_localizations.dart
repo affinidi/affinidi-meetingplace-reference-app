@@ -4162,6 +4162,12 @@ abstract class AppLocalizations {
   /// **'membership ID'**
   String get vtcJoinMembershipDidField;
 
+  /// The last item of a list joined to the others, as in 'name, team and role'
+  ///
+  /// In en, this message translates to:
+  /// **'{rest} and {last}'**
+  String vtcJoinListAnd(String rest, String last);
+
   /// No description provided for @vtcJoinKeepsNotes.
   ///
   /// In en, this message translates to:

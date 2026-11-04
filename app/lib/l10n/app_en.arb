@@ -2547,6 +2547,18 @@
 		}
 	},
 	"vtcJoinMembershipDidField": "membership ID",
+	"vtcJoinListAnd": "{rest} and {last}",
+	"@vtcJoinListAnd": {
+		"description": "The last item of a list joined to the others, as in 'name, team and role'",
+		"placeholders": {
+			"rest": {
+				"type": "String"
+			},
+			"last": {
+				"type": "String"
+			}
+		}
+	},
 	"vtcJoinKeepsNotes": "Keep notes about you",
 	"vtcJoinAdminNotesDetail": "No other member sees them, and you can ask for yours.",
 	"vtcJoinFieldShareUpTo": "you can share it up to {audience}",
