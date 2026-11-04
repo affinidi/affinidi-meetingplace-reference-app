@@ -8,11 +8,13 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../dialogs/qr_code_picker/qr_code_picker.dart';
+import '../../widgets/onboarding_style/onboarding_style.dart';
 import 'vtc_sign_in_controller.dart';
 import 'vtc_sign_in_state.dart';
 
 /// Signs the member in to a community's member portal or operator console
 /// in a browser: scan the code, type the number, approve with biometrics.
+/// In the look of joining a community.
 class VtcSignInScreen extends ConsumerWidget {
   const VtcSignInScreen({super.key});
 
@@ -33,51 +35,62 @@ class VtcSignInScreen extends ConsumerWidget {
 
     void close() => Navigator.of(context).pop();
 
-    return Scaffold(
-      appBar: AppBar(title: Text(context.l10n.vtcSignInMenuTitle)),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: switch (state.step) {
-            VtcSignInStep.scanning || VtcSignInStep.working => const Center(
-              child: CircularProgressIndicator(),
-            ),
-            VtcSignInStep.confirmMembership => _ConfirmMembership(
-              state: state,
-              onConfirm: controller.confirmMembership,
-              onCancel: close,
-            ),
-            VtcSignInStep.number => _EnterNumber(
-              state: state,
-              onSubmit: controller.submitNumber,
-              onCancel: () async {
-                await controller.decline();
-              },
-              onExpired: controller.expire,
-            ),
-            VtcSignInStep.review => _Review(
-              state: state,
-              onApprove: controller.approve,
-              onDecline: controller.decline,
-              onExpired: controller.expire,
-            ),
-            VtcSignInStep.approved => _Outcome(
-              message: context.l10n.vtcSignInApproved,
-              onDone: close,
-            ),
-            VtcSignInStep.declined => _Outcome(
-              message: context.l10n.vtcSignInDeclined,
-              onDone: close,
-            ),
-            VtcSignInStep.failed => _Outcome(
-              message: _failureMessage(context, state),
-              onDone: close,
-            ),
-          },
+    return OnboardingLayout(
+      onClose: close,
+      child: switch (state.step) {
+        VtcSignInStep.scanning ||
+        VtcSignInStep.working => const Center(child: OnboardingSpinner()),
+        VtcSignInStep.confirmMembership => _ConfirmMembership(
+          state: state,
+          onConfirm: controller.confirmMembership,
+          onCancel: close,
         ),
-      ),
+        VtcSignInStep.number => _EnterNumber(
+          state: state,
+          onSubmit: controller.submitNumber,
+          onCancel: () async {
+            await controller.decline();
+          },
+          onExpired: controller.expire,
+        ),
+        VtcSignInStep.review => _Review(
+          state: state,
+          onApprove: controller.approve,
+          onDecline: controller.decline,
+          onExpired: controller.expire,
+        ),
+        VtcSignInStep.approved => _Outcome(
+          icon: Icons.verified,
+          message: Text(
+            context.l10n.vtcSignInApproved,
+            textAlign: TextAlign.center,
+            style: _outcomeStyle(context),
+          ),
+          onDone: close,
+        ),
+        VtcSignInStep.declined => _Outcome(
+          icon: Icons.block,
+          message: Text(
+            context.l10n.vtcSignInDeclined,
+            textAlign: TextAlign.center,
+            style: _outcomeStyle(context),
+          ),
+          onDone: close,
+        ),
+        VtcSignInStep.failed => _Outcome(
+          icon: Icons.error_outline,
+          message: OnboardingMessage(
+            _failureMessage(context, state),
+            isError: true,
+          ),
+          onDone: close,
+        ),
+      },
     );
   }
+
+  static TextStyle? _outcomeStyle(BuildContext context) =>
+      context.textTheme.titleMedium?.copyWith(color: Colors.white);
 
   static String _failureMessage(BuildContext context, VtcSignInState state) {
     final l10n = context.l10n;
@@ -102,22 +115,24 @@ class _ConfirmMembership extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 12,
       children: [
-        Text(
-          context.l10n.vtcSignInFoundMembership(
+        OnboardingTitle(l10n.vtcSignInTitle(state.communityName ?? '')),
+        OnboardingSubtitle(
+          l10n.vtcSignInFoundMembership(
             state.communityName ?? '',
             state.personaDid ?? '',
           ),
-          style: context.textTheme.bodyLarge,
         ),
-        const Spacer(),
-        FilledButton(
+        const SizedBox(height: 12),
+        OnboardingButton(
+          label: l10n.vtcSignInUseMembership,
           onPressed: onConfirm,
-          child: Text(context.l10n.vtcSignInUseMembership),
         ),
-        TextButton(onPressed: onCancel, child: Text(context.l10n.cancel)),
+        OnboardingTextButton(label: l10n.cancel, onPressed: onCancel),
       ],
     );
   }
@@ -132,15 +147,13 @@ class _Heading extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 4,
       children: [
-        Text(
-          l10n.vtcSignInTitle(state.communityName ?? ''),
-          style: context.textTheme.titleLarge,
-        ),
+        OnboardingTitle(l10n.vtcSignInTitle(state.communityName ?? '')),
         const SizedBox(height: 4),
-        Text(l10n.vtcSignInAudience(state.audience.name)),
-        Text(l10n.vtcSignInWebsite(state.website ?? '')),
+        OnboardingSubtitle(l10n.vtcSignInAudience(state.audience.name)),
+        OnboardingSubtitle(l10n.vtcSignInWebsite(state.website ?? '')),
       ],
     );
   }
@@ -180,6 +193,9 @@ class _EnterNumber extends HookWidget {
   final VoidCallback onCancel;
   final VoidCallback onExpired;
 
+  /// The browser shows a two-digit number.
+  static const _numberLength = 2;
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -188,31 +204,35 @@ class _EnterNumber extends HookWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 12,
       children: [
         _Heading(state: state),
-        const SizedBox(height: 24),
-        Text(l10n.vtcSignInEnterNumber),
-        TextField(
+        const SizedBox(height: 12),
+        OnboardingSubtitle(l10n.vtcSignInEnterNumber),
+        OnboardingTextField(
+          key: const Key('vtc_sign_in_number'),
           controller: number,
+          label: l10n.vtcSignInNumberLabel,
           autofocus: true,
           keyboardType: TextInputType.number,
-          maxLength: 2,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          decoration: InputDecoration(
-            labelText: l10n.vtcSignInNumberLabel,
-            errorText: state.failure == SignInFailure.badNumber
-                ? l10n.vtcSignInFailure(SignInFailure.badNumber.name)
-                : null,
-          ),
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+            LengthLimitingTextInputFormatter(_numberLength),
+          ],
           onSubmitted: onSubmit,
         ),
-        Text(l10n.vtcSignInTimeLeft(secondsLeft)),
-        const Spacer(),
-        FilledButton(
+        if (state.failure == SignInFailure.badNumber)
+          OnboardingMessage(
+            l10n.vtcSignInFailure(SignInFailure.badNumber.name),
+            isError: true,
+          ),
+        _TimeLeft(secondsLeft),
+        const SizedBox(height: 12),
+        OnboardingButton(
+          label: l10n.vtcSignInContinue,
           onPressed: () => onSubmit(number.text),
-          child: Text(l10n.vtcSignInContinue),
         ),
-        TextButton(onPressed: onCancel, child: Text(l10n.cancel)),
+        OnboardingTextButton(label: l10n.cancel, onPressed: onCancel),
       ],
     );
   }
@@ -239,50 +259,104 @@ class _Review extends HookWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 12,
       children: [
         _Heading(state: state),
-        const SizedBox(height: 24),
-        Text(l10n.vtcSignInReviewHeading, style: context.textTheme.titleMedium),
-        const SizedBox(height: 8),
-        Text(l10n.vtcSignInAs(state.personaDid ?? '')),
-        if (requester != null) ...[
-          const SizedBox(height: 8),
-          Text(l10n.vtcSignInBrowser(requester.browser, requester.os)),
-          Text(l10n.vtcSignInLocation(requester.location)),
-          Text(
-            requester.sameNetwork
-                ? l10n.vtcSignInSameNetwork
-                : l10n.vtcSignInOtherNetwork,
+        const SizedBox(height: 12),
+        GlassCard(
+          title: l10n.vtcSignInReviewHeading,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: 12,
+            children: [
+              OnboardingLine(
+                icon: Icons.fingerprint,
+                title: l10n.vtcSignInAs(state.personaDid ?? ''),
+              ),
+              if (requester != null) ...[
+                OnboardingLine(
+                  icon: Icons.computer,
+                  title: l10n.vtcSignInBrowser(requester.browser, requester.os),
+                ),
+                OnboardingLine(
+                  icon: Icons.location_on_outlined,
+                  title: l10n.vtcSignInLocation(requester.location),
+                ),
+                OnboardingLine(
+                  icon: requester.sameNetwork ? Icons.wifi : Icons.public,
+                  title: requester.sameNetwork
+                      ? l10n.vtcSignInSameNetwork
+                      : l10n.vtcSignInOtherNetwork,
+                ),
+              ],
+              Text(l10n.vtcSignInReportedNote, style: onboardingNote(context)),
+            ],
           ),
-        ],
-        const SizedBox(height: 8),
-        Text(l10n.vtcSignInReportedNote, style: context.textTheme.bodySmall),
-        Text(l10n.vtcSignInTimeLeft(secondsLeft)),
-        const Spacer(),
-        FilledButton(onPressed: onApprove, child: Text(l10n.vtcSignInApprove)),
-        TextButton(onPressed: onDecline, child: Text(l10n.vtcSignInDecline)),
+        ),
+        _TimeLeft(secondsLeft),
+        const SizedBox(height: 12),
+        Row(
+          spacing: 12,
+          children: [
+            Expanded(
+              child: OnboardingButton(
+                label: l10n.vtcSignInDecline,
+                isOutlined: true,
+                onPressed: onDecline,
+              ),
+            ),
+            Expanded(
+              child: OnboardingButton(
+                label: l10n.vtcSignInApprove,
+                onPressed: onApprove,
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
 }
 
-class _Outcome extends StatelessWidget {
-  const _Outcome({required this.message, required this.onDone});
+/// How many seconds are left to decide, as small print.
+class _TimeLeft extends StatelessWidget {
+  const _TimeLeft(this.seconds);
 
-  final String message;
+  final int seconds;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      context.l10n.vtcSignInTimeLeft(seconds),
+      textAlign: TextAlign.center,
+      style: onboardingNote(context),
+    );
+  }
+}
+
+/// How the sign-in ended: a white [icon], the [message], then Done.
+class _Outcome extends StatelessWidget {
+  const _Outcome({
+    required this.icon,
+    required this.message,
+    required this.onDone,
+  });
+
+  final IconData icon;
+  final Widget message;
   final VoidCallback onDone;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 12,
       children: [
-        Text(message, style: context.textTheme.bodyLarge),
-        const Spacer(),
-        FilledButton(
-          onPressed: onDone,
-          child: Text(context.l10n.vtcSignInDone),
-        ),
+        Icon(icon, size: 72, color: Colors.white),
+        const SizedBox(height: 4),
+        message,
+        const SizedBox(height: 12),
+        OnboardingButton(label: context.l10n.vtcSignInDone, onPressed: onDone),
       ],
     );
   }
