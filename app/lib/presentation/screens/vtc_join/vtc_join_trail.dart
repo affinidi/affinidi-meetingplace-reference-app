@@ -67,10 +67,21 @@ class VtcJoinTrail extends StatelessWidget {
       DateTime? signedAt,
     }) => [
       if (cryptosuite != null)
-        _Detail(l10n.vtcJoinTrailCryptosuite, cryptosuite),
-      if (key != null) _Detail(l10n.vtcJoinTrailKey, key, isId: true),
-      if (purpose != null) _Detail(l10n.vtcJoinTrailProofPurpose, purpose),
-      if (signedAt != null) _Detail(l10n.vtcJoinTrailSignedAt, time(signedAt)),
+        _Detail(
+          Icons.enhanced_encryption_outlined,
+          l10n.vtcJoinTrailCryptosuite,
+          cryptosuite,
+        ),
+      if (key != null)
+        _Detail(Icons.key_outlined, l10n.vtcJoinTrailKey, key, isId: true),
+      if (purpose != null)
+        _Detail(
+          Icons.verified_outlined,
+          l10n.vtcJoinTrailProofPurpose,
+          purpose,
+        ),
+      if (signedAt != null)
+        _Detail(Icons.schedule, l10n.vtcJoinTrailSignedAt, time(signedAt)),
     ];
 
     return Column(
@@ -92,9 +103,19 @@ class VtcJoinTrail extends StatelessWidget {
           },
           details: [
             if (receipt != null) ...[
-              _Detail(l10n.vtcJoinTrailIdentity, receipt.signer, isId: true),
-              _Detail(l10n.vtcJoinTrailTask, receipt.type),
               _Detail(
+                Icons.fingerprint,
+                l10n.vtcJoinTrailIdentity,
+                receipt.signer,
+                isId: true,
+              ),
+              _Detail(
+                Icons.assignment_outlined,
+                l10n.vtcJoinTrailTask,
+                receipt.type,
+              ),
+              _Detail(
+                Icons.description_outlined,
                 l10n.vtcJoinTrailDocument,
                 receipt.documentId,
                 isId: true,
@@ -122,16 +143,22 @@ class VtcJoinTrail extends StatelessWidget {
           details: [
             if (receipt != null) ...[
               _Detail(
+                Icons.groups_outlined,
                 l10n.vtcJoinTrailAnsweredBy,
                 receipt.answeredBy,
                 isId: true,
               ),
               if (receipt.answerType case final type?)
-                _Detail(l10n.vtcJoinTrailTask, type),
+                _Detail(Icons.assignment_outlined, l10n.vtcJoinTrailTask, type),
               if (receipt.answerDocumentId case final id?)
-                _Detail(l10n.vtcJoinTrailDocument, id, isId: true),
+                _Detail(
+                  Icons.description_outlined,
+                  l10n.vtcJoinTrailDocument,
+                  id,
+                  isId: true,
+                ),
               if (receipt.answeredAt case final at?)
-                _Detail(l10n.vtcJoinTrailAnsweredAt, time(at)),
+                _Detail(Icons.schedule, l10n.vtcJoinTrailAnsweredAt, time(at)),
               ...proof(
                 cryptosuite: receipt.answerCryptosuite,
                 key: receipt.answerVerificationMethod,
@@ -140,7 +167,7 @@ class VtcJoinTrail extends StatelessWidget {
               ),
             ],
             if (requestId case final id?)
-              _Detail(l10n.vtcJoinTrailRequestId, id, isId: true),
+              _Detail(Icons.tag, l10n.vtcJoinTrailRequestId, id, isId: true),
           ],
           document: submit?.answer.toJson(),
           documentTitle: l10n.vtcJoinTrailAnswerDocument,
@@ -159,13 +186,30 @@ class VtcJoinTrail extends StatelessWidget {
           },
           details: [
             if (lastCheck != null) ...[
-              _Detail(l10n.vtcJoinTrailCheckTask, lastCheck.type),
+              _Detail(
+                Icons.assignment_outlined,
+                l10n.vtcJoinTrailCheckTask,
+                lastCheck.type,
+              ),
               if (lastCheck.signedAt case final at?)
-                _Detail(l10n.vtcJoinTrailCheckSignedAt, time(at)),
+                _Detail(
+                  Icons.schedule,
+                  l10n.vtcJoinTrailCheckSignedAt,
+                  time(at),
+                ),
               if (lastCheck.answeredAt case final at?)
-                _Detail(l10n.vtcJoinTrailCheckAnsweredAt, time(at)),
+                _Detail(
+                  Icons.schedule,
+                  l10n.vtcJoinTrailCheckAnsweredAt,
+                  time(at),
+                ),
               if (lastCheck.answerVerificationMethod case final key?)
-                _Detail(l10n.vtcJoinTrailCheckAnswerKey, key, isId: true),
+                _Detail(
+                  Icons.key_outlined,
+                  l10n.vtcJoinTrailCheckAnswerKey,
+                  key,
+                  isId: true,
+                ),
             ],
           ],
           document: this.lastCheck?.answer.toJson(),
@@ -188,10 +232,12 @@ class VtcJoinTrail extends StatelessWidget {
 /// How far the application got with a step.
 enum _Stage { done, current, next }
 
-/// One technical fact behind a step, such as the key that signed.
+/// One technical fact behind a step, such as the key that signed, with an
+/// icon for what it is.
 class _Detail {
-  const _Detail(this.label, this.value, {this.isId = false});
+  const _Detail(this.icon, this.label, this.value, {this.isId = false});
 
+  final IconData icon;
   final String label;
   final String value;
 
@@ -230,6 +276,9 @@ class _Step extends HookWidget {
   final bool isLast;
 
   static const _markerSize = 32.0;
+
+  /// Room above each detail, beyond the column's own spacing.
+  static const _detailSpacing = 10.0;
   static const _lineWidth = 2.0;
 
   @override
@@ -280,18 +329,11 @@ class _Step extends HookWidget {
                     ),
                     Text(summary, style: onboardingNote(context)),
                     if (expanded.value)
-                      for (final detail in details) ...[
-                        Text(detail.label, style: onboardingNote(context)),
-                        if (detail.isId)
-                          MonospaceDid(detail.value)
-                        else
-                          SelectableText(
-                            detail.value,
-                            style: context.textTheme.bodySmall?.copyWith(
-                              color: Colors.white,
-                            ),
-                          ),
-                      ],
+                      for (final detail in details)
+                        Padding(
+                          padding: const EdgeInsets.only(top: _detailSpacing),
+                          child: _DetailLine(detail),
+                        ),
                   ],
                 ),
               ),
@@ -319,6 +361,42 @@ class _Step extends HookWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// A detail of a step: its icon, then its label above its value.
+class _DetailLine extends StatelessWidget {
+  const _DetailLine(this.detail);
+
+  final _Detail detail;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 8,
+      children: [
+        Icon(detail.icon, size: 16, color: Colors.white70),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 2,
+            children: [
+              Text(detail.label, style: onboardingNote(context)),
+              if (detail.isId)
+                MonospaceDid(detail.value)
+              else
+                SelectableText(
+                  detail.value,
+                  style: context.textTheme.bodySmall?.copyWith(
+                    color: Colors.white,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

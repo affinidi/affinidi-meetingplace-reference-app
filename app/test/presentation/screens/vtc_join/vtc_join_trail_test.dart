@@ -144,6 +144,10 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('did:webvh:persona'), findsOneWidget);
       expect(find.text(JoinTask.submit), findsOneWidget);
+      // Each detail with an icon for what it is.
+      expect(find.byIcon(Icons.fingerprint), findsOneWidget);
+      expect(find.byIcon(Icons.assignment_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.key_outlined), findsOneWidget);
       expect(find.text('urn:uuid:submit'), findsOneWidget);
       expect(find.text('Cryptosuite'), findsOneWidget);
       expect(find.text('did:webvh:persona#key-0'), findsOneWidget);
