@@ -140,7 +140,7 @@ void main() {
     expect(credential['type'], ['VerifiableCredential', 'EmployeeCredential']);
   });
 
-  testWidgets("says why the VTA refused a credential", (tester) async {
+  testWidgets('says why the VTA refused a credential', (tester) async {
     vta.refusals[VtaTask.credentialsReceive] = {
       'code':
           'https://trusttasks.org/spec/trust-task-error/0.1#malformedRequest',
