@@ -4,6 +4,7 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../application/services/vtc_service/vtc_service.dart';
+import '../../../infrastructure/providers/app_logger_provider.dart';
 import 'vtc_sign_in_state.dart';
 
 part 'vtc_sign_in_controller.g.dart';
@@ -12,7 +13,8 @@ part 'vtc_sign_in_controller.g.dart';
 /// code to the member's approval.
 ///
 /// A claimed sign-in that is left before it is approved is cancelled, unless
-/// the grant may already have been sent. Nothing is logged.
+/// the grant may already have been sent. Only a failure's code is logged;
+/// never a DID, key or document.
 @riverpod
 class VtcSignInController extends _$VtcSignInController {
   late final VtcService _service = ref.read(vtcServiceProvider);
@@ -164,7 +166,9 @@ class VtcSignInController extends _$VtcSignInController {
   Future<void> _run(Future<void> Function() step) async {
     try {
       await step();
-    } on SignInException catch (error) {
+    } on SignInException catch (error, stackTrace) {
+      // The detail tells a version the community dropped from a refusal.
+      _logFailure('${error.failure.name} ${error.detail ?? ''}', stackTrace);
       if (error.responded) _claimed = null;
       await _cancelIfOpen();
       state = state.copyWith(
@@ -173,13 +177,24 @@ class VtcSignInController extends _$VtcSignInController {
       );
     } on VtaNotLinkedException {
       state = state.copyWith(step: VtcSignInStep.failed, isVtaMissing: true);
-    } on MeetingPlaceVtcSDKException {
+    } on MeetingPlaceVtcSDKException catch (error, stackTrace) {
+      _logFailure('${error.code.name} ${error.refusalCode ?? ''}', stackTrace);
       await _cancelIfOpen();
       state = state.copyWith(
         step: VtcSignInStep.failed,
         failure: SignInFailure.agentUnreachable,
       );
     }
+  }
+
+  void _logFailure(String reason, StackTrace stackTrace) {
+    ref
+        .read(appLoggerProvider)
+        .error(
+          'Signing in to the community failed: $reason',
+          stackTrace: stackTrace,
+          name: 'VtcSignInController',
+        );
   }
 
   bool get _isOpen => _claimed != null && !_claimed!.responded;

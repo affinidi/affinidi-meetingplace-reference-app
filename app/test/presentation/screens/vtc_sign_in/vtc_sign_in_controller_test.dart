@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/app_logger_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/vtc/user_verification_key.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_sign_in/vtc_sign_in_controller.dart';
@@ -10,6 +11,19 @@ import 'package:mpx_flutter_reference_app/presentation/screens/vtc_sign_in/vtc_s
 
 import '../../../fakes/fake_vta.dart';
 import '../../../fakes/fake_vtc_network.dart';
+import '../../../mocks/fake_app_logger.dart';
+
+class _RecordingLogger extends FakeAppLogger {
+  final errors = <String>[];
+
+  @override
+  void error(
+    String message, {
+    String name = '',
+    dynamic error,
+    StackTrace? stackTrace,
+  }) => errors.add(message);
+}
 
 String _signInCode() =>
     'https://link.trustoverip.org/t#_from=$fakeVtcDid'
@@ -21,6 +35,7 @@ void main() {
   late FakeVtcNetwork network;
   late VtcService service;
   late ProviderContainer container;
+  late _RecordingLogger logger;
 
   VtcSignInController controller() =>
       container.read(vtcSignInControllerProvider.notifier);
@@ -65,7 +80,10 @@ void main() {
     await service.checkGrant();
 
     container = ProviderContainer(
-      overrides: [vtcServiceProvider.overrideWithValue(service)],
+      overrides: [
+        vtcServiceProvider.overrideWithValue(service),
+        appLoggerProvider.overrideWithValue(logger = _RecordingLogger()),
+      ],
     );
     container.listen(vtcSignInControllerProvider, (_, _) {});
   });
@@ -110,6 +128,18 @@ void main() {
 
       expect(state().step, VtcSignInStep.failed);
       expect(state().failure, SignInFailure.wrongNumber);
+    });
+
+    test('logs the community refusal code, never a DID', () async {
+      await controller().onScanned(_signInCode());
+      await controller().confirmMembership();
+      await controller().submitNumber('12');
+
+      expect(logger.errors, [
+        'Signing in to the community failed: wrongNumber '
+            'auth/oob/prove:numberMismatch',
+      ]);
+      expect(logger.errors.single, isNot(contains('did:')));
     });
 
     test('cancels a declined sign-in', () async {
