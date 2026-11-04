@@ -5,10 +5,12 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../domain/models/vtc/linked_vta.dart';
+import '../../../domain/models/vtc/mock_credential_template.dart';
 import '../../../domain/models/vtc/vtc_community.dart';
 import '../../../domain/repositories/vtc_repository.dart';
 import '../../../infrastructure/providers/vtc_sdk_provider.dart';
 import '../../../infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
+import '../../../infrastructure/vtc/mock_credential_issuer.dart';
 import '../../../infrastructure/vtc/user_verification_key.dart';
 
 /// Thrown when the text entered as a VTA is not a DID.
@@ -51,12 +53,15 @@ class VtcService {
     required this._sdk,
     required this._repository,
     required this._userVerificationKey,
+    MockCredentialIssuer? mockCredentialIssuer,
     String? platform,
-  }) : _platform = platform ?? Platform.operatingSystem;
+  }) : _platform = platform ?? Platform.operatingSystem,
+       _mockIssuer = mockCredentialIssuer ?? MockCredentialIssuer();
 
   final MeetingPlaceVtcSDK _sdk;
   final VtcRepository _repository;
   final UserVerificationKey _userVerificationKey;
+  final MockCredentialIssuer _mockIssuer;
   final String _platform;
   VtaClient? _client;
 
@@ -437,6 +442,48 @@ class VtcService {
       purpose: 'join',
     );
     return presented.presentation;
+  }
+
+  /// Issues the test credential [template] to the identity [personaDid] and
+  /// keeps it on the VTA in that identity's context [contextId], where a way
+  /// into a community asking for it finds it. The VTA checks the issuer's
+  /// signature before it keeps it.
+  ///
+  /// Returns whether the VTA keeps it as valid. Throws as [join] does.
+  Future<bool> importMockCredential(
+    MockCredentialTemplate template, {
+    required String personaDid,
+    required String contextId,
+  }) async {
+    final vta = await _grantedVta();
+    final credential = await _mockIssuer.issue(
+      template,
+      subjectDid: personaDid,
+    );
+    return vta.keepCredential(credential, contextId: contextId);
+  }
+
+  /// Which of [personaDids] hold each test credential, by template id: the
+  /// valid ones this phone issued and the VTA keeps.
+  ///
+  /// Throws as [join] does.
+  Future<Map<String, Set<String>>> mockCredentialHolders(
+    List<String> personaDids,
+  ) async {
+    final vta = await _grantedVta();
+    final issuer = await _mockIssuer.did();
+    final holders = <String, Set<String>>{};
+    for (final template in mockCredentialTemplates) {
+      for (final did in personaDids) {
+        final held = await vta.findCredentials(
+          type: template.type,
+          issuerDid: issuer,
+          subjectDid: did,
+        );
+        if (held.isNotEmpty) (holders[template.id] ??= {}).add(did);
+      }
+    }
+    return holders;
   }
 
   /// Discloses the preview [previewId] the member approved, through the

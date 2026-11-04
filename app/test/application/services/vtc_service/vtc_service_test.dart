@@ -2,6 +2,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
+import 'package:mpx_flutter_reference_app/domain/models/vtc/mock_credential_template.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/vtc/user_verification_key.dart';
 
@@ -492,6 +493,66 @@ void main() {
         expect(archived(), isEmpty);
         expect((await service.community(fakeVtcDid))?.isMember, isTrue);
       });
+    });
+  });
+
+  group('VtcService mock credentials', () {
+    const ada = 'did:webvh:QmAda:host.example';
+    const bo = 'did:webvh:QmBo:host.example';
+
+    setUp(() async {
+      await service.startLink(vta.did);
+      await service.checkGrant();
+    });
+
+    test('imports a test credential for an identity', () async {
+      vta.answers[VtaTask.credentialsReceive] = {'status': 'valid'};
+
+      final kept = await service.importMockCredential(
+        mockCredentialTemplates.first,
+        personaDid: ada,
+        contextId: 'vta',
+      );
+
+      expect(kept, isTrue);
+      final payload =
+          vta.received.lastWhere(
+                (r) => r['type'] == VtaTask.credentialsReceive,
+              )['payload']
+              as Map;
+      expect(payload['contextId'], 'vta');
+      final credential = payload['credential'] as Map;
+      expect((credential['credentialSubject'] as Map)['id'], ada);
+      expect(credential['type'], [
+        'VerifiableCredential',
+        'MembershipCredential',
+      ]);
+      expect(payload['id'], credential['id']);
+    });
+
+    test('says which identities hold each test credential', () async {
+      vta.answerTo[VtaTask.credentialsQuery] = (payload) => {
+        'credentials': [
+          if (payload['subjectDid'] == ada &&
+              payload['type'] == 'MembershipCredential')
+            {
+              'id': 'card-1',
+              'types': ['VerifiableCredential', 'MembershipCredential'],
+              'status': 'valid',
+            },
+        ],
+      };
+
+      final holders = await service.mockCredentialHolders([ada, bo]);
+
+      expect(holders, {
+        'membership': {ada},
+      });
+      final issuers = vta.received
+          .where((r) => r['type'] == VtaTask.credentialsQuery)
+          .map((r) => (r['payload'] as Map)['issuerDid'])
+          .toSet();
+      expect(issuers.single, startsWith('did:key:'));
     });
   });
 }
