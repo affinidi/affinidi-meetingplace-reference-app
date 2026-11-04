@@ -473,14 +473,17 @@ class VtcService {
     final vta = await _grantedVta();
     final issuer = await _mockIssuer.did();
     final holders = <String, Set<String>>{};
-    for (final template in mockCredentialTemplates) {
-      for (final did in personaDids) {
-        final held = await vta.findCredentials(
-          type: template.type,
-          issuerDid: issuer,
-          subjectDid: did,
-        );
-        if (held.isNotEmpty) (holders[template.id] ??= {}).add(did);
+    for (final did in personaDids) {
+      final held = await vta.findCredentials(
+        issuerDid: issuer,
+        subjectDid: did,
+      );
+      for (final template in mockCredentialTemplates) {
+        if (held.any(
+          (credential) => credential.types.contains(template.type),
+        )) {
+          (holders[template.id] ??= {}).add(did);
+        }
       }
     }
     return holders;

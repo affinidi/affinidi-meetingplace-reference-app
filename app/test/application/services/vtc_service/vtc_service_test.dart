@@ -533,8 +533,7 @@ void main() {
     test('says which identities hold each test credential', () async {
       vta.answerTo[VtaTask.credentialsQuery] = (payload) => {
         'credentials': [
-          if (payload['subjectDid'] == ada &&
-              payload['type'] == 'MembershipCredential')
+          if (payload['subjectDid'] == ada)
             {
               'id': 'card-1',
               'types': ['VerifiableCredential', 'MembershipCredential'],
@@ -548,11 +547,15 @@ void main() {
       expect(holders, {
         'membership': {ada},
       });
-      final issuers = vta.received
-          .where((r) => r['type'] == VtaTask.credentialsQuery)
-          .map((r) => (r['payload'] as Map)['issuerDid'])
-          .toSet();
-      expect(issuers.single, startsWith('did:key:'));
+      final queries = [
+        for (final r in vta.received)
+          if (r['type'] == VtaTask.credentialsQuery) r['payload'] as Map,
+      ];
+      expect(queries, hasLength(2), reason: 'one query per identity');
+      expect(
+        queries.map((q) => q['issuerDid']).toSet().single,
+        startsWith('did:key:'),
+      );
     });
   });
 }
