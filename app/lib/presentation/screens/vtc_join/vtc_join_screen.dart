@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -253,6 +255,7 @@ class _Review extends StatelessWidget {
             onListInDirectory: onListInDirectory,
           ),
         _WaysIn(state: state, onChoose: onChooseWay),
+        if (state.manifest.isNotEmpty) _Manifest(state.manifest),
         const SizedBox(height: 12),
         Row(
           spacing: 12,
@@ -690,6 +693,55 @@ class _Way extends StatelessWidget {
         onTap: onChoose,
         borderRadius: BorderRadius.circular(8),
         child: line,
+      ),
+    );
+  }
+}
+
+/// The community's join manifest as it sent it, collapsed until the member
+/// opens it. Shown as plain text only: the community writes it.
+class _Manifest extends StatelessWidget {
+  const _Manifest(this.manifest);
+
+  final Map<String, dynamic> manifest;
+
+  @override
+  Widget build(BuildContext context) {
+    // A Material of the glass cards' tint, on which the tile paints.
+    return Material(
+      color: Colors.white.withAlpha(25),
+      borderRadius: BorderRadius.circular(16),
+      clipBehavior: Clip.antiAlias,
+      child: Theme(
+        // No divider lines around the open section.
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          key: const Key('vtc_join_manifest'),
+          tilePadding: const EdgeInsets.symmetric(horizontal: 20),
+          childrenPadding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+          iconColor: Colors.white,
+          collapsedIconColor: Colors.white,
+          expandedAlignment: Alignment.centerLeft,
+          title: Text(
+            context.l10n.vtcJoinManifestHeading,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+            ),
+          ),
+          children: [
+            SelectableText(
+              const JsonEncoder.withIndent('  ').convert(manifest),
+              key: const Key('vtc_join_manifest_json'),
+              style: context.textTheme.bodySmall?.copyWith(
+                color: Colors.white,
+                fontFamily: 'monospace',
+                height: 1.4,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

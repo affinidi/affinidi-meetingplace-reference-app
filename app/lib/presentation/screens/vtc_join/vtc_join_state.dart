@@ -174,6 +174,10 @@ abstract class VtcJoinState with _$VtcJoinState {
     /// can apply under none.
     String? chosenWayId,
 
+    /// The join manifest exactly as the community sent it, for the member
+    /// to read.
+    @Default(<String, dynamic>{}) Map<String, dynamic> manifest,
+
     /// The profile details the community asks for.
     @Default(<JoinAttributeRequest>[])
     List<JoinAttributeRequest> requestedDetails,

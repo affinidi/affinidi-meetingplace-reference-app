@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -371,6 +372,31 @@ void main() {
 
       expect(find.byIcon(Icons.radio_button_checked), findsNothing);
       expect(find.byIcon(Icons.radio_button_unchecked), findsNothing);
+    });
+
+    testWidgets('shows the manifest as sent, collapsed at first', (
+      tester,
+    ) async {
+      network.joinManifest = {
+        ...network.joinManifest,
+        'criteria': [
+          ...network.joinManifest['criteria'] as List,
+          {'id': 'unreadable', 'admission': 'automatic'},
+        ],
+      };
+      await pumpScreen(tester);
+      await enterCode(tester, fakeVtcDid);
+
+      final json = find.byKey(const Key('vtc_join_manifest_json'));
+      expect(find.text('Manifest'), findsOneWidget);
+      expect(json, findsNothing);
+
+      await tapVisible(tester, find.text('Manifest'));
+      await tester.pumpAndSettle();
+
+      final shown = tester.widget<SelectableText>(json).data!;
+      expect(jsonDecode(shown), network.joinManifest);
+      expect(shown, contains('"unreadable"'));
     });
 
     testWidgets('titles a community without a name by what it asks', (

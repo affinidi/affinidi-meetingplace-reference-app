@@ -94,6 +94,7 @@ class VtcJoinController extends _$VtcJoinController {
           for (final criterion in manifest.criteria) VtcJoinWay.of(criterion),
         ],
         chosenWayId: manifest.openCriterion?.id,
+        manifest: manifest.document,
         requestedDetails: manifest.requestedAttributes,
         listsNewMembers: manifest.listsNewMembers,
         denialReason: community?.rejectionReason,

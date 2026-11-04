@@ -2665,6 +2665,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get vtcJoinWaysHeading => 'Ways in';
 
   @override
+  String get vtcJoinManifestHeading => 'Manifest';
+
+  @override
   String get vtcJoinWayAutomatic => 'You become a member when you apply';
 
   @override
