@@ -219,16 +219,8 @@ class VtcJoinController extends _$VtcJoinController {
 
   /// The member's identities, which are personas of their VTA, primary
   /// first.
-  List<Identity> _joinableIdentities() {
-    final identities = ref
-        .read(identitiesServiceProvider)
-        .identities
-        .where((identity) => identity.isVtaPersona);
-    return [
-      ...identities.where((identity) => identity.isPrimary),
-      ...identities.where((identity) => !identity.isPrimary),
-    ];
-  }
+  List<Identity> _joinableIdentities() =>
+      ref.read(identitiesServiceProvider).vtaPersonas;
 
   /// Joins as the VTA identity [personaDid], or as a new identity when
   /// null. Only an identity the VTA offered is used, and under a way in

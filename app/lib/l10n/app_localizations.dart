@@ -3886,6 +3886,78 @@ abstract class AppLocalizations {
   /// **'Credential missing'**
   String get vtcJoinCredentialMissing;
 
+  /// No description provided for @mockCredentialsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mock credentials'**
+  String get mockCredentialsTitle;
+
+  /// No description provided for @mockCredentialsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Test credentials for your identities'**
+  String get mockCredentialsSubtitle;
+
+  /// No description provided for @mockCredentialsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone signs these as a test issuer. Import one for an identity, then join a community whose way in asks for it and accepts any issuer.'**
+  String get mockCredentialsNote;
+
+  /// No description provided for @mockCredentialsImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get mockCredentialsImport;
+
+  /// No description provided for @mockCredentialsChooseIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'Import for which identity?'**
+  String get mockCredentialsChooseIdentity;
+
+  /// No description provided for @mockCredentialsHeldBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Held by {name}'**
+  String mockCredentialsHeldBy(String name);
+
+  /// No description provided for @mockCredentialsImported.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported for {name}'**
+  String mockCredentialsImported(String name);
+
+  /// No description provided for @mockCredentialsNotKept.
+  ///
+  /// In en, this message translates to:
+  /// **'Your VTA took the credential but doesn\'t keep it as valid.'**
+  String get mockCredentialsNotKept;
+
+  /// No description provided for @mockCredentialsImportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The credential couldn\'t be imported: your VTA refused it or can\'t be reached.'**
+  String get mockCredentialsImportFailed;
+
+  /// No description provided for @mockCredentialsNoIdentities.
+  ///
+  /// In en, this message translates to:
+  /// **'Create an identity on your VTA to import a credential for it.'**
+  String get mockCredentialsNoIdentities;
+
+  /// No description provided for @mockCredentialsVtaMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Link your VTA in Settings to import test credentials.'**
+  String get mockCredentialsVtaMissing;
+
+  /// No description provided for @mockCredentialsUnreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'Your VTA can\'t be reached.'**
+  String get mockCredentialsUnreachable;
+
   /// No description provided for @vtcJoinWayWithCredential.
   ///
   /// In en, this message translates to:

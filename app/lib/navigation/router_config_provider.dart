@@ -11,6 +11,7 @@ import '../application/services/vtc_service/vta_link_service.dart';
 import '../presentation/screens/authentication/authentication_screen/authentication_screen.dart';
 import '../presentation/screens/call_log/call_log_screen.dart';
 import '../presentation/screens/link_vta/link_vta_screen.dart';
+import '../presentation/screens/mock_credentials/mock_credentials_screen.dart';
 import '../presentation/screens/onboarding/onboarding_screen/onboarding_screen.dart';
 import '../presentation/screens/settings/settings_screen.dart';
 import 'routes/app_routes.dart';
@@ -161,6 +162,12 @@ GoRouter routerConfig(Ref ref) {
         parentNavigatorKey: rootNavigatorKey,
         pageBuilder: (context, state) =>
             const NoTransitionPage(child: SettingsScreen()),
+      ),
+      GoRoute(
+        path: RoutePaths.mockCredentials,
+        parentNavigatorKey: rootNavigatorKey,
+        pageBuilder: (context, state) =>
+            const NoTransitionPage(child: MockCredentialsScreen()),
       ),
       GoRoute(
         path: RoutePaths.callLog,

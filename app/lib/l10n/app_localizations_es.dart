@@ -2627,6 +2627,51 @@ class AppLocalizationsEs extends AppLocalizations {
   String get vtcJoinCredentialMissing => 'Credential missing';
 
   @override
+  String get mockCredentialsTitle => 'Mock credentials';
+
+  @override
+  String get mockCredentialsSubtitle => 'Test credentials for your identities';
+
+  @override
+  String get mockCredentialsNote =>
+      'This phone signs these as a test issuer. Import one for an identity, then join a community whose way in asks for it and accepts any issuer.';
+
+  @override
+  String get mockCredentialsImport => 'Import';
+
+  @override
+  String get mockCredentialsChooseIdentity => 'Import for which identity?';
+
+  @override
+  String mockCredentialsHeldBy(String name) {
+    return 'Held by $name';
+  }
+
+  @override
+  String mockCredentialsImported(String name) {
+    return 'Imported for $name';
+  }
+
+  @override
+  String get mockCredentialsNotKept =>
+      'Your VTA took the credential but doesn\'t keep it as valid.';
+
+  @override
+  String get mockCredentialsImportFailed =>
+      'The credential couldn\'t be imported: your VTA refused it or can\'t be reached.';
+
+  @override
+  String get mockCredentialsNoIdentities =>
+      'Create an identity on your VTA to import a credential for it.';
+
+  @override
+  String get mockCredentialsVtaMissing =>
+      'Link your VTA in Settings to import test credentials.';
+
+  @override
+  String get mockCredentialsUnreachable => 'Your VTA can\'t be reached.';
+
+  @override
   String vtcJoinWayWithCredential(String type) {
     return 'With your $type';
   }

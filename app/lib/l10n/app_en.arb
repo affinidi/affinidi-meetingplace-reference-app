@@ -2441,6 +2441,32 @@
 	},
 	"vtcJoinShareAction": "Share and apply",
 	"vtcJoinCredentialMissing": "Credential missing",
+	"mockCredentialsTitle": "Mock credentials",
+	"mockCredentialsSubtitle": "Test credentials for your identities",
+	"mockCredentialsNote": "This phone signs these as a test issuer. Import one for an identity, then join a community whose way in asks for it and accepts any issuer.",
+	"mockCredentialsImport": "Import",
+	"mockCredentialsChooseIdentity": "Import for which identity?",
+	"mockCredentialsHeldBy": "Held by {name}",
+	"@mockCredentialsHeldBy": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"mockCredentialsImported": "Imported for {name}",
+	"@mockCredentialsImported": {
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"mockCredentialsNotKept": "Your VTA took the credential but doesn't keep it as valid.",
+	"mockCredentialsImportFailed": "The credential couldn't be imported: your VTA refused it or can't be reached.",
+	"mockCredentialsNoIdentities": "Create an identity on your VTA to import a credential for it.",
+	"mockCredentialsVtaMissing": "Link your VTA in Settings to import test credentials.",
+	"mockCredentialsUnreachable": "Your VTA can't be reached.",
 	"vtcJoinWayWithCredential": "With your {type}",
 	"@vtcJoinWayWithCredential": {
 		"placeholders": {

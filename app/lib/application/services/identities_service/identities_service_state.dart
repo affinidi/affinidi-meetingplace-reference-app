@@ -20,4 +20,13 @@ abstract class IdentitiesServiceState with _$IdentitiesServiceState {
 
   Identity? getIdentityByDid(String? identityDid) =>
       identities.firstWhereOrNull((i) => i.did == identityDid);
+
+  /// The identities that are personas of the member's VTA, primary first.
+  List<Identity> get vtaPersonas {
+    final personas = identities.where((identity) => identity.isVtaPersona);
+    return [
+      ...personas.where((identity) => identity.isPrimary),
+      ...personas.where((identity) => !identity.isPrimary),
+    ];
+  }
 }

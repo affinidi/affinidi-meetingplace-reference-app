@@ -10,6 +10,7 @@ class RoutePaths {
   static const credentials = '/credentials';
   static const settings = '/settings';
   static const callLog = '/call-log';
+  static const mockCredentials = '/mock-credentials';
 
   // Contacts
   static const chat = ':contactId/chat';

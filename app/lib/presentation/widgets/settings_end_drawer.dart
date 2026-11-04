@@ -5,7 +5,8 @@ import '../../infrastructure/extensions/build_context_extensions.dart';
 import '../../navigation/routes/route_paths.dart';
 import '../../navigation/tabs/tabs.dart';
 
-/// Right-side drawer with shortcuts to Settings and the call log.
+/// Right-side drawer with shortcuts to Settings, the call log and the test
+/// credentials this phone can issue.
 class SettingsEndDrawer extends StatelessWidget {
   const SettingsEndDrawer({super.key});
 
@@ -17,6 +18,11 @@ class SettingsEndDrawer extends StatelessWidget {
   void _openCallLog(BuildContext context) {
     Navigator.of(context).pop();
     GoRouter.of(context).push(RoutePaths.callLog);
+  }
+
+  void _openMockCredentials(BuildContext context) {
+    Navigator.of(context).pop();
+    GoRouter.of(context).push(RoutePaths.mockCredentials);
   }
 
   @override
@@ -65,6 +71,18 @@ class SettingsEndDrawer extends StatelessWidget {
                 ).textTheme.titleMedium?.copyWith(color: Colors.white),
               ),
               onTap: () => _openCallLog(context),
+            ),
+            ListTile(
+              minLeadingWidth: 20,
+              horizontalTitleGap: 8,
+              leading: const Icon(Icons.science, color: Colors.white, size: 20),
+              title: Text(
+                l10n.mockCredentialsTitle,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(color: Colors.white),
+              ),
+              onTap: () => _openMockCredentials(context),
             ),
           ],
         ),
