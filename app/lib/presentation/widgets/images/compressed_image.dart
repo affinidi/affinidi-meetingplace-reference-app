@@ -55,6 +55,56 @@ Future<CompressedImage> compressAndResizeImageFromFileAsBase64({
   );
 }
 
+/// Lowest JPEG quality [thumbnailFromBase64] tries before giving up.
+const _thumbnailMinQualityPercent = 30;
+const _thumbnailQualityStepPercent = 10;
+
+/// A JPEG thumbnail of the base64-encoded [image], at most [imageSize] on its
+/// longest side and at most [maxLength] characters of base64.
+///
+/// Quality is lowered step by step until the thumbnail fits. Returns null
+/// when [image] cannot be decoded or no quality fits [maxLength].
+String? thumbnailFromBase64(
+  String image, {
+  required int imageSize,
+  required int maxLength,
+  int qualityPercent = 80,
+}) {
+  final decoded = _decodeBase64Image(image);
+  if (decoded == null) return null;
+
+  final longestSide = decoded.width > decoded.height
+      ? decoded.width
+      : decoded.height;
+  final size = longestSide < imageSize ? longestSide : imageSize;
+
+  for (
+    var quality = qualityPercent;
+    quality >= _thumbnailMinQualityPercent;
+    quality -= _thumbnailQualityStepPercent
+  ) {
+    final thumbnail = base64Encode(
+      _compressAndResize(
+        image: decoded,
+        imageSize: size,
+        qualityPercent: quality,
+      ),
+    );
+    if (thumbnail.length <= maxLength) return thumbnail;
+  }
+  return null;
+}
+
+/// The decoders throw, rather than return null, on some bytes that are not
+/// an image they know, so any failure reads as "not a picture".
+img.Image? _decodeBase64Image(String image) {
+  try {
+    return img.decodeImage(base64Decode(image));
+  } catch (_) {
+    return null;
+  }
+}
+
 Uint8List _compressAndResize({
   required img.Image image,
   required int imageSize,
