@@ -496,6 +496,40 @@ void main() {
       expect(state().step, VtcJoinStep.joined);
     });
 
+    test('shows the signed application while it waits', () async {
+      network.joinVerdict = {'effect': 'refer'};
+      await controller().onScanned(fakeVtcDid);
+      await controller().join();
+
+      expect(state().submitReceipt?.type, JoinTask.submit);
+      expect(state().submitReceipt?.signer, persona.did);
+      expect(state().submitReceipt?.answeredBy, fakeVtcDid);
+      expect(state().lastCheckedAt, isNull);
+
+      // Reopened later, the screen shows the same application.
+      container.dispose();
+      useService();
+      await controller().onScanned(fakeVtcDid);
+      expect(state().step, VtcJoinStep.pending);
+      expect(state().submitReceipt?.type, JoinTask.submit);
+    });
+
+    test('says when the administrators put the application off', () async {
+      network.joinVerdict = {'effect': 'refer'};
+      await controller().onScanned(fakeVtcDid);
+      await controller().join();
+
+      network.joinStatus = 'deferred';
+      await controller().checkAgain();
+      expect(state().step, VtcJoinStep.pending);
+      expect(state().deferred, isTrue);
+      expect(state().lastCheckedAt, isNotNull);
+
+      network.joinStatus = 'pending';
+      await controller().checkAgain();
+      expect(state().deferred, isFalse);
+    });
+
     test('shows a denial', () async {
       network.joinVerdict = {'effect': 'deny'};
       await controller().onScanned(fakeVtcDid);

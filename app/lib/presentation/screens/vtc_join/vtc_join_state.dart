@@ -196,6 +196,16 @@ abstract class VtcJoinState with _$VtcJoinState {
     /// The profile details the member is asked to approve sharing.
     @Default(<VtcJoinDetail>[]) List<VtcJoinDetail> details,
 
+    /// The open application as the VTA signed it and the community answered
+    /// it, or null when this phone did not send it.
+    TrustTaskReceipt? submitReceipt,
+
+    /// Whether the community's administrators put the open application off.
+    @Default(false) bool deferred,
+
+    /// When this phone last asked the community about the open application.
+    DateTime? lastCheckedAt,
+
     /// The community's reason for turning the application down, if given.
     String? denialReason,
     VtcJoinFailure? failure,

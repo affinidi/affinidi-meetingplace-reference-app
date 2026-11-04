@@ -97,6 +97,7 @@ class VtcJoinController extends _$VtcJoinController {
         manifest: manifest.document,
         requestedDetails: manifest.requestedAttributes,
         listsNewMembers: manifest.listsNewMembers,
+        submitReceipt: community?.submitReceipt,
         denialReason: community?.rejectionReason,
       );
     });
@@ -268,8 +269,13 @@ class VtcJoinController extends _$VtcJoinController {
       attributes: attributes,
       listInDirectory: state.listInDirectory,
     );
+    // The receipt as recorded: an application already open keeps its own.
+    final recorded = verdict is JoinPending
+        ? await _service.community(manifest.communityDid)
+        : null;
     state = state.copyWith(
       details: const [],
+      submitReceipt: recorded?.submitReceipt,
       denialReason: verdict is JoinDenied ? verdict.reason : null,
       step: switch (verdict) {
         JoinAdmitted() => VtcJoinStep.joined,
@@ -290,6 +296,8 @@ class VtcJoinController extends _$VtcJoinController {
       final status = await _service.checkApplication(manifest.communityDid);
       state = state.copyWith(
         denialReason: status?.reason,
+        deferred: status?.status == JoinRequestStatus.deferred,
+        lastCheckedAt: DateTime.now(),
         step: switch (status?.status) {
           JoinRequestStatus.approved => VtcJoinStep.joined,
           JoinRequestStatus.pending ||
