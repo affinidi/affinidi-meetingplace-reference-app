@@ -2705,7 +2705,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get vtcJoinListMeNote =>
-      'If this is off, Meeting Place takes you out of the directory right after you join.';
+      'If this is off, you may be listed for a moment when you join, until Meeting Place takes your card out of the directory.';
 
   @override
   String get vtcJoinProfileHeading => 'About the community';
@@ -2807,7 +2807,7 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get vtcJoinMembershipDidField => 'membership DID';
+  String get vtcJoinMembershipDidField => 'membership ID';
 
   @override
   String get vtcJoinKeepsNotes => 'Keep notes about you';

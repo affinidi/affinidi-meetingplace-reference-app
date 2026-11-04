@@ -2487,7 +2487,7 @@
 	"vtcJoinDirectoryListed": "This community lists new members in its member directory.",
 	"vtcJoinDirectoryHidden": "This community doesn't list new members in its member directory.",
 	"vtcJoinListMe": "List me in the member directory",
-	"vtcJoinListMeNote": "If this is off, Meeting Place takes you out of the directory right after you join.",
+	"vtcJoinListMeNote": "If this is off, you may be listed for a moment when you join, until Meeting Place takes your card out of the directory.",
 	"vtcJoinProfileHeading": "About the community",
 	"vtcJoinWebsite": "Website",
 	"vtcJoinContact": "Contact",
@@ -2546,7 +2546,7 @@
 			}
 		}
 	},
-	"vtcJoinMembershipDidField": "membership DID",
+	"vtcJoinMembershipDidField": "membership ID",
 	"vtcJoinKeepsNotes": "Keep notes about you",
 	"vtcJoinAdminNotesDetail": "No other member sees them, and you can ask for yours.",
 	"vtcJoinFieldShareUpTo": "you can share it up to {audience}",

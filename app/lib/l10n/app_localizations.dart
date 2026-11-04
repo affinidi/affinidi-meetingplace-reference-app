@@ -3991,7 +3991,7 @@ abstract class AppLocalizations {
   /// No description provided for @vtcJoinListMeNote.
   ///
   /// In en, this message translates to:
-  /// **'If this is off, Meeting Place takes you out of the directory right after you join.'**
+  /// **'If this is off, you may be listed for a moment when you join, until Meeting Place takes your card out of the directory.'**
   String get vtcJoinListMeNote;
 
   /// No description provided for @vtcJoinProfileHeading.
@@ -4159,7 +4159,7 @@ abstract class AppLocalizations {
   /// No description provided for @vtcJoinMembershipDidField.
   ///
   /// In en, this message translates to:
-  /// **'membership DID'**
+  /// **'membership ID'**
   String get vtcJoinMembershipDidField;
 
   /// No description provided for @vtcJoinKeepsNotes.

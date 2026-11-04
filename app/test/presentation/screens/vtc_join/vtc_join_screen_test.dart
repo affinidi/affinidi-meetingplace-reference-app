@@ -285,8 +285,8 @@ void main() {
       expect(find.text('hello@club.example'), findsOneWidget);
       expect(find.text('Keep notes about you'), findsOneWidget);
 
-      // Grouped by who sees it by default, the membership DID among them.
-      const group = 'Show your Role, membership DID to the administrators';
+      // Grouped by who sees it by default, the membership ID among them.
+      const group = 'Show your Role, membership ID to the administrators';
       expect(find.text(group), findsOneWidget);
       const detail =
           'Role · you can share it up to all members · '
