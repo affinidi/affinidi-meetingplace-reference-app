@@ -42,6 +42,7 @@ class VtcJoinScreen extends ConsumerWidget {
           state: state,
           onJoin: controller.join,
           onListInDirectory: controller.setListInDirectory,
+          onChooseWay: controller.chooseWay,
           onCancel: close,
         ),
         VtcJoinStep.chooseIdentity => _ChooseIdentity(
@@ -209,12 +210,14 @@ class _Review extends StatelessWidget {
     required this.state,
     required this.onJoin,
     required this.onListInDirectory,
+    required this.onChooseWay,
     required this.onCancel,
   });
 
   final VtcJoinState state;
   final VoidCallback onJoin;
   final ValueChanged<bool> onListInDirectory;
+  final ValueChanged<String> onChooseWay;
   final VoidCallback onCancel;
 
   @override
@@ -249,7 +252,7 @@ class _Review extends StatelessWidget {
             communityName: hasName ? name : l10n.vtcJoinThisCommunity,
             onListInDirectory: onListInDirectory,
           ),
-        _WaysIn(state: state),
+        _WaysIn(state: state, onChoose: onChooseWay),
         const SizedBox(height: 12),
         Row(
           spacing: 12,
@@ -605,16 +608,19 @@ class _ConsentItem extends HookWidget {
   }
 }
 
-/// How to get in: what admission takes, and each way in the community
-/// offers.
+/// How to get in: what admission under the chosen way takes, and each way
+/// in the community offers. When this app supports more than one, the
+/// member chooses which to apply under.
 class _WaysIn extends StatelessWidget {
-  const _WaysIn({required this.state});
+  const _WaysIn({required this.state, required this.onChoose});
 
   final VtcJoinState state;
+  final ValueChanged<String> onChoose;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final choosable = state.ways.where((way) => way.canApply).length > 1;
     return GlassCard(
       title: l10n.vtcJoinWaysHeading,
       child: Column(
@@ -629,22 +635,61 @@ class _WaysIn extends StatelessWidget {
               style: onboardingNote(context),
             ),
           for (final way in state.ways)
-            OnboardingLine(
-              icon: way.unsupported != null
-                  ? Icons.block
-                  : way.automatic
-                  ? Icons.how_to_reg
-                  : Icons.rate_review,
-              title: switch (way) {
-                VtcJoinWay(:final unsupported?) => l10n.vtcJoinWayUnsupported(
-                  unsupported.name,
-                ),
-                VtcJoinWay(automatic: true) => l10n.vtcJoinWayAutomatic,
-                _ => l10n.vtcJoinWayReviewed,
-              },
-              subtitle: way.description,
+            _Way(
+              way: way,
+              chosen: way.id == state.chosenWayId,
+              onChoose: choosable && way.canApply
+                  ? () => onChoose(way.id)
+                  : null,
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// One way in: what admission under it takes and the community's words for
+/// it. With [onChoose], a choice among the ways in, marked when [chosen].
+class _Way extends StatelessWidget {
+  const _Way({required this.way, required this.chosen, this.onChoose});
+
+  final VtcJoinWay way;
+  final bool chosen;
+  final VoidCallback? onChoose;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final onChoose = this.onChoose;
+    final line = OnboardingLine(
+      icon: onChoose != null
+          ? chosen
+                ? Icons.radio_button_checked
+                : Icons.radio_button_unchecked
+          : way.unsupported != null
+          ? Icons.block
+          : way.automatic
+          ? Icons.how_to_reg
+          : Icons.rate_review,
+      title: switch (way) {
+        VtcJoinWay(:final unsupported?) => l10n.vtcJoinWayUnsupported(
+          unsupported.name,
+        ),
+        VtcJoinWay(automatic: true) => l10n.vtcJoinWayAutomatic,
+        _ => l10n.vtcJoinWayReviewed,
+      },
+      subtitle: way.description,
+    );
+    if (onChoose == null) return line;
+    return Semantics(
+      key: Key('vtc_join_way_${way.id}'),
+      button: true,
+      inMutuallyExclusiveGroup: true,
+      selected: chosen,
+      child: InkWell(
+        onTap: onChoose,
+        borderRadius: BorderRadius.circular(8),
+        child: line,
       ),
     );
   }

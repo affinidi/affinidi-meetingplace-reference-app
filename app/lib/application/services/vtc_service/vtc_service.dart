@@ -224,6 +224,9 @@ class VtcService {
   /// Applies to join [manifest]'s community as a persona of the member's
   /// VTA, and records the outcome.
   ///
+  /// The application is made under [criterion], or else the first way in
+  /// this app supports.
+  ///
   /// The first application to a community is made as [persona], one of
   /// [vtaPersonas], or else as a new persona the VTA creates; a later one
   /// applies as the same persona. Once admitted, the issued cards are kept
@@ -239,6 +242,7 @@ class VtcService {
   Future<JoinVerdict> join(
     JoinManifest manifest, {
     VtaPersona? persona,
+    JoinCriterion? criterion,
     List<JoinAttribute> attributes = const [],
     bool listInDirectory = false,
   }) async {
@@ -254,6 +258,7 @@ class VtcService {
       manifest,
       agent: vta,
       persona: await _personaSigner(vta, community),
+      criterion: criterion,
       attributes: attributes,
     );
     switch (verdict) {

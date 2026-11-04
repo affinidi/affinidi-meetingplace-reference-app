@@ -314,6 +314,65 @@ void main() {
       });
     });
 
+    testWidgets('lets the member choose among the ways in', (tester) async {
+      network.joinManifest = {
+        ...network.joinManifest,
+        'criteria': [
+          {
+            'id': 'open',
+            'admission': 'automatic',
+            'requirementsDigest': 'zOpen',
+          },
+          {
+            'id': 'reviewed',
+            'admission': 'review',
+            'requirementsDigest': 'zReviewed',
+            'description': 'For clubs from abroad',
+          },
+          {
+            'id': 'invited',
+            'admission': 'automatic',
+            'requirementsDigest': 'zInvited',
+            'invitationRequired': true,
+          },
+        ],
+      };
+      await pumpScreen(tester);
+      await enterCode(tester, fakeVtcDid);
+
+      bool chosen(String id) => tester.any(
+        find.descendant(
+          of: find.byKey(Key('vtc_join_way_$id')),
+          matching: find.byIcon(Icons.radio_button_checked),
+        ),
+      );
+      expect(chosen('open'), isTrue);
+      expect(chosen('reviewed'), isFalse);
+      expect(find.byKey(const Key('vtc_join_way_invited')), findsNothing);
+      expect(
+        find.text('You become a member as soon as you apply.'),
+        findsOneWidget,
+      );
+
+      await tapVisible(tester, find.text('For clubs from abroad'));
+      await tester.pumpAndSettle();
+
+      expect(chosen('reviewed'), isTrue);
+      expect(chosen('open'), isFalse);
+      expect(
+        find.text("The community's administrators review each application."),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('offers no choice with one way in', (tester) async {
+      await pumpScreen(tester);
+      await enterCode(tester, fakeVtcDid);
+
+      expect(find.byIcon(Icons.radio_button_checked), findsNothing);
+      expect(find.byIcon(Icons.radio_button_unchecked), findsNothing);
+    });
+
     testWidgets('titles a community without a name by what it asks', (
       tester,
     ) async {

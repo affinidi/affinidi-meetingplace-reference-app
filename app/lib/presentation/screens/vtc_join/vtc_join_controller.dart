@@ -89,11 +89,11 @@ class VtcJoinController extends _$VtcJoinController {
         contactEmail: profile?.contactEmail,
         directoryDisclosure: manifest.directoryDisclosure,
         canApply: manifest.canApply,
-        admitsAtOnce: manifest.admitsAtOnce,
         wasMember: community?.isMember ?? false,
         ways: [
           for (final criterion in manifest.criteria) VtcJoinWay.of(criterion),
         ],
+        chosenWayId: manifest.openCriterion?.id,
         requestedDetails: manifest.requestedAttributes,
         listsNewMembers: manifest.listsNewMembers,
         denialReason: community?.rejectionReason,
@@ -117,8 +117,17 @@ class VtcJoinController extends _$VtcJoinController {
     state = state.copyWith(listInDirectory: listed);
   }
 
-  /// Goes on to apply to the scanned community, under the first way in
-  /// this app supports; does nothing when there is none.
+  /// Applies under the way in [id] from now on. Only a way in of the
+  /// scanned community that this app supports is taken.
+  void chooseWay(String id) {
+    final manifest = _manifest;
+    if (state.step != VtcJoinStep.review || manifest == null) return;
+    if (!manifest.openCriteria.any((criterion) => criterion.id == id)) return;
+    state = state.copyWith(chosenWayId: id);
+  }
+
+  /// Goes on to apply to the scanned community, under the way in the member
+  /// chose; does nothing when this app supports none.
   ///
   /// A first application asks which of the member's identities joins, or a
   /// new one, when the member has any; a later one applies as the identity
@@ -252,6 +261,9 @@ class VtcJoinController extends _$VtcJoinController {
     final verdict = await _service.join(
       manifest,
       persona: persona,
+      criterion: manifest.openCriteria
+          .where((criterion) => criterion.id == state.chosenWayId)
+          .firstOrNull,
       attributes: attributes,
       listInDirectory: state.listInDirectory,
     );

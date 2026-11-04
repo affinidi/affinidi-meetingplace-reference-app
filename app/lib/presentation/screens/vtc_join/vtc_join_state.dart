@@ -104,6 +104,7 @@ class VtcJoinDetail {
 class VtcJoinWay {
   /// Creates a [VtcJoinWay].
   const VtcJoinWay({
+    required this.id,
     required this.automatic,
     this.description,
     this.unsupported,
@@ -111,6 +112,7 @@ class VtcJoinWay {
 
   /// Reads the way [criterion] describes.
   factory VtcJoinWay.of(JoinCriterion criterion) => VtcJoinWay(
+    id: criterion.id,
     automatic: criterion.admission == JoinAdmission.automatic,
     description: criterion.description,
     unsupported: criterion.invitationRequired
@@ -122,6 +124,9 @@ class VtcJoinWay {
         : null,
   );
 
+  /// The criterion's id within the community.
+  final String id;
+
   /// Whether meeting it admits at once, rather than after review.
   final bool automatic;
 
@@ -130,10 +135,15 @@ class VtcJoinWay {
 
   /// Why this app cannot apply under it, or null when it can.
   final VtcJoinUnsupported? unsupported;
+
+  /// Whether this app can apply under it.
+  bool get canApply => unsupported == null;
 }
 
 @Freezed(fromJson: false, toJson: false)
 abstract class VtcJoinState with _$VtcJoinState {
+  VtcJoinState._();
+
   factory VtcJoinState({
     @Default(VtcJoinStep.scanning) VtcJoinStep step,
 
@@ -155,11 +165,14 @@ abstract class VtcJoinState with _$VtcJoinState {
     /// or null when it offers none.
     DirectoryDisclosure? directoryDisclosure,
     @Default(false) bool canApply,
-    @Default(false) bool admitsAtOnce,
     @Default(false) bool wasMember,
 
     /// The ways into the community, in its order.
     @Default(<VtcJoinWay>[]) List<VtcJoinWay> ways,
+
+    /// The id of the way in the member applies under, or null when this app
+    /// can apply under none.
+    String? chosenWayId,
 
     /// The profile details the community asks for.
     @Default(<JoinAttributeRequest>[])
@@ -185,4 +198,11 @@ abstract class VtcJoinState with _$VtcJoinState {
     String? denialReason,
     VtcJoinFailure? failure,
   }) = _VtcJoinState;
+
+  /// The way in the member applies under, or null when there is none.
+  VtcJoinWay? get chosenWay =>
+      ways.where((way) => way.id == chosenWayId).firstOrNull;
+
+  /// Whether applying under [chosenWay] admits at once.
+  bool get admitsAtOnce => chosenWay?.automatic ?? false;
 }

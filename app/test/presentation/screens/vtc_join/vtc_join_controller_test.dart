@@ -134,6 +134,68 @@ void main() {
       expect(state().listInDirectory, isTrue);
     });
 
+    group('choosing the way in', () {
+      setUp(() {
+        network.joinManifest = {
+          ...network.joinManifest,
+          'criteria': [
+            {
+              'id': 'invited',
+              'admission': 'automatic',
+              'requirementsDigest': 'zInvited',
+              'invitationRequired': true,
+            },
+            {
+              'id': 'open',
+              'admission': 'automatic',
+              'requirementsDigest': 'zOpen',
+            },
+            {
+              'id': 'reviewed',
+              'admission': 'review',
+              'requirementsDigest': 'zReviewed',
+            },
+          ],
+        };
+      });
+
+      Map<dynamic, dynamic> submitted() =>
+          network.joinRequests.lastWhere(
+                (r) => r['type'] == JoinTask.submit,
+              )['payload']
+              as Map;
+
+      test('applies under the first supported way unless told', () async {
+        await controller().onScanned(fakeVtcDid);
+        expect(state().chosenWayId, 'open');
+        expect(state().admitsAtOnce, isTrue);
+
+        await controller().join();
+
+        expect(submitted()['criterion'], 'zOpen');
+      });
+
+      test('applies under the way the member chose', () async {
+        await controller().onScanned(fakeVtcDid);
+
+        controller().chooseWay('reviewed');
+        expect(state().chosenWayId, 'reviewed');
+        expect(state().admitsAtOnce, isFalse);
+        await controller().join();
+
+        expect(submitted()['criterion'], 'zReviewed');
+      });
+
+      test('ignores a way it cannot apply under', () async {
+        await controller().onScanned(fakeVtcDid);
+
+        controller().chooseWay('invited');
+        controller().chooseWay('unknown');
+
+        expect(state().chosenWayId, 'open');
+      });
+    });
+
     test('sends nothing when no way in is supported', () async {
       network.joinManifest = {
         ...network.joinManifest,
