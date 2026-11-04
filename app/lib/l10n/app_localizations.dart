@@ -3880,6 +3880,42 @@ abstract class AppLocalizations {
   /// **'Share and apply'**
   String get vtcJoinShareAction;
 
+  /// No description provided for @vtcJoinCredentialMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Credential missing'**
+  String get vtcJoinCredentialMissing;
+
+  /// No description provided for @vtcJoinWayWithCredential.
+  ///
+  /// In en, this message translates to:
+  /// **'With your {type}'**
+  String vtcJoinWayWithCredential(String type);
+
+  /// No description provided for @vtcJoinShareCredential.
+  ///
+  /// In en, this message translates to:
+  /// **'Present this credential to {name}?'**
+  String vtcJoinShareCredential(String name);
+
+  /// No description provided for @vtcJoinCredentialIssuer.
+  ///
+  /// In en, this message translates to:
+  /// **'Issued by'**
+  String get vtcJoinCredentialIssuer;
+
+  /// No description provided for @vtcJoinCredentialClaimsHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'What presenting it shows'**
+  String get vtcJoinCredentialClaimsHeading;
+
+  /// No description provided for @vtcJoinCredentialNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Your VTA presents the whole credential, signed as this identity, and records that you shared it.'**
+  String get vtcJoinCredentialNote;
+
   /// No description provided for @vtcJoinNewIdentity.
   ///
   /// In en, this message translates to:
@@ -4489,7 +4525,7 @@ abstract class AppLocalizations {
   /// Why joining a community could not go ahead
   ///
   /// In en, this message translates to:
-  /// **'{reason, select, invalidCode{This isn\'t a community\'s code.} profileMissing{Your VTA has no profile for this identity, so it can\'t share the details the community asks for. Set up your profile on your VTA, then try again.} detailsMissing{Your VTA doesn\'t hold a detail the community requires, so nothing was sent.} vtaMissing{Link your VTA in Settings before joining a community.} unreachable{The community can\'t be reached from your phone.} noDidHosting{Your VTA has no DID hosting server, so it can\'t create an identity the community can find.} notAccepting{This community isn\'t accepting applications.} badAnswer{The community\'s answer couldn\'t be checked, so nothing was recorded.} lastAdministrator{You\'re this community\'s last administrator. Make another member an administrator before you leave.} other{The community or your VTA refused the application.}}'**
+  /// **'{reason, select, invalidCode{This isn\'t a community\'s code.} profileMissing{Your VTA has no profile for this identity, so it can\'t share the details the community asks for. Set up your profile on your VTA, then try again.} detailsMissing{Your VTA doesn\'t hold a detail the community requires, so nothing was sent.} credentialMissing{Your identity holds no credential this way in accepts that your VTA can present, so nothing was sent.} vtaMissing{Link your VTA in Settings before joining a community.} unreachable{The community can\'t be reached from your phone.} noDidHosting{Your VTA has no DID hosting server, so it can\'t create an identity the community can find.} notAccepting{This community isn\'t accepting applications.} badAnswer{The community\'s answer couldn\'t be checked, so nothing was recorded.} lastAdministrator{You\'re this community\'s last administrator. Make another member an administrator before you leave.} other{The community or your VTA refused the application.}}'**
   String vtcJoinFailure(String reason);
 
   /// No description provided for @vtaDetailsTitle.

@@ -38,6 +38,10 @@ class FakeVta implements HttpClientAdapter, DidResolver {
   final _key = Ed25519DidKeySigner.generate();
   late final DidDocument document;
   final Map<String, Map<String, dynamic>> answers = {};
+
+  /// Answers that depend on the request's payload, ahead of [answers].
+  final Map<String, Map<String, dynamic> Function(Map<String, dynamic>)>
+  answerTo = {};
   final Map<String, Map<String, dynamic>> refusals = {};
   final List<Map<String, dynamic>> received = [];
 
@@ -109,7 +113,10 @@ class FakeVta implements HttpClientAdapter, DidResolver {
       VtaTask.authenticate => {
         'tokens': {'accessToken': 'token'},
       },
-      _ => answers[type] ?? const <String, dynamic>{},
+      _ =>
+        answerTo[type]?.call(request['payload'] as Map<String, dynamic>) ??
+            answers[type] ??
+            const <String, dynamic>{},
     };
     final refusal = refusals[type];
     final answer = refusal == null

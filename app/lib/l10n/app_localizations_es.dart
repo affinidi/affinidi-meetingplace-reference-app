@@ -2624,6 +2624,29 @@ class AppLocalizationsEs extends AppLocalizations {
   String get vtcJoinShareAction => 'Share and apply';
 
   @override
+  String get vtcJoinCredentialMissing => 'Credential missing';
+
+  @override
+  String vtcJoinWayWithCredential(String type) {
+    return 'With your $type';
+  }
+
+  @override
+  String vtcJoinShareCredential(String name) {
+    return 'Present this credential to $name?';
+  }
+
+  @override
+  String get vtcJoinCredentialIssuer => 'Issued by';
+
+  @override
+  String get vtcJoinCredentialClaimsHeading => 'What presenting it shows';
+
+  @override
+  String get vtcJoinCredentialNote =>
+      'Your VTA presents the whole credential, signed as this identity, and records that you shared it.';
+
+  @override
   String get vtcJoinNewIdentity => 'A new identity';
 
   @override
@@ -3012,6 +3035,8 @@ class AppLocalizationsEs extends AppLocalizations {
           'Your VTA has no profile for this identity, so it can\'t share the details the community asks for. Set up your profile on your VTA, then try again.',
       'detailsMissing':
           'Your VTA doesn\'t hold a detail the community requires, so nothing was sent.',
+      'credentialMissing':
+          'Your identity holds no credential this way in accepts that your VTA can present, so nothing was sent.',
       'vtaMissing': 'Link your VTA in Settings before joining a community.',
       'unreachable': 'The community can\'t be reached from your phone.',
       'noDidHosting':

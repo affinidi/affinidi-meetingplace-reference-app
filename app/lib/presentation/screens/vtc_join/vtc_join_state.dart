@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
+import '../../../application/services/vtc_service/vtc_service.dart';
 import '../../../domain/models/identity/identity.dart';
 
 part 'vtc_join_state.freezed.dart';
@@ -22,6 +23,10 @@ enum VtcJoinStep {
   /// The member approves sharing the profile details the community asks
   /// for, as their VTA holds them.
   approveDetails,
+
+  /// The member approves presenting the credential the chosen way in asks
+  /// for, as their VTA holds it.
+  approveCredential,
 
   /// The member is a member, newly or already.
   joined,
@@ -71,6 +76,10 @@ enum VtcJoinFailure {
   /// The VTA holds no value for a detail the community requires.
   detailsMissing,
 
+  /// The identity holds no credential the chosen way in accepts, or none
+  /// it can present.
+  credentialMissing,
+
   /// The member is the community's last administrator, so cannot leave.
   lastAdministrator,
 
@@ -83,8 +92,11 @@ enum VtcJoinUnsupported {
   /// Only invited applicants meet it.
   invitation,
 
-  /// It asks for credentials.
+  /// It asks for credentials in a way this app cannot present.
   credentials,
+
+  /// It asks for a credential none of the member's identities holds.
+  credentialMissing,
 
   /// It asks for an in-person check.
   vetting,
@@ -103,6 +115,26 @@ class VtcJoinDetail {
   final String value;
 }
 
+/// A credential the member approves presenting, as the VTA holds it. Kept
+/// in memory only.
+class VtcJoinCredential {
+  /// Creates a [VtcJoinCredential].
+  const VtcJoinCredential({
+    required this.types,
+    required this.claims,
+    this.issuerDid,
+  });
+
+  /// Its VC types, the most specific last.
+  final List<String> types;
+
+  /// The DID that issued it, when it says.
+  final String? issuerDid;
+
+  /// Every subject claim presenting it discloses.
+  final List<VtcJoinDetail> claims;
+}
+
 /// One way into a community, as the review shows it.
 class VtcJoinWay {
   /// Creates a [VtcJoinWay].
@@ -111,21 +143,36 @@ class VtcJoinWay {
     required this.automatic,
     this.description,
     this.unsupported,
+    this.credentialType,
+    this.heldBy = const {},
   });
 
-  /// Reads the way [criterion] describes.
-  factory VtcJoinWay.of(JoinCriterion criterion) => VtcJoinWay(
-    id: criterion.id,
-    automatic: criterion.admission == JoinAdmission.automatic,
-    description: criterion.description,
-    unsupported: criterion.invitationRequired
-        ? VtcJoinUnsupported.invitation
-        : criterion.asksForCredentials
-        ? VtcJoinUnsupported.credentials
-        : criterion.asksForVetting
-        ? VtcJoinUnsupported.vetting
-        : null,
-  );
+  /// Reads the way [criterion] describes. [heldBy] are the member's
+  /// identities holding the credential it asks for, if it asks for one.
+  factory VtcJoinWay.of(
+    JoinCriterion criterion, {
+    Set<String> heldBy = const {},
+  }) {
+    final presentable = isMetByOneCredential(criterion);
+    return VtcJoinWay(
+      id: criterion.id,
+      automatic: criterion.admission == JoinAdmission.automatic,
+      description: criterion.description,
+      unsupported: criterion.invitationRequired
+          ? VtcJoinUnsupported.invitation
+          : criterion.asksForCredentials && !presentable
+          ? VtcJoinUnsupported.credentials
+          : presentable && heldBy.isEmpty
+          ? VtcJoinUnsupported.credentialMissing
+          : criterion.asksForVetting
+          ? VtcJoinUnsupported.vetting
+          : null,
+      credentialType: presentable
+          ? criterion.credentials!.typeAlternatives.single.first.last
+          : null,
+      heldBy: heldBy,
+    );
+  }
 
   /// The criterion's id within the community.
   final String id;
@@ -138,6 +185,13 @@ class VtcJoinWay {
 
   /// Why this app cannot apply under it, or null when it can.
   final VtcJoinUnsupported? unsupported;
+
+  /// The most specific VC type of the credential it asks for, when this app
+  /// can present one for it.
+  final String? credentialType;
+
+  /// The member's identities holding the credential it asks for, by DID.
+  final Set<String> heldBy;
 
   /// Whether this app can apply under it.
   bool get canApply => unsupported == null;
@@ -195,6 +249,13 @@ abstract class VtcJoinState with _$VtcJoinState {
 
     /// Each identity in [identityChoices], by its DID.
     @Default(<String, Identity>{}) Map<String, Identity> identities,
+
+    /// The identities holding the credential the chosen way in asks for,
+    /// or null when it asks for none: only they can join under it.
+    Set<String>? credentialHolders,
+
+    /// The credential the member is asked to approve presenting.
+    VtcJoinCredential? sharedCredential,
 
     /// The profile details the member is asked to approve sharing.
     @Default(<VtcJoinDetail>[]) List<VtcJoinDetail> details,

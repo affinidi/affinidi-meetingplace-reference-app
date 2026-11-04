@@ -283,6 +283,148 @@ void main() {
     });
   });
 
+  group('VtcJoinController credential', () {
+    const other = 'did:webvh:QmOther:host.example';
+    const membership = ['VerifiableCredential', 'MembershipCredential'];
+
+    setUp(() {
+      network.joinManifest = {
+        ...network.joinManifest,
+        'criteria': [
+          {
+            'id': 'members',
+            'admission': 'automatic',
+            'requirementsDigest': 'zMembers',
+            'credentialIssuers': 'any',
+            'presentationDefinition': {
+              'credentials': [
+                {
+                  'id': 'membership',
+                  'format': 'ldp_vc',
+                  'meta': {
+                    'type_values': [membership],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      };
+      identities = IdentitiesServiceState(
+        identities: [
+          _vtaIdentity(persona.did, 'Ada'),
+          _vtaIdentity(other, 'Bo'),
+        ],
+      );
+      // Only Ada holds a membership card.
+      network.vta.answerTo[VtaTask.credentialsQuery] = (payload) => {
+        'credentials': [
+          if (payload['subjectDid'] == persona.did)
+            {
+              'id': 'card-1',
+              'types': membership,
+              'status': 'valid',
+              'issuerDid': 'did:web:chess.example',
+            },
+        ],
+      };
+      network.vta.answers[VtaTask.credentialsGet] = {
+        'credential': {
+          'id': 'urn:uuid:card',
+          'type': membership,
+          'issuer': 'did:web:chess.example',
+          'credentialSubject': {'id': persona.did, 'memberOf': 'Chess club'},
+        },
+      };
+      network.vta.answers[VtaTask.credentialsPresent] = {
+        'presentation': {
+          'type': ['VerifiablePresentation'],
+          'holder': persona.did,
+          'verifiableCredential': [
+            {'id': 'urn:uuid:card'},
+          ],
+        },
+        'disclosed': ['memberOf'],
+      };
+    });
+
+    Iterable<Map<String, dynamic>> submits() =>
+        network.joinRequests.where((r) => r['type'] == JoinTask.submit);
+
+    test('offers the way once an identity holds the credential', () async {
+      await controller().onScanned(fakeVtcDid);
+
+      final way = state().ways.single;
+      expect(way.canApply, isTrue);
+      expect(way.heldBy, {persona.did});
+      expect(way.credentialType, 'MembershipCredential');
+    });
+
+    test('says the credential is missing when no identity holds it', () async {
+      network.vta.answerTo[VtaTask.credentialsQuery] = (_) => {
+        'credentials': <Object>[],
+      };
+
+      await controller().onScanned(fakeVtcDid);
+      await controller().join();
+
+      expect(
+        state().ways.single.unsupported,
+        VtcJoinUnsupported.credentialMissing,
+      );
+      expect(state().step, VtcJoinStep.review);
+      expect(submits(), isEmpty);
+    });
+
+    test('joins only as an identity holding it', () async {
+      await controller().onScanned(fakeVtcDid);
+      await controller().join();
+      expect(state().step, VtcJoinStep.chooseIdentity);
+      expect(state().credentialHolders, {persona.did});
+
+      await controller().useIdentity(null);
+      await controller().useIdentity(other);
+
+      expect(state().step, VtcJoinStep.chooseIdentity);
+      expect(submits(), isEmpty);
+    });
+
+    test('presents the credential the member approved, then applies', () async {
+      await controller().onScanned(fakeVtcDid);
+      await controller().join();
+      await controller().useIdentity(persona.did);
+
+      expect(state().step, VtcJoinStep.approveCredential);
+      final shared = state().sharedCredential!;
+      expect(shared.types, membership);
+      expect(shared.issuerDid, 'did:web:chess.example');
+      expect(shared.claims.single.type, 'memberOf');
+      expect(shared.claims.single.value, 'Chess club');
+      expect(
+        network.vta.received.where(
+          (r) => r['type'] == VtaTask.credentialsPresent,
+        ),
+        isEmpty,
+        reason: 'nothing presented before approval',
+      );
+
+      await controller().approveCredential();
+
+      final present =
+          network.vta.received.lastWhere(
+                (r) => r['type'] == VtaTask.credentialsPresent,
+              )['payload']
+              as Map;
+      expect(present['id'], 'card-1');
+      expect(present['claims'], ['memberOf']);
+      expect(present['audience'], fakeVtcDid);
+      final payload = submits().single['payload'] as Map;
+      expect(payload['criterion'], 'zMembers');
+      expect((payload['vp'] as Map)['holder'], persona.did);
+      expect(state().step, VtcJoinStep.joined);
+    });
+  });
+
   group('VtcJoinController details', () {
     setUp(() {
       network.joinManifest = {

@@ -459,6 +459,157 @@ void main() {
       semantics.dispose();
     });
 
+    group('credential', () {
+      const other = 'did:webvh:QmOther:host.example';
+      const membership = ['VerifiableCredential', 'MembershipCredential'];
+
+      setUp(() {
+        network.joinManifest = {
+          ...network.joinManifest,
+          'criteria': [
+            {
+              'id': 'members',
+              'admission': 'automatic',
+              'requirementsDigest': 'zMembers',
+              'credentialIssuers': 'any',
+              'presentationDefinition': {
+                'credentials': [
+                  {
+                    'id': 'membership',
+                    'format': 'ldp_vc',
+                    'meta': {
+                      'type_values': [membership],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        };
+        identities = IdentitiesServiceState(
+          identities: [
+            _vtaIdentity(persona.did, 'Ada'),
+            _vtaIdentity(other, 'Bo'),
+          ],
+        );
+        // Only Ada holds a membership card.
+        network.vta.answerTo[VtaTask.credentialsQuery] = (payload) => {
+          'credentials': [
+            if (payload['subjectDid'] == persona.did)
+              {
+                'id': 'card-1',
+                'types': membership,
+                'status': 'valid',
+                'issuerDid': 'did:web:chess.example',
+              },
+          ],
+        };
+        network.vta.answers[VtaTask.credentialsGet] = {
+          'credential': {
+            'id': 'urn:uuid:card',
+            'type': membership,
+            'credentialSubject': {'id': persona.did, 'memberOf': 'Chess club'},
+          },
+        };
+        network.vta.answers[VtaTask.credentialsPresent] = {
+          'presentation': {
+            'type': ['VerifiablePresentation'],
+            'holder': persona.did,
+            'verifiableCredential': [
+              {'id': 'urn:uuid:card'},
+            ],
+          },
+          'disclosed': ['memberOf'],
+        };
+      });
+
+      Future<void> reachIdentities(WidgetTester tester) async {
+        await pumpScreen(tester);
+        await enterCode(tester, fakeVtcDid);
+        await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
+        await settle(tester);
+      }
+
+      ElevatedButton useIdentity(WidgetTester tester) => tester.widget(
+        find.widgetWithText(ElevatedButton, 'Join with this identity'),
+      );
+
+      Future<void> swipeIdentities(WidgetTester tester) async {
+        final deck = find.byKey(const Key('vtc_join_identities'));
+        await tester.ensureVisible(deck);
+        await tester.pumpAndSettle();
+        await tester.timedDrag(
+          deck,
+          const Offset(-500, 0),
+          const Duration(milliseconds: 300),
+        );
+        await tester.pumpAndSettle();
+      }
+
+      testWidgets('shows the way with the credential it asks for', (
+        tester,
+      ) async {
+        await pumpScreen(tester);
+        await enterCode(tester, fakeVtcDid);
+
+        expect(find.text('With your MembershipCredential'), findsOneWidget);
+      });
+
+      testWidgets('marks the identities missing the credential', (
+        tester,
+      ) async {
+        await reachIdentities(tester);
+
+        // The deck starts on Ada, who holds it.
+        expect(find.text('2 of 3 · swipe to see the others'), findsOneWidget);
+        expect(useIdentity(tester).onPressed, isNotNull);
+
+        await swipeIdentities(tester);
+        expect(find.text('3 of 3 · swipe to see the others'), findsOneWidget);
+        expect(
+          find.byKey(const Key('vta_identity_missing_credential')),
+          findsWidgets,
+        );
+        expect(useIdentity(tester).onPressed, isNull);
+
+        await swipeIdentities(tester);
+        expect(find.text('1 of 3 · swipe to see the others'), findsOneWidget);
+        expect(useIdentity(tester).onPressed, isNull);
+      });
+
+      testWidgets('presents the credential once approved', (tester) async {
+        await reachIdentities(tester);
+        await tapVisible(
+          tester,
+          find.widgetWithText(ElevatedButton, 'Join with this identity'),
+        );
+        await settle(tester);
+
+        expect(
+          find.text('Present this credential to Football club?'),
+          findsOneWidget,
+        );
+        expect(find.text('Chess club'), findsOneWidget);
+        expect(find.text('memberOf'), findsOneWidget);
+        expect(find.text('did:web:chess.example'), findsOneWidget);
+
+        await tapVisible(
+          tester,
+          find.widgetWithText(ElevatedButton, 'Share and apply'),
+        );
+        await settle(tester);
+
+        expect(find.text("You're a member of Football club."), findsOneWidget);
+        final submit = network.joinRequests.lastWhere(
+          (r) => r['type'] == JoinTask.submit,
+        );
+        expect(
+          ((submit['payload'] as Map)['vp'] as Map)['holder'],
+          persona.did,
+        );
+      });
+    });
+
     group('identity', () {
       setUp(() {
         // The member has one identity on their VTA, so joining asks which.

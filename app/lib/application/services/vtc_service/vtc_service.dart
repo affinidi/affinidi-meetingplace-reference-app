@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../domain/models/vtc/linked_vta.dart';
 import '../../../domain/models/vtc/vtc_community.dart';
@@ -225,7 +226,8 @@ class VtcService {
   /// VTA, and records the outcome.
   ///
   /// The application is made under [criterion], or else the first way in
-  /// this app supports.
+  /// this app supports, with [presentation] when the criterion asks for a
+  /// credential (see [presentCredential]).
   ///
   /// The first application to a community is made as [persona], one of
   /// [vtaPersonas], or else as a new persona the VTA creates; a later one
@@ -243,6 +245,7 @@ class VtcService {
     JoinManifest manifest, {
     VtaPersona? persona,
     JoinCriterion? criterion,
+    Map<String, dynamic>? presentation,
     List<JoinAttribute> attributes = const [],
     bool listInDirectory = false,
   }) async {
@@ -259,6 +262,7 @@ class VtcService {
       agent: vta,
       persona: await _personaSigner(vta, community),
       criterion: criterion,
+      presentation: presentation,
       attributes: attributes,
     );
     switch (verdict) {
@@ -379,6 +383,60 @@ class VtcService {
         for (final detail in manifest.requestedAttributes) detail.type,
       ],
     );
+  }
+
+  /// For each way into [manifest]'s community met by presenting one held
+  /// credential, the credential each of [personaDids] holds for it: by
+  /// criterion id, then by persona DID. An identity holding none is left
+  /// out.
+  ///
+  /// Throws as [join] does.
+  Future<Map<String, Map<String, HeldCredential>>> credentialHolders(
+    JoinManifest manifest,
+    List<String> personaDids,
+  ) async {
+    final criteria = manifest.criteria.where(isMetByOneCredential).toList();
+    if (criteria.isEmpty || personaDids.isEmpty) return const {};
+    final vta = await _grantedVta();
+    final holders = <String, Map<String, HeldCredential>>{};
+    for (final criterion in criteria) {
+      for (final did in personaDids) {
+        final matches = await vta.matchCredentials(
+          criterion.credentials!,
+          subjectDid: did,
+          communityDid: manifest.communityDid,
+        );
+        if (matches?.single case final held?) {
+          (holders[criterion.id] ??= {})[did] = held;
+        }
+      }
+    }
+    return holders;
+  }
+
+  /// The held credential [id], as the VTA stores it, to show the member
+  /// what presenting it discloses. Nothing leaves the VTA.
+  Future<Map<String, dynamic>?> heldCredential(String id) async =>
+      (await _grantedVta()).credential(id);
+
+  /// Presents the held credential [id] to [manifest]'s community,
+  /// disclosing its subject claims [claims]: the VTA signs it as the
+  /// credential's subject and records the disclosure. Returns the
+  /// presentation, for [join].
+  Future<Map<String, dynamic>> presentCredential(
+    JoinManifest manifest,
+    String id,
+    List<String> claims,
+  ) async {
+    final vta = await _grantedVta();
+    final presented = await vta.presentCredential(
+      id: id,
+      claims: claims,
+      audience: manifest.communityDid,
+      nonce: const Uuid().v4(),
+      purpose: 'join',
+    );
+    return presented.presentation;
   }
 
   /// Discloses the preview [previewId] the member approved, through the
@@ -663,3 +721,9 @@ final vtcServiceProvider = Provider<VtcService>(
   ),
   name: 'vtcServiceProvider',
 );
+
+/// Whether [criterion] is met by presenting one held credential: a way in
+/// this app can apply under once an identity holds it.
+bool isMetByOneCredential(JoinCriterion criterion) =>
+    criterion.asksOnlyForCredentials &&
+    criterion.credentials!.typeAlternatives.length == 1;

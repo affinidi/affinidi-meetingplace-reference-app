@@ -35,6 +35,17 @@ class VtcJoinController extends _$VtcJoinController {
   VtaPersona? _identity;
   DisclosurePreview? _preview;
 
+  /// For each way in met by presenting a credential, the credential each of
+  /// the member's identities holds for it: by criterion id, then by DID.
+  Map<String, Map<String, HeldCredential>> _holders = const {};
+
+  /// The credential awaiting approval to present, the subject claims that
+  /// discloses, and the application it completes. Kept in memory only.
+  HeldCredential? _sharing;
+  List<String> _sharedClaims = const [];
+  VtaPersona? _applicant;
+  List<JoinAttribute> _attributes = const [];
+
   @override
   VtcJoinState build() {
     ref.onDispose(() => _pendingCheck?.cancel());
@@ -57,6 +68,8 @@ class VtcJoinController extends _$VtcJoinController {
   void restart() {
     _manifest = null;
     _personas = const [];
+    _holders = const {};
+    _sharing = null;
     state = VtcJoinState();
   }
 
@@ -79,6 +92,7 @@ class VtcJoinController extends _$VtcJoinController {
           community = await _service.community(manifest.communityDid);
         }
       }
+      _holders = await _credentialHolders(manifest, community);
       state = state.copyWith(
         step: _stepOf(community),
         communityDid: manifest.communityDid,
@@ -95,7 +109,11 @@ class VtcJoinController extends _$VtcJoinController {
         canApply: manifest.canApply,
         wasMember: community?.isMember ?? false,
         ways: [
-          for (final criterion in manifest.criteria) VtcJoinWay.of(criterion),
+          for (final criterion in manifest.criteria)
+            VtcJoinWay.of(
+              criterion,
+              heldBy: {...?_holders[criterion.id]?.keys},
+            ),
         ],
         // The first way this app supports, else the community's first.
         chosenWayId:
@@ -108,6 +126,26 @@ class VtcJoinController extends _$VtcJoinController {
         denialReason: community?.rejectionReason,
       );
     });
+  }
+
+  /// Which of the member's identities hold the credentials [manifest]'s ways
+  /// in ask for: only the identity recorded for [community], when there is
+  /// one, since a later application applies as it. A VTA that is not linked
+  /// or cannot be asked holds none, and the review says so.
+  Future<Map<String, Map<String, HeldCredential>>> _credentialHolders(
+    JoinManifest manifest,
+    VtcCommunity? community,
+  ) async {
+    final dids = community != null
+        ? [community.personaDid]
+        : [for (final identity in _joinableIdentities()) identity.did];
+    try {
+      return await _service.credentialHolders(manifest, dids);
+    } on VtaNotLinkedException {
+      return const {};
+    } on MeetingPlaceVtcSDKException {
+      return const {};
+    }
   }
 
   /// The community's public profile, or null when it publishes none or it
@@ -135,10 +173,14 @@ class VtcJoinController extends _$VtcJoinController {
     state = state.copyWith(chosenWayId: id);
   }
 
-  /// The chosen way in, when this app can apply under it.
-  JoinCriterion? _chosenCriterion(JoinManifest manifest) => manifest
-      .openCriteria
-      .where((criterion) => criterion.id == state.chosenWayId)
+  /// The chosen way in, when this app can apply under it: an open one, or
+  /// one asking for a credential one of the member's identities holds.
+  JoinCriterion? _chosenCriterion(JoinManifest manifest) => manifest.criteria
+      .where(
+        (criterion) =>
+            criterion.id == state.chosenWayId &&
+            (criterion.isOpen || (_holders[criterion.id]?.isNotEmpty ?? false)),
+      )
       .firstOrNull;
 
   /// Goes on to apply to the scanned community, under the way in the member
@@ -154,6 +196,7 @@ class VtcJoinController extends _$VtcJoinController {
         _chosenCriterion(manifest) == null) {
       return;
     }
+    final criterion = _chosenCriterion(manifest)!;
     state = state.copyWith(step: VtcJoinStep.working);
 
     await _run(() async {
@@ -170,6 +213,9 @@ class VtcJoinController extends _$VtcJoinController {
         step: VtcJoinStep.chooseIdentity,
         identityChoices: [for (final persona in _personas) persona.did],
         identities: {for (final identity in identities) identity.did: identity},
+        credentialHolders: criterion.asksForCredentials
+            ? {...?_holders[criterion.id]?.keys}
+            : null,
       );
     });
   }
@@ -188,12 +234,15 @@ class VtcJoinController extends _$VtcJoinController {
   }
 
   /// Joins as the VTA identity [personaDid], or as a new identity when
-  /// null. Only an identity the VTA offered is used.
+  /// null. Only an identity the VTA offered is used, and under a way in
+  /// asking for a credential only one holding it.
   Future<void> useIdentity(String? personaDid) async {
     final manifest = _manifest;
     if (state.step != VtcJoinStep.chooseIdentity || manifest == null) return;
     final persona = _personas.where((p) => p.did == personaDid).firstOrNull;
     if (personaDid != null && persona == null) return;
+    final holders = state.credentialHolders;
+    if (holders != null && !holders.contains(personaDid)) return;
     state = state.copyWith(step: VtcJoinStep.working);
 
     await _run(() => _apply(manifest, persona: persona));
@@ -215,7 +264,7 @@ class VtcJoinController extends _$VtcJoinController {
 
     await _run(() async {
       await _service.shareDetails(identity, preview.previewId);
-      await _send(
+      await _sendOrAskCredential(
         manifest,
         identity,
         attributes: [
@@ -227,11 +276,38 @@ class VtcJoinController extends _$VtcJoinController {
     });
   }
 
+  /// Presents the credential the member approved, through the VTA, and
+  /// applies with it.
+  Future<void> approveCredential() async {
+    final manifest = _manifest;
+    final sharing = _sharing;
+    if (state.step != VtcJoinStep.approveCredential ||
+        manifest == null ||
+        sharing == null) {
+      return;
+    }
+    state = state.copyWith(step: VtcJoinStep.working);
+
+    await _run(() async {
+      final presentation = await _service.presentCredential(
+        manifest,
+        sharing.id,
+        _sharedClaims,
+      );
+      await _send(
+        manifest,
+        _applicant,
+        attributes: _attributes,
+        presentation: presentation,
+      );
+    });
+  }
+
   /// Applies, first asking the member to approve the profile details the
   /// community asks for, when it asks for any.
   Future<void> _apply(JoinManifest manifest, {VtaPersona? persona}) async {
     if (manifest.requestedAttributes.isEmpty) {
-      return _send(manifest, persona);
+      return _sendOrAskCredential(manifest, persona);
     }
     final identity = await _service.joiningIdentity(
       manifest,
@@ -267,16 +343,69 @@ class VtcJoinController extends _$VtcJoinController {
     );
   }
 
-  Future<void> _send(
+  /// Applies, first asking the member to approve presenting the credential
+  /// the chosen way in asks for, when it asks for one. The credential is
+  /// the one the applying identity holds; the recorded one when [persona]
+  /// is null.
+  Future<void> _sendOrAskCredential(
     JoinManifest manifest,
     VtaPersona? persona, {
     List<JoinAttribute> attributes = const [],
   }) async {
+    final criterion = _chosenCriterion(manifest);
+    if (criterion == null || !criterion.asksForCredentials) {
+      return _send(manifest, persona, attributes: attributes);
+    }
+    final applicant =
+        persona?.did ??
+        (await _service.community(manifest.communityDid))?.personaDid;
+    final held = _holders[criterion.id]?[applicant];
+    final credential = held == null
+        ? null
+        : await _service.heldCredential(held.id);
+    final subject = credential?['credentialSubject'];
+    final claims = <String, Object>{
+      if (subject is Map)
+        for (final MapEntry(:key, :value) in subject.entries)
+          if (key is String && key != 'id' && value != null)
+            key: value as Object,
+    };
+    // A credential that discloses nothing about its subject but who they
+    // are cannot be presented by naming its claims.
+    if (held == null || claims.isEmpty) {
+      return _fail(VtcJoinFailure.credentialMissing);
+    }
+    _sharing = held;
+    _sharedClaims = [...claims.keys];
+    _applicant = persona;
+    _attributes = attributes;
+    state = state.copyWith(
+      step: VtcJoinStep.approveCredential,
+      details: const [],
+      sharedCredential: VtcJoinCredential(
+        types: held.types,
+        issuerDid: held.issuerDid,
+        claims: [
+          for (final MapEntry(:key, :value) in claims.entries)
+            VtcJoinDetail(type: key, value: _shown(value)),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _send(
+    JoinManifest manifest,
+    VtaPersona? persona, {
+    List<JoinAttribute> attributes = const [],
+    Map<String, dynamic>? presentation,
+  }) async {
     _preview = null;
+    _sharing = null;
     final verdict = await _service.join(
       manifest,
       persona: persona,
       criterion: _chosenCriterion(manifest),
+      presentation: presentation,
       attributes: attributes,
       listInDirectory: state.listInDirectory,
     );
@@ -286,6 +415,7 @@ class VtcJoinController extends _$VtcJoinController {
         : null;
     state = state.copyWith(
       details: const [],
+      sharedCredential: null,
       submitExchange: recorded?.submitExchange,
       requestId: recorded?.joinRequestId,
       denialReason: verdict is JoinDenied ? verdict.reason : null,

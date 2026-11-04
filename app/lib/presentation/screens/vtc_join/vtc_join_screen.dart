@@ -60,6 +60,11 @@ class VtcJoinScreen extends ConsumerWidget {
           onShare: controller.approveDetails,
           onCancel: close,
         ),
+        VtcJoinStep.approveCredential => _ApproveCredential(
+          state: state,
+          onShare: controller.approveCredential,
+          onCancel: close,
+        ),
         VtcJoinStep.joined => _Outcome(
           icon: Icons.verified,
           message: state.wasMember
@@ -872,6 +877,14 @@ class _WayCard extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+                if (way.credentialType case final type?)
+                  Text(
+                    context.l10n.vtcJoinWayWithCredential(type),
+                    textAlign: TextAlign.center,
+                    style: context.textTheme.bodySmall?.copyWith(
+                      color: Colors.white,
+                    ),
+                  ),
                 if (way.description case final description?)
                   Text(
                     description,
@@ -894,6 +907,8 @@ IconData _iconOf(VtcJoinWay way) => way.unsupported != null
     : Icons.rate_review;
 
 String _titleOf(AppLocalizations l10n, VtcJoinWay way) => switch (way) {
+  VtcJoinWay(unsupported: VtcJoinUnsupported.credentialMissing) =>
+    l10n.vtcJoinCredentialMissing,
   VtcJoinWay(:final unsupported?) => l10n.vtcJoinWayUnsupported(
     unsupported.name,
   ),
@@ -943,7 +958,12 @@ class _ChooseIdentity extends HookWidget {
     final l10n = context.l10n;
     // Null stands for a new identity.
     final options = <String?>[null, ...state.identityChoices];
-    final current = useState(0);
+    final holders = state.credentialHolders;
+    bool missingCredential(String? did) =>
+        holders != null && !holders.contains(did);
+    // Under a way in asking for a credential, start on one who holds it.
+    final first = options.indexWhere((did) => !missingCredential(did));
+    final current = useState(first < 0 ? 0 : first);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -957,11 +977,13 @@ class _ChooseIdentity extends HookWidget {
           // Room for the picture over the card's edge, the profile's details
           // and the full DID.
           maxHeight: 380,
+          initialIndex: current.value,
           onCardChange: (index) => current.value = index,
           cardBuilder: (context, did) => VtaIdentityCard(
             key: did == null ? const Key('vtc_join_new_identity') : null,
             did: did,
             identity: state.identities[did],
+            missingCredential: missingCredential(did),
           ),
         ),
         if (options.length > 1)
@@ -974,7 +996,9 @@ class _ChooseIdentity extends HookWidget {
         const SizedBox(height: 12),
         OnboardingButton(
           label: l10n.vtcJoinUseIdentity,
-          onPressed: () => onChoose(options[current.value]),
+          onPressed: missingCredential(options[current.value])
+              ? null
+              : () => onChoose(options[current.value]),
         ),
         OnboardingTextButton(label: l10n.generalCancel, onPressed: onCancel),
       ],
@@ -1016,6 +1040,74 @@ class _ApproveDetails extends StatelessWidget {
                   title: detail.value,
                   subtitle: _claimTypeLabel(l10n, detail.type),
                 ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        OnboardingButton(label: l10n.vtcJoinShareAction, onPressed: onShare),
+        OnboardingTextButton(label: l10n.generalCancel, onPressed: onCancel),
+      ],
+    );
+  }
+}
+
+/// The credential the chosen way in asks for, as the VTA holds it: who
+/// issued it and every claim presenting it shows. Nothing is presented
+/// until the member approves.
+class _ApproveCredential extends StatelessWidget {
+  const _ApproveCredential({
+    required this.state,
+    required this.onShare,
+    required this.onCancel,
+  });
+
+  final VtcJoinState state;
+  final VoidCallback onShare;
+  final VoidCallback onCancel;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final credential = state.sharedCredential;
+    if (credential == null) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 12,
+      children: [
+        OnboardingTitle(l10n.vtcJoinShareCredential(state.communityName ?? '')),
+        const SizedBox(height: 12),
+        GlassCard(
+          title: credential.types.last,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: 4,
+            children: [
+              if (credential.issuerDid case final issuer?) ...[
+                Text(
+                  l10n.vtcJoinCredentialIssuer,
+                  style: onboardingNote(context),
+                ),
+                MonospaceDid(
+                  issuer,
+                  textKey: const Key('vtc_join_credential_issuer'),
+                ),
+              ],
+            ],
+          ),
+        ),
+        GlassCard(
+          title: l10n.vtcJoinCredentialClaimsHeading,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: 12,
+            children: [
+              for (final claim in credential.claims)
+                OnboardingLine(
+                  icon: Icons.badge,
+                  title: claim.value,
+                  subtitle: claim.type,
+                ),
+              Text(l10n.vtcJoinCredentialNote, style: onboardingNote(context)),
             ],
           ),
         ),

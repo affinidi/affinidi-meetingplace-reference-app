@@ -16,13 +16,22 @@ import 'vta_details.dart';
 /// where it lives on the VTA, collapsed. A null [did] is the new identity
 /// the VTA would create.
 class VtaIdentityCard extends ConsumerWidget {
-  const VtaIdentityCard({super.key, required this.did, this.identity});
+  const VtaIdentityCard({
+    super.key,
+    required this.did,
+    this.identity,
+    this.missingCredential = false,
+  });
 
   final String? did;
 
   /// The identity, with its profile as this phone keeps it in step with the
   /// VTA; null for an identity this phone does not hold.
   final Identity? identity;
+
+  /// Whether the identity lacks a credential it needs, e.g. to join under
+  /// a way into a community that asks for one; marked under its name.
+  final bool missingCredential;
 
   static const _radius = Radius.circular(25);
 
@@ -108,6 +117,26 @@ class VtaIdentityCard extends ConsumerWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                      if (missingCredential)
+                        Row(
+                          key: const Key('vta_identity_missing_credential'),
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          spacing: 4,
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              size: 16,
+                              color: context.colorScheme.error,
+                            ),
+                            Text(
+                              l10n.vtcJoinCredentialMissing,
+                              style: textTheme.labelMedium?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
                       if (did == null) ...[
                         Text(
                           l10n.vtcJoinNewIdentityHost,
