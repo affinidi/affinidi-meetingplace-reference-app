@@ -316,6 +316,30 @@ void main() {
       expect(find.text('Receive your x:shoe.size'), findsOneWidget);
     });
 
+    testWidgets('says without a tap whether a detail is required', (
+      tester,
+    ) async {
+      network.joinManifest = {
+        ...network.joinManifest,
+        'requestedAttributes': [
+          {'type': 'name.display', 'purpose': 'To greet you'},
+          {'type': 'email.personal', 'required': false},
+        ],
+      };
+      await pumpScreen(tester);
+
+      await enterCode(tester, fakeVtcDid);
+
+      expect(find.text('Required to apply'), findsOneWidget);
+      expect(find.text('Optional'), findsOneWidget);
+      expect(find.text('To greet you'), findsNothing);
+
+      await tapVisible(tester, find.text('Receive your display name'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('To greet you'), findsOneWidget);
+    });
+
     group('identity', () {
       setUp(() {
         // The member has one identity on their VTA, so joining asks which.

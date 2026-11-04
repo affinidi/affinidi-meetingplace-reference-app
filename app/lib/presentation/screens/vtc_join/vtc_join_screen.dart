@@ -468,13 +468,10 @@ class _Consent extends StatelessWidget {
         _ConsentItem(
           icon: Icons.badge_outlined,
           title: l10n.vtcJoinReceivesDetail(_claimTypeLabel(l10n, detail.type)),
-          details: [
-            ?detail.purpose,
-            detail.required
-                ? l10n.vtcJoinDetailRequiredNote
-                : l10n.vtcJoinDetailOptionalNote,
-            l10n.vtcJoinDetailsNote,
-          ],
+          subtitle: detail.required
+              ? l10n.vtcJoinDetailRequiredNote
+              : l10n.vtcJoinDetailOptionalNote,
+          details: [?detail.purpose, l10n.vtcJoinDetailsNote],
         ),
       if (disclosure != null) ..._audienceItems(context, disclosure),
       if (disclosure?.adminNotes ?? false)
@@ -616,17 +613,20 @@ class _Divider extends StatelessWidget {
   );
 }
 
-/// One thing joining allows: an icon and a title, and [details] shown on
-/// tap, as a consent screen explains a permission.
+/// One thing joining allows: an icon, a title and an always shown
+/// [subtitle], and [details] shown on tap, as a consent screen explains a
+/// permission.
 class _ConsentItem extends HookWidget {
   const _ConsentItem({
     required this.icon,
     required this.title,
+    this.subtitle,
     this.details = const [],
   });
 
   final IconData icon;
   final String title;
+  final String? subtitle;
   final List<String> details;
 
   @override
@@ -654,6 +654,8 @@ class _ConsentItem extends HookWidget {
                       color: Colors.white,
                     ),
                   ),
+                  if (subtitle case final subtitle?)
+                    Text(subtitle, style: onboardingNote(context)),
                   if (expanded.value)
                     for (final detail in details)
                       Text(detail, style: onboardingNote(context)),
