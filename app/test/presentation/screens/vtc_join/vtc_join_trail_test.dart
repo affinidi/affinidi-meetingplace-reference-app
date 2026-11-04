@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
@@ -204,16 +205,35 @@ void main() {
       await tester.tap(find.byKey(const Key('vtc_join_trail_vta_document')));
       await tester.pumpAndSettle();
       expect(find.text('Your signed application'), findsOneWidget);
-      final shown = tester
-          .widget<SelectableText>(
-            find.descendant(
-              of: find.byType(AlertDialog),
-              matching: find.byType(SelectableText),
-            ),
-          )
-          .data!;
+      final json = tester.widget<SelectableText>(
+        find.byKey(const Key('vtc_join_json')),
+      );
+      final shown = json.textSpan!.toPlainText();
       expect(jsonDecode(shown), submit.request.toJson());
-      await tester.tap(find.text('Close'));
+      // Named by its Trust Task, and copied whole.
+      expect(find.text(JoinTask.submit), findsWidgets);
+      String? copied;
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          if (call.method == 'Clipboard.setData') {
+            copied = (call.arguments as Map)['text'] as String;
+          }
+          return null;
+        },
+      );
+      addTearDown(
+        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        ),
+      );
+      await tester.tap(find.byKey(const Key('vtc_join_json_copy')));
+      await tester.pump();
+      expect(find.byTooltip('Copied to clipboard'), findsOneWidget);
+      expect(jsonDecode(copied!), submit.request.toJson());
+      await tester.pump(const Duration(seconds: 2));
+      await tester.tap(find.byKey(const Key('vtc_join_json_close')));
       await tester.pumpAndSettle();
 
       await tester.tap(
@@ -222,7 +242,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text("The community's signed answer"), findsOneWidget);
       expect(find.textContaining('"effect": "refer"'), findsOneWidget);
-      await tester.tap(find.text('Close'));
+      await tester.tap(find.byKey(const Key('vtc_join_json_close')));
       await tester.pumpAndSettle();
 
       final review = find.byKey(const Key('vtc_join_trail_review_document'));

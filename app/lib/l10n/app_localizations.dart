@@ -4456,6 +4456,12 @@ abstract class AppLocalizations {
   /// **'Key that signed the last answer'**
   String get vtcJoinTrailCheckAnswerKey;
 
+  /// Tooltip of the button that copies a shown JSON document
+  ///
+  /// In en, this message translates to:
+  /// **'Copy JSON'**
+  String get vtcJoinJsonCopy;
+
   /// Tooltip of the icon that shows a trail step's signed Trust Task document as JSON
   ///
   /// In en, this message translates to:

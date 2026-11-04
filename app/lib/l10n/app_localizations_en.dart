@@ -2949,6 +2949,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vtcJoinTrailCheckAnswerKey => 'Key that signed the last answer';
 
   @override
+  String get vtcJoinJsonCopy => 'Copy JSON';
+
+  @override
   String get vtcJoinTrailShowDocument => 'Show the signed document';
 
   @override

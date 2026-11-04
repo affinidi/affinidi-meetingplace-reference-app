@@ -791,11 +791,11 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Manifest'), findsOneWidget);
-      final shown = tester.widget<SelectableText>(json).data!;
+      final shown = tester.widget<SelectableText>(json).textSpan!.toPlainText();
       expect(jsonDecode(shown), network.joinManifest);
       expect(shown, contains('"unreadable"'));
 
-      await tester.tap(find.text('Close'));
+      await tester.tap(find.byKey(const Key('vtc_join_json_close')));
       await tester.pumpAndSettle();
       expect(json, findsNothing);
     });

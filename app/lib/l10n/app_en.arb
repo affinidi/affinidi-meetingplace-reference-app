@@ -2805,6 +2805,10 @@
 	"@vtcJoinTrailCheckAnswerKey": {
 		"description": "Label of the community's key that signed its answer to the last status request"
 	},
+	"vtcJoinJsonCopy": "Copy JSON",
+	"@vtcJoinJsonCopy": {
+		"description": "Tooltip of the button that copies a shown JSON document"
+	},
 	"vtcJoinTrailShowDocument": "Show the signed document",
 	"@vtcJoinTrailShowDocument": {
 		"description": "Tooltip of the icon that shows a trail step's signed Trust Task document as JSON"

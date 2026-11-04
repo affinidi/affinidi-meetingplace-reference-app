@@ -340,6 +340,11 @@ class _Step extends HookWidget {
                               context,
                               title: documentTitle,
                               json: document,
+                              icon: Icons.receipt_long_outlined,
+                              subtitle: switch (document['type']) {
+                                final String type => type,
+                                _ => null,
+                              },
                             ),
                           ),
                         if (canExpand)
