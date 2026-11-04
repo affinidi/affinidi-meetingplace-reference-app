@@ -1,3 +1,5 @@
+import 'package:meeting_place_vtc/meeting_place_vtc.dart';
+
 /// A Verifiable Trust Community the member belongs to or applied to, and the
 /// persona they are known by there.
 class VtcCommunity {
@@ -13,6 +15,7 @@ class VtcCommunity {
     this.listInDirectory = true,
     this.isSettled = true,
     this.rejectionReason,
+    this.submitReceipt,
   });
 
   /// Restores a [VtcCommunity] stored with [toJson].
@@ -31,6 +34,12 @@ class VtcCommunity {
       listInDirectory: json['listInDirectory'] as bool? ?? true,
       isSettled: json['isSettled'] as bool? ?? true,
       rejectionReason: json['rejectionReason'] as String?,
+      submitReceipt: switch (json['submitReceipt']) {
+        final Map<String, dynamic> receipt => TrustTaskReceipt.fromJson(
+          receipt,
+        ),
+        _ => null,
+      },
     );
   }
 
@@ -69,17 +78,26 @@ class VtcCommunity {
   /// own words, if it gave one. Kept until the next application.
   final String? rejectionReason;
 
+  /// The open application as the VTA signed it and the community answered
+  /// it, if this phone sent it. Proof metadata only, never what was sent.
+  final TrustTaskReceipt? submitReceipt;
+
   /// Whether an application is waiting for the community's decision.
   bool get isApplying => !isMember && joinRequestId != null;
 
   /// This record with the application's outcome: a member, or still
-  /// applying under [requestId], or neither. A new member is not settled
-  /// until [settled] says so.
-  VtcCommunity withApplication({required bool isMember, String? requestId}) {
+  /// applying under [requestId], as [receipt] shows when this phone sent it,
+  /// or neither. A new member is not settled until [settled] says so.
+  VtcCommunity withApplication({
+    required bool isMember,
+    String? requestId,
+    TrustTaskReceipt? receipt,
+  }) {
     return _copy(
       isMember: isMember,
       joinRequestId: isMember ? null : requestId,
       isSettled: !isMember || (this.isMember && isSettled),
+      submitReceipt: receipt,
     );
   }
 
@@ -101,6 +119,7 @@ class VtcCommunity {
     bool? isSettled,
     bool? listInDirectory,
     String? rejectionReason,
+    TrustTaskReceipt? submitReceipt,
   }) {
     return VtcCommunity(
       communityDid: communityDid,
@@ -116,6 +135,13 @@ class VtcCommunity {
       rejectionReason: isMember == null
           ? this.rejectionReason
           : rejectionReason,
+      // The receipt belongs to the open request: kept while it stays open.
+      submitReceipt: isMember == null
+          ? this.submitReceipt
+          : submitReceipt ??
+                (joinRequestId != null && joinRequestId == this.joinRequestId
+                    ? this.submitReceipt
+                    : null),
     );
   }
 
@@ -131,5 +157,6 @@ class VtcCommunity {
     'listInDirectory': listInDirectory,
     'isSettled': isSettled,
     'rejectionReason': ?rejectionReason,
+    'submitReceipt': ?submitReceipt?.toJson(),
   };
 }

@@ -267,9 +267,13 @@ class VtcService {
         await _repository.saveCommunity(member);
         await _keepCards(vta, credentials, community.contextId);
         await _settle(vta, member, membershipCard, verdict.requestId);
-      case JoinPending(:final requestId):
+      case JoinPending(:final requestId, :final receipt):
         await _repository.saveCommunity(
-          community.withApplication(isMember: false, requestId: requestId),
+          community.withApplication(
+            isMember: false,
+            requestId: requestId,
+            receipt: receipt,
+          ),
         );
       case JoinDenied(:final reason):
         await _repository.saveCommunity(community.rejected(reason));

@@ -242,6 +242,9 @@ void main() {
       final community = await service.community(fakeVtcDid);
       expect(community?.isApplying, isTrue);
       expect(community?.joinRequestId, 'request-1');
+      expect(community?.submitReceipt?.type, JoinTask.submit);
+      expect(community?.submitReceipt?.signer, persona.did);
+      expect(community?.submitReceipt?.answeredBy, fakeVtcDid);
       expect(await service.recordedMembership(fakeVtcDid), isNull);
     });
 
@@ -256,7 +259,9 @@ void main() {
         (await service.checkApplication(fakeVtcDid))?.status,
         JoinRequestStatus.pending,
       );
-      expect((await service.community(fakeVtcDid))?.isApplying, isTrue);
+      final applying = await service.community(fakeVtcDid);
+      expect(applying?.isApplying, isTrue);
+      expect(applying?.submitReceipt?.type, JoinTask.submit);
 
       network.joinStatus = 'approved';
       expect(
