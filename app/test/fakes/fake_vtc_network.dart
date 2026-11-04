@@ -44,7 +44,9 @@ class FakeVtcNetwork implements HttpClientAdapter {
   final vta = FakeVta();
   final _vtcKey = Ed25519DidKeySigner.generate();
   final browserKey = Ed25519DidKeySigner.generate();
-  final decisionDeadline = DateTime.now().millisecondsSinceEpoch ~/ 1000 + 600;
+  final decisionClosesAt = formatTrustTaskTime(
+    DateTime.now().add(const Duration(minutes: 10)),
+  );
   String matchNumber = '47';
   int cancels = 0;
   bool approved = false;
@@ -175,7 +177,7 @@ class FakeVtcNetwork implements HttpClientAdapter {
       'service': {'did': fakeVtcDid},
       'purpose': 'login',
       'origin': fakeVtcOrigin,
-      'decisionDeadline': decisionDeadline,
+      'decisionClosesAt': decisionClosesAt,
       'ext': {
         'org.openvtc.session': {'audience': 'admin'},
       },
