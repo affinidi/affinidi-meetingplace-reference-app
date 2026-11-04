@@ -246,9 +246,9 @@ class _Detail {
   final bool isId;
 }
 
-/// A step of the trail: a marker on the line, a title and summary, its
-/// [details] shown on tap, and its signed [document], if any, behind an
-/// icon.
+/// A step of the trail: a marker on the line, a title and summary with its
+/// actions beside them — its signed [document], if any, behind an icon, and
+/// the toggle for its [details] — and the details below, shown on tap.
 class _Step extends HookWidget {
   const _Step({
     super.key,
@@ -315,19 +315,58 @@ class _Step extends HookWidget {
               child: Padding(
                 padding: EdgeInsets.only(top: 6, bottom: isLast ? 0 : 16),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 4,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text(
-                      title,
-                      style: context.textTheme.bodyMedium?.copyWith(
-                        color: foreground,
-                        fontWeight: stage == _Stage.current
-                            ? FontWeight.bold
-                            : null,
-                      ),
+                    // The step's actions sit beside its title, so the
+                    // details below have the step's full width.
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            spacing: 4,
+                            children: [
+                              Text(
+                                title,
+                                style: context.textTheme.bodyMedium?.copyWith(
+                                  color: foreground,
+                                  fontWeight: stage == _Stage.current
+                                      ? FontWeight.bold
+                                      : null,
+                                ),
+                              ),
+                              Text(summary, style: onboardingNote(context)),
+                            ],
+                          ),
+                        ),
+                        if (document != null)
+                          IconButton(
+                            key: documentKey,
+                            icon: const Icon(
+                              Icons.receipt_long_outlined,
+                              color: Colors.white,
+                            ),
+                            tooltip: context.l10n.vtcJoinTrailShowDocument,
+                            visualDensity: VisualDensity.compact,
+                            onPressed: () => showVtcJoinJson(
+                              context,
+                              title: documentTitle,
+                              json: document,
+                            ),
+                          ),
+                        if (canExpand)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Icon(
+                              expanded.value
+                                  ? Icons.expand_less
+                                  : Icons.expand_more,
+                              color: Colors.white,
+                            ),
+                          ),
+                      ],
                     ),
-                    Text(summary, style: onboardingNote(context)),
                     if (expanded.value)
                       for (final detail in details)
                         Padding(
@@ -338,26 +377,6 @@ class _Step extends HookWidget {
                 ),
               ),
             ),
-            if (document != null)
-              IconButton(
-                key: documentKey,
-                icon: const Icon(Icons.data_object, color: Colors.white),
-                tooltip: context.l10n.vtcJoinTrailShowDocument,
-                visualDensity: VisualDensity.compact,
-                onPressed: () => showVtcJoinJson(
-                  context,
-                  title: documentTitle,
-                  json: document,
-                ),
-              ),
-            if (canExpand)
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Icon(
-                  expanded.value ? Icons.expand_less : Icons.expand_more,
-                  color: Colors.white,
-                ),
-              ),
           ],
         ),
       ),

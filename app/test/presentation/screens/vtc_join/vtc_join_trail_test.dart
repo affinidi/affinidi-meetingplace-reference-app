@@ -184,6 +184,24 @@ void main() {
     testWidgets('shows each signed document in full', (tester) async {
       await pumpTrail(tester, submit: submit, lastCheck: lastCheck);
 
+      // The step's actions sit beside its title, above its details, which
+      // take the step's full width.
+      await tester.tap(find.byKey(const Key('vtc_join_trail_vta')));
+      await tester.pumpAndSettle();
+      final documentIcon = tester.getRect(
+        find.byKey(const Key('vtc_join_trail_vta_document')),
+      );
+      final identity = tester.getRect(
+        find
+            .ancestor(
+              of: find.text('did:webvh:persona'),
+              matching: find.byType(Row),
+            )
+            .first,
+      );
+      expect(documentIcon.bottom, lessThanOrEqualTo(identity.top));
+      expect(identity.right, greaterThan(documentIcon.left));
+
       await tester.tap(find.byKey(const Key('vtc_join_trail_vta_document')));
       await tester.pumpAndSettle();
       expect(find.text('Your signed application'), findsOneWidget);
@@ -229,7 +247,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('urn:uuid:submit'), findsOneWidget);
       // No documents to show.
-      expect(find.byIcon(Icons.data_object), findsNothing);
+      expect(find.byIcon(Icons.receipt_long_outlined), findsNothing);
     });
 
     testWidgets('says when the administrators put it off', (tester) async {
@@ -257,7 +275,7 @@ void main() {
       );
       // Nothing to open or show.
       expect(find.byIcon(Icons.expand_more), findsNothing);
-      expect(find.byIcon(Icons.data_object), findsNothing);
+      expect(find.byIcon(Icons.receipt_long_outlined), findsNothing);
     });
   });
 }
