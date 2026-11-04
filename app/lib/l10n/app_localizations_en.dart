@@ -2599,6 +2599,73 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your VTA doesn\'t offer DIDComm, which Meeting Place uses to talk to it. Ask its admin to enable DIDComm with a mediator.';
 
   @override
+  String get linkedVtaScanAction => 'Scan code from your VTA host';
+
+  @override
+  String get linkedVtaManualHint =>
+      'Or paste the enrolment link from your VTA host, or your VTA\'s DID:';
+
+  @override
+  String get linkedVtaFieldLabel => 'Enrolment link or VTA DID';
+
+  @override
+  String get linkedVtaEnrolmentTitle => 'Compare the codes';
+
+  @override
+  String get linkedVtaEnrolmentCodeLabel => 'Code on this phone';
+
+  @override
+  String get linkedVtaEnrolmentInstruction =>
+      'Your VTA host shows a code too. Your VTA admin must check that it is exactly this code before granting access.';
+
+  @override
+  String get linkedVtaEnrolmentWarning =>
+      'If the codes differ, someone else\'s key was submitted: don\'t grant access, and cancel here.';
+
+  @override
+  String get linkedVtaWaitingForHost =>
+      'Waiting for your admin to grant access on your VTA host…';
+
+  @override
+  String get linkedVtaOfferMalformed =>
+      'This isn\'t a valid enrolment code. Scan the code your VTA host shows again.';
+
+  @override
+  String get linkedVtaOfferUnsupported =>
+      'This enrolment code is from a newer version of the VTA host. Update Meeting Place, or link your VTA by its DID.';
+
+  @override
+  String get linkedVtaOfferInsecure =>
+      'This enrolment code points to a host that isn\'t secured with HTTPS, so it can\'t be used.';
+
+  @override
+  String get linkedVtaOfferExpired =>
+      'This enrolment code has expired. Ask your VTA host for a new one.';
+
+  @override
+  String get linkedVtaOfferUsed =>
+      'This enrolment code was already used. Ask your VTA host for a new one.';
+
+  @override
+  String get linkedVtaEnrolmentRejected =>
+      'Your VTA host didn\'t accept this phone. Ask it for a new enrolment code.';
+
+  @override
+  String get linkedVtaCodeMismatch =>
+      'Your VTA host answered with a different code, so it didn\'t receive this phone\'s key. Ask it for a new enrolment code.';
+
+  @override
+  String get linkedVtaHostUnreachable => 'Your VTA host couldn\'t be reached.';
+
+  @override
+  String get linkedVtaEnrolmentRefused =>
+      'Your VTA admin refused access for this phone.';
+
+  @override
+  String get linkedVtaEnrolmentExpired =>
+      'The enrolment code expired before your VTA admin granted access. Ask your VTA host for a new one.';
+
+  @override
   String get identityPersonaTitle => 'Persona on your VTA';
 
   @override

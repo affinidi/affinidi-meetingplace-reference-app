@@ -3,7 +3,9 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../application/services/vtc_service/vta_link_service.dart';
 import '../../../application/services/vtc_service/vtc_service.dart';
+import '../../../domain/models/vtc/vta_enrolment_offer.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
+import '../../../infrastructure/vtc/vta_enrolment_client.dart';
 import 'vta_link_screen_state.dart';
 
 part 'vta_link_screen_controller.g.dart';
@@ -26,8 +28,9 @@ class VtaLinkScreenController extends _$VtaLinkScreenController {
     return VtaLinkScreenState(link: ref.read(vtaLinkServiceProvider));
   }
 
-  /// Starts linking the VTA [vtaDid].
-  Future<void> link(String vtaDid) => _run(() => _service.link(vtaDid));
+  /// Starts linking the VTA [text] names: its DID, or an enrolment link
+  /// scanned or pasted from the VTA host.
+  Future<void> link(String text) => _run(() => _service.link(text));
 
   /// Checks for the grant again, after the phone stopped checking.
   Future<void> checkAgain() => _service.checkAgain();
@@ -43,6 +46,16 @@ class VtaLinkScreenController extends _$VtaLinkScreenController {
     } on InvalidVtaDidException catch (error) {
       _fail(error);
     } on VtaAlreadyLinkedException catch (error) {
+      _fail(error);
+    } on InvalidVtaEnrolmentOfferException catch (error) {
+      _fail(error);
+    } on VtaEnrolmentException catch (error) {
+      ref
+          .read(appLoggerProvider)
+          .error(
+            'VTA enrolment failed: ${error.problem.name}',
+            name: 'VtaLinkScreenController',
+          );
       _fail(error);
     } on MeetingPlaceVtcSDKException catch (error, stackTrace) {
       ref

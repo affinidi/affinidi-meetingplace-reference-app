@@ -3956,6 +3956,114 @@ abstract class AppLocalizations {
   /// **'Your VTA doesn\'t offer DIDComm, which Meeting Place uses to talk to it. Ask its admin to enable DIDComm with a mediator.'**
   String get linkedVtaNoDidcomm;
 
+  /// No description provided for @linkedVtaScanAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan code from your VTA host'**
+  String get linkedVtaScanAction;
+
+  /// No description provided for @linkedVtaManualHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Or paste the enrolment link from your VTA host, or your VTA\'s DID:'**
+  String get linkedVtaManualHint;
+
+  /// No description provided for @linkedVtaFieldLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrolment link or VTA DID'**
+  String get linkedVtaFieldLabel;
+
+  /// No description provided for @linkedVtaEnrolmentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare the codes'**
+  String get linkedVtaEnrolmentTitle;
+
+  /// No description provided for @linkedVtaEnrolmentCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Code on this phone'**
+  String get linkedVtaEnrolmentCodeLabel;
+
+  /// No description provided for @linkedVtaEnrolmentInstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'Your VTA host shows a code too. Your VTA admin must check that it is exactly this code before granting access.'**
+  String get linkedVtaEnrolmentInstruction;
+
+  /// No description provided for @linkedVtaEnrolmentWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'If the codes differ, someone else\'s key was submitted: don\'t grant access, and cancel here.'**
+  String get linkedVtaEnrolmentWarning;
+
+  /// No description provided for @linkedVtaWaitingForHost.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for your admin to grant access on your VTA host…'**
+  String get linkedVtaWaitingForHost;
+
+  /// No description provided for @linkedVtaOfferMalformed.
+  ///
+  /// In en, this message translates to:
+  /// **'This isn\'t a valid enrolment code. Scan the code your VTA host shows again.'**
+  String get linkedVtaOfferMalformed;
+
+  /// No description provided for @linkedVtaOfferUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'This enrolment code is from a newer version of the VTA host. Update Meeting Place, or link your VTA by its DID.'**
+  String get linkedVtaOfferUnsupported;
+
+  /// No description provided for @linkedVtaOfferInsecure.
+  ///
+  /// In en, this message translates to:
+  /// **'This enrolment code points to a host that isn\'t secured with HTTPS, so it can\'t be used.'**
+  String get linkedVtaOfferInsecure;
+
+  /// No description provided for @linkedVtaOfferExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'This enrolment code has expired. Ask your VTA host for a new one.'**
+  String get linkedVtaOfferExpired;
+
+  /// No description provided for @linkedVtaOfferUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'This enrolment code was already used. Ask your VTA host for a new one.'**
+  String get linkedVtaOfferUsed;
+
+  /// No description provided for @linkedVtaEnrolmentRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Your VTA host didn\'t accept this phone. Ask it for a new enrolment code.'**
+  String get linkedVtaEnrolmentRejected;
+
+  /// No description provided for @linkedVtaCodeMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Your VTA host answered with a different code, so it didn\'t receive this phone\'s key. Ask it for a new enrolment code.'**
+  String get linkedVtaCodeMismatch;
+
+  /// No description provided for @linkedVtaHostUnreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'Your VTA host couldn\'t be reached.'**
+  String get linkedVtaHostUnreachable;
+
+  /// No description provided for @linkedVtaEnrolmentRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'Your VTA admin refused access for this phone.'**
+  String get linkedVtaEnrolmentRefused;
+
+  /// No description provided for @linkedVtaEnrolmentExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'The enrolment code expired before your VTA admin granted access. Ask your VTA host for a new one.'**
+  String get linkedVtaEnrolmentExpired;
+
   /// No description provided for @identityPersonaTitle.
   ///
   /// In en, this message translates to:

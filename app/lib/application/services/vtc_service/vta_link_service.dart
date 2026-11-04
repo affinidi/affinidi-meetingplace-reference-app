@@ -1,9 +1,12 @@
 import 'dart:async';
 
+import 'package:clock/clock.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
+import '../../../domain/models/vtc/vta_enrolment_offer.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
+import '../../../infrastructure/vtc/vta_enrolment_client.dart';
 import 'vtc_service.dart';
 
 /// Where linking the member's VTA stands.
@@ -39,12 +42,49 @@ enum VtaLinkFailure {
   unreachable,
 
   /// The VTA's answer did not verify.
-  badAnswer;
+  badAnswer,
+
+  /// The scanned or pasted text is not a readable enrolment offer.
+  offerMalformed,
+
+  /// The enrolment offer is of a version the app does not read.
+  offerUnsupported,
+
+  /// The enrolment offer's host is not reached over HTTPS.
+  offerInsecure,
+
+  /// The enrolment offer has expired.
+  offerExpired,
+
+  /// The enrolment offer was already used.
+  offerUsed,
+
+  /// The VTA host refused this phone's key.
+  enrolmentRejected,
+
+  /// The VTA host answered with another code than this phone's.
+  codeMismatch,
+
+  /// The VTA host cannot be reached.
+  hostUnreachable;
 
   /// The failure [error] from linking stands for.
   static VtaLinkFailure of(Object error) => switch (error) {
     InvalidVtaDidException() => invalidDid,
     VtaAlreadyLinkedException() => alreadyLinked,
+    InvalidVtaEnrolmentOfferException(:final problem) => switch (problem) {
+      VtaEnrolmentOfferProblem.malformed => offerMalformed,
+      VtaEnrolmentOfferProblem.unsupportedVersion => offerUnsupported,
+      VtaEnrolmentOfferProblem.insecureUrl => offerInsecure,
+      VtaEnrolmentOfferProblem.expired => offerExpired,
+    },
+    VtaEnrolmentException(:final problem) => switch (problem) {
+      VtaEnrolmentProblem.expired => offerExpired,
+      VtaEnrolmentProblem.alreadyUsed => offerUsed,
+      VtaEnrolmentProblem.rejected => enrolmentRejected,
+      VtaEnrolmentProblem.codeMismatch => codeMismatch,
+      VtaEnrolmentProblem.unreachable => hostUnreachable,
+    },
     MeetingPlaceVtcSDKException(:final code) => switch (code) {
       MeetingPlaceVtcSDKErrorCode.didResolutionFailed => didNotResolved,
       MeetingPlaceVtcSDKErrorCode.signInNotOffered => noDidcomm,
@@ -54,6 +94,15 @@ enum VtaLinkFailure {
     },
     _ => unreachable,
   };
+}
+
+/// How an enrolment through the VTA host ended without a link.
+enum VtaEnrolmentOutcome {
+  /// The VTA admin refused this phone on the host.
+  refused,
+
+  /// The offer expired before the VTA admin granted this phone.
+  expired,
 }
 
 /// The VTA link as the app knows it: shared by the router and every view of
@@ -68,6 +117,9 @@ class VtaLinkState {
     this.hasTimedOut = false,
     this.isAdminOnly = false,
     this.checkFailure,
+    this.enrolmentCode,
+    this.enrolmentExpiresAt,
+    this.enrolmentOutcome,
   });
 
   /// Where linking stands.
@@ -92,6 +144,20 @@ class VtaLinkState {
   /// Why the last check for the grant failed, if it did.
   final VtaLinkFailure? checkFailure;
 
+  /// The code to compare with the VTA host's, while a link started by an
+  /// enrolment offer waits for the grant.
+  final String? enrolmentCode;
+
+  /// When the VTA host stops accepting a grant, while [enrolmentCode] is
+  /// shown.
+  final DateTime? enrolmentExpiresAt;
+
+  /// How the last enrolment ended, when it ended without a link.
+  final VtaEnrolmentOutcome? enrolmentOutcome;
+
+  /// Whether the pending link was started by an enrolment offer.
+  bool get isEnrolment => enrolmentCode != null;
+
   /// The `pnm` command that grants the manager key, while pending.
   String get grantCommand {
     final did = managerDid;
@@ -113,6 +179,10 @@ class VtaLinkState {
     hasTimedOut: hasTimedOut ?? this.hasTimedOut,
     isAdminOnly: isAdminOnly ?? this.isAdminOnly,
     checkFailure: clearCheckFailure ? null : checkFailure ?? this.checkFailure,
+    enrolmentCode: status == VtaLinkStatus.active ? null : enrolmentCode,
+    enrolmentExpiresAt: status == VtaLinkStatus.active
+        ? null
+        : enrolmentExpiresAt,
   );
 }
 
@@ -164,11 +234,17 @@ class VtaLinkService extends Notifier<VtaLinkState> {
   /// Completes once the stored link has been read.
   Future<void> ensureLoaded() => _loaded ?? Future.value();
 
-  /// Starts linking the VTA [vtaDid].
+  /// Starts linking the VTA [text] names: an enrolment link from the VTA
+  /// host, or the VTA's DID.
   ///
-  /// Throws as [VtcService.startLink] does; [VtaLinkFailure.of] names why.
-  Future<void> link(String vtaDid) async {
-    await _service.startLink(vtaDid);
+  /// Throws as [VtcService.startEnrolment] or [VtcService.startLink] does;
+  /// [VtaLinkFailure.of] names why.
+  Future<void> link(String text) async {
+    if (VtaEnrolmentOffer.isLink(text)) {
+      await _service.startEnrolment(text);
+    } else {
+      await _service.startLink(text);
+    }
     await _load();
   }
 
@@ -213,12 +289,15 @@ class VtaLinkService extends Notifier<VtaLinkState> {
       state = const VtaLinkState(status: VtaLinkStatus.unlinked);
       return;
     }
+    final enrolment = linkedVta.isGranted ? null : linkedVta.enrolment;
     state = VtaLinkState(
       status: linkedVta.isGranted
           ? VtaLinkStatus.active
           : VtaLinkStatus.pending,
       vtaDid: linkedVta.vtaDid,
       managerDid: managerDid,
+      enrolmentCode: enrolment?.code,
+      enrolmentExpiresAt: enrolment?.expiresAt,
     );
     if (state.status == VtaLinkStatus.pending) {
       _startPolling();
@@ -260,6 +339,15 @@ class VtaLinkService extends Notifier<VtaLinkState> {
 
     _isChecking = true;
     try {
+      final enrolment = state.isEnrolment ? await _checkEnrolment() : null;
+      if (!ref.mounted || state.status != VtaLinkStatus.pending) return;
+      if (enrolment == VtaEnrolmentStatus.refused ||
+          enrolment == VtaEnrolmentStatus.expired) {
+        await _endEnrolment(enrolment!);
+        return;
+      }
+
+      // The VTA, not the host, says whether the key is granted.
       final access = await _service.checkGrant();
       if (!ref.mounted || state.status != VtaLinkStatus.pending) return;
       if (access != null && access.isGranted) {
@@ -269,6 +357,8 @@ class VtaLinkService extends Notifier<VtaLinkState> {
           isAdminOnly: false,
           clearCheckFailure: true,
         );
+      } else if (_hasEnrolmentLapsed(enrolment, access)) {
+        await _endEnrolment(VtaEnrolmentStatus.expired);
       } else {
         state = state._copyWith(
           isAdminOnly: access?.isAdmin ?? false,
@@ -289,6 +379,46 @@ class VtaLinkService extends Notifier<VtaLinkState> {
     } finally {
       _isChecking = false;
     }
+  }
+
+  /// Where the enrolment stands on the VTA host, or null when the host
+  /// cannot be reached: the VTA is asked all the same.
+  Future<VtaEnrolmentStatus?> _checkEnrolment() async {
+    try {
+      return await _service.checkEnrolment();
+    } on VtaEnrolmentException catch (error, stackTrace) {
+      ref
+          .read(appLoggerProvider)
+          .error(
+            'Checking the VTA enrolment failed: ${error.problem.name}',
+            stackTrace: stackTrace,
+            name: 'VtaLinkService',
+          );
+      return null;
+    }
+  }
+
+  /// Whether the offer expired with no grant: past its expiry, the host
+  /// granted nothing it reported and the VTA grants no admin role.
+  bool _hasEnrolmentLapsed(VtaEnrolmentStatus? enrolment, VtaAccess? access) {
+    final expiresAt = state.enrolmentExpiresAt;
+    return expiresAt != null &&
+        clock.now().isAfter(expiresAt) &&
+        enrolment != VtaEnrolmentStatus.granted &&
+        !(access?.isAdmin ?? false);
+  }
+
+  /// Forgets the link the enrolment started, and says how it ended.
+  Future<void> _endEnrolment(VtaEnrolmentStatus status) async {
+    _stopPolling();
+    await _service.unlink();
+    if (!ref.mounted) return;
+    state = VtaLinkState(
+      status: VtaLinkStatus.unlinked,
+      enrolmentOutcome: status == VtaEnrolmentStatus.refused
+          ? VtaEnrolmentOutcome.refused
+          : VtaEnrolmentOutcome.expired,
+    );
   }
 }
 

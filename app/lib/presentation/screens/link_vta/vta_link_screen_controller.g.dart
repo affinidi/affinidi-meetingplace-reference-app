@@ -51,7 +51,7 @@ final class VtaLinkScreenControllerProvider
 }
 
 String _$vtaLinkScreenControllerHash() =>
-    r'1f1c7b8988021b87ccdc64f233113bbcf1e7156e';
+    r'9dd5d6d8b36ca24a825dc248ef9774a5b4610640';
 
 /// Drives a view of the VTA link, on the link screen or in the settings:
 /// turns the member's taps into link actions and their outcome into what the

@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
+import 'package:clock/clock.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../domain/models/vtc/linked_vta.dart';
 import '../../../domain/models/vtc/mock_credential_template.dart';
+import '../../../domain/models/vtc/vta_enrolment_offer.dart';
 import '../../../domain/models/vtc/vtc_card_delivery.dart';
 import '../../../domain/models/vtc/vtc_community.dart';
 import '../../../domain/models/vtc/vtc_identity_check.dart';
@@ -18,6 +20,7 @@ import '../../../infrastructure/providers/vtc_sdk_provider.dart';
 import '../../../infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
 import '../../../infrastructure/vtc/mock_credential_issuer.dart';
 import '../../../infrastructure/vtc/user_verification_key.dart';
+import '../../../infrastructure/vtc/vta_enrolment_client.dart';
 
 /// Thrown when the text entered as a VTA is not a DID.
 class InvalidVtaDidException implements Exception {
@@ -50,24 +53,37 @@ class VtaNotLinkedException implements Exception {
 /// Communities as personas the VTA holds, and signs the member in to their
 /// communities' portals.
 ///
-/// The link is manual: the phone mints a manager key and shows its DID; the
-/// VTA's administrator grants it; the phone then checks for the grant. The
-/// biometric approval key is enrolled only when a sign-in first needs it.
+/// The link is manual or by an enrolment offer. Manually, the phone mints a
+/// manager key and shows its DID; the VTA's administrator grants it; the
+/// phone then checks for the grant. By an offer the VTA host shows, the
+/// phone submits the manager key to the host, and the administrator grants
+/// it there after comparing codes. The biometric approval key is enrolled
+/// only when a sign-in first needs it.
 class VtcService {
   /// Creates a [VtcService].
+  ///
+  /// Enrolment offers with a plain HTTP host are accepted only when
+  /// [allowHttpEnrolment], by default in debug builds only.
   VtcService({
     required this._sdk,
     required this._repository,
     required this._userVerificationKey,
     MockCredentialIssuer? mockCredentialIssuer,
+    VtaEnrolmentClient? enrolmentClient,
+    bool allowHttpEnrolment = kDebugMode,
     String? platform,
-  }) : _platform = platform ?? Platform.operatingSystem,
+  }) : _allowHttpEnrolment = allowHttpEnrolment,
+       _enrolmentClient =
+           enrolmentClient ?? VtaEnrolmentClient(allowHttp: allowHttpEnrolment),
+       _platform = platform ?? Platform.operatingSystem,
        _mockIssuer = mockCredentialIssuer ?? MockCredentialIssuer();
 
   final MeetingPlaceVtcSDK _sdk;
   final VtcRepository _repository;
   final UserVerificationKey _userVerificationKey;
   final MockCredentialIssuer _mockIssuer;
+  final VtaEnrolmentClient _enrolmentClient;
+  final bool _allowHttpEnrolment;
   final String _platform;
   VtaClient? _client;
   final _membershipsChanged = StreamController<void>.broadcast();
@@ -117,6 +133,62 @@ class VtcService {
     );
     _client = client;
     return manager.did;
+  }
+
+  /// Starts linking the VTA the enrolment offer [link] names: submits a new
+  /// manager key to the VTA host, with a proof bound to the offer, and
+  /// returns the code the app and the host both show.
+  ///
+  /// The link is stored only once the VTA answers and the host has taken
+  /// the key with the same code.
+  ///
+  /// Throws [InvalidVtaEnrolmentOfferException] when [link] is not an offer
+  /// the app accepts, [VtaAlreadyLinkedException] when a VTA is linked or
+  /// being linked, [MeetingPlaceVtcSDKException] when the VTA cannot be
+  /// reached, and [VtaEnrolmentException] when the host refuses the key.
+  Future<String> startEnrolment(String link) async {
+    final offer = VtaEnrolmentOffer.parse(
+      link,
+      now: clock.now(),
+      allowHttp: _allowHttpEnrolment,
+    );
+    if (await _repository.getLinkedVta() != null) {
+      throw const VtaAlreadyLinkedException();
+    }
+
+    final manager = _sdk.newManagerKey();
+    final client = _sdk.vtaClient(vtaDid: offer.vtaDid, manager: manager);
+    await client.checkReachable();
+    final code = await _enrolmentClient.submit(
+      offer,
+      manager,
+      now: clock.now(),
+    );
+
+    await _repository.saveLinkedVta(
+      LinkedVta(
+        vtaDid: offer.vtaDid,
+        managerSeed: manager.seed,
+        isGranted: false,
+        enrolment: VtaEnrolment(
+          url: offer.url,
+          code: code,
+          expiresAt: offer.expiresAt,
+        ),
+      ),
+    );
+    _client = client;
+    return code;
+  }
+
+  /// Asks the VTA host where the pending enrolment stands.
+  ///
+  /// Returns null when no enrolment is pending. Throws
+  /// [VtaEnrolmentException] when the host cannot be reached.
+  Future<VtaEnrolmentStatus?> checkEnrolment() async {
+    final enrolment = (await _repository.getLinkedVta())?.enrolment;
+    if (enrolment == null) return null;
+    return _enrolmentClient.status(enrolment.url);
   }
 
   /// The manager DID of the pending or completed link, or null.
