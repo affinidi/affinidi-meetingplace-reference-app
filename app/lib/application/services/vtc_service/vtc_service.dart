@@ -472,6 +472,41 @@ class VtcService {
     await _settle(vta, member, card, requestId);
   }
 
+  /// Withdraws the open application to [communityDid], so the member can
+  /// apply again, as the same persona. Does nothing while none is open.
+  ///
+  /// An application the community no longer holds open as this persona's
+  /// is forgotten all the same. One it already decided on is recorded as
+  /// [checkApplication] records it, and the refusal passed on. Throws
+  /// [VtaNotLinkedException] when no VTA is linked, and
+  /// [MeetingPlaceVtcSDKException] when the VTA or the community refuses or
+  /// cannot be reached; the application is then kept.
+  Future<void> withdraw(String communityDid) async {
+    final community = await _repository.findCommunity(communityDid);
+    final requestId = community?.joinRequestId;
+    if (community == null || !community.isApplying || requestId == null) {
+      return;
+    }
+
+    final vta = await _grantedVta();
+    try {
+      await _sdk.joinClient().withdraw(
+        communityDid,
+        requestId: requestId,
+        agent: vta,
+        persona: await _personaSigner(vta, community),
+      );
+    } on MeetingPlaceVtcSDKException catch (error) {
+      final code = error.refusalCode ?? '';
+      if (code.endsWith(':alreadyDecided')) {
+        await checkApplication(communityDid);
+        rethrow;
+      }
+      if (!code.endsWith(':notFound')) rethrow;
+    }
+    await _repository.saveCommunity(community.withApplication(isMember: false));
+  }
+
   /// Leaves [communityDid] as the persona the member joined it with: the
   /// community ends the membership, the VTA archives its membership cards,
   /// and this phone forgets the community. Does nothing for a community

@@ -95,6 +95,9 @@ class FakeVtcNetwork implements HttpClientAdapter {
   /// When set, the community refuses a join submit with this code.
   String? joinRefusal;
 
+  /// When set, the community refuses a withdraw with this code.
+  String? withdrawRefusal;
+
   /// What `GET <base>/community/public-profile` answers, or null for a 404.
   Map<String, dynamic>? publicProfile = {
     'communityDid': fakeVtcDid,
@@ -203,12 +206,17 @@ class FakeVtcNetwork implements HttpClientAdapter {
       'https://trusttasks.org/spec/vtc/join-requests/',
     )) {
       joinRequests.add(request);
-      if (type == JoinTask.submit && joinRefusal != null) {
+      final refusal = switch (type) {
+        JoinTask.submit => joinRefusal,
+        JoinTask.withdraw => withdrawRefusal,
+        _ => null,
+      };
+      if (refusal != null) {
         return {
           'id': 'urn:uuid:error',
           'type': 'https://trusttasks.org/spec/trust-task-error/0.1',
           'issuer': fakeVtcDid,
-          'payload': {'code': joinRefusal},
+          'payload': {'code': refusal},
         };
       }
       purpose = ProofPurpose.authentication;
@@ -217,6 +225,10 @@ class FakeVtcNetwork implements HttpClientAdapter {
         JoinTask.submit => {
           'requestId': 'request-1',
           'verdict': _withApplicant(joinVerdict, request['issuer'] as String),
+        },
+        JoinTask.withdraw => {
+          'requestId': payload['requestId'],
+          'status': joinStatus = 'withdrawn',
         },
         _ => {
           'requestId': payload['requestId'],

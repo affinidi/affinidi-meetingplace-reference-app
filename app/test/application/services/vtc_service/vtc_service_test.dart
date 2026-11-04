@@ -352,6 +352,65 @@ void main() {
       expect(await service.checkApplication(fakeVtcDid), isNull);
     });
 
+    group('withdraw', () {
+      setUp(() async {
+        network.joinVerdict = {'effect': 'refer'};
+        await service.join(
+          await service.readCommunity(fakeVtcDid),
+          persona: joinAs,
+        );
+      });
+
+      test('withdraws the open application as the persona', () async {
+        await service.withdraw(fakeVtcDid);
+
+        final request = network.joinRequests.last;
+        expect(request['type'], JoinTask.withdraw);
+        expect(request['issuer'], persona.did);
+        expect(request['payload'], {'requestId': 'request-1'});
+        final community = await service.community(fakeVtcDid);
+        expect(community?.isApplying, isFalse);
+        expect(community?.isMember, isFalse);
+        expect(community?.submitReceipt, isNull);
+        expect(community?.personaDid, persona.did);
+      });
+
+      test('forgets an application the community no longer holds', () async {
+        network.withdrawRefusal = 'vtc/join-requests/withdraw:notFound';
+
+        await service.withdraw(fakeVtcDid);
+
+        expect((await service.community(fakeVtcDid))?.isApplying, isFalse);
+      });
+
+      test('records a decision the community made already', () async {
+        network
+          ..withdrawRefusal = 'vtc/join-requests/withdraw:alreadyDecided'
+          ..joinStatus = 'rejected'
+          ..joinRejectionReason = 'Members only';
+
+        await expectLater(
+          service.withdraw(fakeVtcDid),
+          throwsA(isA<MeetingPlaceVtcSDKException>()),
+        );
+
+        final community = await service.community(fakeVtcDid);
+        expect(community?.isApplying, isFalse);
+        expect(community?.rejectionReason, 'Members only');
+      });
+
+      test('keeps the application when the community refuses', () async {
+        network.withdrawRefusal = 'vtc/join-requests/withdraw:unavailable';
+
+        await expectLater(
+          service.withdraw(fakeVtcDid),
+          throwsA(isA<MeetingPlaceVtcSDKException>()),
+        );
+
+        expect((await service.community(fakeVtcDid))?.isApplying, isTrue);
+      });
+    });
+
     test('applies again as the same persona', () async {
       network.joinVerdict = {
         'effect': 'deny',
