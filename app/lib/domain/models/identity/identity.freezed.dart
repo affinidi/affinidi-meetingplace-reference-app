@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Identity {
 
- String get id; String get did; ContactCard get card; bool get isPrimary;
+ String get id; String get did; ContactCard get card; bool get isPrimary; String? get vtaContextId; String? get vtaProfileId;
 /// Create a copy of Identity
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $IdentityCopyWith<Identity> get copyWith => _$IdentityCopyWithImpl<Identity>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Identity&&(identical(other.id, id) || other.id == id)&&(identical(other.did, did) || other.did == did)&&(identical(other.card, card) || other.card == card)&&(identical(other.isPrimary, isPrimary) || other.isPrimary == isPrimary));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Identity&&(identical(other.id, id) || other.id == id)&&(identical(other.did, did) || other.did == did)&&(identical(other.card, card) || other.card == card)&&(identical(other.isPrimary, isPrimary) || other.isPrimary == isPrimary)&&(identical(other.vtaContextId, vtaContextId) || other.vtaContextId == vtaContextId)&&(identical(other.vtaProfileId, vtaProfileId) || other.vtaProfileId == vtaProfileId));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,did,card,isPrimary);
+int get hashCode => Object.hash(runtimeType,id,did,card,isPrimary,vtaContextId,vtaProfileId);
 
 @override
 String toString() {
-  return 'Identity(id: $id, did: $did, card: $card, isPrimary: $isPrimary)';
+  return 'Identity(id: $id, did: $did, card: $card, isPrimary: $isPrimary, vtaContextId: $vtaContextId, vtaProfileId: $vtaProfileId)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $IdentityCopyWith<$Res>  {
   factory $IdentityCopyWith(Identity value, $Res Function(Identity) _then) = _$IdentityCopyWithImpl;
 @useResult
 $Res call({
- String id, String did, ContactCard card, bool isPrimary
+ String id, String did, ContactCard card, bool isPrimary, String? vtaContextId, String? vtaProfileId
 });
 
 
@@ -62,13 +62,15 @@ class _$IdentityCopyWithImpl<$Res>
 
 /// Create a copy of Identity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? did = null,Object? card = null,Object? isPrimary = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? did = null,Object? card = null,Object? isPrimary = null,Object? vtaContextId = freezed,Object? vtaProfileId = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,did: null == did ? _self.did : did // ignore: cast_nullable_to_non_nullable
 as String,card: null == card ? _self.card : card // ignore: cast_nullable_to_non_nullable
 as ContactCard,isPrimary: null == isPrimary ? _self.isPrimary : isPrimary // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,vtaContextId: freezed == vtaContextId ? _self.vtaContextId : vtaContextId // ignore: cast_nullable_to_non_nullable
+as String?,vtaProfileId: freezed == vtaProfileId ? _self.vtaProfileId : vtaProfileId // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 /// Create a copy of Identity
@@ -162,10 +164,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String did,  ContactCard card,  bool isPrimary)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String did,  ContactCard card,  bool isPrimary,  String? vtaContextId,  String? vtaProfileId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Identity() when $default != null:
-return $default(_that.id,_that.did,_that.card,_that.isPrimary);case _:
+return $default(_that.id,_that.did,_that.card,_that.isPrimary,_that.vtaContextId,_that.vtaProfileId);case _:
   return orElse();
 
 }
@@ -183,10 +185,10 @@ return $default(_that.id,_that.did,_that.card,_that.isPrimary);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String did,  ContactCard card,  bool isPrimary)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String did,  ContactCard card,  bool isPrimary,  String? vtaContextId,  String? vtaProfileId)  $default,) {final _that = this;
 switch (_that) {
 case _Identity():
-return $default(_that.id,_that.did,_that.card,_that.isPrimary);case _:
+return $default(_that.id,_that.did,_that.card,_that.isPrimary,_that.vtaContextId,_that.vtaProfileId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -203,10 +205,10 @@ return $default(_that.id,_that.did,_that.card,_that.isPrimary);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String did,  ContactCard card,  bool isPrimary)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String did,  ContactCard card,  bool isPrimary,  String? vtaContextId,  String? vtaProfileId)?  $default,) {final _that = this;
 switch (_that) {
 case _Identity() when $default != null:
-return $default(_that.id,_that.did,_that.card,_that.isPrimary);case _:
+return $default(_that.id,_that.did,_that.card,_that.isPrimary,_that.vtaContextId,_that.vtaProfileId);case _:
   return null;
 
 }
@@ -218,13 +220,15 @@ return $default(_that.id,_that.did,_that.card,_that.isPrimary);case _:
 
 
 class _Identity implements Identity {
-  const _Identity({required this.id, required this.did, required this.card, this.isPrimary = false});
+  const _Identity({required this.id, required this.did, required this.card, this.isPrimary = false, this.vtaContextId, this.vtaProfileId});
   
 
 @override final  String id;
 @override final  String did;
 @override final  ContactCard card;
 @override@JsonKey() final  bool isPrimary;
+@override final  String? vtaContextId;
+@override final  String? vtaProfileId;
 
 /// Create a copy of Identity
 /// with the given fields replaced by the non-null parameter values.
@@ -236,16 +240,16 @@ _$IdentityCopyWith<_Identity> get copyWith => __$IdentityCopyWithImpl<_Identity>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Identity&&(identical(other.id, id) || other.id == id)&&(identical(other.did, did) || other.did == did)&&(identical(other.card, card) || other.card == card)&&(identical(other.isPrimary, isPrimary) || other.isPrimary == isPrimary));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Identity&&(identical(other.id, id) || other.id == id)&&(identical(other.did, did) || other.did == did)&&(identical(other.card, card) || other.card == card)&&(identical(other.isPrimary, isPrimary) || other.isPrimary == isPrimary)&&(identical(other.vtaContextId, vtaContextId) || other.vtaContextId == vtaContextId)&&(identical(other.vtaProfileId, vtaProfileId) || other.vtaProfileId == vtaProfileId));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,did,card,isPrimary);
+int get hashCode => Object.hash(runtimeType,id,did,card,isPrimary,vtaContextId,vtaProfileId);
 
 @override
 String toString() {
-  return 'Identity(id: $id, did: $did, card: $card, isPrimary: $isPrimary)';
+  return 'Identity(id: $id, did: $did, card: $card, isPrimary: $isPrimary, vtaContextId: $vtaContextId, vtaProfileId: $vtaProfileId)';
 }
 
 
@@ -256,7 +260,7 @@ abstract mixin class _$IdentityCopyWith<$Res> implements $IdentityCopyWith<$Res>
   factory _$IdentityCopyWith(_Identity value, $Res Function(_Identity) _then) = __$IdentityCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String did, ContactCard card, bool isPrimary
+ String id, String did, ContactCard card, bool isPrimary, String? vtaContextId, String? vtaProfileId
 });
 
 
@@ -273,13 +277,15 @@ class __$IdentityCopyWithImpl<$Res>
 
 /// Create a copy of Identity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? did = null,Object? card = null,Object? isPrimary = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? did = null,Object? card = null,Object? isPrimary = null,Object? vtaContextId = freezed,Object? vtaProfileId = freezed,}) {
   return _then(_Identity(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,did: null == did ? _self.did : did // ignore: cast_nullable_to_non_nullable
 as String,card: null == card ? _self.card : card // ignore: cast_nullable_to_non_nullable
 as ContactCard,isPrimary: null == isPrimary ? _self.isPrimary : isPrimary // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,vtaContextId: freezed == vtaContextId ? _self.vtaContextId : vtaContextId // ignore: cast_nullable_to_non_nullable
+as String?,vtaProfileId: freezed == vtaProfileId ? _self.vtaProfileId : vtaProfileId // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

@@ -6,6 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../domain/models/identity/identity.dart';
 import '../../../infrastructure/exceptions/app_exception.dart';
 import '../../../infrastructure/exceptions/app_exception_type.dart';
+import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
@@ -71,7 +72,7 @@ class OOBService extends _$OOBService {
     _logger.info('createOobFlow', name: _logKey);
 
     state = state.copyWith(lastConnectionChannel: null);
-    final contactCard = _currentIdentity!.toSdkContactCard();
+    final contactCard = _currentIdentity!.card.toSharedSdkContactCard();
 
     final directConnection = await sdk.createDirectConnection(
       CreateDirectConnectionRequest(
@@ -135,7 +136,7 @@ class OOBService extends _$OOBService {
       final result = await sdk.acceptDirectConnection(
         AcceptDirectConnectionRequest(
           directConnectionUrl: oobUri,
-          contactCard: _currentIdentity!.toSdkContactCard(),
+          contactCard: _currentIdentity!.card.toSharedSdkContactCard(),
           externalRef: _currentIdentity!.id,
           type: type,
         ),

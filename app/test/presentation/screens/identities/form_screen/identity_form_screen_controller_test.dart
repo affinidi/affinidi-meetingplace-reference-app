@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -30,6 +32,44 @@ void main() {
       addTearDown(container.dispose);
       return container;
     }
+
+    test('is busy saving until the VTA answers', () async {
+      final identity = FakeIdentities.primaryIdentity;
+      final service = _FakeIdentitiesService([identity])
+        ..pendingUpdate = Completer<void>();
+      final container = makeContainer(service);
+      final provider = identityFormScreenControllerProvider(identity.id);
+      final controller = container.read(provider.notifier);
+      container.read(provider);
+
+      final saving = controller.saveIdentity(
+        anonymousLabel: 'Anonymous',
+        mode: IdentityFormMode.edit,
+      );
+
+      expect(container.read(provider).isSaving, isTrue);
+      service.pendingUpdate!.complete();
+      expect(await saving, isTrue);
+      expect(container.read(provider).isSaving, isFalse);
+    });
+
+    test('stops being busy when the VTA refuses', () async {
+      final identity = FakeIdentities.primaryIdentity;
+      final service = _FakeIdentitiesService([identity])..failUpdate = true;
+      final container = makeContainer(service);
+      final provider = identityFormScreenControllerProvider(identity.id);
+      final controller = container.read(provider.notifier);
+      container.read(provider);
+
+      final saved = await controller.saveIdentity(
+        anonymousLabel: 'Anonymous',
+        mode: IdentityFormMode.edit,
+      );
+
+      expect(saved, isFalse);
+      expect(container.read(provider).isSaving, isFalse);
+      expect(container.read(provider).hasSaved, isFalse);
+    });
 
     test('does not mark the stored mobile as touched on init callback', () {
       final identity = FakeIdentities.primaryIdentity;
@@ -439,6 +479,12 @@ class _FakeIdentitiesService extends IdentitiesService {
   final IdentitiesServiceState _initialState;
   Identity? updatedIdentity;
 
+  /// Holds an update until completed, when set.
+  Completer<void>? pendingUpdate;
+
+  /// Fails an update, as a VTA that refuses does.
+  bool failUpdate = false;
+
   @override
   IdentitiesServiceState build() {
     return _initialState;
@@ -446,6 +492,8 @@ class _FakeIdentitiesService extends IdentitiesService {
 
   @override
   Future<void> updateIdentity(Identity identity) async {
+    await pendingUpdate?.future;
+    if (failUpdate) throw StateError('VTA refused');
     updatedIdentity = identity;
     state = state.copyWith(
       identities: [

@@ -96,7 +96,7 @@ class RCardManager {
       final rCard = await credentialsSDK.sendRCard(
         SendRCardRequest(
           channel: channel,
-          subjectDid: identity.did,
+          subjectDid: channelDid,
           card: identity.card.toRCardSubject(),
           issuerDidManager: didManager,
         ),
@@ -148,7 +148,7 @@ class RCardManager {
       final rCard = await credentialsSDK.sendRCard(
         SendRCardRequest(
           channel: channel,
-          subjectDid: identity.did,
+          subjectDid: channelDid,
           card: identity.card.toRCardSubject(),
           issuerDidManager: didManager,
         ),
@@ -165,7 +165,7 @@ class RCardManager {
         data: {
           ...message.data,
           'messageType': 'rCardUpdated',
-          'subjectDid': identity.did,
+          'subjectDid': channelDid,
         },
       );
 

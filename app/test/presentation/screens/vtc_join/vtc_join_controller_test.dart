@@ -4,13 +4,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
+import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service.dart';
+import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service_state.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
+import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/vtc/user_verification_key.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_state.dart';
 
+import '../../../fakes/fake_identities.dart';
+import '../../../fakes/fake_identities_service.dart';
 import '../../../fakes/fake_vta.dart';
 import '../../../fakes/fake_vtc_network.dart';
 
@@ -20,13 +25,21 @@ void main() {
   late ProviderContainer container;
   late Ed25519DidKeySigner persona;
 
+  /// The member's identities on this phone.
+  var identities = IdentitiesServiceState();
+
   VtcJoinController controller() =>
       container.read(vtcJoinControllerProvider.notifier);
   VtcJoinState state() => container.read(vtcJoinControllerProvider);
 
   void useService() {
     container = ProviderContainer(
-      overrides: [vtcServiceProvider.overrideWithValue(service)],
+      overrides: [
+        vtcServiceProvider.overrideWithValue(service),
+        identitiesServiceProvider.overrideWith(
+          () => FakeIdentitiesService(identities),
+        ),
+      ],
     );
     container.listen(vtcJoinControllerProvider, (_, _) {});
   }
@@ -38,6 +51,7 @@ void main() {
   });
 
   setUp(() async {
+    identities = IdentitiesServiceState();
     FlutterSecureStorage.setMockInitialValues({});
     network = FakeVtcNetwork();
     persona = Ed25519DidKeySigner.generate();
@@ -148,11 +162,9 @@ void main() {
 
   group('VtcJoinController identity', () {
     void vtaHoldsPersona() {
-      network.vta.answers[VtaTask.didsList] = {
-        'dids': [
-          {'did': persona.did, 'contextId': 'vta'},
-        ],
-      };
+      identities = IdentitiesServiceState(
+        identities: [_vtaIdentity(persona.did, 'Ada')],
+      );
     }
 
     bool createdPersona() =>
@@ -165,6 +177,7 @@ void main() {
       await controller().join();
       expect(state().step, VtcJoinStep.chooseIdentity);
       expect(state().identityChoices, [persona.did]);
+      expect(state().identityNames, {persona.did: 'Ada'});
 
       await controller().useIdentity(persona.did);
 
@@ -549,3 +562,15 @@ void main() {
     });
   });
 }
+
+/// The member's identity [name], a persona of their VTA whose DID is [did].
+Identity _vtaIdentity(String did, String name) =>
+    FakeIdentities.primaryIdentity.copyWith(
+      did: did,
+      card: FakeIdentities.primaryIdentity.card.copyWith(
+        did: did,
+        displayName: name,
+      ),
+      vtaContextId: 'vta',
+      vtaProfileId: '01PROFILE',
+    );

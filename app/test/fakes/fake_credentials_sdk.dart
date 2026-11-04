@@ -162,6 +162,9 @@ class StubRCardCredentialsSdk extends MeetingPlaceCredentialsSDK {
 
   RCard? pendingRCard;
 
+  /// The R-Cards asked to be sent, in order.
+  final List<SendRCardRequest> sentRCards = [];
+
   @override
   Stream<RCard> get receivedRCards => _AwaitableBroadcastStream<RCard>(
     _rCardsCtrl.stream,
@@ -177,6 +180,7 @@ class StubRCardCredentialsSdk extends MeetingPlaceCredentialsSDK {
 
   @override
   Future<RCard> sendRCard(SendRCardRequest request) async {
+    sentRCards.add(request);
     return RCard(
       subjectDid: request.subjectDid,
       vcBlob: jsonEncode({

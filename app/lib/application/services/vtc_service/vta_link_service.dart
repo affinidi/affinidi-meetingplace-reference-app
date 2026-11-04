@@ -89,10 +89,10 @@ class VtaLinkState {
   /// Why the last check for the grant failed, if it did.
   final VtaLinkFailure? checkFailure;
 
-  /// The `pnm` commands that grant the manager key, while pending.
-  List<String> get grantCommands {
+  /// The `pnm` command that grants the manager key, while pending.
+  String get grantCommand {
     final did = managerDid;
-    return did == null ? const [] : VtaLink.grantCommands(did);
+    return did == null ? '' : VtaLink.grantCommand(did);
   }
 
   VtaLinkState _copyWith({

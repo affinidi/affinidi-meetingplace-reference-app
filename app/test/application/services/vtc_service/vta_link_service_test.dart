@@ -120,8 +120,10 @@ void main() {
       expect(pending.status, VtaLinkStatus.pending);
       expect(pending.isPolling, isTrue);
       expect(pending.managerDid, startsWith('did:key:'));
-      expect(pending.grantCommands, hasLength(2));
-      expect(pending.grantCommands.last, contains('persona-holder'));
+      expect(
+        pending.grantCommand,
+        contains('--role admin --capabilities persona-holder'),
+      );
 
       await until(c, (state) => state.isAdminOnly);
 

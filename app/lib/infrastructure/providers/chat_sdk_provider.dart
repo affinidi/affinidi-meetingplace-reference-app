@@ -34,7 +34,7 @@ final chatSdkProvider = FutureProvider.autoDispose
       );
 
       final identity = identitiesService.getIdentityById(channel.externalRef);
-      final sdkContactCard = identity?.card.toSdkContactCard();
+      final sdkContactCard = identity?.card.toSharedSdkContactCard();
 
       try {
         final coreSDK = await ref.read(meetingPlaceSdkProvider.future);

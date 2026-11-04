@@ -3559,25 +3559,25 @@ abstract class AppLocalizations {
   /// No description provided for @linkedVtaGrantInstruction.
   ///
   /// In en, this message translates to:
-  /// **'Ask your VTA administrator to grant this DID by running:'**
+  /// **'Ask your VTA admin to grant this DID by running:'**
   String get linkedVtaGrantInstruction;
 
   /// No description provided for @linkedVtaGrantWarning.
   ///
   /// In en, this message translates to:
-  /// **'This makes Meeting Place an administrator of your VTA, able to create and use your identities (persona-holder). Only grant it to a phone you own.'**
+  /// **'This makes Meeting Place an admin of your VTA, able to create and use your identities (persona-holder). Only grant it to a phone you own.'**
   String get linkedVtaGrantWarning;
 
   /// No description provided for @linkedVtaCopyCommand.
   ///
   /// In en, this message translates to:
-  /// **'Copy commands'**
+  /// **'Copy command'**
   String get linkedVtaCopyCommand;
 
   /// No description provided for @linkedVtaWaiting.
   ///
   /// In en, this message translates to:
-  /// **'Waiting for your administrator…'**
+  /// **'Waiting for your admin…'**
   String get linkedVtaWaiting;
 
   /// No description provided for @linkedVtaWaitingForPersonaHolder.
@@ -3603,6 +3603,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Check again'**
   String get linkedVtaCheckAgain;
+
+  /// No description provided for @identityPersonaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Persona on your VTA'**
+  String get identityPersonaTitle;
+
+  /// No description provided for @identityPersonaHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your VTA holds this identity\'s keys. Contacts never see this DID.'**
+  String get identityPersonaHint;
+
+  /// No description provided for @identityPersonaCopyDid.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy persona DID'**
+  String get identityPersonaCopyDid;
+
+  /// No description provided for @identityVtaSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your VTA couldn\'t save this identity. Check it\'s reachable and try again.'**
+  String get identityVtaSaveFailed;
+
+  /// No description provided for @identityVtaDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Your VTA couldn\'t delete this identity. Check it\'s reachable and try again.'**
+  String get identityVtaDeleteFailed;
+
+  /// No description provided for @identityDeleteConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this identity?'**
+  String get identityDeleteConfirmTitle;
+
+  /// No description provided for @identityDeleteConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Its persona is deleted from your VTA, and its DID can never be used again.'**
+  String get identityDeleteConfirmMessage;
 
   /// No description provided for @linkedVtaUnlinkAction.
   ///

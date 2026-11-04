@@ -65,7 +65,7 @@ final class IdentityFormScreenControllerProvider
 }
 
 String _$identityFormScreenControllerHash() =>
-    r'b185c7d14feee25e92a67765e7b5e6a30446f30c';
+    r'f0ac453d8fdbd9378b56020c30959c7ad14fa2dc';
 
 final class IdentityFormScreenControllerFamily extends $Family
     with

@@ -1,7 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 
-import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../contact_card/contact_card.dart';
 
 part 'identity.freezed.dart';
@@ -18,6 +16,9 @@ const placeholderIdentityId = 'add-new';
 /// - [card] - ContactCard holding the public profile information for this
 ///   identity.
 /// - [isPrimary] - Boolean value identifying a primary identity
+/// - [vtaContextId] - The context the identity's persona lives in on the
+///   member's VTA, or null for an identity this phone created on its own.
+/// - [vtaProfileId] - The VTA profile the persona wears.
 @freezed
 abstract class Identity with _$Identity {
   const factory Identity({
@@ -25,9 +26,12 @@ abstract class Identity with _$Identity {
     required String did,
     required ContactCard card,
     @Default(false) bool isPrimary,
+    String? vtaContextId,
+    String? vtaProfileId,
   }) = _Identity;
 }
 
 extension IdentityExtensions on Identity {
-  sdk.ContactCard toSdkContactCard() => card.toSdkContactCard();
+  /// Whether the identity is a persona held by the member's VTA.
+  bool get isVtaPersona => vtaContextId != null && vtaProfileId != null;
 }

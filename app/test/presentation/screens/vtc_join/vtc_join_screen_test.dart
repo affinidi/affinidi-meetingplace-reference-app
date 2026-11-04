@@ -5,7 +5,10 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
+import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service.dart';
+import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service_state.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
+import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/camera_service/camera_service.dart';
@@ -16,6 +19,8 @@ import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/onboarding_style/onboarding_style.dart';
 
+import '../../../fakes/fake_identities.dart';
+import '../../../fakes/fake_identities_service.dart';
 import '../../../fakes/fake_vta.dart';
 import '../../../fakes/fake_vtc_network.dart';
 
@@ -30,6 +35,9 @@ void main() {
   late VtcService service;
   late Ed25519DidKeySigner persona;
 
+  /// The member's identities on this phone.
+  var identities = IdentitiesServiceState();
+
   setUpAll(() {
     AppLogger.initialize(
       File('${Directory.systemTemp.path}/vtc_join_screen_test.log'),
@@ -37,6 +45,7 @@ void main() {
   });
 
   setUp(() async {
+    identities = IdentitiesServiceState();
     FlutterSecureStorage.setMockInitialValues({});
     network = FakeVtcNetwork();
     persona = Ed25519DidKeySigner.generate();
@@ -79,6 +88,9 @@ void main() {
       ProviderScope(
         overrides: [
           vtcServiceProvider.overrideWithValue(service),
+          identitiesServiceProvider.overrideWith(
+            () => FakeIdentitiesService(identities),
+          ),
           cameraServiceProvider.overrideWith(_NoCamera.new),
         ],
         child: MaterialApp(
@@ -235,12 +247,10 @@ void main() {
 
     group('identity', () {
       setUp(() {
-        // The VTA already holds one identity, so joining asks which.
-        network.vta.answers[VtaTask.didsList] = {
-          'dids': [
-            {'did': persona.did, 'contextId': 'vta'},
-          ],
-        };
+        // The member has one identity on their VTA, so joining asks which.
+        identities = IdentitiesServiceState(
+          identities: [_vtaIdentity(persona.did, 'Ada')],
+        );
       });
 
       Iterable<Object?> vtaTasks() =>
@@ -279,7 +289,7 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(find.text('2 of 2 · swipe to see the others'), findsOneWidget);
-        expect(find.text('Existing identity'), findsOneWidget);
+        expect(find.text('Ada'), findsOneWidget);
 
         await tapVisible(
           tester,
@@ -319,3 +329,15 @@ void main() {
     });
   });
 }
+
+/// The member's identity [name], a persona of their VTA whose DID is [did].
+Identity _vtaIdentity(String did, String name) =>
+    FakeIdentities.primaryIdentity.copyWith(
+      did: did,
+      card: FakeIdentities.primaryIdentity.card.copyWith(
+        did: did,
+        displayName: name,
+      ),
+      vtaContextId: 'vta',
+      vtaProfileId: '01PROFILE',
+    );

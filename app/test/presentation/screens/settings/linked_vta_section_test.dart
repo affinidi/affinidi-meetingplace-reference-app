@@ -106,12 +106,12 @@ void main() {
       final commands = tester
           .widget<SelectableText>(find.byKey(const Key('vta_grant_commands')))
           .data;
-      expect(commands, contains('--did $managerDid --role admin'));
       expect(
         commands,
-        contains('pnm acl update $managerDid --capabilities persona-holder'),
+        'pnm acl create --did $managerDid --role admin '
+        '--capabilities persona-holder --label "Meeting Place"',
       );
-      expect(find.text('Waiting for your administrator…'), findsOneWidget);
+      expect(find.text('Waiting for your admin…'), findsOneWidget);
       expect(find.textContaining('Only grant it to a phone'), findsOneWidget);
       await unmount(tester);
     });

@@ -127,6 +127,44 @@ class VtcService {
     await _userVerificationKey.reset();
   }
 
+  /// Creates an identity on the member's VTA: a persona in a context of its
+  /// own, wearing a profile showing [profile]. All or nothing.
+  ///
+  /// Throws [VtaNotLinkedException] when no VTA is linked and granted, and
+  /// [MeetingPlaceVtcSDKException] when the VTA refuses or cannot be reached.
+  Future<VtaIdentity> createIdentity(VtaProfile profile) async =>
+      (await _grantedVta()).createIdentity(profile);
+
+  /// Reads the profile [profileId] that the identity in [contextId] wears.
+  /// Throws as [createIdentity] does.
+  Future<VtaProfile> identityProfile({
+    required String contextId,
+    required String profileId,
+  }) async =>
+      (await _grantedVta()).profile(contextId: contextId, profileId: profileId);
+
+  /// Replaces the details of the profile [profileId] that the identity in
+  /// [contextId] wears. Throws as [createIdentity] does.
+  Future<void> updateIdentity({
+    required String contextId,
+    required String profileId,
+    required VtaProfile profile,
+  }) async => (await _grantedVta()).updateProfile(
+    contextId: contextId,
+    profileId: profileId,
+    profile: profile,
+  );
+
+  /// Retires the identity's profile and deletes its persona DID and keys on
+  /// the VTA. The DID cannot be used again. Throws as [createIdentity] does.
+  Future<void> deleteIdentity({
+    required String contextId,
+    required String profileId,
+  }) async => (await _grantedVta()).deleteIdentity(
+    contextId: contextId,
+    profileId: profileId,
+  );
+
   /// Reads scanned [text] as a trigger link, offline.
   TriggerLinkResult readLink(String text) => _sdk.readTriggerLink(text);
 

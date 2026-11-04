@@ -1123,14 +1123,24 @@ class ChatScreenController extends _$ChatScreenController
   }) async {
     try {
       final credentialsSdk = await ref.read(credentialsSdkProvider.future);
+      final channelDid = state.contact?.channelDid;
+      if (channelDid == null) return;
+
+      // A VRC names, and is signed by, the DIDs of this connection only: the
+      // identity's DID is never shared with a contact, so contacts cannot
+      // link the member across connections.
+      final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
+      final channel = await coreSdk.findChannelByOtherPartyPermanentDid(
+        channelDid,
+      );
+      final ownChannelDid = channel?.permanentChannelDid;
+      if (ownChannelDid == null || ownChannelDid.isEmpty) return;
 
       if (role == VrcExchangeRole.initiator) {
-        final channelDid = state.contact?.channelDid;
-        if (channelDid == null) return;
         await credentialsSdk.requestVrcExchange(
           RequestVrcExchangeParams(
             channelDid: channelDid,
-            requesterDid: identity.did,
+            requesterDid: ownChannelDid,
             requesterName: identity.card.displayName,
           ),
         );
@@ -1146,29 +1156,22 @@ class ChatScreenController extends _$ChatScreenController
           },
         );
       } else {
-        final peerIdentityDid = state.vrcRequestIdentityDid ?? '';
         final peerIdentityName = state.vrcRequestIdentityName ?? '';
-        final channelDid = state.contact?.channelDid;
-        if (channelDid == null) return;
+        // Issued to the contact's DID for this connection, whatever DID
+        // their request named.
         final sentVcBlob = await credentialsSdk.sendVrc(
           SendVrcRequest(
             channelDid: channelDid,
-            issuerDid: identity.did,
+            issuerDid: ownChannelDid,
             issuerName: identity.card.displayName,
-            peerDid: peerIdentityDid,
+            peerDid: channelDid,
             peerName: peerIdentityName,
           ),
         );
         if (sentVcBlob.isNotEmpty) {
-          final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
-          final channel = await coreSdk.findChannelByOtherPartyPermanentDid(
-            channelDid,
-          );
-          final senderDid = channel?.permanentChannelDid;
-          if (senderDid == null || senderDid.isEmpty) return;
           await _chatService?.showSentVrcAttachment(
             vcBlob: sentVcBlob,
-            senderDid: senderDid,
+            senderDid: ownChannelDid,
           );
         }
         await _chatService?.dismissVrcConciergeMessages();

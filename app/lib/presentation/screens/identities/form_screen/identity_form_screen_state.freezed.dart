@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$IdentityFormScreenState {
 
- Identity get identity; bool get canSave; bool get canDelete; bool get hasEnteredAnyInfo; bool get hasSaved; bool get hasDeleted; bool get isAliasMirroringFirstName; Set<ContactCardFieldDefinition> get showingErrorFields;
+ Identity get identity; bool get canSave; bool get canDelete; bool get hasEnteredAnyInfo; bool get hasSaved; bool get hasDeleted; bool get isSaving; bool get isDeleting; bool get isAliasMirroringFirstName; Set<ContactCardFieldDefinition> get showingErrorFields;
 /// Create a copy of IdentityFormScreenState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $IdentityFormScreenStateCopyWith<IdentityFormScreenState> get copyWith => _$Iden
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is IdentityFormScreenState&&(identical(other.identity, identity) || other.identity == identity)&&(identical(other.canSave, canSave) || other.canSave == canSave)&&(identical(other.canDelete, canDelete) || other.canDelete == canDelete)&&(identical(other.hasEnteredAnyInfo, hasEnteredAnyInfo) || other.hasEnteredAnyInfo == hasEnteredAnyInfo)&&(identical(other.hasSaved, hasSaved) || other.hasSaved == hasSaved)&&(identical(other.hasDeleted, hasDeleted) || other.hasDeleted == hasDeleted)&&(identical(other.isAliasMirroringFirstName, isAliasMirroringFirstName) || other.isAliasMirroringFirstName == isAliasMirroringFirstName)&&const DeepCollectionEquality().equals(other.showingErrorFields, showingErrorFields));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is IdentityFormScreenState&&(identical(other.identity, identity) || other.identity == identity)&&(identical(other.canSave, canSave) || other.canSave == canSave)&&(identical(other.canDelete, canDelete) || other.canDelete == canDelete)&&(identical(other.hasEnteredAnyInfo, hasEnteredAnyInfo) || other.hasEnteredAnyInfo == hasEnteredAnyInfo)&&(identical(other.hasSaved, hasSaved) || other.hasSaved == hasSaved)&&(identical(other.hasDeleted, hasDeleted) || other.hasDeleted == hasDeleted)&&(identical(other.isSaving, isSaving) || other.isSaving == isSaving)&&(identical(other.isDeleting, isDeleting) || other.isDeleting == isDeleting)&&(identical(other.isAliasMirroringFirstName, isAliasMirroringFirstName) || other.isAliasMirroringFirstName == isAliasMirroringFirstName)&&const DeepCollectionEquality().equals(other.showingErrorFields, showingErrorFields));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,identity,canSave,canDelete,hasEnteredAnyInfo,hasSaved,hasDeleted,isAliasMirroringFirstName,const DeepCollectionEquality().hash(showingErrorFields));
+int get hashCode => Object.hash(runtimeType,identity,canSave,canDelete,hasEnteredAnyInfo,hasSaved,hasDeleted,isSaving,isDeleting,isAliasMirroringFirstName,const DeepCollectionEquality().hash(showingErrorFields));
 
 @override
 String toString() {
-  return 'IdentityFormScreenState(identity: $identity, canSave: $canSave, canDelete: $canDelete, hasEnteredAnyInfo: $hasEnteredAnyInfo, hasSaved: $hasSaved, hasDeleted: $hasDeleted, isAliasMirroringFirstName: $isAliasMirroringFirstName, showingErrorFields: $showingErrorFields)';
+  return 'IdentityFormScreenState(identity: $identity, canSave: $canSave, canDelete: $canDelete, hasEnteredAnyInfo: $hasEnteredAnyInfo, hasSaved: $hasSaved, hasDeleted: $hasDeleted, isSaving: $isSaving, isDeleting: $isDeleting, isAliasMirroringFirstName: $isAliasMirroringFirstName, showingErrorFields: $showingErrorFields)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $IdentityFormScreenStateCopyWith<$Res>  {
   factory $IdentityFormScreenStateCopyWith(IdentityFormScreenState value, $Res Function(IdentityFormScreenState) _then) = _$IdentityFormScreenStateCopyWithImpl;
 @useResult
 $Res call({
- Identity identity, bool canSave, bool canDelete, bool hasEnteredAnyInfo, bool hasSaved, bool hasDeleted, bool isAliasMirroringFirstName, Set<ContactCardFieldDefinition> showingErrorFields
+ Identity identity, bool canSave, bool canDelete, bool hasEnteredAnyInfo, bool hasSaved, bool hasDeleted, bool isSaving, bool isDeleting, bool isAliasMirroringFirstName, Set<ContactCardFieldDefinition> showingErrorFields
 });
 
 
@@ -62,7 +62,7 @@ class _$IdentityFormScreenStateCopyWithImpl<$Res>
 
 /// Create a copy of IdentityFormScreenState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? identity = null,Object? canSave = null,Object? canDelete = null,Object? hasEnteredAnyInfo = null,Object? hasSaved = null,Object? hasDeleted = null,Object? isAliasMirroringFirstName = null,Object? showingErrorFields = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? identity = null,Object? canSave = null,Object? canDelete = null,Object? hasEnteredAnyInfo = null,Object? hasSaved = null,Object? hasDeleted = null,Object? isSaving = null,Object? isDeleting = null,Object? isAliasMirroringFirstName = null,Object? showingErrorFields = null,}) {
   return _then(_self.copyWith(
 identity: null == identity ? _self.identity : identity // ignore: cast_nullable_to_non_nullable
 as Identity,canSave: null == canSave ? _self.canSave : canSave // ignore: cast_nullable_to_non_nullable
@@ -70,6 +70,8 @@ as bool,canDelete: null == canDelete ? _self.canDelete : canDelete // ignore: ca
 as bool,hasEnteredAnyInfo: null == hasEnteredAnyInfo ? _self.hasEnteredAnyInfo : hasEnteredAnyInfo // ignore: cast_nullable_to_non_nullable
 as bool,hasSaved: null == hasSaved ? _self.hasSaved : hasSaved // ignore: cast_nullable_to_non_nullable
 as bool,hasDeleted: null == hasDeleted ? _self.hasDeleted : hasDeleted // ignore: cast_nullable_to_non_nullable
+as bool,isSaving: null == isSaving ? _self.isSaving : isSaving // ignore: cast_nullable_to_non_nullable
+as bool,isDeleting: null == isDeleting ? _self.isDeleting : isDeleting // ignore: cast_nullable_to_non_nullable
 as bool,isAliasMirroringFirstName: null == isAliasMirroringFirstName ? _self.isAliasMirroringFirstName : isAliasMirroringFirstName // ignore: cast_nullable_to_non_nullable
 as bool,showingErrorFields: null == showingErrorFields ? _self.showingErrorFields : showingErrorFields // ignore: cast_nullable_to_non_nullable
 as Set<ContactCardFieldDefinition>,
@@ -166,10 +168,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Identity identity,  bool canSave,  bool canDelete,  bool hasEnteredAnyInfo,  bool hasSaved,  bool hasDeleted,  bool isAliasMirroringFirstName,  Set<ContactCardFieldDefinition> showingErrorFields)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Identity identity,  bool canSave,  bool canDelete,  bool hasEnteredAnyInfo,  bool hasSaved,  bool hasDeleted,  bool isSaving,  bool isDeleting,  bool isAliasMirroringFirstName,  Set<ContactCardFieldDefinition> showingErrorFields)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _IdentityFormScreenState() when $default != null:
-return $default(_that.identity,_that.canSave,_that.canDelete,_that.hasEnteredAnyInfo,_that.hasSaved,_that.hasDeleted,_that.isAliasMirroringFirstName,_that.showingErrorFields);case _:
+return $default(_that.identity,_that.canSave,_that.canDelete,_that.hasEnteredAnyInfo,_that.hasSaved,_that.hasDeleted,_that.isSaving,_that.isDeleting,_that.isAliasMirroringFirstName,_that.showingErrorFields);case _:
   return orElse();
 
 }
@@ -187,10 +189,10 @@ return $default(_that.identity,_that.canSave,_that.canDelete,_that.hasEnteredAny
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Identity identity,  bool canSave,  bool canDelete,  bool hasEnteredAnyInfo,  bool hasSaved,  bool hasDeleted,  bool isAliasMirroringFirstName,  Set<ContactCardFieldDefinition> showingErrorFields)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Identity identity,  bool canSave,  bool canDelete,  bool hasEnteredAnyInfo,  bool hasSaved,  bool hasDeleted,  bool isSaving,  bool isDeleting,  bool isAliasMirroringFirstName,  Set<ContactCardFieldDefinition> showingErrorFields)  $default,) {final _that = this;
 switch (_that) {
 case _IdentityFormScreenState():
-return $default(_that.identity,_that.canSave,_that.canDelete,_that.hasEnteredAnyInfo,_that.hasSaved,_that.hasDeleted,_that.isAliasMirroringFirstName,_that.showingErrorFields);case _:
+return $default(_that.identity,_that.canSave,_that.canDelete,_that.hasEnteredAnyInfo,_that.hasSaved,_that.hasDeleted,_that.isSaving,_that.isDeleting,_that.isAliasMirroringFirstName,_that.showingErrorFields);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -207,10 +209,10 @@ return $default(_that.identity,_that.canSave,_that.canDelete,_that.hasEnteredAny
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Identity identity,  bool canSave,  bool canDelete,  bool hasEnteredAnyInfo,  bool hasSaved,  bool hasDeleted,  bool isAliasMirroringFirstName,  Set<ContactCardFieldDefinition> showingErrorFields)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Identity identity,  bool canSave,  bool canDelete,  bool hasEnteredAnyInfo,  bool hasSaved,  bool hasDeleted,  bool isSaving,  bool isDeleting,  bool isAliasMirroringFirstName,  Set<ContactCardFieldDefinition> showingErrorFields)?  $default,) {final _that = this;
 switch (_that) {
 case _IdentityFormScreenState() when $default != null:
-return $default(_that.identity,_that.canSave,_that.canDelete,_that.hasEnteredAnyInfo,_that.hasSaved,_that.hasDeleted,_that.isAliasMirroringFirstName,_that.showingErrorFields);case _:
+return $default(_that.identity,_that.canSave,_that.canDelete,_that.hasEnteredAnyInfo,_that.hasSaved,_that.hasDeleted,_that.isSaving,_that.isDeleting,_that.isAliasMirroringFirstName,_that.showingErrorFields);case _:
   return null;
 
 }
@@ -222,7 +224,7 @@ return $default(_that.identity,_that.canSave,_that.canDelete,_that.hasEnteredAny
 
 
 class _IdentityFormScreenState implements IdentityFormScreenState {
-   _IdentityFormScreenState({required this.identity, this.canSave = true, this.canDelete = true, this.hasEnteredAnyInfo = false, this.hasSaved = false, this.hasDeleted = false, this.isAliasMirroringFirstName = true, final  Set<ContactCardFieldDefinition> showingErrorFields = const {}}): _showingErrorFields = showingErrorFields;
+   _IdentityFormScreenState({required this.identity, this.canSave = true, this.canDelete = true, this.hasEnteredAnyInfo = false, this.hasSaved = false, this.hasDeleted = false, this.isSaving = false, this.isDeleting = false, this.isAliasMirroringFirstName = true, final  Set<ContactCardFieldDefinition> showingErrorFields = const {}}): _showingErrorFields = showingErrorFields;
   
 
 @override final  Identity identity;
@@ -231,6 +233,8 @@ class _IdentityFormScreenState implements IdentityFormScreenState {
 @override@JsonKey() final  bool hasEnteredAnyInfo;
 @override@JsonKey() final  bool hasSaved;
 @override@JsonKey() final  bool hasDeleted;
+@override@JsonKey() final  bool isSaving;
+@override@JsonKey() final  bool isDeleting;
 @override@JsonKey() final  bool isAliasMirroringFirstName;
  final  Set<ContactCardFieldDefinition> _showingErrorFields;
 @override@JsonKey() Set<ContactCardFieldDefinition> get showingErrorFields {
@@ -250,16 +254,16 @@ _$IdentityFormScreenStateCopyWith<_IdentityFormScreenState> get copyWith => __$I
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _IdentityFormScreenState&&(identical(other.identity, identity) || other.identity == identity)&&(identical(other.canSave, canSave) || other.canSave == canSave)&&(identical(other.canDelete, canDelete) || other.canDelete == canDelete)&&(identical(other.hasEnteredAnyInfo, hasEnteredAnyInfo) || other.hasEnteredAnyInfo == hasEnteredAnyInfo)&&(identical(other.hasSaved, hasSaved) || other.hasSaved == hasSaved)&&(identical(other.hasDeleted, hasDeleted) || other.hasDeleted == hasDeleted)&&(identical(other.isAliasMirroringFirstName, isAliasMirroringFirstName) || other.isAliasMirroringFirstName == isAliasMirroringFirstName)&&const DeepCollectionEquality().equals(other._showingErrorFields, _showingErrorFields));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _IdentityFormScreenState&&(identical(other.identity, identity) || other.identity == identity)&&(identical(other.canSave, canSave) || other.canSave == canSave)&&(identical(other.canDelete, canDelete) || other.canDelete == canDelete)&&(identical(other.hasEnteredAnyInfo, hasEnteredAnyInfo) || other.hasEnteredAnyInfo == hasEnteredAnyInfo)&&(identical(other.hasSaved, hasSaved) || other.hasSaved == hasSaved)&&(identical(other.hasDeleted, hasDeleted) || other.hasDeleted == hasDeleted)&&(identical(other.isSaving, isSaving) || other.isSaving == isSaving)&&(identical(other.isDeleting, isDeleting) || other.isDeleting == isDeleting)&&(identical(other.isAliasMirroringFirstName, isAliasMirroringFirstName) || other.isAliasMirroringFirstName == isAliasMirroringFirstName)&&const DeepCollectionEquality().equals(other._showingErrorFields, _showingErrorFields));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,identity,canSave,canDelete,hasEnteredAnyInfo,hasSaved,hasDeleted,isAliasMirroringFirstName,const DeepCollectionEquality().hash(_showingErrorFields));
+int get hashCode => Object.hash(runtimeType,identity,canSave,canDelete,hasEnteredAnyInfo,hasSaved,hasDeleted,isSaving,isDeleting,isAliasMirroringFirstName,const DeepCollectionEquality().hash(_showingErrorFields));
 
 @override
 String toString() {
-  return 'IdentityFormScreenState(identity: $identity, canSave: $canSave, canDelete: $canDelete, hasEnteredAnyInfo: $hasEnteredAnyInfo, hasSaved: $hasSaved, hasDeleted: $hasDeleted, isAliasMirroringFirstName: $isAliasMirroringFirstName, showingErrorFields: $showingErrorFields)';
+  return 'IdentityFormScreenState(identity: $identity, canSave: $canSave, canDelete: $canDelete, hasEnteredAnyInfo: $hasEnteredAnyInfo, hasSaved: $hasSaved, hasDeleted: $hasDeleted, isSaving: $isSaving, isDeleting: $isDeleting, isAliasMirroringFirstName: $isAliasMirroringFirstName, showingErrorFields: $showingErrorFields)';
 }
 
 
@@ -270,7 +274,7 @@ abstract mixin class _$IdentityFormScreenStateCopyWith<$Res> implements $Identit
   factory _$IdentityFormScreenStateCopyWith(_IdentityFormScreenState value, $Res Function(_IdentityFormScreenState) _then) = __$IdentityFormScreenStateCopyWithImpl;
 @override @useResult
 $Res call({
- Identity identity, bool canSave, bool canDelete, bool hasEnteredAnyInfo, bool hasSaved, bool hasDeleted, bool isAliasMirroringFirstName, Set<ContactCardFieldDefinition> showingErrorFields
+ Identity identity, bool canSave, bool canDelete, bool hasEnteredAnyInfo, bool hasSaved, bool hasDeleted, bool isSaving, bool isDeleting, bool isAliasMirroringFirstName, Set<ContactCardFieldDefinition> showingErrorFields
 });
 
 
@@ -287,7 +291,7 @@ class __$IdentityFormScreenStateCopyWithImpl<$Res>
 
 /// Create a copy of IdentityFormScreenState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? identity = null,Object? canSave = null,Object? canDelete = null,Object? hasEnteredAnyInfo = null,Object? hasSaved = null,Object? hasDeleted = null,Object? isAliasMirroringFirstName = null,Object? showingErrorFields = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? identity = null,Object? canSave = null,Object? canDelete = null,Object? hasEnteredAnyInfo = null,Object? hasSaved = null,Object? hasDeleted = null,Object? isSaving = null,Object? isDeleting = null,Object? isAliasMirroringFirstName = null,Object? showingErrorFields = null,}) {
   return _then(_IdentityFormScreenState(
 identity: null == identity ? _self.identity : identity // ignore: cast_nullable_to_non_nullable
 as Identity,canSave: null == canSave ? _self.canSave : canSave // ignore: cast_nullable_to_non_nullable
@@ -295,6 +299,8 @@ as bool,canDelete: null == canDelete ? _self.canDelete : canDelete // ignore: ca
 as bool,hasEnteredAnyInfo: null == hasEnteredAnyInfo ? _self.hasEnteredAnyInfo : hasEnteredAnyInfo // ignore: cast_nullable_to_non_nullable
 as bool,hasSaved: null == hasSaved ? _self.hasSaved : hasSaved // ignore: cast_nullable_to_non_nullable
 as bool,hasDeleted: null == hasDeleted ? _self.hasDeleted : hasDeleted // ignore: cast_nullable_to_non_nullable
+as bool,isSaving: null == isSaving ? _self.isSaving : isSaving // ignore: cast_nullable_to_non_nullable
+as bool,isDeleting: null == isDeleting ? _self.isDeleting : isDeleting // ignore: cast_nullable_to_non_nullable
 as bool,isAliasMirroringFirstName: null == isAliasMirroringFirstName ? _self.isAliasMirroringFirstName : isAliasMirroringFirstName // ignore: cast_nullable_to_non_nullable
 as bool,showingErrorFields: null == showingErrorFields ? _self._showingErrorFields : showingErrorFields // ignore: cast_nullable_to_non_nullable
 as Set<ContactCardFieldDefinition>,

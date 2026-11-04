@@ -77,6 +77,28 @@ class $IdentitiesTableTable extends IdentitiesTable
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _vtaContextIdMeta = const VerificationMeta(
+    'vtaContextId',
+  );
+  @override
+  late final GeneratedColumn<String> vtaContextId = GeneratedColumn<String>(
+    'vta_context_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _vtaProfileIdMeta = const VerificationMeta(
+    'vtaProfileId',
+  );
+  @override
+  late final GeneratedColumn<String> vtaProfileId = GeneratedColumn<String>(
+    'vta_profile_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -85,6 +107,8 @@ class $IdentitiesTableTable extends IdentitiesTable
     contactInfoJson,
     profilePic,
     isPrimary,
+    vtaContextId,
+    vtaProfileId,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -141,6 +165,24 @@ class $IdentitiesTableTable extends IdentitiesTable
         isPrimary.isAcceptableOrUnknown(data['is_primary']!, _isPrimaryMeta),
       );
     }
+    if (data.containsKey('vta_context_id')) {
+      context.handle(
+        _vtaContextIdMeta,
+        vtaContextId.isAcceptableOrUnknown(
+          data['vta_context_id']!,
+          _vtaContextIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('vta_profile_id')) {
+      context.handle(
+        _vtaProfileIdMeta,
+        vtaProfileId.isAcceptableOrUnknown(
+          data['vta_profile_id']!,
+          _vtaProfileIdMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -174,6 +216,14 @@ class $IdentitiesTableTable extends IdentitiesTable
         DriftSqlType.bool,
         data['${effectivePrefix}is_primary'],
       )!,
+      vtaContextId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}vta_context_id'],
+      ),
+      vtaProfileId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}vta_profile_id'],
+      ),
     );
   }
 
@@ -198,6 +248,12 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
   /// Profile picture of the identity
   final String? profilePic;
   final bool isPrimary;
+
+  /// Context of the identity's persona on the member's VTA.
+  final String? vtaContextId;
+
+  /// VTA profile the persona wears.
+  final String? vtaProfileId;
   const IdentityRecord({
     required this.id,
     required this.did,
@@ -205,6 +261,8 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
     required this.contactInfoJson,
     this.profilePic,
     required this.isPrimary,
+    this.vtaContextId,
+    this.vtaProfileId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -217,6 +275,12 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
       map['profile_pic'] = Variable<String>(profilePic);
     }
     map['is_primary'] = Variable<bool>(isPrimary);
+    if (!nullToAbsent || vtaContextId != null) {
+      map['vta_context_id'] = Variable<String>(vtaContextId);
+    }
+    if (!nullToAbsent || vtaProfileId != null) {
+      map['vta_profile_id'] = Variable<String>(vtaProfileId);
+    }
     return map;
   }
 
@@ -230,6 +294,12 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
           ? const Value.absent()
           : Value(profilePic),
       isPrimary: Value(isPrimary),
+      vtaContextId: vtaContextId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(vtaContextId),
+      vtaProfileId: vtaProfileId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(vtaProfileId),
     );
   }
 
@@ -245,6 +315,8 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
       contactInfoJson: serializer.fromJson<String>(json['contactInfoJson']),
       profilePic: serializer.fromJson<String?>(json['profilePic']),
       isPrimary: serializer.fromJson<bool>(json['isPrimary']),
+      vtaContextId: serializer.fromJson<String?>(json['vtaContextId']),
+      vtaProfileId: serializer.fromJson<String?>(json['vtaProfileId']),
     );
   }
   @override
@@ -257,6 +329,8 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
       'contactInfoJson': serializer.toJson<String>(contactInfoJson),
       'profilePic': serializer.toJson<String?>(profilePic),
       'isPrimary': serializer.toJson<bool>(isPrimary),
+      'vtaContextId': serializer.toJson<String?>(vtaContextId),
+      'vtaProfileId': serializer.toJson<String?>(vtaProfileId),
     };
   }
 
@@ -267,6 +341,8 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
     String? contactInfoJson,
     Value<String?> profilePic = const Value.absent(),
     bool? isPrimary,
+    Value<String?> vtaContextId = const Value.absent(),
+    Value<String?> vtaProfileId = const Value.absent(),
   }) => IdentityRecord(
     id: id ?? this.id,
     did: did ?? this.did,
@@ -274,6 +350,8 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
     contactInfoJson: contactInfoJson ?? this.contactInfoJson,
     profilePic: profilePic.present ? profilePic.value : this.profilePic,
     isPrimary: isPrimary ?? this.isPrimary,
+    vtaContextId: vtaContextId.present ? vtaContextId.value : this.vtaContextId,
+    vtaProfileId: vtaProfileId.present ? vtaProfileId.value : this.vtaProfileId,
   );
   IdentityRecord copyWithCompanion(IdentitiesTableCompanion data) {
     return IdentityRecord(
@@ -289,6 +367,12 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
           ? data.profilePic.value
           : this.profilePic,
       isPrimary: data.isPrimary.present ? data.isPrimary.value : this.isPrimary,
+      vtaContextId: data.vtaContextId.present
+          ? data.vtaContextId.value
+          : this.vtaContextId,
+      vtaProfileId: data.vtaProfileId.present
+          ? data.vtaProfileId.value
+          : this.vtaProfileId,
     );
   }
 
@@ -300,14 +384,24 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
           ..write('displayName: $displayName, ')
           ..write('contactInfoJson: $contactInfoJson, ')
           ..write('profilePic: $profilePic, ')
-          ..write('isPrimary: $isPrimary')
+          ..write('isPrimary: $isPrimary, ')
+          ..write('vtaContextId: $vtaContextId, ')
+          ..write('vtaProfileId: $vtaProfileId')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, did, displayName, contactInfoJson, profilePic, isPrimary);
+  int get hashCode => Object.hash(
+    id,
+    did,
+    displayName,
+    contactInfoJson,
+    profilePic,
+    isPrimary,
+    vtaContextId,
+    vtaProfileId,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -317,7 +411,9 @@ class IdentityRecord extends DataClass implements Insertable<IdentityRecord> {
           other.displayName == this.displayName &&
           other.contactInfoJson == this.contactInfoJson &&
           other.profilePic == this.profilePic &&
-          other.isPrimary == this.isPrimary);
+          other.isPrimary == this.isPrimary &&
+          other.vtaContextId == this.vtaContextId &&
+          other.vtaProfileId == this.vtaProfileId);
 }
 
 class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
@@ -327,6 +423,8 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
   final Value<String> contactInfoJson;
   final Value<String?> profilePic;
   final Value<bool> isPrimary;
+  final Value<String?> vtaContextId;
+  final Value<String?> vtaProfileId;
   final Value<int> rowid;
   const IdentitiesTableCompanion({
     this.id = const Value.absent(),
@@ -335,6 +433,8 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
     this.contactInfoJson = const Value.absent(),
     this.profilePic = const Value.absent(),
     this.isPrimary = const Value.absent(),
+    this.vtaContextId = const Value.absent(),
+    this.vtaProfileId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   IdentitiesTableCompanion.insert({
@@ -344,6 +444,8 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
     this.contactInfoJson = const Value.absent(),
     this.profilePic = const Value.absent(),
     this.isPrimary = const Value.absent(),
+    this.vtaContextId = const Value.absent(),
+    this.vtaProfileId = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : did = Value(did),
        displayName = Value(displayName);
@@ -354,6 +456,8 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
     Expression<String>? contactInfoJson,
     Expression<String>? profilePic,
     Expression<bool>? isPrimary,
+    Expression<String>? vtaContextId,
+    Expression<String>? vtaProfileId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -363,6 +467,8 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
       if (contactInfoJson != null) 'contact_info_json': contactInfoJson,
       if (profilePic != null) 'profile_pic': profilePic,
       if (isPrimary != null) 'is_primary': isPrimary,
+      if (vtaContextId != null) 'vta_context_id': vtaContextId,
+      if (vtaProfileId != null) 'vta_profile_id': vtaProfileId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -374,6 +480,8 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
     Value<String>? contactInfoJson,
     Value<String?>? profilePic,
     Value<bool>? isPrimary,
+    Value<String?>? vtaContextId,
+    Value<String?>? vtaProfileId,
     Value<int>? rowid,
   }) {
     return IdentitiesTableCompanion(
@@ -383,6 +491,8 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
       contactInfoJson: contactInfoJson ?? this.contactInfoJson,
       profilePic: profilePic ?? this.profilePic,
       isPrimary: isPrimary ?? this.isPrimary,
+      vtaContextId: vtaContextId ?? this.vtaContextId,
+      vtaProfileId: vtaProfileId ?? this.vtaProfileId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -408,6 +518,12 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
     if (isPrimary.present) {
       map['is_primary'] = Variable<bool>(isPrimary.value);
     }
+    if (vtaContextId.present) {
+      map['vta_context_id'] = Variable<String>(vtaContextId.value);
+    }
+    if (vtaProfileId.present) {
+      map['vta_profile_id'] = Variable<String>(vtaProfileId.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -423,6 +539,8 @@ class IdentitiesTableCompanion extends UpdateCompanion<IdentityRecord> {
           ..write('contactInfoJson: $contactInfoJson, ')
           ..write('profilePic: $profilePic, ')
           ..write('isPrimary: $isPrimary, ')
+          ..write('vtaContextId: $vtaContextId, ')
+          ..write('vtaProfileId: $vtaProfileId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -450,6 +568,8 @@ typedef $$IdentitiesTableTableCreateCompanionBuilder =
       Value<String> contactInfoJson,
       Value<String?> profilePic,
       Value<bool> isPrimary,
+      Value<String?> vtaContextId,
+      Value<String?> vtaProfileId,
       Value<int> rowid,
     });
 typedef $$IdentitiesTableTableUpdateCompanionBuilder =
@@ -460,6 +580,8 @@ typedef $$IdentitiesTableTableUpdateCompanionBuilder =
       Value<String> contactInfoJson,
       Value<String?> profilePic,
       Value<bool> isPrimary,
+      Value<String?> vtaContextId,
+      Value<String?> vtaProfileId,
       Value<int> rowid,
     });
 
@@ -499,6 +621,16 @@ class $$IdentitiesTableTableFilterComposer
 
   ColumnFilters<bool> get isPrimary => $composableBuilder(
     column: $table.isPrimary,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get vtaContextId => $composableBuilder(
+    column: $table.vtaContextId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get vtaProfileId => $composableBuilder(
+    column: $table.vtaProfileId,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -541,6 +673,16 @@ class $$IdentitiesTableTableOrderingComposer
     column: $table.isPrimary,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get vtaContextId => $composableBuilder(
+    column: $table.vtaContextId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get vtaProfileId => $composableBuilder(
+    column: $table.vtaProfileId,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$IdentitiesTableTableAnnotationComposer
@@ -575,6 +717,16 @@ class $$IdentitiesTableTableAnnotationComposer
 
   GeneratedColumn<bool> get isPrimary =>
       $composableBuilder(column: $table.isPrimary, builder: (column) => column);
+
+  GeneratedColumn<String> get vtaContextId => $composableBuilder(
+    column: $table.vtaContextId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get vtaProfileId => $composableBuilder(
+    column: $table.vtaProfileId,
+    builder: (column) => column,
+  );
 }
 
 class $$IdentitiesTableTableTableManager
@@ -620,6 +772,8 @@ class $$IdentitiesTableTableTableManager
                 Value<String> contactInfoJson = const Value.absent(),
                 Value<String?> profilePic = const Value.absent(),
                 Value<bool> isPrimary = const Value.absent(),
+                Value<String?> vtaContextId = const Value.absent(),
+                Value<String?> vtaProfileId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => IdentitiesTableCompanion(
                 id: id,
@@ -628,6 +782,8 @@ class $$IdentitiesTableTableTableManager
                 contactInfoJson: contactInfoJson,
                 profilePic: profilePic,
                 isPrimary: isPrimary,
+                vtaContextId: vtaContextId,
+                vtaProfileId: vtaProfileId,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -638,6 +794,8 @@ class $$IdentitiesTableTableTableManager
                 Value<String> contactInfoJson = const Value.absent(),
                 Value<String?> profilePic = const Value.absent(),
                 Value<bool> isPrimary = const Value.absent(),
+                Value<String?> vtaContextId = const Value.absent(),
+                Value<String?> vtaProfileId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => IdentitiesTableCompanion.insert(
                 id: id,
@@ -646,6 +804,8 @@ class $$IdentitiesTableTableTableManager
                 contactInfoJson: contactInfoJson,
                 profilePic: profilePic,
                 isPrimary: isPrimary,
+                vtaContextId: vtaContextId,
+                vtaProfileId: vtaProfileId,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

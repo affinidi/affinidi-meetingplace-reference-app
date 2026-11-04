@@ -266,7 +266,7 @@ class ConnectionsService extends _$ConnectionsService {
     await sdk.acceptOffer(
       AcceptOfferRequest(
         connectionOffer: connectionOffer,
-        contactCard: identity.card.toSdkContactCard(),
+        contactCard: identity.card.toSharedSdkContactCard(),
         externalRef: identity.id,
         senderInfo: identity.card.firstName,
       ),
@@ -337,7 +337,7 @@ class ConnectionsService extends _$ConnectionsService {
       final result = await sdk.publishOffer(
         PublishOfferRequest(
           offerName: data.headline,
-          contactCard: identity.card.toSdkContactCard(),
+          contactCard: identity.card.toSharedSdkContactCard(),
           type: isGroupOffer
               ? SDKConnectionOfferType.groupInvitation
               : SDKConnectionOfferType.invitation,
@@ -541,7 +541,7 @@ class ConnectionsService extends _$ConnectionsService {
       final didManager = await sdk.getDidManager(permanentChannelDid);
       return RCardDIDCommAttachmentBuilder.build(
         issuerDid: permanentChannelDid,
-        subjectDid: identity.did,
+        subjectDid: permanentChannelDid,
         card: identity.card.toRCardSubject(),
         issuerDidManager: didManager,
       );
@@ -577,7 +577,7 @@ class ConnectionsService extends _$ConnectionsService {
 
       final score = await ref
           .read(vrcServiceProvider.notifier)
-          .countVrcsByDid(identity.did);
+          .countVrcsForIdentity(identity);
 
       if (publishedOffers.isNotEmpty) {
         final result = await sdk.updateOffersScore(

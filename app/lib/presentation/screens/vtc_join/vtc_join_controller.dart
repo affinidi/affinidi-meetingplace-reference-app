@@ -4,7 +4,9 @@ import 'dart:convert';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../application/services/identities_service/identities_service.dart';
 import '../../../application/services/vtc_service/vtc_service.dart';
+import '../../../domain/models/identity/identity.dart';
 import '../../../domain/models/vtc/vtc_community.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import 'vtc_join_state.dart';
@@ -118,8 +120,9 @@ class VtcJoinController extends _$VtcJoinController {
   /// Goes on to apply to the scanned community, under the first way in
   /// this app supports; does nothing when there is none.
   ///
-  /// A first application asks which identity on the VTA joins, when the VTA
-  /// holds any; a later one applies as the identity recorded for it.
+  /// A first application asks which of the member's identities joins, or a
+  /// new one, when the member has any; a later one applies as the identity
+  /// recorded for it.
   Future<void> join() async {
     final manifest = _manifest;
     if (state.step != VtcJoinStep.review ||
@@ -133,13 +136,34 @@ class VtcJoinController extends _$VtcJoinController {
       if (await _service.community(manifest.communityDid) != null) {
         return _apply(manifest);
       }
-      _personas = await _service.vtaPersonas();
+      final identities = _joinableIdentities();
+      _personas = [
+        for (final identity in identities)
+          VtaPersona(did: identity.did, contextId: identity.vtaContextId!),
+      ];
       if (_personas.isEmpty) return _apply(manifest);
       state = state.copyWith(
         step: VtcJoinStep.chooseIdentity,
         identityChoices: [for (final persona in _personas) persona.did],
+        identityNames: {
+          for (final identity in identities)
+            identity.did: identity.card.displayName,
+        },
       );
     });
+  }
+
+  /// The member's identities, which are personas of their VTA, primary
+  /// first.
+  List<Identity> _joinableIdentities() {
+    final identities = ref
+        .read(identitiesServiceProvider)
+        .identities
+        .where((identity) => identity.isVtaPersona);
+    return [
+      ...identities.where((identity) => identity.isPrimary),
+      ...identities.where((identity) => !identity.isPrimary),
+    ];
   }
 
   /// Joins as the VTA identity [personaDid], or as a new identity when

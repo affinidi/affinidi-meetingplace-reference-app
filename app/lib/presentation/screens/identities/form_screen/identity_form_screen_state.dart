@@ -14,6 +14,8 @@ abstract class IdentityFormScreenState with _$IdentityFormScreenState {
     @Default(false) bool hasEnteredAnyInfo,
     @Default(false) bool hasSaved,
     @Default(false) bool hasDeleted,
+    @Default(false) bool isSaving,
+    @Default(false) bool isDeleting,
     @Default(true) bool isAliasMirroringFirstName,
     @Default({}) Set<ContactCardFieldDefinition> showingErrorFields,
   }) = _IdentityFormScreenState;

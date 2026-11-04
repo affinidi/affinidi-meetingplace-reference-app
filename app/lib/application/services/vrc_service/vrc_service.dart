@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../domain/models/identity/identity.dart';
 import '../../../domain/models/vrc/vrc_credential.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/credentials_sdk_provider.dart';
+import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 
 part 'vrc_service.g.dart';
 
@@ -79,9 +81,27 @@ class VrcService extends _$VrcService {
     return vrcs.map(_toVrcCredential).toList();
   }
 
-  Future<int> countVrcsByDid(String did) async {
+  /// Counts the VRCs [identity] holds: those issued to it over any of its
+  /// connections.
+  ///
+  /// A VRC is issued to this phone's DID for one connection, never to the
+  /// identity's own DID, so it is found through its connection. A VRC an
+  /// older version issued to the identity's DID still counts.
+  Future<int> countVrcsForIdentity(Identity identity) async {
     final credentialsSdk = await ref.read(credentialsSdkProvider.future);
-    return credentialsSdk.countVrcsByHolderDid(did);
+    final coreSdk = await ref.read(meetingPlaceSdkProvider.future);
+    var count = 0;
+    for (final vrc in await credentialsSdk.listVrcs()) {
+      final channel = await coreSdk.findChannelByOtherPartyPermanentDid(
+        vrc.referenceId,
+      );
+      if (channel == null || channel.externalRef != identity.id) continue;
+      if (vrc.holderDid == channel.permanentChannelDid ||
+          vrc.holderDid == identity.did) {
+        count++;
+      }
+    }
+    return count;
   }
 
   Future<bool> hasVrcInChannel(String? channelId) async {

@@ -117,7 +117,7 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceMatrixSDK>(
 
                   return RCardDIDCommAttachmentBuilder.build(
                     issuerDid: permanentChannelDid,
-                    subjectDid: identity.did,
+                    subjectDid: permanentChannelDid,
                     card: identity.card.toRCardSubject(),
                     issuerDidManager: didManager,
                   );

@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 import 'package:synchronized/synchronized.dart';
 
+import '../../../../domain/models/identity/identity.dart';
 import '../../../../infrastructure/extensions/vrc_extensions.dart';
 import '../../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../../infrastructure/plugins/vrc_attachments_plugin/vrc_attachment.dart';
@@ -221,7 +221,7 @@ class VdipManager {
         request: request,
         hasVrcExchangeInitiated: messages.hasVrcExchangeInitiated,
         isConnectionInitiator: channel.isConnectionInitiator,
-        issuerDid: messages.vrcInitiatorIdentityDid,
+        issuerDid: channel.permanentChannelDid,
         issuerName: messages.vrcInitiatorIdentityName,
       ),
     );
@@ -267,6 +267,10 @@ class VdipManager {
   /// the SDK returns [VrcProcessingResultIgnored] (exchange already complete).
   /// On [VrcProcessingResultReciprocated], shows the incoming card first then
   /// the outgoing card to guarantee deterministic display order.
+  /// The identity [channel] was made with, as its external reference names.
+  Identity? _identityOf(Channel channel) =>
+      _ref.read(identitiesServiceProvider).getIdentityById(channel.externalRef);
+
   Future<void> _handleReceivedVrc(
     String vcBlob,
     MeetingPlaceCredentialsSDK credentialsSdk,
@@ -284,7 +288,7 @@ class VdipManager {
           hasVrcExchangeCompleted: messages.hasVrcExchangeCompleted,
           isConnectionInitiator: _isConnectionInitiator,
         ),
-        issuerDid: messages.vrcInitiatorIdentityDid,
+        issuerDid: channel.permanentChannelDid,
         issuerName: messages.vrcInitiatorIdentityName,
       ),
     );
@@ -307,17 +311,7 @@ class VdipManager {
           'VRC exchange completed (outcome: completed)',
           name: _logKey,
         );
-        final completedIdentityDid =
-            messages.vrcInitiatorIdentityDid ??
-            _ref
-                .read(vrcServiceProvider)
-                .firstWhereOrNull((v) => v.channelId == _otherPartyPermanentDid)
-                ?.holderIdentityDid;
-        final completedIdentity = completedIdentityDid != null
-            ? _ref
-                  .read(identitiesServiceProvider)
-                  .getIdentityByDid(completedIdentityDid)
-            : null;
+        final completedIdentity = _identityOf(channel);
         if (completedIdentity != null) {
           unawaited(
             _ref
@@ -344,17 +338,7 @@ class VdipManager {
           'VRC exchange completed (outcome: reciprocated)',
           name: _logKey,
         );
-        final reciprocatedIdentityDid =
-            messages.vrcInitiatorIdentityDid ??
-            _ref
-                .read(vrcServiceProvider)
-                .firstWhereOrNull((v) => v.channelId == _otherPartyPermanentDid)
-                ?.holderIdentityDid;
-        final reciprocatedIdentity = reciprocatedIdentityDid != null
-            ? _ref
-                  .read(identitiesServiceProvider)
-                  .getIdentityByDid(reciprocatedIdentityDid)
-            : null;
+        final reciprocatedIdentity = _identityOf(channel);
         if (reciprocatedIdentity != null) {
           unawaited(
             _ref

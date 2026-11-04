@@ -127,6 +127,19 @@ extension ContactCardExtensions on ContactCard {
   /// Last name or empty string for fallback.
   String get lastNameOrEmpty => lastName ?? '';
 
+  /// The card as shared with a contact, a community or the control plane:
+  /// without the identity's DID, which contacts must never see, so they
+  /// cannot link the member across connections. Contacts know each other by
+  /// the DIDs of their connection.
+  sdk.ContactCard toSharedSdkContactCard() {
+    final card = toSdkContactCard();
+    return sdk.ContactCard(
+      did: '',
+      type: card.type,
+      contactInfo: card.contactInfo,
+    );
+  }
+
   sdk.ContactCard toSdkContactCard() {
     final contactInfo = <String, dynamic>{};
     for (final field in ContactCardFieldDefinitions.values) {

@@ -105,7 +105,7 @@ void main() {
         .widget<SelectableText>(find.byKey(const Key('vta_grant_commands')))
         .data;
     expect(commands, contains('--capabilities persona-holder'));
-    expect(find.text('Waiting for your administrator…'), findsOneWidget);
+    expect(find.text('Waiting for your admin…'), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
   });
 }

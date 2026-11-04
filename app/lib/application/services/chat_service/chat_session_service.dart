@@ -304,7 +304,9 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
         if (previousCard == nextCard) return;
 
         unawaited(
-          _chatSDK?.refreshCurrentContactCard(nextCard?.toSdkContactCard()) ??
+          _chatSDK?.refreshCurrentContactCard(
+                nextCard?.toSharedSdkContactCard(),
+              ) ??
               Future<void>.value(),
         );
       });

@@ -1,4 +1,5 @@
 import 'package:mpx_flutter_reference_app/application/services/vrc_service/vrc_service.dart';
+import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vrc/vrc_credential.dart';
 
 class FakeVrcService extends VrcService {
@@ -19,6 +20,6 @@ class FakeVrcService extends VrcService {
   Future<bool> hasVrcInChannel(String? channelId) async => hasVrc;
 
   @override
-  Future<int> countVrcsByDid(String did) async =>
+  Future<int> countVrcsForIdentity(Identity identity) async =>
       _vrcCount ?? _credentials.length;
 }

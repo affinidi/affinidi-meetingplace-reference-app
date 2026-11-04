@@ -209,6 +209,15 @@ void main() {
       expect(fakeChatSdk.createAttachmentMessageCalls, hasLength(1));
     });
 
+    test('sendRCardFromPlugin — names this connection\'s DID, '
+        'never the identity\'s', () async {
+      await manager.sendRCardFromPlugin(FakeIdentities.primaryIdentity);
+
+      final sent = stub.sentRCards.single;
+      expect(sent.subjectDid, localChannelDid);
+      expect(sent.subjectDid, isNot(FakeIdentities.primaryIdentity.did));
+    });
+
     test(
       'replayPendingRCard — delivers pending R-Card from cache as chat tile',
       () async {

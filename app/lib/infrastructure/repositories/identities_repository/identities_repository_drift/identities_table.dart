@@ -27,6 +27,12 @@ class IdentitiesTable extends Table {
 
   BoolColumn get isPrimary => boolean().withDefault(const Constant(false))();
 
+  /// Context of the identity's persona on the member's VTA.
+  TextColumn get vtaContextId => text().nullable()();
+
+  /// VTA profile the persona wears.
+  TextColumn get vtaProfileId => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }

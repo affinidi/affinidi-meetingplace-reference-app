@@ -426,29 +426,37 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
 
     final updatedIdentity = state.identity.copyWith(card: updatedCard);
 
+    state = state.copyWith(isSaving: true);
     try {
       if (mode == IdentityFormMode.add) {
         await identitiesService.addIdentity(updatedIdentity);
       } else {
         await identitiesService.updateIdentity(updatedIdentity);
       }
+      if (!ref.mounted) return true;
       state = state.copyWith(identity: updatedIdentity, hasSaved: true);
       return true;
     } catch (error) {
       return false;
+    } finally {
+      if (ref.mounted) state = state.copyWith(isSaving: false);
     }
   }
 
   Future<bool> deleteIdentity() async {
     if (state.identity.isPrimary) return false;
 
+    state = state.copyWith(isDeleting: true);
     try {
       final id = state.identity.id;
       await ref.read(identitiesServiceProvider.notifier).deleteIdentity(id);
+      if (!ref.mounted) return true;
       state = state.copyWith(hasDeleted: true);
       return true;
     } catch (error) {
       return false;
+    } finally {
+      if (ref.mounted) state = state.copyWith(isDeleting: false);
     }
   }
 

@@ -173,6 +173,9 @@ abstract class VtcJoinState with _$VtcJoinState {
     /// The identities on the member's VTA to join with, as DIDs.
     @Default(<String>[]) List<String> identityChoices,
 
+    /// The name of each identity in [identityChoices], by its DID.
+    @Default(<String, String>{}) Map<String, String> identityNames,
+
     /// The profile details the member is asked to approve sharing.
     @Default(<VtcJoinDetail>[]) List<VtcJoinDetail> details,
 

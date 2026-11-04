@@ -76,7 +76,7 @@ extension IdentityMapper on Identity {
   /// Converts an [Identity] into an [IdentityRecord] for persistence.
   IdentityRecord toRecord() {
     final contactInfo = Map<String, dynamic>.from(
-      toSdkContactCard().contactInfo,
+      card.toSdkContactCard().contactInfo,
     )..remove('photo');
     final contactInfoJson = jsonEncode(contactInfo);
     return IdentityRecord(
@@ -86,6 +86,8 @@ extension IdentityMapper on Identity {
       contactInfoJson: contactInfoJson,
       isPrimary: isPrimary,
       profilePic: card.profilePic,
+      vtaContextId: vtaContextId,
+      vtaProfileId: vtaProfileId,
     );
   }
 
@@ -111,6 +113,8 @@ extension IdentityMapper on Identity {
       did: record.did,
       isPrimary: record.isPrimary,
       card: card,
+      vtaContextId: record.vtaContextId,
+      vtaProfileId: record.vtaProfileId,
     );
   }
 }

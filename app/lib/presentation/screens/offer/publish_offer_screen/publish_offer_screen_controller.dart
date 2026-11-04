@@ -346,7 +346,7 @@ class PublishOfferScreenController extends _$PublishOfferScreenController {
       // Reset expiryDate to null if not set and refresh offer score.
       final vrcCount = await ref
           .read(vrcServiceProvider.notifier)
-          .countVrcsByDid(selectedIdentity.did);
+          .countVrcsForIdentity(selectedIdentity);
 
       final normalizedFormData = formData.hasExpiry
           ? formData

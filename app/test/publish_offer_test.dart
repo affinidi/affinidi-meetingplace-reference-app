@@ -5,6 +5,7 @@ import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
 
+import 'fakes/fake_channels.dart';
 import 'fakes/fake_identities.dart';
 import 'fakes/fake_mediators.dart';
 import 'fakes/fake_meeting_place_sdk.dart';
@@ -1068,23 +1069,35 @@ void main() {
     });
 
     group('and the user has VRCs', () {
+      // Each VRC is issued to this phone's DID for one of the identity's
+      // connections, never to the identity's own DID.
       List<Vrc> makeVrcs(int count, {String? holderDid}) => List.generate(
         count,
         (i) => Vrc(
           id: 'vrc-$i',
           vcBlob: 'blob-$i',
           referenceId: 'channel-$i',
-          holderDid: holderDid ?? testIdentity.did,
+          holderDid: holderDid ?? 'did:key:own-$i',
           issuerDid: 'did:key:issuer-$i',
           issuedAt: DateTime(2024, 1, i + 1),
         ),
       );
 
+      Map<String, Channel> connectionsOf(Identity identity, int count) => {
+        for (var i = 0; i < count; i++)
+          'channel-$i': FakeChannels.individualChannel
+            ..otherPartyPermanentChannelDid = 'channel-$i'
+            ..permanentChannelDid = 'did:key:own-$i'
+            ..externalRef = identity.id,
+      };
+
       testWidgets('it passes score 1 when the user has exactly 1 VRC', (
         tester,
       ) async {
         final l10n = await getL10n();
-        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK(
+          channels: connectionsOf(testIdentity, 3),
+        );
 
         await setupPublishOfferTest(
           tester,
@@ -1104,7 +1117,9 @@ void main() {
         tester,
       ) async {
         final l10n = await getL10n();
-        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK(
+          channels: connectionsOf(testIdentity, 3),
+        );
 
         await setupPublishOfferTest(
           tester,
@@ -1125,7 +1140,9 @@ void main() {
         tester,
       ) async {
         final l10n = await getL10n();
-        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK(
+          channels: connectionsOf(testIdentity, 3),
+        );
 
         await setupPublishOfferTest(
           tester,
@@ -1143,7 +1160,9 @@ void main() {
 
       testWidgets('it passes the VRC score for group offers', (tester) async {
         final l10n = await getL10n();
-        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK();
+        final fakeMeetingPlaceCoreSDK = FakeMeetingPlaceSDK(
+          channels: connectionsOf(testIdentity, 3),
+        );
 
         await setupPublishOfferTest(
           tester,

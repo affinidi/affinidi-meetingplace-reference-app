@@ -736,7 +736,8 @@ class _ChooseIdentity extends HookWidget {
           maxWidth: double.infinity,
           maxHeight: 250,
           onCardChange: (index) => current.value = index,
-          cardBuilder: (context, did) => _VtaIdentityCard(did: did),
+          cardBuilder: (context, did) =>
+              _VtaIdentityCard(did: did, name: state.identityNames[did]),
         ),
         if (options.length > 1)
           Text(
@@ -760,9 +761,12 @@ class _ChooseIdentity extends HookWidget {
 /// for the gradient: a header with its title and host, its avatar, and its
 /// DID. A null [did] is the new identity the VTA would create.
 class _VtaIdentityCard extends StatelessWidget {
-  const _VtaIdentityCard({required this.did});
+  const _VtaIdentityCard({required this.did, this.name});
 
   final String? did;
+
+  /// The identity's name, as the member gave it.
+  final String? name;
 
   static const _radius = Radius.circular(25);
 
@@ -814,7 +818,7 @@ class _VtaIdentityCard extends StatelessWidget {
                         Text(
                           did == null
                               ? l10n.vtcJoinNewIdentity
-                              : l10n.vtcJoinExistingIdentity,
+                              : name ?? l10n.vtcJoinExistingIdentity,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: textTheme.titleMedium?.copyWith(

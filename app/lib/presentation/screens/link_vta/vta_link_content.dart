@@ -85,9 +85,9 @@ class VtaLinkContent extends HookConsumerWidget {
             GlassCard(
               title: l10n.linkedVtaGrantInstruction,
               copyLabel: l10n.linkedVtaCopyCommand,
-              onCopy: () => copy(state.grantCommands.join('\n')),
+              onCopy: () => copy(state.grantCommand),
               child: SelectableText(
-                state.grantCommands.join('\n'),
+                state.grantCommand,
                 key: const Key('vta_grant_commands'),
                 style: textTheme.bodySmall?.copyWith(
                   color: Colors.white,

@@ -2386,17 +2386,17 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get linkedVtaGrantInstruction =>
-      'Ask your VTA administrator to grant this DID by running:';
+      'Ask your VTA admin to grant this DID by running:';
 
   @override
   String get linkedVtaGrantWarning =>
-      'This makes Meeting Place an administrator of your VTA, able to create and use your identities (persona-holder). Only grant it to a phone you own.';
+      'This makes Meeting Place an admin of your VTA, able to create and use your identities (persona-holder). Only grant it to a phone you own.';
 
   @override
-  String get linkedVtaCopyCommand => 'Copy commands';
+  String get linkedVtaCopyCommand => 'Copy command';
 
   @override
-  String get linkedVtaWaiting => 'Waiting for your administrator…';
+  String get linkedVtaWaiting => 'Waiting for your admin…';
 
   @override
   String get linkedVtaWaitingForPersonaHolder =>
@@ -2411,6 +2411,31 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get linkedVtaCheckAgain => 'Check again';
+
+  @override
+  String get identityPersonaTitle => 'Persona on your VTA';
+
+  @override
+  String get identityPersonaHint =>
+      'Your VTA holds this identity\'s keys. Contacts never see this DID.';
+
+  @override
+  String get identityPersonaCopyDid => 'Copy persona DID';
+
+  @override
+  String get identityVtaSaveFailed =>
+      'Your VTA couldn\'t save this identity. Check it\'s reachable and try again.';
+
+  @override
+  String get identityVtaDeleteFailed =>
+      'Your VTA couldn\'t delete this identity. Check it\'s reachable and try again.';
+
+  @override
+  String get identityDeleteConfirmTitle => 'Delete this identity?';
+
+  @override
+  String get identityDeleteConfirmMessage =>
+      'Its persona is deleted from your VTA, and its DID can never be used again.';
 
   @override
   String get linkedVtaUnlinkAction => 'Remove';

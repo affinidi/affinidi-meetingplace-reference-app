@@ -9,17 +9,17 @@ part of 'vtc_join_controller.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 /// Drives joining one community, from its scanned code to the community's
-/// answer. Nothing is logged.
+/// answer. Only a failure's code is logged; never a DID, key or document.
 
 @ProviderFor(VtcJoinController)
 const vtcJoinControllerProvider = VtcJoinControllerProvider._();
 
 /// Drives joining one community, from its scanned code to the community's
-/// answer. Nothing is logged.
+/// answer. Only a failure's code is logged; never a DID, key or document.
 final class VtcJoinControllerProvider
     extends $NotifierProvider<VtcJoinController, VtcJoinState> {
   /// Drives joining one community, from its scanned code to the community's
-  /// answer. Nothing is logged.
+  /// answer. Only a failure's code is logged; never a DID, key or document.
   const VtcJoinControllerProvider._()
     : super(
         from: null,
@@ -47,10 +47,10 @@ final class VtcJoinControllerProvider
   }
 }
 
-String _$vtcJoinControllerHash() => r'a6600a9b64845f6bf0822932490dbd934151a344';
+String _$vtcJoinControllerHash() => r'7b1a1d7f76d8eed878379508bbdd232a6c3ff170';
 
 /// Drives joining one community, from its scanned code to the community's
-/// answer. Nothing is logged.
+/// answer. Only a failure's code is logged; never a DID, key or document.
 
 abstract class _$VtcJoinController extends $Notifier<VtcJoinState> {
   VtcJoinState build();

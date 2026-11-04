@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../../domain/models/contact_card/contact_card_field_definition.dart';
+import '../../../../domain/models/identity/identity.dart';
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../infrastructure/extensions/identities_extensions.dart';
 import '../../../../infrastructure/extensions/widget_ref_extensions.dart';
@@ -59,6 +61,7 @@ class IdentityFormScreen extends ConsumerWidget {
                       _IdentitySection(identityId),
                       _IdentityFormSection(identityId),
                       _IdentityFormAliasField(identityId),
+                      _PersonaSection(identityId),
                     ],
                   ),
                 ),
@@ -66,6 +69,65 @@ class IdentityFormScreen extends ConsumerWidget {
               _IdentityFormBottomContainer(identityId, mode: mode),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The persona DID an identity held by the member's VTA is, for the member
+/// to find it on their VTA.
+class _PersonaSection extends ConsumerWidget {
+  const _PersonaSection(this.identityId);
+
+  final String? identityId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final provider = identityFormScreenControllerProvider(identityId);
+    final identity = ref.watch(provider.select((state) => state.identity));
+    if (!identity.isVtaPersona) return const SizedBox.shrink();
+
+    final l10n = context.l10n;
+    return FormCard(
+      title: l10n.identityPersonaTitle,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: 8,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: SelectableText(
+                    identity.did,
+                    key: const Key('identity_persona_did'),
+                    style: context.textTheme.bodySmall,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.copy, size: 18),
+                  tooltip: l10n.identityPersonaCopyDid,
+                  visualDensity: VisualDensity.compact,
+                  onPressed: () async {
+                    await Clipboard.setData(ClipboardData(text: identity.did));
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(l10n.copiedToClipboard)),
+                    );
+                  },
+                ),
+              ],
+            ),
+            Text(
+              l10n.identityPersonaHint,
+              style: context.textTheme.bodySmall?.copyWith(
+                color: context.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
         ),
       ),
     );

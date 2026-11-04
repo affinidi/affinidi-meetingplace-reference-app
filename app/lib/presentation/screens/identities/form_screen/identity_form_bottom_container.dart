@@ -12,6 +12,9 @@ class _IdentityFormBottomContainer extends ConsumerWidget {
     final controller = ref.read(provider.notifier);
     final canSave = ref.watch(provider.select((state) => state.canSave));
     final canDelete = ref.watch(provider.select((state) => state.canDelete));
+    final isSaving = ref.watch(provider.select((state) => state.isSaving));
+    final isDeleting = ref.watch(provider.select((state) => state.isDeleting));
+    final isBusy = isSaving || isDeleting;
     final emailField = ContactCardFieldDefinitions.byKey(
       ContactCardFieldKey.email,
     );
@@ -42,16 +45,25 @@ class _IdentityFormBottomContainer extends ConsumerWidget {
         mode: mode,
       );
 
-      if (success && context.mounted) {
+      if (!context.mounted) return;
+      if (success) {
         controller.markAsCurrentIdentity();
         context.pop();
+      } else {
+        _showError(context, context.l10n.identityVtaSaveFailed);
       }
     }
 
     Future<void> handleDelete() async {
+      final isPersona = ref.read(provider).identity.isVtaPersona;
+      if (isPersona && !await _confirmDelete(context)) return;
+
       final success = await controller.deleteIdentity();
-      if (success && context.mounted) {
+      if (!context.mounted) return;
+      if (success) {
         context.pop();
+      } else {
+        _showError(context, context.l10n.identityVtaDeleteFailed);
       }
     }
 
@@ -60,17 +72,58 @@ class _IdentityFormBottomContainer extends ConsumerWidget {
       spacing: 20,
       children: [
         ElevatedLoadingButton(
-          onPressed: canDelete ? handleDelete : context.pop,
+          key: const Key('identity_form_delete'),
+          isLoading: isDeleting,
+          onPressed: isBusy
+              ? null
+              : canDelete
+              ? handleDelete
+              : context.pop,
           color: context.colorScheme.error,
           child: Text(
             canDelete ? context.l10n.generalDelete : context.l10n.generalCancel,
           ),
         ),
         ElevatedLoadingButton(
-          onPressed: canSave ? handleSave : null,
+          key: const Key('identity_form_save'),
+          isLoading: isSaving,
+          onPressed: canSave && !isBusy ? handleSave : null,
           child: Text(context.l10n.generalDone),
         ),
       ],
     );
+  }
+
+  static void _showError(BuildContext context, String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  /// Asks before deleting a persona, whose DID can never be used again.
+  static Future<bool> _confirmDelete(BuildContext context) async {
+    final l10n = context.l10n;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.identityDeleteConfirmTitle),
+        content: Text(l10n.identityDeleteConfirmMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.generalCancel),
+          ),
+          TextButton(
+            key: const Key('identity_delete_confirm'),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            style: TextButton.styleFrom(
+              foregroundColor: context.colorScheme.error,
+            ),
+            child: Text(l10n.generalDelete),
+          ),
+        ],
+      ),
+    );
+    return confirmed ?? false;
   }
 }

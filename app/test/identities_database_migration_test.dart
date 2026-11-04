@@ -124,5 +124,33 @@ void main() {
         );
       },
     );
+
+    test('v3 to v4: adds the VTA persona references, empty', () async {
+      final rawDb = sqlite3.openInMemory();
+      rawDb.execute('PRAGMA user_version = 3');
+      rawDb.execute('''
+        CREATE TABLE identities_table (
+          id TEXT NOT NULL PRIMARY KEY,
+          did TEXT NOT NULL,
+          display_name TEXT NOT NULL,
+          contact_info_json TEXT NOT NULL DEFAULT '{}',
+          profile_pic TEXT,
+          is_primary INTEGER NOT NULL DEFAULT 0
+        )
+      ''');
+      rawDb.execute('''
+        INSERT INTO identities_table (id, did, display_name, is_primary)
+        VALUES ('id-1', 'did:key:z6Mk', 'Alice', 1)
+      ''');
+
+      final db = IdentitiesDatabase.withExecutor(NativeDatabase.opened(rawDb));
+      addTearDown(db.close);
+
+      final row = (await db.select(db.identitiesTable).get()).single;
+      expect(row.did, 'did:key:z6Mk');
+      expect(row.isPrimary, isTrue);
+      expect(row.vtaContextId, isNull);
+      expect(row.vtaProfileId, isNull);
+    });
   });
 }

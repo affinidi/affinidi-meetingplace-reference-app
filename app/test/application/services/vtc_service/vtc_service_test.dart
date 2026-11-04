@@ -128,6 +128,7 @@ void main() {
   group('VtcService join', () {
     late FakeVtcNetwork network;
     late Ed25519DidKeySigner persona;
+    late VtaPersona joinAs;
 
     setUp(() async {
       network = FakeVtcNetwork();
@@ -152,6 +153,11 @@ void main() {
         ..answers[VtaTask.vaultUpsert] = {
           'entry': {'id': 'entry-1'},
         };
+      joinAs = VtaPersona(
+        did: persona.did,
+        contextId: 'mpx-ada',
+        signingKeyId: '${persona.did}#key-1',
+      );
       service = VtcService(
         sdk: network.sdk(),
         repository: SecureStorageVtcRepository(),
@@ -181,35 +187,43 @@ void main() {
       });
     }
 
-    test('joins as a new persona and keeps the cards', () async {
-      final manifest = await service.readCommunity(' $fakeVtcDid ');
+    test(
+      'joins as the chosen identity\'s persona and keeps the cards',
+      () async {
+        final manifest = await service.readCommunity(' $fakeVtcDid ');
 
-      final verdict = await service.join(manifest);
+        final verdict = await service.join(manifest, persona: joinAs);
 
-      expect(verdict, isA<JoinAdmitted>());
-      final community = await service.community(fakeVtcDid);
-      expect(community?.personaDid, persona.did);
-      expect(community?.name, 'Football club');
-      expect(community?.isMember, isTrue);
-      expect(
-        (await service.recordedMembership(fakeVtcDid))?.persona.signingKeyId,
-        '${persona.did}#key-1',
-      );
-      expect(
-        vtaTasks().where((type) => type == VtaTask.credentialsReceive),
-        hasLength(2),
-      );
-      final submit = network.joinRequests.last;
-      expect(submit['type'], JoinTask.submit);
-      expect(submit['issuer'], persona.did);
-    });
+        expect(verdict, isA<JoinAdmitted>());
+        final community = await service.community(fakeVtcDid);
+        expect(community?.personaDid, persona.did);
+        expect(community?.name, 'Football club');
+        expect(community?.isMember, isTrue);
+        expect(
+          (await service.recordedMembership(fakeVtcDid))?.persona.signingKeyId,
+          '${persona.did}#key-1',
+        );
+        expect(
+          vtaTasks().where((type) => type == VtaTask.credentialsReceive),
+          hasLength(2),
+        );
+        final submit = network.joinRequests.last;
+        expect(submit['type'], JoinTask.submit);
+        expect(submit['issuer'], persona.did);
+        expect(community?.contextId, 'mpx-ada');
+        expect(vtaTasks(), isNot(contains(VtaTask.didsCreate)));
+      },
+    );
 
     test('is a member even when the VTA keeps no card', () async {
       network.vta.refusals[VtaTask.credentialsReceive] = {
         'code': 'vault/credentials/receive:proofSetUnsupported',
       };
 
-      await service.join(await service.readCommunity(fakeVtcDid));
+      await service.join(
+        await service.readCommunity(fakeVtcDid),
+        persona: joinAs,
+      );
 
       expect((await service.community(fakeVtcDid))?.isMember, isTrue);
     });
@@ -220,7 +234,10 @@ void main() {
         'with': {'queue': 'review'},
       };
 
-      await service.join(await service.readCommunity(fakeVtcDid));
+      await service.join(
+        await service.readCommunity(fakeVtcDid),
+        persona: joinAs,
+      );
 
       final community = await service.community(fakeVtcDid);
       expect(community?.isApplying, isTrue);
@@ -230,7 +247,10 @@ void main() {
 
     test('records the membership once the application is approved', () async {
       network.joinVerdict = {'effect': 'refer'};
-      await service.join(await service.readCommunity(fakeVtcDid));
+      await service.join(
+        await service.readCommunity(fakeVtcDid),
+        persona: joinAs,
+      );
 
       expect(
         (await service.checkApplication(fakeVtcDid))?.status,
@@ -313,7 +333,10 @@ void main() {
 
     test('closes a rejected application', () async {
       network.joinVerdict = {'effect': 'refer'};
-      await service.join(await service.readCommunity(fakeVtcDid));
+      await service.join(
+        await service.readCommunity(fakeVtcDid),
+        persona: joinAs,
+      );
       network.joinStatus = 'rejected';
 
       await service.checkApplication(fakeVtcDid);
@@ -330,15 +353,13 @@ void main() {
         'with': {'reason': 'Not now'},
       };
       final manifest = await service.readCommunity(fakeVtcDid);
-      await service.join(manifest);
+      await service.join(manifest, persona: joinAs);
       network.joinVerdict = {'effect': 'allow', 'with': <String, dynamic>{}};
 
-      await service.join(manifest);
+      await service.join(manifest, persona: joinAs);
 
-      expect(
-        vtaTasks().where((type) => type == VtaTask.didsCreate),
-        hasLength(1),
-      );
+      expect(vtaTasks(), isNot(contains(VtaTask.didsCreate)));
+      expect((await service.community(fakeVtcDid))?.personaDid, persona.did);
       expect((await service.community(fakeVtcDid))?.isMember, isTrue);
     });
 

@@ -43,7 +43,7 @@ class IdentitiesDatabase extends _$IdentitiesDatabase {
   IdentitiesDatabase.withExecutor(super.executor);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -115,6 +115,13 @@ class IdentitiesDatabase extends _$IdentitiesDatabase {
             },
           ),
         );
+      }
+
+      // Before 3, the table migration above rebuilt the table with every
+      // current column, these included.
+      if (from == 3) {
+        await migrator.addColumn(identitiesTable, identitiesTable.vtaContextId);
+        await migrator.addColumn(identitiesTable, identitiesTable.vtaProfileId);
       }
     },
   );
