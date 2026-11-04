@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image/image.dart' as img;
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:mpx_flutter_reference_app/application/services/credential_service/credential_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service.dart';
@@ -17,6 +20,9 @@ import '../../../fakes/fake_vta.dart';
 import '../../../mocks/fake_app_logger.dart';
 
 const _personaDid = 'did:webvh:QmP:dids.example:ada';
+
+String _picture({required int size}) =>
+    base64Encode(img.encodeJpg(img.Image(width: size, height: size)));
 
 void main() {
   late FakeVta vta;
@@ -196,6 +202,96 @@ void main() {
             .displayName,
         'Ada Lovelace',
       );
+    });
+
+    test('sends a thumbnail of the picture to the VTA', () async {
+      final identity = newIdentity();
+      await service().addIdentity(
+        identity.copyWith(
+          card: identity.card.copyWith(profilePic: _picture(size: 1024)),
+        ),
+      );
+
+      final claims = payloadOf(VtaTask.profileCompose)['claims'] as List;
+      final thumbnail =
+          claims.cast<Map>().singleWhere(
+                (claim) => claim['type'] == 'x:photo.thumbnail',
+              )['value']
+              as String;
+      final image = img.decodeImage(base64Decode(thumbnail))!;
+      expect(image.width, 256);
+      expect(
+        thumbnail.length,
+        lessThanOrEqualTo(VtaProfile.maxThumbnailLength),
+      );
+      expect(
+        repository.identities.single.card.profilePic,
+        isNot(thumbnail),
+        reason: 'the phone keeps the full picture',
+      );
+    });
+
+    group('reading a thumbnail from the VTA', () {
+      final thumbnail = _picture(size: 64);
+
+      setUp(() {
+        vta.answers[VtaTask.localProfileGet] = {
+          'profile': {
+            'entries': [
+              {
+                'slot': 'displayName',
+                'inline': {
+                  'type': 'name.display',
+                  'valueType': 'string',
+                  'value': 'Ada L',
+                },
+              },
+              {
+                'inline': {
+                  'type': 'name.given',
+                  'valueType': 'string',
+                  'value': 'Ada',
+                },
+              },
+              {
+                'inline': {
+                  'type': 'email.personal',
+                  'valueType': 'string',
+                  'value': 'ada@example.com',
+                },
+              },
+              {
+                'slot': 'avatar',
+                'inline': {
+                  'type': 'x:photo.thumbnail',
+                  'valueType': 'string',
+                  'value': thumbnail,
+                },
+              },
+            ],
+          },
+        };
+      });
+
+      test('fills in a picture the phone lacks', () async {
+        await service().addIdentity(newIdentity());
+
+        await service().refreshFromVta();
+
+        expect(repository.identities.single.card.profilePic, thumbnail);
+      });
+
+      test('keeps the picture the phone has', () async {
+        final picture = _picture(size: 512);
+        final identity = newIdentity();
+        await service().addIdentity(
+          identity.copyWith(card: identity.card.copyWith(profilePic: picture)),
+        );
+
+        await service().refreshFromVta();
+
+        expect(repository.identities.single.card.profilePic, picture);
+      });
     });
 
     test('keeps the copy when the VTA cannot be reached', () async {

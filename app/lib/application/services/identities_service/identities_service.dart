@@ -11,6 +11,7 @@ import '../../../domain/repositories/identities_repository.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/identities_repository_provider.dart';
+import '../../../presentation/widgets/images/compressed_image.dart';
 import '../credential_service/credential_service.dart';
 import '../vtc_service/vtc_service.dart';
 import 'identities_service_state.dart';
@@ -234,25 +235,41 @@ class IdentitiesService extends _$IdentitiesService {
       await ref.read(identitiesRepositoryProvider.future);
 }
 
+/// Longest side, in pixels, of the picture thumbnail kept on the VTA.
+const _vtaThumbnailSize = 256;
+
 extension on ContactCard {
   /// The card's details as the VTA profile an identity's persona wears. The
-  /// picture and colour stay on the phone.
+  /// picture goes as a thumbnail; the colour stays on the phone.
   VtaProfile toVtaProfile() => VtaProfile(
     displayName: displayName,
     firstName: firstName,
     lastName: lastName,
     email: email,
     mobile: mobile,
+    thumbnail: switch (profilePic) {
+      final picture? when picture.trim().isNotEmpty => thumbnailFromBase64(
+        picture,
+        imageSize: _vtaThumbnailSize,
+        maxLength: VtaProfile.maxThumbnailLength,
+      ),
+      _ => null,
+    },
   );
 
-  /// The card showing [profile]'s details. The picture and colour stay as
-  /// they are.
+  /// The card showing [profile]'s details. The colour stays as it is, and so
+  /// does a picture the phone has: the VTA holds only a thumbnail of it. The
+  /// thumbnail fills in a picture the phone lacks, as after a restore.
   ContactCard withVtaProfile(VtaProfile profile) => copyWith(
     displayName: profile.displayName,
     firstName: profile.firstName,
     lastName: profile.lastName,
     email: profile.email,
     mobile: profile.mobile,
+    profilePic: switch (profilePic) {
+      final picture? when picture.trim().isNotEmpty => picture,
+      _ => profile.thumbnail ?? profilePic,
+    },
   );
 }
 
