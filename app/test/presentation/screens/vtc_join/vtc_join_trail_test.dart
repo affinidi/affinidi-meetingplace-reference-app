@@ -47,12 +47,18 @@ void main() {
     testWidgets('draws each step, the card still to come', (tester) async {
       await pumpTrail(tester, receipt: receipt);
 
-      expect(find.text('Sent from this phone'), findsOneWidget);
       expect(find.text('Signed by your VTA'), findsOneWidget);
-      expect(find.textContaining('eddsa-jcs-2022 · '), findsOneWidget);
+      expect(
+        find.textContaining(
+          'As your identity in Football club · eddsa-jcs-2022 · ',
+        ),
+        findsOneWidget,
+      );
       expect(find.text('Answered by Football club'), findsOneWidget);
       expect(
-        find.text('Its answer is signed, and the signature checked out'),
+        find.text(
+          "Sent from this phone; the community's signed answer checked out",
+        ),
         findsOneWidget,
       );
       expect(find.text('Waiting for the administrators'), findsOneWidget);
@@ -69,6 +75,7 @@ void main() {
 
       await tester.tap(find.byKey(const Key('vtc_join_trail_vta')));
       await tester.pumpAndSettle();
+      expect(find.text('did:webvh:persona'), findsOneWidget);
       expect(find.text(JoinTask.submit), findsOneWidget);
       expect(find.text('did:webvh:persona#key-0'), findsOneWidget);
 
@@ -95,9 +102,10 @@ void main() {
     testWidgets('shows the steps without a receipt', (tester) async {
       await pumpTrail(tester);
 
+      expect(find.text('As your identity in Football club'), findsOneWidget);
       expect(
         find.text('Sent earlier; this phone keeps no receipt for it'),
-        findsNWidgets(2),
+        findsOneWidget,
       );
       // Nothing to open.
       expect(find.byIcon(Icons.expand_more), findsNothing);

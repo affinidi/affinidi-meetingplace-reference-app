@@ -2778,29 +2778,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vtcJoinTrailHeading => 'Your application';
 
   @override
-  String get vtcJoinTrailPhone => 'Sent from this phone';
+  String get vtcJoinTrailVta => 'Signed by your VTA';
 
   @override
-  String vtcJoinTrailPhoneSummary(String name) {
+  String vtcJoinTrailVtaIdentity(String name) {
     return 'As your identity in $name';
   }
 
   @override
-  String get vtcJoinTrailVta => 'Signed by your VTA';
+  String vtcJoinTrailVtaSummary(String name, String cryptosuite, String time) {
+    return 'As your identity in $name · $cryptosuite · $time';
+  }
 
   @override
-  String vtcJoinTrailVtaSummary(String cryptosuite, String time) {
-    return '$cryptosuite · $time';
-  }
+  String get vtcJoinTrailCommunitySummary =>
+      'Sent from this phone; the community\'s signed answer checked out';
 
   @override
   String vtcJoinTrailCommunity(String name) {
     return 'Answered by $name';
   }
-
-  @override
-  String get vtcJoinTrailCommunitySummary =>
-      'Its answer is signed, and the signature checked out';
 
   @override
   String get vtcJoinTrailNoReceipt =>

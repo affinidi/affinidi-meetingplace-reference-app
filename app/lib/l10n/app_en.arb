@@ -2598,27 +2598,26 @@
 	"@vtcJoinTrailHeading": {
 		"description": "Heading of the card that shows the path an open application took"
 	},
-	"vtcJoinTrailPhone": "Sent from this phone",
-	"@vtcJoinTrailPhone": {
-		"description": "Trail step: the member applied from this phone"
+	"vtcJoinTrailVta": "Signed by your VTA",
+	"@vtcJoinTrailVta": {
+		"description": "Trail step: the member's VTA signed the application"
 	},
-	"vtcJoinTrailPhoneSummary": "As your identity in {name}",
-	"@vtcJoinTrailPhoneSummary": {
-		"description": "Trail step summary: the identity the member applied as",
+	"vtcJoinTrailVtaIdentity": "As your identity in {name}",
+	"@vtcJoinTrailVtaIdentity": {
+		"description": "Trail step summary: the identity the VTA signed the application as",
 		"placeholders": {
 			"name": {
 				"type": "String"
 			}
 		}
 	},
-	"vtcJoinTrailVta": "Signed by your VTA",
-	"@vtcJoinTrailVta": {
-		"description": "Trail step: the member's VTA signed the application"
-	},
-	"vtcJoinTrailVtaSummary": "{cryptosuite} · {time}",
+	"vtcJoinTrailVtaSummary": "As your identity in {name} · {cryptosuite} · {time}",
 	"@vtcJoinTrailVtaSummary": {
-		"description": "Trail step summary: how and when the VTA signed",
+		"description": "Trail step summary: as which identity, how and when the VTA signed",
 		"placeholders": {
+			"name": {
+				"type": "String"
+			},
 			"cryptosuite": {
 				"type": "String"
 			},
@@ -2626,6 +2625,10 @@
 				"type": "String"
 			}
 		}
+	},
+	"vtcJoinTrailCommunitySummary": "Sent from this phone; the community's signed answer checked out",
+	"@vtcJoinTrailCommunitySummary": {
+		"description": "Trail step summary: the phone sent the signed application and verified the community's answer"
 	},
 	"vtcJoinTrailCommunity": "Answered by {name}",
 	"@vtcJoinTrailCommunity": {
@@ -2635,10 +2638,6 @@
 				"type": "String"
 			}
 		}
-	},
-	"vtcJoinTrailCommunitySummary": "Its answer is signed, and the signature checked out",
-	"@vtcJoinTrailCommunitySummary": {
-		"description": "Trail step summary: the community's answer was verified"
 	},
 	"vtcJoinTrailNoReceipt": "Sent earlier; this phone keeps no receipt for it",
 	"@vtcJoinTrailNoReceipt": {

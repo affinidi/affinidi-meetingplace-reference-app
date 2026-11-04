@@ -4168,41 +4168,35 @@ abstract class AppLocalizations {
   /// **'Your application'**
   String get vtcJoinTrailHeading;
 
-  /// Trail step: the member applied from this phone
-  ///
-  /// In en, this message translates to:
-  /// **'Sent from this phone'**
-  String get vtcJoinTrailPhone;
-
-  /// Trail step summary: the identity the member applied as
-  ///
-  /// In en, this message translates to:
-  /// **'As your identity in {name}'**
-  String vtcJoinTrailPhoneSummary(String name);
-
   /// Trail step: the member's VTA signed the application
   ///
   /// In en, this message translates to:
   /// **'Signed by your VTA'**
   String get vtcJoinTrailVta;
 
-  /// Trail step summary: how and when the VTA signed
+  /// Trail step summary: the identity the VTA signed the application as
   ///
   /// In en, this message translates to:
-  /// **'{cryptosuite} · {time}'**
-  String vtcJoinTrailVtaSummary(String cryptosuite, String time);
+  /// **'As your identity in {name}'**
+  String vtcJoinTrailVtaIdentity(String name);
+
+  /// Trail step summary: as which identity, how and when the VTA signed
+  ///
+  /// In en, this message translates to:
+  /// **'As your identity in {name} · {cryptosuite} · {time}'**
+  String vtcJoinTrailVtaSummary(String name, String cryptosuite, String time);
+
+  /// Trail step summary: the phone sent the signed application and verified the community's answer
+  ///
+  /// In en, this message translates to:
+  /// **'Sent from this phone; the community\'s signed answer checked out'**
+  String get vtcJoinTrailCommunitySummary;
 
   /// Trail step: the named community answered the application
   ///
   /// In en, this message translates to:
   /// **'Answered by {name}'**
   String vtcJoinTrailCommunity(String name);
-
-  /// Trail step summary: the community's answer was verified
-  ///
-  /// In en, this message translates to:
-  /// **'Its answer is signed, and the signature checked out'**
-  String get vtcJoinTrailCommunitySummary;
 
   /// Trail step summary when the application was sent before receipts were kept
   ///

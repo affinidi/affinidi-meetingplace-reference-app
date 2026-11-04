@@ -6,10 +6,11 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 
-/// Where an open application stands, drawn as the path it took: sent from
-/// this phone, signed by the member's VTA, answered by the community, now
-/// with its administrators, and the membership card still to come. Each
-/// step opens to the proof behind it, as [receipt] holds it.
+/// Where an open application stands, drawn as the path it took: signed by
+/// the member's VTA as their identity in the community, sent from this
+/// phone and answered by the community, now with its administrators, and
+/// the membership card still to come. Each step opens to the proof behind
+/// it, as [receipt] holds it.
 class VtcJoinTrail extends StatelessWidget {
   const VtcJoinTrail({
     super.key,
@@ -47,28 +48,22 @@ class VtcJoinTrail extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _Step(
-          key: const Key('vtc_join_trail_phone'),
-          icon: Icons.smartphone,
-          stage: _Stage.done,
-          title: l10n.vtcJoinTrailPhone,
-          summary: l10n.vtcJoinTrailPhoneSummary(communityName),
-          details: [
-            if (receipt != null)
-              _Detail(l10n.vtcJoinTrailIdentity, receipt.signer, isDid: true),
-          ],
-        ),
-        _Step(
           key: const Key('vtc_join_trail_vta'),
           icon: Icons.draw_outlined,
           stage: _Stage.done,
           title: l10n.vtcJoinTrailVta,
           summary: switch (receipt) {
             TrustTaskReceipt(:final cryptosuite?, :final signedAt?) =>
-              l10n.vtcJoinTrailVtaSummary(cryptosuite, time(signedAt)),
-            _ => l10n.vtcJoinTrailNoReceipt,
+              l10n.vtcJoinTrailVtaSummary(
+                communityName,
+                cryptosuite,
+                time(signedAt),
+              ),
+            _ => l10n.vtcJoinTrailVtaIdentity(communityName),
           },
           details: [
             if (receipt != null) ...[
+              _Detail(l10n.vtcJoinTrailIdentity, receipt.signer, isDid: true),
               _Detail(l10n.vtcJoinTrailTask, receipt.type),
               if (receipt.verificationMethod case final key?)
                 _Detail(l10n.vtcJoinTrailKey, key, isDid: true),
