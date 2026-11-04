@@ -138,8 +138,8 @@ class _ConfirmMembership extends StatelessWidget {
   }
 }
 
-/// The identity that signs in, as the card joining shows it, named as the
-/// member named it on this phone.
+/// The identity that signs in, as the card joining shows it, with the
+/// details of its profile.
 class _PersonaCard extends ConsumerWidget {
   const _PersonaCard(this.did);
 
@@ -147,19 +147,18 @@ class _PersonaCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final name = ref.watch(
+    final card = ref.watch(
       identitiesServiceProvider.select(
         (state) => state.identities
             .where((identity) => identity.did == did)
             .firstOrNull
-            ?.card
-            .displayName,
+            ?.card,
       ),
     );
     return VtaIdentityCard(
       key: const Key('vtc_sign_in_persona'),
       did: did,
-      name: name,
+      card: card,
     );
   }
 }

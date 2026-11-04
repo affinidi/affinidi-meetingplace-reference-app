@@ -290,6 +290,10 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text('2 of 2 · swipe to see the others'), findsOneWidget);
         expect(find.text('Ada'), findsOneWidget);
+        // The details its profile holds.
+        expect(find.text('John'), findsOneWidget);
+        expect(find.text('john.doe@example.com'), findsOneWidget);
+        expect(find.text('+1234567890'), findsOneWidget);
 
         await tapVisible(
           tester,

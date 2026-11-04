@@ -708,7 +708,7 @@ class _ChooseIdentity extends HookWidget {
           cardBuilder: (context, did) => VtaIdentityCard(
             key: did == null ? const Key('vtc_join_new_identity') : null,
             did: did,
-            name: state.identityNames[did],
+            card: state.identityCards[did],
           ),
         ),
         if (options.length > 1)

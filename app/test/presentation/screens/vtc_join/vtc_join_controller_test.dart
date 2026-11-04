@@ -177,7 +177,7 @@ void main() {
       await controller().join();
       expect(state().step, VtcJoinStep.chooseIdentity);
       expect(state().identityChoices, [persona.did]);
-      expect(state().identityNames, {persona.did: 'Ada'});
+      expect(state().identityCards[persona.did]?.displayName, 'Ada');
 
       await controller().useIdentity(persona.did);
 

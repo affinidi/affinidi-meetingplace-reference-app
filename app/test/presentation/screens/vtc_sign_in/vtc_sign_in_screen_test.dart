@@ -110,13 +110,21 @@ void main() {
         findsOneWidget,
       );
       expect(find.text('Signing in as'), findsOneWidget);
-      expect(
-        find.descendant(
-          of: find.byType(VtaIdentityCard),
-          matching: find.text('John Doe'),
-        ),
-        findsOneWidget,
-      );
+      for (final detail in [
+        'John Doe',
+        'John',
+        'john.doe@example.com',
+        '+1234567890',
+      ]) {
+        expect(
+          find.descendant(
+            of: find.byType(VtaIdentityCard),
+            matching: find.text(detail),
+          ),
+          findsOneWidget,
+          reason: detail,
+        );
+      }
       expect(find.byType(OnboardingLine), findsNWidgets(3));
 
       await tapVisible(tester, find.text('Approve'));
