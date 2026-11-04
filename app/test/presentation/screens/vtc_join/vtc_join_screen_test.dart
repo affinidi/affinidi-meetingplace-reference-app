@@ -282,10 +282,17 @@ void main() {
 
       testWidgets('joins as the identity swiped to', (tester) async {
         await reachIdentities(tester);
+        await tester.ensureVisible(
+          find.byKey(const Key('vtc_join_identities')),
+        );
+        await tester.pumpAndSettle();
 
-        await tester.drag(
+        // The deck no longer fits the test screen, so the screen scrolls;
+        // a drag spread over time swipes the deck rather than the page.
+        await tester.timedDrag(
           find.byKey(const Key('vtc_join_identities')),
           const Offset(-500, 0),
+          const Duration(milliseconds: 300),
         );
         await tester.pumpAndSettle();
         expect(find.text('2 of 2 · swipe to see the others'), findsOneWidget);

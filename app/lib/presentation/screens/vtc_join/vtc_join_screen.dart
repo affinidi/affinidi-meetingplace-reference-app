@@ -703,8 +703,9 @@ class _ChooseIdentity extends HookWidget {
           key: const Key('vtc_join_identities'),
           items: options,
           maxWidth: double.infinity,
-          // Room for the picture over the header and the profile's details.
-          maxHeight: 320,
+          // Room for the picture over the card's edge, the profile's details
+          // and the full DID.
+          maxHeight: 380,
           onCardChange: (index) => current.value = index,
           cardBuilder: (context, did) => VtaIdentityCard(
             key: did == null ? const Key('vtc_join_new_identity') : null,

@@ -8,10 +8,9 @@ import '../../infrastructure/providers/cache_manager_provider.dart';
 import 'onboarding_style/onboarding_style.dart';
 
 /// A VTA identity as a card in the shape of an MPX identity card, frosted
-/// for the gradient: a header with its name and host, its picture centred
-/// over the header's edge, the details its profile holds, and its DID as
-/// metadata at the foot. A null [did] is the new identity the VTA would
-/// create.
+/// glass over the gradient: its picture centred over the card's upper edge,
+/// its name, the details its profile holds, and its full DID as metadata at
+/// the foot. A null [did] is the new identity the VTA would create.
 class VtaIdentityCard extends ConsumerWidget {
   const VtaIdentityCard({super.key, required this.did, this.card});
 
@@ -23,14 +22,9 @@ class VtaIdentityCard extends ConsumerWidget {
 
   static const _radius = Radius.circular(25);
 
-  /// The picture straddles the header's lower edge by half its height.
+  /// The picture straddles the card's upper edge by half its height.
   static const _avatarRadius = 40.0;
   static const _avatarRing = 3.0;
-
-  /// Lines the DID may take, fewer when the profile's details share the
-  /// card with it.
-  static const _didMaxLines = 3;
-  static const _didMaxLinesWithDetails = 2;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -52,143 +46,88 @@ class VtaIdentityCard extends ConsumerWidget {
         ? card.image(cacheManager: ref.read(cacheManagerProvider))
         : null;
 
-    return Container(
-      margin: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Color.alphaBlend(
-          Colors.white.withAlpha(30),
-          context.colorScheme.primary,
-        ),
-        borderRadius: const BorderRadius.all(_radius),
-        border: Border.all(color: Colors.white.withAlpha(90)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(40),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      // Sized to its content, or filling a slot such as a card in a deck.
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+    // The upper half of the picture hangs above the card, inside the margin.
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, _avatarRadius + 8, 8, 8),
+      child: Stack(
+        // The card takes the slot's full width, not its text's.
+        fit: StackFit.passthrough,
+        clipBehavior: Clip.none,
         children: [
-          // The picture hangs below the header, so the header's own height
-          // decides where it sits and no height is fixed.
-          Stack(
-            // The header takes the card's full width, not its text's.
-            fit: StackFit.passthrough,
-            clipBehavior: Clip.none,
-            children: [
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  color: Colors.white.withAlpha(40),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: _radius,
-                    topRight: _radius,
-                  ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    16,
-                    14,
-                    16,
-                    _avatarRadius + 6,
-                  ),
-                  child: Column(
-                    spacing: 4,
-                    children: [
-                      Text(
-                        did == null
-                            ? l10n.vtcJoinNewIdentity
-                            : displayName.isNotEmpty
-                            ? displayName
-                            : l10n.vtcJoinExistingIdentity,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                        style: textTheme.titleMedium?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        did == null ? l10n.vtcJoinNewIdentityHost : _host(did),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                        style: textTheme.labelMedium?.copyWith(
-                          color: Colors.white70,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: -_avatarRadius,
-                child: Center(
-                  child: _Avatar(
-                    picture: picture,
-                    icon: did == null ? Icons.person_add : Icons.person,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          Flexible(
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: Colors.white.withAlpha(35),
+              borderRadius: const BorderRadius.all(_radius),
+              border: Border.all(color: Colors.white.withAlpha(90)),
+            ),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(
                 16,
-                _avatarRadius + 12,
+                _avatarRadius + 10,
                 16,
                 14,
               ),
-              child: did == null
-                  ? Text(
+              // Sized to its content, or filling a slot such as a card in a
+              // deck.
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: 6,
+                children: [
+                  Text(
+                    did == null
+                        ? l10n.vtcJoinNewIdentity
+                        : displayName.isNotEmpty
+                        ? displayName
+                        : l10n.vtcJoinExistingIdentity,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: textTheme.titleMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  if (did == null) ...[
+                    Text(
+                      l10n.vtcJoinNewIdentityHost,
+                      textAlign: TextAlign.center,
+                      style: textTheme.labelMedium?.copyWith(
+                        color: Colors.white70,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
                       l10n.vtcJoinNewIdentityNote,
                       textAlign: TextAlign.center,
                       style: onboardingNote(context),
-                    )
-                  : Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      spacing: 6,
-                      children: [
-                        for (final (icon, value) in details)
-                          _Detail(icon: icon, value: value),
-                        if (details.isNotEmpty)
-                          Divider(
-                            height: 12,
-                            color: Colors.white.withAlpha(50),
-                          ),
-                        Flexible(
-                          child: _DidMetadata(
-                            did: did,
-                            maxLines: details.isEmpty
-                                ? _didMaxLines
-                                : _didMaxLinesWithDetails,
-                          ),
-                        ),
-                      ],
                     ),
+                  ] else ...[
+                    const SizedBox(height: 4),
+                    for (final (icon, value) in details)
+                      _Detail(icon: icon, value: value),
+                    if (details.isNotEmpty)
+                      Divider(height: 12, color: Colors.white.withAlpha(50)),
+                    _DidMetadata(did: did),
+                  ],
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            top: -_avatarRadius,
+            child: Center(
+              child: _Avatar(
+                picture: picture,
+                icon: did == null ? Icons.person_add : Icons.person,
+              ),
             ),
           ),
         ],
       ),
     );
-  }
-
-  /// Where a `did:webvh` is published, e.g. `vta.example`; else the method.
-  static String _host(String did) {
-    final parts = did.split(':');
-    if (parts.length > 3 && parts[1] == 'webvh') {
-      return Uri.decodeComponent(parts.sublist(3).join('/'));
-    }
-    return parts.length > 1 ? 'did:${parts[1]}' : did;
   }
 }
 
@@ -258,13 +197,12 @@ class _Detail extends StatelessWidget {
   }
 }
 
-/// The identity's DID, set small and muted as metadata rather than as a
-/// detail of the profile.
+/// The identity's DID in full, set small and muted as metadata rather than
+/// as a detail of the profile.
 class _DidMetadata extends StatelessWidget {
-  const _DidMetadata({required this.did, required this.maxLines});
+  const _DidMetadata({required this.did});
 
   final String did;
-  final int maxLines;
 
   @override
   Widget build(BuildContext context) {
@@ -279,8 +217,6 @@ class _DidMetadata extends StatelessWidget {
         Expanded(
           child: Text(
             did,
-            maxLines: maxLines,
-            overflow: TextOverflow.ellipsis,
             style: context.textTheme.labelSmall?.copyWith(
               color: Colors.white60,
               fontFamily: 'monospace',

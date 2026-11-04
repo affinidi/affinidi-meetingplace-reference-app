@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image/image.dart' as img;
@@ -38,24 +39,47 @@ Future<void> _pump(WidgetTester tester, VtaIdentityCard card) =>
       ),
     );
 
+/// The card's frosted glass, the first box it decorates.
+Finder _glass() => find
+    .descendant(
+      of: find.byType(VtaIdentityCard),
+      matching: find.byType(DecoratedBox),
+    )
+    .first;
+
 void main() {
   group('VtaIdentityCard', () {
     testWidgets('shows the details its profile holds', (tester) async {
       await _pump(tester, const VtaIdentityCard(did: _did, card: _card));
 
       expect(find.text('Ada L'), findsOneWidget);
-      expect(find.text('vta.example/ada'), findsOneWidget);
+      expect(find.text('vta.example/ada'), findsNothing);
       expect(find.text('Ada Lovelace'), findsOneWidget);
       expect(find.text('ada@example.com'), findsOneWidget);
       expect(find.text('+44 20'), findsOneWidget);
       expect(find.byIcon(Icons.person), findsOneWidget);
     });
 
-    testWidgets('shows the DID as metadata at the foot', (tester) async {
-      await _pump(tester, const VtaIdentityCard(did: _did, card: _card));
+    testWidgets('shows the full DID as metadata at the foot', (tester) async {
+      const longDid =
+          'did:webvh:QmPEQVM1JPTyrvEgBcDXwjK4TeyLGSX1PxjgyeAisdWM1p:'
+          'webvh.example.com:people:ada-lovelace';
+      await _pump(
+        tester,
+        VtaIdentityCard(
+          did: longDid,
+          card: _card.copyWith(did: longDid),
+        ),
+      );
 
-      final did = tester.widget<Text>(find.text(_did));
-      final context = tester.element(find.text(_did));
+      final did = tester.widget<Text>(find.text(longDid));
+      expect(did.maxLines, isNull);
+      expect(did.overflow, isNull);
+      final paragraph = tester.renderObject<RenderParagraph>(
+        find.text(longDid),
+      );
+      expect(paragraph.didExceedMaxLines, isFalse);
+      final context = tester.element(find.text(longDid));
       expect(
         did.style?.fontSize,
         Theme.of(context).textTheme.labelSmall?.fontSize,
@@ -63,24 +87,24 @@ void main() {
       expect(did.style?.fontFamily, 'monospace');
       expect(find.byIcon(Icons.fingerprint), findsOneWidget);
       expect(
-        tester.getTopLeft(find.text(_did)).dy,
+        tester.getTopLeft(find.text(longDid)).dy,
         greaterThan(tester.getTopLeft(find.text('+44 20')).dy),
       );
     });
 
-    testWidgets('centres the picture over the header edge', (tester) async {
+    testWidgets('centres the picture over the upper edge', (tester) async {
       await _pump(tester, const VtaIdentityCard(did: _did, card: _card));
 
       final avatar = tester.getRect(find.byType(CircleAvatar));
-      final card = tester.getRect(find.byType(VtaIdentityCard));
-      final host = tester.getRect(find.text('vta.example/ada'));
-      final fullName = tester.getRect(find.text('Ada Lovelace'));
-      expect(avatar.center.dx, moreOrLessEquals(card.center.dx, epsilon: 1));
-      expect(avatar.top, greaterThan(host.bottom));
-      expect(avatar.bottom, lessThan(fullName.top));
+      final glass = tester.getRect(_glass());
+      final name = tester.getRect(find.text('Ada L'));
+      expect(avatar.center.dx, moreOrLessEquals(glass.center.dx, epsilon: 1));
+      expect(avatar.top, lessThan(glass.top));
+      expect(avatar.bottom, greaterThan(glass.top));
+      expect(avatar.bottom, lessThan(name.top));
     });
 
-    testWidgets('spans the header across a short name', (tester) async {
+    testWidgets('spans the card across a short name', (tester) async {
       await _pump(
         tester,
         VtaIdentityCard(
@@ -89,17 +113,10 @@ void main() {
         ),
       );
 
-      final header = tester.getRect(
-        find
-            .descendant(
-              of: find.byType(VtaIdentityCard),
-              matching: find.byType(DecoratedBox),
-            )
-            .at(1),
-      );
+      final glass = tester.getRect(_glass());
       final card = tester.getRect(find.byType(VtaIdentityCard));
-      // The card's margin and border sit around the header.
-      expect(header.width, moreOrLessEquals(card.width - 18, epsilon: 1));
+      // The card's margin sits around the glass.
+      expect(glass.width, moreOrLessEquals(card.width - 16, epsilon: 1));
     });
 
     testWidgets('leaves out the details the profile lacks', (tester) async {

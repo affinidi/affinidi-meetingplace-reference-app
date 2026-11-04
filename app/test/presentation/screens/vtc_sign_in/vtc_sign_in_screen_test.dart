@@ -151,9 +151,8 @@ void main() {
         ),
         findsOneWidget,
       );
-      // An identity not on this phone shows by its DID and host.
+      // An identity not on this phone shows by its DID.
       expect(find.text('did:webvh:abc:vta.example'), findsOneWidget);
-      expect(find.text('vta.example'), findsOneWidget);
     });
 
     testWidgets('shows a bad number in place', (tester) async {
