@@ -2815,4 +2815,28 @@ class AppLocalizationsEn extends AppLocalizations {
     });
     return '$_temp0';
   }
+
+  @override
+  String get vtaDetailsTitle => 'VTA details';
+
+  @override
+  String get vtaDetailsContextId => 'Context ID';
+
+  @override
+  String get vtaDetailsProfileId => 'Profile ID';
+
+  @override
+  String get vtaDetailsProfile => 'Profile';
+
+  @override
+  String get vtaDetailsCopyProfile => 'Copy profile';
+
+  @override
+  String get vtaDetailsProfileFailed =>
+      'Couldn\'t read this profile from your VTA.';
+
+  @override
+  String vtaDetailsValueShortened(String start, int length) {
+    return '$start… ($length characters)';
+  }
 }

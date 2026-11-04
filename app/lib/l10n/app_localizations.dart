@@ -4191,6 +4191,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{reason, select, invalidCode{This isn\'t a community\'s code.} profileMissing{Your VTA has no profile for this identity, so it can\'t share the details the community asks for. Set up your profile on your VTA, then try again.} detailsMissing{Your VTA doesn\'t hold a detail the community requires, so nothing was sent.} vtaMissing{Link your VTA in Settings before joining a community.} unreachable{The community can\'t be reached from your phone.} noDidHosting{Your VTA has no DID hosting server, so it can\'t create an identity the community can find.} notAccepting{This community isn\'t accepting applications.} badAnswer{The community\'s answer couldn\'t be checked, so nothing was recorded.} lastAdministrator{You\'re this community\'s last administrator. Make another member an administrator before you leave.} other{The community or your VTA refused the application.}}'**
   String vtcJoinFailure(String reason);
+
+  /// No description provided for @vtaDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'VTA details'**
+  String get vtaDetailsTitle;
+
+  /// No description provided for @vtaDetailsContextId.
+  ///
+  /// In en, this message translates to:
+  /// **'Context ID'**
+  String get vtaDetailsContextId;
+
+  /// No description provided for @vtaDetailsProfileId.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile ID'**
+  String get vtaDetailsProfileId;
+
+  /// No description provided for @vtaDetailsProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get vtaDetailsProfile;
+
+  /// No description provided for @vtaDetailsCopyProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy profile'**
+  String get vtaDetailsCopyProfile;
+
+  /// No description provided for @vtaDetailsProfileFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t read this profile from your VTA.'**
+  String get vtaDetailsProfileFailed;
+
+  /// A long value in the profile JSON, cut short for display. The copied profile keeps it whole.
+  ///
+  /// In en, this message translates to:
+  /// **'{start}… ({length} characters)'**
+  String vtaDetailsValueShortened(String start, int length);
 }
 
 class _AppLocalizationsDelegate

@@ -2630,5 +2630,23 @@
 				"type": "String"
 			}
 		}
+	},
+	"vtaDetailsTitle": "VTA details",
+	"vtaDetailsContextId": "Context ID",
+	"vtaDetailsProfileId": "Profile ID",
+	"vtaDetailsProfile": "Profile",
+	"vtaDetailsCopyProfile": "Copy profile",
+	"vtaDetailsProfileFailed": "Couldn't read this profile from your VTA.",
+	"vtaDetailsValueShortened": "{start}… ({length} characters)",
+	"@vtaDetailsValueShortened": {
+		"description": "A long value in the profile JSON, cut short for display. The copied profile keeps it whole.",
+		"placeholders": {
+			"start": {
+				"type": "String"
+			},
+			"length": {
+				"type": "int"
+			}
+		}
 	}
 }
