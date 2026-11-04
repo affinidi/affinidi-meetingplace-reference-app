@@ -693,10 +693,18 @@ void main() {
         (_, next) => steps.add(next.step),
       );
 
+      final checking = <bool>[];
+      container.listen(
+        vtcJoinControllerProvider.select((s) => s.checking),
+        (_, next) => checking.add(next),
+      );
+
       await controller().checkAgain();
 
       expect(steps, isNot(contains(VtcJoinStep.working)));
       expect(state().step, VtcJoinStep.pending);
+      // Marked as under way while it runs, for the screen to show.
+      expect(checking, [true, false]);
     });
 
     test('keeps waiting when a check fails', () async {

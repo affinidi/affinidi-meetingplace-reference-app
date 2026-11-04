@@ -22,6 +22,7 @@ class VtcJoinTrail extends StatelessWidget {
     this.receipt,
     this.requestId,
     this.deferred = false,
+    this.checking = false,
     this.lastCheckedAt,
     this.lastCheck,
   });
@@ -41,6 +42,10 @@ class VtcJoinTrail extends StatelessWidget {
 
   /// Whether the administrators put the application off.
   final bool deferred;
+
+  /// Whether this phone is asking the community right now; the review
+  /// step's marker turns while it does.
+  final bool checking;
 
   /// When this phone last asked the community, if it has since applying.
   final DateTime? lastCheckedAt;
@@ -164,6 +169,7 @@ class VtcJoinTrail extends StatelessWidget {
           key: const Key('vtc_join_trail_review'),
           icon: deferred ? Icons.schedule : Icons.hourglass_top,
           stage: _Stage.current,
+          busy: checking,
           title: deferred ? l10n.vtcJoinTrailDeferred : l10n.vtcJoinTrailReview,
           summary: switch (lastCheckedAt) {
             final at? => l10n.vtcJoinTrailLastChecked(
@@ -247,6 +253,7 @@ class _Step extends HookWidget {
     this.document,
     this.documentTitle = '',
     this.documentKey,
+    this.busy = false,
     this.isLast = false,
   });
 
@@ -260,6 +267,9 @@ class _Step extends HookWidget {
   final Map<String, dynamic>? document;
   final String documentTitle;
   final Key? documentKey;
+
+  /// Whether the step is being worked on right now, which its marker shows.
+  final bool busy;
   final bool isLast;
 
   static const _markerSize = 32.0;
@@ -286,7 +296,12 @@ class _Step extends HookWidget {
           children: [
             Column(
               children: [
-                _Marker(icon: icon, stage: stage, size: _markerSize),
+                _Marker(
+                  icon: icon,
+                  stage: stage,
+                  size: _markerSize,
+                  busy: busy,
+                ),
                 if (!isLast)
                   Expanded(
                     child: Container(
@@ -413,16 +428,40 @@ class _DetailLine extends StatelessWidget {
 }
 
 /// A step's marker: filled when done, ringed when current, faint when
-/// still to come.
-class _Marker extends StatelessWidget {
-  const _Marker({required this.icon, required this.stage, required this.size});
+/// still to come. While [busy], its icon turns, easing round once a cycle,
+/// and comes to rest upright.
+class _Marker extends HookWidget {
+  const _Marker({
+    required this.icon,
+    required this.stage,
+    required this.size,
+    this.busy = false,
+  });
 
   final IconData icon;
   final _Stage stage;
   final double size;
+  final bool busy;
+
+  static const _turn = Duration(milliseconds: 1200);
 
   @override
   Widget build(BuildContext context) {
+    final turning = useAnimationController(duration: _turn);
+    useEffect(() {
+      if (busy) {
+        turning.repeat();
+      } else {
+        // Finish the turn under way, so the icon comes to rest upright.
+        if (turning.isAnimating) turning.forward();
+      }
+      return null;
+    }, [busy]);
+    final turns = useMemoized(
+      () => turning.drive(CurveTween(curve: Curves.easeInOutCubic)),
+      [turning],
+    );
+
     final done = stage == _Stage.done;
     return Container(
       width: size,
@@ -435,14 +474,18 @@ class _Marker extends StatelessWidget {
           width: 2,
         ),
       ),
-      child: Icon(
-        icon,
-        size: size / 2,
-        color: done
-            ? context.colorScheme.primary
-            : stage == _Stage.next
-            ? Colors.white54
-            : Colors.white,
+      child: RotationTransition(
+        key: busy ? const Key('vtc_join_trail_marker_busy') : null,
+        turns: turns,
+        child: Icon(
+          icon,
+          size: size / 2,
+          color: done
+              ? context.colorScheme.primary
+              : stage == _Stage.next
+              ? Colors.white54
+              : Colors.white,
+        ),
       ),
     );
   }

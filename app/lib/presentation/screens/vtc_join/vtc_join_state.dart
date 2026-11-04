@@ -275,6 +275,10 @@ abstract class VtcJoinState with _$VtcJoinState {
     /// Whether the community's administrators put the open application off.
     @Default(false) bool deferred,
 
+    /// Whether this phone is asking the community about the open
+    /// application right now.
+    @Default(false) bool checking,
+
     /// When this phone last asked the community about the open application.
     DateTime? lastCheckedAt,
 

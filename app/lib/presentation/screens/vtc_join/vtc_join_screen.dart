@@ -1162,6 +1162,7 @@ class _Pending extends StatelessWidget {
             receipt: state.submitReceipt,
             requestId: state.requestId,
             deferred: state.deferred,
+            checking: state.checking,
             lastCheckedAt: state.lastCheckedAt,
             lastCheck: state.lastCheckExchange,
             autoCheckInterval: VtcJoinController.pendingCheckInterval,

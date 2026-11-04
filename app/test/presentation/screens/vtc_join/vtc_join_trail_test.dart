@@ -81,6 +81,7 @@ void main() {
     TrustTaskReceipt? receipt,
     String? requestId,
     bool deferred = false,
+    bool checking = false,
     DateTime? lastCheckedAt,
     TrustTaskExchange? lastCheck,
   }) {
@@ -97,6 +98,7 @@ void main() {
               receipt: receipt,
               requestId: requestId,
               deferred: deferred,
+              checking: checking,
               lastCheckedAt: lastCheckedAt,
               lastCheck: lastCheck,
               autoCheckInterval: const Duration(seconds: 30),
@@ -267,6 +269,31 @@ void main() {
       expect(find.text(JoinTask.submit), findsOneWidget);
       // No documents to show.
       expect(find.byIcon(Icons.receipt_long_outlined), findsNothing);
+    });
+
+    testWidgets('turns the review marker while it checks', (tester) async {
+      await pumpTrail(tester, submit: submit, checking: true);
+      final busy = find.byKey(const Key('vtc_join_trail_marker_busy'));
+      expect(busy, findsOneWidget);
+      expect(
+        find.descendant(of: busy, matching: find.byIcon(Icons.hourglass_top)),
+        findsOneWidget,
+      );
+      final turns = tester.widget<RotationTransition>(busy).turns;
+      await tester.pump(const Duration(milliseconds: 600));
+      expect(turns.value, greaterThan(0));
+
+      // Once the check is done, it comes to rest upright.
+      await pumpTrail(tester, submit: submit);
+      await tester.pumpAndSettle();
+      expect(busy, findsNothing);
+      final rest = tester.widget<RotationTransition>(
+        find.ancestor(
+          of: find.byIcon(Icons.hourglass_top),
+          matching: find.byType(RotationTransition),
+        ),
+      );
+      expect(rest.turns.value % 1, 0);
     });
 
     testWidgets('says when the administrators put it off', (tester) async {

@@ -26,10 +26,6 @@ class VtcJoinController extends _$VtcJoinController {
   List<VtaPersona> _personas = const [];
   Timer? _pendingCheck;
 
-  /// Whether a check of the open application is under way: a check can
-  /// take longer than [pendingCheckInterval], and checks do not overlap.
-  bool _checking = false;
-
   /// The identity whose details await approval, and what the VTA would
   /// disclose. Kept in memory only.
   VtaPersona? _identity;
@@ -435,10 +431,14 @@ class VtcJoinController extends _$VtcJoinController {
   /// application waiting for the next one.
   Future<void> checkAgain() async {
     final manifest = _manifest;
-    if (state.step != VtcJoinStep.pending || manifest == null || _checking) {
+    // A check can take longer than [pendingCheckInterval]; checks never
+    // overlap.
+    if (state.step != VtcJoinStep.pending ||
+        manifest == null ||
+        state.checking) {
       return;
     }
-    _checking = true;
+    state = state.copyWith(checking: true);
     try {
       final status = await _service.checkApplication(manifest.communityDid);
       // The member may have moved on while the community answered.
@@ -463,7 +463,7 @@ class VtcJoinController extends _$VtcJoinController {
     } on VtaNotLinkedException {
       _fail(VtcJoinFailure.vtaMissing);
     } finally {
-      _checking = false;
+      state = state.copyWith(checking: false);
     }
   }
 
