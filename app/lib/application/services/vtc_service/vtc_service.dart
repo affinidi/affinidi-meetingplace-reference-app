@@ -921,6 +921,45 @@ class VtcService {
     return null;
   }
 
+  /// The role card in which [communityDid] makes the member's persona there
+  /// one of its admins, as their VTA keeps it, or null when this phone
+  /// knows no such membership or the VTA holds no valid one. Of several,
+  /// e.g. after a renewal, the one valid longest.
+  ///
+  /// Throws as [membershipCard] does.
+  Future<Map<String, dynamic>?> adminRoleCard(String communityDid) async {
+    final community = await _repository.findCommunity(communityDid);
+    if (community == null || !community.isMember) return null;
+    final vta = await _grantedVta();
+    final held = await vta.findCredentials(
+      type: CommunityRoleCard.type,
+      issuerDid: communityDid,
+      subjectDid: community.personaDid,
+    );
+    Map<String, dynamic>? latest;
+    for (final record in held) {
+      final card = await vta.credential(record.id);
+      if (card == null ||
+          !CommunityRoleCard.grants(
+            card,
+            communityDid: communityDid,
+            holderDid: community.personaDid,
+            role: CommunityRoleCard.adminRole,
+          )) {
+        continue;
+      }
+      final validUntil = CommunityRoleCard.validUntil(card);
+      final latestUntil = latest == null
+          ? null
+          : CommunityRoleCard.validUntil(latest);
+      if (latestUntil == null ||
+          (validUntil != null && validUntil.isAfter(latestUntil))) {
+        latest = card;
+      }
+    }
+    return latest;
+  }
+
   /// Every membership card of the member: those a community issued that
   /// their VTA holds, then those of the memberships they left, the latest
   /// first. A card of a membership left is shown once, as left. Test
