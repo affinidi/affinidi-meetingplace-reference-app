@@ -38,41 +38,48 @@ class CredentialsScreen extends HookConsumerWidget {
         memberships.entries.isEmpty;
 
     return SafeArea(
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SectionBanner(
-              title: l10n.tabsTitle(Tabs.credentials.name),
-              subtitle: l10n.verifiableCredentialWallet,
-            ),
-            TabBar(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              isScrollable: true,
-              enableFeedback: true,
-              labelPadding: const EdgeInsets.symmetric(horizontal: 10),
-              tabAlignment: TabAlignment.start,
-              controller: tabController,
-              tabs: [
-                TabBarTab(label: l10n.all),
-                TabBarTab(label: l10n.membershipsTab),
-              ],
-            ),
-            if (tab == 0 && hasNone)
-              const _EmptyStateWidget()
-            else ...[
-              if (tab == 0 && credentials.isNotEmpty)
-                _CredentialsListWidget(credentials: credentials),
-              MembershipCredentialsList(
-                onOpen: (entry) => Navigator.of(context).push<void>(
-                  MaterialPageRoute<void>(
-                    builder: (context) =>
-                        MembershipCredentialDetailsScreen(entryKey: entry.key),
+      child: RefreshIndicator(
+        onRefresh: ref
+            .read(membershipCredentialsControllerProvider.notifier)
+            .refresh,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SectionBanner(
+                title: l10n.tabsTitle(Tabs.credentials.name),
+                subtitle: l10n.verifiableCredentialWallet,
+              ),
+              TabBar(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                isScrollable: true,
+                enableFeedback: true,
+                labelPadding: const EdgeInsets.symmetric(horizontal: 10),
+                tabAlignment: TabAlignment.start,
+                controller: tabController,
+                tabs: [
+                  TabBarTab(label: l10n.all),
+                  TabBarTab(label: l10n.membershipsTab),
+                ],
+              ),
+              if (tab == 0 && hasNone)
+                const _EmptyStateWidget()
+              else ...[
+                if (tab == 0 && credentials.isNotEmpty)
+                  _CredentialsListWidget(credentials: credentials),
+                MembershipCredentialsList(
+                  onOpen: (entry) => Navigator.of(context).push<void>(
+                    MaterialPageRoute<void>(
+                      builder: (context) => MembershipCredentialDetailsScreen(
+                        entryKey: entry.key,
+                      ),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

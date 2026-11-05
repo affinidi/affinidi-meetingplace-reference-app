@@ -589,6 +589,19 @@ void main() {
         await service.join(await service.readCommunity(fakeVtcDid));
       });
 
+      test('tells when a card is kept and when it is left', () async {
+        var changes = 0;
+        final listening = service.membershipsChanged.listen((_) => changes++);
+        addTearDown(listening.cancel);
+        await service.leave(fakeVtcDid);
+        await Future<void>.delayed(Duration.zero);
+        expect(changes, 1);
+
+        await service.join(await service.readCommunity(fakeVtcDid));
+        await Future<void>.delayed(Duration.zero);
+        expect(changes, 2);
+      });
+
       test('lists the cards communities issued, not test ones', () async {
         hold([
           card(status: FakeVtcNetwork.statusEntry(7)),

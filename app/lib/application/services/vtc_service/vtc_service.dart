@@ -69,6 +69,11 @@ class VtcService {
   final MockCredentialIssuer _mockIssuer;
   final String _platform;
   VtaClient? _client;
+  final _membershipsChanged = StreamController<void>.broadcast();
+
+  /// Fires each time the member's membership cards change: a card a
+  /// community issued is kept on their VTA, or a membership is left.
+  Stream<void> get membershipsChanged => _membershipsChanged.stream;
 
   /// The identity keys lent and inboxes open, by community, while a
   /// membership card is collected, so a check every few seconds borrows the
@@ -336,6 +341,7 @@ class VtcService {
         final member = community.withApplication(isMember: true);
         await _repository.saveCommunity(member);
         await _keepCards(vta, credentials, community.contextId);
+        _membershipsChanged.add(null);
         await _settle(vta, member, membershipCard, verdict.requestId);
       case JoinPending(:final requestId, :final exchange):
         await _repository.saveCommunity(
@@ -651,6 +657,8 @@ class VtcService {
       return;
     }
     if (report.isCollecting) {
+      // Collected from the inbox just now: a card the VTA did not hold.
+      _membershipsChanged.add(null);
       report.step(VtcDeliveryStep.confirmed, VtcDeliveryStatus.working);
     }
     final confirmed = await _settle(vta, member, card, requestId);
@@ -866,6 +874,7 @@ class VtcService {
       personaDid: community.personaDid,
     );
     await _repository.removeCommunity(communityDid);
+    _membershipsChanged.add(null);
   }
 
   /// The membership card [communityDid] issued to the member's persona

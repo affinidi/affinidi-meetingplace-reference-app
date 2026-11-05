@@ -19,6 +19,10 @@ class MembershipCredentialsController
 
   @override
   MembershipCredentialsState build() {
+    // The Credentials tab stays alive in the background: read again
+    // whenever a card is kept or a membership left.
+    final changes = _service.membershipsChanged.listen((_) => refresh());
+    ref.onDispose(changes.cancel);
     Future.microtask(refresh);
     return MembershipCredentialsState();
   }

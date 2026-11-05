@@ -327,6 +327,24 @@ void main() {
     );
   });
 
+  testWidgets('reads the cards again when pulled down', (tester) async {
+    network.vta.answers[VtaTask.credentialsQuery] = {'credentials': <Object>[]};
+    await pumpScreen(tester);
+    expect(find.text('Chess club'), findsNothing);
+
+    // The card reaches the VTA while the tab stays open.
+    network.vta.answers[VtaTask.credentialsQuery] = {
+      'credentials': [
+        {'id': 'urn:uuid:chess'},
+      ],
+    };
+    await tester.fling(find.text('All'), const Offset(0, 400), 1000);
+    await tester.pump();
+    await settle(tester);
+
+    expect(find.text('Chess club'), findsOneWidget);
+  });
+
   testWidgets('says when no VTA can be reached', (tester) async {
     network.vta.isDown = true;
 
