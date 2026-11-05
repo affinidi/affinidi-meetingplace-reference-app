@@ -851,6 +851,7 @@ class VtcService {
       VtcDeliveryStep.kept,
       VtcDeliveryStatus.done,
       isKeptAsValid: isValid,
+      card: membership.credential,
     );
     return membership.credential;
   }
@@ -1337,6 +1338,7 @@ class _DeliveryReport {
     int? waiting,
     TrustTaskDocument? issue,
     bool? isKeptAsValid,
+    Map<String, dynamic>? card,
   }) {
     _isCollecting = true;
     _delivery = _delivery.at(
@@ -1348,6 +1350,7 @@ class _DeliveryReport {
       waiting: waiting,
       issue: issue,
       isKeptAsValid: isKeptAsValid,
+      card: card,
     );
     _onDelivery?.call(_delivery);
   }

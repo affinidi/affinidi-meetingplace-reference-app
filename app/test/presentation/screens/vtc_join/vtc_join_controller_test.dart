@@ -897,15 +897,6 @@ void main() {
           'credentialSubject': {'id': mailPersona.did},
         };
 
-        /// The VTA holds the card, as it does once it kept it.
-        void vtaKeptCard() => network.vta
-          ..answers[VtaTask.credentialsQuery] = {
-            'credentials': [
-              {'id': 'card-1'},
-            ],
-          }
-          ..answers[VtaTask.credentialsGet] = {'credential': card()};
-
         int loans() => network.vta.received
             .where((request) => request['type'] == VtaTask.exportSecret)
             .length;
@@ -947,11 +938,29 @@ void main() {
           final delivery = state().cardDelivery;
           expect(delivery?.isDone, isTrue);
           expect(delivery?.issue?.issuer, fakeVtcDid);
-          // The read the joined step started found no card yet.
-          await readDone();
-          vtaKeptCard();
-          await controller().readMembershipCard();
           expect(state().membershipCard?.memberDid, mailPersona.did);
+        });
+
+        test('is shown once kept, before the community confirms it', () async {
+          await approve();
+          await network.deliver(mailPersona, card());
+          VtcJoinState? whenKept;
+          container.listen(vtcJoinControllerProvider, (_, next) {
+            final delivery = next.cardDelivery;
+            if (whenKept == null &&
+                delivery?.status(VtcDeliveryStep.kept) ==
+                    VtcDeliveryStatus.done) {
+              whenKept = next;
+            }
+          });
+
+          await controller().checkAgain();
+
+          expect(
+            whenKept?.cardDelivery?.status(VtcDeliveryStep.confirmed),
+            isNot(VtcDeliveryStatus.done),
+          );
+          expect(whenKept?.membershipCard?.memberDid, mailPersona.did);
         });
 
         test('is waited for, then collected on a later check', () async {

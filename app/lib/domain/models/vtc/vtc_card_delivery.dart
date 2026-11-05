@@ -48,7 +48,8 @@ class VtcCardDelivery {
       mediatorDid = null,
       waiting = null,
       issue = null,
-      isKeptAsValid = null;
+      isKeptAsValid = null,
+      card = null;
 
   const VtcCardDelivery._({
     required this.personaDid,
@@ -59,6 +60,7 @@ class VtcCardDelivery {
     required this.waiting,
     required this.issue,
     required this.isKeptAsValid,
+    required this.card,
   });
 
   /// The identity the card is for.
@@ -86,6 +88,9 @@ class VtcCardDelivery {
   /// expired.
   final bool? isKeptAsValid;
 
+  /// The membership card, once the VTA keeps it.
+  final Map<String, dynamic>? card;
+
   /// How far [step] got.
   VtcDeliveryStatus status(VtcDeliveryStep step) =>
       _statuses[step] ?? VtcDeliveryStatus.next;
@@ -105,6 +110,7 @@ class VtcCardDelivery {
     int? waiting,
     TrustTaskDocument? issue,
     bool? isKeptAsValid,
+    Map<String, dynamic>? card,
   }) => VtcCardDelivery._(
     personaDid: personaDid,
     statuses: {..._statuses, step: status},
@@ -114,5 +120,6 @@ class VtcCardDelivery {
     waiting: waiting ?? this.waiting,
     issue: issue ?? this.issue,
     isKeptAsValid: isKeptAsValid ?? this.isKeptAsValid,
+    card: card ?? this.card,
   );
 }

@@ -613,7 +613,16 @@ class VtcJoinController extends _$VtcJoinController {
   void _showCardDelivery(VtcCardDelivery delivery) {
     // The screen may have closed while the card was collected.
     if (!ref.mounted) return;
-    state = state.copyWith(cardDelivery: delivery);
+    state = state.copyWith(
+      cardDelivery: delivery,
+      // Shown once the VTA keeps it, before the community confirms it.
+      membershipCard:
+          state.membershipCard ??
+          switch (delivery.card) {
+            final card? => VtcMembershipCard.fromCredential(card),
+            null => null,
+          },
+    );
   }
 
   /// Reads the member's card for the joined screen from their VTA, which

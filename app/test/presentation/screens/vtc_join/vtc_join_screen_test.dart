@@ -585,25 +585,7 @@ void main() {
         );
         await settle(tester);
 
-        // The card is not on show yet: the trail is, open.
-        expect(find.byKey(const Key('vtc_membership_card')), findsNothing);
-        expect(find.text('Keys lent by your VTA'), findsOneWidget);
-        expect(
-          find.text('Membership confirmed with Football club'),
-          findsOneWidget,
-        );
-
-        // The VTA kept it; the next check reads it.
-        network.vta
-          ..answers[VtaTask.credentialsQuery] = {
-            'credentials': [
-              {'id': 'card-1'},
-            ],
-          }
-          ..answers[VtaTask.credentialsGet] = {'credential': card};
-        await tester.pump(const Duration(seconds: 5));
-        await settle(tester);
-
+        // On show as soon as the VTA kept it, with how it came folded away.
         expect(find.byKey(const Key('vtc_membership_card')), findsOneWidget);
         expect(find.text('How your card arrived'), findsOneWidget);
         expect(find.text('Keys lent by your VTA'), findsNothing);
@@ -611,6 +593,10 @@ void main() {
         await tapVisible(tester, find.byKey(const Key('vtc_delivery_toggle')));
         await tester.pumpAndSettle();
         expect(find.text('Keys lent by your VTA'), findsOneWidget);
+        expect(
+          find.text('Membership confirmed with Football club'),
+          findsOneWidget,
+        );
       });
     });
 
