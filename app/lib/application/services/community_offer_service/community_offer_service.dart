@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
+import '../settings_service/settings_service.dart';
 
 /// Thrown when a join phrase is already registered in Meeting Place.
 class CommunityPhraseTakenException implements Exception {
@@ -38,10 +39,14 @@ class CommunityPhraseException implements Exception {
 /// trust it. The offer is never accepted as a connection.
 class CommunityOfferService {
   /// Creates a [CommunityOfferService] publishing through the Meeting Place
-  /// SDK.
-  CommunityOfferService({required this._sdk});
+  /// SDK, on the mediator selected in the settings at the time.
+  CommunityOfferService({required this._sdk, required this._mediatorDid});
 
   final Future<MeetingPlaceCoreSDK> Function() _sdk;
+
+  /// The mediator selected now, as the publish offer screen takes it: the
+  /// SDK's own is the one selected when it was created.
+  final String Function() _mediatorDid;
 
   /// The contact card type of a join phrase's offer.
   static const contactCardType = 'community';
@@ -149,6 +154,7 @@ class CommunityOfferService {
         ),
         offerDescription: '',
         customMnemonic: trimmed,
+        mediatorDid: _mediatorDid(),
         externalRef: _externalRef(communityDid),
       ),
     );
@@ -176,6 +182,7 @@ class CommunityOfferService {
 final communityOfferServiceProvider = Provider<CommunityOfferService>(
   (ref) => CommunityOfferService(
     sdk: () => ref.read(meetingPlaceSdkProvider.future),
+    mediatorDid: () => ref.read(settingsServiceProvider).selectedMediatorDid,
   ),
   name: 'communityOfferServiceProvider',
 );

@@ -13,7 +13,10 @@ void main() {
 
   setUp(() {
     sdk = FakeOfferSdk();
-    service = CommunityOfferService(sdk: () async => sdk);
+    service = CommunityOfferService(
+      sdk: () async => sdk,
+      mediatorDid: () => 'did:web:mediator.example',
+    );
   });
 
   Future<ConnectionOffer> publish({String phrase = _phrase}) =>
@@ -28,6 +31,7 @@ void main() {
       expect(request.offerName, 'Club');
       expect(request.validUntil, isNull);
       expect(request.maximumUsage, isNull);
+      expect(request.mediatorDid, 'did:web:mediator.example');
       expect(request.contactCard.type, CommunityOfferService.contactCardType);
       expect(request.contactCard.contactInfo, {
         CommunityOfferService.contactInfoKey: _communityDid,

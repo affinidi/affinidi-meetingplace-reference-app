@@ -24,7 +24,10 @@ void main() {
       ProviderScope(
         overrides: [
           communityOfferServiceProvider.overrideWithValue(
-            CommunityOfferService(sdk: () async => sdk),
+            CommunityOfferService(
+              sdk: () async => sdk,
+              mediatorDid: () => 'did:web:mediator.example',
+            ),
           ),
         ],
         child: MaterialApp(
