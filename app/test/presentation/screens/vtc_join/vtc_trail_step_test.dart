@@ -70,6 +70,38 @@ void main() {
       );
     });
 
+    testWidgets('sets the names in its summary apart', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.dark,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const Scaffold(
+            body: VtcTrailStep(
+              icon: Icons.card_membership_outlined,
+              stage: VtcTrailStage.done,
+              title: 'Issued by Chess club',
+              summary: 'Your card for Ada, signed by Chess club on Nov 4',
+              highlights: ['Ada', 'Chess club'],
+              isLast: true,
+            ),
+          ),
+        ),
+      );
+
+      final summary = tester.widget<Text>(
+        find.text('Your card for Ada, signed by Chess club on Nov 4'),
+      );
+      final bold = <String>[];
+      summary.textSpan!.visitChildren((span) {
+        if (span is TextSpan && span.style?.fontWeight == FontWeight.bold) {
+          bold.add(span.text!);
+        }
+        return true;
+      });
+      expect(bold, ['Ada', 'Chess club']);
+    });
+
     testWidgets('shows its own icon otherwise', (tester) async {
       await pumpStep(tester, VtcTrailStage.current);
 

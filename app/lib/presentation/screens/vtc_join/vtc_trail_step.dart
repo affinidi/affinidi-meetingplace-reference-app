@@ -54,6 +54,7 @@ class VtcTrailStep extends HookWidget {
     this.busy = false,
     this.isLast = false,
     this.actor,
+    this.highlights = const [],
   });
 
   final IconData icon;
@@ -74,6 +75,10 @@ class VtcTrailStep extends HookWidget {
   /// Who did the step, such as the member's VTA, if the trail says: the
   /// first of its details.
   final String? actor;
+
+  /// Names in [summary], such as the member's identity and the community,
+  /// set apart from the words around them.
+  final List<String> highlights;
 
   static const _markerSize = 32.0;
 
@@ -152,7 +157,10 @@ class VtcTrailStep extends HookWidget {
                                       : null,
                                 ),
                               ),
-                              Text(summary, style: onboardingNote(context)),
+                              Text.rich(
+                                _summarySpan(),
+                                style: onboardingNote(context),
+                              ),
                             ],
                           ),
                         ),
@@ -207,6 +215,36 @@ class VtcTrailStep extends HookWidget {
         ),
       ),
     );
+  }
+}
+
+/// Splits a step's summary into its words and its [VtcTrailStep.highlights],
+/// the first and longest name found at each place.
+extension on VtcTrailStep {
+  static const _highlight = TextStyle(
+    color: Colors.white,
+    fontWeight: FontWeight.bold,
+  );
+
+  TextSpan _summarySpan() {
+    final names = highlights.where((name) => name.isNotEmpty).toList()
+      ..sort((a, b) => b.length.compareTo(a.length));
+    final spans = <TextSpan>[];
+    var at = 0;
+    while (at < summary.length) {
+      final (start, name) = names
+          .map((name) => (summary.indexOf(name, at), name))
+          .where((found) => found.$1 >= 0)
+          .fold<(int, String?)>((
+            summary.length,
+            null,
+          ), (first, found) => found.$1 < first.$1 ? found : first);
+      if (start > at) spans.add(TextSpan(text: summary.substring(at, start)));
+      if (name == null) break;
+      spans.add(TextSpan(text: name, style: _highlight));
+      at = start + name.length;
+    }
+    return TextSpan(children: spans);
   }
 }
 

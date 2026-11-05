@@ -118,6 +118,7 @@ class _MembershipTrail extends StatelessWidget {
     final status = this.status;
     final lastKnown = status?.lastKnown;
     final statusList = status?.statusList ?? lastKnown?.statusList;
+    final names = [identity, community];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -138,6 +139,7 @@ class _MembershipTrail extends StatelessWidget {
               community,
             ),
           },
+          highlights: names,
           actor: community,
           details: [
             VtcTrailDetail(
@@ -182,6 +184,7 @@ class _MembershipTrail extends StatelessWidget {
             ),
             (null, null) => l10n.membershipTrailKept,
           },
+          highlights: names,
           actor: l10n.membershipTrailYourVta,
           details: [
             if (entry.stored case final stored?) ...[
@@ -224,6 +227,7 @@ class _MembershipTrail extends StatelessWidget {
                     community,
                     _keeps(l10n, leave.answer.payload['disposition']),
                   ),
+            highlights: names,
             actor: leave == null
                 ? community
                 : l10n.membershipTrailLeftActor(community),
@@ -276,6 +280,7 @@ class _MembershipTrail extends StatelessWidget {
             date,
             validUntil: card.validUntil,
           ),
+          highlights: names,
           actor: l10n.membershipTrailThisPhone,
           details: [
             if (status?.statusListUrl case final url?)
