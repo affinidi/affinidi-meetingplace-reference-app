@@ -3654,4 +3654,99 @@ class AppLocalizationsEn extends AppLocalizations {
     });
     return '$_temp0';
   }
+
+  @override
+  String vtcJoinAlreadyMember(String name) {
+    return 'You\'re already a member of $name.';
+  }
+
+  @override
+  String get vtcGroupsOpen => 'Groups';
+
+  @override
+  String vtcGroupsTitle(String community) {
+    return '$community groups';
+  }
+
+  @override
+  String get vtcGroupsNone => 'You\'re not in any of this community\'s groups.';
+
+  @override
+  String get vtcGroupsVtaMissing => 'Link your VTA to see your groups.';
+
+  @override
+  String get vtcGroupsUnreachable =>
+      'Your groups couldn\'t be loaded. Check your connection and try again.';
+
+  @override
+  String get vtcGroupManager => 'Manager';
+
+  @override
+  String get vtcGroupChatUnknown => 'This group\'s chat couldn\'t be checked.';
+
+  @override
+  String get vtcGroupChatNone => 'This group has no chat yet.';
+
+  @override
+  String get vtcGroupChatLinked => 'This group has a chat you can join.';
+
+  @override
+  String get vtcGroupChatOwned =>
+      'You own this group\'s chat. Members you let in appear in it.';
+
+  @override
+  String get vtcGroupChatJoined =>
+      'You asked to join this group\'s chat. You\'ll find it in your chats.';
+
+  @override
+  String get vtcGroupChatCreate => 'Create chat';
+
+  @override
+  String get vtcGroupChatJoin => 'Join chat';
+
+  @override
+  String get vtcGroupChatHidesMembers =>
+      'This group hides its members, so it can\'t have a chat.';
+
+  @override
+  String get vtcGroupChatNotAManager =>
+      'Only a manager of this group can create its chat.';
+
+  @override
+  String get vtcGroupChatAlreadyLinked => 'This group already has a chat.';
+
+  @override
+  String get vtcGroupChatNotLinked =>
+      'This group\'s chat isn\'t linked yet. Ask one of its managers.';
+
+  @override
+  String get vtcGroupChatElsewhere =>
+      'This group\'s chat is on another Meeting Place.';
+
+  @override
+  String get vtcGroupChatNotTheGroups =>
+      'The linked chat isn\'t this group\'s. Ask one of its managers.';
+
+  @override
+  String get vtcGroupChatNoCredential =>
+      'Your VTA doesn\'t have this group\'s membership credential yet. Try again later.';
+
+  @override
+  String get vtcGroupChatFailed => 'That didn\'t work. Try again.';
+
+  @override
+  String get vtcGroupChatLinkTitle => 'Publish the chat\'s link';
+
+  @override
+  String get vtcGroupChatLinkBody =>
+      'Members find the chat through the group\'s DID. Ask your community\'s operator to add this service to the group\'s DID document. Until then, members can\'t find the chat.';
+
+  @override
+  String get vtcGroupChatLinkCopy => 'Copy';
+
+  @override
+  String get vtcGroupChatLinkCopied => 'Copied';
+
+  @override
+  String get vtcGroupChatLinkDone => 'Done';
 }

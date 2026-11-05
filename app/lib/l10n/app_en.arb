@@ -3612,5 +3612,123 @@
 				"type": "String"
 			}
 		}
+	},
+	"vtcJoinAlreadyMember": "You're already a member of {name}.",
+	"@vtcJoinAlreadyMember": {
+		"description": "The scanned community is one the member belongs to",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcGroupsOpen": "Groups",
+	"@vtcGroupsOpen": {
+		"description": "Button on a membership card that opens the member's groups in the community"
+	},
+	"vtcGroupsTitle": "{community} groups",
+	"@vtcGroupsTitle": {
+		"description": "Title of the member's groups in a community",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcGroupsNone": "You're not in any of this community's groups.",
+	"@vtcGroupsNone": {
+		"description": "Shown when the member belongs to no group of the community"
+	},
+	"vtcGroupsVtaMissing": "Link your VTA to see your groups.",
+	"@vtcGroupsVtaMissing": {
+		"description": "Shown when no VTA is linked, so groups cannot be read"
+	},
+	"vtcGroupsUnreachable": "Your groups couldn't be loaded. Check your connection and try again.",
+	"@vtcGroupsUnreachable": {
+		"description": "Shown when the community or the VTA cannot be reached"
+	},
+	"vtcGroupManager": "Manager",
+	"@vtcGroupManager": {
+		"description": "Chip on a group the member manages"
+	},
+	"vtcGroupChatUnknown": "This group's chat couldn't be checked.",
+	"@vtcGroupChatUnknown": {
+		"description": "A group's chat status when its link cannot be read"
+	},
+	"vtcGroupChatNone": "This group has no chat yet.",
+	"@vtcGroupChatNone": {
+		"description": "A group's chat status when no chat is linked"
+	},
+	"vtcGroupChatLinked": "This group has a chat you can join.",
+	"@vtcGroupChatLinked": {
+		"description": "A group's chat status when the community linked a chat"
+	},
+	"vtcGroupChatOwned": "You own this group's chat. Members you let in appear in it.",
+	"@vtcGroupChatOwned": {
+		"description": "A group's chat status when the member owns it"
+	},
+	"vtcGroupChatJoined": "You asked to join this group's chat. You'll find it in your chats.",
+	"@vtcGroupChatJoined": {
+		"description": "A group's chat status after the member asked to join"
+	},
+	"vtcGroupChatCreate": "Create chat",
+	"@vtcGroupChatCreate": {
+		"description": "Button for a group's manager to create its chat"
+	},
+	"vtcGroupChatJoin": "Join chat",
+	"@vtcGroupChatJoin": {
+		"description": "Button for a member to ask to join a group's chat"
+	},
+	"vtcGroupChatHidesMembers": "This group hides its members, so it can't have a chat.",
+	"@vtcGroupChatHidesMembers": {
+		"description": "Shown when a group's members are hidden from one another"
+	},
+	"vtcGroupChatNotAManager": "Only a manager of this group can create its chat.",
+	"@vtcGroupChatNotAManager": {
+		"description": "Shown when a member who does not manage the group tries to create its chat"
+	},
+	"vtcGroupChatAlreadyLinked": "This group already has a chat.",
+	"@vtcGroupChatAlreadyLinked": {
+		"description": "Shown when the community already linked a chat to the group"
+	},
+	"vtcGroupChatNotLinked": "This group's chat isn't linked yet. Ask one of its managers.",
+	"@vtcGroupChatNotLinked": {
+		"description": "Shown when the community has not linked a chat to the group"
+	},
+	"vtcGroupChatElsewhere": "This group's chat is on another Meeting Place.",
+	"@vtcGroupChatElsewhere": {
+		"description": "Shown when the linked chat is published on another control plane"
+	},
+	"vtcGroupChatNotTheGroups": "The linked chat isn't this group's. Ask one of its managers.",
+	"@vtcGroupChatNotTheGroups": {
+		"description": "Shown when the linked offer is not for the group's DID"
+	},
+	"vtcGroupChatNoCredential": "Your VTA doesn't have this group's membership credential yet. Try again later.",
+	"@vtcGroupChatNoCredential": {
+		"description": "Shown when the member's VTA keeps no credential of the group"
+	},
+	"vtcGroupChatFailed": "That didn't work. Try again.",
+	"@vtcGroupChatFailed": {
+		"description": "Shown when creating or joining a group's chat fails for another reason"
+	},
+	"vtcGroupChatLinkTitle": "Publish the chat's link",
+	"@vtcGroupChatLinkTitle": {
+		"description": "Title of the dialog showing a new chat's link"
+	},
+	"vtcGroupChatLinkBody": "Members find the chat through the group's DID. Ask your community's operator to add this service to the group's DID document. Until then, members can't find the chat.",
+	"@vtcGroupChatLinkBody": {
+		"description": "Explains how a new group chat's link is published"
+	},
+	"vtcGroupChatLinkCopy": "Copy",
+	"@vtcGroupChatLinkCopy": {
+		"description": "Button that copies a group chat's link"
+	},
+	"vtcGroupChatLinkCopied": "Copied",
+	"@vtcGroupChatLinkCopied": {
+		"description": "Shown after a group chat's link is copied"
+	},
+	"vtcGroupChatLinkDone": "Done",
+	"@vtcGroupChatLinkDone": {
+		"description": "Closes the dialog showing a group chat's link"
 	}
 }

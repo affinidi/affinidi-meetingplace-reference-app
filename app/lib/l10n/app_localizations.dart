@@ -5497,6 +5497,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{reason, select, taken{That phrase is already taken in Meeting Place. Try another.} other{The phrase couldn\'t be published or withdrawn. Try again.}}'**
   String vtcJoinPhraseFailure(String reason);
+
+  /// The scanned community is one the member belongs to
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re already a member of {name}.'**
+  String vtcJoinAlreadyMember(String name);
+
+  /// Button on a membership card that opens the member's groups in the community
+  ///
+  /// In en, this message translates to:
+  /// **'Groups'**
+  String get vtcGroupsOpen;
+
+  /// Title of the member's groups in a community
+  ///
+  /// In en, this message translates to:
+  /// **'{community} groups'**
+  String vtcGroupsTitle(String community);
+
+  /// Shown when the member belongs to no group of the community
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re not in any of this community\'s groups.'**
+  String get vtcGroupsNone;
+
+  /// Shown when no VTA is linked, so groups cannot be read
+  ///
+  /// In en, this message translates to:
+  /// **'Link your VTA to see your groups.'**
+  String get vtcGroupsVtaMissing;
+
+  /// Shown when the community or the VTA cannot be reached
+  ///
+  /// In en, this message translates to:
+  /// **'Your groups couldn\'t be loaded. Check your connection and try again.'**
+  String get vtcGroupsUnreachable;
+
+  /// Chip on a group the member manages
+  ///
+  /// In en, this message translates to:
+  /// **'Manager'**
+  String get vtcGroupManager;
+
+  /// A group's chat status when its link cannot be read
+  ///
+  /// In en, this message translates to:
+  /// **'This group\'s chat couldn\'t be checked.'**
+  String get vtcGroupChatUnknown;
+
+  /// A group's chat status when no chat is linked
+  ///
+  /// In en, this message translates to:
+  /// **'This group has no chat yet.'**
+  String get vtcGroupChatNone;
+
+  /// A group's chat status when the community linked a chat
+  ///
+  /// In en, this message translates to:
+  /// **'This group has a chat you can join.'**
+  String get vtcGroupChatLinked;
+
+  /// A group's chat status when the member owns it
+  ///
+  /// In en, this message translates to:
+  /// **'You own this group\'s chat. Members you let in appear in it.'**
+  String get vtcGroupChatOwned;
+
+  /// A group's chat status after the member asked to join
+  ///
+  /// In en, this message translates to:
+  /// **'You asked to join this group\'s chat. You\'ll find it in your chats.'**
+  String get vtcGroupChatJoined;
+
+  /// Button for a group's manager to create its chat
+  ///
+  /// In en, this message translates to:
+  /// **'Create chat'**
+  String get vtcGroupChatCreate;
+
+  /// Button for a member to ask to join a group's chat
+  ///
+  /// In en, this message translates to:
+  /// **'Join chat'**
+  String get vtcGroupChatJoin;
+
+  /// Shown when a group's members are hidden from one another
+  ///
+  /// In en, this message translates to:
+  /// **'This group hides its members, so it can\'t have a chat.'**
+  String get vtcGroupChatHidesMembers;
+
+  /// Shown when a member who does not manage the group tries to create its chat
+  ///
+  /// In en, this message translates to:
+  /// **'Only a manager of this group can create its chat.'**
+  String get vtcGroupChatNotAManager;
+
+  /// Shown when the community already linked a chat to the group
+  ///
+  /// In en, this message translates to:
+  /// **'This group already has a chat.'**
+  String get vtcGroupChatAlreadyLinked;
+
+  /// Shown when the community has not linked a chat to the group
+  ///
+  /// In en, this message translates to:
+  /// **'This group\'s chat isn\'t linked yet. Ask one of its managers.'**
+  String get vtcGroupChatNotLinked;
+
+  /// Shown when the linked chat is published on another control plane
+  ///
+  /// In en, this message translates to:
+  /// **'This group\'s chat is on another Meeting Place.'**
+  String get vtcGroupChatElsewhere;
+
+  /// Shown when the linked offer is not for the group's DID
+  ///
+  /// In en, this message translates to:
+  /// **'The linked chat isn\'t this group\'s. Ask one of its managers.'**
+  String get vtcGroupChatNotTheGroups;
+
+  /// Shown when the member's VTA keeps no credential of the group
+  ///
+  /// In en, this message translates to:
+  /// **'Your VTA doesn\'t have this group\'s membership credential yet. Try again later.'**
+  String get vtcGroupChatNoCredential;
+
+  /// Shown when creating or joining a group's chat fails for another reason
+  ///
+  /// In en, this message translates to:
+  /// **'That didn\'t work. Try again.'**
+  String get vtcGroupChatFailed;
+
+  /// Title of the dialog showing a new chat's link
+  ///
+  /// In en, this message translates to:
+  /// **'Publish the chat\'s link'**
+  String get vtcGroupChatLinkTitle;
+
+  /// Explains how a new group chat's link is published
+  ///
+  /// In en, this message translates to:
+  /// **'Members find the chat through the group\'s DID. Ask your community\'s operator to add this service to the group\'s DID document. Until then, members can\'t find the chat.'**
+  String get vtcGroupChatLinkBody;
+
+  /// Button that copies a group chat's link
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get vtcGroupChatLinkCopy;
+
+  /// Shown after a group chat's link is copied
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get vtcGroupChatLinkCopied;
+
+  /// Closes the dialog showing a group chat's link
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get vtcGroupChatLinkDone;
 }
 
 class _AppLocalizationsDelegate

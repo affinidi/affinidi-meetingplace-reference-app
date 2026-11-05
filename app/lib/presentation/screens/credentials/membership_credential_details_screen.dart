@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../domain/models/vtc/vtc_membership_entry.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../l10n/app_localizations.dart';
+import '../vtc_groups/vtc_groups_screen.dart';
 import '../vtc_join/vtc_flow_diagram.dart';
 import '../vtc_join/vtc_join_screen.dart';
 import '../vtc_join/vtc_trail_step.dart';
@@ -79,6 +80,22 @@ class MembershipCredentialDetailsScreen extends ConsumerWidget {
                       ),
                     ],
                   ),
+                  if (entry.left == null)
+                    OutlinedButton.icon(
+                      key: const Key('membership_groups'),
+                      icon: const Icon(Icons.groups_outlined),
+                      label: Text(l10n.vtcGroupsOpen),
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => VtcGroupsScreen(
+                            communityDid: entry.card.issuer,
+                            communityName:
+                                entry.communityName ??
+                                l10n.membershipCredentialUnnamed,
+                          ),
+                        ),
+                      ),
+                    ),
                   _MembershipTrail(
                     entry: entry,
                     identity: membershipIdentityName(context, ref, entry),
