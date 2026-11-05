@@ -347,6 +347,49 @@ void main() {
       expect(card?.memberDid, persona.did);
     });
 
+    test('reads the role the VTA holds', () async {
+      await service.join(
+        await service.readCommunity(fakeVtcDid),
+        persona: joinAs,
+      );
+      network.vta.answerTo[VtaTask.credentialsQuery] = (payload) => {
+        'credentials': [
+          if (payload['type'] == 'AuthorityCredential' &&
+              payload['issuerDid'] == fakeVtcDid &&
+              payload['subjectDid'] == persona.did)
+            {
+              'id': 'role-1',
+              'types': ['VerifiableCredential', 'AuthorityCredential'],
+            },
+        ],
+      };
+      network.vta.answers[VtaTask.credentialsGet] = {
+        'credential': {
+          'type': ['VerifiableCredential', 'AuthorityCredential'],
+          'issuer': fakeVtcDid,
+          'credentialSubject': {
+            'id': persona.did,
+            'authority': {
+              'scope': fakeVtcDid,
+              'actions': ['role:moderator'],
+            },
+          },
+        },
+      };
+
+      expect(await service.communityRole(fakeVtcDid), 'moderator');
+    });
+
+    test('reads no role while the application waits', () async {
+      network.joinVerdict = {'effect': 'refer'};
+      await service.join(
+        await service.readCommunity(fakeVtcDid),
+        persona: joinAs,
+      );
+
+      expect(await service.communityRole(fakeVtcDid), isNull);
+    });
+
     test('reads no card while the application waits', () async {
       network.joinVerdict = {'effect': 'refer'};
       await service.join(

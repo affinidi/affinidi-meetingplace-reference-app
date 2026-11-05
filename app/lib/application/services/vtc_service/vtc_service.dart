@@ -894,6 +894,20 @@ class VtcService {
     return card == null ? null : VtcMembershipCard.fromCredential(card);
   }
 
+  /// The member's role in [communityDid], e.g. `member` or `moderator`, as
+  /// the role card their VTA keeps says, or null when this phone knows no
+  /// such membership or the VTA holds no card yet, e.g. while the community
+  /// has still to deliver it.
+  ///
+  /// Throws as [membershipCard] does.
+  Future<String?> communityRole(String communityDid) async {
+    final community = await _repository.findCommunity(communityDid);
+    if (community == null || !community.isMember) return null;
+    return _sdk
+        .communityImport(await _grantedVta())
+        .role(communityDid, personaDid: community.personaDid);
+  }
+
   /// The community [communityDid]'s own check of the member's identity
   /// there, as their VTA keeps it, or null when this phone knows no such
   /// membership or the VTA holds no valid check. The community delivers it
