@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -103,6 +104,40 @@ void main() {
 
       expect(logger.errors, [
         'Saving the identity (edit) failed: refused vta:forbidden 403',
+      ]);
+    });
+
+    test('logs how the mediator answered a transport failure', () async {
+      final identity = FakeIdentities.primaryIdentity;
+      final request = RequestOptions(path: '/inbound');
+      final service = _FakeIdentitiesService([identity])
+        ..failUpdate = true
+        ..updateFailure = MeetingPlaceVtcSDKException(
+          message: 'mediator refused the message',
+          code: MeetingPlaceVtcSDKErrorCode.transportFailed,
+          innerException: DioException(
+            requestOptions: request,
+            type: DioExceptionType.badResponse,
+            response: Response(
+              requestOptions: request,
+              statusCode: 403,
+              data: 'details of ${identity.card.firstName}',
+            ),
+          ),
+        );
+      final logger = _RecordingAppLogger();
+      final container = makeContainer(service, logger: logger);
+      final provider = identityFormScreenControllerProvider(identity.id);
+      final controller = container.read(provider.notifier);
+      container.read(provider);
+
+      await controller.saveIdentity(
+        anonymousLabel: 'Anonymous',
+        mode: IdentityFormMode.edit,
+      );
+
+      expect(logger.errors, [
+        'Saving the identity (edit) failed: transportFailed badResponse 403',
       ]);
     });
 

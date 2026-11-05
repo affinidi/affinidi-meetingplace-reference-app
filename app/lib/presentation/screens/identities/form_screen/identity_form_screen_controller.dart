@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
@@ -454,11 +455,18 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
   }
 
   /// Names [error] without its message, which may carry the card's details.
+  ///
+  /// A transport failure names the mediator's HTTP answer, as the SDK keeps
+  /// it in the inner exception.
   static String _describeFailure(Object error) => switch (error) {
     MeetingPlaceVtcSDKException() => [
       error.code.name,
       error.refusalCode,
       error.httpStatus,
+      if (error.innerException case final DioException inner) ...[
+        inner.type.name,
+        inner.response?.statusCode,
+      ],
     ].nonNulls.join(' '),
     _ => '${error.runtimeType}',
   };
