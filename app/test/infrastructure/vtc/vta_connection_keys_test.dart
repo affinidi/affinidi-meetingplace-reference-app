@@ -17,17 +17,13 @@ Matcher _throwsUnavailable(String code) => throwsA(
 
 void main() {
   // did:key multibase of an Ed25519 key, multicodec-prefixed.
-  final signingKey = Ed25519DidKeySigner.fromSeed(
+  String multibaseOf(Uint8List seed) =>
+      Ed25519DidKeySigner.fromSeed(seed).did.substring('did:key:'.length);
+  final signingKey = multibaseOf(
     Uint8List.fromList(List.generate(32, (i) => i)),
-  ).did.substring('did:key:'.length);
-  final secret = Uint8List.fromList(List.generate(32, (i) => i + 1));
-  final agreementKey = toMultiBase(
-    Uint8List.fromList([
-      0x80,
-      0x24,
-      ...P256KeyPair.fromPrivateKey(secret).publicKey.bytes,
-    ]),
   );
+  final secret = Uint8List.fromList(List.generate(32, (i) => i + 1));
+  final agreementKey = multibaseOf(secret);
 
   late FakeVta vta;
   late VtcService service;
@@ -37,23 +33,25 @@ void main() {
       vta.received.where((r) => r['type'] == VtaTask.exportSecret).length;
 
   setUp(() async {
+    var created = 0;
     vta = FakeVta();
     vta.answers[VtaTask.contextsList] = {
       'contexts': [
         {'id': connectionKeysContextId},
       ],
     };
+    // The signing key first, then the agreement key.
     vta.answerTo[VtaTask.keysCreate] = (payload) => {
       'key': {
-        'keyId': 'key-${payload['keyType']}',
+        'keyId': 'key-${++created}',
         'keyType': payload['keyType'],
-        'publicKey': payload['keyType'] == 'p256' ? agreementKey : signingKey,
+        'publicKey': created == 1 ? signingKey : agreementKey,
       },
     };
     vta.answerTo[VtaTask.exportSecret] = (payload) => {
       'keyId': payload['keyId'],
       'privateKeyMultibase': toMultiBase(
-        Uint8List.fromList([0x86, 0x26, ...secret]),
+        Uint8List.fromList([0x80, 0x26, ...secret]),
       ),
     };
     service = await vta.linkedService();
@@ -64,47 +62,44 @@ void main() {
     test('creates the keys on the VTA and keeps only references', () async {
       final created = await keys.createKeys(_connectionDid);
 
-      expect(created!.signing.keyId, 'key-ed25519');
+      expect(created!.signing.keyId, 'key-1');
       expect(created.signing.publicKey, hasLength(32));
-      expect(created.agreement.keyId, 'key-p256');
-      expect(created.agreement.publicKey, hasLength(33));
+      expect(created.agreement.keyId, 'key-2');
+      expect(created.agreement.publicKey, hasLength(32));
 
       final found = await keys.findKeys(_connectionDid);
-      expect(found!.signing.keyId, 'key-ed25519');
-      expect(found.agreement.keyId, 'key-p256');
+      expect(found!.signing.keyId, 'key-1');
+      expect(found.agreement.keyId, 'key-2');
       expect(found.agreement.publicKey, created.agreement.publicKey);
 
       final stored = (await const FlutterSecureStorage().readAll()).values
           .join();
-      expect(stored, contains('key-p256'));
+      expect(stored, contains('key-2'));
       expect(stored, isNot(contains('privateKey')));
       expect(loans(), 0);
     });
 
     test('borrows the DIDComm key once while linked', () async {
-      final first = await keys.lendSecret('key-p256');
+      final first = await keys.lendSecret('key-2');
       first.fillRange(0, first.length, 0);
-      final second = await keys.lendSecret('key-p256');
+      final second = await keys.lendSecret('key-2');
 
       expect(second, secret);
       expect(loans(), 1);
     });
 
     test('borrows the key once when asked for it at the same time', () async {
-      await Future.wait([
-        keys.lendSecret('key-p256'),
-        keys.lendSecret('key-p256'),
-      ]);
+      await Future.wait([keys.lendSecret('key-2'), keys.lendSecret('key-2')]);
 
       expect(loans(), 1);
     });
 
     test('forgets lent keys on unlink', () async {
-      await keys.lendSecret('key-p256');
+      await keys.lendSecret('key-2');
       await service.unlink();
 
       await expectLater(
-        keys.lendSecret('key-p256'),
+        keys.lendSecret('key-2'),
         _throwsUnavailable(VtaSigningUnavailableException.notLinkedCode),
       );
     });
@@ -112,12 +107,12 @@ void main() {
     test('asks again after a failed loan', () async {
       vta.isDown = true;
       await expectLater(
-        keys.lendSecret('key-p256'),
+        keys.lendSecret('key-2'),
         _throwsUnavailable(VtaSigningUnavailableException.unreachableCode),
       );
 
       vta.isDown = false;
-      expect(await keys.lendSecret('key-p256'), secret);
+      expect(await keys.lendSecret('key-2'), secret);
     });
 
     test('keeps the keys on the device when no VTA is linked', () async {
