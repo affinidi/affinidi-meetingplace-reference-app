@@ -579,6 +579,142 @@ void main() {
       expect((await service.community(fakeVtcDid))?.isMember, isTrue);
     });
 
+    group('refresh membership', () {
+      /// The VTA holds a role card granting [role].
+      void holdRole(String role) {
+        network.vta.answerTo[VtaTask.credentialsQuery] = (_) => {
+          'credentials': [
+            {
+              'id': 'role-1',
+              'types': ['VerifiableCredential', 'AuthorityCredential'],
+            },
+          ],
+        };
+        network.vta.answers[VtaTask.credentialsGet] = {
+          'credential': {
+            'type': ['VerifiableCredential', 'AuthorityCredential'],
+            'issuer': fakeVtcDid,
+            'credentialSubject': {
+              'id': persona.did,
+              'authority': {
+                'scope': fakeVtcDid,
+                'actions': ['role:$role'],
+              },
+            },
+          },
+        };
+      }
+
+      setUp(() async {
+        // Lets the membership confirmation through, so the join settles.
+        network.vta.answers[VtaTask.signDocument] = {
+          'document': {
+            'issuer': persona.did,
+            'proof': {'proofPurpose': 'assertionMethod'},
+          },
+        };
+        await service.join(
+          await service.readCommunity(fakeVtcDid),
+          persona: joinAs,
+        );
+        holdRole('member');
+        network.vta.received.clear();
+      });
+
+      List<Object?> kept() => [
+        for (final request in network.vta.received)
+          if (request['type'] == VtaTask.credentialsReceive)
+            ((request['payload'] as Map)['credential'] as Map)['id'],
+      ];
+
+      test('keeps the cards of a new role and says so', () async {
+        network.renewedRole = 'admin';
+        var changes = 0;
+        final listening = service.membershipsChanged.listen((_) => changes++);
+
+        await service.refreshMembership(fakeVtcDid);
+        await Future<void>.delayed(Duration.zero);
+        await listening.cancel();
+
+        final renewal = network.memberRequests.last;
+        expect(renewal['type'], MemberTask.renew);
+        expect(renewal['issuer'], persona.did);
+        expect(kept(), ['urn:uuid:vmc-renewed', 'urn:uuid:vac-renewed']);
+        expect(changes, 1);
+      });
+
+      test('keeps nothing while the role is unchanged', () async {
+        var changes = 0;
+        final listening = service.membershipsChanged.listen((_) => changes++);
+
+        await service.refreshMembership(fakeVtcDid);
+        await Future<void>.delayed(Duration.zero);
+        await listening.cancel();
+
+        expect(network.memberRequests.last['type'], MemberTask.renew);
+        expect(kept(), isEmpty);
+        expect(changes, 0);
+      });
+
+      test('keeps the cards when the VTA holds no role card', () async {
+        network.vta.answerTo[VtaTask.credentialsQuery] = (_) => {
+          'credentials': <Object>[],
+        };
+
+        await service.refreshMembership(fakeVtcDid);
+
+        expect(kept(), hasLength(2));
+      });
+
+      test('changes nothing once no longer a member', () async {
+        network.renewRefusal = (404, MemberTask.notMember);
+
+        await service.refreshMembership(fakeVtcDid);
+
+        expect(kept(), isEmpty);
+        expect((await service.community(fakeVtcDid))?.isMember, isTrue);
+      });
+
+      test('passes on a refusal for another reason', () {
+        network.renewRefusal = (403, 'permissionDenied');
+
+        expect(
+          service.refreshMembership(fakeVtcDid),
+          throwsA(isA<MeetingPlaceVtcSDKException>()),
+        );
+      });
+
+      test('asks nothing while the application waits', () async {
+        network.joinVerdict = {'effect': 'refer'};
+        await service.leave(fakeVtcDid);
+        await service.join(await service.readCommunity(fakeVtcDid));
+        network.memberRequests.clear();
+
+        await service.refreshMembership(fakeVtcDid);
+
+        expect(network.memberRequests, isEmpty);
+      });
+
+      test('refreshes once per while on coming to the foreground', () async {
+        network.renewedRole = 'admin';
+
+        await service.checkApplications();
+        await service.checkApplications();
+
+        final renewals = network.memberRequests.where(
+          (request) => request['type'] == MemberTask.renew,
+        );
+        expect(renewals, hasLength(1));
+        expect(kept(), contains('urn:uuid:vac-renewed'));
+      });
+
+      test('leaves an unreachable community for the next check', () async {
+        network.renewRefusal = (503, 'unavailable');
+
+        await expectLater(service.checkApplications(), completes);
+      });
+    });
+
     group('leave', () {
       setUp(() async {
         await service.join(await service.readCommunity(fakeVtcDid));

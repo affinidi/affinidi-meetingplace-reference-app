@@ -130,6 +130,13 @@ class FakeVtcNetwork implements HttpClientAdapter {
   /// When set, the community refuses a leave with this HTTP status and code.
   (int, String)? leaveRefusal;
 
+  /// The role a renewal's role card grants.
+  String renewedRole = 'member';
+
+  /// When set, the community refuses a renewal with this HTTP status and
+  /// code.
+  (int, String)? renewRefusal;
+
   /// Where the community publishes its revocation list.
   static const statusListUrl = '$fakeVtcOrigin/v1/status-lists/revocation';
 
@@ -154,8 +161,34 @@ class FakeVtcNetwork implements HttpClientAdapter {
   static const _statusListBytes = 16;
 
   /// The member documents the community received: membership
-  /// confirmations, directory card updates and leaves.
+  /// confirmations, directory card updates, leaves and renewals.
   final List<Map<String, dynamic>> memberRequests = [];
+
+  /// A renewal's answer: fresh cards for [memberDid], the role card
+  /// granting [renewedRole].
+  Map<String, dynamic> _renewal(String memberDid) => {
+    'did': memberDid,
+    'vmc': {
+      'id': 'urn:uuid:vmc-renewed',
+      'type': ['VerifiableCredential', 'MembershipCredential'],
+      'issuer': fakeVtcDid,
+      'credentialSubject': {'id': memberDid},
+    },
+    'roleVac': {
+      'id': 'urn:uuid:vac-renewed',
+      'type': ['VerifiableCredential', 'AuthorityCredential'],
+      'issuer': fakeVtcDid,
+      'credentialSubject': {
+        'id': memberDid,
+        'authority': {
+          'scope': fakeVtcDid,
+          'actions': ['role:$renewedRole'],
+        },
+      },
+    },
+    'personhood': false,
+    'personhoodChanged': false,
+  };
 
   /// An SDK that reaches only this network.
   MeetingPlaceVtcSDK sdk() => MeetingPlaceVtcSDK(
@@ -269,9 +302,14 @@ class FakeVtcNetwork implements HttpClientAdapter {
       bytes.addAll(chunk);
     }
     final request = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
-    if (request['type'] == MemberTask.selfRemove && leaveRefusal != null) {
+    final memberRefusal = switch (request['type']) {
+      MemberTask.selfRemove => leaveRefusal,
+      MemberTask.renew => renewRefusal,
+      _ => null,
+    };
+    if (memberRefusal != null) {
       memberRequests.add(request);
-      final (status, code) = leaveRefusal!;
+      final (status, code) = memberRefusal;
       return ResponseBody.fromString(
         jsonEncode({
           'id': 'urn:uuid:error',
@@ -312,7 +350,8 @@ class FakeVtcNetwork implements HttpClientAdapter {
     var purpose = ProofPurpose.assertionMethod;
     if (type == MemberTask.vmc ||
         type == MemberTask.directoryCardUpdate ||
-        type == MemberTask.selfRemove) {
+        type == MemberTask.selfRemove ||
+        type == MemberTask.renew) {
       memberRequests.add(request);
       purpose = ProofPurpose.authentication;
       answer = switch (type) {
@@ -322,6 +361,7 @@ class FakeVtcNetwork implements HttpClientAdapter {
           'disposition': 'tombstone',
           'removed': true,
         },
+        MemberTask.renew => _renewal(request['issuer'] as String),
         _ => {'revision': 1},
       };
     } else if (type.startsWith(

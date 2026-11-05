@@ -89,7 +89,8 @@ class VtcService {
   final _membershipsChanged = StreamController<void>.broadcast();
 
   /// Fires each time the member's membership cards change: a card a
-  /// community issued is kept on their VTA, or a membership is left.
+  /// community issued is kept on their VTA, e.g. after a role change, or a
+  /// membership is left.
   Stream<void> get membershipsChanged => _membershipsChanged.stream;
 
   /// The identity keys lent and inboxes open, by community, while a
@@ -103,6 +104,14 @@ class VtcService {
 
   /// How long lent keys are held without a check before they are forgotten.
   static const _collectionIdle = Duration(minutes: 5);
+
+  /// When each settled membership was last refreshed, by community, so
+  /// coming back to the foreground asks each community at most once per
+  /// [_refreshInterval]: every renewal has the community issue new cards.
+  final Map<String, DateTime> _refreshedAt = {};
+
+  /// How long a refreshed membership is not asked again in the background.
+  static const _refreshInterval = Duration(hours: 1);
 
   /// The linked VTA, or null when the phone is not linked.
   Future<LinkedVta?> linkedVta() => _repository.getLinkedVta();
@@ -674,18 +683,21 @@ class VtcService {
     return status;
   }
 
-  /// Checks every open application and completes every admission still to
-  /// settle, e.g. when the app comes to the foreground: a community decides
-  /// on its own time. A community that cannot be reached is left for the
-  /// next check. Does nothing while no VTA is linked.
+  /// Checks every open application, completes every admission still to
+  /// settle and refreshes every settled membership not refreshed for a
+  /// while, e.g. when the app comes to the foreground: a community decides
+  /// on its own time, and may change the member's role. A community that
+  /// cannot be reached is left for the next check. Does nothing while no
+  /// VTA is linked.
   Future<void> checkApplications() async {
     final linkedVta = await _repository.getLinkedVta();
     if (linkedVta == null || !linkedVta.isGranted) return;
     for (final community in await _repository.communities()) {
-      if (!community.isApplying &&
-          (!community.isMember || community.isSettled)) {
+      if (community.isMember && community.isSettled) {
+        await _refreshWhenDue(community.communityDid);
         continue;
       }
+      if (!community.isApplying && !community.isMember) continue;
       try {
         await checkApplication(community.communityDid);
       } on MeetingPlaceVtcSDKException {
@@ -858,6 +870,57 @@ class VtcService {
   /// closes. Does nothing when none are held.
   Future<void> endCardCollection(String communityDid) async {
     await _collections.remove(communityDid)?.end();
+  }
+
+  /// Asks [communityDid] for the member's current cards, and keeps them on
+  /// their VTA when the role there changed, e.g. after an administrator
+  /// promoted them: the card the community pushes on a role change may
+  /// never reach the VTA. A kept change fires [membershipsChanged].
+  ///
+  /// Does nothing for a community this phone knows no membership of, or
+  /// when the community no longer counts the persona as a member.
+  /// Throws [VtaNotLinkedException] when no VTA is linked, and
+  /// [MeetingPlaceVtcSDKException] when the VTA or the community refuses or
+  /// cannot be reached.
+  Future<void> refreshMembership(String communityDid) async {
+    final community = await _repository.findCommunity(communityDid);
+    if (community == null || !community.isMember) return;
+    final vta = await _grantedVta();
+    final cards = await _sdk.joinClient().renew(
+      communityDid,
+      agent: vta,
+      persona: await _personaSigner(vta, community),
+    );
+    _refreshedAt[communityDid] = DateTime.now();
+    if (cards == null) return;
+
+    final personaDid = community.personaDid;
+    final heldRole = await _sdk
+        .communityImport(vta)
+        .role(communityDid, personaDid: personaDid);
+    // Unchanged: keeping the new cards would only fill the VTA's vault.
+    if (CommunityImport.roleOf(cards.role, communityDid, personaDid) ==
+        heldRole) {
+      return;
+    }
+    await _keepCards(vta, cards.credentials, community.contextId);
+    _membershipsChanged.add(null);
+  }
+
+  /// Refreshes [communityDid]'s membership unless it was refreshed within
+  /// [_refreshInterval]. A community that cannot be reached is left for the
+  /// next check.
+  Future<void> _refreshWhenDue(String communityDid) async {
+    final refreshedAt = _refreshedAt[communityDid];
+    if (refreshedAt != null &&
+        DateTime.now().difference(refreshedAt) < _refreshInterval) {
+      return;
+    }
+    try {
+      await refreshMembership(communityDid);
+    } on MeetingPlaceVtcSDKException {
+      return;
+    }
   }
 
   /// Withdraws the open application to [communityDid], so the member can
