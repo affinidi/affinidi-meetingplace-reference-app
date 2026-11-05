@@ -214,6 +214,22 @@ void main() {
     await settle(tester);
   }
 
+  /// The diagram of [step], read left to right: its parties and arrows.
+  List<String> flow(String step) {
+    final texts = find.descendant(
+      of: find.byKey(Key('membership_flow_$step')),
+      matching: find.byType(Text),
+    );
+    final found = [
+      for (final element in texts.evaluate())
+        (
+          (element.renderObject! as RenderBox).localToGlobal(Offset.zero).dx,
+          (element.widget as Text).data!,
+        ),
+    ]..sort((a, b) => a.$1.compareTo(b.$1));
+    return [for (final (_, text) in found) text];
+  }
+
   Future<void> expand(WidgetTester tester, String step) async {
     final finder = find.byKey(Key('membership_trail_$step'));
     await tester.ensureVisible(finder);
@@ -243,9 +259,24 @@ void main() {
       findsOneWidget,
     );
 
+    // Each step pictured: who passes what to whom.
+    expect(flow('issued'), ['Chess club', 'issues the card', 'Ada']);
+    expect(flow('kept'), ['Your VTA', 'hands over the card', 'This phone']);
+    expect(flow('checked'), [
+      'This phone',
+      'fetches the signed list',
+      'Chess club',
+    ]);
+
     await expand(tester, 'kept');
     expect(find.text('Done by'), findsOneWidget);
-    expect(find.text('Your VTA'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('membership_trail_kept')),
+        matching: find.text('Your VTA'),
+      ),
+      findsNWidgets(2),
+    );
     // What the VTA records of the card.
     expect(find.text('vault-chess'), findsOneWidget);
     expect(find.text('membership'), findsOneWidget);
@@ -265,7 +296,13 @@ void main() {
       lessThan(tester.getTopLeft(find.text('MembershipCredential')).dy),
     );
     await expand(tester, 'checked');
-    expect(find.text('This phone'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('membership_trail_checked')),
+        matching: find.text('This phone'),
+      ),
+      findsNWidgets(2),
+    );
     expect(find.text(FakeVtcNetwork.statusListUrl), findsOneWidget);
     expect(find.text('1'), findsOneWidget);
     // Both steps of the VTA carry its marker.
@@ -306,6 +343,15 @@ void main() {
       ),
       findsOneWidget,
     );
+
+    expect(flow('kept'), ['This phone', 'asks to put it away', 'Your VTA']);
+    expect(flow('left'), [
+      'Your VTA',
+      'signs the leave',
+      'This phone',
+      'sends it',
+      'Football club',
+    ]);
 
     await expand(tester, 'left');
     expect(find.text('Your VTA, then Football club'), findsOneWidget);

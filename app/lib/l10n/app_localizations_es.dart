@@ -2046,6 +2046,24 @@ class AppLocalizationsEs extends AppLocalizations {
   String get membershipTrailStoredTypes => 'Types';
 
   @override
+  String get membershipFlowIssues => 'issues the card';
+
+  @override
+  String get membershipFlowHandsOver => 'hands over the card';
+
+  @override
+  String get membershipFlowPutAway => 'asks to put it away';
+
+  @override
+  String get membershipFlowSignsLeave => 'signs the leave';
+
+  @override
+  String get membershipFlowSendsLeave => 'sends it';
+
+  @override
+  String get membershipFlowFetchesList => 'fetches the signed list';
+
+  @override
   String get all => 'Todos';
 
   @override

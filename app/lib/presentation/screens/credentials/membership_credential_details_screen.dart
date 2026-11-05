@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../domain/models/vtc/vtc_membership_entry.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../l10n/app_localizations.dart';
+import '../vtc_join/vtc_flow_diagram.dart';
 import '../vtc_join/vtc_trail_step.dart';
 import 'membership_credentials_controller.dart';
 import 'membership_credentials_list.dart';
@@ -119,6 +120,16 @@ class _MembershipTrail extends StatelessWidget {
     final lastKnown = status?.lastKnown;
     final statusList = status?.statusList ?? lastKnown?.statusList;
     final names = [identity, community];
+    final phoneNode = VtcFlowNode(
+      Icons.smartphone,
+      l10n.membershipTrailThisPhone,
+    );
+    final vtaNode = VtcFlowNode(
+      Icons.shield_outlined,
+      l10n.membershipTrailYourVta,
+    );
+    final communityNode = VtcFlowNode(Icons.groups_outlined, community);
+    final identityNode = VtcFlowNode(Icons.person_outline, identity);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -128,6 +139,11 @@ class _MembershipTrail extends StatelessWidget {
           icon: Icons.card_membership_outlined,
           stage: VtcTrailStage.done,
           title: l10n.membershipTrailIssued(community),
+          flow: VtcFlowDiagram(
+            key: const Key('membership_flow_issued'),
+            nodes: [communityNode, identityNode],
+            links: [l10n.membershipFlowIssues],
+          ),
           summary: switch (card.validFrom) {
             final from? => l10n.membershipTrailIssuedSummary(
               identity,
@@ -176,6 +192,16 @@ class _MembershipTrail extends StatelessWidget {
           icon: Icons.draw_outlined,
           stage: VtcTrailStage.done,
           title: l10n.membershipTrailKept,
+          flow: VtcFlowDiagram(
+            key: const Key('membership_flow_kept'),
+            nodes: left == null ? [vtaNode, phoneNode] : [phoneNode, vtaNode],
+            links: [
+              if (left == null)
+                l10n.membershipFlowHandsOver
+              else
+                l10n.membershipFlowPutAway,
+            ],
+          ),
           summary: switch ((left, readAt)) {
             (_?, _) => l10n.membershipTrailPutAway,
             (null, final at?) => l10n.membershipTrailKeptSummary(
@@ -221,6 +247,14 @@ class _MembershipTrail extends StatelessWidget {
             icon: Icons.draw_outlined,
             stage: VtcTrailStage.done,
             title: l10n.membershipTrailLeft(community),
+            flow: VtcFlowDiagram(
+              key: const Key('membership_flow_left'),
+              nodes: [vtaNode, phoneNode, communityNode],
+              links: [
+                l10n.membershipFlowSignsLeave,
+                l10n.membershipFlowSendsLeave,
+              ],
+            ),
             summary: leave == null
                 ? l10n.membershipTrailLeftNoReceipt(community)
                 : l10n.membershipTrailLeftSummary(
@@ -272,6 +306,11 @@ class _MembershipTrail extends StatelessWidget {
           },
           busy: status == null,
           title: l10n.membershipTrailChecked(community),
+          flow: VtcFlowDiagram(
+            key: const Key('membership_flow_checked'),
+            nodes: [phoneNode, communityNode],
+            links: [l10n.membershipFlowFetchesList],
+          ),
           summary: _checkSummary(
             l10n,
             community,

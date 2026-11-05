@@ -64,6 +64,7 @@ class VtcTrailStep extends HookWidget {
     this.isLast = false,
     this.actor,
     this.highlights = const [],
+    this.flow,
   });
 
   final IconData icon;
@@ -88,6 +89,10 @@ class VtcTrailStep extends HookWidget {
   /// Names in [summary], such as the member's identity and the community,
   /// set apart from the words around them.
   final List<String> highlights;
+
+  /// What the summary says, pictured under it, such as a
+  /// `VtcFlowDiagram`.
+  final Widget? flow;
 
   static const _markerSize = 32.0;
 
@@ -170,6 +175,11 @@ class VtcTrailStep extends HookWidget {
                                 _summarySpan(),
                                 style: onboardingNote(context),
                               ),
+                              if (flow case final flow?)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 8),
+                                  child: flow,
+                                ),
                             ],
                           ),
                         ),
