@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:didcomm/didcomm.dart' hide TrustTaskDocument;
@@ -129,6 +130,29 @@ class FakeVtcNetwork implements HttpClientAdapter {
   /// When set, the community refuses a leave with this HTTP status and code.
   (int, String)? leaveRefusal;
 
+  /// Where the community publishes its revocation list.
+  static const statusListUrl = '$fakeVtcOrigin/v1/status-lists/revocation';
+
+  /// The places in the revocation list the community revoked.
+  final Set<int> revoked = {};
+
+  /// When true, the revocation list cannot be fetched.
+  bool isStatusListDown = false;
+
+  /// How many times the revocation list was fetched.
+  int statusListFetches = 0;
+
+  /// A card's `credentialStatus` for place [index] of the revocation list.
+  static Map<String, dynamic> statusEntry(int index) => {
+    'id': '$statusListUrl#$index',
+    'type': 'BitstringStatusListEntry',
+    'statusPurpose': 'revocation',
+    'statusListIndex': '$index',
+    'statusListCredential': statusListUrl,
+  };
+
+  static const _statusListBytes = 16;
+
   /// The member documents the community received: membership
   /// confirmations, directory card updates and leaves.
   final List<Map<String, dynamic>> memberRequests = [];
@@ -170,6 +194,32 @@ class FakeVtcNetwork implements HttpClientAdapter {
         jsonDecode(jsonEncode(sealed)) as Map<String, dynamic>;
   }
 
+  /// The revocation list as the community signs it: [revoked] set in a
+  /// GZIP bitstring, bit 0 the first byte's most significant.
+  Future<Map<String, dynamic>> _statusList() {
+    final bits = Uint8List(_statusListBytes);
+    for (final index in revoked) {
+      bits[index ~/ 8] |= 1 << (7 - index % 8);
+    }
+    final encoded = base64Url.encode(gzip.encode(bits)).replaceAll('=', '');
+    return EddsaJcs2022.sign(
+      {
+        '@context': ['https://www.w3.org/ns/credentials/v2'],
+        'id': statusListUrl,
+        'type': ['VerifiableCredential', 'BitstringStatusListCredential'],
+        'issuer': fakeVtcDid,
+        'credentialSubject': {
+          'id': '$statusListUrl#list',
+          'type': 'BitstringStatusList',
+          'statusPurpose': 'revocation',
+          'encodedList': 'u$encoded',
+        },
+      },
+      signer: _VtcSigner(_vtcKey),
+      purpose: ProofPurpose.assertionMethod,
+    );
+  }
+
   Future<MediatorInbox> _openInbox({
     required String mediatorDid,
     required DidDocument mediatorDocument,
@@ -188,6 +238,18 @@ class FakeVtcNetwork implements HttpClientAdapter {
   ) async {
     if (options.uri.host != 'community.example') {
       return vta.fetch(options, requestStream, cancelFuture);
+    }
+    if (options.method == 'GET' && options.uri.toString() == statusListUrl) {
+      statusListFetches++;
+      return ResponseBody.fromString(
+        jsonEncode(
+          isStatusListDown ? {'error': 'unavailable'} : await _statusList(),
+        ),
+        isStatusListDown ? 503 : 200,
+        headers: {
+          Headers.contentTypeHeader: [Headers.jsonContentType],
+        },
+      );
     }
     if (options.method == 'GET') {
       final profile = options.uri.path.endsWith('/community/public-profile')

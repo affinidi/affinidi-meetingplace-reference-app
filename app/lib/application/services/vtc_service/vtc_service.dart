@@ -11,6 +11,7 @@ import '../../../domain/models/vtc/vtc_card_delivery.dart';
 import '../../../domain/models/vtc/vtc_community.dart';
 import '../../../domain/models/vtc/vtc_left_membership.dart';
 import '../../../domain/models/vtc/vtc_membership_card.dart';
+import '../../../domain/models/vtc/vtc_membership_entry.dart';
 import '../../../domain/repositories/vtc_repository.dart';
 import '../../../infrastructure/providers/vtc_sdk_provider.dart';
 import '../../../infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
@@ -881,6 +882,110 @@ class VtcService {
         .communityImport(await _grantedVta())
         .membershipCard(communityDid, personaDid: community.personaDid);
     return card == null ? null : VtcMembershipCard.fromCredential(card);
+  }
+
+  /// Every membership card of the member: those a community issued that
+  /// their VTA holds, then those of the memberships they left, the latest
+  /// first. A card of a membership left is shown once, as left. Test
+  /// credentials this phone issued are not memberships of a community.
+  ///
+  /// Throws [VtaNotLinkedException] when no VTA is linked, and
+  /// [MeetingPlaceVtcSDKException] when the VTA cannot be reached.
+  Future<List<VtcMembershipEntry>> membershipCredentials() async {
+    final held = await _sdk
+        .communityImport(await _grantedVta())
+        .membershipCards();
+    final mockIssuer = await _mockIssuer.did();
+    final communities = await _repository.communities();
+    final left = [...await _repository.leftMemberships()]
+      ..sort((a, b) => b.leftAt.compareTo(a.leftAt));
+
+    final leftEntries = [
+      for (final membership in left)
+        if (membership.card case final json?)
+          if (VtcMembershipCard.fromCredential(json) case final card?)
+            VtcMembershipEntry(
+              card: card,
+              communityName: membership.name,
+              left: membership,
+            ),
+    ];
+    final leftKeys = {for (final entry in leftEntries) entry.key};
+    final heldEntries = [
+      for (final json in held)
+        if (VtcMembershipCard.fromCredential(json) case final card?)
+          if (card.issuer != mockIssuer)
+            VtcMembershipEntry(
+              card: card,
+              communityName:
+                  communities
+                      .where((c) => c.communityDid == card.issuer)
+                      .firstOrNull
+                      ?.name ??
+                  switch (json['name']) {
+                    final String name => name,
+                    _ => null,
+                  },
+            ),
+    ].where((entry) => !leftKeys.contains(entry.key));
+
+    return [...heldEntries, ...leftEntries];
+  }
+
+  /// Reads whether [entry]'s community revoked its card, from the
+  /// community's signed status list. The list read for a membership left is
+  /// kept with it, so what showed the card's state stays when the community
+  /// no longer answers.
+  ///
+  /// Never throws: a list that cannot be read or checked is
+  /// [VtcCardState.unknown], with what it said when last read.
+  Future<VtcCardStatus> checkMembershipStatus(VtcMembershipEntry entry) async {
+    final now = DateTime.now();
+    if (entry.card.validUntil case final until? when now.isAfter(until)) {
+      return const VtcCardStatus(state: VtcCardState.expired);
+    }
+    final CredentialStatusCheck check;
+    try {
+      check = await _sdk.statusListClient().check(entry.card.credential);
+    } on MeetingPlaceVtcSDKException catch (error) {
+      return VtcCardStatus(
+        state: VtcCardState.unknown,
+        lastKnown: await _lastKnown(entry),
+        failure: error.code,
+      );
+    }
+    if (check.state == CredentialStatusState.noStatus) {
+      return const VtcCardStatus(state: VtcCardState.notRevocable);
+    }
+    final revoked = check.state == CredentialStatusState.revoked;
+    if (entry.left case final left?) {
+      await _repository.saveLeftMembership(
+        left.withStatus(
+          VtcStatusRecord(
+            revoked: revoked,
+            checkedAt: check.checkedAt,
+            statusList: check.statusListCredential!,
+          ),
+        ),
+      );
+    }
+    return VtcCardStatus(
+      state: revoked ? VtcCardState.revoked : VtcCardState.valid,
+      checkedAt: check.checkedAt,
+      statusListUrl: check.statusList,
+      index: check.index,
+      statusList: check.statusListCredential,
+    );
+  }
+
+  /// The last status stored for [entry]'s membership left, as stored now.
+  Future<VtcStatusRecord?> _lastKnown(VtcMembershipEntry entry) async {
+    final left = entry.left;
+    if (left == null) return null;
+    final stored = (await _repository.leftMemberships())
+        .where((membership) => membership.key == left.key)
+        .firstOrNull;
+    return (stored ?? left).lastStatus;
   }
 
   /// Looks up the member's membership of [communityDid] in the cards backed

@@ -4,7 +4,9 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/mock_credential_template.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_card_delivery.dart';
+import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_membership_entry.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/vtc/mock_credential_issuer.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/vtc/user_verification_key.dart';
 
 import '../../../fakes/fake_persona.dart';
@@ -553,6 +555,110 @@ void main() {
         expect(archived(), isEmpty);
         expect((await service.community(fakeVtcDid))?.isMember, isTrue);
         expect(await SecureStorageVtcRepository().leftMemberships(), isEmpty);
+      });
+    });
+
+    group('membership credentials', () {
+      Map<String, dynamic> card({
+        String id = 'urn:uuid:vmc',
+        String issuer = fakeVtcDid,
+        Map<String, dynamic>? status,
+        String? validUntil,
+      }) => {
+        'id': id,
+        'type': ['VerifiableCredential', 'MembershipCredential'],
+        'issuer': issuer,
+        'validUntil': ?validUntil,
+        'credentialSubject': {'id': persona.did},
+        'credentialStatus': ?status,
+      };
+
+      void hold(List<Map<String, dynamic>> cards) {
+        network.vta
+          ..answers[VtaTask.credentialsQuery] = {
+            'credentials': [
+              for (final card in cards) {'id': card['id']},
+            ],
+          }
+          ..answerTo[VtaTask.credentialsGet] = (payload) => {
+            'credential': cards.firstWhere((c) => c['id'] == payload['id']),
+          };
+      }
+
+      setUp(() async {
+        await service.join(await service.readCommunity(fakeVtcDid));
+      });
+
+      test('lists the cards communities issued, not test ones', () async {
+        hold([
+          card(status: FakeVtcNetwork.statusEntry(7)),
+          card(id: 'urn:uuid:mock', issuer: await MockCredentialIssuer().did()),
+        ]);
+
+        final entries = await service.membershipCredentials();
+
+        expect(entries.single.key, 'urn:uuid:vmc');
+        expect(entries.single.communityName, 'Football club');
+        expect(entries.single.left, isNull);
+      });
+
+      test('reads a card valid, then revoked once left', () async {
+        hold([card(status: FakeVtcNetwork.statusEntry(7))]);
+        final active = (await service.membershipCredentials()).single;
+
+        final valid = await service.checkMembershipStatus(active);
+        expect(valid.state, VtcCardState.valid);
+        expect(valid.index, 7);
+        expect(valid.statusList?['issuer'], fakeVtcDid);
+
+        await service.leave(fakeVtcDid);
+        network.revoked.add(7);
+        // The VTA still answers with the card; it shows once, as left.
+        final left = (await service.membershipCredentials()).single;
+        expect(left.left?.leaveExchange, isNotNull);
+
+        final revoked = await service.checkMembershipStatus(left);
+        expect(revoked.state, VtcCardState.revoked);
+        final stored = (await SecureStorageVtcRepository().leftMemberships())
+            .single
+            .lastStatus;
+        expect(stored?.revoked, isTrue);
+        expect(stored?.statusList, revoked.statusList);
+      });
+
+      test('keeps the last list when the community is down', () async {
+        hold([card(status: FakeVtcNetwork.statusEntry(7))]);
+        await service.leave(fakeVtcDid);
+        network.revoked.add(7);
+        final left = (await service.membershipCredentials()).single;
+        await service.checkMembershipStatus(left);
+        network.isStatusListDown = true;
+
+        final status = await service.checkMembershipStatus(left);
+
+        expect(status.state, VtcCardState.unknown);
+        expect(status.failure, MeetingPlaceVtcSDKErrorCode.transportFailed);
+        expect(status.lastKnown?.revoked, isTrue);
+      });
+
+      test('says when a card cannot be revoked, or has expired', () async {
+        hold([
+          card(),
+          card(
+            id: 'urn:uuid:old',
+            status: FakeVtcNetwork.statusEntry(7),
+            validUntil: '2020-01-01T00:00:00Z',
+          ),
+        ]);
+        final entries = await service.membershipCredentials();
+
+        final states = [
+          for (final entry in entries)
+            (await service.checkMembershipStatus(entry)).state,
+        ];
+
+        expect(states, [VtcCardState.notRevocable, VtcCardState.expired]);
+        expect(network.statusListFetches, 0);
       });
     });
   });
