@@ -13,6 +13,7 @@ import '../../../widgets/async_loaders/modal_async_loading_status.dart';
 import '../../../widgets/identity_picker/identity_picker.dart';
 import '../../../widgets/offer_banner.dart';
 import '../../../widgets/qr/qr_scan_button.dart';
+import '../../vtc_join/vtc_join_screen.dart';
 import 'find_offer_screen_controller.dart';
 
 class FindOfferScreen extends HookConsumerWidget {
@@ -60,14 +61,21 @@ class FindOfferScreen extends HookConsumerWidget {
 
       final trimmed = mnemonic.trim();
       var success = false;
+      var isJoinPhrase = false;
       await ref.read(controller.findOfferLoadingController.notifier).start(
         () async {
-          await controller.findOffer(trimmed);
+          isJoinPhrase = await controller.findOffer(trimmed);
           success = true;
         },
       );
 
       if (!context.mounted) return;
+      if (success && isJoinPhrase) {
+        // The join screen verifies the admin's statement before it opens
+        // the community.
+        await VtcJoinScreen.show(context, code: trimmed);
+        return;
+      }
       if (success) {
         await ref
             .read(navigatorProvider)

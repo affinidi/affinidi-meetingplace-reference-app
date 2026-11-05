@@ -101,7 +101,7 @@ void main() {
           theme: AppTheme.dark,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: VtcJoinScreen(communityDid: communityDid),
+          home: VtcJoinScreen(code: communityDid),
         ),
       ),
     );

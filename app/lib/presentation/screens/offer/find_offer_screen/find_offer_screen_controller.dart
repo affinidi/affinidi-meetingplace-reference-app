@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../application/services/community_offer_service/community_offer_service.dart';
 import '../../../../application/services/connections_service/connections_service.dart';
 import '../../../../application/services/identities_service/identities_service.dart';
 import '../../../../domain/models/identity/identity.dart';
@@ -35,7 +36,13 @@ class FindOfferScreenController extends _$FindOfferScreenController {
     state = state.copyWith(selectedIdentity: identity);
   }
 
-  Future<void> findOffer(String mnemonic) async {
+  /// Finds the offer under [mnemonic]. Returns whether it is a community's
+  /// join phrase, which leads to joining the community rather than to
+  /// accepting the offer.
+  Future<bool> findOffer(String mnemonic) async {
     await ref.read(connectionsServiceProvider.notifier).findOffer(mnemonic);
+    final offer = ref.read(connectionsServiceProvider).selectedOffer;
+    return offer != null &&
+        CommunityOfferService.statementOf(offer.contactCard) != null;
   }
 }

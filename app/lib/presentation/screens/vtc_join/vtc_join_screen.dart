@@ -30,17 +30,18 @@ import 'vtc_membership_card_view.dart';
 /// apply as an identity from the member's VTA. In the look of linking the
 /// VTA, the review laid out like a consent screen.
 class VtcJoinScreen extends HookConsumerWidget {
-  const VtcJoinScreen({super.key, this.communityDid});
+  const VtcJoinScreen({super.key, this.code});
 
-  /// The community to open at once, as if its code were scanned; null to
-  /// ask for a code.
-  final String? communityDid;
+  /// The code of the community to open at once, as if it were scanned: its
+  /// DID or join phrase; null to ask for a code.
+  final String? code;
 
-  /// Opens joining over the current screen, at [communityDid] if given.
-  static Future<void> show(BuildContext context, {String? communityDid}) =>
+  /// Opens joining over the current screen, at the community of [code] if
+  /// given.
+  static Future<void> show(BuildContext context, {String? code}) =>
       Navigator.of(context, rootNavigator: true).push<void>(
         MaterialPageRoute<void>(
-          builder: (context) => VtcJoinScreen(communityDid: communityDid),
+          builder: (context) => VtcJoinScreen(code: code),
         ),
       );
 
@@ -49,9 +50,9 @@ class VtcJoinScreen extends HookConsumerWidget {
     final state = ref.watch(vtcJoinControllerProvider);
     final controller = ref.read(vtcJoinControllerProvider.notifier);
     useEffect(() {
-      if (communityDid case final did?) {
+      if (code case final code?) {
         // Not while building: reading the community changes the state.
-        Future.microtask(() => controller.onScanned(did));
+        Future.microtask(() => controller.onScanned(code));
       }
       return null;
     }, const []);

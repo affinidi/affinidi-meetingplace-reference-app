@@ -112,8 +112,7 @@ class _CommunityLinks extends ConsumerWidget {
           key: const Key('membership_open_community'),
           icon: const Icon(Icons.groups_outlined),
           label: Text(l10n.membershipOpenCommunity),
-          onPressed: () =>
-              VtcJoinScreen.show(context, communityDid: communityDid),
+          onPressed: () => VtcJoinScreen.show(context, code: communityDid),
         ),
         if (website != null)
           OutlinedButton.icon(

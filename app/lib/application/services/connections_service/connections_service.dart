@@ -458,19 +458,25 @@ class ConnectionsService extends _$ConnectionsService {
 
     final sdk = await ref.read(meetingPlaceSdkProvider.future);
     final result = await sdk.findOffer(mnemonic: mnemonic);
+    final offer = result.connectionOffer;
+    // A community's join phrase is never claimed, so who could claim it does
+    // not matter: e.g. its admin finds their own.
+    final isJoinPhrase =
+        offer != null &&
+        CommunityOfferService.statementOf(offer.contactCard) != null;
 
-    if (result.errorCode != null) {
+    if (result.errorCode != null && !isJoinPhrase) {
       throw AppException('Unable to find offer', code: result.errorCode!.name);
     }
 
-    if (result.connectionOffer == null) {
+    if (offer == null) {
       throw AppException(
         'Unable to find offer',
         code: AppExceptionType.offerNotFound.name,
       );
     }
 
-    state = state.copyWith(selectedOffer: result.connectionOffer);
+    state = state.copyWith(selectedOffer: offer);
   }
 
   /// Retrieve an offer by mnemonic and set it as the selected offer.

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:meeting_place_vtc/meeting_place_vtc.dart' show CommunityOffer;
 import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_screen.dart';
 
+import 'fakes/fake_community_offers.dart';
 import 'fakes/fake_connection_offers.dart';
 import 'fakes/fake_identities.dart';
 import 'fakes/fake_mediators.dart';
@@ -127,6 +130,38 @@ void main() {
         await tapSearchButton(tester, searchButton);
 
         expect(find.text(l10n.error('offerNotFound')), findsOneWidget);
+      });
+    });
+
+    group('and the passphrase is a community\'s join phrase', () {
+      testWidgets('it opens the community instead of the offer', (
+        tester,
+      ) async {
+        final l10n = await getL10n();
+        final offer = fakeFoundOffer(
+          'my-club',
+          contactInfo: {
+            CommunityOffer.contactInfoKey: {
+              'type': CommunityOffer.statementType,
+            },
+          },
+        );
+
+        await navigateToLocation(
+          tester,
+          location,
+          identities: [testIdentity],
+          mediators: FakeMediators.all,
+          meetingPlaceCoreSDK: FakeMeetingPlaceSDK(offerToFind: offer),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.enterText(find.byType(TextField), 'my-club');
+        await tester.pumpAndSettle();
+        await tapSearchButton(tester, find.text(l10n.generalSearch));
+
+        expect(find.byType(VtcJoinScreen), findsOneWidget);
+        expect(find.text(l10n.acceptOfferTitle), findsNothing);
       });
     });
 
