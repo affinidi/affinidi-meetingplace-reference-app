@@ -7,6 +7,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../application/services/identities_service/identities_service.dart';
 import '../../../application/services/vtc_service/vtc_service.dart';
 import '../../../domain/models/identity/identity.dart';
+import '../../../domain/models/vtc/vtc_card_delivery.dart';
 import '../../../domain/models/vtc/vtc_community.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import 'vtc_join_state.dart';
@@ -45,9 +46,19 @@ class VtcJoinController extends _$VtcJoinController {
   /// Whether the membership card is being read; reads do not overlap.
   bool _readingCard = false;
 
+  /// Whether the membership card is being collected; collections do not
+  /// overlap.
+  bool _collectingCard = false;
+
   @override
   VtcJoinState build() {
-    ref.onDispose(() => _pendingCheck?.cancel());
+    ref.onDispose(() {
+      _pendingCheck?.cancel();
+      // Forget the identity's keys the VTA lent for collecting the card.
+      if (_manifest case final manifest?) {
+        unawaited(_service.endCardCollection(manifest.communityDid));
+      }
+    });
     // While an application waits, or a new member's card has yet to reach
     // their VTA, ask again now and then.
     listenSelf((previous, next) {
@@ -60,7 +71,7 @@ class VtcJoinController extends _$VtcJoinController {
           // The step as it is at each tick, not as it was when set.
           (_) => state.step == VtcJoinStep.pending
               ? checkAgain()
-              : readMembershipCard(),
+              : collectMembershipCard(),
         );
       } else {
         _pendingCheck?.cancel();
@@ -439,7 +450,10 @@ class VtcJoinController extends _$VtcJoinController {
     }
     state = state.copyWith(checking: true);
     try {
-      final status = await _service.checkApplication(manifest.communityDid);
+      final status = await _service.checkApplication(
+        manifest.communityDid,
+        onCardDelivery: _showCardDelivery,
+      );
       // The member may have moved on while the community answered.
       if (state.step != VtcJoinStep.pending) return;
       state = state.copyWith(
@@ -464,6 +478,40 @@ class VtcJoinController extends _$VtcJoinController {
     } finally {
       state = state.copyWith(checking: false);
     }
+  }
+
+  /// Collects the member's card from their identity's inbox when the
+  /// community delivered it there, showing each step, then reads it from
+  /// their VTA. Quietly, as [checkAgain]: a collection that fails waits for
+  /// the next.
+  Future<void> collectMembershipCard() async {
+    final manifest = _manifest;
+    if (state.step != VtcJoinStep.joined ||
+        manifest == null ||
+        state.membershipCard != null ||
+        _collectingCard) {
+      return;
+    }
+    _collectingCard = true;
+    try {
+      await _service.checkApplication(
+        manifest.communityDid,
+        onCardDelivery: _showCardDelivery,
+      );
+    } on MeetingPlaceVtcSDKException {
+      // The next collection tries again.
+    } on VtaNotLinkedException {
+      // Nothing to collect with; the membership stands all the same.
+    } finally {
+      _collectingCard = false;
+    }
+    if (ref.mounted) await readMembershipCard();
+  }
+
+  void _showCardDelivery(VtcCardDelivery delivery) {
+    // The screen may have closed while the card was collected.
+    if (!ref.mounted) return;
+    state = state.copyWith(cardDelivery: delivery);
   }
 
   /// Reads the member's card for the joined screen from their VTA, which

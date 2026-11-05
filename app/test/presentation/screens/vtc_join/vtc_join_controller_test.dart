@@ -8,6 +8,7 @@ import 'package:mpx_flutter_reference_app/application/services/identities_servic
 import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service_state.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
 import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
+import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_card_delivery.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/vtc/user_verification_key.dart';
@@ -16,6 +17,7 @@ import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join
 
 import '../../../fakes/fake_identities.dart';
 import '../../../fakes/fake_identities_service.dart';
+import '../../../fakes/fake_persona.dart';
 import '../../../fakes/fake_vta.dart';
 import '../../../fakes/fake_vtc_network.dart';
 
@@ -830,6 +832,104 @@ void main() {
         await readDone();
 
         expect(state().membershipCard?.issuer, fakeVtcDid);
+      });
+
+      group('from the identity inbox', () {
+        late FakePersona mailPersona;
+
+        Map<String, dynamic> card() => {
+          'id': 'urn:uuid:vmc',
+          'type': ['VerifiableCredential', 'MembershipCredential'],
+          'issuer': fakeVtcDid,
+          'credentialSubject': {'id': mailPersona.did},
+        };
+
+        /// The VTA holds the card, as it does once it kept it.
+        void vtaKeptCard() => network.vta
+          ..answers[VtaTask.credentialsQuery] = {
+            'credentials': [
+              {'id': 'card-1'},
+            ],
+          }
+          ..answers[VtaTask.credentialsGet] = {'credential': card()};
+
+        int loans() => network.vta.received
+            .where((request) => request['type'] == VtaTask.exportSecret)
+            .length;
+
+        Future<void> approve() async {
+          network.joinVerdict = {'effect': 'refer'};
+          await controller().onScanned(fakeVtcDid);
+          await controller().join();
+          network.joinStatus = 'approved';
+        }
+
+        setUp(() {
+          mailPersona = FakePersona(mediatorDid: network.mediatorDid);
+          network.vta
+            ..persona = mailPersona
+            ..otherDocuments[mailPersona.did] = mailPersona.document
+            ..answers[VtaTask.didsCreate] = {
+              'did': mailPersona.did,
+              'contextId': 'vta',
+              'signingKeyId': mailPersona.signingKeyId,
+            }
+            ..answers[VtaTask.signDocument] = {
+              'document': {
+                'issuer': mailPersona.did,
+                'proof': {'proofPurpose': 'assertionMethod'},
+              },
+            }
+            ..answerTo[VtaTask.exportSecret] = (payload) =>
+                mailPersona.exportAnswer(payload['keyId']);
+        });
+
+        test('is collected on approval, showing each step', () async {
+          await approve();
+          await network.deliver(mailPersona, card());
+
+          await controller().checkAgain();
+
+          expect(state().step, VtcJoinStep.joined);
+          final delivery = state().cardDelivery;
+          expect(delivery?.isDone, isTrue);
+          expect(delivery?.issue?.issuer, fakeVtcDid);
+          // The read the joined step started found no card yet.
+          await readDone();
+          vtaKeptCard();
+          await controller().readMembershipCard();
+          expect(state().membershipCard?.memberDid, mailPersona.did);
+        });
+
+        test('is waited for, then collected on a later check', () async {
+          await approve();
+          await controller().checkAgain();
+          expect(
+            state().cardDelivery?.status(VtcDeliveryStep.pickedUp),
+            VtcDeliveryStatus.waiting,
+          );
+
+          await network.deliver(mailPersona, card());
+          await controller().collectMembershipCard();
+
+          expect(state().cardDelivery?.isDone, isTrue);
+          expect(network.inboxDeleted, ['message-1']);
+          // The keys were lent once for both checks.
+          expect(loans(), 2);
+        });
+
+        test('forgets the lent keys when the screen closes', () async {
+          await approve();
+          await controller().checkAgain();
+          expect(loans(), 2);
+
+          container.dispose();
+          await Future<void>.delayed(Duration.zero);
+          useService();
+          await service.checkApplication(fakeVtcDid);
+
+          expect(loans(), 4);
+        });
       });
     });
 
