@@ -2413,6 +2413,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get linkedVtaCheckAgain => 'Check again';
 
   @override
+  String get linkedVtaNoDidcomm =>
+      'Your VTA doesn\'t offer DIDComm, which Meeting Place uses to talk to it. Ask its admin to enable DIDComm with a mediator.';
+
+  @override
   String get identityPersonaTitle => 'Persona on your VTA';
 
   @override

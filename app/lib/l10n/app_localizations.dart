@@ -3604,6 +3604,12 @@ abstract class AppLocalizations {
   /// **'Check again'**
   String get linkedVtaCheckAgain;
 
+  /// No description provided for @linkedVtaNoDidcomm.
+  ///
+  /// In en, this message translates to:
+  /// **'Your VTA doesn\'t offer DIDComm, which Meeting Place uses to talk to it. Ask its admin to enable DIDComm with a mediator.'**
+  String get linkedVtaNoDidcomm;
+
   /// No description provided for @identityPersonaTitle.
   ///
   /// In en, this message translates to:

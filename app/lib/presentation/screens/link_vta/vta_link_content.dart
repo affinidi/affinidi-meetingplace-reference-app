@@ -149,6 +149,7 @@ String? vtaLinkFailureText(AppLocalizations l10n, VtaLinkFailure? failure) =>
       VtaLinkFailure.invalidDid => l10n.linkedVtaInvalidDid,
       VtaLinkFailure.alreadyLinked => l10n.linkedVtaAlreadyLinked,
       VtaLinkFailure.didNotResolved => l10n.linkedVtaDidNotResolved,
+      VtaLinkFailure.noDidcomm => l10n.linkedVtaNoDidcomm,
       VtaLinkFailure.unreachable => l10n.linkedVtaUnreachable,
       VtaLinkFailure.badAnswer => l10n.linkedVtaBadAnswer,
     };

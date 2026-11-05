@@ -29,8 +29,11 @@ enum VtaLinkFailure {
   /// A VTA is already linked or being linked.
   alreadyLinked,
 
-  /// The VTA's DID does not resolve to a VTA with an HTTPS endpoint.
+  /// The VTA's DID does not resolve.
   didNotResolved,
+
+  /// The VTA's DID names no DIDComm mediator to reach it through.
+  noDidcomm,
 
   /// The VTA cannot be reached.
   unreachable,
@@ -43,8 +46,8 @@ enum VtaLinkFailure {
     InvalidVtaDidException() => invalidDid,
     VtaAlreadyLinkedException() => alreadyLinked,
     MeetingPlaceVtcSDKException(:final code) => switch (code) {
-      MeetingPlaceVtcSDKErrorCode.didResolutionFailed ||
-      MeetingPlaceVtcSDKErrorCode.signInNotOffered => didNotResolved,
+      MeetingPlaceVtcSDKErrorCode.didResolutionFailed => didNotResolved,
+      MeetingPlaceVtcSDKErrorCode.signInNotOffered => noDidcomm,
       MeetingPlaceVtcSDKErrorCode.invalidProof ||
       MeetingPlaceVtcSDKErrorCode.invalidDocument => badAnswer,
       _ => unreachable,
