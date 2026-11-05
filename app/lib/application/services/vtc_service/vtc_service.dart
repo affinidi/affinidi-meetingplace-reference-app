@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
@@ -72,6 +73,10 @@ class VtcService {
   /// keys once: the VTA audits each loan.
   final Map<String, _CardCollection> _collections = {};
 
+  /// Connection DIDComm keys the VTA lent, by key id, for as long as the
+  /// link lasts.
+  final Map<String, Future<Uint8List>> _lentConnectionKeys = {};
+
   /// How long lent keys are held without a check before they are forgotten.
   static const _collectionIdle = Duration(minutes: 5);
 
@@ -139,6 +144,7 @@ class VtcService {
     final linkedVta = await _repository.getLinkedVta();
     if (linkedVta != null) await _vtaClient(linkedVta).signOut();
     _client = null;
+    await _forgetConnectionKeys();
     await _repository.clear();
     await _userVerificationKey.reset();
   }
@@ -191,18 +197,40 @@ class VtcService {
     profileId: profileId,
   );
 
-  /// Creates a key on the member's VTA that signs credentials as one
-  /// connection DID. Its private key never leaves the VTA.
+  /// Creates the keys of one connection DID on the member's VTA: one that
+  /// signs its credentials, whose private key never leaves the VTA, and
+  /// one for DIDComm, which the VTA lends through [lendConnectionKey].
   ///
   /// Throws [VtaNotLinkedException] when no VTA is linked, and
   /// [MeetingPlaceVtcSDKException] when the VTA refuses or cannot be
   /// reached.
-  Future<VtaSigningKey> createConnectionKey() async =>
-      (await _grantedVta()).createConnectionKey();
+  Future<({VtaConnectionKey signing, VtaConnectionKey agreement})>
+  createConnectionKeys() async => (await _grantedVta()).createConnectionKeys();
+
+  /// Borrows the connection DIDComm key [keyId] from the member's VTA,
+  /// once for as long as the link lasts: every message needs it, and the
+  /// VTA audits each loan. Held in memory only, and forgotten on [unlink].
+  ///
+  /// Returns a copy the caller may zero-fill. Throws as
+  /// [createConnectionKeys] does.
+  Future<Uint8List> lendConnectionKey(String keyId) async {
+    final lending = _lentConnectionKeys[keyId] ??= _grantedVta().then(
+      (vta) => vta.lendConnectionKey(keyId),
+    );
+    try {
+      return Uint8List.fromList(await lending);
+    } on Object {
+      // Ask again next time rather than keep the failure.
+      if (identical(_lentConnectionKeys[keyId], lending)) {
+        _lentConnectionKeys.remove(keyId)?.ignore();
+      }
+      rethrow;
+    }
+  }
 
   /// Has the member's VTA sign [document] with the connection key [keyId],
   /// as the DID the document names as its issuer. Throws as
-  /// [createConnectionKey] does.
+  /// [createConnectionKeys] does.
   Future<Map<String, dynamic>> signConnectionDocument(
     Map<String, dynamic> document, {
     required String keyId,
@@ -935,6 +963,21 @@ class VtcService {
   }
 
   /// One client per link, so its REST session is reused.
+  /// Zero-fills and drops every lent connection key. Best effort: Dart
+  /// cannot wipe copies already handed out; dropping them lets them go.
+  Future<void> _forgetConnectionKeys() async {
+    final lent = [..._lentConnectionKeys.values];
+    _lentConnectionKeys.clear();
+    for (final lending in lent) {
+      try {
+        final key = await lending;
+        key.fillRange(0, key.length, 0);
+      } on Object {
+        // Never lent: nothing to forget.
+      }
+    }
+  }
+
   VtaClient _vtaClient(LinkedVta linkedVta) {
     final client = _client;
     if (client != null && client.vtaDid == linkedVta.vtaDid) return client;

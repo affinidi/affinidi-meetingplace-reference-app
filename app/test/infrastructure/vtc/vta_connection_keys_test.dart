@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/vtc/vta_connection_keys.dart';
+import 'package:ssi/ssi.dart';
 
 import '../../fakes/fake_vta.dart';
 
@@ -16,13 +17,24 @@ Matcher _throwsUnavailable(String code) => throwsA(
 
 void main() {
   // did:key multibase of an Ed25519 key, multicodec-prefixed.
-  final publicKey = Ed25519DidKeySigner.fromSeed(
+  final signingKey = Ed25519DidKeySigner.fromSeed(
     Uint8List.fromList(List.generate(32, (i) => i)),
   ).did.substring('did:key:'.length);
+  final secret = Uint8List.fromList(List.generate(32, (i) => i + 1));
+  final agreementKey = toMultiBase(
+    Uint8List.fromList([
+      0x80,
+      0x24,
+      ...P256KeyPair.fromPrivateKey(secret).publicKey.bytes,
+    ]),
+  );
 
   late FakeVta vta;
   late VtcService service;
   late VtaConnectionKeys keys;
+
+  int loans() =>
+      vta.received.where((r) => r['type'] == VtaTask.exportSecret).length;
 
   setUp(() async {
     vta = FakeVta();
@@ -31,40 +43,89 @@ void main() {
         {'id': connectionKeysContextId},
       ],
     };
-    vta.answers[VtaTask.keysCreate] = {
-      'key': {'keyId': 'key-1', 'keyType': 'ed25519', 'publicKey': publicKey},
+    vta.answerTo[VtaTask.keysCreate] = (payload) => {
+      'key': {
+        'keyId': 'key-${payload['keyType']}',
+        'keyType': payload['keyType'],
+        'publicKey': payload['keyType'] == 'p256' ? agreementKey : signingKey,
+      },
+    };
+    vta.answerTo[VtaTask.exportSecret] = (payload) => {
+      'keyId': payload['keyId'],
+      'privateKeyMultibase': toMultiBase(
+        Uint8List.fromList([0x86, 0x26, ...secret]),
+      ),
     };
     service = await vta.linkedService();
     keys = VtaConnectionKeys(service);
   });
 
   group('VtaConnectionKeys', () {
-    test('creates the key on the VTA and keeps only its reference', () async {
-      final key = await keys.createKey(_connectionDid);
+    test('creates the keys on the VTA and keeps only references', () async {
+      final created = await keys.createKeys(_connectionDid);
 
-      expect(key!.keyId, 'key-1');
-      expect(key.publicKey, hasLength(32));
-      expect(
-        vta.received.map((request) => request['type']),
-        contains(VtaTask.keysCreate),
-      );
+      expect(created!.signing.keyId, 'key-ed25519');
+      expect(created.signing.publicKey, hasLength(32));
+      expect(created.agreement.keyId, 'key-p256');
+      expect(created.agreement.publicKey, hasLength(33));
 
-      final found = await keys.findKey(_connectionDid);
-      expect(found!.keyId, 'key-1');
-      expect(found.publicKey, key.publicKey);
-      final stored = await const FlutterSecureStorage().readAll();
-      expect(
-        stored.values.where((value) => value.contains('key-1')),
-        hasLength(1),
+      final found = await keys.findKeys(_connectionDid);
+      expect(found!.signing.keyId, 'key-ed25519');
+      expect(found.agreement.keyId, 'key-p256');
+      expect(found.agreement.publicKey, created.agreement.publicKey);
+
+      final stored = (await const FlutterSecureStorage().readAll()).values
+          .join();
+      expect(stored, contains('key-p256'));
+      expect(stored, isNot(contains('privateKey')));
+      expect(loans(), 0);
+    });
+
+    test('borrows the DIDComm key once while linked', () async {
+      final first = await keys.lendSecret('key-p256');
+      first.fillRange(0, first.length, 0);
+      final second = await keys.lendSecret('key-p256');
+
+      expect(second, secret);
+      expect(loans(), 1);
+    });
+
+    test('borrows the key once when asked for it at the same time', () async {
+      await Future.wait([
+        keys.lendSecret('key-p256'),
+        keys.lendSecret('key-p256'),
+      ]);
+
+      expect(loans(), 1);
+    });
+
+    test('forgets lent keys on unlink', () async {
+      await keys.lendSecret('key-p256');
+      await service.unlink();
+
+      await expectLater(
+        keys.lendSecret('key-p256'),
+        _throwsUnavailable(VtaSigningUnavailableException.notLinkedCode),
       );
     });
 
-    test('keeps the key on the device when no VTA is linked', () async {
+    test('asks again after a failed loan', () async {
+      vta.isDown = true;
+      await expectLater(
+        keys.lendSecret('key-p256'),
+        _throwsUnavailable(VtaSigningUnavailableException.unreachableCode),
+      );
+
+      vta.isDown = false;
+      expect(await keys.lendSecret('key-p256'), secret);
+    });
+
+    test('keeps the keys on the device when no VTA is linked', () async {
       await service.unlink();
       vta.received.clear();
 
-      expect(await keys.createKey(_connectionDid), isNull);
-      expect(await keys.findKey(_connectionDid), isNull);
+      expect(await keys.createKeys(_connectionDid), isNull);
+      expect(await keys.findKeys(_connectionDid), isNull);
       expect(vta.received, isEmpty);
     });
 
@@ -72,17 +133,17 @@ void main() {
       vta.isDown = true;
 
       await expectLater(
-        keys.createKey(_connectionDid),
+        keys.createKeys(_connectionDid),
         _throwsUnavailable(VtaSigningUnavailableException.unreachableCode),
       );
-      expect(await keys.findKey(_connectionDid), isNull);
+      expect(await keys.findKeys(_connectionDid), isNull);
     });
 
     test('fails when the linked VTA refuses', () async {
       vta.refusals[VtaTask.keysCreate] = {'code': 'forbidden'};
 
       await expectLater(
-        keys.createKey(_connectionDid),
+        keys.createKeys(_connectionDid),
         _throwsUnavailable(VtaSigningUnavailableException.unreachableCode),
       );
     });

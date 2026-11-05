@@ -81,9 +81,9 @@ meetingPlaceSdkProvider = FutureProvider<MeetingPlaceMatrixSDK>(
         logger: logger,
         rtcDelegate: FlutterMatrixRTCDelegate(),
         roomFactory: (_) => FlutterLiveKitRoom(),
-        // Connection DIDs sign credentials with keys held on the member's
-        // VTA; DIDComm keys stay on this device.
-        externalSigningKeys: VtaConnectionKeys(ref.read(vtcServiceProvider)),
+        // Connection DIDs are made of keys held on the member's VTA: it
+        // signs credentials, and lends the DIDComm key, kept in memory.
+        externalConnectionKeys: VtaConnectionKeys(ref.read(vtcServiceProvider)),
         options: MeetingPlaceMatrixSDKOptions(
           expectedMessageWrappingTypes: const [
             MessageWrappingType.authcryptPlaintext,

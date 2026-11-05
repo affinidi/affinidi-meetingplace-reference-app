@@ -25,12 +25,13 @@ class VtaSigningUnavailableException extends AppException {
   static const notLinkedCode = 'vtaNotLinked';
 }
 
-/// The signing keys of Meeting Place connection DIDs, held on the member's
-/// VTA: the VTA creates each one and signs credentials with it, and this
-/// device keeps only its id and public key, by DID.
+/// The keys of Meeting Place connection DIDs, held on the member's VTA:
+/// the VTA creates them, signs credentials with the signing key, and lends
+/// the DIDComm key when a message is sealed or unsealed. This device keeps
+/// only their ids and public keys, by DID, and lent keys in memory.
 ///
 /// Never logs a DID or key.
-class VtaConnectionKeys implements ExternalSigningKeys {
+class VtaConnectionKeys implements ExternalConnectionKeys {
   /// Creates [VtaConnectionKeys] that reach the VTA through the VTC service.
   VtaConnectionKeys(this._service, [FlutterSecureStorage? storage])
     : _storage =
@@ -42,21 +43,21 @@ class VtaConnectionKeys implements ExternalSigningKeys {
             ),
           );
 
-  static const _keyPrefix = 'vta_connection_key_';
+  static const _keyPrefix = 'vta_connection_keys_';
 
   final VtcService _service;
   final FlutterSecureStorage _storage;
 
-  /// Creates the signing key of [did] on the member's VTA, or returns null
-  /// when no VTA is linked, so [did] keeps its keys on this device.
+  /// Creates the keys of [did] on the member's VTA, or returns null when no
+  /// VTA is linked, so [did] keeps its keys on this device.
   ///
   /// Throws [VtaSigningUnavailableException] when a linked VTA cannot be
   /// reached or refuses.
   @override
-  Future<ExternalSigningKey?> createKey(String did) async {
-    final VtaSigningKey key;
+  Future<ExternalDidKeys?> createKeys(String did) async {
+    final ({VtaConnectionKey signing, VtaConnectionKey agreement}) keys;
     try {
-      key = await _call(_service.createConnectionKey);
+      keys = await _call(_service.createConnectionKeys);
     } on VtaSigningUnavailableException catch (error) {
       if (error.code == VtaSigningUnavailableException.notLinkedCode) {
         return null;
@@ -66,23 +67,24 @@ class VtaConnectionKeys implements ExternalSigningKeys {
     await _storage.write(
       key: '$_keyPrefix$did',
       value: jsonEncode({
-        'keyId': key.keyId,
-        'publicKey': base64Url.encode(key.publicKey),
+        'signing': _toJson(keys.signing),
+        'agreement': _toJson(keys.agreement),
       }),
     );
-    return ExternalSigningKey(keyId: key.keyId, publicKey: key.publicKey);
+    return ExternalDidKeys(
+      signing: _toExternal(keys.signing),
+      agreement: _toExternal(keys.agreement),
+    );
   }
 
   @override
-  Future<ExternalSigningKey?> findKey(String did) async {
+  Future<ExternalDidKeys?> findKeys(String did) async {
     final stored = await _storage.read(key: '$_keyPrefix$did');
     if (stored == null) return null;
     final json = jsonDecode(stored) as Map<String, dynamic>;
-    return ExternalSigningKey(
-      keyId: json['keyId'] as String,
-      publicKey: Uint8List.fromList(
-        base64Url.decode(json['publicKey'] as String),
-      ),
+    return ExternalDidKeys(
+      signing: _fromJson(json['signing'] as Map<String, dynamic>),
+      agreement: _fromJson(json['agreement'] as Map<String, dynamic>),
     );
   }
 
@@ -91,6 +93,30 @@ class VtaConnectionKeys implements ExternalSigningKeys {
     Map<String, dynamic> document, {
     required String keyId,
   }) => _call(() => _service.signConnectionDocument(document, keyId: keyId));
+
+  /// Borrows the DIDComm key [keyId] from the member's VTA, held in memory
+  /// for as long as the link lasts.
+  ///
+  /// Throws [VtaSigningUnavailableException] when no VTA is linked, or it
+  /// cannot be reached or refuses.
+  @override
+  Future<Uint8List> lendSecret(String keyId) =>
+      _call(() => _service.lendConnectionKey(keyId));
+
+  static Map<String, String> _toJson(VtaConnectionKey key) => {
+    'keyId': key.keyId,
+    'publicKey': base64Url.encode(key.publicKey),
+  };
+
+  static ExternalKey _toExternal(VtaConnectionKey key) =>
+      ExternalKey(keyId: key.keyId, publicKey: key.publicKey);
+
+  static ExternalKey _fromJson(Map<String, dynamic> json) => ExternalKey(
+    keyId: json['keyId'] as String,
+    publicKey: Uint8List.fromList(
+      base64Url.decode(json['publicKey'] as String),
+    ),
+  );
 
   static Future<T> _call<T>(Future<T> Function() action) async {
     try {
