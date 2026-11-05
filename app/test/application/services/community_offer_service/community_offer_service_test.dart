@@ -125,4 +125,83 @@ void main() {
       expect((await service.published(_communityDid))?.mnemonic, _phrase);
     });
   });
+
+  group('CommunityOfferService.findCommunity', () {
+    final community = Ed25519DidKeySigner.generate();
+    final admin = Ed25519DidKeySigner.generate();
+
+    Future<void> publishElsewhere(
+      String phrase, {
+      String role = 'admin',
+      String? signedPhrase,
+    }) async {
+      final statement = await signedJoinPhraseStatement(
+        phrase: signedPhrase ?? phrase,
+        community: community,
+        admin: admin,
+        role: role,
+      );
+      sdk.found[phrase] = fakeFoundOffer(
+        phrase,
+        contactInfo: {CommunityOffer.contactInfoKey: statement},
+      );
+    }
+
+    Matcher throwsProblem(CommunityPhraseProblem problem) => throwsA(
+      isA<CommunityPhraseException>().having(
+        (e) => e.problem,
+        'problem',
+        problem,
+      ),
+    );
+
+    test('finds the community an admin vouches for', () async {
+      await publishElsewhere(_phrase);
+
+      expect(await service.findCommunity(' $_phrase '), community.did);
+    });
+
+    test('finds no community under an unknown phrase', () async {
+      await expectLater(
+        service.findCommunity(_phrase),
+        throwsProblem(CommunityPhraseProblem.notFound),
+      );
+    });
+
+    test('finds no community under an expired phrase', () async {
+      sdk.findFailure = MeetingPlaceCoreSDKErrorCode.connectionOfferExpired;
+
+      await expectLater(
+        service.findCommunity(_phrase),
+        throwsProblem(CommunityPhraseProblem.expired),
+      );
+    });
+
+    test('finds no community behind an ordinary offer', () async {
+      sdk.found[_phrase] = fakeFoundOffer(_phrase);
+
+      await expectLater(
+        service.findCommunity(_phrase),
+        throwsProblem(CommunityPhraseProblem.notFound),
+      );
+    });
+
+    test('refuses a statement copied to another phrase', () async {
+      await publishElsewhere('my-club-2', signedPhrase: _phrase);
+
+      await expectLater(
+        service.findCommunity('my-club-2'),
+        throwsProblem(CommunityPhraseProblem.notVouched),
+      );
+    });
+
+    test('refuses a statement of a member who is no admin', () async {
+      await publishElsewhere(_phrase, role: 'member');
+
+      await expectLater(
+        service.findCommunity(_phrase),
+        throwsProblem(CommunityPhraseProblem.notVouched),
+      );
+    });
+  });
 }

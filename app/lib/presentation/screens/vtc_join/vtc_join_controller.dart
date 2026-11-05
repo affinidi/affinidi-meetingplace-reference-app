@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:meeting_place_core/meeting_place_core.dart'
+    show MeetingPlaceCoreSDKException;
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../application/services/community_offer_service/community_offer_service.dart';
 import '../../../application/services/identities_service/identities_service.dart';
 import '../../../application/services/vtc_service/vtc_service.dart';
 import '../../../domain/models/identity/identity.dart';
@@ -98,13 +101,16 @@ class VtcJoinController extends _$VtcJoinController {
     state = VtcJoinState();
   }
 
-  /// Reads the scanned community code and what the community asks.
+  /// Reads the scanned community code, a DID or a join phrase, and what
+  /// the community asks.
   Future<void> onScanned(String code) async {
     if (state.step != VtcJoinStep.scanning) return;
     state = state.copyWith(step: VtcJoinStep.working);
 
     await _run(() async {
-      final manifest = await _service.readCommunity(code);
+      final manifest = await _service.readCommunity(
+        await _communityDidOf(code),
+      );
       _manifest = manifest;
       final profile = await _profileOf(manifest.communityDid);
       var community = await _service.community(manifest.communityDid);
@@ -642,6 +648,18 @@ class VtcJoinController extends _$VtcJoinController {
   /// How a community refuses the leave of its last administrator.
   static const _lastAdministratorStatus = 409;
 
+  /// The DID [code] names: the code itself when it is a DID, else the
+  /// community whose join phrase it is. Text that is neither is refused
+  /// before any network call.
+  Future<String> _communityDidOf(String code) async {
+    final trimmed = code.trim();
+    if (trimmed.startsWith('did:')) return trimmed;
+    if (!CommunityOfferService.isPhrase(trimmed)) {
+      throw const InvalidCommunityCodeException();
+    }
+    return ref.read(communityOfferServiceProvider).findCommunity(trimmed);
+  }
+
   static VtcJoinStep _stepOf(VtcCommunity? community) {
     if (community == null) return VtcJoinStep.review;
     if (community.isMember) return VtcJoinStep.joined;
@@ -656,6 +674,21 @@ class VtcJoinController extends _$VtcJoinController {
       _fail(VtcJoinFailure.invalidCode);
     } on VtaNotLinkedException {
       _fail(VtcJoinFailure.vtaMissing);
+    } on CommunityPhraseException catch (error) {
+      _fail(switch (error.problem) {
+        CommunityPhraseProblem.notFound => VtcJoinFailure.phraseNotFound,
+        CommunityPhraseProblem.expired => VtcJoinFailure.phraseExpired,
+        CommunityPhraseProblem.notVouched => VtcJoinFailure.phraseNotVouched,
+      });
+    } on MeetingPlaceCoreSDKException catch (error, stackTrace) {
+      ref
+          .read(appLoggerProvider)
+          .error(
+            'Looking up the join phrase failed: ${error.code}',
+            stackTrace: stackTrace,
+            name: 'VtcJoinController',
+          );
+      _fail(VtcJoinFailure.unreachable);
     } on MeetingPlaceVtcSDKException catch (error, stackTrace) {
       if (error.refusalCode?.endsWith(':alreadyMember') ?? false) {
         // The community already counts this identity as a member.

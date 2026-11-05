@@ -58,6 +58,15 @@ enum VtcJoinFailure {
   /// The scanned code is not a community's DID.
   invalidCode,
 
+  /// No community goes by the join phrase entered.
+  phraseNotFound,
+
+  /// The join phrase entered expired.
+  phraseExpired,
+
+  /// No admin's statement for the join phrase entered verifies.
+  phraseNotVouched,
+
   /// No VTA is linked.
   vtaMissing,
 

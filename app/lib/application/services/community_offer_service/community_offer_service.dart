@@ -11,6 +11,28 @@ class CommunityPhraseTakenException implements Exception {
   const CommunityPhraseTakenException();
 }
 
+/// Why a phrase entered to join leads to no community.
+enum CommunityPhraseProblem {
+  /// No community goes by the phrase in Meeting Place.
+  notFound,
+
+  /// The phrase was a community's, but it expired.
+  expired,
+
+  /// The phrase names a community, but no admin's statement for it
+  /// verifies.
+  notVouched,
+}
+
+/// Thrown when a phrase entered to join leads to no community.
+class CommunityPhraseException implements Exception {
+  /// Creates a [CommunityPhraseException] for [problem].
+  const CommunityPhraseException(this.problem);
+
+  /// Why the phrase leads to no community.
+  final CommunityPhraseProblem problem;
+}
+
 /// A community's join phrase: a Meeting Place offer one of its admins
 /// publishes, so members find the community by a short phrase rather than
 /// its DID.
@@ -29,6 +51,14 @@ class CommunityOfferService {
 
   /// The contact card type of a join phrase's offer.
   static const contactCardType = 'community';
+
+  /// A character Meeting Place accepts in a phrase, as on the find offer
+  /// screen.
+  static final phraseCharacter = RegExp(r'[0-9!\-_a-zA-Z\s]');
+
+  /// Whether [text] is made only of characters a phrase may hold.
+  static bool isPhrase(String text) =>
+      text.isNotEmpty && text.split('').every(phraseCharacter.hasMatch);
 
   /// Marks this phone's join phrase offers, with the community's DID.
   static const _externalRefPrefix = 'vtc-join-phrase:';
@@ -49,6 +79,43 @@ class CommunityOfferService {
   /// Whether [phrase] is still free in Meeting Place.
   Future<bool> isPhraseAvailable(String phrase) async =>
       (await (await _sdk()).validateOfferPhrase(phrase.trim())).isAvailable;
+
+  /// The DID of the community whose join phrase [phrase] is, once the
+  /// admin's statement the offer carries verifies. Nothing else of the
+  /// offer is taken: not its name, nor its contact card, nor its invitation.
+  ///
+  /// Throws [CommunityPhraseException] when the phrase leads to no
+  /// community, and [MeetingPlaceCoreSDKException] when Meeting Place
+  /// cannot be reached.
+  Future<String> findCommunity(String phrase) async {
+    final FindOfferResult result;
+    try {
+      result = await (await _sdk()).findOffer(mnemonic: phrase.trim());
+    } on MeetingPlaceCoreSDKException catch (error) {
+      if (error.code ==
+          MeetingPlaceCoreSDKErrorCode.connectionOfferExpired.value) {
+        throw const CommunityPhraseException(CommunityPhraseProblem.expired);
+      }
+      if (error.code ==
+          MeetingPlaceCoreSDKErrorCode.connectionOfferNotFoundError.value) {
+        throw const CommunityPhraseException(CommunityPhraseProblem.notFound);
+      }
+      rethrow;
+    }
+    // Whether this phone could claim the offer does not matter: a join
+    // phrase is never claimed.
+    final offer = result.connectionOffer;
+    final statement = offer == null ? null : statementOf(offer.contactCard);
+    if (offer == null || statement == null) {
+      throw const CommunityPhraseException(CommunityPhraseProblem.notFound);
+    }
+    try {
+      // The phrase the offer is registered under, as Meeting Place has it.
+      return await CommunityOffer.verify(statement, phrase: offer.mnemonic);
+    } on MeetingPlaceVtcSDKException {
+      throw const CommunityPhraseException(CommunityPhraseProblem.notVouched);
+    }
+  }
 
   /// The join phrase this phone published for [communityDid] and has not
   /// withdrawn, or null.

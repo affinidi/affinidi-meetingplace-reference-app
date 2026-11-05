@@ -3,7 +3,10 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:meeting_place_core/meeting_place_core.dart'
+    show MeetingPlaceCoreSDKException;
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
+import 'package:mpx_flutter_reference_app/application/services/community_offer_service/community_offer_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service_state.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
@@ -21,8 +24,28 @@ import '../../../fakes/fake_persona.dart';
 import '../../../fakes/fake_vta.dart';
 import '../../../fakes/fake_vtc_network.dart';
 
+/// Finds the communities of [phrases]; any other phrase fails with
+/// [failure].
+class _FakeCommunityOffers implements CommunityOfferService {
+  final phrases = <String, String>{};
+  Exception failure = const CommunityPhraseException(
+    CommunityPhraseProblem.notFound,
+  );
+  final lookedUp = <String>[];
+
+  @override
+  Future<String> findCommunity(String phrase) async {
+    lookedUp.add(phrase);
+    return phrases[phrase] ?? (throw failure);
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
+}
+
 void main() {
   late FakeVtcNetwork network;
+  late _FakeCommunityOffers communityOffers;
   late VtcService service;
   late ProviderContainer container;
   late Ed25519DidKeySigner persona;
@@ -38,6 +61,7 @@ void main() {
     container = ProviderContainer(
       overrides: [
         vtcServiceProvider.overrideWithValue(service),
+        communityOfferServiceProvider.overrideWithValue(communityOffers),
         identitiesServiceProvider.overrideWith(
           () => FakeIdentitiesService(identities),
         ),
@@ -55,6 +79,7 @@ void main() {
   setUp(() async {
     identities = IdentitiesServiceState();
     FlutterSecureStorage.setMockInitialValues({});
+    communityOffers = _FakeCommunityOffers();
     network = FakeVtcNetwork();
     persona = Ed25519DidKeySigner.generate();
     network.vta
@@ -946,6 +971,53 @@ void main() {
       await controller().onScanned('https://example.com');
 
       expect(state().step, VtcJoinStep.failed);
+      expect(state().failure, VtcJoinFailure.invalidCode);
+      expect(communityOffers.lookedUp, isEmpty);
+    });
+
+    test('opens the community a join phrase leads to', () async {
+      communityOffers.phrases['my-club'] = fakeVtcDid;
+
+      await controller().onScanned(' my-club ');
+
+      expect(communityOffers.lookedUp, ['my-club']);
+      expect(state().step, VtcJoinStep.review);
+      expect(state().communityDid, fakeVtcDid);
+    });
+
+    for (final (problem, failure) in [
+      (CommunityPhraseProblem.notFound, VtcJoinFailure.phraseNotFound),
+      (CommunityPhraseProblem.expired, VtcJoinFailure.phraseExpired),
+      (CommunityPhraseProblem.notVouched, VtcJoinFailure.phraseNotVouched),
+    ]) {
+      test('says why a join phrase leads nowhere: ${problem.name}', () async {
+        communityOffers.failure = CommunityPhraseException(problem);
+
+        await controller().onScanned('my-club');
+
+        expect(state().step, VtcJoinStep.failed);
+        expect(state().failure, failure);
+        expect(network.joinRequests, isEmpty);
+      });
+    }
+
+    test('says when Meeting Place cannot be reached for a phrase', () async {
+      communityOffers.failure = MeetingPlaceCoreSDKException(
+        message: 'offline',
+        code: 'transport',
+        innerException: StateError('offline'),
+      );
+
+      await controller().onScanned('my-club');
+
+      expect(state().failure, VtcJoinFailure.unreachable);
+    });
+
+    test('refuses a phrase that leads to a DID no community uses', () async {
+      communityOffers.phrases['my-club'] = 'did:key:z6MkhaXgBZD';
+
+      await controller().onScanned('my-club');
+
       expect(state().failure, VtcJoinFailure.invalidCode);
     });
 

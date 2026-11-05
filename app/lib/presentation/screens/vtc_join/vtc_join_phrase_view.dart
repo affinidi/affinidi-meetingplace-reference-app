@@ -185,9 +185,6 @@ class _PhraseDialog extends HookWidget {
 
   final String communityName;
 
-  /// What Meeting Place accepts in a phrase, as on the find offer screen.
-  static final _phraseCharacters = RegExp(r'[0-9!\-_a-zA-Z\s]');
-
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -199,7 +196,11 @@ class _PhraseDialog extends HookWidget {
         key: const Key('vtc_join_phrase_field'),
         controller: field,
         autofocus: true,
-        inputFormatters: [FilteringTextInputFormatter.allow(_phraseCharacters)],
+        inputFormatters: [
+          FilteringTextInputFormatter.allow(
+            CommunityOfferService.phraseCharacter,
+          ),
+        ],
         decoration: InputDecoration(labelText: l10n.vtcJoinPhraseHint),
         onSubmitted: (_) => submit(),
       ),

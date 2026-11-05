@@ -4181,13 +4181,13 @@ abstract class AppLocalizations {
   /// No description provided for @vtcJoinIntro.
   ///
   /// In en, this message translates to:
-  /// **'Scan the community\'s QR code, or paste its DID. You see what it asks before anything is sent.'**
+  /// **'Scan the community\'s QR code, paste its DID, or enter its join phrase. You see what it asks before anything is sent.'**
   String get vtcJoinIntro;
 
   /// No description provided for @vtcJoinDidHint.
   ///
   /// In en, this message translates to:
-  /// **'Community DID'**
+  /// **'Community DID or join phrase'**
   String get vtcJoinDidHint;
 
   /// No description provided for @vtcJoinScanAction.
@@ -5255,7 +5255,7 @@ abstract class AppLocalizations {
   /// Why joining a community could not go ahead
   ///
   /// In en, this message translates to:
-  /// **'{reason, select, invalidCode{This isn\'t a community\'s code.} profileMissing{Your VTA has no profile for this identity, so it can\'t share the details the community asks for. Set up your profile on your VTA, then try again.} detailsMissing{Your VTA doesn\'t hold a detail the community requires, so nothing was sent.} credentialMissing{Your identity holds no credential this way in accepts that your VTA can present, so nothing was sent.} vtaMissing{Link your VTA in Settings before joining a community.} unreachable{The community can\'t be reached from your phone.} noDidHosting{Your VTA has no DID hosting server, so it can\'t create an identity the community can find.} notAccepting{This community isn\'t accepting applications.} badAnswer{The community\'s answer couldn\'t be checked, so nothing was recorded.} lastAdministrator{You\'re this community\'s last administrator. Make another member an administrator before you leave.} other{The community or your VTA refused the application.}}'**
+  /// **'{reason, select, invalidCode{This isn\'t a community\'s code.} phraseNotFound{No community goes by this phrase in Meeting Place.} phraseExpired{This join phrase has expired. Ask the community for its current phrase.} phraseNotVouched{Meeting Place couldn\'t confirm that the community stands behind this phrase, so it wasn\'t opened.} profileMissing{Your VTA has no profile for this identity, so it can\'t share the details the community asks for. Set up your profile on your VTA, then try again.} detailsMissing{Your VTA doesn\'t hold a detail the community requires, so nothing was sent.} credentialMissing{Your identity holds no credential this way in accepts that your VTA can present, so nothing was sent.} vtaMissing{Link your VTA in Settings before joining a community.} unreachable{The community can\'t be reached from your phone.} noDidHosting{Your VTA has no DID hosting server, so it can\'t create an identity the community can find.} notAccepting{This community isn\'t accepting applications.} badAnswer{The community\'s answer couldn\'t be checked, so nothing was recorded.} lastAdministrator{You\'re this community\'s last administrator. Make another member an administrator before you leave.} other{The community or your VTA refused the application.}}'**
   String vtcJoinFailure(String reason);
 
   /// No description provided for @vtaDetailsTitle.

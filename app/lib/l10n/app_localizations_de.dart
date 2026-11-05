@@ -2836,10 +2836,10 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get vtcJoinIntro =>
-      'Scan the community\'s QR code, or paste its DID. You see what it asks before anything is sent.';
+      'Scan the community\'s QR code, paste its DID, or enter its join phrase. You see what it asks before anything is sent.';
 
   @override
-  String get vtcJoinDidHint => 'Community DID';
+  String get vtcJoinDidHint => 'Community DID or join phrase';
 
   @override
   String get vtcJoinScanAction => 'Scan QR code';
@@ -3517,6 +3517,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String vtcJoinFailure(String reason) {
     String _temp0 = intl.Intl.selectLogic(reason, {
       'invalidCode': 'This isn\'t a community\'s code.',
+      'phraseNotFound': 'No community goes by this phrase in Meeting Place.',
+      'phraseExpired':
+          'This join phrase has expired. Ask the community for its current phrase.',
+      'phraseNotVouched':
+          'Meeting Place couldn\'t confirm that the community stands behind this phrase, so it wasn\'t opened.',
       'profileMissing':
           'Your VTA has no profile for this identity, so it can\'t share the details the community asks for. Set up your profile on your VTA, then try again.',
       'detailsMissing':

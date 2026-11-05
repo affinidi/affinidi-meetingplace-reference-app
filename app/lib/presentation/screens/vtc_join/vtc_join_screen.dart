@@ -242,7 +242,7 @@ class _EnterCode extends HookConsumerWidget {
           key: const Key('vtc_join_did'),
           controller: field,
           label: l10n.vtcJoinDidHint,
-          hint: 'did:webvh:…',
+          hint: 'did:webvh:… · my-club',
           onSubmitted: submit,
           suffixIcon: IconButton(
             tooltip: l10n.vtcJoinPasteAction,
