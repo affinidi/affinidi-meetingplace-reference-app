@@ -153,9 +153,9 @@ class _JsonSheet extends HookWidget {
               child: Container(
                 margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 decoration: BoxDecoration(
-                  color: colors.surfaceContainerLowest,
+                  color: _JsonColors.background(colors),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: colors.outlineVariant),
+                  border: Border.all(color: colors.onSurface.withAlpha(40)),
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: SingleChildScrollView(
@@ -180,7 +180,13 @@ class _JsonSheet extends HookWidget {
   }
 }
 
-/// The colours of each kind of JSON token, from the theme.
+/// The colours of each kind of JSON token, on the dark panel they are
+/// drawn on.
+///
+/// The app's scheme is seeded light and only partly made dark, so its
+/// container and accent colours are a light theme's: a white panel under
+/// white punctuation, and dark accents. The panel and tokens are therefore
+/// chosen here, light on dark.
 class _JsonColors {
   const _JsonColors({
     required this.key,
@@ -190,11 +196,17 @@ class _JsonColors {
   });
 
   factory _JsonColors.of(ColorScheme colors) => _JsonColors(
-    key: colors.primary,
-    string: colors.tertiary,
-    literal: colors.secondary,
-    punctuation: colors.onSurfaceVariant,
+    key: colors.secondary,
+    string: Colors.lightGreen.shade300,
+    literal: Colors.amber.shade300,
+    punctuation: colors.onSurface.withAlpha(_punctuationAlpha),
   );
+
+  /// The panel the document is drawn on.
+  static Color background(ColorScheme colors) => colors.surface;
+
+  /// Punctuation stays readable but steps back from the values.
+  static const _punctuationAlpha = 190;
 
   final Color key;
   final Color string;

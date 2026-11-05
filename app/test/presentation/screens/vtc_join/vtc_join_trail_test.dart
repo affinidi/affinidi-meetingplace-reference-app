@@ -335,6 +335,43 @@ void main() {
       );
     });
 
+    testWidgets('draws every JSON token readable on its panel', (tester) async {
+      await pumpTrail(tester, submit: presented);
+      await tester.tap(
+        find.byKey(const Key('vtc_join_trail_presentation_document')),
+      );
+      await tester.pumpAndSettle();
+
+      final json = find.byKey(const Key('vtc_join_json'));
+      final panel = tester
+          .widgetList<Container>(
+            find.ancestor(of: json, matching: find.byType(Container)),
+          )
+          .firstWhere((container) => container.decoration != null);
+      final background = (panel.decoration! as BoxDecoration).color!;
+      double contrast(Color a, Color b) {
+        final (light, dark) = [a.computeLuminance(), b.computeLuminance()].fold(
+          (0.0, 1.0),
+          (pair, l) => (l > pair.$1 ? l : pair.$1, l < pair.$2 ? l : pair.$2),
+        );
+        return (light + 0.05) / (dark + 0.05);
+      }
+
+      final spans = tester.widget<SelectableText>(json).textSpan!.children!;
+      final punctuation = spans.cast<TextSpan>().where(
+        (span) => span.text!.contains(RegExp(r'[\[\]{},:]')),
+      );
+      expect(punctuation, isNotEmpty);
+      for (final span in spans.cast<TextSpan>()) {
+        final color = Color.alphaBlend(span.style!.color!, background);
+        expect(
+          contrast(color, background),
+          greaterThanOrEqualTo(4.5),
+          reason: '"${span.text}" is hard to read on its panel',
+        );
+      }
+    });
+
     testWidgets('shows a receipt kept without its documents', (tester) async {
       await pumpTrail(tester, receipt: submit.receipt);
 
