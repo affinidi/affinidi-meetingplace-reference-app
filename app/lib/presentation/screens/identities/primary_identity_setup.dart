@@ -15,6 +15,7 @@ class _PrimaryIdentitySetup extends ConsumerWidget {
       provider.select((s) => s.hasEnteredAnyInfo),
     );
     final canSave = ref.watch(provider.select((s) => s.canSave));
+    final isSaving = ref.watch(provider.select((s) => s.isSaving));
     final l10n = context.l10n;
     final emailField = ContactCardFieldDefinitions.byKey(
       ContactCardFieldKey.email,
@@ -64,6 +65,8 @@ class _PrimaryIdentitySetup extends ConsumerWidget {
             ),
           ),
           ElevatedLoadingButton(
+            key: const Key('primary_identity_save'),
+            isLoading: isSaving,
             onPressed: canSave ? handleSave : null,
             child: Text(
               hasEnteredAnyInfo
