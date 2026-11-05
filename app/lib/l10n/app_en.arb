@@ -2753,6 +2753,39 @@
 	"@vtcJoinTrailHeading": {
 		"description": "Heading of the card that shows the path an open application took"
 	},
+	"vtcJoinTrailPresentation": "Your credential, presented",
+	"@vtcJoinTrailPresentation": {
+		"description": "Trail step: the application carries a presentation of the member's credentials"
+	},
+	"vtcJoinTrailPresentationSummary": "{types} · inside your signed application",
+	"@vtcJoinTrailPresentationSummary": {
+		"description": "Trail step summary: the types of the credentials presented, which the signed application carries",
+		"placeholders": {
+			"types": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinTrailHolder": "Holder",
+	"@vtcJoinTrailHolder": {
+		"description": "Trail detail: the identity that presents the credentials"
+	},
+	"vtcJoinTrailCredential": "Credential",
+	"@vtcJoinTrailCredential": {
+		"description": "Trail detail: the types of a credential presented"
+	},
+	"vtcJoinTrailIssuer": "Issued by",
+	"@vtcJoinTrailIssuer": {
+		"description": "Trail detail: the DID that issued a credential presented"
+	},
+	"vtcJoinTrailValidUntil": "Valid until",
+	"@vtcJoinTrailValidUntil": {
+		"description": "Trail detail: when a credential presented stops holding"
+	},
+	"vtcJoinTrailPresentationDocument": "Your presentation",
+	"@vtcJoinTrailPresentationDocument": {
+		"description": "Title of the sheet that shows the presentation the application carries"
+	},
 	"vtcJoinTrailVta": "Signed by your VTA",
 	"@vtcJoinTrailVta": {
 		"description": "Trail step: the member's VTA signed the application"

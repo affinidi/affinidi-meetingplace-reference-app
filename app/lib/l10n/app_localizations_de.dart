@@ -2997,6 +2997,29 @@ class AppLocalizationsDe extends AppLocalizations {
   String get vtcJoinTrailHeading => 'Your application';
 
   @override
+  String get vtcJoinTrailPresentation => 'Your credential, presented';
+
+  @override
+  String vtcJoinTrailPresentationSummary(String types) {
+    return '$types · inside your signed application';
+  }
+
+  @override
+  String get vtcJoinTrailHolder => 'Holder';
+
+  @override
+  String get vtcJoinTrailCredential => 'Credential';
+
+  @override
+  String get vtcJoinTrailIssuer => 'Issued by';
+
+  @override
+  String get vtcJoinTrailValidUntil => 'Valid until';
+
+  @override
+  String get vtcJoinTrailPresentationDocument => 'Your presentation';
+
+  @override
   String get vtcJoinTrailVta => 'Signed by your VTA';
 
   @override

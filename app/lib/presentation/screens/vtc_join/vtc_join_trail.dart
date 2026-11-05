@@ -8,10 +8,11 @@ import '../../widgets/onboarding_style/onboarding_style.dart';
 import 'vtc_detail_line.dart';
 import 'vtc_join_json_dialog.dart';
 
-/// Where an open application stands, drawn as the path it took: signed by
-/// the member's VTA as their identity in the community, sent from this
-/// phone and answered by the community, now with its administrators, and
-/// the membership card still to come. Each step opens to the proof behind
+/// Where an open application stands, drawn as the path it took: the
+/// credentials it presents, if any; signed by the member's VTA as their
+/// identity in the community, sent from this phone and answered by the
+/// community, now with its administrators, and the membership card still
+/// to come. Each step opens to the proof behind
 /// it, and shows its signed document in full, as [submit] and [lastCheck]
 /// hold them.
 class VtcJoinTrail extends StatelessWidget {
@@ -61,6 +62,8 @@ class VtcJoinTrail extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final receipt = submit?.receipt ?? this.receipt;
+    final presentation = _presentationOf(submit);
+    final credentials = _credentialsOf(presentation);
     final lastCheck = this.lastCheck?.receipt;
     final locale = l10n.localeName;
     String time(DateTime at) =>
@@ -93,6 +96,49 @@ class VtcJoinTrail extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (presentation != null && credentials.isNotEmpty)
+          _Step(
+            key: const Key('vtc_join_trail_presentation'),
+            icon: Icons.workspace_premium_outlined,
+            stage: _Stage.done,
+            title: l10n.vtcJoinTrailPresentation,
+            summary: l10n.vtcJoinTrailPresentationSummary(
+              credentials.map(_typesOf).join(', '),
+            ),
+            details: [
+              if (presentation['holder'] case final String holder)
+                _Detail(
+                  Icons.fingerprint,
+                  l10n.vtcJoinTrailHolder,
+                  holder,
+                  isId: true,
+                ),
+              for (final credential in credentials) ...[
+                _Detail(
+                  Icons.workspace_premium_outlined,
+                  l10n.vtcJoinTrailCredential,
+                  _typesOf(credential),
+                ),
+                if (_issuerOf(credential) case final issuer?)
+                  _Detail(
+                    Icons.account_balance_outlined,
+                    l10n.vtcJoinTrailIssuer,
+                    issuer,
+                    isId: true,
+                  ),
+                if (DateTime.tryParse('${credential['validUntil']}')
+                    case final until?)
+                  _Detail(
+                    Icons.event_outlined,
+                    l10n.vtcJoinTrailValidUntil,
+                    time(until),
+                  ),
+              ],
+            ],
+            document: presentation,
+            documentTitle: l10n.vtcJoinTrailPresentationDocument,
+            documentKey: const Key('vtc_join_trail_presentation_document'),
+          ),
         _Step(
           key: const Key('vtc_join_trail_vta'),
           icon: Icons.draw_outlined,
@@ -222,6 +268,40 @@ class VtcJoinTrail extends StatelessWidget {
     );
   }
 }
+
+/// The presentation [submit] carries, as the application holds it.
+Map<String, dynamic>? _presentationOf(TrustTaskExchange? submit) =>
+    switch (submit?.request.payload['vp']) {
+      final Map<String, dynamic> vp => vp,
+      _ => null,
+    };
+
+/// The credentials [presentation] holds.
+List<Map<String, dynamic>> _credentialsOf(Map<String, dynamic>? presentation) =>
+    switch (presentation?['verifiableCredential']) {
+      final Map<String, dynamic> credential => [credential],
+      final List<dynamic> credentials =>
+        credentials.whereType<Map<String, dynamic>>().toList(),
+      _ => const [],
+    };
+
+/// A credential's own types, without the `VerifiableCredential` every one
+/// has.
+String _typesOf(Map<String, dynamic> credential) {
+  final types = switch (credential['type']) {
+    final String type => [type],
+    final List<dynamic> types => types.whereType<String>(),
+    _ => const <String>[],
+  }.where((type) => type != 'VerifiableCredential');
+  return types.isEmpty ? 'VerifiableCredential' : types.join(', ');
+}
+
+String? _issuerOf(Map<String, dynamic> credential) =>
+    switch (credential['issuer']) {
+      final String id => id,
+      {'id': final String id} => id,
+      _ => null,
+    };
 
 /// How far the application got with a step.
 enum _Stage { done, current, next }

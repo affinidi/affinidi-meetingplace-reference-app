@@ -65,6 +65,34 @@ void main() {
     answeredAt: '2026-11-04T10:13:00Z',
   );
 
+  final credential = {
+    '@context': ['https://www.w3.org/ns/credentials/v2'],
+    'id': 'urn:uuid:credential',
+    'type': ['VerifiableCredential', 'MembershipCredential'],
+    'issuer': 'did:key:z6MkIssuer',
+    'validUntil': '2027-11-04T10:00:00Z',
+    'credentialSubject': {'id': 'did:webvh:persona', 'memberOf': 'Chess'},
+  };
+  final presented = exchange(
+    type: JoinTask.submit,
+    id: 'urn:uuid:submit',
+    payload: {
+      'vp': {
+        '@context': ['https://www.w3.org/ns/credentials/v2'],
+        'type': ['VerifiablePresentation'],
+        'holder': 'did:webvh:persona',
+        'verifiableCredential': [credential],
+      },
+      'criterion': 'z1',
+    },
+    answer: {
+      'requestId': 'request-1',
+      'verdict': {'effect': 'refer', 'with': <String, dynamic>{}},
+    },
+    signedAt: '2026-11-04T10:12:00Z',
+    answeredAt: '2026-11-04T10:13:00Z',
+  );
+
   final lastCheck = exchange(
     type: JoinTask.status,
     id: 'urn:uuid:status',
@@ -254,6 +282,57 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text("The community's last signed answer"), findsOneWidget);
       expect(find.textContaining('"status": "pending"'), findsOneWidget);
+    });
+
+    testWidgets('shows the credential the application presents', (
+      tester,
+    ) async {
+      await pumpTrail(tester, submit: presented);
+
+      expect(find.text('Your credential, presented'), findsOneWidget);
+      expect(
+        find.text('MembershipCredential · inside your signed application'),
+        findsOneWidget,
+      );
+      // It comes before the VTA signs the application that carries it.
+      expect(
+        tester
+            .getTopLeft(find.byKey(const Key('vtc_join_trail_presentation')))
+            .dy,
+        lessThan(
+          tester.getTopLeft(find.byKey(const Key('vtc_join_trail_vta'))).dy,
+        ),
+      );
+
+      await tester.tap(find.byKey(const Key('vtc_join_trail_presentation')));
+      await tester.pumpAndSettle();
+      expect(find.text('Holder'), findsOneWidget);
+      expect(find.text('did:webvh:persona'), findsOneWidget);
+      expect(find.text('Issued by'), findsOneWidget);
+      expect(find.text('did:key:z6MkIssuer'), findsOneWidget);
+      expect(find.text('Valid until'), findsOneWidget);
+
+      await tester.tap(
+        find.byKey(const Key('vtc_join_trail_presentation_document')),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Your presentation'), findsOneWidget);
+      final json = tester.widget<SelectableText>(
+        find.byKey(const Key('vtc_join_json')),
+      );
+      expect(
+        jsonDecode(json.textSpan!.toPlainText()),
+        presented.request.payload['vp'],
+      );
+    });
+
+    testWidgets('has no presentation step without credentials', (tester) async {
+      await pumpTrail(tester, submit: submit);
+
+      expect(
+        find.byKey(const Key('vtc_join_trail_presentation')),
+        findsNothing,
+      );
     });
 
     testWidgets('shows a receipt kept without its documents', (tester) async {

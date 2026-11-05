@@ -4456,6 +4456,48 @@ abstract class AppLocalizations {
   /// **'Your application'**
   String get vtcJoinTrailHeading;
 
+  /// Trail step: the application carries a presentation of the member's credentials
+  ///
+  /// In en, this message translates to:
+  /// **'Your credential, presented'**
+  String get vtcJoinTrailPresentation;
+
+  /// Trail step summary: the types of the credentials presented, which the signed application carries
+  ///
+  /// In en, this message translates to:
+  /// **'{types} · inside your signed application'**
+  String vtcJoinTrailPresentationSummary(String types);
+
+  /// Trail detail: the identity that presents the credentials
+  ///
+  /// In en, this message translates to:
+  /// **'Holder'**
+  String get vtcJoinTrailHolder;
+
+  /// Trail detail: the types of a credential presented
+  ///
+  /// In en, this message translates to:
+  /// **'Credential'**
+  String get vtcJoinTrailCredential;
+
+  /// Trail detail: the DID that issued a credential presented
+  ///
+  /// In en, this message translates to:
+  /// **'Issued by'**
+  String get vtcJoinTrailIssuer;
+
+  /// Trail detail: when a credential presented stops holding
+  ///
+  /// In en, this message translates to:
+  /// **'Valid until'**
+  String get vtcJoinTrailValidUntil;
+
+  /// Title of the sheet that shows the presentation the application carries
+  ///
+  /// In en, this message translates to:
+  /// **'Your presentation'**
+  String get vtcJoinTrailPresentationDocument;
+
   /// Trail step: the member's VTA signed the application
   ///
   /// In en, this message translates to:
