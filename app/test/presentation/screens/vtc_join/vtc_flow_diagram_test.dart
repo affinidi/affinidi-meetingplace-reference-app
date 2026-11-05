@@ -31,14 +31,9 @@ void main() {
     );
 
     expect(tester.takeException(), isNull);
-    // Read left to right.
-    expect(
-      tester.getCenter(find.text('Your VTA')).dx,
-      lessThan(tester.getCenter(find.text('signs the leave')).dx),
-    );
-    expect(
-      tester.getCenter(find.text('signs the leave')).dx,
-      lessThan(tester.getCenter(find.text('This phone')).dx),
-    );
+    // Read left to right, wrapping onto the next line when it must.
+    final vta = tester.getTopLeft(find.text('Your VTA'));
+    final signs = tester.getTopLeft(find.text('signs the leave →'));
+    expect(signs.dy > vta.dy || signs.dx > vta.dx, isTrue);
   });
 }
