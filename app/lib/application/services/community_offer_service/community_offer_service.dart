@@ -124,8 +124,11 @@ class CommunityOfferService {
           .firstOrNull;
 
   /// Publishes [phrase] as the join phrase of [communityDid], named
-  /// [communityName], in place of one this phone published before. It lasts
-  /// until withdrawn.
+  /// [communityName] and described as [description], in place of one this
+  /// phone published before. It lasts until withdrawn.
+  ///
+  /// Meeting Place shows the name and description only where an app opens
+  /// the offer as a contact's, and refuses an empty description.
   ///
   /// Throws [CommunityPhraseTakenException] when the phrase is registered
   /// already, and [MeetingPlaceCoreSDKException] when Meeting Place cannot
@@ -134,6 +137,7 @@ class CommunityOfferService {
     String communityDid, {
     required String phrase,
     required String communityName,
+    required String description,
   }) async {
     final trimmed = phrase.trim();
     final sdk = await _sdk();
@@ -152,7 +156,7 @@ class CommunityOfferService {
           type: contactCardType,
           contactInfo: {contactInfoKey: communityDid},
         ),
-        offerDescription: '',
+        offerDescription: description,
         customMnemonic: trimmed,
         mediatorDid: _mediatorDid(),
         externalRef: _externalRef(communityDid),

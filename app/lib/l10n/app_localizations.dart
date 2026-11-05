@@ -5444,6 +5444,12 @@ abstract class AppLocalizations {
   /// **'Phrase'**
   String get vtcJoinPhraseHint;
 
+  /// Description of a community's join phrase offer, as an app that opens it as a contact's offer shows it
+  ///
+  /// In en, this message translates to:
+  /// **'Join {name} in Meeting Place'**
+  String vtcJoinPhraseOfferDescription(String name);
+
   /// Explains a published join phrase of a community
   ///
   /// In en, this message translates to:

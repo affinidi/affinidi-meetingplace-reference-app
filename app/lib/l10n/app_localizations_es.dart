@@ -3651,6 +3651,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get vtcJoinPhraseHint => 'Phrase';
 
   @override
+  String vtcJoinPhraseOfferDescription(String name) {
+    return 'Join $name in Meeting Place';
+  }
+
+  @override
   String vtcJoinPhrasePublished(String name, String phrase) {
     return 'People find $name by entering \"$phrase\" or scanning this code in Meeting Place, until you withdraw it.';
   }

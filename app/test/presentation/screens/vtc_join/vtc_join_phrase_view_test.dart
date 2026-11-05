@@ -71,6 +71,7 @@ void main() {
     await publish(tester, 'my-club');
 
     expect(sdk.requests.single.customMnemonic, 'my-club');
+    expect(sdk.requests.single.offerDescription, 'Join Club in Meeting Place');
     expect(find.byKey(const Key('vtc_join_phrase_text')), findsOneWidget);
     expect(find.text('my-club'), findsOneWidget);
     expect(find.textContaining('nothing about you'), findsOneWidget);

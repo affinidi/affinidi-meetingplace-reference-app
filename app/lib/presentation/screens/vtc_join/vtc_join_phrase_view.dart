@@ -62,6 +62,7 @@ class VtcJoinPhraseView extends HookConsumerWidget {
           communityDid,
           phrase: phrase,
           communityName: communityName,
+          description: l10n.vtcJoinPhraseOfferDescription(communityName),
         ),
       );
     }

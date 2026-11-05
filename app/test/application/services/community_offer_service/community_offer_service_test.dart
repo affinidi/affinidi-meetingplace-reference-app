@@ -19,8 +19,12 @@ void main() {
     );
   });
 
-  Future<ConnectionOffer> publish({String phrase = _phrase}) =>
-      service.publish(_communityDid, phrase: phrase, communityName: 'Club');
+  Future<ConnectionOffer> publish({String phrase = _phrase}) => service.publish(
+    _communityDid,
+    phrase: phrase,
+    communityName: 'Club',
+    description: 'Join Club in Meeting Place',
+  );
 
   group('CommunityOfferService.publish', () {
     test('publishes only the community\'s DID, until withdrawn', () async {
@@ -29,6 +33,7 @@ void main() {
       final request = sdk.requests.single;
       expect(request.customMnemonic, _phrase);
       expect(request.offerName, 'Club');
+      expect(request.offerDescription, 'Join Club in Meeting Place');
       expect(request.validUntil, isNull);
       expect(request.maximumUsage, isNull);
       expect(request.mediatorDid, 'did:web:mediator.example');

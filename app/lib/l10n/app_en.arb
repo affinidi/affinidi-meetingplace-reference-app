@@ -3557,6 +3557,15 @@
 		}
 	},
 	"vtcJoinPhraseHint": "Phrase",
+	"vtcJoinPhraseOfferDescription": "Join {name} in Meeting Place",
+	"@vtcJoinPhraseOfferDescription": {
+		"description": "Description of a community's join phrase offer, as an app that opens it as a contact's offer shows it",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
 	"vtcJoinPhrasePublished": "People find {name} by entering \"{phrase}\" or scanning this code in Meeting Place, until you withdraw it.",
 	"@vtcJoinPhrasePublished": {
 		"description": "Explains a published join phrase of a community",
