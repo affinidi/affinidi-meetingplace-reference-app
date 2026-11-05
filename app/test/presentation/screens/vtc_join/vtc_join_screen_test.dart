@@ -188,7 +188,6 @@ void main() {
           .map((card) => card.title);
       expect(cards, [
         'About the community',
-        'Is this the right community?',
         'If you join, Football club can:',
         'Ways in',
       ]);
@@ -588,46 +587,6 @@ void main() {
       ]) {
         expect(find.text(text), findsOneWidget, reason: text);
       }
-    });
-
-    testWidgets('shows where the community is hosted, from its DID', (
-      tester,
-    ) async {
-      await pumpScreen(tester);
-
-      await enterCode(tester, fakeVtcDid);
-
-      final check = find.byWidgetPredicate(
-        (widget) =>
-            widget is GlassCard &&
-            widget.title == 'Is this the right community?',
-      );
-      expect(
-        find.descendant(of: check, matching: find.text('community.example')),
-        findsOneWidget,
-      );
-      // A did:web has no fingerprint to compare.
-      expect(find.byKey(const Key('vtc_join_fingerprint')), findsNothing);
-      // Its profile lists a website on club.example, another domain.
-      expect(
-        find.byKey(const Key('vtc_join_website_elsewhere')),
-        findsOneWidget,
-      );
-    });
-
-    testWidgets('notes nothing for a website on the community domain', (
-      tester,
-    ) async {
-      network.publicProfile = {
-        ...?network.publicProfile,
-        'publicUrl': 'https://community.example/',
-      };
-      await pumpScreen(tester);
-
-      await enterCode(tester, fakeVtcDid);
-
-      expect(find.text('https://community.example/'), findsOneWidget);
-      expect(find.byKey(const Key('vtc_join_website_elsewhere')), findsNothing);
     });
 
     testWidgets('offers no wider audience than a field allows', (tester) async {

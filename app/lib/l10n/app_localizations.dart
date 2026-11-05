@@ -4466,36 +4466,6 @@ abstract class AppLocalizations {
   /// **'Contact'**
   String get vtcJoinContact;
 
-  /// No description provided for @vtcJoinRightCommunityHeading.
-  ///
-  /// In en, this message translates to:
-  /// **'Is this the right community?'**
-  String get vtcJoinRightCommunityHeading;
-
-  /// No description provided for @vtcJoinHostedAt.
-  ///
-  /// In en, this message translates to:
-  /// **'Hosted at'**
-  String get vtcJoinHostedAt;
-
-  /// No description provided for @vtcJoinFingerprint.
-  ///
-  /// In en, this message translates to:
-  /// **'Fingerprint'**
-  String get vtcJoinFingerprint;
-
-  /// The website in the community's own profile is on another domain than its DID
-  ///
-  /// In en, this message translates to:
-  /// **'{name} lists a website on {websiteHost}, not on {host}. Make sure you trust both.'**
-  String vtcJoinWebsiteElsewhere(String name, String websiteHost, String host);
-
-  /// Under the host and fingerprint read from the community's DID
-  ///
-  /// In en, this message translates to:
-  /// **'Before you join, compare these with what {name} shows on its own website, poster or app.'**
-  String vtcJoinCompareHint(String name);
-
   /// No description provided for @vtcJoinAudience.
   ///
   /// In en, this message translates to:

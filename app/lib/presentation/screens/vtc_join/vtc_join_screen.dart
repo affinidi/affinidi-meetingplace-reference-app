@@ -7,7 +7,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../domain/models/vtc/vtc_card_delivery.dart';
-import '../../../domain/models/vtc/vtc_community_address.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/services/camera_service/camera_service.dart';
 import '../../../l10n/app_localizations.dart';
@@ -17,7 +16,6 @@ import '../../widgets/swipeable_cards.dart';
 import '../../widgets/vta_identity_card.dart';
 import 'vtc_card_delivery_trail.dart';
 import 'vtc_claim_type_label.dart';
-import 'vtc_community_check.dart';
 import 'vtc_identity_check_view.dart';
 import 'vtc_join_controller.dart';
 import 'vtc_join_json_dialog.dart';
@@ -312,12 +310,6 @@ class _Review extends StatelessWidget {
         OnboardingSubtitle(l10n.vtcJoinWantsYou),
         Center(child: _Pill(l10n.vtcJoinWithVtaIdentity)),
         _Profile(state: state),
-        if (VtcCommunityAddress.of(did) case final address?)
-          VtcCommunityCheck(
-            address: address,
-            communityName: hasName ? name : l10n.vtcJoinThisCommunity,
-            website: state.website,
-          ),
         if (state.denialReason case final reason?)
           OnboardingMessage(l10n.vtcJoinLastDenied(reason), isError: true),
         if (!state.canApply)

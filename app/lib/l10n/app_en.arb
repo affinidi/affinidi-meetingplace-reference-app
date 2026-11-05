@@ -2894,33 +2894,6 @@
 	"vtcJoinProfileHeading": "About the community",
 	"vtcJoinWebsite": "Website",
 	"vtcJoinContact": "Contact",
-	"vtcJoinRightCommunityHeading": "Is this the right community?",
-	"vtcJoinHostedAt": "Hosted at",
-	"vtcJoinFingerprint": "Fingerprint",
-	"vtcJoinWebsiteElsewhere": "{name} lists a website on {websiteHost}, not on {host}. Make sure you trust both.",
-	"@vtcJoinWebsiteElsewhere": {
-		"description": "The website in the community's own profile is on another domain than its DID",
-		"placeholders": {
-			"name": {
-				"type": "String"
-			},
-			"websiteHost": {
-				"type": "String"
-			},
-			"host": {
-				"type": "String"
-			}
-		}
-	},
-	"vtcJoinCompareHint":"Before you join, compare these with what {name} shows on its own website, poster or app.",
-	"@vtcJoinCompareHint": {
-		"description": "Under the host and fingerprint read from the community's DID",
-		"placeholders": {
-			"name": {
-				"type": "String"
-			}
-		}
-	},
 	"vtcJoinAudience": "{audience, select, admins{the administrators} groups{your groups} connections{your connections} members{all members} public{anyone} other{some people}}",
 	"@vtcJoinAudience": {
 		"placeholders": {
