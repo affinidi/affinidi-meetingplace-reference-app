@@ -263,6 +263,31 @@ void main() {
     expect(find.byKey(const Key('membership_flow_issued')), findsNothing);
     await expand(tester, 'issued');
     expect(flow(tester, 'issued'), ['Community', 'Ada']);
+    // Spread across the step's full width.
+    expect(
+      tester.getSize(find.byKey(const Key('membership_flow_issued'))).width,
+      moreOrLessEquals(
+        tester.getSize(find.byKey(const Key('vtc_trail_flow_box'))).width - 20,
+        epsilon: 1,
+      ),
+    );
+    expect(
+      tester.getCenter(find.text('Ada')).dx -
+          tester.getCenter(find.text('Community')).dx,
+      greaterThan(200),
+    );
+    // In a tinted box, with what it shows moved under it.
+    final box = find.byKey(const Key('vtc_trail_flow_box'));
+    final summary = find.textContaining('Your membership card for Ada');
+    expect(find.descendant(of: box, matching: summary), findsOneWidget);
+    expect(
+      tester.getTopLeft(summary).dy,
+      greaterThan(
+        tester
+            .getBottomLeft(find.byKey(const Key('membership_flow_issued')))
+            .dy,
+      ),
+    );
     final issued = find.byKey(const Key('membership_flow_issued'));
     // Small: a circle and one line of name under it, centred in the step.
     expect(tester.getSize(issued).height, lessThanOrEqualTo(40));
@@ -278,7 +303,14 @@ void main() {
     );
     // Above the details, with room between.
     expect(
-      tester.getBottomLeft(issued).dy + 12,
+      tester
+              .getBottomLeft(
+                find
+                    .descendant(of: box, matching: find.byType(DecoratedBox))
+                    .first,
+              )
+              .dy +
+          12,
       lessThanOrEqualTo(
         tester
             .getTopLeft(

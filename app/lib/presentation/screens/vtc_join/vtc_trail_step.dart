@@ -90,8 +90,9 @@ class VtcTrailStep extends HookWidget {
   /// set apart from the words around them.
   final List<String> highlights;
 
-  /// What the summary says, pictured above the [details] once the step is
-  /// opened, such as a `VtcFlowDiagram`.
+  /// What the summary says, pictured once the step is opened, such as a
+  /// `VtcFlowDiagram`: in a tinted box above the [details], the summary
+  /// moved under it.
   final Widget? flow;
 
   static const _markerSize = 32.0;
@@ -101,6 +102,11 @@ class VtcTrailStep extends HookWidget {
 
   /// Room between a step's picture and its details, beyond theirs.
   static const _flowSpacing = 6.0;
+
+  /// The box a step's picture and summary sit in once opened.
+  static const _flowPadding = 10.0;
+  static const _flowRadius = 12.0;
+  static const _flowTint = 20;
   static const _lineWidth = 2.0;
 
   @override
@@ -116,6 +122,9 @@ class VtcTrailStep extends HookWidget {
       ...this.details,
     ];
     final canExpand = details.isNotEmpty || flow != null;
+    // Once opened, the summary moves under the step's picture, if any.
+    final pictured = expanded.value && flow != null;
+    final summary = Text.rich(_summarySpan(), style: onboardingNote(context));
     final document = this.document;
     final foreground = stage == VtcTrailStage.next
         ? Colors.white54
@@ -174,10 +183,7 @@ class VtcTrailStep extends HookWidget {
                                       : null,
                                 ),
                               ),
-                              Text.rich(
-                                _summarySpan(),
-                                style: onboardingNote(context),
-                              ),
+                              if (!pictured) summary,
                             ],
                           ),
                         ),
@@ -213,15 +219,25 @@ class VtcTrailStep extends HookWidget {
                           ),
                       ],
                     ),
-                    if (expanded.value)
-                      if (flow case final flow?)
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            top: _detailSpacing,
-                            bottom: _flowSpacing,
-                          ),
-                          child: flow,
+                    // Opened, the picture and, under it, what it shows.
+                    if (pictured)
+                      Container(
+                        key: const Key('vtc_trail_flow_box'),
+                        margin: const EdgeInsets.only(
+                          top: _detailSpacing,
+                          bottom: _flowSpacing,
                         ),
+                        padding: const EdgeInsets.all(_flowPadding),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withAlpha(_flowTint),
+                          borderRadius: BorderRadius.circular(_flowRadius),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          spacing: _flowPadding,
+                          children: [flow!, summary],
+                        ),
+                      ),
                     if (expanded.value)
                       for (final detail in details)
                         Padding(
