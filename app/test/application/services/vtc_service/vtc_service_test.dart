@@ -3,9 +3,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/mock_credential_template.dart';
+import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_card_delivery.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/vtc/user_verification_key.dart';
 
+import '../../../fakes/fake_persona.dart';
 import '../../../fakes/fake_vta.dart';
 import '../../../fakes/fake_vtc_network.dart';
 
@@ -593,6 +595,194 @@ void main() {
         queries.map((q) => q['issuerDid']).toSet().single,
         startsWith('did:key:'),
       );
+    });
+  });
+
+  group('VtcService card collection', () {
+    late FakeVtcNetwork network;
+    late FakePersona persona;
+    late List<VtcCardDelivery> deliveries;
+
+    Map<String, dynamic> card() => {
+      'id': 'urn:uuid:vmc',
+      'type': ['VerifiableCredential', 'MembershipCredential'],
+      'issuer': fakeVtcDid,
+      'credentialSubject': {'id': persona.did},
+    };
+
+    Iterable<Object?> vtaTasks() =>
+        network.vta.received.map((request) => request['type']);
+
+    /// The last report's status of each step.
+    Map<VtcDeliveryStep, VtcDeliveryStatus> statuses() => {
+      for (final step in VtcDeliveryStep.values)
+        step: deliveries.last.status(step),
+    };
+
+    Future<void> approve() async {
+      network.joinVerdict = {'effect': 'refer'};
+      await service.join(
+        await service.readCommunity(fakeVtcDid),
+        persona: VtaPersona(
+          did: persona.did,
+          contextId: 'mpx-ada',
+          signingKeyId: persona.signingKeyId,
+        ),
+      );
+      network.joinStatus = 'approved';
+    }
+
+    setUp(() async {
+      network = FakeVtcNetwork();
+      persona = FakePersona(mediatorDid: network.mediatorDid);
+      deliveries = [];
+      network.vta
+        ..persona = persona
+        ..otherDocuments[persona.did] = persona.document
+        ..answers[VtaTask.vaultUpsert] = {
+          'entry': {'id': 'entry-1'},
+        }
+        ..answers[VtaTask.signDocument] = {
+          'document': {
+            'issuer': persona.did,
+            'proof': {'proofPurpose': 'assertionMethod'},
+          },
+        }
+        ..answerTo[VtaTask.exportSecret] = (payload) =>
+            persona.exportAnswer(payload['keyId']);
+      service = VtcService(
+        sdk: network.sdk(),
+        repository: SecureStorageVtcRepository(),
+        userVerificationKey: UserVerificationKey(keyStorage),
+        platform: 'ios',
+      );
+      await service.startLink(network.vta.did);
+      await service.checkGrant();
+    });
+
+    test('collects the card from the identity inbox and keeps it', () async {
+      await approve();
+      await network.deliver(persona, card());
+
+      await service.checkApplication(
+        fakeVtcDid,
+        onCardDelivery: deliveries.add,
+      );
+
+      expect(statuses().values, everyElement(VtcDeliveryStatus.done));
+      final delivery = deliveries.last;
+      expect(delivery.personaDid, persona.did);
+      expect(delivery.signingKeyId, persona.signingKeyId);
+      expect(delivery.keyAgreementKeyId, persona.keyAgreementKeyId);
+      expect(delivery.mediatorDid, network.mediatorDid);
+      expect(delivery.waiting, 1);
+      expect(delivery.issue?.type, credentialIssueTask);
+      expect(delivery.issue?.issuer, fakeVtcDid);
+      expect(delivery.isKeptAsValid, isTrue);
+      // Kept on the VTA, then taken out of the inbox, then confirmed.
+      final keep = network.vta.received.lastWhere(
+        (request) => request['type'] == VtaTask.credentialsReceive,
+      );
+      expect((keep['payload'] as Map)['credential'], card());
+      expect((keep['payload'] as Map)['contextId'], 'mpx-ada');
+      expect(network.inboxDeleted, ['message-1']);
+      expect(network.memberRequests.first['type'], MemberTask.vmc);
+      expect((await service.community(fakeVtcDid))?.isSettled, isTrue);
+    });
+
+    test('waits for the community, asking it to deliver again', () async {
+      await approve();
+
+      await service.checkApplication(
+        fakeVtcDid,
+        onCardDelivery: deliveries.add,
+      );
+
+      expect(statuses(), {
+        VtcDeliveryStep.keysLent: VtcDeliveryStatus.done,
+        VtcDeliveryStep.signedIn: VtcDeliveryStatus.done,
+        VtcDeliveryStep.pickedUp: VtcDeliveryStatus.waiting,
+        VtcDeliveryStep.kept: VtcDeliveryStatus.next,
+        VtcDeliveryStep.confirmed: VtcDeliveryStatus.next,
+      });
+      expect(deliveries.last.waiting, 0);
+      expect(network.joinRequests.last['payload'], {
+        'requestId': 'request-1',
+        'resendCredentials': true,
+      });
+      expect((await service.community(fakeVtcDid))?.isSettled, isFalse);
+    });
+
+    test('says when the VTA does not lend the keys', () async {
+      await approve();
+      network.vta.refusals[VtaTask.exportSecret] = {
+        'code': 'keys/export-secret:notExportable',
+      };
+
+      await service.checkApplication(
+        fakeVtcDid,
+        onCardDelivery: deliveries.add,
+      );
+
+      expect(
+        deliveries.last.status(VtcDeliveryStep.keysLent),
+        VtcDeliveryStatus.failed,
+      );
+      expect(network.inboxOpens, 0);
+    });
+
+    test('says when the inbox cannot be reached', () async {
+      await approve();
+      network.isMediatorDown = true;
+
+      await service.checkApplication(
+        fakeVtcDid,
+        onCardDelivery: deliveries.add,
+      );
+
+      expect(
+        deliveries.last.status(VtcDeliveryStep.signedIn),
+        VtcDeliveryStatus.failed,
+      );
+    });
+
+    test('borrows the keys once while it keeps checking', () async {
+      await approve();
+
+      await service.checkApplication(fakeVtcDid);
+      await service.checkApplication(fakeVtcDid);
+
+      int loans() =>
+          vtaTasks().where((type) => type == VtaTask.exportSecret).length;
+      // Two keys, lent once.
+      expect(loans(), 2);
+      expect(network.inboxOpens, 1);
+
+      await service.endCardCollection(fakeVtcDid);
+      await service.checkApplication(fakeVtcDid);
+
+      expect(loans(), 4);
+      expect(network.inboxOpens, 2);
+    });
+
+    test('reports nothing for a card the VTA already holds', () async {
+      network.vta
+        ..answers[VtaTask.credentialsQuery] = {
+          'credentials': [
+            {'id': 'card-1'},
+          ],
+        }
+        ..answers[VtaTask.credentialsGet] = {'credential': card()};
+      await approve();
+
+      await service.checkApplication(
+        fakeVtcDid,
+        onCardDelivery: deliveries.add,
+      );
+
+      expect(deliveries, isEmpty);
+      expect(vtaTasks(), isNot(contains(VtaTask.exportSecret)));
+      expect((await service.community(fakeVtcDid))?.isSettled, isTrue);
     });
   });
 }

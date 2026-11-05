@@ -61,7 +61,7 @@ class FakeVta implements HttpClientAdapter, DidResolver {
   final Map<String, DidDocument> otherDocuments = {};
 
   /// When set, `vault/sign-trust-task` signs as this persona.
-  Ed25519DidKeySigner? persona;
+  TrustTaskSigner? persona;
 
   String get did => _key.did;
 

@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:didcomm/didcomm.dart' hide TrustTaskDocument;
 import 'package:dio/dio.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:ssi/ssi.dart';
 
+import 'fake_persona.dart';
 import 'fake_vta.dart';
 
 const fakeVtcDid = 'did:web:community.example';
@@ -43,6 +45,22 @@ class FakeVtcNetwork implements HttpClientAdapter {
 
   final vta = FakeVta();
   final _vtcKey = Ed25519DidKeySigner.generate();
+  final _mediatorKey = Ed25519DidKeySigner.generate();
+
+  /// DID of the mediator identities' mail goes to.
+  String get mediatorDid => _mediatorKey.did;
+
+  /// Messages waiting in identities' inboxes on the mediator, by id.
+  final Map<String, Map<String, dynamic>> inbox = {};
+
+  /// Ids of the messages deleted from [inbox].
+  final List<String> inboxDeleted = [];
+
+  /// How many times an identity signed in to its inbox.
+  int inboxOpens = 0;
+
+  /// When true, the mediator cannot be reached.
+  bool isMediatorDown = false;
   final browserKey = Ed25519DidKeySigner.generate();
   final decisionClosesAt = formatTrustTaskTime(
     DateTime.now().add(const Duration(minutes: 10)),
@@ -120,7 +138,47 @@ class FakeVtcNetwork implements HttpClientAdapter {
     didResolver: vta,
     dio: Dio()..httpClientAdapter = this,
     openVtaMailbox: vta.openMailbox,
+    openMediatorInbox: _openInbox,
   );
+
+  /// Delivers [credential] to [persona]'s inbox as the community does: a
+  /// signed `credential-exchange/issue` document, sealed to the identity.
+  Future<void> deliver(
+    FakePersona persona,
+    Map<String, dynamic> credential,
+  ) async {
+    final issue = await TrustTaskDocument.create(
+      type: credentialIssueTask,
+      issuer: fakeVtcDid,
+      recipient: persona.did,
+      payload: {
+        'credential_response': {'credential': credential},
+      },
+    ).sign(_VtcSigner(_vtcKey), purpose: ProofPurpose.authentication);
+    final sealed = await EncryptedMessage.packAnonymously(
+      PlainTextMessage(
+        id: issue.id,
+        type: Uri.parse(trustTaskEnvelopeType),
+        to: [persona.did],
+        body: issue.toJson(),
+      ),
+      keyType: KeyType.ed25519,
+      recipientDidDocuments: [persona.document],
+      encryptionAlgorithm: EncryptionAlgorithm.a256cbc,
+    );
+    inbox['message-${inbox.length + 1}'] =
+        jsonDecode(jsonEncode(sealed)) as Map<String, dynamic>;
+  }
+
+  Future<MediatorInbox> _openInbox({
+    required String mediatorDid,
+    required DidDocument mediatorDocument,
+    required DidManager manager,
+  }) async {
+    if (isMediatorDown) throw StateError('mediator down');
+    inboxOpens++;
+    return _FakeInbox(this);
+  }
 
   @override
   Future<ResponseBody> fetch(
@@ -310,4 +368,25 @@ class _VtcSigner implements TrustTaskSigner {
 
   @override
   Future<Uint8List> sign(Uint8List data) => _key.sign(data);
+}
+
+class _FakeInbox implements MediatorInbox {
+  _FakeInbox(this._network);
+
+  final FakeVtcNetwork _network;
+
+  @override
+  Future<List<String>> listIds() async => _network.inbox.keys.toList();
+
+  @override
+  Future<Map<String, dynamic>?> fetch(String id) async => _network.inbox[id];
+
+  @override
+  Future<void> delete(List<String> ids) async {
+    _network.inboxDeleted.addAll(ids);
+    ids.forEach(_network.inbox.remove);
+  }
+
+  @override
+  Future<void> close() async {}
 }

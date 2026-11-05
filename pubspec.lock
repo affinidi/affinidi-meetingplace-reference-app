@@ -2255,10 +2255,10 @@ packages:
     dependency: transitive
     description:
       name: ssi
-      sha256: "6069c8a3feba2d9df020eafe0a2af1e10cc9e3b90e07c852f89b4570ce6c602d"
+      sha256: "99db31c8074140ce76c6f16d7f674f7bb16725e857fedb662756fcf8b4e2521a"
       url: "https://pub.dev"
     source: hosted
-    version: "3.9.5"
+    version: "3.9.6"
   stack_trace:
     dependency: transitive
     description:
@@ -2559,10 +2559,10 @@ packages:
     dependency: transitive
     description:
       name: x25519
-      sha256: cec3c125f0d934dccba6c4cab48f3fbf866dc78895dcc5a1584d35b0a845005b
+      sha256: "5108a324e1704a04f174507cf162cfce345f99585573356236c6421a4df45324"
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.1"
+    version: "0.1.2"
   xdg_directories:
     dependency: transitive
     description:

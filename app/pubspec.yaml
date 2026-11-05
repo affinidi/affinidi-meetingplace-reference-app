@@ -116,6 +116,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   riverpod_generator: ^3.0.3
+  x25519: any
 
 flutter:
   generate: true

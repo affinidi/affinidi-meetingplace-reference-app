@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,6 +6,7 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../domain/models/vtc/linked_vta.dart';
 import '../../../domain/models/vtc/mock_credential_template.dart';
+import '../../../domain/models/vtc/vtc_card_delivery.dart';
 import '../../../domain/models/vtc/vtc_community.dart';
 import '../../../domain/models/vtc/vtc_membership_card.dart';
 import '../../../domain/repositories/vtc_repository.dart';
@@ -64,6 +66,14 @@ class VtcService {
   final MockCredentialIssuer _mockIssuer;
   final String _platform;
   VtaClient? _client;
+
+  /// The identity keys lent and inboxes open, by community, while a
+  /// membership card is collected, so a check every few seconds borrows the
+  /// keys once: the VTA audits each loan.
+  final Map<String, _CardCollection> _collections = {};
+
+  /// How long lent keys are held without a check before they are forgotten.
+  static const _collectionIdle = Duration(minutes: 5);
 
   /// The linked VTA, or null when the phone is not linked.
   Future<LinkedVta?> linkedVta() => _repository.getLinkedVta();
@@ -334,13 +344,16 @@ class VtcService {
   /// membership with [membershipCard], the card the community issued, and,
   /// unless the member opted in, withdraws their directory card. Records
   /// whether both succeeded; neither failure undoes the membership.
-  Future<void> _settle(
+  ///
+  /// Returns whether the community took the confirmation.
+  Future<bool> _settle(
     VtaClient vta,
     VtcCommunity member,
     Map<String, dynamic>? membershipCard,
     String? requestId,
   ) async {
-    var settled = membershipCard != null;
+    var confirmed = membershipCard != null;
+    var settled = confirmed;
     final signer = await _personaSigner(vta, member);
     final client = _sdk.joinClient();
     if (membershipCard != null) {
@@ -354,7 +367,7 @@ class VtcService {
           requestId: requestId,
         );
       } on MeetingPlaceVtcSDKException {
-        settled = false;
+        confirmed = settled = false;
       }
     }
     if (!member.listInDirectory) {
@@ -369,6 +382,7 @@ class VtcService {
       }
     }
     await _repository.saveCommunity(member.settled(settled));
+    return confirmed;
   }
 
   /// Previews what the VTA would disclose about [persona] for the profile
@@ -481,12 +495,25 @@ class VtcService {
   /// membership, completed as [join] completes one, a rejection with the
   /// community's reason. Also completes an admission still to settle.
   ///
+  /// A card the community delivered to the identity's inbox, rather than to
+  /// the VTA, is collected from there with keys the VTA lends, and each
+  /// step of that is reported to [onCardDelivery]. The keys stay lent until
+  /// [endCardCollection], the card is kept, or no check came for a while.
+  ///
   /// Returns null when no application is open. Throws as [join] does.
-  Future<JoinStatus?> checkApplication(String communityDid) async {
+  Future<JoinStatus?> checkApplication(
+    String communityDid, {
+    void Function(VtcCardDelivery delivery)? onCardDelivery,
+  }) async {
     final community = await _repository.findCommunity(communityDid);
     if (community == null) return null;
     if (community.isMember && !community.isSettled) {
-      await _settleFromVta(await _grantedVta(), community, requestId: null);
+      await _settleFromVta(
+        await _grantedVta(),
+        community,
+        requestId: null,
+        onCardDelivery: onCardDelivery,
+      );
       return null;
     }
     final requestId = community.joinRequestId;
@@ -503,7 +530,12 @@ class VtcService {
       case JoinRequestStatus.approved:
         final member = community.withApplication(isMember: true);
         await _repository.saveCommunity(member);
-        await _settleFromVta(vta, member, requestId: requestId);
+        await _settleFromVta(
+          vta,
+          member,
+          requestId: requestId,
+          onCardDelivery: onCardDelivery,
+        );
       case JoinRequestStatus.rejected || JoinRequestStatus.withdrawn:
         await _repository.saveCommunity(community.rejected(status.reason));
       case JoinRequestStatus.pending || JoinRequestStatus.deferred:
@@ -528,22 +560,32 @@ class VtcService {
         await checkApplication(community.communityDid);
       } on MeetingPlaceVtcSDKException {
         continue;
+      } finally {
+        await endCardCollection(community.communityDid);
       }
     }
   }
 
   /// Completes [member]'s admission with the membership card the community
-  /// delivered to their VTA. When the VTA holds none yet, asks the
-  /// community to deliver it again and leaves the admission to settle at
-  /// the next check.
+  /// delivered: held by their VTA, or collected from the identity's inbox
+  /// and kept on the VTA, each step reported to [onCardDelivery]. When
+  /// neither holds it yet, asks the community to deliver it again and
+  /// leaves the admission to settle at the next check.
   Future<void> _settleFromVta(
     VtaClient vta,
     VtcCommunity member, {
     required String? requestId,
+    void Function(VtcCardDelivery delivery)? onCardDelivery,
   }) async {
-    final card = await _sdk
-        .communityImport(vta)
-        .membershipCard(member.communityDid, personaDid: member.personaDid);
+    final report = _DeliveryReport(member.personaDid, onCardDelivery);
+    final card =
+        await _sdk
+            .communityImport(vta)
+            .membershipCard(
+              member.communityDid,
+              personaDid: member.personaDid,
+            ) ??
+        await _collectCards(vta, member, report);
     if (card == null) {
       if (requestId != null) {
         await _sdk.joinClient().status(
@@ -557,7 +599,133 @@ class VtcService {
       await _repository.saveCommunity(member.settled(false));
       return;
     }
-    await _settle(vta, member, card, requestId);
+    if (report.isCollecting) {
+      report.step(VtcDeliveryStep.confirmed, VtcDeliveryStatus.working);
+    }
+    final confirmed = await _settle(vta, member, card, requestId);
+    if (report.isCollecting) {
+      report.step(
+        VtcDeliveryStep.confirmed,
+        confirmed ? VtcDeliveryStatus.done : VtcDeliveryStatus.failed,
+      );
+      await endCardCollection(member.communityDid);
+    }
+  }
+
+  /// Collects the cards [member]'s community delivered to the identity's
+  /// inbox: borrows the identity's keys from [vta], signs in to the inbox,
+  /// keeps each card the community issued to the identity on the VTA, and
+  /// only then removes it from the inbox. Returns the membership card, or
+  /// null when there is none yet or a step failed; [report] says which.
+  Future<Map<String, dynamic>?> _collectCards(
+    VtaClient vta,
+    VtcCommunity member,
+    _DeliveryReport report,
+  ) async {
+    report.step(VtcDeliveryStep.keysLent, VtcDeliveryStatus.working);
+    final _CardCollection collection;
+    try {
+      collection = await _collection(vta, member);
+    } on MeetingPlaceVtcSDKException {
+      report.step(VtcDeliveryStep.keysLent, VtcDeliveryStatus.failed);
+      return null;
+    }
+    report
+      ..step(
+        VtcDeliveryStep.keysLent,
+        VtcDeliveryStatus.done,
+        signingKeyId: collection.keys.authentication.first,
+        keyAgreementKeyId: collection.keys.keyAgreement.first,
+      )
+      ..step(VtcDeliveryStep.signedIn, VtcDeliveryStatus.working);
+
+    final InboxPickup pickup;
+    try {
+      await collection.inbox.open();
+      pickup = await collection.inbox.issuedCredentials(
+        issuerDid: member.communityDid,
+      );
+    } on MeetingPlaceVtcSDKException {
+      report.step(VtcDeliveryStep.signedIn, VtcDeliveryStatus.failed);
+      return null;
+    }
+    report.step(
+      VtcDeliveryStep.signedIn,
+      VtcDeliveryStatus.done,
+      mediatorDid: collection.inbox.mediatorDid,
+      waiting: pickup.waiting,
+    );
+    final membership = pickup.credentials
+        .where(
+          (issued) =>
+              VtcMembershipCard.fromCredential(issued.credential) != null,
+        )
+        .firstOrNull;
+    if (membership == null) {
+      report.step(VtcDeliveryStep.pickedUp, VtcDeliveryStatus.waiting);
+      return null;
+    }
+    report
+      ..step(
+        VtcDeliveryStep.pickedUp,
+        VtcDeliveryStatus.done,
+        issue: membership.document,
+      )
+      ..step(VtcDeliveryStep.kept, VtcDeliveryStatus.working);
+
+    final bool isValid;
+    try {
+      isValid = await vta.keepCredential(
+        membership.credential,
+        contextId: member.contextId,
+      );
+    } on MeetingPlaceVtcSDKException {
+      report.step(VtcDeliveryStep.kept, VtcDeliveryStatus.failed);
+      return null;
+    }
+    final others = pickup.credentials.where((issued) => issued != membership);
+    await _keepCards(vta, [
+      for (final issued in others) issued.credential,
+    ], member.contextId);
+    try {
+      await collection.inbox.remove([
+        for (final issued in pickup.credentials) issued.messageId,
+      ]);
+    } on MeetingPlaceVtcSDKException {
+      // Kept all the same; a copy left behind is kept again by its id.
+    }
+    report.step(
+      VtcDeliveryStep.kept,
+      VtcDeliveryStatus.done,
+      isKeptAsValid: isValid,
+    );
+    return membership.credential;
+  }
+
+  /// The collection open for [member]'s community, or a new one with the
+  /// identity's keys borrowed from [vta]. Held until [endCardCollection]
+  /// or [_collectionIdle] without use.
+  Future<_CardCollection> _collection(
+    VtaClient vta,
+    VtcCommunity member,
+  ) async {
+    final communityDid = member.communityDid;
+    if (_collections[communityDid] case final open?) {
+      return open..touch(() => endCardCollection(communityDid));
+    }
+    final keys = await vta.borrowPersonaKeys(_persona(member));
+    return _collections[communityDid] = _CardCollection(
+      keys,
+      _sdk.personaInbox(keys),
+      idle: _collectionIdle,
+    )..touch(() => endCardCollection(communityDid));
+  }
+
+  /// Signs out of the identity's inbox for [communityDid] and forgets the
+  /// keys the VTA lent for it, e.g. when the screen collecting the card
+  /// closes. Does nothing when none are held.
+  Future<void> endCardCollection(String communityDid) async {
+    await _collections.remove(communityDid)?.end();
   }
 
   /// Withdraws the open application to [communityDid], so the member can
@@ -753,6 +921,66 @@ class VtcService {
       vtaDid: linkedVta.vtaDid,
       manager: Ed25519DidKeySigner.fromSeed(linkedVta.managerSeed),
     );
+  }
+}
+
+/// Reports a card's collection as it goes, to whoever asked.
+class _DeliveryReport {
+  _DeliveryReport(String personaDid, this._onDelivery)
+    : _delivery = VtcCardDelivery(personaDid: personaDid);
+
+  final void Function(VtcCardDelivery delivery)? _onDelivery;
+  VtcCardDelivery _delivery;
+  bool _isCollecting = false;
+
+  /// Whether a collection from the identity's inbox ran.
+  bool get isCollecting => _isCollecting;
+
+  void step(
+    VtcDeliveryStep step,
+    VtcDeliveryStatus status, {
+    String? signingKeyId,
+    String? keyAgreementKeyId,
+    String? mediatorDid,
+    int? waiting,
+    TrustTaskDocument? issue,
+    bool? isKeptAsValid,
+  }) {
+    _isCollecting = true;
+    _delivery = _delivery.at(
+      step,
+      status,
+      signingKeyId: signingKeyId,
+      keyAgreementKeyId: keyAgreementKeyId,
+      mediatorDid: mediatorDid,
+      waiting: waiting,
+      issue: issue,
+      isKeptAsValid: isKeptAsValid,
+    );
+    _onDelivery?.call(_delivery);
+  }
+}
+
+/// Keys an identity's VTA lent and the identity's inbox, held in memory
+/// while its membership card is collected.
+class _CardCollection {
+  _CardCollection(this.keys, this.inbox, {required this._idle});
+
+  final PersonaDidManager keys;
+  final PersonaInbox inbox;
+  final Duration _idle;
+  Timer? _idleTimer;
+
+  /// Marks the collection used, to end with [onIdle] once unused for a while.
+  void touch(void Function() onIdle) {
+    _idleTimer?.cancel();
+    _idleTimer = Timer(_idle, onIdle);
+  }
+
+  Future<void> end() async {
+    _idleTimer?.cancel();
+    await inbox.close();
+    keys.forget();
   }
 }
 
