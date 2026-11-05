@@ -1,0 +1,46 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_trail_step.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
+
+void main() {
+  Future<void> pumpStep(WidgetTester tester, VtcTrailStage stage) =>
+      tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.dark,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: VtcTrailStep(
+              icon: Icons.inbox_outlined,
+              stage: stage,
+              title: 'Signed in',
+              summary: 'Trying again',
+              isLast: true,
+            ),
+          ),
+        ),
+      );
+
+  group('VtcTrailStep', () {
+    testWidgets('marks a failed step in the error colour', (tester) async {
+      await pumpStep(tester, VtcTrailStage.failed);
+
+      final marker = tester.widget<Container>(
+        find.byKey(const Key('vtc_trail_marker_failed')),
+      );
+      final decoration = marker.decoration! as BoxDecoration;
+      expect(decoration.color, AppTheme.dark.colorScheme.error);
+      expect(find.byIcon(Icons.priority_high), findsOneWidget);
+      expect(find.byIcon(Icons.inbox_outlined), findsNothing);
+    });
+
+    testWidgets('shows its own icon otherwise', (tester) async {
+      await pumpStep(tester, VtcTrailStage.current);
+
+      expect(find.byKey(const Key('vtc_trail_marker_failed')), findsNothing);
+      expect(find.byIcon(Icons.inbox_outlined), findsOneWidget);
+    });
+  });
+}

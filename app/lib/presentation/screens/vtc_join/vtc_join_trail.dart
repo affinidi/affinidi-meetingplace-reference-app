@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
-import '../../widgets/onboarding_style/onboarding_style.dart';
-import 'vtc_detail_line.dart';
-import 'vtc_join_json_dialog.dart';
+import 'vtc_trail_step.dart';
 
 /// Where an open application stands, drawn as the path it took: the
 /// credentials it presents, if any; signed by the member's VTA as their
@@ -69,58 +66,67 @@ class VtcJoinTrail extends StatelessWidget {
     String time(DateTime at) =>
         DateFormat.yMMMd(locale).add_Hm().format(at.toLocal());
     // How a document was signed, as far as its proof says.
-    List<_Detail> proof({
+    List<VtcTrailDetail> proof({
       String? cryptosuite,
       String? key,
       String? purpose,
       DateTime? signedAt,
     }) => [
       if (cryptosuite != null)
-        _Detail(
+        VtcTrailDetail(
           Icons.enhanced_encryption_outlined,
           l10n.vtcJoinTrailCryptosuite,
           cryptosuite,
         ),
       if (key != null)
-        _Detail(Icons.key_outlined, l10n.vtcJoinTrailKey, key, isId: true),
+        VtcTrailDetail(
+          Icons.key_outlined,
+          l10n.vtcJoinTrailKey,
+          key,
+          isId: true,
+        ),
       if (purpose != null)
-        _Detail(
+        VtcTrailDetail(
           Icons.verified_outlined,
           l10n.vtcJoinTrailProofPurpose,
           purpose,
         ),
       if (signedAt != null)
-        _Detail(Icons.schedule, l10n.vtcJoinTrailSignedAt, time(signedAt)),
+        VtcTrailDetail(
+          Icons.schedule,
+          l10n.vtcJoinTrailSignedAt,
+          time(signedAt),
+        ),
     ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (presentation != null && credentials.isNotEmpty)
-          _Step(
+          VtcTrailStep(
             key: const Key('vtc_join_trail_presentation'),
             icon: Icons.workspace_premium_outlined,
-            stage: _Stage.done,
+            stage: VtcTrailStage.done,
             title: l10n.vtcJoinTrailPresentation,
             summary: l10n.vtcJoinTrailPresentationSummary(
               credentials.map(_typesOf).join(', '),
             ),
             details: [
               if (presentation['holder'] case final String holder)
-                _Detail(
+                VtcTrailDetail(
                   Icons.fingerprint,
                   l10n.vtcJoinTrailHolder,
                   holder,
                   isId: true,
                 ),
               for (final credential in credentials) ...[
-                _Detail(
+                VtcTrailDetail(
                   Icons.workspace_premium_outlined,
                   l10n.vtcJoinTrailCredential,
                   _typesOf(credential),
                 ),
                 if (_issuerOf(credential) case final issuer?)
-                  _Detail(
+                  VtcTrailDetail(
                     Icons.account_balance_outlined,
                     l10n.vtcJoinTrailIssuer,
                     issuer,
@@ -128,7 +134,7 @@ class VtcJoinTrail extends StatelessWidget {
                   ),
                 if (DateTime.tryParse('${credential['validUntil']}')
                     case final until?)
-                  _Detail(
+                  VtcTrailDetail(
                     Icons.event_outlined,
                     l10n.vtcJoinTrailValidUntil,
                     time(until),
@@ -139,10 +145,10 @@ class VtcJoinTrail extends StatelessWidget {
             documentTitle: l10n.vtcJoinTrailPresentationDocument,
             documentKey: const Key('vtc_join_trail_presentation_document'),
           ),
-        _Step(
+        VtcTrailStep(
           key: const Key('vtc_join_trail_vta'),
           icon: Icons.draw_outlined,
-          stage: _Stage.done,
+          stage: VtcTrailStage.done,
           title: l10n.vtcJoinTrailVta,
           summary: switch (receipt) {
             TrustTaskReceipt(:final cryptosuite?, :final signedAt?) =>
@@ -155,13 +161,13 @@ class VtcJoinTrail extends StatelessWidget {
           },
           details: [
             if (receipt != null) ...[
-              _Detail(
+              VtcTrailDetail(
                 Icons.fingerprint,
                 l10n.vtcJoinTrailIdentity,
                 receipt.signer,
                 isId: true,
               ),
-              _Detail(
+              VtcTrailDetail(
                 Icons.assignment_outlined,
                 l10n.vtcJoinTrailTask,
                 receipt.type,
@@ -178,26 +184,34 @@ class VtcJoinTrail extends StatelessWidget {
           documentTitle: l10n.vtcJoinTrailSubmitDocument,
           documentKey: const Key('vtc_join_trail_vta_document'),
         ),
-        _Step(
+        VtcTrailStep(
           key: const Key('vtc_join_trail_community'),
           icon: Icons.verified_user_outlined,
-          stage: _Stage.done,
+          stage: VtcTrailStage.done,
           title: l10n.vtcJoinTrailCommunity(communityName),
           summary: receipt == null
               ? l10n.vtcJoinTrailNoReceipt
               : l10n.vtcJoinTrailCommunitySummary,
           details: [
             if (receipt != null) ...[
-              _Detail(
+              VtcTrailDetail(
                 Icons.groups_outlined,
                 l10n.vtcJoinTrailAnsweredBy,
                 receipt.answeredBy,
                 isId: true,
               ),
               if (receipt.answerType case final type?)
-                _Detail(Icons.assignment_outlined, l10n.vtcJoinTrailTask, type),
+                VtcTrailDetail(
+                  Icons.assignment_outlined,
+                  l10n.vtcJoinTrailTask,
+                  type,
+                ),
               if (receipt.answeredAt case final at?)
-                _Detail(Icons.schedule, l10n.vtcJoinTrailAnsweredAt, time(at)),
+                VtcTrailDetail(
+                  Icons.schedule,
+                  l10n.vtcJoinTrailAnsweredAt,
+                  time(at),
+                ),
               ...proof(
                 cryptosuite: receipt.answerCryptosuite,
                 key: receipt.answerVerificationMethod,
@@ -206,16 +220,21 @@ class VtcJoinTrail extends StatelessWidget {
               ),
             ],
             if (requestId case final id?)
-              _Detail(Icons.tag, l10n.vtcJoinTrailRequestId, id, isId: true),
+              VtcTrailDetail(
+                Icons.tag,
+                l10n.vtcJoinTrailRequestId,
+                id,
+                isId: true,
+              ),
           ],
           document: submit?.answer.toJson(),
           documentTitle: l10n.vtcJoinTrailAnswerDocument,
           documentKey: const Key('vtc_join_trail_community_document'),
         ),
-        _Step(
+        VtcTrailStep(
           key: const Key('vtc_join_trail_review'),
           icon: deferred ? Icons.schedule : Icons.hourglass_top,
-          stage: _Stage.current,
+          stage: VtcTrailStage.current,
           busy: checking,
           title: deferred ? l10n.vtcJoinTrailDeferred : l10n.vtcJoinTrailReview,
           summary: switch (lastCheckedAt) {
@@ -226,25 +245,25 @@ class VtcJoinTrail extends StatelessWidget {
           },
           details: [
             if (lastCheck != null) ...[
-              _Detail(
+              VtcTrailDetail(
                 Icons.assignment_outlined,
                 l10n.vtcJoinTrailCheckTask,
                 lastCheck.type,
               ),
               if (lastCheck.signedAt case final at?)
-                _Detail(
+                VtcTrailDetail(
                   Icons.schedule,
                   l10n.vtcJoinTrailCheckSignedAt,
                   time(at),
                 ),
               if (lastCheck.answeredAt case final at?)
-                _Detail(
+                VtcTrailDetail(
                   Icons.schedule,
                   l10n.vtcJoinTrailCheckAnsweredAt,
                   time(at),
                 ),
               if (lastCheck.answerVerificationMethod case final key?)
-                _Detail(
+                VtcTrailDetail(
                   Icons.key_outlined,
                   l10n.vtcJoinTrailCheckAnswerKey,
                   key,
@@ -256,10 +275,10 @@ class VtcJoinTrail extends StatelessWidget {
           documentTitle: l10n.vtcJoinTrailCheckDocument,
           documentKey: const Key('vtc_join_trail_review_document'),
         ),
-        _Step(
+        VtcTrailStep(
           key: const Key('vtc_join_trail_card'),
           icon: Icons.badge_outlined,
-          stage: _Stage.next,
+          stage: VtcTrailStage.next,
           title: l10n.vtcJoinTrailCard,
           summary: l10n.vtcJoinTrailCardSummary,
           isLast: true,
@@ -302,241 +321,3 @@ String? _issuerOf(Map<String, dynamic> credential) =>
       {'id': final String id} => id,
       _ => null,
     };
-
-/// How far the application got with a step.
-enum _Stage { done, current, next }
-
-/// One technical fact behind a step, such as the key that signed, with an
-/// icon for what it is.
-class _Detail {
-  const _Detail(this.icon, this.label, this.value, {this.isId = false});
-
-  final IconData icon;
-  final String label;
-  final String value;
-
-  /// Whether [value] is an identifier, such as a DID, a DID URL or a
-  /// document id, shown in monospace.
-  final bool isId;
-}
-
-/// A step of the trail: a marker on the line, a title and summary with its
-/// actions beside them — its signed [document], if any, behind an icon, and
-/// the toggle for its [details] — and the details below, shown on tap.
-class _Step extends HookWidget {
-  const _Step({
-    super.key,
-    required this.icon,
-    required this.stage,
-    required this.title,
-    required this.summary,
-    this.details = const [],
-    this.document,
-    this.documentTitle = '',
-    this.documentKey,
-    this.busy = false,
-    this.isLast = false,
-  });
-
-  final IconData icon;
-  final _Stage stage;
-  final String title;
-  final String summary;
-  final List<_Detail> details;
-
-  /// The signed document behind the step, as it was on the wire.
-  final Map<String, dynamic>? document;
-  final String documentTitle;
-  final Key? documentKey;
-
-  /// Whether the step is being worked on right now, which its marker shows.
-  final bool busy;
-  final bool isLast;
-
-  static const _markerSize = 32.0;
-
-  /// Room above each detail, beyond the column's own spacing.
-  static const _detailSpacing = 10.0;
-  static const _lineWidth = 2.0;
-
-  @override
-  Widget build(BuildContext context) {
-    final expanded = useState(false);
-    final canExpand = details.isNotEmpty;
-    final document = this.document;
-    final foreground = stage == _Stage.next ? Colors.white54 : Colors.white;
-
-    return InkWell(
-      onTap: canExpand ? () => expanded.value = !expanded.value : null,
-      // The line runs the step's full height, so the row is as tall as its
-      // text.
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: 12,
-          children: [
-            Column(
-              children: [
-                _Marker(
-                  icon: icon,
-                  stage: stage,
-                  size: _markerSize,
-                  busy: busy,
-                ),
-                if (!isLast)
-                  Expanded(
-                    child: Container(
-                      width: _lineWidth,
-                      color: stage == _Stage.done
-                          ? Colors.white70
-                          : Colors.white24,
-                    ),
-                  ),
-              ],
-            ),
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.only(top: 6, bottom: isLast ? 0 : 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // The step's actions sit beside its title, so the
-                    // details below have the step's full width.
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            spacing: 4,
-                            children: [
-                              Text(
-                                title,
-                                style: context.textTheme.bodyMedium?.copyWith(
-                                  color: foreground,
-                                  fontWeight: stage == _Stage.current
-                                      ? FontWeight.bold
-                                      : null,
-                                ),
-                              ),
-                              Text(summary, style: onboardingNote(context)),
-                            ],
-                          ),
-                        ),
-                        if (document != null)
-                          IconButton(
-                            key: documentKey,
-                            icon: const Icon(
-                              Icons.receipt_long_outlined,
-                              color: Colors.white,
-                            ),
-                            tooltip: context.l10n.vtcJoinTrailShowDocument,
-                            visualDensity: VisualDensity.compact,
-                            onPressed: () => showVtcJoinJson(
-                              context,
-                              title: documentTitle,
-                              json: document,
-                              icon: Icons.receipt_long_outlined,
-                              subtitle: switch (document['type']) {
-                                final String type => type,
-                                _ => null,
-                              },
-                            ),
-                          ),
-                        if (canExpand)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 4),
-                            child: Icon(
-                              expanded.value
-                                  ? Icons.expand_less
-                                  : Icons.expand_more,
-                              color: Colors.white,
-                            ),
-                          ),
-                      ],
-                    ),
-                    if (expanded.value)
-                      for (final detail in details)
-                        Padding(
-                          padding: const EdgeInsets.only(top: _detailSpacing),
-                          child: VtcDetailLine(
-                            icon: detail.icon,
-                            label: detail.label,
-                            value: detail.value,
-                            isId: detail.isId,
-                          ),
-                        ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// A step's marker: filled when done, ringed when current, faint when
-/// still to come. While [busy], its icon turns, easing round once a cycle,
-/// and comes to rest upright.
-class _Marker extends HookWidget {
-  const _Marker({
-    required this.icon,
-    required this.stage,
-    required this.size,
-    this.busy = false,
-  });
-
-  final IconData icon;
-  final _Stage stage;
-  final double size;
-  final bool busy;
-
-  static const _turn = Duration(milliseconds: 1200);
-
-  @override
-  Widget build(BuildContext context) {
-    final turning = useAnimationController(duration: _turn);
-    useEffect(() {
-      if (busy) {
-        turning.repeat();
-      } else {
-        // Finish the turn under way, so the icon comes to rest upright.
-        if (turning.isAnimating) turning.forward();
-      }
-      return null;
-    }, [busy]);
-    final turns = useMemoized(
-      () => turning.drive(CurveTween(curve: Curves.easeInOutCubic)),
-      [turning],
-    );
-
-    final done = stage == _Stage.done;
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: done ? Colors.white : Colors.white.withAlpha(25),
-        border: Border.all(
-          color: stage == _Stage.next ? Colors.white38 : Colors.white,
-          width: 2,
-        ),
-      ),
-      child: RotationTransition(
-        key: busy ? const Key('vtc_join_trail_marker_busy') : null,
-        turns: turns,
-        child: Icon(
-          icon,
-          size: size / 2,
-          color: done
-              ? context.colorScheme.primary
-              : stage == _Stage.next
-              ? Colors.white54
-              : Colors.white,
-        ),
-      ),
-    );
-  }
-}
