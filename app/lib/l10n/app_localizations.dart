@@ -2824,6 +2824,18 @@ abstract class AppLocalizations {
   /// **'Membership card'**
   String get membershipDetailsTitle;
 
+  /// Button under a membership card's trail: opens the community in this app
+  ///
+  /// In en, this message translates to:
+  /// **'Open community'**
+  String get membershipOpenCommunity;
+
+  /// Button under a membership card's trail: opens the community's website in the browser
+  ///
+  /// In en, this message translates to:
+  /// **'Visit website'**
+  String get membershipOpenWebsite;
+
   /// Trail step: the community issued the membership card
   ///
   /// In en, this message translates to:

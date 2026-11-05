@@ -78,3 +78,18 @@ class MembershipCredentialsController
       .read(appLoggerProvider)
       .warning('failed: ${code.name}', name: _logKey);
 }
+
+/// The website the community [communityDid] lists in its profile, or null
+/// when it lists none or cannot be reached. The profile is unsigned: a link
+/// to follow, never proof of anything.
+@riverpod
+Future<Uri?> communityWebsite(Ref ref, String communityDid) async {
+  try {
+    final profile = await ref
+        .read(vtcServiceProvider)
+        .readProfile(communityDid);
+    return profile.website;
+  } on MeetingPlaceVtcSDKException {
+    return null;
+  }
+}

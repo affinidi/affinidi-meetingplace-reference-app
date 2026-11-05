@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../domain/models/vtc/vtc_membership_entry.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../l10n/app_localizations.dart';
 import '../vtc_join/vtc_flow_diagram.dart';
+import '../vtc_join/vtc_join_screen.dart';
 import '../vtc_join/vtc_trail_step.dart';
 import 'membership_credentials_controller.dart';
 import 'membership_credentials_list.dart';
@@ -15,7 +17,8 @@ import 'membership_credentials_list.dart';
 /// what the community's status list says of it now. Each step says who did
 /// it, so the member sees where their VTA took part and where this phone
 /// asked the community directly. The signed documents show in full behind
-/// each step's icon.
+/// each step's icon. Under the trail, the community opens in this app and,
+/// when it lists one, on its website.
 class MembershipCredentialDetailsScreen extends ConsumerWidget {
   const MembershipCredentialDetailsScreen({super.key, required this.entryKey});
 
@@ -82,9 +85,45 @@ class MembershipCredentialDetailsScreen extends ConsumerWidget {
                     readAt: state.readAt,
                     status: checking ? null : state.statuses[entryKey],
                   ),
+                  _CommunityLinks(communityDid: entry.card.issuer),
                 ],
               ),
             ),
+    );
+  }
+}
+
+/// The card's community: in this app, and on its website once its profile
+/// says where that is.
+class _CommunityLinks extends ConsumerWidget {
+  const _CommunityLinks({required this.communityDid});
+
+  final String communityDid;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final website = ref.watch(communityWebsiteProvider(communityDid)).value;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 12,
+      children: [
+        FilledButton.icon(
+          key: const Key('membership_open_community'),
+          icon: const Icon(Icons.groups_outlined),
+          label: Text(l10n.membershipOpenCommunity),
+          onPressed: () =>
+              VtcJoinScreen.show(context, communityDid: communityDid),
+        ),
+        if (website != null)
+          OutlinedButton.icon(
+            key: const Key('membership_open_website'),
+            icon: const Icon(Icons.open_in_new),
+            label: Text(l10n.membershipOpenWebsite),
+            onPressed: () =>
+                launchUrl(website, mode: LaunchMode.externalApplication),
+          ),
+      ],
     );
   }
 }

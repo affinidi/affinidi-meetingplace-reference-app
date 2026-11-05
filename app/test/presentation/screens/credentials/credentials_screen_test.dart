@@ -16,6 +16,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_reposi
 import 'package:mpx_flutter_reference_app/infrastructure/vtc/user_verification_key.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/credentials/credentials_screen.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 
 import '../../../fakes/fake_identities.dart';
@@ -368,6 +369,33 @@ void main() {
       ),
       findsOneWidget,
     );
+  });
+
+  testWidgets('links to the community in the app and on its website', (
+    tester,
+  ) async {
+    await pumpScreen(tester);
+    await open(tester, 'Chess club');
+
+    final website = find.byKey(const Key('membership_open_website'));
+    await tester.ensureVisible(website);
+    expect(find.text('Visit website'), findsOneWidget);
+
+    await tester.tap(find.text('Open community'));
+    await settle(tester);
+    expect(find.byType(VtcJoinScreen), findsOneWidget);
+    expect(find.byKey(const Key('vtc_join_did')), findsNothing);
+  });
+
+  testWidgets('offers no website when the community lists none', (
+    tester,
+  ) async {
+    network.publicProfile = null;
+    await pumpScreen(tester);
+    await open(tester, 'Chess club');
+
+    expect(find.byKey(const Key('membership_open_community')), findsOne);
+    expect(find.byKey(const Key('membership_open_website')), findsNothing);
   });
 
   testWidgets("tells a left card's story, with the receipt and the list", (

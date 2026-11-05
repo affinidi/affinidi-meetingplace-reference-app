@@ -1746,6 +1746,14 @@
 	"@membershipDetailsTitle": {
 		"description": "Title of a membership card's details"
 	},
+	"membershipOpenCommunity": "Open community",
+	"@membershipOpenCommunity": {
+		"description": "Button under a membership card's trail: opens the community in this app"
+	},
+	"membershipOpenWebsite": "Visit website",
+	"@membershipOpenWebsite": {
+		"description": "Button under a membership card's trail: opens the community's website in the browser"
+	},
 	"membershipTrailIssued": "Issued by {community}",
 	"@membershipTrailIssued": {
 		"description": "Trail step: the community issued the membership card",

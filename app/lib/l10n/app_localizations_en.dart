@@ -1859,6 +1859,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get membershipDetailsTitle => 'Membership card';
 
   @override
+  String get membershipOpenCommunity => 'Open community';
+
+  @override
+  String get membershipOpenWebsite => 'Visit website';
+
+  @override
   String membershipTrailIssued(String community) {
     return 'Issued by $community';
   }

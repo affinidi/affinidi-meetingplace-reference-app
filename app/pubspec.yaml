@@ -100,6 +100,7 @@ dependencies:
   ssi: ^3.9.4
   stack_trace: ^1.12.1
   synchronized: ^3.4.0
+  url_launcher: ^6.3.3
   uuid: ^4.5.1
   vc_zkp: ^1.2.5
   video_player: ^2.11.1
