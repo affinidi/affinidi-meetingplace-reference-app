@@ -9,6 +9,7 @@ import '../../../domain/models/vtc/linked_vta.dart';
 import '../../../domain/models/vtc/mock_credential_template.dart';
 import '../../../domain/models/vtc/vtc_card_delivery.dart';
 import '../../../domain/models/vtc/vtc_community.dart';
+import '../../../domain/models/vtc/vtc_identity_check.dart';
 import '../../../domain/models/vtc/vtc_left_membership.dart';
 import '../../../domain/models/vtc/vtc_membership_card.dart';
 import '../../../domain/models/vtc/vtc_membership_entry.dart';
@@ -891,6 +892,33 @@ class VtcService {
         .communityImport(await _grantedVta())
         .membershipCard(communityDid, personaDid: community.personaDid);
     return card == null ? null : VtcMembershipCard.fromCredential(card);
+  }
+
+  /// The community [communityDid]'s own check of the member's identity
+  /// there, as their VTA keeps it, or null when this phone knows no such
+  /// membership or the VTA holds no valid check. The community delivers it
+  /// to the VTA once an administrator checked the person.
+  ///
+  /// Throws as [membershipCard] does.
+  Future<VtcIdentityCheck?> identityCheck(String communityDid) async {
+    final community = await _repository.findCommunity(communityDid);
+    if (community == null || !community.isMember) return null;
+    final vta = await _grantedVta();
+    final held = await vta.findCredentials(
+      type: VtcIdentityCheck.statementType,
+      issuerDid: communityDid,
+      subjectDid: community.personaDid,
+    );
+    for (final statement in held) {
+      final credential = await vta.credential(statement.id);
+      if (credential == null) continue;
+      final check = VtcIdentityCheck.fromCredential(
+        credential,
+        communityDid: communityDid,
+      );
+      if (check?.memberDid == community.personaDid) return check;
+    }
+    return null;
   }
 
   /// Every membership card of the member: those a community issued that

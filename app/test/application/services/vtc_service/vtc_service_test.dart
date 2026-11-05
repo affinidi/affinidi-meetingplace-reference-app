@@ -357,6 +357,71 @@ void main() {
       expect(await service.membershipCard(fakeVtcDid), isNull);
     });
 
+    test(
+      'reads the identity check the VTA holds, not an endorsement',
+      () async {
+        await service.join(
+          await service.readCommunity(fakeVtcDid),
+          persona: joinAs,
+        );
+        Map<String, dynamic> statement(String predicate) => {
+          'type': ['VerifiableCredential', 'StatementCredential'],
+          'issuer': fakeVtcDid,
+          'credentialSubject': {
+            'id': persona.did,
+            'predicate': predicate,
+            'object': {
+              'value': {
+                'community': fakeVtcDid,
+                'method': 'inPerson',
+                'claimsVerified': ['name.legal'],
+                'livenessConfirmed': true,
+              },
+            },
+          },
+        };
+        final statements = {
+          'endorsement': statement(
+            'https://registry.trustoverip.org/dtg/vsc/endorses/1',
+          ),
+          'check': statement(
+            'https://registry.trustoverip.org/dtg/vsc/vetted/1',
+          ),
+        };
+        network.vta.answerTo[VtaTask.credentialsQuery] = (payload) => {
+          'credentials': [
+            if (payload['type'] == 'StatementCredential' &&
+                payload['issuerDid'] == fakeVtcDid &&
+                payload['subjectDid'] == persona.did)
+              for (final id in statements.keys)
+                {
+                  'id': id,
+                  'types': ['VerifiableCredential', 'StatementCredential'],
+                },
+          ],
+        };
+        network.vta.answerTo[VtaTask.credentialsGet] = (payload) => {
+          'credential': statements[payload['id']],
+        };
+
+        final check = await service.identityCheck(fakeVtcDid);
+
+        expect(check?.memberDid, persona.did);
+        expect(check?.method, 'inPerson');
+        expect(check?.claimsVerified, ['name.legal']);
+      },
+    );
+
+    test('reads no identity check while the application waits', () async {
+      network.joinVerdict = {'effect': 'refer'};
+      await service.join(
+        await service.readCommunity(fakeVtcDid),
+        persona: joinAs,
+      );
+
+      expect(await service.identityCheck(fakeVtcDid), isNull);
+    });
+
     test('keeps the reason a rejection gives', () async {
       network.joinVerdict = {'effect': 'refer'};
       await service.join(await service.readCommunity(fakeVtcDid));
