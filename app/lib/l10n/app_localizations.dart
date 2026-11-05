@@ -4484,6 +4484,12 @@ abstract class AppLocalizations {
   /// **'Fingerprint'**
   String get vtcJoinFingerprint;
 
+  /// The website in the community's own profile is on another domain than its DID
+  ///
+  /// In en, this message translates to:
+  /// **'{name} lists a website on {websiteHost}, not on {host}. Make sure you trust both.'**
+  String vtcJoinWebsiteElsewhere(String name, String websiteHost, String host);
+
   /// Under the host and fingerprint read from the community's DID
   ///
   /// In en, this message translates to:

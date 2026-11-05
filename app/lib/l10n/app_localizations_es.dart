@@ -3015,6 +3015,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get vtcJoinFingerprint => 'Fingerprint';
 
   @override
+  String vtcJoinWebsiteElsewhere(String name, String websiteHost, String host) {
+    return '$name lists a website on $websiteHost, not on $host. Make sure you trust both.';
+  }
+
+  @override
   String vtcJoinCompareHint(String name) {
     return 'Before you join, compare these with what $name shows on its own website, poster or app.';
   }

@@ -14,10 +14,15 @@ class VtcCommunityCheck extends StatelessWidget {
     super.key,
     required this.address,
     required this.communityName,
+    this.website,
   });
 
   final VtcCommunityAddress address;
   final String communityName;
+
+  /// The website the community lists, which a note flags when it is on
+  /// another domain than [address]: a hint, since hosted communities differ.
+  final Uri? website;
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +64,17 @@ class VtcCommunityCheck extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+          if (website case final website?
+              when !address.sharesDomainWith(website))
+            OnboardingMessage(
+              l10n.vtcJoinWebsiteElsewhere(
+                communityName,
+                website.host,
+                address.host,
+              ),
+              key: const Key('vtc_join_website_elsewhere'),
+              isError: false,
             ),
           Text(
             l10n.vtcJoinCompareHint(communityName),

@@ -509,6 +509,26 @@ void main() {
       );
       // A did:web has no fingerprint to compare.
       expect(find.byKey(const Key('vtc_join_fingerprint')), findsNothing);
+      // Its profile lists a website on club.example, another domain.
+      expect(
+        find.byKey(const Key('vtc_join_website_elsewhere')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('notes nothing for a website on the community domain', (
+      tester,
+    ) async {
+      network.publicProfile = {
+        ...?network.publicProfile,
+        'publicUrl': 'https://community.example/',
+      };
+      await pumpScreen(tester);
+
+      await enterCode(tester, fakeVtcDid);
+
+      expect(find.text('https://community.example/'), findsOneWidget);
+      expect(find.byKey(const Key('vtc_join_website_elsewhere')), findsNothing);
     });
 
     testWidgets('offers no wider audience than a field allows', (tester) async {

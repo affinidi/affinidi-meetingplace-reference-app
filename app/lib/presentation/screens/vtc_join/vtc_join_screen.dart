@@ -301,6 +301,7 @@ class _Review extends StatelessWidget {
           VtcCommunityCheck(
             address: address,
             communityName: hasName ? name : l10n.vtcJoinThisCommunity,
+            website: state.website,
           ),
         if (state.denialReason case final reason?)
           OnboardingMessage(l10n.vtcJoinLastDenied(reason), isError: true),
