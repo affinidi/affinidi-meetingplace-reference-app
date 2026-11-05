@@ -2970,6 +2970,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vtcJoinContact => 'Contact';
 
   @override
+  String get vtcJoinRightCommunityHeading => 'Is this the right community?';
+
+  @override
+  String get vtcJoinHostedAt => 'Hosted at';
+
+  @override
+  String get vtcJoinFingerprint => 'Fingerprint';
+
+  @override
+  String vtcJoinCompareHint(String name) {
+    return 'Before you join, compare these with what $name shows on its own website, poster or app.';
+  }
+
+  @override
   String vtcJoinAudience(String audience) {
     String _temp0 = intl.Intl.selectLogic(audience, {
       'admins': 'the administrators',
