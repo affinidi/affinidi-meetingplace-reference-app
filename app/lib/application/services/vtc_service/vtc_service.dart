@@ -40,6 +40,13 @@ class InvalidCommunityCodeException implements Exception {
   const InvalidCommunityCodeException();
 }
 
+/// Thrown when a community action needs a membership this phone does not
+/// hold.
+class NotACommunityMemberException implements Exception {
+  /// Creates a [NotACommunityMemberException].
+  const NotACommunityMemberException();
+}
+
 /// Name the phone registers with on the member's VTA.
 const _deviceName = 'Meeting Place';
 
@@ -873,6 +880,159 @@ class VtcService {
       _sdk.personaInbox(keys),
       idle: _collectionIdle,
     )..touch(() => endCardCollection(communityDid));
+  }
+
+  /// The groups of the community [communityDid] the member belongs to, as
+  /// the community shows them to the member's identity there.
+  ///
+  /// Throws [NotACommunityMemberException] when the phone holds no
+  /// membership of [communityDid], [VtaNotLinkedException] when no VTA is
+  /// linked, and [MeetingPlaceVtcSDKException] when the VTA or the community
+  /// refuses or cannot be reached.
+  Future<List<VtcGroupListing>> memberGroups(String communityDid) async {
+    final (vta, signer) = await _asMember(communityDid);
+    return _sdk.groupsClient().list(
+      communityDid,
+      agent: vta,
+      persona: signer,
+      mine: true,
+    );
+  }
+
+  /// The group [groupId] of the community [communityDid], with its managers
+  /// when the member is one. Throws as [memberGroups] does.
+  Future<VtcGroupListing> communityGroup(
+    String communityDid, {
+    required String groupId,
+  }) async {
+    final (vta, signer) = await _asMember(communityDid);
+    return _sdk.groupsClient().show(
+      communityDid,
+      groupId: groupId,
+      agent: vta,
+      persona: signer,
+    );
+  }
+
+  /// The members of the group [groupId] that the community shows the
+  /// member, with their credentials' ids when the member manages it.
+  /// Throws as [memberGroups] does.
+  Future<List<VtcGroupMember>> groupMembers(
+    String communityDid, {
+    required String groupId,
+  }) async {
+    final (vta, signer) = await _asMember(communityDid);
+    return _sdk.groupsClient().members(
+      communityDid,
+      groupId: groupId,
+      agent: vta,
+      persona: signer,
+    );
+  }
+
+  /// Picks up the credentials the groups [groupDids] of [communityDid]
+  /// issued to the member's identity from its inbox, keeps them on the VTA,
+  /// and only then removes them from the inbox. Returns how many it kept.
+  ///
+  /// The community delivers a group's credentials once, when it admits the
+  /// member or renews them. Throws as [memberGroups] does.
+  Future<int> collectGroupCredentials(
+    String communityDid, {
+    required Set<String> groupDids,
+  }) async {
+    if (groupDids.isEmpty) return 0;
+    final community = await _memberCommunity(communityDid);
+    final vta = await _grantedVta();
+    final collection = await _collection(vta, community);
+    await collection.inbox.open();
+    final pickup = await collection.inbox.groupCredentials(
+      communityDid: communityDid,
+      groupDids: groupDids,
+    );
+    await _keepCards(vta, [
+      for (final issued in pickup.credentials) issued.credential,
+    ], community.contextId);
+    try {
+      await collection.inbox.remove([
+        for (final issued in pickup.credentials) issued.messageId,
+      ]);
+    } on MeetingPlaceVtcSDKException {
+      // Kept all the same; a copy left behind is kept again by its id.
+    }
+    return pickup.credentials.length;
+  }
+
+  /// Whether the member's VTA keeps a valid credential of the group
+  /// [groupDid] of [communityDid] for the member's identity there. Throws
+  /// as [memberGroups] does.
+  Future<bool> holdsGroupCredential(
+    String communityDid, {
+    required String groupDid,
+  }) async {
+    final community = await _memberCommunity(communityDid);
+    final held = await (await _grantedVta()).findCredentials(
+      type: GroupAdmissionVerifier.membershipType,
+      issuerDid: groupDid,
+      subjectDid: community.personaDid,
+    );
+    return held.isNotEmpty;
+  }
+
+  /// Has the member's VTA prove to the chat of the group [groupDid] of
+  /// [communityDid] that the member belongs to the group, bound to
+  /// [memberDid], the DID the member joins the chat as. Null when the VTA
+  /// keeps no valid credential of the group for the member's identity.
+  /// Throws as [memberGroups] does.
+  Future<GroupJoinProof?> proveGroupMembership(
+    String communityDid, {
+    required String groupDid,
+    required String memberDid,
+  }) async {
+    final community = await _memberCommunity(communityDid);
+    return GroupJoinProof.prove(
+      await _grantedVta(),
+      groupDid: groupDid,
+      communityDid: communityDid,
+      personaDid: community.personaDid,
+      memberDid: memberDid,
+    );
+  }
+
+  /// The chat the community linked to its group [groupDid], or null when
+  /// it linked none. Throws when the group's DID cannot be resolved.
+  Future<GroupChatLink?> groupChatLink(String groupDid) =>
+      _sdk.groupChatLink(groupDid);
+
+  /// Checks that [proof] admits [memberDid] to the chat of the group
+  /// [groupDid] of [communityDid], offline but for the community's status
+  /// list. Throws [GroupAdmissionException] when it does not.
+  Future<GroupAdmission> verifyGroupJoin(
+    GroupJoinProof proof, {
+    required String communityDid,
+    required String groupDid,
+    required String memberDid,
+  }) => _sdk.groupAdmissionVerifier().verify(
+    presentation: proof.presentation,
+    authority: proof.authority,
+    groupDid: groupDid,
+    communityDid: communityDid,
+    memberDid: memberDid,
+  );
+
+  /// The member's VTA, and their identity's signer in [communityDid].
+  Future<(VtaClient, SignInPersona)> _asMember(String communityDid) async {
+    final community = await _memberCommunity(communityDid);
+    final vta = await _grantedVta();
+    return (vta, await _personaSigner(vta, community));
+  }
+
+  /// The community [communityDid], which the phone holds a membership of.
+  Future<VtcCommunity> _memberCommunity(String communityDid) async {
+    final community = await _repository.findCommunity(communityDid);
+    if (community == null || !community.isMember) {
+      throw const NotACommunityMemberException();
+    }
+    return community;
   }
 
   /// Signs out of the identity's inbox for [communityDid] and forgets the

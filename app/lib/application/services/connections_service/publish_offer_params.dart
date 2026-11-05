@@ -11,6 +11,7 @@ class PublishOfferParams {
     this.maxUsages,
     this.score,
     this.customPhrase,
+    this.groupDid,
   });
 
   final String headline;
@@ -22,4 +23,8 @@ class PublishOfferParams {
   final int? score;
   final String? customPhrase;
   final ChannelTransport transport;
+
+  /// For a group offer, the DID the group is known by when it is held
+  /// elsewhere, such as a community group's; null for a new one.
+  final String? groupDid;
 }

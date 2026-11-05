@@ -253,6 +253,8 @@ class ConnectionsService extends _$ConnectionsService {
   ///
   /// [connectionOffer] - The offer to accept.
   /// [identity] - External identity reference used when accepting the offer.
+  /// [buildGroupJoinAttachments] - For a group offer, what to send the
+  /// group's owner to be let in, such as a community group's credential.
   ///
   /// Throws [AppException] if:
   /// - The offer has already been claimed.
@@ -266,6 +268,7 @@ class ConnectionsService extends _$ConnectionsService {
   Future<void> acceptOffer(
     ConnectionOffer connectionOffer, {
     required Identity identity,
+    GroupJoinAttachmentsBuilder? buildGroupJoinAttachments,
   }) async {
     final sdk = await ref.read(meetingPlaceSdkProvider.future);
     await sdk.acceptOffer(
@@ -274,6 +277,7 @@ class ConnectionsService extends _$ConnectionsService {
         contactCard: identity.card.toSharedSdkContactCard(),
         externalRef: identity.id,
         senderInfo: identity.card.firstName,
+        buildGroupJoinAttachments: buildGroupJoinAttachments,
       ),
     );
     await fetchConnections();
@@ -354,6 +358,7 @@ class ConnectionsService extends _$ConnectionsService {
           externalRef: identity.id,
           score: data.score,
           transport: isGroupOffer ? ChannelTransport.matrix : data.transport,
+          groupDid: isGroupOffer ? data.groupDid : null,
         ),
       );
 

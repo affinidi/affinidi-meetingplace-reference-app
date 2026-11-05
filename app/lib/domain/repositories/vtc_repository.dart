@@ -1,5 +1,6 @@
 import '../models/vtc/linked_vta.dart';
 import '../models/vtc/vtc_community.dart';
+import '../models/vtc/vtc_group_chat.dart';
 import '../models/vtc/vtc_left_membership.dart';
 
 /// Stores the linked VTA, the communities the member signs in to, and the
@@ -29,6 +30,19 @@ abstract interface class VtcRepository {
   /// Records [left], replacing a record of the same [VtcLeftMembership.key].
   Future<void> saveLeftMembership(VtcLeftMembership left);
 
+  /// Every chat this phone owns or joined that follows a community group.
+  Future<List<VtcGroupChat>> groupChats();
+
+  /// Records [chat], replacing a record of the same
+  /// [VtcGroupChat.chatGroupId].
+  Future<void> saveGroupChat(VtcGroupChat chat);
+
+  /// Forgets the chat with [chatGroupId], if recorded.
+  Future<void> removeGroupChat(String chatGroupId);
+
   /// Forgets the linked VTA, every community and every left membership.
+  ///
+  /// Keeps the group chats: a chat this phone owns lets in only a group's
+  /// members, and must keep refusing everyone else while no VTA is linked.
   Future<void> clear();
 }

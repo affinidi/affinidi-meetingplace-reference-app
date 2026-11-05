@@ -4,6 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../../domain/models/vtc/linked_vta.dart';
 import '../../../domain/models/vtc/vtc_community.dart';
+import '../../../domain/models/vtc/vtc_group_chat.dart';
 import '../../../domain/models/vtc/vtc_left_membership.dart';
 import '../../../domain/repositories/vtc_repository.dart';
 
@@ -25,6 +26,7 @@ class SecureStorageVtcRepository implements VtcRepository {
   static const _linkedVtaKey = 'vtc_linked_vta';
   static const _communitiesKey = 'vtc_communities';
   static const _leftMembershipsKey = 'vtc_left_memberships';
+  static const _groupChatsKey = 'vtc_group_chats';
 
   final FlutterSecureStorage _storage;
 
@@ -87,11 +89,43 @@ class SecureStorageVtcRepository implements VtcRepository {
   }
 
   @override
+  Future<List<VtcGroupChat>> groupChats() async {
+    final json = await _storage.read(key: _groupChatsKey);
+    if (json == null) return const [];
+    return [
+      for (final chat in jsonDecode(json) as List<dynamic>)
+        VtcGroupChat.fromJson(chat as Map<String, dynamic>),
+    ];
+  }
+
+  @override
+  Future<void> saveGroupChat(VtcGroupChat chat) async {
+    final others = (await groupChats()).where(
+      (stored) => stored.chatGroupId != chat.chatGroupId,
+    );
+    await _saveGroupChats([...others, chat]);
+  }
+
+  @override
+  Future<void> removeGroupChat(String chatGroupId) async {
+    await _saveGroupChats([
+      ...(await groupChats()).where(
+        (stored) => stored.chatGroupId != chatGroupId,
+      ),
+    ]);
+  }
+
+  @override
   Future<void> clear() async {
     await _storage.delete(key: _linkedVtaKey);
     await _storage.delete(key: _communitiesKey);
     await _storage.delete(key: _leftMembershipsKey);
   }
+
+  Future<void> _saveGroupChats(List<VtcGroupChat> chats) => _storage.write(
+    key: _groupChatsKey,
+    value: jsonEncode([for (final chat in chats) chat.toJson()]),
+  );
 
   Future<List<VtcCommunity>> _othersThan(String communityDid) async => [
     ...(await _communities()).where(
