@@ -4664,6 +4664,12 @@ abstract class AppLocalizations {
   /// **'Join'**
   String get vtcJoinAction;
 
+  /// Under the diagram of a new member's card: from the community to the identity, then to the VTA
+  ///
+  /// In en, this message translates to:
+  /// **'{community} issued your membership card to {identity}, which passed it on to your VTA'**
+  String vtcJoinCardRoute(String community, String identity);
+
   /// The application to the named community was accepted
   ///
   /// In en, this message translates to:

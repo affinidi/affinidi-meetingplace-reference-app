@@ -2991,6 +2991,18 @@
 		}
 	},
 	"vtcJoinAction": "Join",
+	"vtcJoinCardRoute": "{community} issued your membership card to {identity}, which passed it on to your VTA",
+	"@vtcJoinCardRoute": {
+		"description": "Under the diagram of a new member's card: from the community to the identity, then to the VTA",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			},
+			"identity": {
+				"type": "String"
+			}
+		}
+	},
 	"vtcJoinJoined": "You're a member of {name}.",
 	"@vtcJoinJoined": {
 		"description": "The application to the named community was accepted",

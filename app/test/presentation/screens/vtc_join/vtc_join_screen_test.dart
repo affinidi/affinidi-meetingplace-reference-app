@@ -16,6 +16,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/services/camera_service
 import 'package:mpx_flutter_reference_app/infrastructure/services/camera_service/camera_service_state.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/vtc/user_verification_key.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_flow_diagram.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_trail.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
@@ -116,6 +117,17 @@ void main() {
     }
     await tester.pumpAndSettle();
   }
+
+  /// The parties of the diagram on show, left to right.
+  List<String?> flowLabels(WidgetTester tester) => [
+    for (final text in tester.widgetList<Text>(
+      find.descendant(
+        of: find.byType(VtcFlowDiagram),
+        matching: find.byType(Text),
+      ),
+    ))
+      text.data,
+  ];
 
   /// The screen's title reading [text]; its manifest icon sits inside it.
   Finder title(String text) => find.byWidgetPredicate(
@@ -334,6 +346,30 @@ void main() {
         expect(jsonDecode(shown), card);
       });
 
+      testWidgets('draws the card from the community via the identity '
+          'to the VTA', (tester) async {
+        vtaHoldsCard();
+        await pumpScreen(tester);
+        await enterCode(tester, fakeVtcDid);
+        await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
+        await settle(tester);
+
+        final route = find.byKey(const Key('vtc_join_card_route'));
+        await tester.ensureVisible(route);
+        // An identity this phone does not name.
+        expect(flowLabels(tester), ['Community', 'Identity', 'Your VTA']);
+        expect(
+          find.descendant(
+            of: route,
+            matching: find.text(
+              'Football club issued your membership card to Identity, '
+              'which passed it on to your VTA',
+            ),
+          ),
+          findsOneWidget,
+        );
+      });
+
       testWidgets('says when the card states personhood', (tester) async {
         vtaHoldsCard(personhood: true);
         await pumpScreen(tester);
@@ -353,6 +389,7 @@ void main() {
         await settle(tester);
 
         expect(find.byKey(const Key('vtc_membership_card')), findsNothing);
+        expect(find.byKey(const Key('vtc_join_card_route')), findsNothing);
         expect(
           find.text('Your membership card is on its way to your VTA'),
           findsOneWidget,
@@ -884,6 +921,44 @@ void main() {
 
         expect(find.text("You're a member of Football club."), findsOneWidget);
         expect(vtaTasks(), contains(VtaTask.didsCreate));
+      });
+
+      testWidgets('names the identity the card came through', (tester) async {
+        network.vta
+          ..answers[VtaTask.credentialsQuery] = {
+            'credentials': [
+              {'id': 'card-1'},
+            ],
+          }
+          ..answers[VtaTask.credentialsGet] = {
+            'credential': {
+              'id': 'urn:uuid:vmc',
+              'type': ['VerifiableCredential', 'MembershipCredential'],
+              'issuer': fakeVtcDid,
+              'credentialSubject': {'id': persona.did},
+            },
+          };
+        await reachIdentities(tester);
+        await tester.ensureVisible(
+          find.byKey(const Key('vtc_join_identities')),
+        );
+        await tester.pumpAndSettle();
+        await tester.timedDrag(
+          find.byKey(const Key('vtc_join_identities')),
+          const Offset(-500, 0),
+          const Duration(milliseconds: 300),
+        );
+        await tester.pumpAndSettle();
+        await tapVisible(
+          tester,
+          find.widgetWithText(ElevatedButton, 'Join with this identity'),
+        );
+        await settle(tester);
+
+        await tester.ensureVisible(
+          find.byKey(const Key('vtc_join_card_route')),
+        );
+        expect(flowLabels(tester), ['Community', 'Ada', 'Your VTA']);
       });
 
       testWidgets('joins as the identity swiped to', (tester) async {

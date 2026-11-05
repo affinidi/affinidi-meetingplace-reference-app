@@ -3093,6 +3093,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vtcJoinAction => 'Join';
 
   @override
+  String vtcJoinCardRoute(String community, String identity) {
+    return '$community issued your membership card to $identity, which passed it on to your VTA';
+  }
+
+  @override
   String vtcJoinJoined(String name) {
     return 'You\'re a member of $name.';
   }

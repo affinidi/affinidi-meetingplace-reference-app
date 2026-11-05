@@ -6,6 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
+import '../../../application/services/identities_service/identities_service.dart';
 import '../../../domain/models/vtc/vtc_card_delivery.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/services/camera_service/camera_service.dart';
@@ -16,6 +17,7 @@ import '../../widgets/swipeable_cards.dart';
 import '../../widgets/vta_identity_card.dart';
 import 'vtc_card_delivery_trail.dart';
 import 'vtc_claim_type_label.dart';
+import 'vtc_flow_diagram.dart';
 import 'vtc_identity_check_view.dart';
 import 'vtc_join_controller.dart';
 import 'vtc_join_json_dialog.dart';
@@ -1223,6 +1225,7 @@ class _Joined extends StatelessWidget {
             communityName: name,
             logoUrl: state.logoUrl,
           ),
+          _CardRoute(communityName: name, memberDid: card.memberDid),
           if (delivery != null)
             _CardArrival(delivery: delivery, communityName: name),
         ] else if (delivery != null)
@@ -1248,6 +1251,47 @@ class _Joined extends StatelessWidget {
         OnboardingButton(label: l10n.generalDone, onPressed: onDone),
         leave,
       ],
+    );
+  }
+}
+
+/// Where the card on show came from, as the Credentials tab draws it: the
+/// community issued it to the identity, which passed it on to the VTA.
+class _CardRoute extends ConsumerWidget {
+  const _CardRoute({required this.communityName, required this.memberDid});
+
+  final String communityName;
+
+  /// The DID of the identity the card is for.
+  final String memberDid;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final name = ref
+        .watch(identitiesServiceProvider)
+        .identities
+        .where((identity) => identity.did == memberDid)
+        .firstOrNull
+        ?.card
+        .displayName
+        .trim();
+    final identity = name == null || name.isEmpty
+        ? l10n.vtcJoinTrailIdentity
+        : name;
+    return VtcFlowBox(
+      key: const Key('vtc_join_card_route'),
+      flow: VtcFlowDiagram(
+        nodes: [
+          VtcFlowNode(Icons.groups_outlined, l10n.membershipFlowCommunity),
+          VtcFlowNode(Icons.person_outline, identity),
+          VtcFlowNode(Icons.shield_outlined, l10n.membershipTrailYourVta),
+        ],
+      ),
+      summary: Text(
+        l10n.vtcJoinCardRoute(communityName, identity),
+        style: onboardingNote(context),
+      ),
     );
   }
 }

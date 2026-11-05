@@ -96,3 +96,32 @@ class VtcFlowDiagram extends StatelessWidget {
     );
   }
 }
+
+/// A [flow] in a tinted box, with its [summary] in words under it.
+class VtcFlowBox extends StatelessWidget {
+  /// Creates a [VtcFlowBox].
+  const VtcFlowBox({super.key, required this.flow, required this.summary});
+
+  final Widget flow;
+  final Widget summary;
+
+  static const _padding = 10.0;
+  static const _radius = 12.0;
+  static const _tint = 20;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(_padding),
+      decoration: BoxDecoration(
+        color: Colors.white.withAlpha(_tint),
+        borderRadius: BorderRadius.circular(_radius),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: _padding,
+        children: [flow, summary],
+      ),
+    );
+  }
+}

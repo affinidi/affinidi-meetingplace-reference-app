@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import 'vtc_detail_line.dart';
+import 'vtc_flow_diagram.dart';
 import 'vtc_join_json_dialog.dart';
 
 /// How far a trail got with a step.
@@ -102,11 +103,6 @@ class VtcTrailStep extends HookWidget {
 
   /// Room between a step's picture and its details, beyond theirs.
   static const _flowSpacing = 6.0;
-
-  /// The box a step's picture and summary sit in once opened.
-  static const _flowPadding = 10.0;
-  static const _flowRadius = 12.0;
-  static const _flowTint = 20;
   static const _lineWidth = 2.0;
 
   @override
@@ -221,21 +217,15 @@ class VtcTrailStep extends HookWidget {
                     ),
                     // Opened, the picture and, under it, what it shows.
                     if (pictured)
-                      Container(
-                        key: const Key('vtc_trail_flow_box'),
-                        margin: const EdgeInsets.only(
+                      Padding(
+                        padding: const EdgeInsets.only(
                           top: _detailSpacing,
                           bottom: _flowSpacing,
                         ),
-                        padding: const EdgeInsets.all(_flowPadding),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withAlpha(_flowTint),
-                          borderRadius: BorderRadius.circular(_flowRadius),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          spacing: _flowPadding,
-                          children: [flow!, summary],
+                        child: VtcFlowBox(
+                          key: const Key('vtc_trail_flow_box'),
+                          flow: flow!,
+                          summary: summary,
                         ),
                       ),
                     if (expanded.value)
