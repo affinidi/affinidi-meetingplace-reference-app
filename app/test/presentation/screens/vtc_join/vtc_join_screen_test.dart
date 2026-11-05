@@ -314,7 +314,9 @@ void main() {
         expect(find.byType(VtcJoinPhraseView), findsOneWidget);
       });
 
-      testWidgets('centers the role and settings on the page', (tester) async {
+      testWidgets('lines up the role on the left with settings on the right', (
+        tester,
+      ) async {
         vtaHoldsRole('member');
 
         await joinCommunity(tester);
@@ -331,11 +333,9 @@ void main() {
         final settings = tester.getRect(
           find.byKey(const Key('vtc_community_settings')),
         );
-        expect(roleIcon.left - line.left, greaterThan(0));
-        expect(
-          roleIcon.left - line.left,
-          moreOrLessEquals(line.right - settings.right),
-        );
+        expect(roleIcon.left, line.left);
+        expect(settings.right, line.right);
+        expect(roleIcon.center.dy, moreOrLessEquals(settings.center.dy));
       });
 
       testWidgets('shows no role until the VTA holds the role card', (
