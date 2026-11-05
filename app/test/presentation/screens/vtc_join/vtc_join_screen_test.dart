@@ -23,6 +23,7 @@ import 'package:mpx_flutter_reference_app/presentation/widgets/onboarding_style/
 
 import '../../../fakes/fake_identities.dart';
 import '../../../fakes/fake_identities_service.dart';
+import '../../../fakes/fake_persona.dart';
 import '../../../fakes/fake_vta.dart';
 import '../../../fakes/fake_vtc_network.dart';
 
@@ -351,6 +352,74 @@ void main() {
           find.widgetWithText(OutlinedButton, 'Leave community'),
           findsOneWidget,
         );
+      });
+
+      testWidgets('shows how the card came from the identity inbox', (
+        tester,
+      ) async {
+        final mailPersona = FakePersona(mediatorDid: network.mediatorDid);
+        final card = {
+          'id': 'urn:uuid:vmc',
+          'type': ['VerifiableCredential', 'MembershipCredential'],
+          'issuer': fakeVtcDid,
+          'credentialSubject': {'id': mailPersona.did},
+        };
+        network.vta
+          ..persona = mailPersona
+          ..otherDocuments[mailPersona.did] = mailPersona.document
+          ..answers[VtaTask.didsCreate] = {
+            'did': mailPersona.did,
+            'contextId': 'vta',
+            'signingKeyId': mailPersona.signingKeyId,
+          }
+          ..answers[VtaTask.signDocument] = {
+            'document': {
+              'issuer': mailPersona.did,
+              'proof': {'proofPurpose': 'assertionMethod'},
+            },
+          }
+          ..answerTo[VtaTask.exportSecret] = (payload) =>
+              mailPersona.exportAnswer(payload['keyId']);
+        network.joinVerdict = {'effect': 'refer'};
+        await pumpScreen(tester);
+        await enterCode(tester, fakeVtcDid);
+        await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
+        await settle(tester);
+
+        await tester.runAsync(() => network.deliver(mailPersona, card));
+        network.joinStatus = 'approved';
+        await tapVisible(
+          tester,
+          find.widgetWithText(OutlinedButton, 'Check again'),
+        );
+        await settle(tester);
+
+        // The card is not on show yet: the trail is, open.
+        expect(find.byKey(const Key('vtc_membership_card')), findsNothing);
+        expect(find.text('Keys lent by your VTA'), findsOneWidget);
+        expect(
+          find.text('Membership confirmed with Football club'),
+          findsOneWidget,
+        );
+
+        // The VTA kept it; the next check reads it.
+        network.vta
+          ..answers[VtaTask.credentialsQuery] = {
+            'credentials': [
+              {'id': 'card-1'},
+            ],
+          }
+          ..answers[VtaTask.credentialsGet] = {'credential': card};
+        await tester.pump(const Duration(seconds: 5));
+        await settle(tester);
+
+        expect(find.byKey(const Key('vtc_membership_card')), findsOneWidget);
+        expect(find.text('How your card arrived'), findsOneWidget);
+        expect(find.text('Keys lent by your VTA'), findsNothing);
+
+        await tapVisible(tester, find.byKey(const Key('vtc_delivery_toggle')));
+        await tester.pumpAndSettle();
+        expect(find.text('Keys lent by your VTA'), findsOneWidget);
       });
     });
 

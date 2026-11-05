@@ -4678,6 +4678,138 @@ abstract class AppLocalizations {
   /// **'Answered at'**
   String get vtcJoinTrailAnsweredAt;
 
+  /// Toggle and heading over the steps that brought the membership card from the identity's inbox to the VTA
+  ///
+  /// In en, this message translates to:
+  /// **'How your card arrived'**
+  String get vtcDeliveryHeading;
+
+  /// Delivery step: the VTA lent the identity's keys to this phone
+  ///
+  /// In en, this message translates to:
+  /// **'Keys lent by your VTA'**
+  String get vtcDeliveryKeysLent;
+
+  /// Delivery step summary: how the lent keys are held
+  ///
+  /// In en, this message translates to:
+  /// **'Held in memory only, while this screen collects the card'**
+  String get vtcDeliveryKeysLentSummary;
+
+  /// Delivery step summary: the VTA refused or could not lend the keys
+  ///
+  /// In en, this message translates to:
+  /// **'Your VTA didn\'t lend the keys. Trying again'**
+  String get vtcDeliveryKeysFailed;
+
+  /// Label of the identity's key agreement key id
+  ///
+  /// In en, this message translates to:
+  /// **'Key agreement key'**
+  String get vtcDeliveryKeyAgreementKey;
+
+  /// Delivery step: the phone signed in to the identity's inbox on its mediator
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in to your identity\'s inbox'**
+  String get vtcDeliverySignedIn;
+
+  /// Delivery step summary: how many messages waited in the identity's inbox
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No messages waiting} =1{1 message waiting} other{{count} messages waiting}}'**
+  String vtcDeliveryWaitingMessages(int count);
+
+  /// Delivery step summary: the mediator could not be reached
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t reach the inbox. Trying again'**
+  String get vtcDeliverySignedInFailed;
+
+  /// Label of the mediator holding the identity's inbox
+  ///
+  /// In en, this message translates to:
+  /// **'Mediator'**
+  String get vtcDeliveryMediator;
+
+  /// Delivery step: the named community's card was found in the identity's inbox
+  ///
+  /// In en, this message translates to:
+  /// **'Card picked up from {name}'**
+  String vtcDeliveryPickedUp(String name);
+
+  /// Delivery step summary: the card's delivery was signed by the named community and its proof checked
+  ///
+  /// In en, this message translates to:
+  /// **'Signed by {name} · proof verified'**
+  String vtcDeliveryPickedUpSummary(String name);
+
+  /// Delivery step summary: the named community has not delivered the card yet
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for {name} to deliver it'**
+  String vtcDeliveryWaiting(String name);
+
+  /// Label of the DID that signed the card's delivery
+  ///
+  /// In en, this message translates to:
+  /// **'Sent by'**
+  String get vtcDeliverySentBy;
+
+  /// Title of the sheet showing the signed document that delivered the card
+  ///
+  /// In en, this message translates to:
+  /// **'The community\'s signed delivery'**
+  String get vtcDeliveryIssueDocument;
+
+  /// Delivery step: the VTA checked and keeps the card
+  ///
+  /// In en, this message translates to:
+  /// **'Kept on your VTA'**
+  String get vtcDeliveryKept;
+
+  /// Delivery step summary: the VTA verified the card when it stored it
+  ///
+  /// In en, this message translates to:
+  /// **'Proof checked by your VTA'**
+  String get vtcDeliveryKeptSummary;
+
+  /// Delivery step summary: the VTA stored the card but does not hold it valid
+  ///
+  /// In en, this message translates to:
+  /// **'Kept, but your VTA finds it revoked or expired'**
+  String get vtcDeliveryKeptInvalid;
+
+  /// Delivery step summary: the VTA refused to store the card
+  ///
+  /// In en, this message translates to:
+  /// **'Your VTA didn\'t keep it. Trying again'**
+  String get vtcDeliveryKeptFailed;
+
+  /// Delivery step: the named community took the confirmation of the membership
+  ///
+  /// In en, this message translates to:
+  /// **'Membership confirmed with {name}'**
+  String vtcDeliveryConfirmed(String name);
+
+  /// Delivery step summary: how the membership was confirmed
+  ///
+  /// In en, this message translates to:
+  /// **'Your identity signed the card back to the community'**
+  String get vtcDeliveryConfirmedSummary;
+
+  /// Delivery step summary: the community did not take the confirmation
+  ///
+  /// In en, this message translates to:
+  /// **'Not confirmed yet. Trying again'**
+  String get vtcDeliveryConfirmedFailed;
+
+  /// Delivery step summary of a step not reached yet
+  ///
+  /// In en, this message translates to:
+  /// **'Still to come'**
+  String get vtcDeliveryNext;
+
   /// The named community turned the application down
   ///
   /// In en, this message translates to:

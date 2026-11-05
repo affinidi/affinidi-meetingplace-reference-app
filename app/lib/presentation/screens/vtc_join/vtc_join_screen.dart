@@ -6,6 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
+import '../../../domain/models/vtc/vtc_card_delivery.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/services/camera_service/camera_service.dart';
 import '../../../l10n/app_localizations.dart';
@@ -13,6 +14,7 @@ import '../../dialogs/qr_code_picker/qr_code_picker.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import '../../widgets/swipeable_cards.dart';
 import '../../widgets/vta_identity_card.dart';
+import 'vtc_card_delivery_trail.dart';
 import 'vtc_join_controller.dart';
 import 'vtc_join_json_dialog.dart';
 import 'vtc_join_state.dart';
@@ -1201,6 +1203,7 @@ class _Joined extends StatelessWidget {
     final l10n = context.l10n;
     final name = state.communityName ?? '';
     final card = state.membershipCard;
+    final delivery = state.cardDelivery;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: 12,
@@ -1215,12 +1218,16 @@ class _Joined extends StatelessWidget {
           style: context.textTheme.titleMedium?.copyWith(color: Colors.white),
         ),
         const SizedBox(height: 4),
-        if (card != null)
+        if (card != null) ...[
           VtcMembershipCardView(
             card: card,
             communityName: name,
             logoUrl: state.logoUrl,
-          )
+          ),
+          if (delivery != null)
+            _CardArrival(delivery: delivery, communityName: name),
+        ] else if (delivery != null)
+          VtcCardDeliveryTrail(delivery: delivery, communityName: name)
         else
           Row(
             key: const Key('vtc_membership_card_pending'),
@@ -1239,6 +1246,55 @@ class _Joined extends StatelessWidget {
         const SizedBox(height: 12),
         OnboardingButton(label: l10n.generalDone, onPressed: onDone),
         leave,
+      ],
+    );
+  }
+}
+
+/// How the card on show came to the VTA, folded away behind a toggle.
+class _CardArrival extends HookWidget {
+  const _CardArrival({required this.delivery, required this.communityName});
+
+  final VtcCardDelivery delivery;
+  final String communityName;
+
+  @override
+  Widget build(BuildContext context) {
+    final expanded = useState(false);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 8,
+      children: [
+        InkWell(
+          key: const Key('vtc_delivery_toggle'),
+          onTap: () => expanded.value = !expanded.value,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              spacing: 8,
+              children: [
+                const Icon(Icons.route_outlined, color: Colors.white),
+                Expanded(
+                  child: Text(
+                    context.l10n.vtcDeliveryHeading,
+                    style: context.textTheme.bodyMedium?.copyWith(
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                Icon(
+                  expanded.value ? Icons.expand_less : Icons.expand_more,
+                  color: Colors.white,
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (expanded.value)
+          VtcCardDeliveryTrail(
+            delivery: delivery,
+            communityName: communityName,
+          ),
       ],
     );
   }

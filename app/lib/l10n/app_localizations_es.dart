@@ -3114,6 +3114,94 @@ class AppLocalizationsEs extends AppLocalizations {
   String get vtcJoinTrailAnsweredAt => 'Answered at';
 
   @override
+  String get vtcDeliveryHeading => 'How your card arrived';
+
+  @override
+  String get vtcDeliveryKeysLent => 'Keys lent by your VTA';
+
+  @override
+  String get vtcDeliveryKeysLentSummary =>
+      'Held in memory only, while this screen collects the card';
+
+  @override
+  String get vtcDeliveryKeysFailed =>
+      'Your VTA didn\'t lend the keys. Trying again';
+
+  @override
+  String get vtcDeliveryKeyAgreementKey => 'Key agreement key';
+
+  @override
+  String get vtcDeliverySignedIn => 'Signed in to your identity\'s inbox';
+
+  @override
+  String vtcDeliveryWaitingMessages(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count messages waiting',
+      one: '1 message waiting',
+      zero: 'No messages waiting',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get vtcDeliverySignedInFailed =>
+      'Couldn\'t reach the inbox. Trying again';
+
+  @override
+  String get vtcDeliveryMediator => 'Mediator';
+
+  @override
+  String vtcDeliveryPickedUp(String name) {
+    return 'Card picked up from $name';
+  }
+
+  @override
+  String vtcDeliveryPickedUpSummary(String name) {
+    return 'Signed by $name · proof verified';
+  }
+
+  @override
+  String vtcDeliveryWaiting(String name) {
+    return 'Waiting for $name to deliver it';
+  }
+
+  @override
+  String get vtcDeliverySentBy => 'Sent by';
+
+  @override
+  String get vtcDeliveryIssueDocument => 'The community\'s signed delivery';
+
+  @override
+  String get vtcDeliveryKept => 'Kept on your VTA';
+
+  @override
+  String get vtcDeliveryKeptSummary => 'Proof checked by your VTA';
+
+  @override
+  String get vtcDeliveryKeptInvalid =>
+      'Kept, but your VTA finds it revoked or expired';
+
+  @override
+  String get vtcDeliveryKeptFailed => 'Your VTA didn\'t keep it. Trying again';
+
+  @override
+  String vtcDeliveryConfirmed(String name) {
+    return 'Membership confirmed with $name';
+  }
+
+  @override
+  String get vtcDeliveryConfirmedSummary =>
+      'Your identity signed the card back to the community';
+
+  @override
+  String get vtcDeliveryConfirmedFailed => 'Not confirmed yet. Trying again';
+
+  @override
+  String get vtcDeliveryNext => 'Still to come';
+
+  @override
   String vtcJoinDenied(String name) {
     return '$name didn\'t accept your application.';
   }
