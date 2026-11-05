@@ -102,7 +102,12 @@ void main() {
     network.vta
       ..answers[VtaTask.credentialsQuery] = {
         'credentials': [
-          {'id': 'urn:uuid:chess'},
+          {
+            'id': 'vault-chess',
+            'types': ['VerifiableCredential', 'MembershipCredential'],
+            'purpose': 'membership',
+            'status': 'valid',
+          },
         ],
       }
       ..answers[VtaTask.credentialsGet] = {'credential': chessCard};
@@ -241,6 +246,15 @@ void main() {
     await expand(tester, 'kept');
     expect(find.text('Done by'), findsOneWidget);
     expect(find.text('Your VTA'), findsOneWidget);
+    // What the VTA records of the card.
+    expect(find.text('vault-chess'), findsOneWidget);
+    expect(find.text('membership'), findsOneWidget);
+    expect(find.text('Your VTA holds it as'), findsOneWidget);
+    expect(find.text('valid'), findsOneWidget);
+    expect(
+      find.text('VerifiableCredential, MembershipCredential'),
+      findsOneWidget,
+    );
     await expand(tester, 'checked');
     expect(find.text('This phone'), findsOneWidget);
     expect(find.text(FakeVtcNetwork.statusListUrl), findsOneWidget);

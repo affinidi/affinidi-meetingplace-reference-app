@@ -11,10 +11,14 @@ class VtcMembershipEntry {
     required this.card,
     this.communityName,
     this.left,
+    this.stored,
   });
 
   /// The card the community issued.
   final VtcMembershipCard card;
+
+  /// What the member's VTA records of the card, while it holds it.
+  final HeldCredential? stored;
 
   /// The community's name, if known.
   final String? communityName;

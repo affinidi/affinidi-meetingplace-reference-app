@@ -3032,6 +3032,30 @@ abstract class AppLocalizations {
   /// **'{community}\'s signed status list'**
   String membershipTrailStatusDocument(String community);
 
+  /// Trail detail: the id under which the VTA keeps the card
+  ///
+  /// In en, this message translates to:
+  /// **'Kept under'**
+  String get membershipTrailStoredId;
+
+  /// Trail detail: what the VTA files the card under, e.g. membership
+  ///
+  /// In en, this message translates to:
+  /// **'Filed as'**
+  String get membershipTrailStoredPurpose;
+
+  /// Trail detail: whether the VTA holds the card valid, as it last read
+  ///
+  /// In en, this message translates to:
+  /// **'Your VTA holds it as'**
+  String get membershipTrailStoredStatus;
+
+  /// Trail detail: the card's credential types, as the VTA records them
+  ///
+  /// In en, this message translates to:
+  /// **'Types'**
+  String get membershipTrailStoredTypes;
+
   /// No description provided for @all.
   ///
   /// In en, this message translates to:

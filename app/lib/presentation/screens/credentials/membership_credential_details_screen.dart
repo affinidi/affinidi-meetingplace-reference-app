@@ -183,6 +183,34 @@ class _MembershipTrail extends StatelessWidget {
             (null, null) => l10n.membershipTrailKept,
           },
           actor: l10n.membershipTrailYourVta,
+          details: [
+            if (entry.stored case final stored?) ...[
+              VtcTrailDetail(
+                Icons.inventory_2_outlined,
+                l10n.membershipTrailStoredId,
+                stored.id,
+                isId: true,
+              ),
+              if (stored.purpose case final purpose?)
+                VtcTrailDetail(
+                  Icons.folder_outlined,
+                  l10n.membershipTrailStoredPurpose,
+                  purpose,
+                ),
+              if (stored.status case final status?)
+                VtcTrailDetail(
+                  Icons.verified_outlined,
+                  l10n.membershipTrailStoredStatus,
+                  status,
+                ),
+              if (stored.types.isNotEmpty)
+                VtcTrailDetail(
+                  Icons.category_outlined,
+                  l10n.membershipTrailStoredTypes,
+                  stored.types.join(', '),
+                ),
+            ],
+          ],
         ),
         if (left != null)
           VtcTrailStep(

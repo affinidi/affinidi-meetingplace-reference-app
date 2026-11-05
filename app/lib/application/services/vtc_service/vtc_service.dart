@@ -921,11 +921,12 @@ class VtcService {
     ];
     final leftKeys = {for (final entry in leftEntries) entry.key};
     final heldEntries = [
-      for (final json in held)
+      for (final StoredCredential(:record, credential: json) in held)
         if (VtcMembershipCard.fromCredential(json) case final card?)
           if (card.issuer != mockIssuer)
             VtcMembershipEntry(
               card: card,
+              stored: record,
               communityName:
                   communities
                       .where((c) => c.communityDid == card.issuer)

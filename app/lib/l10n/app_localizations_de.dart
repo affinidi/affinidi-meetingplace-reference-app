@@ -2046,6 +2046,18 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get membershipTrailStoredId => 'Kept under';
+
+  @override
+  String get membershipTrailStoredPurpose => 'Filed as';
+
+  @override
+  String get membershipTrailStoredStatus => 'Your VTA holds it as';
+
+  @override
+  String get membershipTrailStoredTypes => 'Types';
+
+  @override
   String get all => 'Alle';
 
   @override

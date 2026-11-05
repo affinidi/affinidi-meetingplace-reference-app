@@ -1995,6 +1995,22 @@
 			}
 		}
 	},
+	"membershipTrailStoredId": "Kept under",
+	"@membershipTrailStoredId": {
+		"description": "Trail detail: the id under which the VTA keeps the card"
+	},
+	"membershipTrailStoredPurpose": "Filed as",
+	"@membershipTrailStoredPurpose": {
+		"description": "Trail detail: what the VTA files the card under, e.g. membership"
+	},
+	"membershipTrailStoredStatus": "Your VTA holds it as",
+	"@membershipTrailStoredStatus": {
+		"description": "Trail detail: whether the VTA holds the card valid, as it last read"
+	},
+	"membershipTrailStoredTypes": "Types",
+	"@membershipTrailStoredTypes": {
+		"description": "Trail detail: the card's credential types, as the VTA records them"
+	},
 	"all": "All",
 	"@all": {
 		"type": "text"
