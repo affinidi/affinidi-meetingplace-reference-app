@@ -43,6 +43,6 @@ class FindOfferScreenController extends _$FindOfferScreenController {
     await ref.read(connectionsServiceProvider.notifier).findOffer(mnemonic);
     final offer = ref.read(connectionsServiceProvider).selectedOffer;
     return offer != null &&
-        CommunityOfferService.statementOf(offer.contactCard) != null;
+        CommunityOfferService.communityDidOf(offer.contactCard) != null;
   }
 }

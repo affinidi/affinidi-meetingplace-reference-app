@@ -64,9 +64,6 @@ enum VtcJoinFailure {
   /// The join phrase entered expired.
   phraseExpired,
 
-  /// No admin's statement for the join phrase entered verifies.
-  phraseNotVouched,
-
   /// No VTA is linked.
   vtaMissing,
 

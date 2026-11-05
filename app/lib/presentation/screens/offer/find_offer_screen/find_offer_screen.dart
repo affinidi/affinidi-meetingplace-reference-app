@@ -71,8 +71,8 @@ class FindOfferScreen extends HookConsumerWidget {
 
       if (!context.mounted) return;
       if (success && isJoinPhrase) {
-        // The join screen verifies the admin's statement before it opens
-        // the community.
+        // The join screen resolves the community and shows it for review
+        // before anything is sent.
         await VtcJoinScreen.show(context, code: trimmed);
         return;
       }

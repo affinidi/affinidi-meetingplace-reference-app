@@ -3487,7 +3487,7 @@
 		}
 	},
 	"vtcJoinNeedsMore": "The community needs more than Meeting Place can send, such as credentials.",
-	"vtcJoinFailure": "{reason, select, invalidCode{This isn't a community's code.} phraseNotFound{No community goes by this phrase in Meeting Place.} phraseExpired{This join phrase has expired. Ask the community for its current phrase.} phraseNotVouched{Meeting Place couldn't confirm that the community stands behind this phrase, so it wasn't opened.} profileMissing{Your VTA has no profile for this identity, so it can't share the details the community asks for. Set up your profile on your VTA, then try again.} detailsMissing{Your VTA doesn't hold a detail the community requires, so nothing was sent.} credentialMissing{Your identity holds no credential this way in accepts that your VTA can present, so nothing was sent.} vtaMissing{Link your VTA in Settings before joining a community.} unreachable{The community can't be reached from your phone.} noDidHosting{Your VTA has no DID hosting server, so it can't create an identity the community can find.} notAccepting{This community isn't accepting applications.} badAnswer{The community's answer couldn't be checked, so nothing was recorded.} lastAdministrator{You're this community's last administrator. Make another member an administrator before you leave.} other{The community or your VTA refused the application.}}",
+	"vtcJoinFailure": "{reason, select, invalidCode{This isn't a community's code.} phraseNotFound{No community goes by this phrase in Meeting Place.} phraseExpired{This join phrase has expired. Ask the community for its current phrase.} profileMissing{Your VTA has no profile for this identity, so it can't share the details the community asks for. Set up your profile on your VTA, then try again.} detailsMissing{Your VTA doesn't hold a detail the community requires, so nothing was sent.} credentialMissing{Your identity holds no credential this way in accepts that your VTA can present, so nothing was sent.} vtaMissing{Link your VTA in Settings before joining a community.} unreachable{The community can't be reached from your phone.} noDidHosting{Your VTA has no DID hosting server, so it can't create an identity the community can find.} notAccepting{This community isn't accepting applications.} badAnswer{The community's answer couldn't be checked, so nothing was recorded.} lastAdministrator{You're this community's last administrator. Make another member an administrator before you leave.} other{The community or your VTA refused the application.}}",
 	"@vtcJoinFailure": {
 		"description": "Why joining a community could not go ahead",
 		"placeholders": {
@@ -3515,9 +3515,9 @@
 		}
 	},
 	"vtcJoinPhraseHeading": "Join phrase",
-	"vtcJoinPhraseIntro": "Let people find {name} in Meeting Place by a short phrase instead of its DID. As an administrator, you vouch that the phrase leads to {name}.",
+	"vtcJoinPhraseIntro": "Let people find {name} in Meeting Place by a short phrase instead of its DID. They see the community and where it is hosted before they apply.",
 	"@vtcJoinPhraseIntro": {
-		"description": "Offers a community administrator to publish a join phrase",
+		"description": "Offers a community member to publish a join phrase",
 		"placeholders": {
 			"name": {
 				"type": "String"
@@ -3527,7 +3527,7 @@
 	"vtcJoinPhrasePublishAction": "Publish join phrase",
 	"vtcJoinPhraseDialogTitle": "Join phrase for {name}",
 	"@vtcJoinPhraseDialogTitle": {
-		"description": "Title of the dialog asking an administrator for a community's join phrase",
+		"description": "Title of the dialog asking a member for a community's join phrase",
 		"placeholders": {
 			"name": {
 				"type": "String"
@@ -3535,7 +3535,7 @@
 		}
 	},
 	"vtcJoinPhraseHint": "Phrase",
-	"vtcJoinPhrasePublished": "People join {name} by entering \"{phrase}\" or scanning this code in Meeting Place. It lasts until {date}, and is published again each time the community renews your administrator card.",
+	"vtcJoinPhrasePublished": "People find {name} by entering \"{phrase}\" or scanning this code in Meeting Place, until you withdraw it.",
 	"@vtcJoinPhrasePublished": {
 		"description": "Explains a published join phrase of a community",
 		"placeholders": {
@@ -3544,41 +3544,28 @@
 			},
 			"phrase": {
 				"type": "String"
-			},
-			"date": {
-				"type": "String"
 			}
 		}
 	},
-	"vtcJoinPhraseVisibility": "Anyone who looks the phrase up can see that your identity is an administrator of {name}.",
+	"vtcJoinPhraseVisibility": "The phrase shows only the community's DID, nothing about you. Anyone can publish a phrase for any community, so people still check the community before they apply.",
 	"@vtcJoinPhraseVisibility": {
-		"description": "Warns what a published join phrase shows about the administrator",
-		"placeholders": {
-			"name": {
-				"type": "String"
-			}
-		}
+		"description": "Says what a published join phrase shows, and that anyone can publish one"
 	},
 	"vtcJoinPhraseWithdrawAction": "Withdraw phrase",
 	"vtcJoinPhraseWithdrawTitle": "Withdraw \"{phrase}\"?",
 	"@vtcJoinPhraseWithdrawTitle": {
-		"description": "Asks an administrator to confirm withdrawing a join phrase",
+		"description": "Asks a member to confirm withdrawing a join phrase",
 		"placeholders": {
 			"phrase": {
 				"type": "String"
 			}
 		}
 	},
-	"vtcJoinPhraseWithdrawMessage": "Meeting Place stops listing the phrase. Someone who copied it can list it again until {date}, but it still leads only to this community.",
+	"vtcJoinPhraseWithdrawMessage": "Meeting Place stops listing the phrase, and anyone can then publish it again.",
 	"@vtcJoinPhraseWithdrawMessage": {
-		"description": "Explains what withdrawing a join phrase does, and its limit",
-		"placeholders": {
-			"date": {
-				"type": "String"
-			}
-		}
+		"description": "Explains what withdrawing a join phrase does"
 	},
-	"vtcJoinPhraseFailure": "{reason, select, taken{That phrase is already taken in Meeting Place. Try another.} notAdmin{Your VTA holds no administrator card of this community, so you can't vouch for a phrase.} vtaMissing{Link your VTA in Settings first.} other{The phrase couldn't be published or withdrawn. Try again.}}",
+	"vtcJoinPhraseFailure": "{reason, select, taken{That phrase is already taken in Meeting Place. Try another.} other{The phrase couldn't be published or withdrawn. Try again.}}",
 	"@vtcJoinPhraseFailure": {
 		"description": "Why publishing or withdrawing a join phrase failed",
 		"placeholders": {

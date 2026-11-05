@@ -988,7 +988,6 @@ void main() {
     for (final (problem, failure) in [
       (CommunityPhraseProblem.notFound, VtcJoinFailure.phraseNotFound),
       (CommunityPhraseProblem.expired, VtcJoinFailure.phraseExpired),
-      (CommunityPhraseProblem.notVouched, VtcJoinFailure.phraseNotVouched),
     ]) {
       test('says why a join phrase leads nowhere: ${problem.name}', () async {
         communityOffers.failure = CommunityPhraseException(problem);

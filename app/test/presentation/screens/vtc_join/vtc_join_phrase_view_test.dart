@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mpx_flutter_reference_app/application/services/community_offer_service/community_offer_service.dart';
-import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_phrase_view.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
@@ -13,11 +12,9 @@ const _communityDid = 'did:webvh:community.example';
 
 void main() {
   late FakeOfferSdk sdk;
-  late FakeAdminVtcService vtc;
 
   setUp(() {
     sdk = FakeOfferSdk();
-    vtc = FakeAdminVtcService();
   });
 
   Future<void> pumpView(WidgetTester tester) async {
@@ -26,9 +23,8 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          vtcServiceProvider.overrideWithValue(vtc),
           communityOfferServiceProvider.overrideWithValue(
-            CommunityOfferService(sdk: () async => sdk, vtc: vtc),
+            CommunityOfferService(sdk: () async => sdk),
           ),
         ],
         child: MaterialApp(
@@ -65,15 +61,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('shows nothing to a member who is no admin', (tester) async {
-    vtc.roleCard = null;
-
-    await pumpView(tester);
-
-    expect(find.byKey(const Key('vtc_join_phrase')), findsNothing);
-  });
-
-  testWidgets('lets an admin publish a join phrase', (tester) async {
+  testWidgets('lets a member publish a join phrase', (tester) async {
     await pumpView(tester);
     expect(find.textContaining('Let people find Club'), findsOneWidget);
 
@@ -82,7 +70,7 @@ void main() {
     expect(sdk.requests.single.customMnemonic, 'my-club');
     expect(find.byKey(const Key('vtc_join_phrase_text')), findsOneWidget);
     expect(find.text('my-club'), findsOneWidget);
-    expect(find.textContaining('administrator of Club'), findsOneWidget);
+    expect(find.textContaining('nothing about you'), findsOneWidget);
     expect(find.text('Withdraw phrase'), findsOneWidget);
   });
 

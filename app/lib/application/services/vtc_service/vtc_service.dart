@@ -37,13 +37,6 @@ class InvalidCommunityCodeException implements Exception {
   const InvalidCommunityCodeException();
 }
 
-/// Thrown when only an admin of a community may do something, and the
-/// member's VTA holds no valid admin role card of it.
-class NotCommunityAdminException implements Exception {
-  /// Creates a [NotCommunityAdminException].
-  const NotCommunityAdminException();
-}
-
 /// Name the phone registers with on the member's VTA.
 const _deviceName = 'Meeting Place';
 
@@ -926,71 +919,6 @@ class VtcService {
       if (check?.memberDid == community.personaDid) return check;
     }
     return null;
-  }
-
-  /// The role card in which [communityDid] makes the member's persona there
-  /// one of its admins, as their VTA keeps it, or null when this phone
-  /// knows no such membership or the VTA holds no valid one. Of several,
-  /// e.g. after a renewal, the one valid longest.
-  ///
-  /// Throws as [membershipCard] does.
-  Future<Map<String, dynamic>?> adminRoleCard(String communityDid) async {
-    final community = await _repository.findCommunity(communityDid);
-    if (community == null || !community.isMember) return null;
-    final vta = await _grantedVta();
-    final held = await vta.findCredentials(
-      type: CommunityRoleCard.type,
-      issuerDid: communityDid,
-      subjectDid: community.personaDid,
-    );
-    Map<String, dynamic>? latest;
-    for (final record in held) {
-      final card = await vta.credential(record.id);
-      if (card == null ||
-          !CommunityRoleCard.grants(
-            card,
-            communityDid: communityDid,
-            holderDid: community.personaDid,
-            role: CommunityRoleCard.adminRole,
-          )) {
-        continue;
-      }
-      final validUntil = CommunityRoleCard.validUntil(card);
-      final latestUntil = latest == null
-          ? null
-          : CommunityRoleCard.validUntil(latest);
-      if (latestUntil == null ||
-          (validUntil != null && validUntil.isAfter(latestUntil))) {
-        latest = card;
-      }
-    }
-    return latest;
-  }
-
-  /// Has the member's VTA sign, as their persona in [communityDid], that
-  /// [phrase] leads to the community, showing [adminRoleCard]. The
-  /// statement lasts as long as the card.
-  ///
-  /// Throws [NotCommunityAdminException] when the member is no admin of the
-  /// community, [VtaNotLinkedException] when no VTA is linked, and
-  /// [MeetingPlaceVtcSDKException] when the VTA refuses or cannot be
-  /// reached.
-  Future<Map<String, dynamic>> vouchForPhrase(
-    String communityDid,
-    String phrase,
-  ) async {
-    final community = await _repository.findCommunity(communityDid);
-    final roleCard = await adminRoleCard(communityDid);
-    if (community == null || roleCard == null) {
-      throw const NotCommunityAdminException();
-    }
-    return CommunityOffer.sign(
-      agent: await _grantedVta(),
-      persona: _persona(community),
-      communityDid: communityDid,
-      phrase: phrase,
-      roleCard: roleCard,
-    );
   }
 
   /// Every membership card of the member: those a community issued that

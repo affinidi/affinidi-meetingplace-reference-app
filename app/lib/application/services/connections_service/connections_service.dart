@@ -463,7 +463,7 @@ class ConnectionsService extends _$ConnectionsService {
     // not matter: e.g. its admin finds their own.
     final isJoinPhrase =
         offer != null &&
-        CommunityOfferService.statementOf(offer.contactCard) != null;
+        CommunityOfferService.communityDidOf(offer.contactCard) != null;
 
     if (result.errorCode != null && !isJoinPhrase) {
       throw AppException('Unable to find offer', code: result.errorCode!.name);

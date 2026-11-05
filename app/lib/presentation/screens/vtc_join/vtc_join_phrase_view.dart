@@ -2,18 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 
 import '../../../application/services/community_offer_service/community_offer_service.dart';
-import '../../../application/services/vtc_service/vtc_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import '../../widgets/qr/qr_code_view.dart';
 
-/// An admin's join phrase for the community: a short phrase people enter
+/// A member's join phrase for the community: a short phrase people enter
 /// or scan in Meeting Place to find the community instead of its DID.
-/// Shown only to an admin of the community.
+/// Shown once joined.
 class VtcJoinPhraseView extends HookConsumerWidget {
   const VtcJoinPhraseView({
     super.key,
@@ -28,21 +26,17 @@ class VtcJoinPhraseView extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final service = ref.read(communityOfferServiceProvider);
-    final vtc = ref.read(vtcServiceProvider);
     final reload = useState(0);
     final busy = useState(false);
     final failure = useState<String?>(null);
-    final load = useMemoized(
-      () async => (
-        isAdmin: await vtc.adminRoleCard(communityDid) != null,
-        offer: await service.published(communityDid),
-      ),
-      [reload.value],
-    );
+    final load = useMemoized(() => service.published(communityDid), [
+      reload.value,
+    ]);
     final loaded = useFuture(load);
-    final data = loaded.data;
-    if (data == null || !data.isAdmin) return const SizedBox.shrink();
-    final offer = data.offer;
+    if (loaded.connectionState != ConnectionState.done || loaded.hasError) {
+      return const SizedBox.shrink();
+    }
+    final offer = loaded.data;
 
     Future<void> run(Future<void> Function() action) async {
       busy.value = true;
@@ -53,8 +47,6 @@ class VtcJoinPhraseView extends HookConsumerWidget {
       } on Exception catch (error) {
         failure.value = l10n.vtcJoinPhraseFailure(switch (error) {
           CommunityPhraseTakenException() => 'taken',
-          NotCommunityAdminException() => 'notAdmin',
-          VtaNotLinkedException() => 'vtaMissing',
           _ => 'other',
         });
       } finally {
@@ -111,17 +103,10 @@ class VtcJoinPhraseView extends HookConsumerWidget {
               ),
             ),
             Text(
-              l10n.vtcJoinPhrasePublished(
-                communityName,
-                offer.mnemonic,
-                _date(context, offer.expiresAt),
-              ),
+              l10n.vtcJoinPhrasePublished(communityName, offer.mnemonic),
               style: onboardingNote(context),
             ),
-            Text(
-              l10n.vtcJoinPhraseVisibility(communityName),
-              style: onboardingNote(context),
-            ),
+            Text(l10n.vtcJoinPhraseVisibility, style: onboardingNote(context)),
           ],
           if (failure.value case final message?)
             OnboardingMessage(message, isError: true),
@@ -152,9 +137,7 @@ class VtcJoinPhraseView extends HookConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(l10n.vtcJoinPhraseWithdrawTitle(offer.mnemonic)),
-        content: Text(
-          l10n.vtcJoinPhraseWithdrawMessage(_date(context, offer.expiresAt)),
-        ),
+        content: Text(l10n.vtcJoinPhraseWithdrawMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -173,13 +156,9 @@ class VtcJoinPhraseView extends HookConsumerWidget {
     );
     return confirmed ?? false;
   }
-
-  static String _date(BuildContext context, DateTime? at) => at == null
-      ? ''
-      : DateFormat.yMMMd(context.l10n.localeName).format(at.toLocal());
 }
 
-/// Asks an admin for the phrase to publish.
+/// Asks the member for the phrase to publish.
 class _PhraseDialog extends HookWidget {
   const _PhraseDialog({required this.communityName});
 

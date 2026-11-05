@@ -3510,8 +3510,6 @@ class AppLocalizationsEs extends AppLocalizations {
       'phraseNotFound': 'No community goes by this phrase in Meeting Place.',
       'phraseExpired':
           'This join phrase has expired. Ask the community for its current phrase.',
-      'phraseNotVouched':
-          'Meeting Place couldn\'t confirm that the community stands behind this phrase, so it wasn\'t opened.',
       'profileMissing':
           'Your VTA has no profile for this identity, so it can\'t share the details the community asks for. Set up your profile on your VTA, then try again.',
       'detailsMissing':
@@ -3561,7 +3559,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String vtcJoinPhraseIntro(String name) {
-    return 'Let people find $name in Meeting Place by a short phrase instead of its DID. As an administrator, you vouch that the phrase leads to $name.';
+    return 'Let people find $name in Meeting Place by a short phrase instead of its DID. They see the community and where it is hosted before they apply.';
   }
 
   @override
@@ -3576,14 +3574,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get vtcJoinPhraseHint => 'Phrase';
 
   @override
-  String vtcJoinPhrasePublished(String name, String phrase, String date) {
-    return 'People join $name by entering \"$phrase\" or scanning this code in Meeting Place. It lasts until $date, and is published again each time the community renews your administrator card.';
+  String vtcJoinPhrasePublished(String name, String phrase) {
+    return 'People find $name by entering \"$phrase\" or scanning this code in Meeting Place, until you withdraw it.';
   }
 
   @override
-  String vtcJoinPhraseVisibility(String name) {
-    return 'Anyone who looks the phrase up can see that your identity is an administrator of $name.';
-  }
+  String get vtcJoinPhraseVisibility =>
+      'The phrase shows only the community\'s DID, nothing about you. Anyone can publish a phrase for any community, so people still check the community before they apply.';
 
   @override
   String get vtcJoinPhraseWithdrawAction => 'Withdraw phrase';
@@ -3594,17 +3591,13 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String vtcJoinPhraseWithdrawMessage(String date) {
-    return 'Meeting Place stops listing the phrase. Someone who copied it can list it again until $date, but it still leads only to this community.';
-  }
+  String get vtcJoinPhraseWithdrawMessage =>
+      'Meeting Place stops listing the phrase, and anyone can then publish it again.';
 
   @override
   String vtcJoinPhraseFailure(String reason) {
     String _temp0 = intl.Intl.selectLogic(reason, {
       'taken': 'That phrase is already taken in Meeting Place. Try another.',
-      'notAdmin':
-          'Your VTA holds no administrator card of this community, so you can\'t vouch for a phrase.',
-      'vtaMissing': 'Link your VTA in Settings first.',
       'other': 'The phrase couldn\'t be published or withdrawn. Try again.',
     });
     return '$_temp0';

@@ -678,7 +678,6 @@ class VtcJoinController extends _$VtcJoinController {
       _fail(switch (error.problem) {
         CommunityPhraseProblem.notFound => VtcJoinFailure.phraseNotFound,
         CommunityPhraseProblem.expired => VtcJoinFailure.phraseExpired,
-        CommunityPhraseProblem.notVouched => VtcJoinFailure.phraseNotVouched,
       });
     } on MeetingPlaceCoreSDKException catch (error, stackTrace) {
       ref

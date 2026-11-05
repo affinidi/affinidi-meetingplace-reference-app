@@ -1,9 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
-import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
-import '../vtc_service/vtc_service.dart';
 
 /// Thrown when a join phrase is already registered in Meeting Place.
 class CommunityPhraseTakenException implements Exception {
@@ -18,10 +16,6 @@ enum CommunityPhraseProblem {
 
   /// The phrase was a community's, but it expired.
   expired,
-
-  /// The phrase names a community, but no admin's statement for it
-  /// verifies.
-  notVouched,
 }
 
 /// Thrown when a phrase entered to join leads to no community.
@@ -33,24 +27,27 @@ class CommunityPhraseException implements Exception {
   final CommunityPhraseProblem problem;
 }
 
-/// A community's join phrase: a Meeting Place offer one of its admins
-/// publishes, so members find the community by a short phrase rather than
-/// its DID.
+/// A community's join phrase: a Meeting Place offer a member publishes, so
+/// others find the community by a short phrase rather than its DID.
 ///
-/// The offer is only a pointer. Its contact card carries nothing but the
-/// admin's signed statement that the phrase leads to the community
-/// ([CommunityOffer]), and the admin's own contact details never leave the
-/// phone. The offer is never accepted as a connection.
+/// The offer is an unsigned pointer: its contact card carries the
+/// community's DID and nothing else, none of the member's own details. Like
+/// a scanned DID, it is untrusted: the community is resolved from the DID
+/// and shown for review before anything is sent. Anyone may point a phrase
+/// at any community, so the review, not the phrase, decides whether to
+/// trust it. The offer is never accepted as a connection.
 class CommunityOfferService {
   /// Creates a [CommunityOfferService] publishing through the Meeting Place
-  /// SDK and signing through the member's VTA.
-  CommunityOfferService({required this._sdk, required this._vtc});
+  /// SDK.
+  CommunityOfferService({required this._sdk});
 
   final Future<MeetingPlaceCoreSDK> Function() _sdk;
-  final VtcService _vtc;
 
   /// The contact card type of a join phrase's offer.
   static const contactCardType = 'community';
+
+  /// The key of the community's DID in a join phrase's contact card.
+  static const contactInfoKey = 'x-meetingplace-community-did';
 
   /// A character Meeting Place accepts in a phrase, as on the find offer
   /// screen.
@@ -63,11 +60,11 @@ class CommunityOfferService {
   /// Marks this phone's join phrase offers, with the community's DID.
   static const _externalRefPrefix = 'vtc-join-phrase:';
 
-  /// The admin's statement a join phrase's [card] carries, unverified, or
-  /// null when it is no join phrase.
-  static Map<String, dynamic>? statementOf(ContactCard card) =>
-      switch (card.contactInfo[CommunityOffer.contactInfoKey]) {
-        final Map<String, dynamic> statement => statement,
+  /// The community DID a join phrase's [card] points to, unchecked, or null
+  /// when it is no join phrase.
+  static String? communityDidOf(ContactCard card) =>
+      switch (card.contactInfo[contactInfoKey]) {
+        final String did when did.isNotEmpty => did,
         _ => null,
       };
 
@@ -80,9 +77,9 @@ class CommunityOfferService {
   Future<bool> isPhraseAvailable(String phrase) async =>
       (await (await _sdk()).validateOfferPhrase(phrase.trim())).isAvailable;
 
-  /// The DID of the community whose join phrase [phrase] is, once the
-  /// admin's statement the offer carries verifies. Nothing else of the
-  /// offer is taken: not its name, nor its contact card, nor its invitation.
+  /// The DID the join phrase [phrase] points to, unchecked: the caller
+  /// resolves and shows the community before trusting it. Nothing else of
+  /// the offer is taken: not its name, nor its invitation.
   ///
   /// Throws [CommunityPhraseException] when the phrase leads to no
   /// community, and [MeetingPlaceCoreSDKException] when Meeting Place
@@ -105,16 +102,13 @@ class CommunityOfferService {
     // Whether this phone could claim the offer does not matter: a join
     // phrase is never claimed.
     final offer = result.connectionOffer;
-    final statement = offer == null ? null : statementOf(offer.contactCard);
-    if (offer == null || statement == null) {
+    final communityDid = offer == null
+        ? null
+        : communityDidOf(offer.contactCard);
+    if (communityDid == null) {
       throw const CommunityPhraseException(CommunityPhraseProblem.notFound);
     }
-    try {
-      // The phrase the offer is registered under, as Meeting Place has it.
-      return await CommunityOffer.verify(statement, phrase: offer.mnemonic);
-    } on MeetingPlaceVtcSDKException {
-      throw const CommunityPhraseException(CommunityPhraseProblem.notVouched);
-    }
+    return communityDid;
   }
 
   /// The join phrase this phone published for [communityDid] and has not
@@ -126,11 +120,11 @@ class CommunityOfferService {
 
   /// Publishes [phrase] as the join phrase of [communityDid], named
   /// [communityName], in place of one this phone published before. It lasts
-  /// as long as the member's admin role card.
+  /// until withdrawn.
   ///
   /// Throws [CommunityPhraseTakenException] when the phrase is registered
-  /// already, [NotCommunityAdminException] when the member is no admin of
-  /// the community, and as [VtcService.vouchForPhrase] does.
+  /// already, and [MeetingPlaceCoreSDKException] when Meeting Place cannot
+  /// be reached.
   Future<ConnectionOffer> publish(
     String communityDid, {
     required String phrase,
@@ -142,7 +136,6 @@ class CommunityOfferService {
     if (previous?.mnemonic != trimmed && !await isPhraseAvailable(trimmed)) {
       throw const CommunityPhraseTakenException();
     }
-    final statement = await _vtc.vouchForPhrase(communityDid, trimmed);
     if (previous != null) await sdk.markConnectionOfferAsDeleted(previous);
 
     final result = await sdk.publishOffer(
@@ -152,11 +145,10 @@ class CommunityOfferService {
         contactCard: ContactCard(
           did: '',
           type: contactCardType,
-          contactInfo: {CommunityOffer.contactInfoKey: statement},
+          contactInfo: {contactInfoKey: communityDid},
         ),
         offerDescription: '',
         customMnemonic: trimmed,
-        validUntil: DateTime.parse(statement['validUntil'] as String),
         externalRef: _externalRef(communityDid),
       ),
     );
@@ -164,44 +156,11 @@ class CommunityOfferService {
   }
 
   /// Withdraws the join phrase this phone published for [communityDid], if
-  /// any. A copy of its statement stays valid until it expires.
+  /// any.
   Future<void> withdraw(String communityDid) async {
     final offer = await published(communityDid);
     if (offer == null) return;
     await (await _sdk()).markConnectionOfferAsDeleted(offer);
-  }
-
-  /// Publishes each of this phone's join phrases again whose admin role card
-  /// the community renewed, so the phrase outlives the card it was first
-  /// signed with. A phrase whose card was not renewed expires with it.
-  /// Best effort: one that fails is tried again next time.
-  Future<void> refresh() async {
-    for (final offer in await _publishedOffers()) {
-      final communityDid = offer.externalRef!.substring(
-        _externalRefPrefix.length,
-      );
-      try {
-        final card = await _vtc.adminRoleCard(communityDid);
-        final signedWith = statementOf(offer.contactCard)?['roleCard'];
-        final renewedUntil = card == null
-            ? null
-            : CommunityRoleCard.validUntil(card);
-        final signedUntil = signedWith is Map<String, dynamic>
-            ? CommunityRoleCard.validUntil(signedWith)
-            : null;
-        if (renewedUntil == null ||
-            (signedUntil != null && !renewedUntil.isAfter(signedUntil))) {
-          continue;
-        }
-        await publish(
-          communityDid,
-          phrase: offer.mnemonic,
-          communityName: offer.offerName,
-        );
-      } on Exception {
-        continue;
-      }
-    }
   }
 
   Future<List<ConnectionOffer>> _publishedOffers() async => [
@@ -217,7 +176,6 @@ class CommunityOfferService {
 final communityOfferServiceProvider = Provider<CommunityOfferService>(
   (ref) => CommunityOfferService(
     sdk: () => ref.read(meetingPlaceSdkProvider.future),
-    vtc: ref.read(vtcServiceProvider),
   ),
   name: 'communityOfferServiceProvider',
 );

@@ -1,8 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
-import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:mpx_flutter_reference_app/application/services/community_offer_service/community_offer_service.dart';
-import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
 
 import '../../../fakes/fake_community_offers.dart';
 
@@ -11,39 +9,35 @@ const _phrase = 'my-club';
 
 void main() {
   late FakeOfferSdk sdk;
-  late FakeAdminVtcService vtc;
   late CommunityOfferService service;
 
   setUp(() {
     sdk = FakeOfferSdk();
-    vtc = FakeAdminVtcService();
-    service = CommunityOfferService(sdk: () async => sdk, vtc: vtc);
+    service = CommunityOfferService(sdk: () async => sdk);
   });
 
   Future<ConnectionOffer> publish({String phrase = _phrase}) =>
       service.publish(_communityDid, phrase: phrase, communityName: 'Club');
 
   group('CommunityOfferService.publish', () {
-    test(
-      'publishes only the statement, for the role card\'s lifetime',
-      () async {
-        final offer = await publish(phrase: ' $_phrase ');
+    test('publishes only the community\'s DID, until withdrawn', () async {
+      final offer = await publish(phrase: ' $_phrase ');
 
-        final request = sdk.requests.single;
-        expect(request.customMnemonic, _phrase);
-        expect(request.offerName, 'Club');
-        expect(request.validUntil, DateTime.utc(2026, 12, 1, 10));
-        expect(request.contactCard.type, CommunityOfferService.contactCardType);
-        expect(request.contactCard.contactInfo.keys, [
-          CommunityOffer.contactInfoKey,
-        ]);
-        expect(
-          CommunityOfferService.statementOf(offer.contactCard)?['phrase'],
-          _phrase,
-        );
-        expect((await service.published(_communityDid))?.mnemonic, _phrase);
-      },
-    );
+      final request = sdk.requests.single;
+      expect(request.customMnemonic, _phrase);
+      expect(request.offerName, 'Club');
+      expect(request.validUntil, isNull);
+      expect(request.maximumUsage, isNull);
+      expect(request.contactCard.type, CommunityOfferService.contactCardType);
+      expect(request.contactCard.contactInfo, {
+        CommunityOfferService.contactInfoKey: _communityDid,
+      });
+      expect(
+        CommunityOfferService.communityDidOf(offer.contactCard),
+        _communityDid,
+      );
+      expect((await service.published(_communityDid))?.mnemonic, _phrase);
+    });
 
     test('refuses a phrase already registered', () async {
       sdk.taken.add(_phrase);
@@ -52,14 +46,6 @@ void main() {
         publish(),
         throwsA(isA<CommunityPhraseTakenException>()),
       );
-      expect(vtc.vouched, isEmpty);
-      expect(sdk.requests, isEmpty);
-    });
-
-    test('refuses a member who is no admin', () async {
-      vtc.roleCard = null;
-
-      await expectLater(publish(), throwsA(isA<NotCommunityAdminException>()));
       expect(sdk.requests, isEmpty);
     });
 
@@ -73,16 +59,19 @@ void main() {
       expect((await service.published(_communityDid))?.mnemonic, 'my-club-2');
     });
 
-    test('keeps the phrase published before when signing fails', () async {
-      await publish();
-      vtc.roleCard = null;
+    test(
+      'keeps the phrase published before when the new one is taken',
+      () async {
+        await publish();
+        sdk.taken.add('my-club-2');
 
-      await expectLater(
-        publish(phrase: 'my-club-2'),
-        throwsA(isA<NotCommunityAdminException>()),
-      );
-      expect((await service.published(_communityDid))?.mnemonic, _phrase);
-    });
+        await expectLater(
+          publish(phrase: 'my-club-2'),
+          throwsA(isA<CommunityPhraseTakenException>()),
+        );
+        expect((await service.published(_communityDid))?.mnemonic, _phrase);
+      },
+    );
   });
 
   test('CommunityOfferService.withdraw deregisters the phrase', () async {
@@ -94,59 +83,7 @@ void main() {
     expect(await service.published(_communityDid), isNull);
   });
 
-  group('CommunityOfferService.refresh', () {
-    test('publishes the phrase again with a renewed role card', () async {
-      await publish();
-      vtc.roleCard = fakeRoleCard('2026-12-31T10:00:00Z');
-
-      await service.refresh();
-
-      final current = await service.published(_communityDid);
-      expect(current?.mnemonic, _phrase);
-      expect(current?.expiresAt, DateTime.utc(2026, 12, 31, 10));
-      expect(sdk.offers.where((offer) => offer.isDeleted), hasLength(1));
-    });
-
-    test('leaves a phrase whose role card was not renewed', () async {
-      await publish();
-
-      await service.refresh();
-
-      expect(sdk.requests, hasLength(1));
-    });
-
-    test('leaves a phrase when the member is no admin any more', () async {
-      await publish();
-      vtc.roleCard = null;
-
-      await service.refresh();
-
-      expect(sdk.requests, hasLength(1));
-      expect((await service.published(_communityDid))?.mnemonic, _phrase);
-    });
-  });
-
   group('CommunityOfferService.findCommunity', () {
-    final community = Ed25519DidKeySigner.generate();
-    final admin = Ed25519DidKeySigner.generate();
-
-    Future<void> publishElsewhere(
-      String phrase, {
-      String role = 'admin',
-      String? signedPhrase,
-    }) async {
-      final statement = await signedJoinPhraseStatement(
-        phrase: signedPhrase ?? phrase,
-        community: community,
-        admin: admin,
-        role: role,
-      );
-      sdk.found[phrase] = fakeFoundOffer(
-        phrase,
-        contactInfo: {CommunityOffer.contactInfoKey: statement},
-      );
-    }
-
     Matcher throwsProblem(CommunityPhraseProblem problem) => throwsA(
       isA<CommunityPhraseException>().having(
         (e) => e.problem,
@@ -155,10 +92,13 @@ void main() {
       ),
     );
 
-    test('finds the community an admin vouches for', () async {
-      await publishElsewhere(_phrase);
+    test('finds the community DID the phrase points to', () async {
+      sdk.found[_phrase] = fakeFoundOffer(
+        _phrase,
+        contactInfo: {CommunityOfferService.contactInfoKey: _communityDid},
+      );
 
-      expect(await service.findCommunity(' $_phrase '), community.did);
+      expect(await service.findCommunity(' $_phrase '), _communityDid);
     });
 
     test('finds no community under an unknown phrase', () async {
@@ -183,24 +123,6 @@ void main() {
       await expectLater(
         service.findCommunity(_phrase),
         throwsProblem(CommunityPhraseProblem.notFound),
-      );
-    });
-
-    test('refuses a statement copied to another phrase', () async {
-      await publishElsewhere('my-club-2', signedPhrase: _phrase);
-
-      await expectLater(
-        service.findCommunity('my-club-2'),
-        throwsProblem(CommunityPhraseProblem.notVouched),
-      );
-    });
-
-    test('refuses a statement of a member who is no admin', () async {
-      await publishElsewhere(_phrase, role: 'member');
-
-      await expectLater(
-        service.findCommunity(_phrase),
-        throwsProblem(CommunityPhraseProblem.notVouched),
       );
     });
   });

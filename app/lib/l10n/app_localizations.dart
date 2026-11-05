@@ -5255,7 +5255,7 @@ abstract class AppLocalizations {
   /// Why joining a community could not go ahead
   ///
   /// In en, this message translates to:
-  /// **'{reason, select, invalidCode{This isn\'t a community\'s code.} phraseNotFound{No community goes by this phrase in Meeting Place.} phraseExpired{This join phrase has expired. Ask the community for its current phrase.} phraseNotVouched{Meeting Place couldn\'t confirm that the community stands behind this phrase, so it wasn\'t opened.} profileMissing{Your VTA has no profile for this identity, so it can\'t share the details the community asks for. Set up your profile on your VTA, then try again.} detailsMissing{Your VTA doesn\'t hold a detail the community requires, so nothing was sent.} credentialMissing{Your identity holds no credential this way in accepts that your VTA can present, so nothing was sent.} vtaMissing{Link your VTA in Settings before joining a community.} unreachable{The community can\'t be reached from your phone.} noDidHosting{Your VTA has no DID hosting server, so it can\'t create an identity the community can find.} notAccepting{This community isn\'t accepting applications.} badAnswer{The community\'s answer couldn\'t be checked, so nothing was recorded.} lastAdministrator{You\'re this community\'s last administrator. Make another member an administrator before you leave.} other{The community or your VTA refused the application.}}'**
+  /// **'{reason, select, invalidCode{This isn\'t a community\'s code.} phraseNotFound{No community goes by this phrase in Meeting Place.} phraseExpired{This join phrase has expired. Ask the community for its current phrase.} profileMissing{Your VTA has no profile for this identity, so it can\'t share the details the community asks for. Set up your profile on your VTA, then try again.} detailsMissing{Your VTA doesn\'t hold a detail the community requires, so nothing was sent.} credentialMissing{Your identity holds no credential this way in accepts that your VTA can present, so nothing was sent.} vtaMissing{Link your VTA in Settings before joining a community.} unreachable{The community can\'t be reached from your phone.} noDidHosting{Your VTA has no DID hosting server, so it can\'t create an identity the community can find.} notAccepting{This community isn\'t accepting applications.} badAnswer{The community\'s answer couldn\'t be checked, so nothing was recorded.} lastAdministrator{You\'re this community\'s last administrator. Make another member an administrator before you leave.} other{The community or your VTA refused the application.}}'**
   String vtcJoinFailure(String reason);
 
   /// No description provided for @vtaDetailsTitle.
@@ -5306,10 +5306,10 @@ abstract class AppLocalizations {
   /// **'Join phrase'**
   String get vtcJoinPhraseHeading;
 
-  /// Offers a community administrator to publish a join phrase
+  /// Offers a community member to publish a join phrase
   ///
   /// In en, this message translates to:
-  /// **'Let people find {name} in Meeting Place by a short phrase instead of its DID. As an administrator, you vouch that the phrase leads to {name}.'**
+  /// **'Let people find {name} in Meeting Place by a short phrase instead of its DID. They see the community and where it is hosted before they apply.'**
   String vtcJoinPhraseIntro(String name);
 
   /// No description provided for @vtcJoinPhrasePublishAction.
@@ -5318,7 +5318,7 @@ abstract class AppLocalizations {
   /// **'Publish join phrase'**
   String get vtcJoinPhrasePublishAction;
 
-  /// Title of the dialog asking an administrator for a community's join phrase
+  /// Title of the dialog asking a member for a community's join phrase
   ///
   /// In en, this message translates to:
   /// **'Join phrase for {name}'**
@@ -5333,14 +5333,14 @@ abstract class AppLocalizations {
   /// Explains a published join phrase of a community
   ///
   /// In en, this message translates to:
-  /// **'People join {name} by entering \"{phrase}\" or scanning this code in Meeting Place. It lasts until {date}, and is published again each time the community renews your administrator card.'**
-  String vtcJoinPhrasePublished(String name, String phrase, String date);
+  /// **'People find {name} by entering \"{phrase}\" or scanning this code in Meeting Place, until you withdraw it.'**
+  String vtcJoinPhrasePublished(String name, String phrase);
 
-  /// Warns what a published join phrase shows about the administrator
+  /// Says what a published join phrase shows, and that anyone can publish one
   ///
   /// In en, this message translates to:
-  /// **'Anyone who looks the phrase up can see that your identity is an administrator of {name}.'**
-  String vtcJoinPhraseVisibility(String name);
+  /// **'The phrase shows only the community\'s DID, nothing about you. Anyone can publish a phrase for any community, so people still check the community before they apply.'**
+  String get vtcJoinPhraseVisibility;
 
   /// No description provided for @vtcJoinPhraseWithdrawAction.
   ///
@@ -5348,22 +5348,22 @@ abstract class AppLocalizations {
   /// **'Withdraw phrase'**
   String get vtcJoinPhraseWithdrawAction;
 
-  /// Asks an administrator to confirm withdrawing a join phrase
+  /// Asks a member to confirm withdrawing a join phrase
   ///
   /// In en, this message translates to:
   /// **'Withdraw \"{phrase}\"?'**
   String vtcJoinPhraseWithdrawTitle(String phrase);
 
-  /// Explains what withdrawing a join phrase does, and its limit
+  /// Explains what withdrawing a join phrase does
   ///
   /// In en, this message translates to:
-  /// **'Meeting Place stops listing the phrase. Someone who copied it can list it again until {date}, but it still leads only to this community.'**
-  String vtcJoinPhraseWithdrawMessage(String date);
+  /// **'Meeting Place stops listing the phrase, and anyone can then publish it again.'**
+  String get vtcJoinPhraseWithdrawMessage;
 
   /// Why publishing or withdrawing a join phrase failed
   ///
   /// In en, this message translates to:
-  /// **'{reason, select, taken{That phrase is already taken in Meeting Place. Try another.} notAdmin{Your VTA holds no administrator card of this community, so you can\'t vouch for a phrase.} vtaMissing{Link your VTA in Settings first.} other{The phrase couldn\'t be published or withdrawn. Try again.}}'**
+  /// **'{reason, select, taken{That phrase is already taken in Meeting Place. Try another.} other{The phrase couldn\'t be published or withdrawn. Try again.}}'**
   String vtcJoinPhraseFailure(String reason);
 }
 

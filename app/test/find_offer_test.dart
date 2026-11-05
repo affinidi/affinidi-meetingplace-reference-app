@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
-import 'package:meeting_place_vtc/meeting_place_vtc.dart' show CommunityOffer;
+import 'package:mpx_flutter_reference_app/application/services/community_offer_service/community_offer_service.dart';
 import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_screen.dart';
 
@@ -141,9 +141,7 @@ void main() {
         final offer = fakeFoundOffer(
           'my-club',
           contactInfo: {
-            CommunityOffer.contactInfoKey: {
-              'type': CommunityOffer.statementType,
-            },
+            CommunityOfferService.contactInfoKey: 'did:webvh:community.example',
           },
         );
 
