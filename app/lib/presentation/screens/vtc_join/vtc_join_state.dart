@@ -4,6 +4,7 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import '../../../application/services/vtc_service/vtc_service.dart';
 import '../../../domain/models/identity/identity.dart';
 import '../../../domain/models/vtc/vtc_card_delivery.dart';
+import '../../../domain/models/vtc/vtc_identity_check.dart';
 import '../../../domain/models/vtc/vtc_membership_card.dart';
 
 part 'vtc_join_state.freezed.dart';
@@ -285,6 +286,10 @@ abstract class VtcJoinState with _$VtcJoinState {
     /// The membership card the community issued, once the member's VTA
     /// holds it.
     VtcMembershipCard? membershipCard,
+
+    /// The community's own check of the member's identity, once their VTA
+    /// holds one.
+    VtcIdentityCheck? identityCheck,
 
     /// How the card is being brought from the identity's inbox to the VTA,
     /// once this screen started collecting it.

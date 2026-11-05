@@ -3187,6 +3187,53 @@ class AppLocalizationsDe extends AppLocalizations {
   String get vtcJoinCheckAgain => 'Check again';
 
   @override
+  String vtcIdentityCheckHeading(String name) {
+    return '$name checked your identity';
+  }
+
+  @override
+  String get vtcIdentityCheckHow => 'How';
+
+  @override
+  String vtcIdentityCheckMethod(String method) {
+    String _temp0 = intl.Intl.selectLogic(method, {
+      'inPerson': 'In person',
+      'video': 'By video call',
+      'priorAcquaintance': 'They already knew you',
+      'other': '$method',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get vtcIdentityCheckDocuments => 'Documents seen';
+
+  @override
+  String vtcIdentityCheckDocument(String document) {
+    String _temp0 = intl.Intl.selectLogic(document, {
+      'passport': 'Passport',
+      'nationalId': 'National ID card',
+      'other': '$document',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get vtcIdentityCheckConfirmed => 'Confirmed';
+
+  @override
+  String get vtcIdentityCheckLiveness => 'That you were there';
+
+  @override
+  String get vtcIdentityCheckCheckedOn => 'Checked on';
+
+  @override
+  String get vtcIdentityCheckValidUntil => 'Valid until';
+
+  @override
+  String get vtcIdentityCheckShow => 'Show the signed statement';
+
+  @override
   String get vtcMembershipCardTitle => 'Membership card';
 
   @override

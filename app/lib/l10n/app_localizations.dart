@@ -4730,6 +4730,66 @@ abstract class AppLocalizations {
   /// **'Check again'**
   String get vtcJoinCheckAgain;
 
+  /// Title of the community's own identity check of the member, a vetted/1 statement their VTA holds
+  ///
+  /// In en, this message translates to:
+  /// **'{name} checked your identity'**
+  String vtcIdentityCheckHeading(String name);
+
+  /// No description provided for @vtcIdentityCheckHow.
+  ///
+  /// In en, this message translates to:
+  /// **'How'**
+  String get vtcIdentityCheckHow;
+
+  /// How the community checked the member's identity; an unknown method shows as sent
+  ///
+  /// In en, this message translates to:
+  /// **'{method, select, inPerson{In person} video{By video call} priorAcquaintance{They already knew you} other{{method}}}'**
+  String vtcIdentityCheckMethod(String method);
+
+  /// No description provided for @vtcIdentityCheckDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents seen'**
+  String get vtcIdentityCheckDocuments;
+
+  /// A document the community relied on; an unknown one shows as sent
+  ///
+  /// In en, this message translates to:
+  /// **'{document, select, passport{Passport} nationalId{National ID card} other{{document}}}'**
+  String vtcIdentityCheckDocument(String document);
+
+  /// No description provided for @vtcIdentityCheckConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmed'**
+  String get vtcIdentityCheckConfirmed;
+
+  /// No description provided for @vtcIdentityCheckLiveness.
+  ///
+  /// In en, this message translates to:
+  /// **'That you were there'**
+  String get vtcIdentityCheckLiveness;
+
+  /// No description provided for @vtcIdentityCheckCheckedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Checked on'**
+  String get vtcIdentityCheckCheckedOn;
+
+  /// No description provided for @vtcIdentityCheckValidUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid until'**
+  String get vtcIdentityCheckValidUntil;
+
+  /// No description provided for @vtcIdentityCheckShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show the signed statement'**
+  String get vtcIdentityCheckShow;
+
   /// Title of the membership card a community issued, shown once the member is admitted
   ///
   /// In en, this message translates to:

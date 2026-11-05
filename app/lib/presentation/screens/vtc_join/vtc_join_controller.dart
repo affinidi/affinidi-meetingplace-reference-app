@@ -46,6 +46,9 @@ class VtcJoinController extends _$VtcJoinController {
   /// Whether the membership card is being read; reads do not overlap.
   bool _readingCard = false;
 
+  /// Whether the identity check is being read; reads do not overlap.
+  bool _readingCheck = false;
+
   /// Whether the membership card is being collected; collections do not
   /// overlap.
   bool _collectingCard = false;
@@ -80,6 +83,7 @@ class VtcJoinController extends _$VtcJoinController {
       if (next.step == VtcJoinStep.joined &&
           previous?.step != VtcJoinStep.joined) {
         unawaited(readMembershipCard());
+        unawaited(readIdentityCheck());
       }
     });
     return VtcJoinState();
@@ -506,6 +510,34 @@ class VtcJoinController extends _$VtcJoinController {
       _collectingCard = false;
     }
     if (ref.mounted) await readMembershipCard();
+  }
+
+  /// Reads the community's own check of the member's identity for the
+  /// joined screen from their VTA, which the community delivers it to. Only
+  /// reads, and quietly: a member the community never checked has none.
+  Future<void> readIdentityCheck() async {
+    final manifest = _manifest;
+    if (state.step != VtcJoinStep.joined ||
+        manifest == null ||
+        state.identityCheck != null ||
+        _readingCheck) {
+      return;
+    }
+    _readingCheck = true;
+    try {
+      final check = await _service.identityCheck(manifest.communityDid);
+      // The screen may have closed, or moved on, while the VTA answered.
+      if (!ref.mounted) return;
+      if (check != null && state.step == VtcJoinStep.joined) {
+        state = state.copyWith(identityCheck: check);
+      }
+    } on MeetingPlaceVtcSDKException {
+      // Shown on the next visit.
+    } on VtaNotLinkedException {
+      // Nothing to read from; the membership stands all the same.
+    } finally {
+      _readingCheck = false;
+    }
   }
 
   void _showCardDelivery(VtcCardDelivery delivery) {

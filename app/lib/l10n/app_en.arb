@@ -3058,6 +3058,40 @@
 		}
 	},
 	"vtcJoinCheckAgain": "Check again",
+	"vtcIdentityCheckHeading": "{name} checked your identity",
+	"@vtcIdentityCheckHeading": {
+		"description": "Title of the community's own identity check of the member, a vetted/1 statement their VTA holds",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcIdentityCheckHow": "How",
+	"vtcIdentityCheckMethod": "{method, select, inPerson{In person} video{By video call} priorAcquaintance{They already knew you} other{{method}}}",
+	"@vtcIdentityCheckMethod": {
+		"description": "How the community checked the member's identity; an unknown method shows as sent",
+		"placeholders": {
+			"method": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcIdentityCheckDocuments": "Documents seen",
+	"vtcIdentityCheckDocument": "{document, select, passport{Passport} nationalId{National ID card} other{{document}}}",
+	"@vtcIdentityCheckDocument": {
+		"description": "A document the community relied on; an unknown one shows as sent",
+		"placeholders": {
+			"document": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcIdentityCheckConfirmed": "Confirmed",
+	"vtcIdentityCheckLiveness": "That you were there",
+	"vtcIdentityCheckCheckedOn": "Checked on",
+	"vtcIdentityCheckValidUntil": "Valid until",
+	"vtcIdentityCheckShow": "Show the signed statement",
 	"vtcMembershipCardTitle": "Membership card",
 	"@vtcMembershipCardTitle": {
 		"description": "Title of the membership card a community issued, shown once the member is admitted"

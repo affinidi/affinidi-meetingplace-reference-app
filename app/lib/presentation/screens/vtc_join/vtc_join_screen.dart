@@ -16,7 +16,9 @@ import '../../widgets/onboarding_style/onboarding_style.dart';
 import '../../widgets/swipeable_cards.dart';
 import '../../widgets/vta_identity_card.dart';
 import 'vtc_card_delivery_trail.dart';
+import 'vtc_claim_type_label.dart';
 import 'vtc_community_check.dart';
+import 'vtc_identity_check_view.dart';
 import 'vtc_join_controller.dart';
 import 'vtc_join_json_dialog.dart';
 import 'vtc_join_state.dart';
@@ -492,7 +494,9 @@ class _Consent extends StatelessWidget {
       for (final detail in state.requestedDetails)
         _ConsentItem(
           icon: Icons.badge_outlined,
-          title: l10n.vtcJoinReceivesDetail(_claimTypeLabel(l10n, detail.type)),
+          title: l10n.vtcJoinReceivesDetail(
+            vtcClaimTypeLabel(l10n, detail.type),
+          ),
           subtitle: detail.required
               ? l10n.vtcJoinDetailRequiredNote
               : l10n.vtcJoinDetailOptionalNote,
@@ -610,24 +614,6 @@ class _Consent extends StatelessWidget {
     ];
   }
 }
-
-/// What a VTA claim [type] such as `name.display` is called, or the type
-/// itself when this app has no name for it, so nothing asked goes unshown.
-String _claimTypeLabel(AppLocalizations l10n, String type) => switch (type) {
-  'name.display' => l10n.vtcClaimTypeNameDisplay,
-  'name.given' => l10n.vtcClaimTypeNameGiven,
-  'name.family' => l10n.vtcClaimTypeNameFamily,
-  'name.legal' => l10n.vtcClaimTypeNameLegal,
-  'email.personal' => l10n.vtcClaimTypeEmailPersonal,
-  'email.work' => l10n.vtcClaimTypeEmailWork,
-  'phone.mobile' => l10n.vtcClaimTypePhoneMobile,
-  'phone.work' => l10n.vtcClaimTypePhoneWork,
-  'address.country' => l10n.vtcClaimTypeAddressCountry,
-  'person.birthDate' => l10n.vtcClaimTypePersonBirthDate,
-  'skill.language' => l10n.vtcClaimTypeSkillLanguage,
-  'account.handle' => l10n.vtcClaimTypeAccountHandle,
-  _ => type,
-};
 
 /// [items] as a sentence would list them: "a, b and c".
 String _listOf(AppLocalizations l10n, List<String> items) => switch (items) {
@@ -1055,7 +1041,7 @@ class _ApproveDetails extends StatelessWidget {
                 OnboardingLine(
                   icon: Icons.badge,
                   title: detail.value,
-                  subtitle: _claimTypeLabel(l10n, detail.type),
+                  subtitle: vtcClaimTypeLabel(l10n, detail.type),
                 ),
             ],
           ),
@@ -1251,6 +1237,8 @@ class _Joined extends StatelessWidget {
               ),
             ],
           ),
+        if (state.identityCheck case final check?)
+          VtcIdentityCheckView(check: check, communityName: name),
         const SizedBox(height: 12),
         OnboardingButton(label: l10n.generalDone, onPressed: onDone),
         leave,

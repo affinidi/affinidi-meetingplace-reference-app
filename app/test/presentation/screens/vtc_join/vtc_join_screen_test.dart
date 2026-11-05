@@ -424,6 +424,96 @@ void main() {
       });
     });
 
+    group('identity check', () {
+      /// The VTA holds a statement of the community about the persona under
+      /// [predicate], beside no membership card.
+      Map<String, dynamic> vtaHoldsStatement(String predicate) {
+        final statement = {
+          'id': 'urn:uuid:check',
+          'type': ['VerifiableCredential', 'StatementCredential'],
+          'issuer': fakeVtcDid,
+          'validFrom': '2026-11-04T10:00:00Z',
+          'validUntil': '2027-11-04T10:00:00Z',
+          'credentialSubject': {
+            'id': persona.did,
+            'predicate': predicate,
+            'object': {
+              'value': {
+                'community': fakeVtcDid,
+                'method': 'inPerson',
+                'documentClasses': ['nationalId'],
+                'claimsVerified': ['name.legal'],
+                'livenessConfirmed': true,
+              },
+            },
+          },
+        };
+        network.vta.answerTo[VtaTask.credentialsQuery] = (payload) => {
+          'credentials': [
+            if (payload['type'] == 'StatementCredential')
+              {
+                'id': 'check-1',
+                'types': ['VerifiableCredential', 'StatementCredential'],
+              },
+          ],
+        };
+        network.vta.answers[VtaTask.credentialsGet] = {'credential': statement};
+        return statement;
+      }
+
+      Future<void> join(WidgetTester tester) async {
+        await pumpScreen(tester);
+        await enterCode(tester, fakeVtcDid);
+        await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
+        await settle(tester);
+      }
+
+      testWidgets('shows how the community checked the member', (tester) async {
+        final statement = vtaHoldsStatement(
+          'https://registry.trustoverip.org/dtg/vsc/vetted/1',
+        );
+        await join(tester);
+
+        expect(find.byKey(const Key('vtc_identity_check')), findsOneWidget);
+        for (final text in [
+          'Football club checked your identity',
+          'In person',
+          'National ID card',
+          'That you were there',
+          'Checked on',
+        ]) {
+          expect(find.text(text), findsOneWidget, reason: text);
+        }
+
+        await tapVisible(
+          tester,
+          find.byKey(const Key('vtc_identity_check_document')),
+        );
+        await tester.pumpAndSettle();
+        final shown = tester
+            .widget<SelectableText>(find.byKey(const Key('vtc_join_json')))
+            .textSpan!
+            .toPlainText();
+        expect(jsonDecode(shown), statement);
+      });
+
+      testWidgets('shows no endorsement as an identity check', (tester) async {
+        vtaHoldsStatement(
+          'https://registry.trustoverip.org/dtg/vsc/endorses/1',
+        );
+        await join(tester);
+
+        expect(find.byKey(const Key('vtc_identity_check')), findsNothing);
+      });
+
+      testWidgets('shows nothing for a member never checked', (tester) async {
+        await join(tester);
+
+        expect(find.byKey(const Key('vtc_identity_check')), findsNothing);
+        expect(find.byType(VtcJoinScreen), findsOneWidget);
+      });
+    });
+
     testWidgets('shows the profile and what the directory shows', (
       tester,
     ) async {
