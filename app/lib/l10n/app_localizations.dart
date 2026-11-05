@@ -5299,6 +5299,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{start}… ({length} characters)'**
   String vtaDetailsValueShortened(String start, int length);
+
+  /// No description provided for @vtcJoinPhraseHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Join phrase'**
+  String get vtcJoinPhraseHeading;
+
+  /// Offers a community administrator to publish a join phrase
+  ///
+  /// In en, this message translates to:
+  /// **'Let people find {name} in Meeting Place by a short phrase instead of its DID. As an administrator, you vouch that the phrase leads to {name}.'**
+  String vtcJoinPhraseIntro(String name);
+
+  /// No description provided for @vtcJoinPhrasePublishAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish join phrase'**
+  String get vtcJoinPhrasePublishAction;
+
+  /// Title of the dialog asking an administrator for a community's join phrase
+  ///
+  /// In en, this message translates to:
+  /// **'Join phrase for {name}'**
+  String vtcJoinPhraseDialogTitle(String name);
+
+  /// No description provided for @vtcJoinPhraseHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Phrase'**
+  String get vtcJoinPhraseHint;
+
+  /// Explains a published join phrase of a community
+  ///
+  /// In en, this message translates to:
+  /// **'People join {name} by entering \"{phrase}\" or scanning this code in Meeting Place. It lasts until {date}, and is published again each time the community renews your administrator card.'**
+  String vtcJoinPhrasePublished(String name, String phrase, String date);
+
+  /// Warns what a published join phrase shows about the administrator
+  ///
+  /// In en, this message translates to:
+  /// **'Anyone who looks the phrase up can see that your identity is an administrator of {name}.'**
+  String vtcJoinPhraseVisibility(String name);
+
+  /// No description provided for @vtcJoinPhraseWithdrawAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw phrase'**
+  String get vtcJoinPhraseWithdrawAction;
+
+  /// Asks an administrator to confirm withdrawing a join phrase
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw \"{phrase}\"?'**
+  String vtcJoinPhraseWithdrawTitle(String phrase);
+
+  /// Explains what withdrawing a join phrase does, and its limit
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting Place stops listing the phrase. Someone who copied it can list it again until {date}, but it still leads only to this community.'**
+  String vtcJoinPhraseWithdrawMessage(String date);
+
+  /// Why publishing or withdrawing a join phrase failed
+  ///
+  /// In en, this message translates to:
+  /// **'{reason, select, taken{That phrase is already taken in Meeting Place. Try another.} notAdmin{Your VTA holds no administrator card of this community, so you can\'t vouch for a phrase.} vtaMissing{Link your VTA in Settings first.} other{The phrase couldn\'t be published or withdrawn. Try again.}}'**
+  String vtcJoinPhraseFailure(String reason);
 }
 
 class _AppLocalizationsDelegate

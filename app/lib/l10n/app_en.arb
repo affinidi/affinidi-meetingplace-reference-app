@@ -3513,5 +3513,78 @@
 				"type": "int"
 			}
 		}
+	},
+	"vtcJoinPhraseHeading": "Join phrase",
+	"vtcJoinPhraseIntro": "Let people find {name} in Meeting Place by a short phrase instead of its DID. As an administrator, you vouch that the phrase leads to {name}.",
+	"@vtcJoinPhraseIntro": {
+		"description": "Offers a community administrator to publish a join phrase",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinPhrasePublishAction": "Publish join phrase",
+	"vtcJoinPhraseDialogTitle": "Join phrase for {name}",
+	"@vtcJoinPhraseDialogTitle": {
+		"description": "Title of the dialog asking an administrator for a community's join phrase",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinPhraseHint": "Phrase",
+	"vtcJoinPhrasePublished": "People join {name} by entering \"{phrase}\" or scanning this code in Meeting Place. It lasts until {date}, and is published again each time the community renews your administrator card.",
+	"@vtcJoinPhrasePublished": {
+		"description": "Explains a published join phrase of a community",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			},
+			"phrase": {
+				"type": "String"
+			},
+			"date": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinPhraseVisibility": "Anyone who looks the phrase up can see that your identity is an administrator of {name}.",
+	"@vtcJoinPhraseVisibility": {
+		"description": "Warns what a published join phrase shows about the administrator",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinPhraseWithdrawAction": "Withdraw phrase",
+	"vtcJoinPhraseWithdrawTitle": "Withdraw \"{phrase}\"?",
+	"@vtcJoinPhraseWithdrawTitle": {
+		"description": "Asks an administrator to confirm withdrawing a join phrase",
+		"placeholders": {
+			"phrase": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinPhraseWithdrawMessage": "Meeting Place stops listing the phrase. Someone who copied it can list it again until {date}, but it still leads only to this community.",
+	"@vtcJoinPhraseWithdrawMessage": {
+		"description": "Explains what withdrawing a join phrase does, and its limit",
+		"placeholders": {
+			"date": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinPhraseFailure": "{reason, select, taken{That phrase is already taken in Meeting Place. Try another.} notAdmin{Your VTA holds no administrator card of this community, so you can't vouch for a phrase.} vtaMissing{Link your VTA in Settings first.} other{The phrase couldn't be published or withdrawn. Try again.}}",
+	"@vtcJoinPhraseFailure": {
+		"description": "Why publishing or withdrawing a join phrase failed",
+		"placeholders": {
+			"reason": {
+				"type": "String"
+			}
+		}
 	}
 }

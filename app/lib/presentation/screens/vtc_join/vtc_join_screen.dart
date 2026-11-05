@@ -21,6 +21,7 @@ import 'vtc_flow_diagram.dart';
 import 'vtc_identity_check_view.dart';
 import 'vtc_join_controller.dart';
 import 'vtc_join_json_dialog.dart';
+import 'vtc_join_phrase_view.dart';
 import 'vtc_join_state.dart';
 import 'vtc_join_trail.dart';
 import 'vtc_membership_card_view.dart';
@@ -1247,6 +1248,8 @@ class _Joined extends StatelessWidget {
           ),
         if (state.identityCheck case final check?)
           VtcIdentityCheckView(check: check, communityName: name),
+        if (state.communityDid case final communityDid?)
+          VtcJoinPhraseView(communityDid: communityDid, communityName: name),
         const SizedBox(height: 12),
         OnboardingButton(label: l10n.generalDone, onPressed: onDone),
         leave,

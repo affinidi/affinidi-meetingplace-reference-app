@@ -11,6 +11,7 @@ import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
+import '../community_offer_service/community_offer_service.dart';
 import '../control_plane_service/control_plane_service.dart';
 import '../identities_service/identities_service.dart';
 import '../vrc_service/vrc_service.dart';
@@ -87,7 +88,11 @@ class ConnectionsService extends _$ConnectionsService {
         name: _logKey,
       );
 
-      state = state.copyWith(connections: connectionOffers);
+      state = state.copyWith(
+        connections: connectionOffers
+            .where((offer) => !CommunityOfferService.isJoinPhrase(offer))
+            .toList(),
+      );
     } catch (error, stackTrace) {
       _logger.error(
         'Error calling fetchConnections',

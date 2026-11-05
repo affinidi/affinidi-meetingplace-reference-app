@@ -473,6 +473,27 @@ void main() {
         expect(await service.adminRoleCard(fakeVtcDid), isNull);
       });
 
+      test(
+        'refuses to vouch for a phrase as a member who is no admin',
+        () async {
+          await service.join(
+            await service.readCommunity(fakeVtcDid),
+            persona: joinAs,
+          );
+          holdCards({'member': roleCard('member', '2026-12-01T10:00:00Z')});
+          final before = vtaTasks().length;
+
+          await expectLater(
+            service.vouchForPhrase(fakeVtcDid, 'my-club'),
+            throwsA(isA<NotCommunityAdminException>()),
+          );
+          expect(
+            vtaTasks().skip(before),
+            isNot(contains(VtaTask.signDocument)),
+          );
+        },
+      );
+
       test('reads none while the application waits', () async {
         network.joinVerdict = {'effect': 'refer'};
         await service.join(

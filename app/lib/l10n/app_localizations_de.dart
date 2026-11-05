@@ -3560,4 +3560,58 @@ class AppLocalizationsDe extends AppLocalizations {
   String vtaDetailsValueShortened(String start, int length) {
     return '$start… ($length characters)';
   }
+
+  @override
+  String get vtcJoinPhraseHeading => 'Join phrase';
+
+  @override
+  String vtcJoinPhraseIntro(String name) {
+    return 'Let people find $name in Meeting Place by a short phrase instead of its DID. As an administrator, you vouch that the phrase leads to $name.';
+  }
+
+  @override
+  String get vtcJoinPhrasePublishAction => 'Publish join phrase';
+
+  @override
+  String vtcJoinPhraseDialogTitle(String name) {
+    return 'Join phrase for $name';
+  }
+
+  @override
+  String get vtcJoinPhraseHint => 'Phrase';
+
+  @override
+  String vtcJoinPhrasePublished(String name, String phrase, String date) {
+    return 'People join $name by entering \"$phrase\" or scanning this code in Meeting Place. It lasts until $date, and is published again each time the community renews your administrator card.';
+  }
+
+  @override
+  String vtcJoinPhraseVisibility(String name) {
+    return 'Anyone who looks the phrase up can see that your identity is an administrator of $name.';
+  }
+
+  @override
+  String get vtcJoinPhraseWithdrawAction => 'Withdraw phrase';
+
+  @override
+  String vtcJoinPhraseWithdrawTitle(String phrase) {
+    return 'Withdraw \"$phrase\"?';
+  }
+
+  @override
+  String vtcJoinPhraseWithdrawMessage(String date) {
+    return 'Meeting Place stops listing the phrase. Someone who copied it can list it again until $date, but it still leads only to this community.';
+  }
+
+  @override
+  String vtcJoinPhraseFailure(String reason) {
+    String _temp0 = intl.Intl.selectLogic(reason, {
+      'taken': 'That phrase is already taken in Meeting Place. Try another.',
+      'notAdmin':
+          'Your VTA holds no administrator card of this community, so you can\'t vouch for a phrase.',
+      'vtaMissing': 'Link your VTA in Settings first.',
+      'other': 'The phrase couldn\'t be published or withdrawn. Try again.',
+    });
+    return '$_temp0';
+  }
 }

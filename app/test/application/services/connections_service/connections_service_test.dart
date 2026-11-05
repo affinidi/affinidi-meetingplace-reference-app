@@ -227,4 +227,32 @@ void main() {
       );
     });
   });
+
+  test('ConnectionsService.fetchConnections leaves out join phrases', () async {
+    final fakeSdk = FakeMeetingPlaceSDK(
+      connectionOffers: [
+        _makeOffer(mnemonic: 'pub-1', status: ConnectionOfferStatus.published),
+        _makeOffer(
+          mnemonic: 'my-club',
+          status: ConnectionOfferStatus.published,
+          externalRef: 'vtc-join-phrase:did:webvh:community.example',
+        ),
+      ],
+    );
+    final container = _makeContainer(fakeSdk: fakeSdk);
+    addTearDown(container.dispose);
+    container.listen(connectionsServiceProvider, (_, _) {});
+
+    await container
+        .read(connectionsServiceProvider.notifier)
+        .fetchConnections();
+
+    expect(
+      container
+          .read(connectionsServiceProvider)
+          .connections
+          .map((offer) => offer.mnemonic),
+      ['pub-1'],
+    );
+  });
 }

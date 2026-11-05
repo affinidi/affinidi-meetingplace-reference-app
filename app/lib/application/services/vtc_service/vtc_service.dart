@@ -37,6 +37,13 @@ class InvalidCommunityCodeException implements Exception {
   const InvalidCommunityCodeException();
 }
 
+/// Thrown when only an admin of a community may do something, and the
+/// member's VTA holds no valid admin role card of it.
+class NotCommunityAdminException implements Exception {
+  /// Creates a [NotCommunityAdminException].
+  const NotCommunityAdminException();
+}
+
 /// Name the phone registers with on the member's VTA.
 const _deviceName = 'Meeting Place';
 
@@ -958,6 +965,32 @@ class VtcService {
       }
     }
     return latest;
+  }
+
+  /// Has the member's VTA sign, as their persona in [communityDid], that
+  /// [phrase] leads to the community, showing [adminRoleCard]. The
+  /// statement lasts as long as the card.
+  ///
+  /// Throws [NotCommunityAdminException] when the member is no admin of the
+  /// community, [VtaNotLinkedException] when no VTA is linked, and
+  /// [MeetingPlaceVtcSDKException] when the VTA refuses or cannot be
+  /// reached.
+  Future<Map<String, dynamic>> vouchForPhrase(
+    String communityDid,
+    String phrase,
+  ) async {
+    final community = await _repository.findCommunity(communityDid);
+    final roleCard = await adminRoleCard(communityDid);
+    if (community == null || roleCard == null) {
+      throw const NotCommunityAdminException();
+    }
+    return CommunityOffer.sign(
+      agent: await _grantedVta(),
+      persona: _persona(community),
+      communityDid: communityDid,
+      phrase: phrase,
+      roleCard: roleCard,
+    );
   }
 
   /// Every membership card of the member: those a community issued that
