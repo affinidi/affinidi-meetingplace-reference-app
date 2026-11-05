@@ -52,6 +52,9 @@ class VtcJoinController extends _$VtcJoinController {
   /// Whether the identity check is being read; reads do not overlap.
   bool _readingCheck = false;
 
+  /// Whether the member's role is being read; reads do not overlap.
+  bool _readingRole = false;
+
   /// Whether the membership card is being collected; collections do not
   /// overlap.
   bool _collectingCard = false;
@@ -87,6 +90,7 @@ class VtcJoinController extends _$VtcJoinController {
           previous?.step != VtcJoinStep.joined) {
         unawaited(readMembershipCard());
         unawaited(readIdentityCheck());
+        unawaited(readRole());
       }
     });
     return VtcJoinState();
@@ -515,7 +519,38 @@ class VtcJoinController extends _$VtcJoinController {
     } finally {
       _collectingCard = false;
     }
-    if (ref.mounted) await readMembershipCard();
+    if (!ref.mounted) return;
+    await readMembershipCard();
+    // The community delivers the role card with the membership card.
+    if (ref.mounted) await readRole();
+  }
+
+  /// Reads the member's role in the community for the community page from
+  /// their VTA, which the community delivers its role card to. Only reads,
+  /// and quietly: a read that finds no role waits for the next.
+  Future<void> readRole() async {
+    final manifest = _manifest;
+    if (state.step != VtcJoinStep.joined ||
+        manifest == null ||
+        state.role != null ||
+        _readingRole) {
+      return;
+    }
+    _readingRole = true;
+    try {
+      final role = await _service.communityRole(manifest.communityDid);
+      // The screen may have closed, or moved on, while the VTA answered.
+      if (!ref.mounted) return;
+      if (role != null && state.step == VtcJoinStep.joined) {
+        state = state.copyWith(role: role);
+      }
+    } on MeetingPlaceVtcSDKException {
+      // The next read tries again.
+    } on VtaNotLinkedException {
+      // Nothing to read from; the membership stands all the same.
+    } finally {
+      _readingRole = false;
+    }
   }
 
   /// Reads the community's own check of the member's identity for the

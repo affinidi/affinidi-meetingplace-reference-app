@@ -3003,6 +3003,21 @@ class AppLocalizationsEs extends AppLocalizations {
       'If this is off, you may be listed for a moment when you join, until Meeting Place takes your card out of the directory.';
 
   @override
+  String get vtcCommunityRole => 'Your role';
+
+  @override
+  String vtcCommunityRoleName(String role) {
+    String _temp0 = intl.Intl.selectLogic(role, {
+      'admin': 'Administrator',
+      'moderator': 'Moderator',
+      'issuer': 'Issuer',
+      'member': 'Member',
+      'other': '$role',
+    });
+    return '$_temp0';
+  }
+
+  @override
   String get vtcJoinProfileHeading => 'About the community';
 
   @override

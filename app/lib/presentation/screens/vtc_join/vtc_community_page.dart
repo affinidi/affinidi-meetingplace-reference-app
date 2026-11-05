@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../application/services/identities_service/identities_service.dart';
 import '../../../domain/models/vtc/vtc_card_delivery.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import 'vtc_card_delivery_trail.dart';
 import 'vtc_community_profile.dart';
@@ -14,10 +15,20 @@ import 'vtc_join_phrase_view.dart';
 import 'vtc_join_state.dart';
 import 'vtc_membership_card_view.dart';
 
+/// Prefix of a role the community defined itself, as in `custom:coach`.
+const _customRolePrefix = 'custom:';
+
+/// The member's [role] in plain words; a role the community defined itself
+/// by its own name, which never reads as a built-in one.
+String _roleName(AppLocalizations l10n, String role) =>
+    role.startsWith(_customRolePrefix)
+    ? role.substring(_customRolePrefix.length)
+    : l10n.vtcCommunityRoleName(role);
+
 /// The page of a community the member belongs to, which they come back to:
-/// a welcome right after joining, else the community's logo and name; the
-/// membership card it issued — or that it is on its way to the member's
-/// VTA — what the community is, then Done and [leave].
+/// a welcome right after joining, else the community's logo and name; their
+/// role, the membership card it issued — or that it is on its way to the
+/// member's VTA — what the community is, then Done and [leave].
 class VtcCommunityPage extends StatelessWidget {
   const VtcCommunityPage({
     required this.state,
@@ -59,6 +70,13 @@ class VtcCommunityPage extends StatelessWidget {
             style: context.textTheme.titleMedium?.copyWith(color: Colors.white),
           ),
         ],
+        if (state.role case final role?)
+          OnboardingLine(
+            key: const Key('vtc_community_role'),
+            icon: Icons.badge_outlined,
+            title: l10n.vtcCommunityRole,
+            subtitle: _roleName(l10n, role),
+          ),
         const SizedBox(height: 4),
         if (card != null) ...[
           VtcMembershipCardView(

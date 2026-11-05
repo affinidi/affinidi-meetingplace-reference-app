@@ -252,6 +252,61 @@ void main() {
         expect(about('Five-a-side on Sundays.'), findsOneWidget);
       });
 
+      /// Has the VTA hold a role card in which the community grants the
+      /// persona [role].
+      void vtaHoldsRole(String role) {
+        network.vta.answerTo[VtaTask.credentialsQuery] = (payload) => {
+          'credentials': [
+            if (payload['type'] == 'AuthorityCredential')
+              {
+                'id': 'role-1',
+                'types': ['VerifiableCredential', 'AuthorityCredential'],
+              },
+          ],
+        };
+        network.vta.answers[VtaTask.credentialsGet] = {
+          'credential': {
+            'type': ['VerifiableCredential', 'AuthorityCredential'],
+            'issuer': fakeVtcDid,
+            'credentialSubject': {
+              'id': persona.did,
+              'authority': {
+                'scope': fakeVtcDid,
+                'actions': ['role:$role'],
+              },
+            },
+          },
+        };
+      }
+
+      String? shownRole(WidgetTester tester) => tester
+          .widget<OnboardingLine>(find.byKey(const Key('vtc_community_role')))
+          .subtitle;
+
+      testWidgets('shows the role the community granted', (tester) async {
+        vtaHoldsRole('member');
+
+        await joinCommunity(tester);
+
+        expect(shownRole(tester), 'Member');
+      });
+
+      testWidgets('names a role the community defined itself', (tester) async {
+        vtaHoldsRole('custom:admin');
+
+        await joinCommunity(tester);
+
+        expect(shownRole(tester), 'admin');
+      });
+
+      testWidgets('shows no role until the VTA holds the role card', (
+        tester,
+      ) async {
+        await joinCommunity(tester);
+
+        expect(find.byKey(const Key('vtc_community_role')), findsNothing);
+      });
+
       testWidgets('opens again as the page of the community', (tester) async {
         await joinCommunity(tester);
         await tester.pumpWidget(const SizedBox.shrink());

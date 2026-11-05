@@ -297,6 +297,10 @@ abstract class VtcJoinState with _$VtcJoinState {
     /// holds one.
     VtcIdentityCheck? identityCheck,
 
+    /// The member's role in the community, e.g. `member` or `moderator`,
+    /// once their VTA holds the role card that grants it.
+    String? role,
+
     /// How the card is being brought from the identity's inbox to the VTA,
     /// once this screen started collecting it.
     VtcCardDelivery? cardDelivery,

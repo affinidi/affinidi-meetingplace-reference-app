@@ -2899,6 +2899,19 @@
 	"vtcJoinDirectoryHidden": "This community doesn't list new members in its member directory.",
 	"vtcJoinListMe": "List me in the member directory",
 	"vtcJoinListMeNote": "If this is off, you may be listed for a moment when you join, until Meeting Place takes your card out of the directory.",
+	"vtcCommunityRole": "Your role",
+	"@vtcCommunityRole": {
+		"description": "Label of the member's role in a community on its page"
+	},
+	"vtcCommunityRoleName": "{role, select, admin{Administrator} moderator{Moderator} issuer{Issuer} member{Member} other{{role}}}",
+	"@vtcCommunityRoleName": {
+		"description": "The member's role in a community; a role the community defined itself is shown by its own name",
+		"placeholders": {
+			"role": {
+				"type": "String"
+			}
+		}
+	},
 	"vtcJoinProfileHeading": "About the community",
 	"vtcJoinWebsite": "Website",
 	"vtcJoinContact": "Contact",

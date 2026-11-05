@@ -4460,6 +4460,18 @@ abstract class AppLocalizations {
   /// **'If this is off, you may be listed for a moment when you join, until Meeting Place takes your card out of the directory.'**
   String get vtcJoinListMeNote;
 
+  /// Label of the member's role in a community on its page
+  ///
+  /// In en, this message translates to:
+  /// **'Your role'**
+  String get vtcCommunityRole;
+
+  /// The member's role in a community; a role the community defined itself is shown by its own name
+  ///
+  /// In en, this message translates to:
+  /// **'{role, select, admin{Administrator} moderator{Moderator} issuer{Issuer} member{Member} other{{role}}}'**
+  String vtcCommunityRoleName(String role);
+
   /// No description provided for @vtcJoinProfileHeading.
   ///
   /// In en, this message translates to:
