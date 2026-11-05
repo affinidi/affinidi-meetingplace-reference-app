@@ -504,6 +504,22 @@ void main() {
         expect(await service.community(fakeVtcDid), isNull);
       });
 
+      test('keeps the card and the signed answer once left', () async {
+        await service.leave(fakeVtcDid);
+
+        // As stored: read back through another repository.
+        final left =
+            (await SecureStorageVtcRepository().leftMemberships()).single;
+        expect(left.communityDid, fakeVtcDid);
+        expect(left.personaDid, persona.did);
+        expect(left.card?['issuer'], fakeVtcDid);
+        final exchange = left.leaveExchange!;
+        expect(exchange.request.type, MemberTask.selfRemove);
+        expect(exchange.request.toJson(), network.memberRequests.last);
+        expect(exchange.answer.issuer, fakeVtcDid);
+        expect(exchange.answer.payload['removed'], isTrue);
+      });
+
       test(
         'forgets a community that counts the persona as no member',
         () async {
@@ -513,6 +529,11 @@ void main() {
 
           expect(archived(), hasLength(1));
           expect(await service.community(fakeVtcDid), isNull);
+          // The card, but no answer to show.
+          final left =
+              (await SecureStorageVtcRepository().leftMemberships()).single;
+          expect(left.card, isNotNull);
+          expect(left.leaveExchange, isNull);
         },
       );
 
@@ -531,6 +552,7 @@ void main() {
         );
         expect(archived(), isEmpty);
         expect((await service.community(fakeVtcDid))?.isMember, isTrue);
+        expect(await SecureStorageVtcRepository().leftMemberships(), isEmpty);
       });
     });
   });

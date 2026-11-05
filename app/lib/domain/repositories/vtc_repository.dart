@@ -1,7 +1,9 @@
 import '../models/vtc/linked_vta.dart';
 import '../models/vtc/vtc_community.dart';
+import '../models/vtc/vtc_left_membership.dart';
 
-/// Stores the linked VTA and the communities the member signs in to.
+/// Stores the linked VTA, the communities the member signs in to, and the
+/// memberships they left.
 abstract interface class VtcRepository {
   /// The linked VTA, or null when the phone is not linked.
   Future<LinkedVta?> getLinkedVta();
@@ -21,6 +23,12 @@ abstract interface class VtcRepository {
   /// Forgets the community with [communityDid], if recorded.
   Future<void> removeCommunity(String communityDid);
 
-  /// Forgets the linked VTA and every community.
+  /// Every membership the member left, as recorded.
+  Future<List<VtcLeftMembership>> leftMemberships();
+
+  /// Records [left], replacing a record of the same [VtcLeftMembership.key].
+  Future<void> saveLeftMembership(VtcLeftMembership left);
+
+  /// Forgets the linked VTA, every community and every left membership.
   Future<void> clear();
 }

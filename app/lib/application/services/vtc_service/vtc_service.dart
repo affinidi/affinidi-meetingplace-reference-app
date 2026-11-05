@@ -9,6 +9,7 @@ import '../../../domain/models/vtc/linked_vta.dart';
 import '../../../domain/models/vtc/mock_credential_template.dart';
 import '../../../domain/models/vtc/vtc_card_delivery.dart';
 import '../../../domain/models/vtc/vtc_community.dart';
+import '../../../domain/models/vtc/vtc_left_membership.dart';
 import '../../../domain/models/vtc/vtc_membership_card.dart';
 import '../../../domain/repositories/vtc_repository.dart';
 import '../../../infrastructure/providers/vtc_sdk_provider.dart';
@@ -817,29 +818,52 @@ class VtcService {
   /// and this phone forgets the community. Does nothing for a community
   /// this phone does not know.
   ///
-  /// A community that already counts the persona as no member is forgotten
-  /// all the same. Throws [VtaNotLinkedException] when no VTA is linked, and
+  /// What shows the membership and its end stays on this phone as a
+  /// [VtcLeftMembership]: the card as the VTA kept it, if it held one, and
+  /// the community's signed answer. A community that already counts the
+  /// persona as no member is forgotten all the same, without an answer.
+  ///
+  /// Throws [VtaNotLinkedException] when no VTA is linked, and
   /// [MeetingPlaceVtcSDKException] when the VTA or the community refuses or
   /// cannot be reached, e.g. with HTTP status 409 when the persona is the
-  /// community's last administrator; the community is then kept.
+  /// community's last administrator; the community is then kept, and no
+  /// left membership recorded.
   Future<void> leave(String communityDid) async {
     final community = await _repository.findCommunity(communityDid);
     if (community == null) return;
 
     final vta = await _grantedVta();
+    final cards = _sdk.communityImport(vta);
+    final card = await cards.membershipCard(
+      communityDid,
+      personaDid: community.personaDid,
+    );
+    TrustTaskExchange? leaveExchange;
     try {
-      await _sdk.joinClient().leave(
+      final receipt = await _sdk.joinClient().leave(
         communityDid,
         agent: vta,
         persona: await _personaSigner(vta, community),
       );
+      leaveExchange = receipt.exchange;
     } on MeetingPlaceVtcSDKException catch (error) {
       if (!(error.refusalCode?.endsWith(':notMember') ?? false)) rethrow;
     }
+    await _repository.saveLeftMembership(
+      VtcLeftMembership(
+        communityDid: communityDid,
+        personaDid: community.personaDid,
+        leftAt: DateTime.now(),
+        name: community.name,
+        card: card,
+        leaveExchange: leaveExchange,
+      ),
+    );
     // Else the VTA backup would offer the membership back on the next scan.
-    await _sdk
-        .communityImport(vta)
-        .archiveMembershipCards(communityDid, personaDid: community.personaDid);
+    await cards.archiveMembershipCards(
+      communityDid,
+      personaDid: community.personaDid,
+    );
     await _repository.removeCommunity(communityDid);
   }
 

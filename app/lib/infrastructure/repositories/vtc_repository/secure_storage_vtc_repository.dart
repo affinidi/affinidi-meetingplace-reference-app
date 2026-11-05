@@ -4,10 +4,12 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../../domain/models/vtc/linked_vta.dart';
 import '../../../domain/models/vtc/vtc_community.dart';
+import '../../../domain/models/vtc/vtc_left_membership.dart';
 import '../../../domain/repositories/vtc_repository.dart';
 
 /// [VtcRepository] in the platform keystore, because the link carries the
-/// manager key: this device only, never synchronised or backed up.
+/// manager key and a left membership the member's DID and card: this
+/// device only, never synchronised or backed up.
 class SecureStorageVtcRepository implements VtcRepository {
   /// Creates a [SecureStorageVtcRepository].
   SecureStorageVtcRepository([FlutterSecureStorage? storage])
@@ -22,6 +24,7 @@ class SecureStorageVtcRepository implements VtcRepository {
 
   static const _linkedVtaKey = 'vtc_linked_vta';
   static const _communitiesKey = 'vtc_communities';
+  static const _leftMembershipsKey = 'vtc_left_memberships';
 
   final FlutterSecureStorage _storage;
 
@@ -61,9 +64,33 @@ class SecureStorageVtcRepository implements VtcRepository {
   }
 
   @override
+  Future<List<VtcLeftMembership>> leftMemberships() async {
+    final json = await _storage.read(key: _leftMembershipsKey);
+    if (json == null) return const [];
+    return [
+      for (final left in jsonDecode(json) as List<dynamic>)
+        VtcLeftMembership.fromJson(left as Map<String, dynamic>),
+    ];
+  }
+
+  @override
+  Future<void> saveLeftMembership(VtcLeftMembership left) async {
+    final others = (await leftMemberships()).where(
+      (stored) => stored.key != left.key,
+    );
+    await _storage.write(
+      key: _leftMembershipsKey,
+      value: jsonEncode([
+        for (final l in [...others, left]) l.toJson(),
+      ]),
+    );
+  }
+
+  @override
   Future<void> clear() async {
     await _storage.delete(key: _linkedVtaKey);
     await _storage.delete(key: _communitiesKey);
+    await _storage.delete(key: _leftMembershipsKey);
   }
 
   Future<List<VtcCommunity>> _othersThan(String communityDid) async => [
