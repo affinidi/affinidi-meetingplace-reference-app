@@ -314,6 +314,30 @@ void main() {
         expect(find.byType(VtcJoinPhraseView), findsOneWidget);
       });
 
+      testWidgets('centers the role and settings on the page', (tester) async {
+        vtaHoldsRole('member');
+
+        await joinCommunity(tester);
+
+        final line = tester.getRect(
+          find.byKey(const Key('vtc_community_role')),
+        );
+        final roleIcon = tester.getRect(
+          find.descendant(
+            of: find.byKey(const Key('vtc_community_role')),
+            matching: find.byIcon(Icons.badge_outlined),
+          ),
+        );
+        final settings = tester.getRect(
+          find.byKey(const Key('vtc_community_settings')),
+        );
+        expect(roleIcon.left - line.left, greaterThan(0));
+        expect(
+          roleIcon.left - line.left,
+          moreOrLessEquals(line.right - settings.right),
+        );
+      });
+
       testWidgets('shows no role until the VTA holds the role card', (
         tester,
       ) async {

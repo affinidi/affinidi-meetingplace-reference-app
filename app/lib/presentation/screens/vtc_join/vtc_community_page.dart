@@ -77,6 +77,7 @@ class VtcCommunityPage extends StatelessWidget {
             icon: Icons.badge_outlined,
             title: l10n.vtcCommunityRole,
             subtitle: _roleName(l10n, role),
+            centered: true,
             trailing: switch (state.communityDid) {
               final communityDid? => IconButton(
                 key: const Key('vtc_community_settings'),

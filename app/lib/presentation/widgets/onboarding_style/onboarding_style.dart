@@ -381,6 +381,7 @@ class OnboardingLine extends StatelessWidget {
     required this.title,
     this.subtitle,
     this.trailing,
+    this.centered = false,
   });
 
   final IconData icon;
@@ -390,14 +391,24 @@ class OnboardingLine extends StatelessWidget {
   /// An action at the end of the line, such as an icon button.
   final Widget? trailing;
 
+  /// Whether the line sits in the middle of the card, as wide as its
+  /// content, rather than filling it from the start.
+  final bool centered;
+
   @override
   Widget build(BuildContext context) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: centered
+          ? MainAxisAlignment.center
+          : MainAxisAlignment.start,
+      crossAxisAlignment: centered
+          ? CrossAxisAlignment.center
+          : CrossAxisAlignment.start,
       spacing: 12,
       children: [
         Icon(icon, size: 20, color: Colors.white),
-        Expanded(
+        Flexible(
+          fit: centered ? FlexFit.loose : FlexFit.tight,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             spacing: 2,
