@@ -225,12 +225,23 @@ void main() {
         'code': 'vault/credentials/receive:proofSetUnsupported',
       };
 
-      await service.join(
+      final verdict = await service.join(
         await service.readCommunity(fakeVtcDid),
         persona: joinAs,
       );
 
       expect((await service.community(fakeVtcDid))?.isMember, isTrue);
+      // Not the VTA's to show.
+      expect((verdict as JoinAdmitted).membershipCard, isNull);
+    });
+
+    test('returns the membership card the VTA kept', () async {
+      final verdict = await service.join(
+        await service.readCommunity(fakeVtcDid),
+        persona: joinAs,
+      );
+
+      expect((verdict as JoinAdmitted).membershipCard?['id'], 'urn:uuid:vmc');
     });
 
     test('records a referred application, not a membership', () async {

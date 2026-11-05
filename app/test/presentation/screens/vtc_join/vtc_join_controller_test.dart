@@ -867,6 +867,16 @@ void main() {
         expect(state().membershipCard, isNotNull);
       });
 
+      test('is shown from the admission, before any VTA read', () async {
+        await controller().onScanned(fakeVtcDid);
+        await controller().join();
+
+        // The VTA holds no card to read: the one shown came with the
+        // admission.
+        expect(state().membershipCard?.issuer, fakeVtcDid);
+        expect(state().membershipCard?.memberDid, persona.did);
+      });
+
       test('is shown for an admission at once', () async {
         vtaHoldsCard();
         await controller().onScanned(fakeVtcDid);

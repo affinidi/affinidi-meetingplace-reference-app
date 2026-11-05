@@ -457,6 +457,8 @@ void main() {
             ],
           }
           ..answers[VtaTask.credentialsGet] = {'credential': card};
+        // The admission carries the card the VTA then keeps.
+        (network.joinVerdict['with'] as Map)['vmc'] = card;
         return card;
       }
 
@@ -524,6 +526,8 @@ void main() {
       testWidgets('says the card is on its way until the VTA holds it', (
         tester,
       ) async {
+        // The community delivers the card later.
+        (network.joinVerdict['with'] as Map).remove('vmc');
         await pumpScreen(tester);
         await enterCode(tester, fakeVtcDid);
         await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));

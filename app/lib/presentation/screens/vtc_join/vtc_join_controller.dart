@@ -12,6 +12,7 @@ import '../../../application/services/vtc_service/vtc_service.dart';
 import '../../../domain/models/identity/identity.dart';
 import '../../../domain/models/vtc/vtc_card_delivery.dart';
 import '../../../domain/models/vtc/vtc_community.dart';
+import '../../../domain/models/vtc/vtc_membership_card.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import 'vtc_join_state.dart';
 
@@ -447,6 +448,12 @@ class VtcJoinController extends _$VtcJoinController {
       submitReceipt: recorded?.submitReceipt,
       requestId: recorded?.joinRequestId,
       denialReason: verdict is JoinDenied ? verdict.reason : null,
+      // Shown at once: the VTA already keeps the card the admission carries.
+      membershipCard: switch (verdict) {
+        JoinAdmitted(membershipCard: final card?) =>
+          VtcMembershipCard.fromCredential(card),
+        _ => null,
+      },
       step: switch (verdict) {
         JoinAdmitted() => VtcJoinStep.joined,
         JoinPending() => VtcJoinStep.pending,

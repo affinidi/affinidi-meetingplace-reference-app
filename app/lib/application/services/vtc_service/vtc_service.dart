@@ -385,7 +385,8 @@ class VtcService {
   /// The first application to a community is made as [persona], one of
   /// [vtaPersonas], or else as a new persona the VTA creates; a later one
   /// applies as the same persona. Once admitted, the issued cards are kept
-  /// on the VTA, where other apps of the member find them.
+  /// on the VTA, where other apps of the member find them; an admission
+  /// returns its membership card only when the VTA kept it.
   ///
   /// Throws [VtaNotLinkedException] when no VTA is linked, and
   /// [MeetingPlaceVtcSDKException] when the VTA or the community refuses or
@@ -422,9 +423,17 @@ class VtcService {
       case JoinAdmitted(:final credentials, :final membershipCard):
         final member = community.withApplication(isMember: true);
         await _repository.saveCommunity(member);
-        await _keepCards(vta, credentials, community.contextId);
+        final kept = await _keepCards(vta, credentials, community.contextId);
         _membershipsChanged.add(null);
         await _settle(vta, member, membershipCard, verdict.requestId);
+        if (membershipCard != null && !kept.contains(membershipCard)) {
+          // Not the VTA's to show: read from there once it holds one.
+          return JoinAdmitted(
+            requestId: verdict.requestId,
+            roleCard: verdict.roleCard,
+            role: verdict.role,
+          );
+        }
       case JoinPending(:final requestId, :final exchange):
         await _repository.saveCommunity(
           community.withApplication(
@@ -1232,21 +1241,24 @@ class VtcService {
     );
   }
 
-  /// Keeps [cards] on the VTA. A card that is not kept is skipped: the
-  /// community holds the membership either way, and only another app of the
-  /// member cannot import it.
-  static Future<void> _keepCards(
+  /// Keeps [cards] on the VTA, and returns those it kept. A card that is
+  /// not kept is skipped: the community holds the membership either way,
+  /// and only another app of the member cannot import it.
+  static Future<List<Map<String, dynamic>>> _keepCards(
     VtaClient vta,
     List<Map<String, dynamic>> cards,
     String contextId,
   ) async {
+    final kept = <Map<String, dynamic>>[];
     for (final card in cards) {
       try {
         await vta.keepCredential(card, contextId: contextId);
+        kept.add(card);
       } on MeetingPlaceVtcSDKException {
         continue;
       }
     }
+    return kept;
   }
 
   static VtaPersona _persona(VtcCommunity community) => VtaPersona(
