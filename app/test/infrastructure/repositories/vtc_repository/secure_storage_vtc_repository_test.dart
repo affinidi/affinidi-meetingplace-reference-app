@@ -1,6 +1,8 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_left_membership.dart';
+import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_vetting.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
 
 void main() {
@@ -67,6 +69,86 @@ void main() {
       await repository.clear();
 
       expect(await repository.leftMemberships(), isEmpty);
+    });
+  });
+
+  group('SecureStorageVtcRepository vetting', () {
+    VtcVetting vetting(String communityDid) => VtcVetting(
+      communityDid: communityDid,
+      criterionId: 'vetted',
+      vetterRole: 'vetter',
+      salt: 'salt-1',
+      requests: [
+        const VtcVettingRequest(
+          vetterDid: 'did:webvh:bob',
+          vetterName: 'Bob',
+          request: {
+            'id': 'urn:uuid:request',
+            'type': VettingTask.request,
+            'issuer': 'did:webvh:alice',
+            'recipient': 'did:webvh:bob',
+            'payload': <String, dynamic>{},
+          },
+        ).acceptedBy(
+          AcceptedVetter(
+            vetterDid: 'did:webvh:bob',
+            requestId: 'vr-1',
+            roleValidUntil: DateTime.utc(2027),
+          ),
+        ),
+        const VtcVettingRequest(
+          vetterDid: 'did:webvh:carol',
+          request: {'id': 'urn:uuid:other'},
+        ).refused(VettingFailure.invalidTicket),
+      ],
+    );
+
+    test('keeps the vetting for each community', () async {
+      final repository = SecureStorageVtcRepository();
+      await repository.saveVetting(vetting('did:webvh:club'));
+      await repository.saveVetting(vetting('did:webvh:other'));
+
+      final stored = (await SecureStorageVtcRepository().findVetting(
+        'did:webvh:club',
+      ))!;
+      expect(stored.salt, 'salt-1');
+      final [bob, carol] = stored.requests;
+      expect(bob.status, VtcVettingStatus.accepted);
+      expect(bob.vetterName, 'Bob');
+      expect(bob.accepted?.requestId, 'vr-1');
+      expect(bob.accepted?.roleValidUntil, DateTime.utc(2027));
+      expect(bob.requestDocument.id, 'urn:uuid:request');
+      expect(carol.status, VtcVettingStatus.refused);
+      expect(carol.failure, VettingFailure.invalidTicket);
+      expect(carol.isOpen, isFalse);
+    });
+
+    test('replaces a vetter\'s earlier request', () async {
+      final updated = vetting('did:webvh:club').withRequest(
+        const VtcVettingRequest(
+          vetterDid: 'did:webvh:carol',
+          request: {'id': 'urn:uuid:again'},
+        ),
+      );
+
+      expect(updated.requests.map((r) => r.vetterDid), [
+        'did:webvh:bob',
+        'did:webvh:carol',
+      ]);
+      expect(updated.requestTo('did:webvh:carol')?.isOpen, isTrue);
+    });
+
+    test('forgets a community\'s vetting, and all of it on clear', () async {
+      final repository = SecureStorageVtcRepository();
+      await repository.saveVetting(vetting('did:webvh:club'));
+      await repository.saveVetting(vetting('did:webvh:other'));
+
+      await repository.removeVetting('did:webvh:club');
+      expect(await repository.findVetting('did:webvh:club'), isNull);
+      expect(await repository.findVetting('did:webvh:other'), isNotNull);
+
+      await repository.clear();
+      expect(await repository.findVetting('did:webvh:other'), isNull);
     });
   });
 }

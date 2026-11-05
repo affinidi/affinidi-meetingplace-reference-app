@@ -6,6 +6,7 @@ import '../../../domain/models/vtc/linked_vta.dart';
 import '../../../domain/models/vtc/vtc_community.dart';
 import '../../../domain/models/vtc/vtc_group_chat.dart';
 import '../../../domain/models/vtc/vtc_left_membership.dart';
+import '../../../domain/models/vtc/vtc_vetting.dart';
 import '../../../domain/repositories/vtc_repository.dart';
 
 /// [VtcRepository] in the platform keystore, because the link carries the
@@ -27,6 +28,7 @@ class SecureStorageVtcRepository implements VtcRepository {
   static const _communitiesKey = 'vtc_communities';
   static const _leftMembershipsKey = 'vtc_left_memberships';
   static const _groupChatsKey = 'vtc_group_chats';
+  static const _vettingsKey = 'vtc_vettings';
 
   final FlutterSecureStorage _storage;
 
@@ -116,15 +118,55 @@ class SecureStorageVtcRepository implements VtcRepository {
   }
 
   @override
+  Future<VtcVetting?> findVetting(String communityDid) async =>
+      (await _vettings())
+          .where((vetting) => vetting.communityDid == communityDid)
+          .firstOrNull;
+
+  @override
+  Future<void> saveVetting(VtcVetting vetting) async {
+    await _saveVettings([
+      ...(await _vettings()).where(
+        (stored) => stored.communityDid != vetting.communityDid,
+      ),
+      vetting,
+    ]);
+  }
+
+  @override
+  Future<void> removeVetting(String communityDid) async {
+    await _saveVettings([
+      ...(await _vettings()).where(
+        (stored) => stored.communityDid != communityDid,
+      ),
+    ]);
+  }
+
+  @override
   Future<void> clear() async {
     await _storage.delete(key: _linkedVtaKey);
     await _storage.delete(key: _communitiesKey);
     await _storage.delete(key: _leftMembershipsKey);
+    await _storage.delete(key: _vettingsKey);
   }
 
   Future<void> _saveGroupChats(List<VtcGroupChat> chats) => _storage.write(
     key: _groupChatsKey,
     value: jsonEncode([for (final chat in chats) chat.toJson()]),
+  );
+
+  Future<List<VtcVetting>> _vettings() async {
+    final json = await _storage.read(key: _vettingsKey);
+    if (json == null) return const [];
+    return [
+      for (final vetting in jsonDecode(json) as List<dynamic>)
+        VtcVetting.fromJson(vetting as Map<String, dynamic>),
+    ];
+  }
+
+  Future<void> _saveVettings(List<VtcVetting> vettings) => _storage.write(
+    key: _vettingsKey,
+    value: jsonEncode([for (final v in vettings) v.toJson()]),
   );
 
   Future<List<VtcCommunity>> _othersThan(String communityDid) async => [
