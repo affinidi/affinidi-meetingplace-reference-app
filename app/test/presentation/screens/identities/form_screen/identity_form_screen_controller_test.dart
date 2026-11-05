@@ -4,15 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
+import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service_state.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contact_card/contact_card_field_definition.dart';
 import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/providers/app_logger_provider.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/identities/form_screen/identity_form_mode.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/identities/form_screen/identity_form_screen_controller.dart';
 
 import '../../../../fakes/fake_identities.dart';
+import '../../../../mocks/fake_app_logger.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -25,9 +28,15 @@ void main() {
       ContactCardFieldKey.firstName,
     );
 
-    ProviderContainer makeContainer(_FakeIdentitiesService service) {
+    ProviderContainer makeContainer(
+      _FakeIdentitiesService service, {
+      _RecordingAppLogger? logger,
+    }) {
       final container = ProviderContainer(
-        overrides: [identitiesServiceProvider.overrideWith(() => service)],
+        overrides: [
+          identitiesServiceProvider.overrideWith(() => service),
+          appLoggerProvider.overrideWithValue(logger ?? _RecordingAppLogger()),
+        ],
       );
       addTearDown(container.dispose);
       return container;
@@ -69,6 +78,49 @@ void main() {
       expect(saved, isFalse);
       expect(container.read(provider).isSaving, isFalse);
       expect(container.read(provider).hasSaved, isFalse);
+    });
+
+    test('logs why the VTA refused, without the card details', () async {
+      final identity = FakeIdentities.primaryIdentity;
+      final service = _FakeIdentitiesService([identity])
+        ..failUpdate = true
+        ..updateFailure = MeetingPlaceVtcSDKException(
+          message: 'Refused for ${identity.card.firstName}',
+          code: MeetingPlaceVtcSDKErrorCode.refused,
+          refusalCode: 'vta:forbidden',
+          httpStatus: 403,
+        );
+      final logger = _RecordingAppLogger();
+      final container = makeContainer(service, logger: logger);
+      final provider = identityFormScreenControllerProvider(identity.id);
+      final controller = container.read(provider.notifier);
+      container.read(provider);
+
+      await controller.saveIdentity(
+        anonymousLabel: 'Anonymous',
+        mode: IdentityFormMode.edit,
+      );
+
+      expect(logger.errors, [
+        'Saving the identity (edit) failed: refused vta:forbidden 403',
+      ]);
+    });
+
+    test('logs the type of any other failure', () async {
+      final identity = FakeIdentities.primaryIdentity;
+      final service = _FakeIdentitiesService([identity])..failUpdate = true;
+      final logger = _RecordingAppLogger();
+      final container = makeContainer(service, logger: logger);
+      final provider = identityFormScreenControllerProvider(identity.id);
+      final controller = container.read(provider.notifier);
+      container.read(provider);
+
+      await controller.saveIdentity(
+        anonymousLabel: 'Anonymous',
+        mode: IdentityFormMode.edit,
+      );
+
+      expect(logger.errors, ['Saving the identity (edit) failed: StateError']);
     });
 
     test('does not mark the stored mobile as touched on init callback', () {
@@ -485,6 +537,9 @@ class _FakeIdentitiesService extends IdentitiesService {
   /// Fails an update, as a VTA that refuses does.
   bool failUpdate = false;
 
+  /// What a failed update throws, when not a [StateError].
+  MeetingPlaceVtcSDKException? updateFailure;
+
   @override
   IdentitiesServiceState build() {
     return _initialState;
@@ -493,7 +548,10 @@ class _FakeIdentitiesService extends IdentitiesService {
   @override
   Future<void> updateIdentity(Identity identity) async {
     await pendingUpdate?.future;
-    if (failUpdate) throw StateError('VTA refused');
+    if (failUpdate) {
+      if (updateFailure case final failure?) throw failure;
+      throw StateError('VTA refused');
+    }
     updatedIdentity = identity;
     state = state.copyWith(
       identities: [
@@ -505,4 +563,16 @@ class _FakeIdentitiesService extends IdentitiesService {
           : state.currentIdentity,
     );
   }
+}
+
+class _RecordingAppLogger extends FakeAppLogger {
+  final errors = <String>[];
+
+  @override
+  void error(
+    String message, {
+    String name = '',
+    dynamic error,
+    StackTrace? stackTrace,
+  }) => errors.add(message);
 }

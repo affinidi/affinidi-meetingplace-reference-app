@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
+import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
 
@@ -10,6 +11,7 @@ import '../../../../domain/models/identity/identity.dart';
 import '../../../../infrastructure/exceptions/app_exception.dart';
 import '../../../../infrastructure/exceptions/app_exception_type.dart';
 import '../../../../infrastructure/plugins/device_region_plugin/device_region_plugin.dart';
+import '../../../../infrastructure/providers/app_logger_provider.dart';
 import 'identity_form_mode.dart';
 import 'identity_form_screen_state.dart';
 
@@ -392,6 +394,7 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
     if ((state.hasDeleted) || (state.hasSaved)) return true;
 
     final identitiesService = ref.read(identitiesServiceProvider.notifier);
+    final logger = ref.read(appLoggerProvider);
 
     var updatedCard = state.identity.card;
 
@@ -436,12 +439,29 @@ class IdentityFormScreenController extends _$IdentityFormScreenController {
       if (!ref.mounted) return true;
       state = state.copyWith(identity: updatedIdentity, hasSaved: true);
       return true;
-    } catch (error) {
+    } catch (error, stackTrace) {
+      // The form shows one message for every failure; the log tells them
+      // apart.
+      logger.error(
+        'Saving the identity (${mode.name}) failed: ${_describeFailure(error)}',
+        stackTrace: stackTrace,
+        name: 'IdentityFormScreenController',
+      );
       return false;
     } finally {
       if (ref.mounted) state = state.copyWith(isSaving: false);
     }
   }
+
+  /// Names [error] without its message, which may carry the card's details.
+  static String _describeFailure(Object error) => switch (error) {
+    MeetingPlaceVtcSDKException() => [
+      error.code.name,
+      error.refusalCode,
+      error.httpStatus,
+    ].nonNulls.join(' '),
+    _ => '${error.runtimeType}',
+  };
 
   Future<bool> deleteIdentity() async {
     if (state.identity.isPrimary) return false;
