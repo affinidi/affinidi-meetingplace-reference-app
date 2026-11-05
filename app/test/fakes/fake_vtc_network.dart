@@ -195,7 +195,8 @@ class FakeVtcNetwork implements HttpClientAdapter {
   }
 
   /// The revocation list as the community signs it: [revoked] set in a
-  /// GZIP bitstring, bit 0 the first byte's most significant.
+  /// GZIP bitstring, bit 0 the first byte's most significant, in bare
+  /// base64url as the VTC writes it.
   Future<Map<String, dynamic>> _statusList() {
     final bits = Uint8List(_statusListBytes);
     for (final index in revoked) {
@@ -212,7 +213,7 @@ class FakeVtcNetwork implements HttpClientAdapter {
           'id': '$statusListUrl#list',
           'type': 'BitstringStatusList',
           'statusPurpose': 'revocation',
-          'encodedList': 'u$encoded',
+          'encodedList': encoded,
         },
       },
       signer: _VtcSigner(_vtcKey),
