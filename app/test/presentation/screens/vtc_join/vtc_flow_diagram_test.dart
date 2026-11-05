@@ -40,7 +40,7 @@ void main() {
     );
     expect(
       tester.getSize(find.byType(VtcFlowDiagram)).height,
-      lessThanOrEqualTo(40),
+      lessThanOrEqualTo(48),
     );
   });
 }

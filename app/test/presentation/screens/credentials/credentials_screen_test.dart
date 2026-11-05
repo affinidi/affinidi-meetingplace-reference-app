@@ -291,7 +291,7 @@ void main() {
     );
     final issued = find.byKey(const Key('membership_flow_issued'));
     // Small: a circle and one line of name under it, centred in the step.
-    expect(tester.getSize(issued).height, lessThanOrEqualTo(40));
+    expect(tester.getSize(issued).height, lessThanOrEqualTo(48));
     final row = find.descendant(of: issued, matching: find.byType(Row));
     final trail = find.byKey(const Key('membership_trail_issued'));
     // The step's column of text, which the diagram spans.

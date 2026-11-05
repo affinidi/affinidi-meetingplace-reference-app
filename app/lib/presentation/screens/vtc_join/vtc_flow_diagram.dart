@@ -24,18 +24,21 @@ class VtcFlowDiagram extends StatelessWidget {
 
   final List<VtcFlowNode> nodes;
 
-  static const _nodeSize = 22.0;
+  static const _nodeSize = 28.0;
+  static const _iconSize = 16.0;
 
   /// Room for a name such as "Community" in full, and for three parties on
   /// a narrow phone; the arrows between stretch to spread them across the
   /// full width.
-  static const _nodeWidth = 64.0;
+  static const _nodeWidth = 72.0;
   static const _arrowHead = 8.0;
 
   @override
   Widget build(BuildContext context) {
+    // Without the theme's letter spacing, which cut "Community" short.
     final labelStyle = context.textTheme.labelSmall?.copyWith(
       color: Colors.white,
+      letterSpacing: 0,
     );
 
     return ExcludeSemantics(
@@ -78,7 +81,11 @@ class VtcFlowDiagram extends StatelessWidget {
                       color: Colors.white.withAlpha(25),
                       border: Border.all(color: Colors.white54),
                     ),
-                    child: Icon(node.icon, size: 12, color: Colors.white),
+                    child: Icon(
+                      node.icon,
+                      size: _iconSize,
+                      color: Colors.white,
+                    ),
                   ),
                   Text(
                     node.label,
