@@ -47,9 +47,22 @@ class VtaConnectionKeys implements ExternalSigningKeys {
   final VtcService _service;
   final FlutterSecureStorage _storage;
 
+  /// Creates the signing key of [did] on the member's VTA, or returns null
+  /// when no VTA is linked, so [did] keeps its keys on this device.
+  ///
+  /// Throws [VtaSigningUnavailableException] when a linked VTA cannot be
+  /// reached or refuses.
   @override
-  Future<ExternalSigningKey> createKey(String did) async {
-    final key = await _call(_service.createConnectionKey);
+  Future<ExternalSigningKey?> createKey(String did) async {
+    final VtaSigningKey key;
+    try {
+      key = await _call(_service.createConnectionKey);
+    } on VtaSigningUnavailableException catch (error) {
+      if (error.code == VtaSigningUnavailableException.notLinkedCode) {
+        return null;
+      }
+      rethrow;
+    }
     await _storage.write(
       key: '$_keyPrefix$did',
       value: jsonEncode({
