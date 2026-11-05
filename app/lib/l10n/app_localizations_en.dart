@@ -3103,11 +3103,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String vtcJoinAlreadyMember(String name) {
-    return 'You\'re already a member of $name.';
-  }
-
-  @override
   String get vtcJoinLeaveAction => 'Leave community';
 
   @override

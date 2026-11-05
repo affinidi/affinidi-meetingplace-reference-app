@@ -7,15 +7,17 @@ import '../../../domain/models/vtc/vtc_card_delivery.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import 'vtc_card_delivery_trail.dart';
+import 'vtc_community_profile.dart';
 import 'vtc_flow_diagram.dart';
 import 'vtc_identity_check_view.dart';
 import 'vtc_join_phrase_view.dart';
 import 'vtc_join_state.dart';
 import 'vtc_membership_card_view.dart';
 
-/// The member is a member: the community's message, the membership card it
-/// issued — or that it is on its way to the member's VTA — then Done and
-/// [leave].
+/// The page of a community the member belongs to, which they come back to:
+/// a welcome right after joining, else the community's logo and name; the
+/// membership card it issued — or that it is on its way to the member's
+/// VTA — what the community is, then Done and [leave].
 class VtcCommunityPage extends StatelessWidget {
   const VtcCommunityPage({
     required this.state,
@@ -37,15 +39,26 @@ class VtcCommunityPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: 12,
       children: [
-        const Icon(Icons.verified, size: 72, color: Colors.white),
-        const SizedBox(height: 4),
-        Text(
-          state.wasMember
-              ? l10n.vtcJoinAlreadyMember(name)
-              : l10n.vtcJoinJoined(name),
-          textAlign: TextAlign.center,
-          style: context.textTheme.titleMedium?.copyWith(color: Colors.white),
-        ),
+        if (state.wasMember) ...[
+          if (state.logoUrl case final logoUrl?) VtcCommunityLogo(logoUrl),
+          Text(
+            name,
+            key: const Key('vtc_community_name'),
+            textAlign: TextAlign.center,
+            style: context.textTheme.titleLarge?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ] else ...[
+          const Icon(Icons.verified, size: 72, color: Colors.white),
+          const SizedBox(height: 4),
+          Text(
+            l10n.vtcJoinJoined(name),
+            textAlign: TextAlign.center,
+            style: context.textTheme.titleMedium?.copyWith(color: Colors.white),
+          ),
+        ],
         const SizedBox(height: 4),
         if (card != null) ...[
           VtcMembershipCardView(
@@ -75,6 +88,7 @@ class VtcCommunityPage extends StatelessWidget {
           ),
         if (state.identityCheck case final check?)
           VtcIdentityCheckView(check: check, communityName: name),
+        VtcCommunityProfile(state: state),
         if (state.communityDid case final communityDid?)
           VtcJoinPhraseView(communityDid: communityDid, communityName: name),
         const SizedBox(height: 12),

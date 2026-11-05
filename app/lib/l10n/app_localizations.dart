@@ -4676,12 +4676,6 @@ abstract class AppLocalizations {
   /// **'You\'re a member of {name}.'**
   String vtcJoinJoined(String name);
 
-  /// The scanned community is one the member belongs to
-  ///
-  /// In en, this message translates to:
-  /// **'You\'re already a member of {name}.'**
-  String vtcJoinAlreadyMember(String name);
-
   /// No description provided for @vtcJoinLeaveAction.
   ///
   /// In en, this message translates to:

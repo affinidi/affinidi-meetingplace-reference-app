@@ -226,6 +226,53 @@ void main() {
       expect(await service.community(fakeVtcDid), isNull);
     });
 
+    group('community page', () {
+      Finder about(String text) => find.descendant(
+        of: find.byWidgetPredicate(
+          (widget) =>
+              widget is GlassCard && widget.title == 'About the community',
+        ),
+        matching: find.text(text),
+      );
+
+      Future<void> joinCommunity(WidgetTester tester) async {
+        await pumpScreen(tester);
+        await enterCode(tester, fakeVtcDid);
+        await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
+        await settle(tester);
+      }
+
+      testWidgets('welcomes a new member and says what the community is', (
+        tester,
+      ) async {
+        await joinCommunity(tester);
+
+        expect(find.text("You're a member of Football club."), findsOneWidget);
+        expect(find.byKey(const Key('vtc_community_name')), findsNothing);
+        expect(about('Five-a-side on Sundays.'), findsOneWidget);
+      });
+
+      testWidgets('opens again as the page of the community', (tester) async {
+        await joinCommunity(tester);
+        await tester.pumpWidget(const SizedBox.shrink());
+
+        await pumpScreen(tester, communityDid: fakeVtcDid);
+        await settle(tester);
+
+        expect(
+          tester.widget<Text>(find.byKey(const Key('vtc_community_name'))).data,
+          'Football club',
+        );
+        expect(find.text("You're a member of Football club."), findsNothing);
+        expect(about('Five-a-side on Sundays.'), findsOneWidget);
+        expect(about('https://club.example/'), findsOneWidget);
+        expect(
+          find.widgetWithText(OutlinedButton, 'Leave community'),
+          findsOneWidget,
+        );
+      });
+    });
+
     testWidgets('shows the signed trail of a waiting application', (
       tester,
     ) async {
