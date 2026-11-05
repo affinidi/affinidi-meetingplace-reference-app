@@ -251,9 +251,18 @@ void main() {
     expect(find.text('membership'), findsOneWidget);
     expect(find.text('Your VTA holds it as'), findsOneWidget);
     expect(find.text('valid'), findsOneWidget);
+    // One type a line, each with its bullet.
+    final types = find.ancestor(
+      of: find.text('Types'),
+      matching: find.byType(Column),
+    );
     expect(
-      find.text('VerifiableCredential, MembershipCredential'),
-      findsOneWidget,
+      find.descendant(of: types.first, matching: find.text('•')),
+      findsNWidgets(2),
+    );
+    expect(
+      tester.getTopLeft(find.text('VerifiableCredential')).dy,
+      lessThan(tester.getTopLeft(find.text('MembershipCredential')).dy),
     );
     await expand(tester, 'checked');
     expect(find.text('This phone'), findsOneWidget);

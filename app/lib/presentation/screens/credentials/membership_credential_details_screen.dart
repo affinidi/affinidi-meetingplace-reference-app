@@ -207,10 +207,10 @@ class _MembershipTrail extends StatelessWidget {
                   status,
                 ),
               if (stored.types.isNotEmpty)
-                VtcTrailDetail(
+                VtcTrailDetail.list(
                   Icons.category_outlined,
                   l10n.membershipTrailStoredTypes,
-                  stored.types.join(', '),
+                  stored.types,
                 ),
             ],
           ],

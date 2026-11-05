@@ -25,11 +25,20 @@ enum VtcTrailStage {
 /// icon for what it is.
 class VtcTrailDetail {
   /// Creates a [VtcTrailDetail].
-  const VtcTrailDetail(this.icon, this.label, this.value, {this.isId = false});
+  const VtcTrailDetail(this.icon, this.label, this.value, {this.isId = false})
+    : items = const [];
+
+  /// Creates a [VtcTrailDetail] of several [items], listed one a line.
+  const VtcTrailDetail.list(this.icon, this.label, this.items)
+    : value = '',
+      isId = false;
 
   final IconData icon;
   final String label;
   final String value;
+
+  /// The fact's items, when it has several.
+  final List<String> items;
 
   /// Whether [value] is an identifier, such as a DID, a DID URL or a
   /// document id, shown in monospace.
@@ -205,6 +214,7 @@ class VtcTrailStep extends HookWidget {
                             label: detail.label,
                             value: detail.value,
                             isId: detail.isId,
+                            items: detail.items,
                           ),
                         ),
                   ],
