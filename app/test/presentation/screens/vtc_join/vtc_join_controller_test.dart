@@ -1129,6 +1129,88 @@ void main() {
       expect(state().failure, VtcJoinFailure.vtaMissing);
     });
   });
+
+  group('VtcJoinController role', () {
+    /// The role the VTA's role card grants, or null while it holds none.
+    String? heldRole;
+
+    setUp(() async {
+      heldRole = 'member';
+      network.vta
+        ..answerTo[VtaTask.credentialsQuery] = ((payload) => {
+          'credentials': [
+            if (payload['type'] == 'AuthorityCredential' && heldRole != null)
+              {
+                'id': 'role-1',
+                'types': ['VerifiableCredential', 'AuthorityCredential'],
+              },
+          ],
+        })
+        ..answerTo[VtaTask.credentialsGet] = ((_) => {
+          'credential': {
+            'type': ['VerifiableCredential', 'AuthorityCredential'],
+            'issuer': fakeVtcDid,
+            'credentialSubject': {
+              'id': persona.did,
+              'authority': {
+                'scope': fakeVtcDid,
+                'actions': ['role:$heldRole'],
+              },
+            },
+          },
+        })
+        // Keeping a role card makes the VTA hold its role.
+        ..answerTo[VtaTask.credentialsReceive] = (payload) {
+          final card = payload['credential'] as Map<String, dynamic>;
+          heldRole =
+              CommunityImport.roleOf(card, fakeVtcDid, persona.did) ?? heldRole;
+          return {'status': 'valid'};
+        };
+      await service.join(await service.readCommunity(fakeVtcDid));
+    });
+
+    /// Waits until the screen shows [role].
+    Future<void> shows(String role) async {
+      for (var i = 0; i < 50 && state().role != role; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+      expect(state().role, role);
+    }
+
+    test('shows the role the VTA holds', () async {
+      await controller().onScanned(fakeVtcDid);
+
+      await shows('member');
+    });
+
+    test('shows a role the community changed since', () async {
+      network.renewedRole = 'admin';
+
+      await controller().onScanned(fakeVtcDid);
+
+      await shows('admin');
+    });
+
+    test('shows a role changed while the screen is open', () async {
+      await controller().onScanned(fakeVtcDid);
+      await shows('member');
+
+      network.renewedRole = 'admin';
+      await controller().refreshRole();
+
+      await shows('admin');
+    });
+
+    test('keeps the role shown when the community cannot be reached', () async {
+      await controller().onScanned(fakeVtcDid);
+      await shows('member');
+
+      network.renewRefusal = (503, 'unavailable');
+      await controller().refreshRole();
+
+      expect(state().role, 'member');
+    });
+  });
 }
 
 /// The member's identity [name], a persona of their VTA whose DID is [did].

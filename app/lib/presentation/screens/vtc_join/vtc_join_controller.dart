@@ -61,7 +61,12 @@ class VtcJoinController extends _$VtcJoinController {
 
   @override
   VtcJoinState build() {
+    // A role card kept on the VTA, e.g. after a promotion, is read again.
+    final membershipChanges = _service.membershipsChanged.listen(
+      (_) => unawaited(readRole()),
+    );
     ref.onDispose(() {
+      unawaited(membershipChanges.cancel());
       _pendingCheck?.cancel();
       // Forget the identity's keys the VTA lent for collecting the card.
       if (_manifest case final manifest?) {
@@ -91,6 +96,7 @@ class VtcJoinController extends _$VtcJoinController {
         unawaited(readMembershipCard());
         unawaited(readIdentityCheck());
         unawaited(readRole());
+        unawaited(refreshRole());
       }
     });
     return VtcJoinState();
@@ -527,13 +533,10 @@ class VtcJoinController extends _$VtcJoinController {
 
   /// Reads the member's role in the community for the community page from
   /// their VTA, which the community delivers its role card to. Only reads,
-  /// and quietly: a read that finds no role waits for the next.
+  /// and quietly: a read that finds no role keeps the one shown.
   Future<void> readRole() async {
     final manifest = _manifest;
-    if (state.step != VtcJoinStep.joined ||
-        manifest == null ||
-        state.role != null ||
-        _readingRole) {
+    if (state.step != VtcJoinStep.joined || manifest == null || _readingRole) {
       return;
     }
     _readingRole = true;
@@ -550,6 +553,23 @@ class VtcJoinController extends _$VtcJoinController {
       // Nothing to read from; the membership stands all the same.
     } finally {
       _readingRole = false;
+    }
+  }
+
+  /// Asks the community for the member's current role, which may have
+  /// changed since their VTA last heard, e.g. after an administrator
+  /// promoted them. A changed role is kept on the VTA, and [readRole] reads
+  /// it from there. Quietly: a community that cannot be reached leaves the
+  /// role shown as it was.
+  Future<void> refreshRole() async {
+    final manifest = _manifest;
+    if (state.step != VtcJoinStep.joined || manifest == null) return;
+    try {
+      await _service.refreshMembership(manifest.communityDid);
+    } on MeetingPlaceVtcSDKException {
+      // The role shown stands until the next refresh.
+    } on VtaNotLinkedException {
+      // Nothing to refresh with; the membership stands all the same.
     }
   }
 
