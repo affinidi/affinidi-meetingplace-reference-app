@@ -55,7 +55,8 @@ void main() {
     ProviderContainer container,
     bool Function(VtaLinkState state) test,
   ) async {
-    final deadline = DateTime.now().add(const Duration(seconds: 3));
+    // Generous: other test files load the machine while this one polls.
+    final deadline = DateTime.now().add(const Duration(seconds: 10));
     while (!test(container.read(vtaLinkServiceProvider))) {
       if (DateTime.now().isAfter(deadline)) fail('state never matched');
       await Future<void>.delayed(const Duration(milliseconds: 10));
