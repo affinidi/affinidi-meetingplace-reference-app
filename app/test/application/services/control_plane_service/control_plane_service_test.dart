@@ -129,6 +129,62 @@ void main() {
       expect(emittedActivityCount, 0);
     });
 
+    group('without a push token', () {
+      _FakePushNotificationsHandler handler() =>
+          container.read(pushNotificationsHandlerProvider.notifier)
+              as _FakePushNotificationsHandler;
+
+      Future<void> settle() => Future<void>.delayed(Duration.zero);
+
+      test('registers for DIDComm notifications instead', () async {
+        handler().failures.add(null);
+        await settle();
+        await settle();
+
+        expect(fakeCoreSdk.didcommRegistrations, 1);
+        expect(
+          container.read(controlPlaneServiceProvider).isDeviceTokenRegistered,
+          isTrue,
+        );
+      });
+
+      test('registers for DIDComm notifications once', () async {
+        handler().failures
+          ..add(null)
+          ..add(null);
+        await settle();
+        await settle();
+
+        expect(fakeCoreSdk.didcommRegistrations, 1);
+      });
+
+      test('keeps a device registered for push', () async {
+        handler().tokens.add('push-token');
+        await settle();
+        await settle();
+
+        handler().failures.add(null);
+        await settle();
+        await settle();
+
+        expect(fakeCoreSdk.tokenRegistrationsAttempts, 1);
+        expect(fakeCoreSdk.didcommRegistrations, 0);
+      });
+
+      test('says so when DIDComm registration fails too', () async {
+        fakeCoreSdk.failDidcommRegistration = true;
+
+        handler().failures.add(null);
+        await settle();
+        await settle();
+
+        expect(
+          container.read(controlPlaneServiceProvider).isDeviceTokenRegistered,
+          isFalse,
+        );
+      });
+    });
+
     test('emits channel activity after inauguration', () async {
       final nextActivity = controlPlaneService.onChannelActivity.first;
 
@@ -162,6 +218,18 @@ Channel _channelWithStatus(ChannelStatus status) {
 }
 
 class _FakePushNotificationsHandler extends PushNotificationsHandler {
+  /// Reports, as the real handler does, that no push token can be had.
+  final failures = StreamController<void>.broadcast();
+
+  @override
+  Stream<void> get onFailedToGetDeviceToken => failures.stream;
+
+  /// Hands out push tokens, as the real handler does.
+  final tokens = StreamController<String>.broadcast();
+
+  @override
+  Stream<String> get onReceivedDeviceToken => tokens.stream;
+
   @override
   Future<void> build() async {}
 

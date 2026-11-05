@@ -113,6 +113,7 @@ class PushNotificationsHandler extends _$PushNotificationsHandler {
             'No device token received during initialization',
             name: _logKey,
           );
+          _failedToGetDeviceTokenController.add(null);
           return;
         }
 
@@ -184,7 +185,11 @@ class PushNotificationsHandler extends _$PushNotificationsHandler {
     if (kIsWeb) return;
     if (!Platform.isIOS && !Platform.isMacOS) return;
 
-    final maxAttempts = 10;
+    // About 7.5 seconds in all. A device that has APNs answers well within
+    // it, and one that has none, such as an iOS simulator, falls back to
+    // DIDComm notifications sooner; a token that comes later still arrives
+    // through onTokenRefresh.
+    final maxAttempts = 5;
     var attempt = 0;
     var delayMs = 500;
 

@@ -72,6 +72,10 @@ class ControlPlaneService extends _$ControlPlaneService
 
   String? _lastAttemptedDeviceToken;
   String? _lastRegisteredDeviceToken;
+
+  /// Whether the device is registered for DIDComm notifications, for want of
+  /// a push token.
+  bool _isDidcommRegistered = false;
   late final _registerDeviceTokenLock = Lock();
 
   @override
@@ -93,11 +97,7 @@ class ControlPlaneService extends _$ControlPlaneService
         .read(pushNotificationsHandlerProvider.notifier)
         .onFailedToGetDeviceToken
         .listen((_) {
-          Future(() {
-            if (state.isDeviceTokenRegistered == null) {
-              state = state.copyWith(isDeviceTokenRegistered: false);
-            }
-          });
+          Future(_registerForDidcommNotifications);
         });
 
     ref.listen(
@@ -195,6 +195,37 @@ class ControlPlaneService extends _$ControlPlaneService
         );
       }
       await _processEvents();
+    });
+  }
+
+  /// Registers this device for notifications through the mediator, when no
+  /// push token can be had, as on an iOS simulator without APNs. The control
+  /// plane needs a registered device to publish an offer. A push token that
+  /// arrives later registers the device for push instead.
+  Future<void> _registerForDidcommNotifications() async {
+    await _registerDeviceTokenLock.synchronized(() async {
+      if (_lastRegisteredDeviceToken != null || _isDidcommRegistered) return;
+
+      try {
+        final sdk = await ref.read(meetingPlaceSdkProvider.future);
+        _logger.info(
+          'No push token: registering for DIDComm notifications',
+          name: _logKey,
+        );
+        await sdk.registerForDIDCommNotifications();
+        _isDidcommRegistered = true;
+        state = state.copyWith(isDeviceTokenRegistered: true);
+      } catch (error, stackTrace) {
+        if (state.isDeviceTokenRegistered == null) {
+          state = state.copyWith(isDeviceTokenRegistered: false);
+        }
+        _logger.error(
+          'Failed to register for DIDComm notifications',
+          error: error,
+          stackTrace: stackTrace,
+          name: _logKey,
+        );
+      }
     });
   }
 

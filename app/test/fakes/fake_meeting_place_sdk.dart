@@ -97,6 +97,25 @@ class FakeMeetingPlaceSDK implements MeetingPlaceMatrixSDK {
     );
   }
 
+  /// How often the device was registered for DIDComm notifications.
+  int didcommRegistrations = 0;
+
+  /// Fails a registration for DIDComm notifications, when true.
+  bool failDidcommRegistration = false;
+
+  @override
+  Future<RegisterForDidcommNotificationsResult>
+  registerForDIDCommNotifications([
+    RegisterForDidcommNotificationsRequest request =
+        const RegisterForDidcommNotificationsRequest(),
+  ]) async {
+    if (failDidcommRegistration) {
+      throw Exception('Failed to register for DIDComm notifications');
+    }
+    didcommRegistrations += 1;
+    return _DidcommRegistration();
+  }
+
   final List<Map<String, dynamic>> _publishOfferCalls = [];
   List<Map<String, dynamic>> get publishOfferCalls => _publishOfferCalls;
 
@@ -681,4 +700,9 @@ class _FakeIncomingMessageHandle implements IncomingMessageHandle {
     await _streamController.close();
     onDispose();
   }
+}
+
+class _DidcommRegistration implements RegisterForDidcommNotificationsResult {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
 }

@@ -106,7 +106,10 @@ void main() {
       });
 
       group('and it fails to retrieve a push notification token', () {
-        testWidgets('it shows a network error banner', (tester) async {
+        testWidgets('it registers for DIDComm notifications instead', (
+          tester,
+        ) async {
+          final sdk = FakeMeetingPlaceSDK();
           await navigateToLocation(
             tester,
             location,
@@ -114,12 +117,35 @@ void main() {
               attemptsToFailGettingToken: 1,
             ),
             connectivity: fakeConnectivity,
+            meetingPlaceCoreSDK: sdk,
           );
           await tester.pumpAndSettle();
 
           final l10n = await getL10n();
-          expect(find.text(l10n.networkDisconnected), findsOneWidget);
+          expect(sdk.didcommRegistrations, 1);
+          expect(find.text(l10n.networkDisconnected), findsNothing);
         });
+
+        testWidgets(
+          'it shows a network error banner when DIDComm registration fails '
+          'too',
+          (tester) async {
+            await navigateToLocation(
+              tester,
+              location,
+              pushNotificationMessaging: FakePushNotificationMessaging(
+                attemptsToFailGettingToken: 1,
+              ),
+              connectivity: fakeConnectivity,
+              meetingPlaceCoreSDK: FakeMeetingPlaceSDK()
+                ..failDidcommRegistration = true,
+            );
+            await tester.pumpAndSettle();
+
+            final l10n = await getL10n();
+            expect(find.text(l10n.networkDisconnected), findsOneWidget);
+          },
+        );
       });
 
       group('and it finds a device token', () {
