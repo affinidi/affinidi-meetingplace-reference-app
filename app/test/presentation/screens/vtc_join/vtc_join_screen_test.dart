@@ -84,7 +84,7 @@ void main() {
     await service.checkGrant();
   });
 
-  Future<void> pumpScreen(WidgetTester tester) async {
+  Future<void> pumpScreen(WidgetTester tester, {String? communityDid}) async {
     await tester.binding.setSurfaceSize(const Size(400, 900));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
@@ -100,7 +100,7 @@ void main() {
           theme: AppTheme.dark,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: const VtcJoinScreen(),
+          home: VtcJoinScreen(communityDid: communityDid),
         ),
       ),
     );
@@ -157,6 +157,15 @@ void main() {
   }
 
   group('VtcJoinScreen', () {
+    testWidgets('opens a given community without a code', (tester) async {
+      await pumpScreen(tester, communityDid: fakeVtcDid);
+      await settle(tester);
+
+      expect(find.byKey(const Key('vtc_join_did')), findsNothing);
+      expect(title('Football club'), findsOneWidget);
+      expect(find.text('wants you to join'), findsOneWidget);
+    });
+
     testWidgets('reviews, joins and leaves a community', (tester) async {
       await pumpScreen(tester);
       expect(find.text('Become a member of a community'), findsOneWidget);
