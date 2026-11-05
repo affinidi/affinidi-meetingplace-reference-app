@@ -6,8 +6,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
-import '../../../application/services/identities_service/identities_service.dart';
-import '../../../domain/models/vtc/vtc_card_delivery.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/services/camera_service/camera_service.dart';
 import '../../../l10n/app_localizations.dart';
@@ -15,16 +13,13 @@ import '../../dialogs/qr_code_picker/qr_code_picker.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import '../../widgets/swipeable_cards.dart';
 import '../../widgets/vta_identity_card.dart';
-import 'vtc_card_delivery_trail.dart';
 import 'vtc_claim_type_label.dart';
-import 'vtc_flow_diagram.dart';
-import 'vtc_identity_check_view.dart';
+import 'vtc_community_page.dart';
+import 'vtc_community_profile.dart';
 import 'vtc_join_controller.dart';
 import 'vtc_join_json_dialog.dart';
-import 'vtc_join_phrase_view.dart';
 import 'vtc_join_state.dart';
 import 'vtc_join_trail.dart';
-import 'vtc_membership_card_view.dart';
 
 /// Joins a community: scan its code or enter its DID, read what it asks,
 /// apply as an identity from the member's VTA. In the look of linking the
@@ -87,7 +82,7 @@ class VtcJoinScreen extends HookConsumerWidget {
           onShare: controller.approveCredential,
           onCancel: close,
         ),
-        VtcJoinStep.joined => _Joined(
+        VtcJoinStep.joined => VtcCommunityPage(
           state: state,
           onDone: close,
           leave: OnboardingButton(
@@ -299,7 +294,7 @@ class _Review extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: 12,
       children: [
-        if (state.logoUrl case final logoUrl?) _Logo(logoUrl),
+        if (state.logoUrl case final logoUrl?) VtcCommunityLogo(logoUrl),
         OnboardingTitle(
           hasName ? name : l10n.vtcJoinUnnamedCommunity,
           trailing: state.manifest.isEmpty
@@ -313,7 +308,7 @@ class _Review extends StatelessWidget {
         ),
         OnboardingSubtitle(l10n.vtcJoinWantsYou),
         Center(child: _Pill(l10n.vtcJoinWithVtaIdentity)),
-        _Profile(state: state),
+        VtcCommunityProfile(state: state),
         if (state.denialReason case final reason?)
           OnboardingMessage(l10n.vtcJoinLastDenied(reason), isError: true),
         if (!state.canApply)
@@ -355,93 +350,6 @@ class _Review extends StatelessWidget {
           ],
         ),
       ],
-    );
-  }
-}
-
-/// Who the community is: its description, website, contact and DID, which
-/// can be copied.
-class _Profile extends HookWidget {
-  const _Profile({required this.state});
-
-  final VtcJoinState state;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final did = state.communityDid ?? '';
-    final copied = useState(false);
-
-    Future<void> copyDid() async {
-      await Clipboard.setData(ClipboardData(text: did));
-      copied.value = true;
-    }
-
-    return GlassCard(
-      title: l10n.vtcJoinProfileHeading,
-      child: SelectionArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: 12,
-          children: [
-            if (state.description case final description?)
-              Text(
-                description,
-                style: context.textTheme.bodyMedium?.copyWith(
-                  color: Colors.white,
-                ),
-              ),
-            if (state.website case final website?)
-              OnboardingLine(
-                icon: Icons.language,
-                title: l10n.vtcJoinWebsite,
-                subtitle: website.toString(),
-              ),
-            if (state.contactEmail case final email?)
-              OnboardingLine(
-                icon: Icons.mail_outline,
-                title: l10n.vtcJoinContact,
-                subtitle: email,
-              ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 12,
-              children: [
-                const Icon(Icons.fingerprint, size: 20, color: Colors.white),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: 2,
-                    children: [
-                      Text(
-                        l10n.vtcJoinDidHint,
-                        style: context.textTheme.bodyMedium?.copyWith(
-                          color: Colors.white,
-                        ),
-                      ),
-                      MonospaceDid(
-                        did,
-                        textKey: const Key('vtc_join_community_did'),
-                      ),
-                      if (copied.value)
-                        Text(
-                          l10n.copiedToClipboard,
-                          style: onboardingNote(context),
-                        ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.copy, size: 18, color: Colors.white),
-                  tooltip: l10n.linkedVtaCopyDid,
-                  visualDensity: VisualDensity.compact,
-                  onPressed: copyDid,
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
@@ -928,29 +836,6 @@ String _titleOf(AppLocalizations l10n, VtcJoinWay way) => switch (way) {
   _ => l10n.vtcJoinWayReviewed,
 };
 
-/// The community's logo above the title; nothing while it cannot load.
-class _Logo extends StatelessWidget {
-  const _Logo(this.url);
-
-  final Uri url;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Image.network(
-          url.toString(),
-          key: const Key('vtc_join_logo'),
-          height: 64,
-          fit: BoxFit.contain,
-          errorBuilder: (_, _, _) => const SizedBox.shrink(),
-        ),
-      ),
-    );
-  }
-}
-
 /// Which identity on the member's VTA joins, in a deck to swipe through as
 /// MPX picks an identity: a new one first, which no other community can link
 /// to, then those the VTA already holds.
@@ -1154,7 +1039,7 @@ class _Pending extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: 12,
       children: [
-        if (state.logoUrl case final logoUrl?) _Logo(logoUrl),
+        if (state.logoUrl case final logoUrl?) VtcCommunityLogo(logoUrl),
         OnboardingTitle(name),
         OnboardingSubtitle(l10n.vtcJoinPending(name)),
         GlassCard(
@@ -1182,168 +1067,6 @@ class _Pending extends StatelessWidget {
           label: l10n.vtcJoinWithdrawAction,
           onPressed: onWithdraw,
         ),
-      ],
-    );
-  }
-}
-
-/// The member is a member: the community's message, the membership card it
-/// issued — or that it is on its way to the member's VTA — then Done and
-/// [leave].
-class _Joined extends StatelessWidget {
-  const _Joined({
-    required this.state,
-    required this.onDone,
-    required this.leave,
-  });
-
-  final VtcJoinState state;
-  final VoidCallback onDone;
-  final Widget leave;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final name = state.communityName ?? '';
-    final card = state.membershipCard;
-    final delivery = state.cardDelivery;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 12,
-      children: [
-        const Icon(Icons.verified, size: 72, color: Colors.white),
-        const SizedBox(height: 4),
-        Text(
-          state.wasMember
-              ? l10n.vtcJoinAlreadyMember(name)
-              : l10n.vtcJoinJoined(name),
-          textAlign: TextAlign.center,
-          style: context.textTheme.titleMedium?.copyWith(color: Colors.white),
-        ),
-        const SizedBox(height: 4),
-        if (card != null) ...[
-          VtcMembershipCardView(
-            card: card,
-            communityName: name,
-            logoUrl: state.logoUrl,
-          ),
-          _CardRoute(communityName: name, memberDid: card.memberDid),
-          if (delivery != null)
-            _CardArrival(delivery: delivery, communityName: name),
-        ] else if (delivery != null)
-          VtcCardDeliveryTrail(delivery: delivery, communityName: name)
-        else
-          Row(
-            key: const Key('vtc_membership_card_pending'),
-            mainAxisAlignment: MainAxisAlignment.center,
-            spacing: 8,
-            children: [
-              const Icon(Icons.hourglass_top, size: 16, color: Colors.white70),
-              Flexible(
-                child: Text(
-                  l10n.vtcMembershipCardOnItsWay,
-                  style: onboardingNote(context),
-                ),
-              ),
-            ],
-          ),
-        if (state.identityCheck case final check?)
-          VtcIdentityCheckView(check: check, communityName: name),
-        if (state.communityDid case final communityDid?)
-          VtcJoinPhraseView(communityDid: communityDid, communityName: name),
-        const SizedBox(height: 12),
-        OnboardingButton(label: l10n.generalDone, onPressed: onDone),
-        leave,
-      ],
-    );
-  }
-}
-
-/// Where the card on show came from, as the Credentials tab draws it: the
-/// community issued it to the identity, which passed it on to the VTA.
-class _CardRoute extends ConsumerWidget {
-  const _CardRoute({required this.communityName, required this.memberDid});
-
-  final String communityName;
-
-  /// The DID of the identity the card is for.
-  final String memberDid;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = context.l10n;
-    final name = ref
-        .watch(identitiesServiceProvider)
-        .identities
-        .where((identity) => identity.did == memberDid)
-        .firstOrNull
-        ?.card
-        .displayName
-        .trim();
-    final identity = name == null || name.isEmpty
-        ? l10n.vtcJoinTrailIdentity
-        : name;
-    return VtcFlowBox(
-      key: const Key('vtc_join_card_route'),
-      flow: VtcFlowDiagram(
-        nodes: [
-          VtcFlowNode(Icons.groups_outlined, l10n.membershipFlowCommunity),
-          VtcFlowNode(Icons.person_outline, identity),
-          VtcFlowNode(Icons.shield_outlined, l10n.membershipTrailYourVta),
-        ],
-      ),
-      summary: Text(
-        l10n.vtcJoinCardRoute(communityName, identity),
-        style: onboardingNote(context),
-      ),
-    );
-  }
-}
-
-/// How the card on show came to the VTA, folded away behind a toggle.
-class _CardArrival extends HookWidget {
-  const _CardArrival({required this.delivery, required this.communityName});
-
-  final VtcCardDelivery delivery;
-  final String communityName;
-
-  @override
-  Widget build(BuildContext context) {
-    final expanded = useState(false);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 8,
-      children: [
-        InkWell(
-          key: const Key('vtc_delivery_toggle'),
-          onTap: () => expanded.value = !expanded.value,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Row(
-              spacing: 8,
-              children: [
-                const Icon(Icons.route_outlined, color: Colors.white),
-                Expanded(
-                  child: Text(
-                    context.l10n.vtcDeliveryHeading,
-                    style: context.textTheme.bodyMedium?.copyWith(
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                Icon(
-                  expanded.value ? Icons.expand_less : Icons.expand_more,
-                  color: Colors.white,
-                ),
-              ],
-            ),
-          ),
-        ),
-        if (expanded.value)
-          VtcCardDeliveryTrail(
-            delivery: delivery,
-            communityName: communityName,
-          ),
       ],
     );
   }
