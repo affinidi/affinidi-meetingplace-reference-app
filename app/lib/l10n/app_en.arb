@@ -1667,6 +1667,81 @@
 	"@noCredentialsYet": {
 		"type": "text"
 	},
+	"membershipsTab": "Memberships",
+	"@membershipsTab": {
+		"description": "Credentials tab listing the member's community membership cards"
+	},
+	"membershipCredentialsVtaMissing": "Link your VTA to see your membership cards.",
+	"@membershipCredentialsVtaMissing": {
+		"description": "Shown instead of membership cards when no VTA is linked"
+	},
+	"membershipCredentialsUnreachable": "Your VTA couldn't be reached, so your membership cards can't be shown.",
+	"@membershipCredentialsUnreachable": {
+		"description": "Shown instead of membership cards when the VTA cannot be reached"
+	},
+	"membershipCredentialsNone": "No membership cards yet. Join a community to get one.",
+	"@membershipCredentialsNone": {
+		"description": "Shown when the member holds no membership card"
+	},
+	"membershipCredentialUnnamed": "A community",
+	"@membershipCredentialUnnamed": {
+		"description": "Stands for a community whose name is not known"
+	},
+	"membershipCredentialOtherIdentity": "an identity not on this phone",
+	"@membershipCredentialOtherIdentity": {
+		"description": "Stands for an identity of the member that this phone does not hold"
+	},
+	"membershipCredentialAs": "as {identity}",
+	"@membershipCredentialAs": {
+		"description": "Which identity of the member a membership card is for",
+		"placeholders": {
+			"identity": {
+				"type": "String"
+			}
+		}
+	},
+	"membershipCredentialUntil": "until {date}",
+	"@membershipCredentialUntil": {
+		"description": "When a membership card stops holding",
+		"placeholders": {
+			"date": {
+				"type": "String"
+			}
+		}
+	},
+	"membershipCredentialLeft": "left {date}",
+	"@membershipCredentialLeft": {
+		"description": "When the member left the community of a membership card",
+		"placeholders": {
+			"date": {
+				"type": "String"
+			}
+		}
+	},
+	"membershipStatusChecking": "Checking…",
+	"@membershipStatusChecking": {
+		"description": "Status chip while the phone asks the community about a card"
+	},
+	"membershipStatusValid": "Valid",
+	"@membershipStatusValid": {
+		"description": "Status chip: the community still holds the card"
+	},
+	"membershipStatusRevoked": "Revoked",
+	"@membershipStatusRevoked": {
+		"description": "Status chip: the community revoked the card"
+	},
+	"membershipStatusExpired": "Expired",
+	"@membershipStatusExpired": {
+		"description": "Status chip: the card's validity ended"
+	},
+	"membershipStatusNotRevocable": "Can't be revoked",
+	"@membershipStatusNotRevocable": {
+		"description": "Status chip: the community gave the card no status list"
+	},
+	"membershipStatusUnknown": "Couldn't check",
+	"@membershipStatusUnknown": {
+		"description": "Status chip: the community's status list could not be read"
+	},
 	"all": "All",
 	"@all": {
 		"type": "text"

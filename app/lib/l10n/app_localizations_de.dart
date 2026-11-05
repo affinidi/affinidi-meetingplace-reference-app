@@ -1839,6 +1839,61 @@ class AppLocalizationsDe extends AppLocalizations {
   String get noCredentialsYet => 'Sie haben noch keine Anmeldeinformationen.';
 
   @override
+  String get membershipsTab => 'Memberships';
+
+  @override
+  String get membershipCredentialsVtaMissing =>
+      'Link your VTA to see your membership cards.';
+
+  @override
+  String get membershipCredentialsUnreachable =>
+      'Your VTA couldn\'t be reached, so your membership cards can\'t be shown.';
+
+  @override
+  String get membershipCredentialsNone =>
+      'No membership cards yet. Join a community to get one.';
+
+  @override
+  String get membershipCredentialUnnamed => 'A community';
+
+  @override
+  String get membershipCredentialOtherIdentity =>
+      'an identity not on this phone';
+
+  @override
+  String membershipCredentialAs(String identity) {
+    return 'as $identity';
+  }
+
+  @override
+  String membershipCredentialUntil(String date) {
+    return 'until $date';
+  }
+
+  @override
+  String membershipCredentialLeft(String date) {
+    return 'left $date';
+  }
+
+  @override
+  String get membershipStatusChecking => 'Checking…';
+
+  @override
+  String get membershipStatusValid => 'Valid';
+
+  @override
+  String get membershipStatusRevoked => 'Revoked';
+
+  @override
+  String get membershipStatusExpired => 'Expired';
+
+  @override
+  String get membershipStatusNotRevocable => 'Can\'t be revoked';
+
+  @override
+  String get membershipStatusUnknown => 'Couldn\'t check';
+
+  @override
   String get all => 'Alle';
 
   @override

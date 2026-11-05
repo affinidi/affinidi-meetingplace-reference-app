@@ -12,8 +12,13 @@ import '../../widgets/cards/credential_card.dart';
 import '../../widgets/section_banner.dart';
 import '../../widgets/tab_bar_tab.dart';
 import 'credential_details_screen.dart';
+import 'membership_credentials_controller.dart';
+import 'membership_credentials_list.dart';
 
-class CredentialsScreen extends ConsumerWidget {
+/// The member's credentials: their liveness credentials and their
+/// community membership cards, under All, and the cards alone under
+/// Memberships.
+class CredentialsScreen extends HookConsumerWidget {
   const CredentialsScreen({super.key});
 
   @override
@@ -22,6 +27,14 @@ class CredentialsScreen extends ConsumerWidget {
     final credentials = ref.watch(
       credentialServiceProvider.select((state) => state.credentials),
     );
+    final memberships = ref.watch(membershipCredentialsControllerProvider);
+    final tabController = useTabController(initialLength: 2);
+    final tab = useListenableSelector(tabController, () => tabController.index);
+    final hasNone =
+        credentials.isEmpty &&
+        !memberships.isLoading &&
+        memberships.failure == null &&
+        memberships.entries.isEmpty;
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -32,9 +45,25 @@ class CredentialsScreen extends ConsumerWidget {
               title: l10n.tabsTitle(Tabs.credentials.name),
               subtitle: l10n.verifiableCredentialWallet,
             ),
-            credentials.isEmpty
-                ? const _EmptyStateWidget()
-                : _CredentialsListWidget(credentials: credentials),
+            TabBar(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              isScrollable: true,
+              enableFeedback: true,
+              labelPadding: const EdgeInsets.symmetric(horizontal: 10),
+              tabAlignment: TabAlignment.start,
+              controller: tabController,
+              tabs: [
+                TabBarTab(label: l10n.all),
+                TabBarTab(label: l10n.membershipsTab),
+              ],
+            ),
+            if (tab == 0 && hasNone)
+              const _EmptyStateWidget()
+            else ...[
+              if (tab == 0 && credentials.isNotEmpty)
+                _CredentialsListWidget(credentials: credentials),
+              const MembershipCredentialsList(),
+            ],
           ],
         ),
       ),
@@ -64,52 +93,37 @@ class _EmptyStateWidget extends StatelessWidget {
   }
 }
 
-class _CredentialsListWidget extends HookConsumerWidget {
+class _CredentialsListWidget extends StatelessWidget {
   const _CredentialsListWidget({required this.credentials});
 
   final List<LivenessCredentialRecord> credentials;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final tabController = useTabController(initialLength: 1);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        TabBar(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          isScrollable: true,
-          enableFeedback: true,
-          labelPadding: const EdgeInsets.symmetric(horizontal: 10),
-          tabAlignment: TabAlignment.start,
-          controller: tabController,
-          tabs: [TabBarTab(label: l10n.all)],
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-          child: AnimatedStackedCardDeck<LivenessCredentialRecord>(
-            items: credentials,
-            cardHeight: 208.0,
-            overlapOffset: 60.0,
-            cardBuilder: (context, credential, index, fadeAnimation) {
-              return CredentialCard(
-                topLeftText: l10n.livenessCredential,
-                bottomLeftText: l10n.verifiableCredential,
-                onTap: () {
-                  Navigator.of(context).push<void>(
-                    MaterialPageRoute<void>(
-                      builder: (context) => CredentialDetailsScreen(
-                        identityId: credential.identityId,
-                      ),
-                    ),
-                  );
-                },
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      child: AnimatedStackedCardDeck<LivenessCredentialRecord>(
+        items: credentials,
+        cardHeight: 208.0,
+        overlapOffset: 60.0,
+        cardBuilder: (context, credential, index, fadeAnimation) {
+          return CredentialCard(
+            topLeftText: l10n.livenessCredential,
+            bottomLeftText: l10n.verifiableCredential,
+            onTap: () {
+              Navigator.of(context).push<void>(
+                MaterialPageRoute<void>(
+                  builder: (context) => CredentialDetailsScreen(
+                    identityId: credential.identityId,
+                  ),
+                ),
               );
             },
-          ),
-        ),
-      ],
+          );
+        },
+      ),
     );
   }
 }

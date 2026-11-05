@@ -2728,6 +2728,96 @@ abstract class AppLocalizations {
   /// **'You don\'t have any credentials yet.'**
   String get noCredentialsYet;
 
+  /// Credentials tab listing the member's community membership cards
+  ///
+  /// In en, this message translates to:
+  /// **'Memberships'**
+  String get membershipsTab;
+
+  /// Shown instead of membership cards when no VTA is linked
+  ///
+  /// In en, this message translates to:
+  /// **'Link your VTA to see your membership cards.'**
+  String get membershipCredentialsVtaMissing;
+
+  /// Shown instead of membership cards when the VTA cannot be reached
+  ///
+  /// In en, this message translates to:
+  /// **'Your VTA couldn\'t be reached, so your membership cards can\'t be shown.'**
+  String get membershipCredentialsUnreachable;
+
+  /// Shown when the member holds no membership card
+  ///
+  /// In en, this message translates to:
+  /// **'No membership cards yet. Join a community to get one.'**
+  String get membershipCredentialsNone;
+
+  /// Stands for a community whose name is not known
+  ///
+  /// In en, this message translates to:
+  /// **'A community'**
+  String get membershipCredentialUnnamed;
+
+  /// Stands for an identity of the member that this phone does not hold
+  ///
+  /// In en, this message translates to:
+  /// **'an identity not on this phone'**
+  String get membershipCredentialOtherIdentity;
+
+  /// Which identity of the member a membership card is for
+  ///
+  /// In en, this message translates to:
+  /// **'as {identity}'**
+  String membershipCredentialAs(String identity);
+
+  /// When a membership card stops holding
+  ///
+  /// In en, this message translates to:
+  /// **'until {date}'**
+  String membershipCredentialUntil(String date);
+
+  /// When the member left the community of a membership card
+  ///
+  /// In en, this message translates to:
+  /// **'left {date}'**
+  String membershipCredentialLeft(String date);
+
+  /// Status chip while the phone asks the community about a card
+  ///
+  /// In en, this message translates to:
+  /// **'Checking…'**
+  String get membershipStatusChecking;
+
+  /// Status chip: the community still holds the card
+  ///
+  /// In en, this message translates to:
+  /// **'Valid'**
+  String get membershipStatusValid;
+
+  /// Status chip: the community revoked the card
+  ///
+  /// In en, this message translates to:
+  /// **'Revoked'**
+  String get membershipStatusRevoked;
+
+  /// Status chip: the card's validity ended
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get membershipStatusExpired;
+
+  /// Status chip: the community gave the card no status list
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t be revoked'**
+  String get membershipStatusNotRevocable;
+
+  /// Status chip: the community's status list could not be read
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t check'**
+  String get membershipStatusUnknown;
+
   /// No description provided for @all.
   ///
   /// In en, this message translates to:
