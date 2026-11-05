@@ -14,19 +14,18 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.dark,
-        home: Scaffold(
+        home: const Scaffold(
           body: Align(
             alignment: Alignment.topLeft,
             child: VtcFlowDiagram(
               nodes: [
-                const VtcFlowNode(Icons.shield_outlined, 'Your VTA'),
-                const VtcFlowNode(Icons.smartphone, 'This phone'),
-                const VtcFlowNode(
+                VtcFlowNode(Icons.shield_outlined, 'Your VTA'),
+                VtcFlowNode(Icons.smartphone, 'This phone'),
+                VtcFlowNode(
                   Icons.groups_outlined,
                   'The Sunday Morning Five-a-side Football Club',
                 ),
               ],
-              links: ['signs the leave', 'sends it'],
             ),
           ),
         ),
@@ -37,10 +36,6 @@ void main() {
     // Read left to right, and small: a circle and one line under it.
     expect(
       tester.getCenter(find.text('Your VTA')).dx,
-      lessThan(tester.getCenter(find.text('signs the leave')).dx),
-    );
-    expect(
-      tester.getCenter(find.text('signs the leave')).dx,
       lessThan(tester.getCenter(find.text('This phone')).dx),
     );
     expect(

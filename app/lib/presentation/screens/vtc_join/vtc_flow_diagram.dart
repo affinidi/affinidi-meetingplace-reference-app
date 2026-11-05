@@ -12,115 +12,79 @@ class VtcFlowNode {
   final String label;
 }
 
-/// Who passes what to whom in a step, drawn small and left to right: each
-/// of [nodes] as an icon in a circle over its name, and between two of
-/// them an arrow over what passes, [links]`[i]` between `nodes[i]` and
-/// `nodes[i + 1]`.
+/// Who takes part in a step, in the order things pass between them: each
+/// of [nodes] as an icon in a circle over its name, an arrow between each
+/// two, all centred.
 ///
 /// Only pictures the step's summary, which says the same in words, so
 /// screen readers skip it.
 class VtcFlowDiagram extends StatelessWidget {
-  /// Creates a [VtcFlowDiagram]; [links] has one label fewer than [nodes].
-  VtcFlowDiagram({super.key, required this.nodes, required this.links})
-    : assert(links.length == nodes.length - 1);
+  /// Creates a [VtcFlowDiagram].
+  const VtcFlowDiagram({super.key, required this.nodes});
 
   final List<VtcFlowNode> nodes;
-  final List<String> links;
 
   static const _nodeSize = 22.0;
 
-  /// How the width is shared: each party a little more than each arrow,
-  /// so both fit a narrow phone and grow on a wide one.
-  static const _nodeFlex = 4;
-  static const _linkFlex = 3;
-  static const _arrowHeight = 8.0;
-  static const _linkFontSize = 10.0;
+  /// Three parties and two arrows fit the trail on a narrow phone.
+  static const _nodeWidth = 60.0;
+  static const _arrowWidth = 24.0;
+  static const _arrowSize = 10.0;
 
   @override
   Widget build(BuildContext context) {
     final labelStyle = context.textTheme.labelSmall?.copyWith(
       color: Colors.white,
     );
-    final linkStyle = context.textTheme.labelSmall?.copyWith(
-      color: Colors.white70,
-      fontSize: _linkFontSize,
-    );
 
     return ExcludeSemantics(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          for (final (index, node) in nodes.indexed) ...[
-            if (index > 0)
-              Expanded(
-                flex: _linkFlex,
-                // The arrow level with the icons' middles, what passes
-                // under it.
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                    top: (_nodeSize - _arrowHeight) / 2,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    spacing: 2,
-                    children: [
-                      const SizedBox(
-                        height: _arrowHeight,
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Divider(
-                                color: Colors.white54,
-                                height: _arrowHeight,
-                              ),
-                            ),
-                            Icon(
-                              Icons.arrow_forward_ios,
-                              size: _arrowHeight,
-                              color: Colors.white54,
-                            ),
-                          ],
-                        ),
-                      ),
-                      Text(
-                        links[index - 1],
-                        style: linkStyle,
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+      // As tall as the diagram, however much height it is offered.
+      child: Center(
+        heightFactor: 1,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (final (index, node) in nodes.indexed) ...[
+              if (index > 0)
+                const SizedBox(
+                  width: _arrowWidth,
+                  height: _nodeSize,
+                  child: Icon(
+                    Icons.arrow_forward,
+                    size: _arrowSize,
+                    color: Colors.white54,
                   ),
                 ),
-              ),
-            Expanded(
-              flex: _nodeFlex,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                spacing: 2,
-                children: [
-                  Container(
-                    width: _nodeSize,
-                    height: _nodeSize,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withAlpha(25),
-                      border: Border.all(color: Colors.white54),
+              SizedBox(
+                width: _nodeWidth,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 2,
+                  children: [
+                    Container(
+                      width: _nodeSize,
+                      height: _nodeSize,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withAlpha(25),
+                        border: Border.all(color: Colors.white54),
+                      ),
+                      child: Icon(node.icon, size: 12, color: Colors.white),
                     ),
-                    child: Icon(node.icon, size: 12, color: Colors.white),
-                  ),
-                  Text(
-                    node.label,
-                    style: labelStyle,
-                    textAlign: TextAlign.center,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+                    Text(
+                      node.label,
+                      style: labelStyle,
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
-            ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

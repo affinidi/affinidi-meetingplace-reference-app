@@ -3056,41 +3056,11 @@ abstract class AppLocalizations {
   /// **'Types'**
   String get membershipTrailStoredTypes;
 
-  /// Diagram arrow: the community issues the membership card to the identity
+  /// Diagram party: the community, named generally
   ///
   /// In en, this message translates to:
-  /// **'issues the card'**
-  String get membershipFlowIssues;
-
-  /// Diagram arrow: the VTA hands the card it keeps to this phone
-  ///
-  /// In en, this message translates to:
-  /// **'hands over the card'**
-  String get membershipFlowHandsOver;
-
-  /// Diagram arrow: this phone asks the VTA to archive the card
-  ///
-  /// In en, this message translates to:
-  /// **'asks to put it away'**
-  String get membershipFlowPutAway;
-
-  /// Diagram arrow: the VTA signs the leave as the identity
-  ///
-  /// In en, this message translates to:
-  /// **'signs the leave'**
-  String get membershipFlowSignsLeave;
-
-  /// Diagram arrow: this phone sends the signed leave to the community
-  ///
-  /// In en, this message translates to:
-  /// **'sends it'**
-  String get membershipFlowSendsLeave;
-
-  /// Diagram arrow: this phone fetches the community's signed status list
-  ///
-  /// In en, this message translates to:
-  /// **'fetches the signed list'**
-  String get membershipFlowFetchesList;
+  /// **'Community'**
+  String get membershipFlowCommunity;
 
   /// No description provided for @all.
   ///

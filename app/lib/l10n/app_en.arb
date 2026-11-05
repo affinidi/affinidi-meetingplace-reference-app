@@ -2011,29 +2011,9 @@
 	"@membershipTrailStoredTypes": {
 		"description": "Trail detail: the card's credential types, as the VTA records them"
 	},
-	"membershipFlowIssues": "issues the card",
-	"@membershipFlowIssues": {
-		"description": "Diagram arrow: the community issues the membership card to the identity"
-	},
-	"membershipFlowHandsOver": "hands over the card",
-	"@membershipFlowHandsOver": {
-		"description": "Diagram arrow: the VTA hands the card it keeps to this phone"
-	},
-	"membershipFlowPutAway": "asks to put it away",
-	"@membershipFlowPutAway": {
-		"description": "Diagram arrow: this phone asks the VTA to archive the card"
-	},
-	"membershipFlowSignsLeave": "signs the leave",
-	"@membershipFlowSignsLeave": {
-		"description": "Diagram arrow: the VTA signs the leave as the identity"
-	},
-	"membershipFlowSendsLeave": "sends it",
-	"@membershipFlowSendsLeave": {
-		"description": "Diagram arrow: this phone sends the signed leave to the community"
-	},
-	"membershipFlowFetchesList": "fetches the signed list",
-	"@membershipFlowFetchesList": {
-		"description": "Diagram arrow: this phone fetches the community's signed status list"
+	"membershipFlowCommunity": "Community",
+	"@membershipFlowCommunity": {
+		"description": "Diagram party: the community, named generally"
 	},
 	"all": "All",
 	"@all": {

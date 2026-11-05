@@ -128,7 +128,10 @@ class _MembershipTrail extends StatelessWidget {
       Icons.shield_outlined,
       l10n.membershipTrailYourVta,
     );
-    final communityNode = VtcFlowNode(Icons.groups_outlined, community);
+    final communityNode = VtcFlowNode(
+      Icons.groups_outlined,
+      l10n.membershipFlowCommunity,
+    );
     final identityNode = VtcFlowNode(Icons.person_outline, identity);
 
     return Column(
@@ -142,7 +145,6 @@ class _MembershipTrail extends StatelessWidget {
           flow: VtcFlowDiagram(
             key: const Key('membership_flow_issued'),
             nodes: [communityNode, identityNode],
-            links: [l10n.membershipFlowIssues],
           ),
           summary: switch (card.validFrom) {
             final from? => l10n.membershipTrailIssuedSummary(
@@ -195,12 +197,6 @@ class _MembershipTrail extends StatelessWidget {
           flow: VtcFlowDiagram(
             key: const Key('membership_flow_kept'),
             nodes: left == null ? [vtaNode, phoneNode] : [phoneNode, vtaNode],
-            links: [
-              if (left == null)
-                l10n.membershipFlowHandsOver
-              else
-                l10n.membershipFlowPutAway,
-            ],
           ),
           summary: switch ((left, readAt)) {
             (_?, _) => l10n.membershipTrailPutAway,
@@ -250,10 +246,6 @@ class _MembershipTrail extends StatelessWidget {
             flow: VtcFlowDiagram(
               key: const Key('membership_flow_left'),
               nodes: [vtaNode, phoneNode, communityNode],
-              links: [
-                l10n.membershipFlowSignsLeave,
-                l10n.membershipFlowSendsLeave,
-              ],
             ),
             summary: leave == null
                 ? l10n.membershipTrailLeftNoReceipt(community)
@@ -309,7 +301,6 @@ class _MembershipTrail extends StatelessWidget {
           flow: VtcFlowDiagram(
             key: const Key('membership_flow_checked'),
             nodes: [phoneNode, communityNode],
-            links: [l10n.membershipFlowFetchesList],
           ),
           summary: _checkSummary(
             l10n,

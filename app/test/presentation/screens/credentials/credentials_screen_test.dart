@@ -259,28 +259,38 @@ void main() {
       findsOneWidget,
     );
 
-    // Each step pictured: who passes what to whom.
-    expect(flow(tester, 'issued'), ['Chess club', 'issues the card', 'Ada']);
-    expect(flow(tester, 'kept'), [
-      'Your VTA',
-      'hands over the card',
-      'This phone',
-    ]);
-    expect(flow(tester, 'checked'), [
-      'This phone',
-      'fetches the signed list',
-      'Chess club',
-    ]);
-
-    // Small: a circle and one line of name under it.
-    for (final step in ['issued', 'kept', 'checked']) {
-      expect(
-        tester.getSize(find.byKey(Key('membership_flow_$step'))).height,
-        lessThanOrEqualTo(40),
-      );
-    }
+    // Pictured only once a step is opened.
+    expect(find.byKey(const Key('membership_flow_issued')), findsNothing);
+    await expand(tester, 'issued');
+    expect(flow(tester, 'issued'), ['Community', 'Ada']);
+    final issued = find.byKey(const Key('membership_flow_issued'));
+    // Small: a circle and one line of name under it, centred in the step.
+    expect(tester.getSize(issued).height, lessThanOrEqualTo(40));
+    final row = find.descendant(of: issued, matching: find.byType(Row));
+    final trail = find.byKey(const Key('membership_trail_issued'));
+    // The step's column of text, which the diagram spans.
+    final textColumn = tester.getRect(
+      find.ancestor(of: issued, matching: find.byType(Expanded)).first,
+    );
+    expect(
+      tester.getCenter(row.first).dx,
+      moreOrLessEquals(textColumn.center.dx, epsilon: 1),
+    );
+    // Above the details, with room between.
+    expect(
+      tester.getBottomLeft(issued).dy + 12,
+      lessThanOrEqualTo(
+        tester
+            .getTopLeft(
+              find.descendant(of: trail, matching: find.text('Done by')),
+            )
+            .dy,
+      ),
+    );
+    await expand(tester, 'issued');
 
     await expand(tester, 'kept');
+    expect(flow(tester, 'kept'), ['Your VTA', 'This phone']);
     expect(find.text('Done by'), findsOneWidget);
     expect(
       find.descendant(
@@ -308,6 +318,7 @@ void main() {
       lessThan(tester.getTopLeft(find.text('MembershipCredential')).dy),
     );
     await expand(tester, 'checked');
+    expect(flow(tester, 'checked'), ['This phone', 'Community']);
     expect(
       find.descendant(
         of: find.byKey(const Key('membership_trail_checked')),
@@ -356,20 +367,10 @@ void main() {
       findsOneWidget,
     );
 
-    expect(flow(tester, 'kept'), [
-      'This phone',
-      'asks to put it away',
-      'Your VTA',
-    ]);
-    expect(flow(tester, 'left'), [
-      'Your VTA',
-      'signs the leave',
-      'This phone',
-      'sends it',
-      'Football club',
-    ]);
-
+    await expand(tester, 'kept');
+    expect(flow(tester, 'kept'), ['This phone', 'Your VTA']);
     await expand(tester, 'left');
+    expect(flow(tester, 'left'), ['Your VTA', 'This phone', 'Community']);
     expect(find.text('Your VTA, then Football club'), findsOneWidget);
     expect(find.text(MemberTask.selfRemove), findsOneWidget);
 

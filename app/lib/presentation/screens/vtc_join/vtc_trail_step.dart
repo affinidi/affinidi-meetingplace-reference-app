@@ -90,14 +90,17 @@ class VtcTrailStep extends HookWidget {
   /// set apart from the words around them.
   final List<String> highlights;
 
-  /// What the summary says, pictured under it, such as a
-  /// `VtcFlowDiagram`.
+  /// What the summary says, pictured above the [details] once the step is
+  /// opened, such as a `VtcFlowDiagram`.
   final Widget? flow;
 
   static const _markerSize = 32.0;
 
   /// Room above each detail, beyond the column's own spacing.
   static const _detailSpacing = 10.0;
+
+  /// Room between a step's picture and its details, beyond theirs.
+  static const _flowSpacing = 6.0;
   static const _lineWidth = 2.0;
 
   @override
@@ -112,7 +115,7 @@ class VtcTrailStep extends HookWidget {
         ),
       ...this.details,
     ];
-    final canExpand = details.isNotEmpty;
+    final canExpand = details.isNotEmpty || flow != null;
     final document = this.document;
     final foreground = stage == VtcTrailStage.next
         ? Colors.white54
@@ -175,11 +178,6 @@ class VtcTrailStep extends HookWidget {
                                 _summarySpan(),
                                 style: onboardingNote(context),
                               ),
-                              if (flow case final flow?)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 6),
-                                  child: flow,
-                                ),
                             ],
                           ),
                         ),
@@ -215,6 +213,15 @@ class VtcTrailStep extends HookWidget {
                           ),
                       ],
                     ),
+                    if (expanded.value)
+                      if (flow case final flow?)
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            top: _detailSpacing,
+                            bottom: _flowSpacing,
+                          ),
+                          child: flow,
+                        ),
                     if (expanded.value)
                       for (final detail in details)
                         Padding(
