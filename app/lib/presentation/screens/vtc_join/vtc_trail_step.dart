@@ -177,7 +177,7 @@ class VtcTrailStep extends HookWidget {
                               ),
                               if (flow case final flow?)
                                 Padding(
-                                  padding: const EdgeInsets.only(top: 4),
+                                  padding: const EdgeInsets.only(top: 6),
                                   child: flow,
                                 ),
                             ],

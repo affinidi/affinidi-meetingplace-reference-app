@@ -215,23 +215,18 @@ void main() {
   }
 
   /// The diagram of [step], read left to right: its parties and arrows.
-  List<String> flow(String step) {
+  List<String> flow(WidgetTester tester, String step) {
     final texts = find.descendant(
       of: find.byKey(Key('membership_flow_$step')),
       matching: find.byType(Text),
     );
-    // In reading order: line by line, then left to right.
-    final found =
-        [
-          for (final element in texts.evaluate())
-            (
-              (element.renderObject! as RenderBox).localToGlobal(Offset.zero),
-              (element.widget as Text).data!,
-            ),
-        ]..sort((a, b) {
-          final line = a.$1.dy.round().compareTo(b.$1.dy.round());
-          return line != 0 ? line : a.$1.dx.compareTo(b.$1.dx);
-        });
+    final found = [
+      for (final element in texts.evaluate())
+        (
+          tester.getCenter(find.byWidget(element.widget)).dx,
+          (element.widget as Text).data!,
+        ),
+    ]..sort((a, b) => a.$1.compareTo(b.$1));
     return [for (final (_, text) in found) text];
   }
 
@@ -265,19 +260,23 @@ void main() {
     );
 
     // Each step pictured: who passes what to whom.
-    expect(flow('issued'), ['Chess club', 'issues the card →', 'Ada']);
-    expect(flow('kept'), ['Your VTA', 'hands over the card →', 'This phone']);
-    expect(flow('checked'), [
+    expect(flow(tester, 'issued'), ['Chess club', 'issues the card', 'Ada']);
+    expect(flow(tester, 'kept'), [
+      'Your VTA',
+      'hands over the card',
       'This phone',
-      'fetches the signed list →',
+    ]);
+    expect(flow(tester, 'checked'), [
+      'This phone',
+      'fetches the signed list',
       'Chess club',
     ]);
 
-    // Small: each on one line, as tall as its text.
+    // Small: a circle and one line of name under it.
     for (final step in ['issued', 'kept', 'checked']) {
       expect(
         tester.getSize(find.byKey(Key('membership_flow_$step'))).height,
-        lessThan(24),
+        lessThanOrEqualTo(40),
       );
     }
 
@@ -357,12 +356,16 @@ void main() {
       findsOneWidget,
     );
 
-    expect(flow('kept'), ['This phone', 'asks to put it away →', 'Your VTA']);
-    expect(flow('left'), [
-      'Your VTA',
-      'signs the leave →',
+    expect(flow(tester, 'kept'), [
       'This phone',
-      'sends it →',
+      'asks to put it away',
+      'Your VTA',
+    ]);
+    expect(flow(tester, 'left'), [
+      'Your VTA',
+      'signs the leave',
+      'This phone',
+      'sends it',
       'Football club',
     ]);
 

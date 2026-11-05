@@ -12,10 +12,10 @@ class VtcFlowNode {
   final String label;
 }
 
-/// Who passes what to whom in a step, inline and left to right: each of
-/// [nodes] as a small icon beside its name, and between two of them what
-/// passes, [links]`[i]` between `nodes[i]` and `nodes[i + 1]`, with an
-/// arrow. Wraps onto a further line when it does not fit.
+/// Who passes what to whom in a step, drawn small and left to right: each
+/// of [nodes] as an icon in a circle over its name, and between two of
+/// them an arrow over what passes, [links]`[i]` between `nodes[i]` and
+/// `nodes[i + 1]`.
 ///
 /// Only pictures the step's summary, which says the same in words, so
 /// screen readers skip it.
@@ -27,40 +27,97 @@ class VtcFlowDiagram extends StatelessWidget {
   final List<VtcFlowNode> nodes;
   final List<String> links;
 
-  static const _iconSize = 14.0;
+  static const _nodeSize = 22.0;
+
+  /// How the width is shared: each party a little more than each arrow,
+  /// so both fit a narrow phone and grow on a wide one.
+  static const _nodeFlex = 4;
+  static const _linkFlex = 3;
+  static const _arrowHeight = 8.0;
+  static const _linkFontSize = 10.0;
 
   @override
   Widget build(BuildContext context) {
-    final nodeStyle = context.textTheme.labelSmall?.copyWith(
+    final labelStyle = context.textTheme.labelSmall?.copyWith(
       color: Colors.white,
-      fontWeight: FontWeight.bold,
     );
     final linkStyle = context.textTheme.labelSmall?.copyWith(
       color: Colors.white70,
+      fontSize: _linkFontSize,
     );
 
     return ExcludeSemantics(
-      child: Wrap(
-        spacing: 6,
-        runSpacing: 2,
-        crossAxisAlignment: WrapCrossAlignment.center,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           for (final (index, node) in nodes.indexed) ...[
-            if (index > 0) Text('${links[index - 1]} →', style: linkStyle),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              spacing: 3,
-              children: [
-                Icon(node.icon, size: _iconSize, color: Colors.white),
-                Flexible(
-                  child: Text(
+            if (index > 0)
+              Expanded(
+                flex: _linkFlex,
+                // The arrow level with the icons' middles, what passes
+                // under it.
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    top: (_nodeSize - _arrowHeight) / 2,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: 2,
+                    children: [
+                      const SizedBox(
+                        height: _arrowHeight,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Divider(
+                                color: Colors.white54,
+                                height: _arrowHeight,
+                              ),
+                            ),
+                            Icon(
+                              Icons.arrow_forward_ios,
+                              size: _arrowHeight,
+                              color: Colors.white54,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        links[index - 1],
+                        style: linkStyle,
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            Expanded(
+              flex: _nodeFlex,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                spacing: 2,
+                children: [
+                  Container(
+                    width: _nodeSize,
+                    height: _nodeSize,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withAlpha(25),
+                      border: Border.all(color: Colors.white54),
+                    ),
+                    child: Icon(node.icon, size: 12, color: Colors.white),
+                  ),
+                  Text(
                     node.label,
-                    style: nodeStyle,
+                    style: labelStyle,
+                    textAlign: TextAlign.center,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ],

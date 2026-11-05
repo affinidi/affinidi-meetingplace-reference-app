@@ -15,25 +15,37 @@ void main() {
       MaterialApp(
         theme: AppTheme.dark,
         home: Scaffold(
-          body: VtcFlowDiagram(
-            nodes: [
-              const VtcFlowNode(Icons.shield_outlined, 'Your VTA'),
-              const VtcFlowNode(Icons.smartphone, 'This phone'),
-              const VtcFlowNode(
-                Icons.groups_outlined,
-                'The Sunday Morning Five-a-side Football Club',
-              ),
-            ],
-            links: ['signs the leave', 'sends it'],
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: VtcFlowDiagram(
+              nodes: [
+                const VtcFlowNode(Icons.shield_outlined, 'Your VTA'),
+                const VtcFlowNode(Icons.smartphone, 'This phone'),
+                const VtcFlowNode(
+                  Icons.groups_outlined,
+                  'The Sunday Morning Five-a-side Football Club',
+                ),
+              ],
+              links: ['signs the leave', 'sends it'],
+            ),
           ),
         ),
       ),
     );
 
     expect(tester.takeException(), isNull);
-    // Read left to right, wrapping onto the next line when it must.
-    final vta = tester.getTopLeft(find.text('Your VTA'));
-    final signs = tester.getTopLeft(find.text('signs the leave →'));
-    expect(signs.dy > vta.dy || signs.dx > vta.dx, isTrue);
+    // Read left to right, and small: a circle and one line under it.
+    expect(
+      tester.getCenter(find.text('Your VTA')).dx,
+      lessThan(tester.getCenter(find.text('signs the leave')).dx),
+    );
+    expect(
+      tester.getCenter(find.text('signs the leave')).dx,
+      lessThan(tester.getCenter(find.text('This phone')).dx),
+    );
+    expect(
+      tester.getSize(find.byType(VtcFlowDiagram)).height,
+      lessThanOrEqualTo(40),
+    );
   });
 }
