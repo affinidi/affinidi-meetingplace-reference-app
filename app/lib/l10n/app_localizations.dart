@@ -2818,6 +2818,220 @@ abstract class AppLocalizations {
   /// **'Couldn\'t check'**
   String get membershipStatusUnknown;
 
+  /// Title of a membership card's details
+  ///
+  /// In en, this message translates to:
+  /// **'Membership card'**
+  String get membershipDetailsTitle;
+
+  /// Trail step: the community issued the membership card
+  ///
+  /// In en, this message translates to:
+  /// **'Issued by {community}'**
+  String membershipTrailIssued(String community);
+
+  /// Trail step summary: for which identity and when the community signed the card
+  ///
+  /// In en, this message translates to:
+  /// **'Your membership card for {identity}, signed by {community} on {date}'**
+  String membershipTrailIssuedSummary(
+    String identity,
+    String community,
+    String date,
+  );
+
+  /// Trail step summary: for which identity the community signed the card, when the card gives no date
+  ///
+  /// In en, this message translates to:
+  /// **'Your membership card for {identity}, signed by {community}'**
+  String membershipTrailIssuedSummaryUndated(String identity, String community);
+
+  /// Trail detail: the identity the membership card is for
+  ///
+  /// In en, this message translates to:
+  /// **'Card is for'**
+  String get membershipTrailMember;
+
+  /// Trail detail: when the membership card starts to hold
+  ///
+  /// In en, this message translates to:
+  /// **'Valid from'**
+  String get membershipTrailValidFrom;
+
+  /// Title of the sheet that shows the membership card in full
+  ///
+  /// In en, this message translates to:
+  /// **'Your membership card'**
+  String get membershipTrailCardDocument;
+
+  /// Who did a trail step: the member's VTA
+  ///
+  /// In en, this message translates to:
+  /// **'Your VTA'**
+  String get membershipTrailYourVta;
+
+  /// Who did a trail step: this phone, without the VTA
+  ///
+  /// In en, this message translates to:
+  /// **'This phone'**
+  String get membershipTrailThisPhone;
+
+  /// Trail step: the member's VTA keeps the membership card
+  ///
+  /// In en, this message translates to:
+  /// **'Kept on your VTA'**
+  String get membershipTrailKept;
+
+  /// Trail step summary: the VTA holds the card, and when this screen read it from there
+  ///
+  /// In en, this message translates to:
+  /// **'Your VTA holds the card for {identity} · read from it at {time}'**
+  String membershipTrailKeptSummary(String identity, String time);
+
+  /// Trail step summary: the VTA archived the card when the member left
+  ///
+  /// In en, this message translates to:
+  /// **'Your VTA put the card away when you left'**
+  String get membershipTrailPutAway;
+
+  /// Trail step: the member left the community
+  ///
+  /// In en, this message translates to:
+  /// **'You left {community}'**
+  String membershipTrailLeft(String community);
+
+  /// Who did the leave step: the VTA signed, then the community answered
+  ///
+  /// In en, this message translates to:
+  /// **'Your VTA, then {community}'**
+  String membershipTrailLeftActor(String community);
+
+  /// Trail step summary: the VTA signed the leave, and the community confirmed it and says what it keeps
+  ///
+  /// In en, this message translates to:
+  /// **'Your VTA signed it as your identity · {community} confirmed it and {keeps}'**
+  String membershipTrailLeftSummary(String community, String keeps);
+
+  /// What the community keeps after the member left: nothing
+  ///
+  /// In en, this message translates to:
+  /// **'keeps nothing about you'**
+  String get membershipTrailKeepsNothing;
+
+  /// What the community keeps after the member left: a tombstone
+  ///
+  /// In en, this message translates to:
+  /// **'keeps only a note that you were a member'**
+  String get membershipTrailKeepsNote;
+
+  /// What the community keeps after the member left: the historical record
+  ///
+  /// In en, this message translates to:
+  /// **'keeps your membership as history'**
+  String get membershipTrailKeepsHistory;
+
+  /// What the community keeps after the member left, when its answer names something unknown
+  ///
+  /// In en, this message translates to:
+  /// **'keeps what its rules say'**
+  String get membershipTrailKeepsUnknown;
+
+  /// Trail step summary when the community already counted the member as no member
+  ///
+  /// In en, this message translates to:
+  /// **'{community} already counted you as no member, so there is no receipt'**
+  String membershipTrailLeftNoReceipt(String community);
+
+  /// Title of the sheet that shows the signed leave request and the community's answer
+  ///
+  /// In en, this message translates to:
+  /// **'Your leave and its receipt'**
+  String get membershipTrailLeftDocument;
+
+  /// Trail step: this phone asked the community whether the card still holds
+  ///
+  /// In en, this message translates to:
+  /// **'Checked with {community}'**
+  String membershipTrailChecked(String community);
+
+  /// Trail step summary start: this phone, not the VTA, asked the community
+  ///
+  /// In en, this message translates to:
+  /// **'This phone asked {community} directly, without your VTA'**
+  String membershipTrailCheckDirect(String community);
+
+  /// Trail step summary while this phone asks the community
+  ///
+  /// In en, this message translates to:
+  /// **'This phone is asking {community}, without your VTA…'**
+  String membershipTrailChecking(String community);
+
+  /// Trail step summary: the community's signed status list shows the card revoked
+  ///
+  /// In en, this message translates to:
+  /// **'{community} has revoked this card · its signed list says so, checked at {time}'**
+  String membershipTrailRevoked(String community, String time);
+
+  /// Trail step summary: the community's signed status list shows the card valid
+  ///
+  /// In en, this message translates to:
+  /// **'Still valid · checked at {time}'**
+  String membershipTrailValid(String time);
+
+  /// Trail step summary: the community's status list could not be read
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t reach {community}'**
+  String membershipTrailUnreachable(String community);
+
+  /// Trail step summary: what the last list read showed, revoked
+  ///
+  /// In en, this message translates to:
+  /// **'last checked at {time}, it was revoked'**
+  String membershipTrailLastRevoked(String time);
+
+  /// Trail step summary: what the last list read showed, valid
+  ///
+  /// In en, this message translates to:
+  /// **'last checked at {time}, it was valid'**
+  String membershipTrailLastValid(String time);
+
+  /// Trail step summary: the card names no status list
+  ///
+  /// In en, this message translates to:
+  /// **'This card can\'t be revoked: {community} gave it no status list'**
+  String membershipTrailNotRevocable(String community);
+
+  /// Trail step summary: the card expired, so it was not checked
+  ///
+  /// In en, this message translates to:
+  /// **'Its validity ended on {date}, so it no longer holds'**
+  String membershipTrailExpired(String date);
+
+  /// Trail detail: where the community publishes its status list
+  ///
+  /// In en, this message translates to:
+  /// **'Status list'**
+  String get membershipTrailStatusList;
+
+  /// Trail detail: the card's place in the community's status list
+  ///
+  /// In en, this message translates to:
+  /// **'Place in the list'**
+  String get membershipTrailStatusIndex;
+
+  /// Trail detail: when this phone read the status list
+  ///
+  /// In en, this message translates to:
+  /// **'Checked at'**
+  String get membershipTrailCheckedAt;
+
+  /// Title of the sheet that shows the community's signed status list
+  ///
+  /// In en, this message translates to:
+  /// **'{community}\'s signed status list'**
+  String membershipTrailStatusDocument(String community);
+
   /// No description provided for @all.
   ///
   /// In en, this message translates to:
@@ -4587,6 +4801,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your presentation'**
   String get vtcJoinTrailPresentationDocument;
+
+  /// Trail detail: who did a step, such as the member's VTA, the community or this phone
+  ///
+  /// In en, this message translates to:
+  /// **'Done by'**
+  String get vtcTrailDoneBy;
 
   /// Trail step: the member's VTA signed the application
   ///

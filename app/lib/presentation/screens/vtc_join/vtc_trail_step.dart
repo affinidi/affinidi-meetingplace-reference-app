@@ -53,6 +53,7 @@ class VtcTrailStep extends HookWidget {
     this.documentKey,
     this.busy = false,
     this.isLast = false,
+    this.actor,
   });
 
   final IconData icon;
@@ -70,6 +71,10 @@ class VtcTrailStep extends HookWidget {
   final bool busy;
   final bool isLast;
 
+  /// Who did the step, such as the member's VTA, if the trail says: the
+  /// first of its details.
+  final String? actor;
+
   static const _markerSize = 32.0;
 
   /// Room above each detail, beyond the column's own spacing.
@@ -79,6 +84,15 @@ class VtcTrailStep extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final expanded = useState(false);
+    final details = [
+      if (actor case final actor?)
+        VtcTrailDetail(
+          Icons.how_to_reg_outlined,
+          context.l10n.vtcTrailDoneBy,
+          actor,
+        ),
+      ...this.details,
+    ];
     final canExpand = details.isNotEmpty;
     final document = this.document;
     final foreground = stage == VtcTrailStage.next

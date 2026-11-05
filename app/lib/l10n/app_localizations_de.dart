@@ -1894,6 +1894,158 @@ class AppLocalizationsDe extends AppLocalizations {
   String get membershipStatusUnknown => 'Couldn\'t check';
 
   @override
+  String get membershipDetailsTitle => 'Membership card';
+
+  @override
+  String membershipTrailIssued(String community) {
+    return 'Issued by $community';
+  }
+
+  @override
+  String membershipTrailIssuedSummary(
+    String identity,
+    String community,
+    String date,
+  ) {
+    return 'Your membership card for $identity, signed by $community on $date';
+  }
+
+  @override
+  String membershipTrailIssuedSummaryUndated(
+    String identity,
+    String community,
+  ) {
+    return 'Your membership card for $identity, signed by $community';
+  }
+
+  @override
+  String get membershipTrailMember => 'Card is for';
+
+  @override
+  String get membershipTrailValidFrom => 'Valid from';
+
+  @override
+  String get membershipTrailCardDocument => 'Your membership card';
+
+  @override
+  String get membershipTrailYourVta => 'Your VTA';
+
+  @override
+  String get membershipTrailThisPhone => 'This phone';
+
+  @override
+  String get membershipTrailKept => 'Kept on your VTA';
+
+  @override
+  String membershipTrailKeptSummary(String identity, String time) {
+    return 'Your VTA holds the card for $identity · read from it at $time';
+  }
+
+  @override
+  String get membershipTrailPutAway =>
+      'Your VTA put the card away when you left';
+
+  @override
+  String membershipTrailLeft(String community) {
+    return 'You left $community';
+  }
+
+  @override
+  String membershipTrailLeftActor(String community) {
+    return 'Your VTA, then $community';
+  }
+
+  @override
+  String membershipTrailLeftSummary(String community, String keeps) {
+    return 'Your VTA signed it as your identity · $community confirmed it and $keeps';
+  }
+
+  @override
+  String get membershipTrailKeepsNothing => 'keeps nothing about you';
+
+  @override
+  String get membershipTrailKeepsNote =>
+      'keeps only a note that you were a member';
+
+  @override
+  String get membershipTrailKeepsHistory => 'keeps your membership as history';
+
+  @override
+  String get membershipTrailKeepsUnknown => 'keeps what its rules say';
+
+  @override
+  String membershipTrailLeftNoReceipt(String community) {
+    return '$community already counted you as no member, so there is no receipt';
+  }
+
+  @override
+  String get membershipTrailLeftDocument => 'Your leave and its receipt';
+
+  @override
+  String membershipTrailChecked(String community) {
+    return 'Checked with $community';
+  }
+
+  @override
+  String membershipTrailCheckDirect(String community) {
+    return 'This phone asked $community directly, without your VTA';
+  }
+
+  @override
+  String membershipTrailChecking(String community) {
+    return 'This phone is asking $community, without your VTA…';
+  }
+
+  @override
+  String membershipTrailRevoked(String community, String time) {
+    return '$community has revoked this card · its signed list says so, checked at $time';
+  }
+
+  @override
+  String membershipTrailValid(String time) {
+    return 'Still valid · checked at $time';
+  }
+
+  @override
+  String membershipTrailUnreachable(String community) {
+    return 'Couldn\'t reach $community';
+  }
+
+  @override
+  String membershipTrailLastRevoked(String time) {
+    return 'last checked at $time, it was revoked';
+  }
+
+  @override
+  String membershipTrailLastValid(String time) {
+    return 'last checked at $time, it was valid';
+  }
+
+  @override
+  String membershipTrailNotRevocable(String community) {
+    return 'This card can\'t be revoked: $community gave it no status list';
+  }
+
+  @override
+  String membershipTrailExpired(String date) {
+    return 'Its validity ended on $date, so it no longer holds';
+  }
+
+  @override
+  String get membershipTrailStatusList => 'Status list';
+
+  @override
+  String get membershipTrailStatusIndex => 'Place in the list';
+
+  @override
+  String get membershipTrailCheckedAt => 'Checked at';
+
+  @override
+  String membershipTrailStatusDocument(String community) {
+    return '$community\'s signed status list';
+  }
+
+  @override
   String get all => 'Alle';
 
   @override
@@ -3073,6 +3225,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get vtcJoinTrailPresentationDocument => 'Your presentation';
+
+  @override
+  String get vtcTrailDoneBy => 'Done by';
 
   @override
   String get vtcJoinTrailVta => 'Signed by your VTA';

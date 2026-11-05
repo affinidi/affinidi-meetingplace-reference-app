@@ -36,6 +36,40 @@ void main() {
       expect(find.byIcon(Icons.inbox_outlined), findsNothing);
     });
 
+    testWidgets('names who did it first among its details', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.dark,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const Scaffold(
+            body: VtcTrailStep(
+              key: Key('step'),
+              icon: Icons.draw_outlined,
+              stage: VtcTrailStage.done,
+              title: 'Signed',
+              summary: 'As your identity',
+              actor: 'Your VTA',
+              details: [
+                VtcTrailDetail(Icons.key_outlined, 'Signing key', 'key-1'),
+              ],
+              isLast: true,
+            ),
+          ),
+        ),
+      );
+      expect(find.text('Your VTA'), findsNothing);
+
+      await tester.tap(find.byKey(const Key('step')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Done by'), findsOneWidget);
+      expect(
+        tester.getTopLeft(find.text('Your VTA')).dy,
+        lessThan(tester.getTopLeft(find.text('key-1')).dy),
+      );
+    });
+
     testWidgets('shows its own icon otherwise', (tester) async {
       await pumpStep(tester, VtcTrailStage.current);
 

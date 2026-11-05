@@ -54,6 +54,38 @@ final footballCard = card(
   slot: 2,
 );
 
+Map<String, dynamic> _proof(String key, String created) => {
+  'type': 'DataIntegrityProof',
+  'cryptosuite': 'eddsa-jcs-2022',
+  'verificationMethod': key,
+  'proofPurpose': 'authentication',
+  'created': created,
+  'proofValue': 'zSignature',
+};
+
+/// Bo's leave as the VTA signed it and the community answered.
+final leaveExchange = TrustTaskExchange(
+  request: TrustTaskDocument.fromJson({
+    'id': 'urn:uuid:leave',
+    'type': MemberTask.selfRemove,
+    'issuer': bo,
+    'recipient': fakeVtcDid,
+    'issuedAt': '2026-11-05T09:40:00Z',
+    'payload': <String, dynamic>{},
+    'proof': _proof('$bo#key-0', '2026-11-05T09:40:00Z'),
+  }),
+  answer: TrustTaskDocument.fromJson({
+    'id': 'urn:uuid:leave-answer',
+    'type': '${MemberTask.selfRemove}#response',
+    'issuer': fakeVtcDid,
+    'recipient': bo,
+    'threadId': 'urn:uuid:leave',
+    'issuedAt': '2026-11-05T09:40:01Z',
+    'payload': {'did': bo, 'disposition': 'tombstone', 'removed': true},
+    'proof': _proof('$fakeVtcDid#key-0', '2026-11-05T09:40:01Z'),
+  }),
+);
+
 void main() {
   late FakeVtcNetwork network;
   late VtcService service;
@@ -92,6 +124,7 @@ void main() {
         leftAt: DateTime.utc(2026, 11, 5, 9, 40),
         name: 'Football club',
         card: footballCard,
+        leaveExchange: leaveExchange,
       ),
     );
     network.revoked.add(2);
@@ -169,6 +202,129 @@ void main() {
     await pumpScreen(tester);
 
     expect(find.text("Couldn't check"), findsNWidgets(2));
+  });
+
+  Future<void> open(WidgetTester tester, String community) async {
+    await tester.tap(find.text(community));
+    await settle(tester);
+  }
+
+  Future<void> expand(WidgetTester tester, String step) async {
+    final finder = find.byKey(Key('membership_trail_$step'));
+    await tester.ensureVisible(finder);
+    await tester.tap(finder);
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets("tells a held card's story, and who did each step", (
+    tester,
+  ) async {
+    await pumpScreen(tester);
+    await open(tester, 'Chess club');
+
+    expect(find.text('Issued by Chess club'), findsOneWidget);
+    expect(find.text('Kept on your VTA'), findsOneWidget);
+    expect(
+      find.textContaining('Your VTA holds the card for Ada · read from it at'),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('membership_trail_left')), findsNothing);
+    expect(find.text('Checked with Chess club'), findsOneWidget);
+    expect(
+      find.textContaining(
+        'This phone asked Chess club directly, without your VTA · '
+        'Still valid · checked at',
+      ),
+      findsOneWidget,
+    );
+
+    await expand(tester, 'kept');
+    expect(find.text('Done by'), findsOneWidget);
+    expect(find.text('Your VTA'), findsOneWidget);
+    await expand(tester, 'checked');
+    expect(find.text('This phone'), findsOneWidget);
+    expect(find.text(FakeVtcNetwork.statusListUrl), findsOneWidget);
+    expect(find.text('1'), findsOneWidget);
+    // Both steps of the VTA carry its marker.
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('membership_trail_kept')),
+        matching: find.byIcon(Icons.draw_outlined),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets("tells a left card's story, with the receipt and the list", (
+    tester,
+  ) async {
+    await pumpScreen(tester);
+    await open(tester, 'Football club');
+
+    expect(find.text('Your VTA put the card away when you left'), findsOne);
+    expect(find.text('You left Football club'), findsOneWidget);
+    expect(
+      find.text(
+        'Your VTA signed it as your identity · Football club confirmed it '
+        'and keeps only a note that you were a member',
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining(
+        'Football club has revoked this card · its signed list says so',
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('membership_trail_left')),
+        matching: find.byIcon(Icons.draw_outlined),
+      ),
+      findsOneWidget,
+    );
+
+    await expand(tester, 'left');
+    expect(find.text('Your VTA, then Football club'), findsOneWidget);
+    expect(find.text(MemberTask.selfRemove), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('membership_trail_left_document')));
+    await tester.pumpAndSettle();
+    expect(find.text('Your leave and its receipt'), findsOneWidget);
+    expect(find.textContaining('"disposition": "tombstone"'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('vtc_join_json_close')));
+    await tester.pumpAndSettle();
+
+    final list = find.byKey(const Key('membership_trail_status_document'));
+    await tester.ensureVisible(list);
+    await tester.tap(list);
+    await tester.pumpAndSettle();
+    expect(find.text("Football club's signed status list"), findsOneWidget);
+    expect(
+      find.textContaining('"type": "BitstringStatusList"'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('keeps showing the last list when the community is down', (
+    tester,
+  ) async {
+    await pumpScreen(tester);
+    await open(tester, 'Football club');
+    network.isStatusListDown = true;
+
+    await tester.tap(find.byKey(const Key('membership_check_again')));
+    await settle(tester);
+
+    expect(
+      find.textContaining("Couldn't reach Football club · last checked at"),
+      findsOneWidget,
+    );
+    expect(find.textContaining('it was revoked'), findsOneWidget);
+    expect(
+      find.byKey(const Key('membership_trail_status_document')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('says when no VTA can be reached', (tester) async {

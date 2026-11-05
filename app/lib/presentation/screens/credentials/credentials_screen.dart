@@ -12,6 +12,7 @@ import '../../widgets/cards/credential_card.dart';
 import '../../widgets/section_banner.dart';
 import '../../widgets/tab_bar_tab.dart';
 import 'credential_details_screen.dart';
+import 'membership_credential_details_screen.dart';
 import 'membership_credentials_controller.dart';
 import 'membership_credentials_list.dart';
 
@@ -62,7 +63,14 @@ class CredentialsScreen extends HookConsumerWidget {
             else ...[
               if (tab == 0 && credentials.isNotEmpty)
                 _CredentialsListWidget(credentials: credentials),
-              const MembershipCredentialsList(),
+              MembershipCredentialsList(
+                onOpen: (entry) => Navigator.of(context).push<void>(
+                  MaterialPageRoute<void>(
+                    builder: (context) =>
+                        MembershipCredentialDetailsScreen(entryKey: entry.key),
+                  ),
+                ),
+              ),
             ],
           ],
         ),

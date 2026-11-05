@@ -1742,6 +1742,259 @@
 	"@membershipStatusUnknown": {
 		"description": "Status chip: the community's status list could not be read"
 	},
+	"membershipDetailsTitle": "Membership card",
+	"@membershipDetailsTitle": {
+		"description": "Title of a membership card's details"
+	},
+	"membershipTrailIssued": "Issued by {community}",
+	"@membershipTrailIssued": {
+		"description": "Trail step: the community issued the membership card",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"membershipTrailIssuedSummary": "Your membership card for {identity}, signed by {community} on {date}",
+	"@membershipTrailIssuedSummary": {
+		"description": "Trail step summary: for which identity and when the community signed the card",
+		"placeholders": {
+			"identity": {
+				"type": "String"
+			},
+			"community": {
+				"type": "String"
+			},
+			"date": {
+				"type": "String"
+			}
+		}
+	},
+	"membershipTrailIssuedSummaryUndated": "Your membership card for {identity}, signed by {community}",
+	"@membershipTrailIssuedSummaryUndated": {
+		"description": "Trail step summary: for which identity the community signed the card, when the card gives no date",
+		"placeholders": {
+			"identity": {
+				"type": "String"
+			},
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"membershipTrailMember": "Card is for",
+	"@membershipTrailMember": {
+		"description": "Trail detail: the identity the membership card is for"
+	},
+	"membershipTrailValidFrom": "Valid from",
+	"@membershipTrailValidFrom": {
+		"description": "Trail detail: when the membership card starts to hold"
+	},
+	"membershipTrailCardDocument": "Your membership card",
+	"@membershipTrailCardDocument": {
+		"description": "Title of the sheet that shows the membership card in full"
+	},
+	"membershipTrailYourVta": "Your VTA",
+	"@membershipTrailYourVta": {
+		"description": "Who did a trail step: the member's VTA"
+	},
+	"membershipTrailThisPhone": "This phone",
+	"@membershipTrailThisPhone": {
+		"description": "Who did a trail step: this phone, without the VTA"
+	},
+	"membershipTrailKept": "Kept on your VTA",
+	"@membershipTrailKept": {
+		"description": "Trail step: the member's VTA keeps the membership card"
+	},
+	"membershipTrailKeptSummary": "Your VTA holds the card for {identity} · read from it at {time}",
+	"@membershipTrailKeptSummary": {
+		"description": "Trail step summary: the VTA holds the card, and when this screen read it from there",
+		"placeholders": {
+			"identity": {
+				"type": "String"
+			},
+			"time": {
+				"type": "String"
+			}
+		}
+	},
+	"membershipTrailPutAway": "Your VTA put the card away when you left",
+	"@membershipTrailPutAway": {
+		"description": "Trail step summary: the VTA archived the card when the member left"
+	},
+	"membershipTrailLeft": "You left {community}",
+	"@membershipTrailLeft": {
+		"description": "Trail step: the member left the community",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"membershipTrailLeftActor": "Your VTA, then {community}",
+	"@membershipTrailLeftActor": {
+		"description": "Who did the leave step: the VTA signed, then the community answered",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"membershipTrailLeftSummary": "Your VTA signed it as your identity · {community} confirmed it and {keeps}",
+	"@membershipTrailLeftSummary": {
+		"description": "Trail step summary: the VTA signed the leave, and the community confirmed it and says what it keeps",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			},
+			"keeps": {
+				"type": "String"
+			}
+		}
+	},
+	"membershipTrailKeepsNothing": "keeps nothing about you",
+	"@membershipTrailKeepsNothing": {
+		"description": "What the community keeps after the member left: nothing"
+	},
+	"membershipTrailKeepsNote": "keeps only a note that you were a member",
+	"@membershipTrailKeepsNote": {
+		"description": "What the community keeps after the member left: a tombstone"
+	},
+	"membershipTrailKeepsHistory": "keeps your membership as history",
+	"@membershipTrailKeepsHistory": {
+		"description": "What the community keeps after the member left: the historical record"
+	},
+	"membershipTrailKeepsUnknown": "keeps what its rules say",
+	"@membershipTrailKeepsUnknown": {
+		"description": "What the community keeps after the member left, when its answer names something unknown"
+	},
+	"membershipTrailLeftNoReceipt": "{community} already counted you as no member, so there is no receipt",
+	"@membershipTrailLeftNoReceipt": {
+		"description": "Trail step summary when the community already counted the member as no member",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"membershipTrailLeftDocument": "Your leave and its receipt",
+	"@membershipTrailLeftDocument": {
+		"description": "Title of the sheet that shows the signed leave request and the community's answer"
+	},
+	"membershipTrailChecked": "Checked with {community}",
+	"@membershipTrailChecked": {
+		"description": "Trail step: this phone asked the community whether the card still holds",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"membershipTrailCheckDirect": "This phone asked {community} directly, without your VTA",
+	"@membershipTrailCheckDirect": {
+		"description": "Trail step summary start: this phone, not the VTA, asked the community",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"membershipTrailChecking": "This phone is asking {community}, without your VTA…",
+	"@membershipTrailChecking": {
+		"description": "Trail step summary while this phone asks the community",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"membershipTrailRevoked": "{community} has revoked this card · its signed list says so, checked at {time}",
+	"@membershipTrailRevoked": {
+		"description": "Trail step summary: the community's signed status list shows the card revoked",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			},
+			"time": {
+				"type": "String"
+			}
+		}
+	},
+	"membershipTrailValid": "Still valid · checked at {time}",
+	"@membershipTrailValid": {
+		"description": "Trail step summary: the community's signed status list shows the card valid",
+		"placeholders": {
+			"time": {
+				"type": "String"
+			}
+		}
+	},
+	"membershipTrailUnreachable": "Couldn't reach {community}",
+	"@membershipTrailUnreachable": {
+		"description": "Trail step summary: the community's status list could not be read",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"membershipTrailLastRevoked": "last checked at {time}, it was revoked",
+	"@membershipTrailLastRevoked": {
+		"description": "Trail step summary: what the last list read showed, revoked",
+		"placeholders": {
+			"time": {
+				"type": "String"
+			}
+		}
+	},
+	"membershipTrailLastValid": "last checked at {time}, it was valid",
+	"@membershipTrailLastValid": {
+		"description": "Trail step summary: what the last list read showed, valid",
+		"placeholders": {
+			"time": {
+				"type": "String"
+			}
+		}
+	},
+	"membershipTrailNotRevocable": "This card can't be revoked: {community} gave it no status list",
+	"@membershipTrailNotRevocable": {
+		"description": "Trail step summary: the card names no status list",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"membershipTrailExpired": "Its validity ended on {date}, so it no longer holds",
+	"@membershipTrailExpired": {
+		"description": "Trail step summary: the card expired, so it was not checked",
+		"placeholders": {
+			"date": {
+				"type": "String"
+			}
+		}
+	},
+	"membershipTrailStatusList": "Status list",
+	"@membershipTrailStatusList": {
+		"description": "Trail detail: where the community publishes its status list"
+	},
+	"membershipTrailStatusIndex": "Place in the list",
+	"@membershipTrailStatusIndex": {
+		"description": "Trail detail: the card's place in the community's status list"
+	},
+	"membershipTrailCheckedAt": "Checked at",
+	"@membershipTrailCheckedAt": {
+		"description": "Trail detail: when this phone read the status list"
+	},
+	"membershipTrailStatusDocument": "{community}'s signed status list",
+	"@membershipTrailStatusDocument": {
+		"description": "Title of the sheet that shows the community's signed status list",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			}
+		}
+	},
 	"all": "All",
 	"@all": {
 		"type": "text"
@@ -2860,6 +3113,10 @@
 	"vtcJoinTrailPresentationDocument": "Your presentation",
 	"@vtcJoinTrailPresentationDocument": {
 		"description": "Title of the sheet that shows the presentation the application carries"
+	},
+	"vtcTrailDoneBy": "Done by",
+	"@vtcTrailDoneBy": {
+		"description": "Trail detail: who did a step, such as the member's VTA, the community or this phone"
 	},
 	"vtcJoinTrailVta": "Signed by your VTA",
 	"@vtcJoinTrailVta": {
