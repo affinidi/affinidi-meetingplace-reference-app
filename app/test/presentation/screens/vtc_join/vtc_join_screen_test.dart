@@ -303,7 +303,7 @@ void main() {
       testWidgets('keeps the join phrase behind settings beside the role', (
         tester,
       ) async {
-        vtaHoldsRole('member');
+        vtaHoldsRole('admin');
 
         await joinCommunity(tester);
         expect(find.byType(VtcJoinPhraseView), findsNothing);
@@ -317,7 +317,7 @@ void main() {
       testWidgets('lines up the role on the left with settings on the right', (
         tester,
       ) async {
-        vtaHoldsRole('member');
+        vtaHoldsRole('admin');
 
         await joinCommunity(tester);
 
@@ -337,6 +337,17 @@ void main() {
         expect(settings.right, line.right);
         expect(roleIcon.center.dy, moreOrLessEquals(settings.center.dy));
       });
+
+      for (final role in ['member', 'custom:admin']) {
+        testWidgets('offers no settings to the role $role', (tester) async {
+          vtaHoldsRole(role);
+
+          await joinCommunity(tester);
+
+          expect(find.byKey(const Key('vtc_community_role')), findsOneWidget);
+          expect(find.byKey(const Key('vtc_community_settings')), findsNothing);
+        });
+      }
 
       testWidgets('shows no role until the VTA holds the role card', (
         tester,

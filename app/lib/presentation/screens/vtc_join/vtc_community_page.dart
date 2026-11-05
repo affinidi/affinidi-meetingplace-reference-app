@@ -18,6 +18,10 @@ import 'vtc_membership_card_view.dart';
 /// Prefix of a role the community defined itself, as in `custom:coach`.
 const _customRolePrefix = 'custom:';
 
+/// The built-in role that manages the community's join phrase; a role the
+/// community defined itself never does, whatever its name.
+const _adminRole = 'admin';
+
 /// The member's [role] in plain words; a role the community defined itself
 /// by its own name, which never reads as a built-in one.
 String _roleName(AppLocalizations l10n, String role) =>
@@ -27,9 +31,9 @@ String _roleName(AppLocalizations l10n, String role) =>
 
 /// The page of a community the member belongs to, which they come back to:
 /// a welcome right after joining, else the community's logo and name; their
-/// role, with the community's settings behind a button beside it, the
-/// membership card it issued — or that it is on its way to the member's
-/// VTA — what the community is, then Done and [leave].
+/// role, with the community's settings behind a button beside it for an
+/// administrator, the membership card it issued — or that it is on its way
+/// to the member's VTA — what the community is, then Done and [leave].
 class VtcCommunityPage extends StatelessWidget {
   const VtcCommunityPage({
     required this.state,
@@ -78,13 +82,13 @@ class VtcCommunityPage extends StatelessWidget {
             title: l10n.vtcCommunityRole,
             subtitle: _roleName(l10n, role),
             trailing: switch (state.communityDid) {
-              final communityDid? => IconButton(
+              final communityDid? when role == _adminRole => IconButton(
                 key: const Key('vtc_community_settings'),
                 icon: const Icon(Icons.settings_outlined, color: Colors.white),
                 tooltip: l10n.vtcCommunitySettings,
                 onPressed: () => _showSettings(context, communityDid, name),
               ),
-              null => null,
+              _ => null,
             },
           ),
         const SizedBox(height: 4),
