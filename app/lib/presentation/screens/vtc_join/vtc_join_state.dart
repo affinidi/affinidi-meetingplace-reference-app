@@ -293,6 +293,10 @@ abstract class VtcJoinState with _$VtcJoinState {
     /// holds it.
     VtcMembershipCard? membershipCard,
 
+    /// Whether this phone is reading the membership card from the member's
+    /// VTA, or collecting it from the community, right now.
+    @Default(false) bool gettingCard,
+
     /// The community's own check of the member's identity, once their VTA
     /// holds one.
     VtcIdentityCheck? identityCheck,

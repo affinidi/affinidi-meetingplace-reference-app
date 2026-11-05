@@ -99,6 +99,27 @@ class VtcCommunityPage extends StatelessWidget {
             _CardArrival(delivery: delivery, communityName: name),
         ] else if (delivery != null)
           VtcCardDeliveryTrail(delivery: delivery, communityName: name)
+        else if (state.gettingCard)
+          Row(
+            key: const Key('vtc_membership_card_loading'),
+            mainAxisAlignment: MainAxisAlignment.center,
+            spacing: 8,
+            children: [
+              const SizedBox.square(
+                dimension: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white70,
+                ),
+              ),
+              Flexible(
+                child: Text(
+                  l10n.vtcMembershipCardLoading,
+                  style: onboardingNote(context),
+                ),
+              ),
+            ],
+          )
         else
           Row(
             key: const Key('vtc_membership_card_pending'),

@@ -849,6 +849,24 @@ void main() {
         expect(state().membershipCard?.memberDid, persona.did);
       });
 
+      test('says it is being read until the read ends', () async {
+        network.joinVerdict = {'effect': 'refer'};
+        await controller().onScanned(fakeVtcDid);
+        await controller().join();
+        network.joinStatus = 'approved';
+        await controller().checkAgain();
+        await readDone();
+        expect(state().gettingCard, isFalse);
+
+        vtaHoldsCard();
+        final reading = controller().readMembershipCard();
+        expect(state().gettingCard, isTrue);
+        await reading;
+
+        expect(state().gettingCard, isFalse);
+        expect(state().membershipCard, isNotNull);
+      });
+
       test('is shown for an admission at once', () async {
         vtaHoldsCard();
         await controller().onScanned(fakeVtcDid);

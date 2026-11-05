@@ -3147,6 +3147,10 @@
 	"@vtcMembershipCardOnItsWay": {
 		"description": "Shown on the joined screen until the member's VTA holds the membership card"
 	},
+	"vtcMembershipCardLoading": "Getting your membership card…",
+	"@vtcMembershipCardLoading": {
+		"description": "Shown with a spinner on the community page while the phone reads the membership card from the member's VTA or collects it from the community"
+	},
 	"vtcJoinWithdrawAction": "Withdraw application",
 	"@vtcJoinWithdrawAction": {
 		"description": "Button that withdraws the open application to a community"

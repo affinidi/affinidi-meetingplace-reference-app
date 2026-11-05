@@ -4952,6 +4952,12 @@ abstract class AppLocalizations {
   /// **'Your membership card is on its way to your VTA'**
   String get vtcMembershipCardOnItsWay;
 
+  /// Shown with a spinner on the community page while the phone reads the membership card from the member's VTA or collects it from the community
+  ///
+  /// In en, this message translates to:
+  /// **'Getting your membership card…'**
+  String get vtcMembershipCardLoading;
+
   /// Button that withdraws the open application to a community
   ///
   /// In en, this message translates to:

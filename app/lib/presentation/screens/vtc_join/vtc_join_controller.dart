@@ -513,6 +513,7 @@ class VtcJoinController extends _$VtcJoinController {
       return;
     }
     _collectingCard = true;
+    _showGettingCard();
     try {
       await _service.checkApplication(
         manifest.communityDid,
@@ -526,6 +527,7 @@ class VtcJoinController extends _$VtcJoinController {
       _collectingCard = false;
     }
     if (!ref.mounted) return;
+    _showGettingCard();
     await readMembershipCard();
     // The community delivers the role card with the membership card.
     if (ref.mounted) await readRole();
@@ -620,6 +622,7 @@ class VtcJoinController extends _$VtcJoinController {
       return;
     }
     _readingCard = true;
+    _showGettingCard();
     try {
       final card = await _service.membershipCard(manifest.communityDid);
       // The screen may have closed, or moved on, while the VTA answered.
@@ -633,7 +636,13 @@ class VtcJoinController extends _$VtcJoinController {
       // Nothing to read from; the membership stands all the same.
     } finally {
       _readingCard = false;
+      if (ref.mounted) _showGettingCard();
     }
+  }
+
+  /// Shows whether the card is being read or collected right now.
+  void _showGettingCard() {
+    state = state.copyWith(gettingCard: _readingCard || _collectingCard);
   }
 
   /// Withdraws the open application; the screen asks the member to confirm

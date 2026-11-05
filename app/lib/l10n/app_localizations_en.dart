@@ -3288,6 +3288,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Your membership card is on its way to your VTA';
 
   @override
+  String get vtcMembershipCardLoading => 'Getting your membership card…';
+
+  @override
   String get vtcJoinWithdrawAction => 'Withdraw application';
 
   @override
