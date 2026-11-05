@@ -3083,6 +3083,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get vtcCommunityRole => 'Your role';
 
   @override
+  String get vtcCommunitySettings => 'Community settings';
+
+  @override
   String vtcCommunityRoleName(String role) {
     String _temp0 = intl.Intl.selectLogic(role, {
       'admin': 'Administrator',

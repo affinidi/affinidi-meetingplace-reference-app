@@ -17,6 +17,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/services/camera_service
 import 'package:mpx_flutter_reference_app/infrastructure/vtc/user_verification_key.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_flow_diagram.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_phrase_view.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_trail.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
@@ -297,6 +298,20 @@ void main() {
         await joinCommunity(tester);
 
         expect(shownRole(tester), 'admin');
+      });
+
+      testWidgets('keeps the join phrase behind settings beside the role', (
+        tester,
+      ) async {
+        vtaHoldsRole('member');
+
+        await joinCommunity(tester);
+        expect(find.byType(VtcJoinPhraseView), findsNothing);
+
+        await tester.tap(find.byKey(const Key('vtc_community_settings')));
+        await settle(tester);
+
+        expect(find.byType(VtcJoinPhraseView), findsOneWidget);
       });
 
       testWidgets('shows no role until the VTA holds the role card', (

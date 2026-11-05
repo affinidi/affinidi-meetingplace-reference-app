@@ -27,8 +27,9 @@ String _roleName(AppLocalizations l10n, String role) =>
 
 /// The page of a community the member belongs to, which they come back to:
 /// a welcome right after joining, else the community's logo and name; their
-/// role, the membership card it issued — or that it is on its way to the
-/// member's VTA — what the community is, then Done and [leave].
+/// role, with the community's settings behind a button beside it, the
+/// membership card it issued — or that it is on its way to the member's
+/// VTA — what the community is, then Done and [leave].
 class VtcCommunityPage extends StatelessWidget {
   const VtcCommunityPage({
     required this.state,
@@ -76,6 +77,15 @@ class VtcCommunityPage extends StatelessWidget {
             icon: Icons.badge_outlined,
             title: l10n.vtcCommunityRole,
             subtitle: _roleName(l10n, role),
+            trailing: switch (state.communityDid) {
+              final communityDid? => IconButton(
+                key: const Key('vtc_community_settings'),
+                icon: const Icon(Icons.settings_outlined, color: Colors.white),
+                tooltip: l10n.vtcCommunitySettings,
+                onPressed: () => _showSettings(context, communityDid, name),
+              ),
+              null => null,
+            },
           ),
         const SizedBox(height: 4),
         if (card != null) ...[
@@ -107,14 +117,39 @@ class VtcCommunityPage extends StatelessWidget {
         if (state.identityCheck case final check?)
           VtcIdentityCheckView(check: check, communityName: name),
         VtcCommunityProfile(state: state),
-        if (state.communityDid case final communityDid?)
-          VtcJoinPhraseView(communityDid: communityDid, communityName: name),
         const SizedBox(height: 12),
         OnboardingButton(label: l10n.generalDone, onPressed: onDone),
         leave,
       ],
     );
   }
+}
+
+/// Opens the settings of the community at [communityDid] in a sheet on the
+/// onboarding gradient: for now its join phrase.
+Future<void> _showSettings(
+  BuildContext context,
+  String communityDid,
+  String communityName,
+) {
+  const radius = BorderRadius.vertical(top: Radius.circular(24));
+  return showModalBottomSheet<void>(
+    context: context,
+    useRootNavigator: true,
+    isScrollControlled: true,
+    useSafeArea: true,
+    backgroundColor: Colors.transparent,
+    builder: (context) => DecoratedBox(
+      decoration: onboardingGradient(context, radius: 2, borderRadius: radius),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+        child: VtcJoinPhraseView(
+          communityDid: communityDid,
+          communityName: communityName,
+        ),
+      ),
+    ),
+  );
 }
 
 /// Where the card on show came from, as the Credentials tab draws it: the

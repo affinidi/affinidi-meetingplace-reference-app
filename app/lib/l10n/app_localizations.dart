@@ -4574,6 +4574,12 @@ abstract class AppLocalizations {
   /// **'Your role'**
   String get vtcCommunityRole;
 
+  /// Tooltip of the button next to the member's role that opens the community's settings, such as its join phrase
+  ///
+  /// In en, this message translates to:
+  /// **'Community settings'**
+  String get vtcCommunitySettings;
+
   /// The member's role in a community; a role the community defined itself is shown by its own name
   ///
   /// In en, this message translates to:

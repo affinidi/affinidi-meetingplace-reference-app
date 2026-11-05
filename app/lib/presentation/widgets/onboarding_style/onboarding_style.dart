@@ -380,11 +380,15 @@ class OnboardingLine extends StatelessWidget {
     required this.icon,
     required this.title,
     this.subtitle,
+    this.trailing,
   });
 
   final IconData icon;
   final String title;
   final String? subtitle;
+
+  /// An action at the end of the line, such as an icon button.
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -409,6 +413,7 @@ class OnboardingLine extends StatelessWidget {
             ],
           ),
         ),
+        ?trailing,
       ],
     );
   }
