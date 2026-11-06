@@ -24,12 +24,79 @@ class VtcMembershipCardView extends StatelessWidget {
   final String communityName;
   final Uri? logoUrl;
 
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return VtcCardView(
+      cardKey: const Key('vtc_membership_card'),
+      documentKey: const Key('vtc_membership_card_document'),
+      communityName: communityName,
+      logoUrl: logoUrl,
+      title: l10n.vtcMembershipCardTitle,
+      credential: card.credential,
+      credentialType: 'MembershipCredential',
+      documentIcon: Icons.card_membership_outlined,
+      chips: [
+        if (card.personhood)
+          (Icons.person_outline, l10n.vtcMembershipCardPersonhood),
+      ],
+      holderLabel: l10n.vtcMembershipCardMember,
+      holderDid: card.memberDid,
+      issuer: card.issuer,
+      validFrom: card.validFrom,
+      validUntil: card.validUntil,
+    );
+  }
+}
+
+/// A card a community issued, as a frosted card on the gradient: the
+/// community and [title], what the card states, whom it is about and for
+/// how long, and the [credential] in full behind an icon.
+class VtcCardView extends StatelessWidget {
+  const VtcCardView({
+    super.key,
+    required this.cardKey,
+    required this.documentKey,
+    required this.communityName,
+    required this.title,
+    required this.credential,
+    required this.credentialType,
+    required this.documentIcon,
+    required this.holderLabel,
+    required this.holderDid,
+    required this.issuer,
+    this.logoUrl,
+    this.chips = const [],
+    this.validFrom,
+    this.validUntil,
+  });
+
+  final Key cardKey;
+  final Key documentKey;
+  final String communityName;
+  final Uri? logoUrl;
+  final String title;
+
+  /// The credential exactly as the VTA keeps it, and its type, named under
+  /// its JSON as on the wire.
+  final Map<String, dynamic> credential;
+  final String credentialType;
+  final IconData documentIcon;
+
+  /// What else the card states, each with its icon.
+  final List<(IconData, String)> chips;
+
+  /// Who the card is about, and the DID it names them by.
+  final String holderLabel;
+  final String holderDid;
+
+  final String issuer;
+  final DateTime? validFrom;
+  final DateTime? validUntil;
+
   static const _radius = Radius.circular(20);
   static const _blurSigma = 20.0;
   static const _logoSize = 44.0;
-
-  /// The credential's type, named under its JSON as on the wire.
-  static const _credentialType = 'MembershipCredential';
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +110,7 @@ class VtcMembershipCardView extends StatelessWidget {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: _blurSigma, sigmaY: _blurSigma),
         child: DecoratedBox(
-          key: const Key('vtc_membership_card'),
+          key: cardKey,
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
@@ -77,15 +144,12 @@ class VtcMembershipCardView extends StatelessWidget {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          Text(
-                            l10n.vtcMembershipCardTitle,
-                            style: onboardingNote(context),
-                          ),
+                          Text(title, style: onboardingNote(context)),
                         ],
                       ),
                     ),
                     IconButton(
-                      key: const Key('vtc_membership_card_document'),
+                      key: documentKey,
                       icon: const Icon(
                         Icons.receipt_long_outlined,
                         color: Colors.white,
@@ -93,21 +157,18 @@ class VtcMembershipCardView extends StatelessWidget {
                       tooltip: l10n.vtcMembershipCardShow,
                       onPressed: () => showVtcJoinJson(
                         context,
-                        title: l10n.vtcMembershipCardTitle,
-                        json: card.credential,
-                        icon: Icons.card_membership_outlined,
-                        subtitle: _credentialType,
+                        title: title,
+                        json: credential,
+                        icon: documentIcon,
+                        subtitle: credentialType,
                       ),
                     ),
                   ],
                 ),
-                if (card.personhood)
+                for (final (icon, label) in chips)
                   Align(
                     alignment: Alignment.centerLeft,
-                    child: _Chip(
-                      icon: Icons.person_outline,
-                      label: l10n.vtcMembershipCardPersonhood,
-                    ),
+                    child: _Chip(icon: icon, label: label),
                   ),
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
@@ -117,23 +178,23 @@ class VtcMembershipCardView extends StatelessWidget {
                     children: [
                       VtcDetailLine(
                         icon: Icons.fingerprint,
-                        label: l10n.vtcMembershipCardMember,
-                        value: card.memberDid,
+                        label: holderLabel,
+                        value: holderDid,
                         isId: true,
                       ),
                       VtcDetailLine(
                         icon: Icons.groups_outlined,
                         label: l10n.vtcMembershipCardIssuedBy,
-                        value: card.issuer,
+                        value: issuer,
                         isId: true,
                       ),
-                      if (card.validFrom case final from?)
+                      if (validFrom case final from?)
                         VtcDetailLine(
                           icon: Icons.event_available_outlined,
                           label: l10n.vtcMembershipCardValidFrom,
                           value: date(from),
                         ),
-                      if (card.validUntil case final until?)
+                      if (validUntil case final until?)
                         VtcDetailLine(
                           icon: Icons.event_busy_outlined,
                           label: l10n.vtcMembershipCardValidUntil,
