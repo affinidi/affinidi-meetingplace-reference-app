@@ -50,10 +50,11 @@ class VtcVettingDeskController extends _$VtcVettingDeskController {
 
   /// Opens the desk as recorded at once, then checks the vetter card: the
   /// community page just offered the desk for a card that held, and a
-  /// ticket is minted only once the card is checked again.
+  /// ticket is minted only once the card is checked again. Tickets from an
+  /// earlier visit are cancelled first, so vetting starts fresh.
   Future<void> _load() async {
     try {
-      final desk = await _service.vetterDesk(communityDid);
+      final desk = await _service.cancelVettingTickets(communityDid);
       // The desk may have closed while it was read.
       if (!ref.mounted) return;
       state = state.copyWith(

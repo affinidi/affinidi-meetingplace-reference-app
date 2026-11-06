@@ -103,6 +103,17 @@ void main() {
           .read(vtcVettingDeskControllerProvider(fakeVtcDid))
           .waitingOnApplicant(DateTime.now());
 
+  /// Shows a ticket from the desk, and returns it.
+  Future<VetterTicket> showTicket(WidgetTester tester) async {
+    await waitFor(tester, find.byKey(const Key('vtc_vetter_show_ticket')));
+    await tap(tester, find.byKey(const Key('vtc_vetter_show_ticket')));
+    await waitFor(tester, find.byKey(const Key('vtc_vetter_ticket_qr')));
+    final desk = await tester.runAsync(
+      () => fixture.service.vetterDesk(fakeVtcDid),
+    );
+    return desk!.tickets.single;
+  }
+
   /// Goes back to the ticket left open on the desk.
   Future<void> resume(WidgetTester tester) async {
     await waitFor(tester, find.byKey(const Key('vtc_vetter_resume')));
@@ -173,6 +184,22 @@ void main() {
     await close(tester);
   });
 
+  testWidgets('cancels the tickets of an earlier visit', (tester) async {
+    await tester.runAsync(
+      () => fixture.service.createVettingTicket(fakeVtcDid),
+    );
+
+    await pumpDesk(tester);
+    await waitFor(tester, find.byKey(const Key('vtc_vetter_show_ticket')));
+
+    expect(find.byKey(const Key('vtc_vetter_resume')), findsNothing);
+    final desk = await tester.runAsync(
+      () => fixture.service.vetterDesk(fakeVtcDid),
+    );
+    expect(desk!.tickets, isEmpty);
+    await close(tester);
+  });
+
   testWidgets('keeps the ticket open when the flow is closed', (tester) async {
     await pumpDesk(tester);
     await waitFor(tester, find.byKey(const Key('vtc_vetter_show_ticket')));
@@ -196,11 +223,8 @@ void main() {
   });
 
   testWidgets('vets an applicant from match code to statement', (tester) async {
-    final ticket = (await tester.runAsync(
-      () => fixture.service.createVettingTicket(fakeVtcDid),
-    ))!;
     await pumpDesk(tester);
-    await resume(tester);
+    final ticket = await showTicket(tester);
     expect(flowStep(tester), VtcVettingFlowStep.ticket);
     expect(waiting(tester), isTrue);
     await tester.runAsync(() => fixture.requestWith(ticket.spoken));
@@ -267,11 +291,8 @@ void main() {
   });
 
   testWidgets('declines when the match codes differ', (tester) async {
-    final ticket = (await tester.runAsync(
-      () => fixture.service.createVettingTicket(fakeVtcDid),
-    ))!;
     await pumpDesk(tester);
-    await resume(tester);
+    final ticket = await showTicket(tester);
     await tester.runAsync(() => fixture.requestWith(ticket.spoken));
     await check(tester);
 
@@ -291,11 +312,8 @@ void main() {
   testWidgets('declines while waiting for the applicant\'s details', (
     tester,
   ) async {
-    final ticket = (await tester.runAsync(
-      () => fixture.service.createVettingTicket(fakeVtcDid),
-    ))!;
     await pumpDesk(tester);
-    await resume(tester);
+    final ticket = await showTicket(tester);
     await tester.runAsync(() => fixture.requestWith(ticket.spoken));
     await check(tester);
     await tap(tester, find.byKey(const Key('vtc_vetter_match_yes')));
