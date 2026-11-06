@@ -93,8 +93,8 @@ class VtcVettingDeskScreen extends HookConsumerWidget {
                 _TicketView(state: state, controller: controller),
               if (state.vetterCard case final card?)
                 VtcCardView(
-                  cardKey: const Key('vtc_vetter_card'),
-                  documentKey: const Key('vtc_vetter_card_document'),
+                  cardKey: const Key('vtc_vetter_role_card'),
+                  documentKey: const Key('vtc_vetter_role_card_document'),
                   communityName: communityName,
                   title: l10n.vtcVetterCardTitle,
                   credential: card.credential,

@@ -264,7 +264,7 @@ void main() {
   });
 
   testWidgets('shows the vetter card it checked', (tester) async {
-    final card = find.byKey(const Key('vtc_vetter_card'));
+    final card = find.byKey(const Key('vtc_vetter_role_card'));
 
     await pumpDesk(tester);
     await tester.pump();
@@ -291,7 +291,7 @@ void main() {
 
     expect(find.byKey(const Key('vtc_vetter_not_vetter')), findsOneWidget);
     expect(find.byKey(const Key('vtc_vetter_show_ticket')), findsNothing);
-    expect(find.byKey(const Key('vtc_vetter_card')), findsNothing);
+    expect(find.byKey(const Key('vtc_vetter_role_card')), findsNothing);
     await close(tester);
   });
 
