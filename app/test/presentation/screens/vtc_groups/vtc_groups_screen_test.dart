@@ -136,6 +136,13 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  Future<void> tapVisible(WidgetTester tester, Key key) async {
+    await tester.ensureVisible(find.byKey(key));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(key));
+    await tester.pumpAndSettle();
+  }
+
   setUp(() {
     vtc = _FakeVtcService();
     chats = _FakeChats();
@@ -145,6 +152,8 @@ void main() {
       'a linked one', (tester) async {
     await pumpScreen(tester);
 
+    expect(find.text('Groups'), findsOneWidget);
+    expect(find.text('Football club'), findsOneWidget);
     expect(find.text('Identity WG'), findsOneWidget);
     expect(find.text('Manager'), findsOneWidget);
     expect(find.byKey(const Key('vtc_group_create_g1')), findsOneWidget);
@@ -156,8 +165,7 @@ void main() {
   ) async {
     await pumpScreen(tester);
 
-    await tester.tap(find.byKey(const Key('vtc_group_create_g1')));
-    await tester.pumpAndSettle();
+    await tapVisible(tester, const Key('vtc_group_create_g1'));
 
     expect(chats.created, ['g1']);
     expect(find.text("Publish the chat's link"), findsOneWidget);
@@ -172,8 +180,7 @@ void main() {
   testWidgets('joins a linked chat', (tester) async {
     await pumpScreen(tester);
 
-    await tester.tap(find.byKey(const Key('vtc_group_join_g2')));
-    await tester.pumpAndSettle();
+    await tapVisible(tester, const Key('vtc_group_join_g2'));
 
     expect(chats.joined, ['g2']);
     expect(find.byKey(const Key('vtc_group_join_g2')), findsNothing);
@@ -183,8 +190,7 @@ void main() {
     chats.joinFailure = VtcGroupChatFailure.noGroupCredential;
     await pumpScreen(tester);
 
-    await tester.tap(find.byKey(const Key('vtc_group_join_g2')));
-    await tester.pumpAndSettle();
+    await tapVisible(tester, const Key('vtc_group_join_g2'));
 
     expect(
       find.text(

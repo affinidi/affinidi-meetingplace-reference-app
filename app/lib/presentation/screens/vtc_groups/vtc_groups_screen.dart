@@ -12,19 +12,20 @@ import 'vtc_groups_controller.dart';
 import 'vtc_groups_state.dart';
 
 /// The member's groups in one community, each with its chat: a manager
-/// creates it, and members join it with the group's credential.
+/// creates it, and members join it with the group's credential. Opened from
+/// a membership card, and drawn as that card's screen is.
 class VtcGroupsScreen extends ConsumerWidget {
   const VtcGroupsScreen({
     super.key,
     required this.communityDid,
-    required this.communityName,
+    this.communityName,
   });
 
   /// DID of the community whose groups are shown.
   final String communityDid;
 
-  /// The community's name, for the title.
-  final String communityName;
+  /// The community's name, above its groups; left out when unknown.
+  final String? communityName;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -54,7 +55,7 @@ class VtcGroupsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          l10n.vtcGroupsTitle(communityName),
+          l10n.vtcGroupsTitle,
           style: context.textTheme.headlineMedium,
         ),
         actions: [
@@ -70,32 +71,36 @@ class VtcGroupsScreen extends ConsumerWidget {
         VtcGroupsState(isLoading: true, groups: []) => const Center(
           child: CircularProgressIndicator(),
         ),
-        VtcGroupsState(failure: final failure?) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Text(switch (failure) {
-              VtcGroupsFailure.vtaMissing => l10n.vtcGroupsVtaMissing,
-              VtcGroupsFailure.unreachable => l10n.vtcGroupsUnreachable,
-            }, textAlign: TextAlign.center),
-          ),
-        ),
-        VtcGroupsState(groups: []) => Center(
-          child: Text(l10n.vtcGroupsNone, textAlign: TextAlign.center),
-        ),
-        _ => ListView.separated(
+        VtcGroupsState(failure: final failure?) => _Message(switch (failure) {
+          VtcGroupsFailure.vtaMissing => l10n.vtcGroupsVtaMissing,
+          VtcGroupsFailure.unreachable => l10n.vtcGroupsUnreachable,
+        }),
+        VtcGroupsState(groups: []) => _Message(l10n.vtcGroupsNone),
+        _ => SingleChildScrollView(
           padding: const EdgeInsets.all(16),
-          itemCount: state.groups.length,
-          separatorBuilder: (_, _) => const SizedBox(height: 12),
-          itemBuilder: (context, index) {
-            final group = state.groups[index].group;
-            return _GroupCard(
-              group: group,
-              status: state.chats[group.groupId] ?? VtcGroupChatStatus.unknown,
-              isBusy: state.busy.contains(group.groupId),
-              onCreate: () => controller.createChat(group),
-              onJoin: () => controller.joinChat(group),
-            );
-          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: 16,
+            children: [
+              if (communityName case final name?)
+                Text(
+                  name,
+                  style: context.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              for (final listing in state.groups)
+                _GroupCard(
+                  group: listing.group,
+                  status:
+                      state.chats[listing.group.groupId] ??
+                      VtcGroupChatStatus.unknown,
+                  isBusy: state.busy.contains(listing.group.groupId),
+                  onCreate: () => controller.createChat(listing.group),
+                  onJoin: () => controller.joinChat(listing.group),
+                ),
+            ],
+          ),
         ),
       },
     );
@@ -117,6 +122,26 @@ class VtcGroupsScreen extends ConsumerWidget {
   }
 }
 
+/// A message in place of the groups, such as why they can't be shown.
+class _Message extends StatelessWidget {
+  const _Message(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Text(text, textAlign: TextAlign.center),
+      ),
+    );
+  }
+}
+
+/// A group in a frosted box, as a membership card's steps are drawn: what it
+/// is, the member's role in it, where its chat stands, and the action the
+/// member can take on the chat.
 class _GroupCard extends StatelessWidget {
   const _GroupCard({
     required this.group,
@@ -132,6 +157,9 @@ class _GroupCard extends StatelessWidget {
   final VoidCallback onCreate;
   final VoidCallback onJoin;
 
+  static const _radius = 16.0;
+  static const _tint = 20;
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -139,31 +167,41 @@ class _GroupCard extends StatelessWidget {
         group.isManagedByCaller &&
         group.showsMembersToMembers &&
         status == VtcGroupChatStatus.none;
-    return Card(
+    final canJoin = status == VtcGroupChatStatus.linked;
+    return Container(
       key: Key('vtc_group_${group.groupId}'),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: 8,
-          children: [
-            Row(
-              spacing: 8,
-              children: [
-                Expanded(
-                  child: Text(
-                    group.name,
-                    style: context.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                if (group.isManagedByCaller)
-                  Chip(label: Text(l10n.vtcGroupManager)),
-              ],
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withAlpha(_tint),
+        borderRadius: BorderRadius.circular(_radius),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 16,
+        children: [
+          Text(
+            group.name,
+            style: context.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
             ),
-            if (group.description case final description?) Text(description),
-            Text(switch (status) {
+          ),
+          if (group.description case final description?)
+            Text(
+              description,
+              style: context.textTheme.bodyMedium?.copyWith(
+                color: context.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          if (group.isManagedByCaller)
+            _Line(
+              icon: Icons.badge_outlined,
+              title: l10n.vtcCommunityRole,
+              subtitle: l10n.vtcGroupManager,
+            ),
+          _Line(
+            icon: Icons.forum_outlined,
+            title: l10n.vtcGroupChatHeading,
+            subtitle: switch (status) {
               VtcGroupChatStatus.unknown => l10n.vtcGroupChatUnknown,
               VtcGroupChatStatus.none when !group.showsMembersToMembers =>
                 l10n.vtcGroupChatHidesMembers,
@@ -171,32 +209,67 @@ class _GroupCard extends StatelessWidget {
               VtcGroupChatStatus.linked => l10n.vtcGroupChatLinked,
               VtcGroupChatStatus.owned => l10n.vtcGroupChatOwned,
               VtcGroupChatStatus.joined => l10n.vtcGroupChatJoined,
-            }, style: context.textTheme.bodySmall),
-            if (canCreate || status == VtcGroupChatStatus.linked)
-              Align(
-                alignment: Alignment.centerRight,
-                child: FilledButton(
-                  key: Key(
-                    canCreate
-                        ? 'vtc_group_create_${group.groupId}'
-                        : 'vtc_group_join_${group.groupId}',
-                  ),
-                  onPressed: isBusy ? null : (canCreate ? onCreate : onJoin),
-                  child: isBusy
-                      ? const SizedBox.square(
-                          dimension: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(
-                          canCreate
-                              ? l10n.vtcGroupChatCreate
-                              : l10n.vtcGroupChatJoin,
-                        ),
+            },
+          ),
+          if (canCreate || canJoin)
+            FilledButton.icon(
+              key: Key(
+                canCreate
+                    ? 'vtc_group_create_${group.groupId}'
+                    : 'vtc_group_join_${group.groupId}',
+              ),
+              icon: isBusy
+                  ? const SizedBox.square(
+                      dimension: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Icon(canCreate ? Icons.add_comment_outlined : Icons.login),
+              label: Text(
+                canCreate ? l10n.vtcGroupChatCreate : l10n.vtcGroupChatJoin,
+              ),
+              onPressed: isBusy ? null : (canCreate ? onCreate : onJoin),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A line in a group's box: an icon, a title, and what it says.
+class _Line extends StatelessWidget {
+  const _Line({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 12,
+      children: [
+        Icon(icon, size: 20),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 2,
+            children: [
+              Text(title, style: context.textTheme.bodyMedium),
+              Text(
+                subtitle,
+                style: context.textTheme.bodySmall?.copyWith(
+                  color: context.colorScheme.onSurfaceVariant,
                 ),
               ),
-          ],
+            ],
+          ),
         ),
-      ),
+      ],
     );
   }
 }

@@ -5510,11 +5510,11 @@ abstract class AppLocalizations {
   /// **'Groups'**
   String get vtcGroupsOpen;
 
-  /// Title of the member's groups in a community
+  /// Title of the member's groups in a community, above the community's name
   ///
   /// In en, this message translates to:
-  /// **'{community} groups'**
-  String vtcGroupsTitle(String community);
+  /// **'Groups'**
+  String get vtcGroupsTitle;
 
   /// Shown when the member belongs to no group of the community
   ///
@@ -5539,6 +5539,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Manager'**
   String get vtcGroupManager;
+
+  /// Heading of where a group's chat stands, and of its link
+  ///
+  /// In en, this message translates to:
+  /// **'Group chat'**
+  String get vtcGroupChatHeading;
 
   /// A group's chat status when its link cannot be read
   ///

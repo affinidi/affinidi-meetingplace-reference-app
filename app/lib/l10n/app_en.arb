@@ -3626,14 +3626,9 @@
 	"@vtcGroupsOpen": {
 		"description": "Button on a membership card that opens the member's groups in the community"
 	},
-	"vtcGroupsTitle": "{community} groups",
+	"vtcGroupsTitle": "Groups",
 	"@vtcGroupsTitle": {
-		"description": "Title of the member's groups in a community",
-		"placeholders": {
-			"community": {
-				"type": "String"
-			}
-		}
+		"description": "Title of the member's groups in a community, above the community's name"
 	},
 	"vtcGroupsNone": "You're not in any of this community's groups.",
 	"@vtcGroupsNone": {
@@ -3650,6 +3645,10 @@
 	"vtcGroupManager": "Manager",
 	"@vtcGroupManager": {
 		"description": "Chip on a group the member manages"
+	},
+	"vtcGroupChatHeading": "Group chat",
+	"@vtcGroupChatHeading": {
+		"description": "Heading of where a group's chat stands, and of its link"
 	},
 	"vtcGroupChatUnknown": "This group's chat couldn't be checked.",
 	"@vtcGroupChatUnknown": {

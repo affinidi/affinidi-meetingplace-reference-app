@@ -89,9 +89,7 @@ class MembershipCredentialDetailsScreen extends ConsumerWidget {
                         MaterialPageRoute<void>(
                           builder: (_) => VtcGroupsScreen(
                             communityDid: entry.card.issuer,
-                            communityName:
-                                entry.communityName ??
-                                l10n.membershipCredentialUnnamed,
+                            communityName: entry.communityName,
                           ),
                         ),
                       ),

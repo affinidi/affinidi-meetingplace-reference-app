@@ -3700,9 +3700,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get vtcGroupsOpen => 'Groups';
 
   @override
-  String vtcGroupsTitle(String community) {
-    return '$community groups';
-  }
+  String get vtcGroupsTitle => 'Groups';
 
   @override
   String get vtcGroupsNone => 'You\'re not in any of this community\'s groups.';
@@ -3716,6 +3714,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get vtcGroupManager => 'Manager';
+
+  @override
+  String get vtcGroupChatHeading => 'Group chat';
 
   @override
   String get vtcGroupChatUnknown => 'This group\'s chat couldn\'t be checked.';
