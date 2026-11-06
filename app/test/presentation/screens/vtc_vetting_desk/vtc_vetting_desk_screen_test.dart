@@ -245,14 +245,21 @@ void main() {
     tester,
   ) async {
     final requirements = find.byKey(const Key('vtc_vetter_requirements'));
+    final progress = find.byKey(const Key('vtc_vetter_progress'));
 
     await pumpDesk(tester);
     await tester.pump();
     expect(find.byKey(const Key('vtc_vetter_show_ticket')), findsOneWidget);
     expect(requirements, findsNothing);
+    expect(find.text('Checking your vetter card is still valid'), findsOne);
+    expect(find.text('Getting what Football club asks you to check'), findsOne);
 
     await waitFor(tester, requirements);
     expect(requirements, findsOneWidget);
+    for (var i = 0; i < 100 && progress.evaluate().isNotEmpty; i++) {
+      await settle(tester);
+    }
+    expect(progress, findsNothing);
     await close(tester);
   });
 

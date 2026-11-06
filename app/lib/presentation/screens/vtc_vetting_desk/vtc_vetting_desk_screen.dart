@@ -9,6 +9,8 @@ import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import '../../widgets/qr/qr_code_view.dart';
 import '../vtc_join/vtc_claim_type_label.dart';
+import '../vtc_join/vtc_progress_line.dart';
+import '../vtc_join/vtc_trail_step.dart';
 import 'vtc_vetting_desk_controller.dart';
 import 'vtc_vetting_desk_state.dart';
 
@@ -69,6 +71,8 @@ class VtcVettingDeskScreen extends HookConsumerWidget {
             ],
             VtcVettingDeskStep.open => [
               OnboardingSubtitle(l10n.vtcVetterIntro),
+              if (state.checkingCard || state.readingRequirements)
+                _Progress(state: state, communityName: communityName),
               if (!state.readingRequirements)
                 _Requirements(
                   requirements: state.requirements,
@@ -109,6 +113,39 @@ List<String> _documentClasses(VettingRequirements? requirements) {
   if (accepted == null) return known;
   final both = known.where(accepted.contains).toList();
   return both.isEmpty ? known : both;
+}
+
+/// What the desk still checks and reads while already open, each step
+/// under way or done.
+class _Progress extends StatelessWidget {
+  const _Progress({required this.state, required this.communityName});
+
+  final VtcVettingDeskState state;
+  final String communityName;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    VtcTrailStage stage(bool running) =>
+        running ? VtcTrailStage.current : VtcTrailStage.done;
+    return Column(
+      key: const Key('vtc_vetter_progress'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 8,
+      children: [
+        VtcProgressLine(
+          key: const Key('vtc_vetter_progress_card'),
+          title: l10n.vtcVetterStepCard,
+          stage: stage(state.checkingCard),
+        ),
+        VtcProgressLine(
+          key: const Key('vtc_vetter_progress_requirements'),
+          title: l10n.vtcVetterStepRequirements(communityName),
+          stage: stage(state.readingRequirements),
+        ),
+      ],
+    );
+  }
 }
 
 /// What the community asks the vetter to check, as its join manifest says.

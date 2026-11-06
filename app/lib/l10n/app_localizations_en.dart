@@ -4016,6 +4016,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get vtcVetterStepCard => 'Checking your vetter card is still valid';
+
+  @override
+  String vtcVetterStepRequirements(String name) {
+    return 'Getting what $name asks you to check';
+  }
+
+  @override
   String get vtcVetterCheckFailed =>
       'Couldn\'t check your vetter card, so vetting isn\'t offered. Try again later.';
 
