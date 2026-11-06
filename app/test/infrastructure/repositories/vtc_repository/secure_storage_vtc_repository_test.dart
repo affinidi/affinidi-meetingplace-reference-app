@@ -2,6 +2,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_left_membership.dart';
+import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_vetter_desk.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_vetting.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
 
@@ -149,6 +150,85 @@ void main() {
 
       await repository.clear();
       expect(await repository.findVetting('did:webvh:other'), isNull);
+    });
+  });
+
+  group('SecureStorageVtcRepository vetter desks', () {
+    final now = DateTime.utc(2026, 11, 6, 9);
+    const request = VetterRequest(
+      requestId: 'vr-1',
+      requestDocumentId: 'urn:uuid:request',
+      threadId: 'urn:uuid:request',
+      applicantDid: 'did:webvh:alice',
+    );
+
+    VtcVetterDesk desk(String communityDid) {
+      final ticket = VetterTicket.mint(
+        community: communityDid,
+        vetter: 'did:webvh:bob',
+        now: now,
+      );
+      return VtcVetterDesk(communityDid: communityDid)
+          .withTicket(ticket, now)
+          .withSession(const VtcVetterSession(request: request).confirmed());
+    }
+
+    test('keeps the desk for each community', () async {
+      final repository = SecureStorageVtcRepository();
+      final club = desk('did:webvh:club');
+      await repository.saveVetterDesk(club);
+      await repository.saveVetterDesk(desk('did:webvh:other'));
+
+      final stored = (await SecureStorageVtcRepository().findVetterDesk(
+        'did:webvh:club',
+      ))!;
+      expect(stored.tickets.single.toJson(), club.tickets.single.toJson());
+      final session = stored.sessionFor('vr-1')!;
+      expect(session.status, VtcVetterSessionStatus.accepted);
+      expect(session.matchConfirmed, isTrue);
+      expect(session.request.applicantDid, 'did:webvh:alice');
+      expect(session.isOpen, isTrue);
+    });
+
+    test('replaces a ticket and a session, dropping spent tickets', () {
+      final club = desk('did:webvh:club');
+      final ticket = club.tickets.single;
+
+      final updated = club
+          .withTicket(ticket.spent(), now)
+          .withSession(club.sessions.single.issued('urn:uuid:statement'));
+
+      expect(updated.tickets.single.usesLeft, 0);
+      expect(updated.liveTickets(now), isEmpty);
+      expect(
+        updated
+            .withTicket(
+              VetterTicket.mint(
+                community: 'did:webvh:club',
+                vetter: 'did:webvh:bob',
+                now: now,
+              ),
+              now,
+            )
+            .tickets,
+        hasLength(1),
+      );
+      expect(updated.sessions.single.status, VtcVetterSessionStatus.issued);
+      expect(updated.sessions.single.statementId, 'urn:uuid:statement');
+      expect(updated.sessions.single.isOpen, isFalse);
+    });
+
+    test('forgets a community\'s desk, and every desk on clear', () async {
+      final repository = SecureStorageVtcRepository();
+      await repository.saveVetterDesk(desk('did:webvh:club'));
+      await repository.saveVetterDesk(desk('did:webvh:other'));
+
+      await repository.removeVetterDesk('did:webvh:club');
+      expect(await repository.findVetterDesk('did:webvh:club'), isNull);
+      expect(await repository.findVetterDesk('did:webvh:other'), isNotNull);
+
+      await repository.clear();
+      expect(await repository.findVetterDesk('did:webvh:other'), isNull);
     });
   });
 }
