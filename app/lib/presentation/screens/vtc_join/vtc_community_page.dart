@@ -37,8 +37,8 @@ String _roleName(AppLocalizations l10n, String role) =>
 /// a welcome right after joining, else the community's logo and name; their
 /// role, with the community's settings and the vetting desk behind icons
 /// beside it for an administrator and a vetter, the membership card it
-/// issued — or that it is on its way to the member's VTA — what the
-/// community is, then Done and [leave].
+/// issued — or that it is on its way to the member's VTA — then Done and
+/// [leave]. What the community is waits behind an icon beside its name.
 class VtcCommunityPage extends HookConsumerWidget {
   const VtcCommunityPage({
     required this.state,
@@ -100,22 +100,30 @@ class VtcCommunityPage extends HookConsumerWidget {
       children: [
         if (state.wasMember) ...[
           if (state.logoUrl case final logoUrl?) VtcCommunityLogo(logoUrl),
-          Text(
-            name,
-            key: const Key('vtc_community_name'),
-            textAlign: TextAlign.center,
-            style: context.textTheme.titleLarge?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
+          _WithAbout(
+            state: state,
+            child: Text(
+              name,
+              key: const Key('vtc_community_name'),
+              textAlign: TextAlign.center,
+              style: context.textTheme.titleLarge?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ] else ...[
           const Icon(Icons.verified, size: 72, color: Colors.white),
           const SizedBox(height: 4),
-          Text(
-            l10n.vtcJoinJoined(name),
-            textAlign: TextAlign.center,
-            style: context.textTheme.titleMedium?.copyWith(color: Colors.white),
+          _WithAbout(
+            state: state,
+            child: Text(
+              l10n.vtcJoinJoined(name),
+              textAlign: TextAlign.center,
+              style: context.textTheme.titleMedium?.copyWith(
+                color: Colors.white,
+              ),
+            ),
           ),
         ],
         if (state.role case final role?)
@@ -181,7 +189,6 @@ class VtcCommunityPage extends HookConsumerWidget {
           ),
         if (state.identityCheck case final check?)
           VtcIdentityCheckView(check: check, communityName: name),
-        VtcCommunityProfile(state: state),
         const SizedBox(height: 12),
         OnboardingButton(label: l10n.generalDone, onPressed: onDone),
         leave,
@@ -243,13 +250,45 @@ class _RoleLine extends StatelessWidget {
   }
 }
 
-/// Opens the settings of the community at [communityDid] in a sheet on the
-/// onboarding gradient: for now its join phrase.
+/// [child], the community's name, with what the community is behind an
+/// icon beside it.
+class _WithAbout extends StatelessWidget {
+  const _WithAbout({required this.state, required this.child});
+
+  final VtcJoinState state;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Flexible(child: child),
+        IconButton(
+          key: const Key('vtc_community_about'),
+          icon: const Icon(Icons.info_outline, color: Colors.white),
+          tooltip: context.l10n.vtcJoinProfileHeading,
+          onPressed: () =>
+              _showSheet(context, VtcCommunityProfile(state: state)),
+        ),
+      ],
+    );
+  }
+}
+
+/// Opens the settings of the community at [communityDid]: for now its join
+/// phrase.
 Future<void> _showSettings(
   BuildContext context,
   String communityDid,
   String communityName,
-) {
+) => _showSheet(
+  context,
+  VtcJoinPhraseView(communityDid: communityDid, communityName: communityName),
+);
+
+/// Shows [child] in a sheet on the onboarding gradient.
+Future<void> _showSheet(BuildContext context, Widget child) {
   const radius = BorderRadius.vertical(top: Radius.circular(24));
   return showModalBottomSheet<void>(
     context: context,
@@ -261,10 +300,7 @@ Future<void> _showSettings(
       decoration: onboardingGradient(context, radius: 2, borderRadius: radius),
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
-        child: VtcJoinPhraseView(
-          communityDid: communityDid,
-          communityName: communityName,
-        ),
+        child: child,
       ),
     ),
   );

@@ -244,6 +244,11 @@ void main() {
         await settle(tester);
       }
 
+      Future<void> openAbout(WidgetTester tester) async {
+        await tester.tap(find.byKey(const Key('vtc_community_about')));
+        await settle(tester);
+      }
+
       testWidgets('welcomes a new member and says what the community is', (
         tester,
       ) async {
@@ -251,6 +256,10 @@ void main() {
 
         expect(find.text("You're a member of Football club."), findsOneWidget);
         expect(find.byKey(const Key('vtc_community_name')), findsNothing);
+        expect(about('Five-a-side on Sundays.'), findsNothing);
+
+        await openAbout(tester);
+
         expect(about('Five-a-side on Sundays.'), findsOneWidget);
       });
 
@@ -370,6 +379,10 @@ void main() {
           'Football club',
         );
         expect(find.text("You're a member of Football club."), findsNothing);
+        expect(about('Five-a-side on Sundays.'), findsNothing);
+
+        await openAbout(tester);
+
         expect(about('Five-a-side on Sundays.'), findsOneWidget);
         expect(about('https://club.example/'), findsOneWidget);
         expect(
