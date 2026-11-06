@@ -1463,12 +1463,19 @@ void main() {
       expect(await service.canVet(fakeVtcDid), isFalse);
     });
 
-    test('mints a ticket and keeps it on the desk', () async {
-      final ticket = await service.createVettingTicket(fakeVtcDid, uses: 3);
+    test('mints a ticket for one applicant, for 15 minutes', () async {
+      final before = DateTime.now();
+      final ticket = await service.createVettingTicket(fakeVtcDid);
 
       final desk = (await service.vetterDesk(fakeVtcDid))!;
       expect(desk.tickets.single.toJson(), ticket.toJson());
-      expect(ticket.usesLeft, 3);
+      expect(ticket.usesLeft, 1);
+      final lasts = ticket.expiresAt.difference(before);
+      expect(lasts, greaterThanOrEqualTo(VtcService.vettingTicketValidity));
+      expect(
+        lasts,
+        lessThan(VtcService.vettingTicketValidity + const Duration(minutes: 1)),
+      );
       expect(ticket.vetter, vetter.did);
     });
 
@@ -1540,9 +1547,8 @@ void main() {
     });
 
     test('declines, and ends a session the applicant declined', () async {
-      final ticket = await service.createVettingTicket(fakeVtcDid, uses: 2);
-      await requestWith(ticket.spoken);
-      await requestWith(ticket.spoken);
+      await requestWith((await service.createVettingTicket(fakeVtcDid)).spoken);
+      await requestWith((await service.createVettingTicket(fakeVtcDid)).spoken);
       final [first, second] = (await service.checkVetterDesk(
         fakeVtcDid,
       ))!.sessions;

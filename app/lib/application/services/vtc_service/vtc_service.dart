@@ -885,17 +885,17 @@ class VtcService {
   Future<VtcVetterDesk?> vetterDesk(String communityDid) =>
       _repository.findVetterDesk(communityDid);
 
-  /// Mints a ticket for applicants to ask the member to vet them for
-  /// [communityDid], good for [uses] requests until [validity] has passed,
+  /// How long a vetting ticket this app mints lasts: long enough to show
+  /// it to the applicant in front of the vetter, no longer.
+  static const vettingTicketValidity = Duration(minutes: 15);
+
+  /// Mints a ticket for an applicant to ask the member to vet them for
+  /// [communityDid], good for one request within [vettingTicketValidity],
   /// and records it on the desk.
   ///
   /// Throws [NotVetterException] when the member may not vet there, and as
   /// [canVet] does.
-  Future<VetterTicket> createVettingTicket(
-    String communityDid, {
-    int uses = VetterTicket.defaultUses,
-    Duration validity = VetterTicket.defaultValidity,
-  }) async {
+  Future<VetterTicket> createVettingTicket(String communityDid) async {
     final member = await _repository.findCommunity(communityDid);
     if (member == null || !await canVet(communityDid)) {
       throw const NotVetterException();
@@ -904,8 +904,7 @@ class VtcService {
     final ticket = VetterTicket.mint(
       community: communityDid,
       vetter: member.personaDid,
-      uses: uses,
-      validity: validity,
+      validity: vettingTicketValidity,
       now: now,
     );
     final desk =

@@ -3935,24 +3935,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vtcVetterTicketCodeHint => 'Or read out this code';
 
   @override
-  String vtcVetterTicketValid(int uses, String date) {
-    String _temp0 = intl.Intl.pluralLogic(
-      uses,
-      locale: localeName,
-      other: 'Good for $uses more applicants',
-      one: 'Good for 1 more applicant',
-    );
-    return '$_temp0 until $date.';
+  String vtcVetterTicketValid(String time) {
+    return 'Good for one applicant, until $time.';
   }
 
   @override
   String get vtcVetterNewTicket => 'New ticket';
-
-  @override
-  String get vtcVetterUses => 'Applicants';
-
-  @override
-  String get vtcVetterDays => 'Days valid';
 
   @override
   String get vtcVetterShowTicket => 'Show a vetting ticket';

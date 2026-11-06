@@ -72,16 +72,11 @@ class VtcVettingDeskController extends _$VtcVettingDeskController {
     }
   }
 
-  /// Shows a new ticket, good for [uses] applicants for [days] days.
-  Future<void> createTicket({required int uses, required int days}) =>
-      _run(() async {
-        await _service.createVettingTicket(
-          communityDid,
-          uses: uses,
-          validity: Duration(days: days),
-        );
-        state = state.copyWith(desk: await _service.vetterDesk(communityDid));
-      });
+  /// Shows a new ticket, good for one applicant for a short while.
+  Future<void> createTicket() => _run(() async {
+    await _service.createVettingTicket(communityDid);
+    state = state.copyWith(desk: await _service.vetterDesk(communityDid));
+  });
 
   /// Records that the codes match, with the applicant present.
   Future<void> confirmMatch(String requestId) => _run(() async {

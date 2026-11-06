@@ -5876,29 +5876,17 @@ abstract class AppLocalizations {
   /// **'Or read out this code'**
   String get vtcVetterTicketCodeHint;
 
-  /// How long the ticket on show still works
+  /// Until when the ticket on show works
   ///
   /// In en, this message translates to:
-  /// **'{uses, plural, =1{Good for 1 more applicant} other{Good for {uses} more applicants}} until {date}.'**
-  String vtcVetterTicketValid(int uses, String date);
+  /// **'Good for one applicant, until {time}.'**
+  String vtcVetterTicketValid(String time);
 
   /// Replaces the ticket on show with a new one
   ///
   /// In en, this message translates to:
   /// **'New ticket'**
   String get vtcVetterNewTicket;
-
-  /// How many applicants a new ticket is good for
-  ///
-  /// In en, this message translates to:
-  /// **'Applicants'**
-  String get vtcVetterUses;
-
-  /// How many days a new ticket is good for
-  ///
-  /// In en, this message translates to:
-  /// **'Days valid'**
-  String get vtcVetterDays;
 
   /// Creates a ticket and shows it
   ///

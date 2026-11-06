@@ -95,9 +95,8 @@ class VtcVettingDeskScreen extends HookConsumerWidget {
   }
 }
 
-/// The ticket on show while it is live, else how many applicants and days
-/// a new one is good for.
-class _TicketView extends HookWidget {
+/// The ticket on show while it is live, else a way to show one.
+class _TicketView extends StatelessWidget {
   const _TicketView({required this.state, required this.controller});
 
   static const _qrSize = 200.0;
@@ -108,12 +107,9 @@ class _TicketView extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final uses = useState(VetterTicket.defaultUses);
-    final days = useState(VetterTicket.defaultValidity.inDays);
     final ticket = state.liveTicket(clock.now());
-    final makeNew = useState(false);
 
-    if (ticket != null && !makeNew.value) {
+    if (ticket != null) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: 12,
@@ -154,10 +150,9 @@ class _TicketView extends HookWidget {
                 ),
                 Text(
                   l10n.vtcVetterTicketValid(
-                    ticket.usesLeft,
-                    MaterialLocalizations.of(
-                      context,
-                    ).formatMediumDate(ticket.expiresAt.toLocal()),
+                    MaterialLocalizations.of(context).formatTimeOfDay(
+                      TimeOfDay.fromDateTime(ticket.expiresAt.toLocal()),
+                    ),
                   ),
                   style: onboardingNote(context),
                   textAlign: TextAlign.center,
@@ -188,77 +183,20 @@ class _TicketView extends HookWidget {
             key: const Key('vtc_vetter_new_ticket'),
             label: l10n.vtcVetterNewTicket,
             isOutlined: true,
-            onPressed: () => makeNew.value = true,
+            isLoading: state.busy,
+            onPressed: controller.createTicket,
           ),
         ],
       );
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 12,
-      children: [
-        _Counter(
-          key: const Key('vtc_vetter_uses'),
-          label: l10n.vtcVetterUses,
-          value: uses.value,
-          onChanged: (value) => uses.value = value,
-        ),
-        _Counter(
-          key: const Key('vtc_vetter_days'),
-          label: l10n.vtcVetterDays,
-          value: days.value,
-          onChanged: (value) => days.value = value,
-        ),
-        OnboardingButton(
-          key: const Key('vtc_vetter_show_ticket'),
-          label: l10n.vtcVetterShowTicket,
-          isLoading: state.busy,
-          onPressed: () async {
-            await controller.createTicket(uses: uses.value, days: days.value);
-            makeNew.value = false;
-          },
-        ),
-      ],
+    return OnboardingButton(
+      key: const Key('vtc_vetter_show_ticket'),
+      label: l10n.vtcVetterShowTicket,
+      isLoading: state.busy,
+      onPressed: controller.createTicket,
     );
   }
-}
-
-/// A whole number of at least one, set with minus and plus.
-class _Counter extends StatelessWidget {
-  const _Counter({
-    super.key,
-    required this.label,
-    required this.value,
-    required this.onChanged,
-  });
-
-  final String label;
-  final int value;
-  final ValueChanged<int> onChanged;
-
-  @override
-  Widget build(BuildContext context) => OnboardingLine(
-    icon: Icons.tune,
-    title: label,
-    trailing: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(
-          icon: const Icon(Icons.remove, color: Colors.white),
-          onPressed: value > 1 ? () => onChanged(value - 1) : null,
-        ),
-        Text(
-          '$value',
-          style: context.textTheme.titleMedium?.copyWith(color: Colors.white),
-        ),
-        IconButton(
-          icon: const Icon(Icons.add, color: Colors.white),
-          onPressed: () => onChanged(value + 1),
-        ),
-      ],
-    ),
-  );
 }
 
 /// One applicant's session: the match code until the vetter confirms it,

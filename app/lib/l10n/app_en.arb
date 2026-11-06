@@ -3957,14 +3957,11 @@
 	"@vtcVetterTicketCodeHint": {
 		"description": "Shown above the ticket's short code"
 	},
-	"vtcVetterTicketValid": "{uses, plural, =1{Good for 1 more applicant} other{Good for {uses} more applicants}} until {date}.",
+	"vtcVetterTicketValid": "Good for one applicant, until {time}.",
 	"@vtcVetterTicketValid": {
-		"description": "How long the ticket on show still works",
+		"description": "Until when the ticket on show works",
 		"placeholders": {
-			"uses": {
-				"type": "int"
-			},
-			"date": {
+			"time": {
 				"type": "String"
 			}
 		}
@@ -3972,14 +3969,6 @@
 	"vtcVetterNewTicket": "New ticket",
 	"@vtcVetterNewTicket": {
 		"description": "Replaces the ticket on show with a new one"
-	},
-	"vtcVetterUses": "Applicants",
-	"@vtcVetterUses": {
-		"description": "How many applicants a new ticket is good for"
-	},
-	"vtcVetterDays": "Days valid",
-	"@vtcVetterDays": {
-		"description": "How many days a new ticket is good for"
 	},
 	"vtcVetterShowTicket": "Show a vetting ticket",
 	"@vtcVetterShowTicket": {
