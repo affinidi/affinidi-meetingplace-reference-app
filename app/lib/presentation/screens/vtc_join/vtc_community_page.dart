@@ -87,13 +87,25 @@ class VtcCommunityPage extends HookConsumerWidget {
     final communityDid = state.communityDid;
     // Whatever role the role line shows: the vetter role comes on a card of
     // its own, checked from the start alongside the reads of the card and
-    // the role rather than after them.
+    // the role rather than after them. Until the check answers, its last
+    // answer stands; the desk checks the card again before any ticket.
     final canVet = useFuture(
       useMemoized(
         () async => communityDid != null && await _canVet(ref, communityDid),
         [communityDid],
       ),
     );
+    final couldVet = useFuture(
+      useMemoized(
+        () async =>
+            communityDid != null &&
+            await ref.read(vtcServiceProvider).couldVet(communityDid),
+        [communityDid],
+      ),
+    );
+    final offersVetting = canVet.hasData
+        ? canVet.data!
+        : !canVet.hasError && couldVet.data == true;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: 12,
@@ -131,7 +143,7 @@ class VtcCommunityPage extends HookConsumerWidget {
             role: role,
             communityDid: communityDid,
             communityName: name,
-            canVet: canVet.data == true,
+            canVet: offersVetting,
           ),
         if (canVet.hasError)
           OnboardingMessage(

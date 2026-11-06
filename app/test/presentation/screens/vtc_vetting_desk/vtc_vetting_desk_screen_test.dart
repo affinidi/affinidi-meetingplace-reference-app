@@ -238,23 +238,25 @@ void main() {
   });
 
   group('the community page', () {
-    Future<void> pumpPage(WidgetTester tester, String? role) async {
-      await pump(
-        tester,
-        Scaffold(
-          body: SingleChildScrollView(
-            child: VtcCommunityPage(
-              state: VtcJoinState(
-                communityDid: fakeVtcDid,
-                communityName: 'Football club',
-                role: role,
-              ),
-              onDone: () {},
-              leave: const SizedBox(key: Key('leave')),
+    Future<void> showPage(WidgetTester tester, String? role) => pump(
+      tester,
+      Scaffold(
+        body: SingleChildScrollView(
+          child: VtcCommunityPage(
+            state: VtcJoinState(
+              communityDid: fakeVtcDid,
+              communityName: 'Football club',
+              role: role,
             ),
+            onDone: () {},
+            leave: const SizedBox(key: Key('leave')),
           ),
         ),
-      );
+      ),
+    );
+
+    Future<void> pumpPage(WidgetTester tester, String? role) async {
+      await showPage(tester, role);
       await waitFor(
         tester,
         find.byKey(const Key('vtc_community_vetting_desk')),
@@ -297,6 +299,26 @@ void main() {
       await pumpPage(tester, 'vetter');
 
       expect(find.byKey(const Key('vtc_community_vetting_desk')), findsNothing);
+      await close(tester);
+    });
+
+    testWidgets('offers the vetting desk as last checked until the check', (
+      tester,
+    ) async {
+      final desk = find.byKey(const Key('vtc_community_vetting_desk'));
+      await tester.runAsync(() => fixture.service.canVet(fakeVtcDid));
+      fixture.network.revoked.add(3);
+
+      await showPage(tester, 'vetter');
+      // The last answer reads from this phone; the check needs the network.
+      await tester.pump();
+      // Only the last answer offers it: the card is withdrawn by now.
+      expect(desk, findsOneWidget);
+
+      for (var i = 0; i < 100 && desk.evaluate().isNotEmpty; i++) {
+        await settle(tester);
+      }
+      expect(desk, findsNothing);
       await close(tester);
     });
 
