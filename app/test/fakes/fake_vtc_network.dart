@@ -68,6 +68,13 @@ class FakeVtcNetwork implements HttpClientAdapter {
   /// The vetters the community lists.
   List<Map<String, dynamic>> listedVetters = [];
 
+  /// The vetter profiles the community received, oldest first.
+  final List<Map<String, dynamic>> vetterProfiles = [];
+
+  /// When set, the community refuses a vetter profile with this HTTP status
+  /// and code.
+  (int, String)? vetterProfileRefusal;
+
   /// What identities sent other members through their mediators.
   final List<ForwardMessage> sentToMembers = [];
   final _vtcKey = Ed25519DidKeySigner.generate();
@@ -558,6 +565,7 @@ class FakeVtcNetwork implements HttpClientAdapter {
     final memberRefusal = switch (request['type']) {
       MemberTask.selfRemove => leaveRefusal,
       MemberTask.renew => renewRefusal,
+      VettingCommunityTask.vettersProfile => vetterProfileRefusal,
       _ => null,
     };
     if (memberRefusal != null) {
@@ -620,6 +628,13 @@ class FakeVtcNetwork implements HttpClientAdapter {
     } else if (type == VettingCommunityTask.vettersList) {
       purpose = ProofPurpose.authentication;
       answer = {'vetters': listedVetters};
+    } else if (type == VettingCommunityTask.vettersProfile) {
+      vetterProfiles.add(request);
+      purpose = ProofPurpose.authentication;
+      answer = {
+        'listed': payload['listed'],
+        'updatedAt': '2026-11-06T09:00:00Z',
+      };
     } else if (type.startsWith(
       'https://trusttasks.org/spec/vtc/join-requests/',
     )) {
