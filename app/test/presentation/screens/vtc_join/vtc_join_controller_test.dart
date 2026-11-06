@@ -1479,6 +1479,59 @@ void main() {
       );
     });
 
+    test('goes step by step with the vetter, saying what it does', () async {
+      final work = <VtcVettingWork?>[];
+      container.listen(
+        vtcJoinControllerProvider.select((state) => state.vettingWork),
+        (_, next) => work.add(next),
+      );
+      VtcApplicantStep? step() => state().applicantStep;
+
+      await askVetter();
+      expect(work, [
+        VtcVettingWork.listingVetters,
+        null,
+        VtcVettingWork.unlockingIdentity,
+        VtcVettingWork.sendingRequest,
+        null,
+      ]);
+      expect(step(), VtcApplicantStep.ticket);
+      expect(state().waitingOnVetter, isTrue);
+
+      await network.vetterAccepts(applicant, request().request);
+      await network.vetterOpensSession(applicant);
+      await controller().checkVetting();
+      expect(step(), VtcApplicantStep.match);
+      expect(state().waitingOnVetter, isFalse);
+
+      await controller().confirmMatch();
+      expect(step(), VtcApplicantStep.details);
+
+      work.clear();
+      await controller().approveVettingCard();
+      expect(work, [
+        VtcVettingWork.recordingDisclosure,
+        VtcVettingWork.sendingDetails,
+        null,
+      ]);
+      expect(step(), VtcApplicantStep.details);
+      expect(state().waitingOnVetter, isTrue);
+
+      final sent = request();
+      await network.vetterVouches(
+        applicant,
+        session: sent.session!,
+        cardDigest: sent.cardDigest!,
+        identityCommitment: sent.identityCommitment!,
+      );
+      await controller().checkVetting();
+      expect(step(), VtcApplicantStep.done);
+      expect(state().waitingOnVetter, isFalse);
+
+      controller().backToVetting();
+      expect(step(), isNull);
+    });
+
     test('ends the session when the codes do not match', () async {
       await askVetter();
       await network.vetterAccepts(applicant, request().request);

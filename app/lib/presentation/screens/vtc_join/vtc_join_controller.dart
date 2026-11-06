@@ -28,6 +28,13 @@ class VtcJoinController extends _$VtcJoinController {
   /// How often an open application is checked while the screen shows it.
   static const pendingCheckInterval = Duration(seconds: 5);
 
+  /// How often the vetter's answers are picked up while the member waits
+  /// on them, so the next step shows as soon as the vetter acts.
+  static const vettingCheckInterval = Duration(seconds: 1);
+
+  /// When the community, the VTA or the vetters were last asked.
+  DateTime? _checkedAt;
+
   JoinManifest? _manifest;
   List<VtaPersona> _personas = const [];
   Timer? _pendingCheck;
@@ -95,15 +102,14 @@ class VtcJoinController extends _$VtcJoinController {
           (next.step == VtcJoinStep.vetting &&
               (next.vetting?.requests.any((r) => r.isOpen) ?? false));
       if (waiting) {
-        _pendingCheck ??= Timer.periodic(
-          pendingCheckInterval,
-          // The step as it is at each tick, not as it was when set.
-          (_) => switch (state.step) {
-            VtcJoinStep.pending => checkAgain(),
-            VtcJoinStep.vetting => checkVetting(),
-            _ => collectMembershipCard(),
-          },
-        );
+        if (_pendingCheck == null) {
+          // The first check waits its whole interval, as before.
+          _checkedAt = DateTime.now();
+          _pendingCheck = Timer.periodic(
+            vettingCheckInterval,
+            (_) => unawaited(_checkWhenDue()),
+          );
+        }
       } else {
         _pendingCheck?.cancel();
         _pendingCheck = null;
@@ -117,6 +123,25 @@ class VtcJoinController extends _$VtcJoinController {
       }
     });
     return VtcJoinState();
+  }
+
+  /// Asks again once [pendingCheckInterval] passed since the last time, or
+  /// [vettingCheckInterval] while the member waits on a vetter; what is
+  /// asked follows the step as it is now, not as it was when the timer
+  /// was set.
+  Future<void> _checkWhenDue() async {
+    final now = DateTime.now();
+    final interval = state.waitingOnVetter
+        ? vettingCheckInterval
+        : pendingCheckInterval;
+    final checkedAt = _checkedAt;
+    if (checkedAt != null && now.difference(checkedAt) < interval) return;
+    _checkedAt = now;
+    await switch (state.step) {
+      VtcJoinStep.pending => checkAgain(),
+      VtcJoinStep.vetting => checkVetting(),
+      _ => collectMembershipCard(),
+    };
   }
 
   /// Starts over with another community's code, e.g. after a failure.
@@ -537,9 +562,15 @@ class VtcJoinController extends _$VtcJoinController {
               now: DateTime.now(),
             ),
       vetterDid: null,
+      vettingWork: null,
       details: const [],
       vettingFailure: failure,
     );
+  }
+
+  void _showWork(VtcVettingWork work) {
+    // The screen may have closed while the work went on.
+    if (ref.mounted) state = state.copyWith(vettingWork: work);
   }
 
   /// Picks up the vetters' answers. Quietly, as [checkAgain]: a check that
@@ -593,10 +624,15 @@ class VtcJoinController extends _$VtcJoinController {
   Future<void> enterVettingCode() async {
     final manifest = _manifest;
     if (state.step != VtcJoinStep.vetting || manifest == null) return;
-    state = state.copyWith(step: VtcJoinStep.working, vettingFailure: null);
+    state = state.copyWith(
+      step: VtcJoinStep.working,
+      vettingWork: VtcVettingWork.listingVetters,
+      vettingFailure: null,
+    );
     await _run(() async {
       final vetters = await _service.vetters(manifest);
       state = state.copyWith(
+        vettingWork: null,
         vetters: vetters,
         step: vetters.length == 1
             ? VtcJoinStep.enterVettingCode
@@ -648,7 +684,12 @@ class VtcJoinController extends _$VtcJoinController {
         .where((vetter) => vetter.did == ticket.vetter)
         .firstOrNull
         ?.displayName;
-    state = state.copyWith(step: VtcJoinStep.working, vettingFailure: null);
+    state = state.copyWith(
+      step: VtcJoinStep.working,
+      flowVetterDid: ticket.vetter,
+      vettingWork: VtcVettingWork.unlockingIdentity,
+      vettingFailure: null,
+    );
     await _run(() async {
       _showVetting(
         await _service.startVetting(
@@ -656,6 +697,7 @@ class VtcJoinController extends _$VtcJoinController {
           criterion: criterion,
           ticket: ticket,
           vetterName: name,
+          onStep: _showWork,
         ),
       );
     });
@@ -678,6 +720,7 @@ class VtcJoinController extends _$VtcJoinController {
         vettingRequirements: null,
         vettingProgress: null,
         vetterDid: null,
+        flowVetterDid: null,
         vettingFailure: null,
       );
     });
@@ -687,6 +730,7 @@ class VtcJoinController extends _$VtcJoinController {
   void backToVetting() {
     final vetting = state.vetting;
     if (vetting == null) return;
+    state = state.copyWith(flowVetterDid: null);
     _showVetting(vetting);
   }
 
@@ -700,7 +744,10 @@ class VtcJoinController extends _$VtcJoinController {
         vetterDid == null) {
       return;
     }
-    state = state.copyWith(step: VtcJoinStep.working);
+    state = state.copyWith(
+      step: VtcJoinStep.working,
+      vettingWork: VtcVettingWork.preparingDetails,
+    );
     await _run(() async {
       final preview = await _service.previewVettingCard(
         manifest.communityDid,
@@ -739,6 +786,7 @@ class VtcJoinController extends _$VtcJoinController {
       _vettingPreview = preview;
       state = state.copyWith(
         step: VtcJoinStep.approveVettingCard,
+        vettingWork: null,
         details: [
           for (final claim in preview.claims)
             if (claim.value case final Object value)
@@ -774,7 +822,10 @@ class VtcJoinController extends _$VtcJoinController {
         preview == null) {
       return;
     }
-    state = state.copyWith(step: VtcJoinStep.working);
+    state = state.copyWith(
+      step: VtcJoinStep.working,
+      vettingWork: VtcVettingWork.recordingDisclosure,
+    );
     _vettingPreview = null;
     await _run(() async {
       _showVetting(
@@ -782,6 +833,7 @@ class VtcJoinController extends _$VtcJoinController {
           manifest.communityDid,
           vetterDid,
           preview: preview,
+          onStep: _showWork,
         ),
       );
     });
@@ -816,7 +868,11 @@ class VtcJoinController extends _$VtcJoinController {
         !(state.vettingProgress?.satisfied ?? false)) {
       return;
     }
-    state = state.copyWith(step: VtcJoinStep.working);
+    state = state.copyWith(
+      step: VtcJoinStep.working,
+      flowVetterDid: null,
+      vettingWork: null,
+    );
     _sendingVetted = true;
     await _run(() => _apply(manifest));
   }
@@ -1168,7 +1224,12 @@ class VtcJoinController extends _$VtcJoinController {
   }
 
   void _fail(VtcJoinFailure failure) {
-    state = state.copyWith(step: VtcJoinStep.failed, failure: failure);
+    state = state.copyWith(
+      step: VtcJoinStep.failed,
+      failure: failure,
+      flowVetterDid: null,
+      vettingWork: null,
+    );
   }
 
   static VtcJoinFailure _failureOf(MeetingPlaceVtcSDKException error) {

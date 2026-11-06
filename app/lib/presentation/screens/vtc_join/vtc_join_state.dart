@@ -71,6 +71,21 @@ enum VtcJoinStep {
   failed,
 }
 
+/// A step of being vetted by one vetter, from their ticket on, in order.
+enum VtcApplicantStep {
+  /// Scanning the vetter's ticket or typing their code, and asking them.
+  ticket,
+
+  /// Comparing the session's match code with the vetter.
+  match,
+
+  /// Sharing the details the vetter checks in person.
+  details,
+
+  /// The vetter vouched, declined or refused, or the member ended it.
+  done,
+}
+
 /// Why joining could not go ahead.
 enum VtcJoinFailure {
   /// The scanned code is not a community's DID.
@@ -354,6 +369,13 @@ abstract class VtcJoinState with _$VtcJoinState {
     /// The vetter of the session or code at hand.
     String? vetterDid,
 
+    /// The vetter the member is being vetted by, step by step, from asking
+    /// them until going back to the overview.
+    String? flowVetterDid,
+
+    /// What the phone does in the background for the vetting at hand.
+    VtcVettingWork? vettingWork,
+
     /// Why the last vetting step could not go ahead, shown on the overview.
     VettingFailure? vettingFailure,
 
@@ -369,4 +391,43 @@ abstract class VtcJoinState with _$VtcJoinState {
     String? denialReason,
     VtcJoinFailure? failure,
   }) = _VtcJoinState;
+
+  VtcJoinState._();
+
+  /// The step of being vetted by one vetter the member is at, or null
+  /// outside it.
+  VtcApplicantStep? get applicantStep => switch (step) {
+    VtcJoinStep.chooseVetter ||
+    VtcJoinStep.enterVettingCode => VtcApplicantStep.ticket,
+    VtcJoinStep.confirmMatch => VtcApplicantStep.match,
+    VtcJoinStep.approveVettingCard => VtcApplicantStep.details,
+    VtcJoinStep.working => switch (vettingWork) {
+      VtcVettingWork.listingVetters ||
+      VtcVettingWork.unlockingIdentity ||
+      VtcVettingWork.sendingRequest => VtcApplicantStep.ticket,
+      VtcVettingWork.preparingDetails => VtcApplicantStep.match,
+      VtcVettingWork.recordingDisclosure ||
+      VtcVettingWork.sendingDetails => VtcApplicantStep.details,
+      null => null,
+    },
+    VtcJoinStep.vetting => switch (flowVetterDid) {
+      null => null,
+      final vetterDid => switch (vetting?.requestTo(vetterDid)?.status) {
+        null ||
+        VtcVettingStatus.requested ||
+        VtcVettingStatus.accepted => VtcApplicantStep.ticket,
+        VtcVettingStatus.inSession => VtcApplicantStep.match,
+        VtcVettingStatus.cardSent => VtcApplicantStep.details,
+        _ => VtcApplicantStep.done,
+      },
+    },
+    _ => null,
+  };
+
+  /// Whether the member waits on the vetter at hand: to open a session, or
+  /// to check their details.
+  bool get waitingOnVetter =>
+      step == VtcJoinStep.vetting &&
+      (applicantStep == VtcApplicantStep.ticket ||
+          applicantStep == VtcApplicantStep.details);
 }
