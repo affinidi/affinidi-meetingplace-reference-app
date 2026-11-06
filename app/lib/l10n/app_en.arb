@@ -3925,7 +3925,7 @@
 	},
 	"vtcVetterStart": "Vet applicants",
 	"@vtcVetterStart": {
-		"description": "Opens the vetting desk of a community where the member is a vetter"
+		"description": "Tooltip of the button next to the member's role that opens the vetting desk of a community where the member is a vetter"
 	},
 	"vtcVetterTitle": "Vetting for {name}",
 	"@vtcVetterTitle": {

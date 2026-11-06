@@ -272,6 +272,23 @@ void main() {
       await close(tester);
     });
 
+    testWidgets('offers the vetting desk as an icon beside the role', (
+      tester,
+    ) async {
+      await pumpPage(tester, 'vetter');
+
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('vtc_community_role')),
+          matching: find.byKey(const Key('vtc_community_vetting_desk')),
+        ),
+        findsOneWidget,
+      );
+      expect(find.byTooltip('Vet applicants'), findsOneWidget);
+      expect(find.text('Vet applicants'), findsNothing);
+      await close(tester);
+    });
+
     testWidgets('offers no vetting desk once the card is withdrawn', (
       tester,
     ) async {

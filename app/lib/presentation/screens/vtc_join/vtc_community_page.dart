@@ -35,8 +35,8 @@ String _roleName(AppLocalizations l10n, String role) =>
 
 /// The page of a community the member belongs to, which they come back to:
 /// a welcome right after joining, else the community's logo and name; their
-/// role, with the community's settings behind a button beside it for an
-/// administrator and the vetting desk for a vetter, the membership card it
+/// role, with the community's settings and the vetting desk behind icons
+/// beside it for an administrator and a vetter, the membership card it
 /// issued — or that it is on its way to the member's VTA — what the
 /// community is, then Done and [leave].
 class VtcCommunityPage extends StatelessWidget {
@@ -81,25 +81,11 @@ class VtcCommunityPage extends StatelessWidget {
           ),
         ],
         if (state.role case final role?)
-          OnboardingLine(
-            key: const Key('vtc_community_role'),
-            icon: Icons.badge_outlined,
-            title: l10n.vtcCommunityRole,
-            subtitle: _roleName(l10n, role),
-            trailing: switch (state.communityDid) {
-              final communityDid? when role == _adminRole => IconButton(
-                key: const Key('vtc_community_settings'),
-                icon: const Icon(Icons.settings_outlined, color: Colors.white),
-                tooltip: l10n.vtcCommunitySettings,
-                onPressed: () => _showSettings(context, communityDid, name),
-              ),
-              _ => null,
-            },
+          _RoleLine(
+            role: role,
+            communityDid: state.communityDid,
+            communityName: name,
           ),
-        // Whatever role the line above shows: the vetter role comes on a
-        // card of its own, which the entry checks.
-        if (state.communityDid case final communityDid?)
-          _VettingDeskEntry(communityDid: communityDid, communityName: name),
         const SizedBox(height: 4),
         if (card != null) ...[
           VtcMembershipCardView(
@@ -159,20 +145,22 @@ class VtcCommunityPage extends StatelessWidget {
   }
 }
 
-/// Opens the vetting desk, while the member's vetter card for the community
-/// at [communityDid] holds; else shows nothing.
-class _VettingDeskEntry extends HookConsumerWidget {
-  const _VettingDeskEntry({
+/// The member's [role], with the community's settings beside it for an
+/// administrator and the vetting desk for a vetter.
+class _RoleLine extends HookConsumerWidget {
+  const _RoleLine({
+    required this.role,
     required this.communityDid,
     required this.communityName,
   });
 
-  final String communityDid;
+  final String role;
+  final String? communityDid;
   final String communityName;
 
   /// Whether the member may vet here; why not, or why it could not be
   /// told, goes to the log, never a DID or a card.
-  Future<bool> _canVet(WidgetRef ref) async {
+  Future<bool> _canVet(WidgetRef ref, String communityDid) async {
     final logger = ref.read(appLoggerProvider);
     try {
       final canVet = await ref.read(vtcServiceProvider).canVet(communityDid);
@@ -200,24 +188,56 @@ class _VettingDeskEntry extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final canVet = useFuture(useMemoized(() => _canVet(ref), [communityDid]));
-    if (canVet.hasError) {
-      return OnboardingMessage(
-        context.l10n.vtcVetterCheckFailed,
-        key: const Key('vtc_community_vetting_check_failed'),
-        isError: true,
-      );
-    }
-    if (canVet.data != true) return const SizedBox.shrink();
-    return OnboardingButton(
-      key: const Key('vtc_community_vetting_desk'),
-      label: context.l10n.vtcVetterStart,
-      isOutlined: true,
-      onPressed: () => VtcVettingDeskScreen.show(
-        context,
-        communityDid: communityDid,
-        communityName: communityName,
+    final l10n = context.l10n;
+    final communityDid = this.communityDid;
+    // Whatever role the line shows: the vetter role comes on a card of its
+    // own, which is checked here.
+    final canVet = useFuture(
+      useMemoized(
+        () async => communityDid != null && await _canVet(ref, communityDid),
+        [communityDid],
       ),
+    );
+    final actions = [
+      if (communityDid != null && role == _adminRole)
+        IconButton(
+          key: const Key('vtc_community_settings'),
+          icon: const Icon(Icons.settings_outlined, color: Colors.white),
+          tooltip: l10n.vtcCommunitySettings,
+          onPressed: () => _showSettings(context, communityDid, communityName),
+        ),
+      if (communityDid != null && canVet.data == true)
+        IconButton(
+          key: const Key('vtc_community_vetting_desk'),
+          icon: const Icon(Icons.how_to_reg_outlined, color: Colors.white),
+          tooltip: l10n.vtcVetterStart,
+          onPressed: () => VtcVettingDeskScreen.show(
+            context,
+            communityDid: communityDid,
+            communityName: communityName,
+          ),
+        ),
+    ];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 12,
+      children: [
+        OnboardingLine(
+          key: const Key('vtc_community_role'),
+          icon: Icons.badge_outlined,
+          title: l10n.vtcCommunityRole,
+          subtitle: _roleName(l10n, role),
+          trailing: actions.isEmpty
+              ? null
+              : Row(mainAxisSize: MainAxisSize.min, children: actions),
+        ),
+        if (canVet.hasError)
+          OnboardingMessage(
+            l10n.vtcVetterCheckFailed,
+            key: const Key('vtc_community_vetting_check_failed'),
+            isError: true,
+          ),
+      ],
     );
   }
 }
