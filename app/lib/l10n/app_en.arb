@@ -4061,6 +4061,21 @@
 			}
 		}
 	},
+	"onboardingStepOf": "Step {step} of {total} · {title}",
+	"@onboardingStepOf": {
+		"description": "Above a flow's progress bar: which step the member is on, and its name",
+		"placeholders": {
+			"step": {
+				"type": "int"
+			},
+			"total": {
+				"type": "int"
+			},
+			"title": {
+				"type": "String"
+			}
+		}
+	},
 	"vtcVetterCardTitle": "Vetter card",
 	"@vtcVetterCardTitle": {
 		"description": "Title of the role card in which the community makes the member a vetter, shown on the vetting desk"

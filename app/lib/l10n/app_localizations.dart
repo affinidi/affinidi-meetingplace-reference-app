@@ -5990,6 +5990,12 @@ abstract class AppLocalizations {
   /// **'{failure, select, notVetter{Your vetter card is no longer valid.} other{Something went wrong. Check your connection and try again.}}'**
   String vtcVetterFailure(String failure);
 
+  /// Above a flow's progress bar: which step the member is on, and its name
+  ///
+  /// In en, this message translates to:
+  /// **'Step {step} of {total} · {title}'**
+  String onboardingStepOf(int step, int total, String title);
+
   /// Title of the role card in which the community makes the member a vetter, shown on the vetting desk
   ///
   /// In en, this message translates to:

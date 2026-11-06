@@ -495,3 +495,41 @@ class OnboardingSpinner extends StatelessWidget {
     );
   }
 }
+
+/// Where a flow of [total] steps stands: a thin white bar filled up to
+/// [step], counted from 1, under the step's [title].
+class OnboardingStepProgress extends StatelessWidget {
+  const OnboardingStepProgress({
+    super.key,
+    required this.step,
+    required this.total,
+    required this.title,
+  });
+
+  final int step;
+  final int total;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 8,
+      children: [
+        Text(
+          context.l10n.onboardingStepOf(step, total, title),
+          style: onboardingNote(context),
+        ),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(2),
+          child: LinearProgressIndicator(
+            value: step / total,
+            minHeight: 4,
+            color: Colors.white,
+            backgroundColor: Colors.white24,
+          ),
+        ),
+      ],
+    );
+  }
+}

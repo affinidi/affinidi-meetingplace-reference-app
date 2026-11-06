@@ -4062,6 +4062,11 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String onboardingStepOf(int step, int total, String title) {
+    return 'Step $step of $total · $title';
+  }
+
+  @override
   String get vtcVetterCardTitle => 'Vetter card';
 
   @override
