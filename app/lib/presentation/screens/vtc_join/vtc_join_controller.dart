@@ -681,19 +681,26 @@ class VtcJoinController extends _$VtcJoinController {
     final manifest = _manifest;
     final criterion = manifest == null ? null : _chosenCriterion(manifest);
     if (manifest == null || criterion == null) return;
+    // A scanned vetter may not be read yet: read the listing first, so the
+    // lines after it name the vetter.
+    final listed = state.vetters.any((vetter) => vetter.did == ticket.vetter);
     state = state.copyWith(
       step: VtcJoinStep.working,
       flowVetterDid: ticket.vetter,
-      vettingWork: VtcVettingWork.unlockingIdentity,
+      vettingWork: listed
+          ? VtcVettingWork.unlockingIdentity
+          : VtcVettingWork.listingVetters,
       vettingFailure: null,
     );
     await _run(() async {
+      final vetterName = await _listedName(manifest, ticket.vetter);
+      state = state.copyWith(vettingWork: VtcVettingWork.unlockingIdentity);
       _showVetting(
         await _service.startVetting(
           manifest,
           criterion: criterion,
           ticket: ticket,
-          vetterName: await _listedName(manifest, ticket.vetter),
+          vetterName: vetterName,
           onStep: _showWork,
         ),
       );

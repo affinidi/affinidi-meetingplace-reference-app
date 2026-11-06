@@ -1392,6 +1392,11 @@ void main() {
     test('names a vetter whose ticket was scanned by their listing', () async {
       await openVetting();
       expect(state().vetters, isEmpty);
+      final work = <VtcVettingWork?>[];
+      container.listen(
+        vtcJoinControllerProvider.select((state) => state.vettingWork),
+        (_, next) => work.add(next),
+      );
 
       await controller().scanVettingTicket(
         VettingTicket.spoken(
@@ -1405,6 +1410,9 @@ void main() {
       expect(request().vetterName, 'Bob');
       // Kept for the rest of what Bob published.
       expect(state().vetters.map((vetter) => vetter.did), [network.vetterDid]);
+      // Read before any line names Bob.
+      expect(work.first, VtcVettingWork.listingVetters);
+      expect(work[1], VtcVettingWork.unlockingIdentity);
     });
 
     test('asks a scanned vetter the listing does not name', () async {
