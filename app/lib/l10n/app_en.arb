@@ -4114,6 +4114,10 @@
 	"@vtcVetterStepCard": {
 		"description": "Step the open vetting desk runs in the background: the vetter role card is in date and not withdrawn"
 	},
+	"vtcVetterStepTicket": "Creating your ticket",
+	"@vtcVetterStepTicket": {
+		"description": "Step of showing a vetting ticket: minting it and recording it on the desk"
+	},
 	"vtcVetterStepRequirements": "Getting what {name} asks you to check",
 	"@vtcVetterStepRequirements": {
 		"description": "Step the open vetting desk runs in the background: reading the community's vetting requirements",

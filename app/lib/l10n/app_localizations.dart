@@ -6038,6 +6038,12 @@ abstract class AppLocalizations {
   /// **'Checking your vetter card is still valid'**
   String get vtcVetterStepCard;
 
+  /// Step of showing a vetting ticket: minting it and recording it on the desk
+  ///
+  /// In en, this message translates to:
+  /// **'Creating your ticket'**
+  String get vtcVetterStepTicket;
+
   /// Step the open vetting desk runs in the background: reading the community's vetting requirements
   ///
   /// In en, this message translates to:

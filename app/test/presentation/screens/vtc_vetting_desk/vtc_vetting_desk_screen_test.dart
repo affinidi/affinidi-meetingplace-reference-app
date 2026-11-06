@@ -143,8 +143,20 @@ void main() {
     await pumpDesk(tester);
     await waitFor(tester, find.byKey(const Key('vtc_vetter_show_ticket')));
 
-    await tap(tester, find.byKey(const Key('vtc_vetter_show_ticket')));
+    final showTicket = find.byKey(const Key('vtc_vetter_show_ticket'));
+    await tester.ensureVisible(showTicket);
+    await tester.tap(showTicket);
+    // The flow opens at once and says what it does before the ticket shows.
+    await tester.pump();
+    await tester.pump();
+    expect(find.byType(VtcVettingFlowScreen), findsOneWidget);
+    expect(find.byKey(const Key('vtc_vetter_ticket_progress')), findsOneWidget);
+    expect(find.text('Checking your vetter card is still valid'), findsOne);
+    expect(find.text('Creating your ticket'), findsOne);
+    expect(find.byKey(const Key('vtc_vetter_new_ticket')), findsNothing);
+
     await waitFor(tester, find.byKey(const Key('vtc_vetter_ticket_qr')));
+    expect(find.byKey(const Key('vtc_vetter_ticket_progress')), findsNothing);
 
     final recorded = (await tester.runAsync(
       () => fixture.service.vetterDesk(fakeVtcDid),

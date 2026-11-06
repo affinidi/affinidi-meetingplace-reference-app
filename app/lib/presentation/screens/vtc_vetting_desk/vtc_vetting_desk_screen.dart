@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -44,9 +46,7 @@ class VtcVettingDeskScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final provider = vtcVettingDeskControllerProvider(communityDid);
-    final state = ref.watch(provider);
-    final controller = ref.read(provider.notifier);
+    final state = ref.watch(vtcVettingDeskControllerProvider(communityDid));
     final l10n = context.l10n;
     void close() => Navigator.of(context).pop();
     Future<void> showFlow() => VtcVettingFlowScreen.show(
@@ -94,11 +94,7 @@ class VtcVettingDeskScreen extends HookConsumerWidget {
                 OnboardingButton(
                   key: const Key('vtc_vetter_show_ticket'),
                   label: l10n.vtcVetterShowTicket,
-                  isLoading: state.busy,
-                  onPressed: () async {
-                    await controller.createTicket();
-                    if (ref.read(provider).failure == null) await showFlow();
-                  },
+                  onPressed: showFlow,
                 ),
               if (state.vetterCard case final card?)
                 VtcCardView(
@@ -134,7 +130,8 @@ class VtcVettingDeskScreen extends HookConsumerWidget {
 /// for them to scan or type in, the match code, their details to check in
 /// person and vouching for them or declining, then how it ended. Closing
 /// it leaves the ticket or session open, to come back to from the desk.
-class VtcVettingFlowScreen extends ConsumerWidget {
+/// Opened with neither, it creates the ticket, saying how far it got.
+class VtcVettingFlowScreen extends HookConsumerWidget {
   const VtcVettingFlowScreen({
     super.key,
     required this.communityDid,
@@ -163,6 +160,18 @@ class VtcVettingFlowScreen extends ConsumerWidget {
     final state = ref.watch(provider);
     final controller = ref.read(provider.notifier);
     final l10n = context.l10n;
+    // Until starting has had its say, the ticket counts as in the making.
+    final starting = useState(true);
+    useEffect(() {
+      // After the first frame: the desk's state cannot change while the
+      // page builds.
+      unawaited(
+        Future(controller.startVetting).whenComplete(() {
+          if (context.mounted) starting.value = false;
+        }),
+      );
+      return null;
+    }, const []);
     // A ticket no longer live, with no applicant, is shown again from the
     // first step.
     final step = state.flowStep(clock.now()) ?? VtcVettingFlowStep.ticket;
@@ -198,7 +207,11 @@ class VtcVettingFlowScreen extends ConsumerWidget {
               busy: state.busy,
               controller: controller,
             ),
-            _ => _TicketView(state: state, controller: controller),
+            _ => _TicketView(
+              state: state,
+              controller: controller,
+              creating: starting.value || state.ticketStep != null,
+            ),
           },
           if (state.failure case final failure?)
             OnboardingMessage(
@@ -340,12 +353,19 @@ class _Requirements extends StatelessWidget {
 
 /// The ticket on show while it is live, else a way to show one.
 class _TicketView extends StatelessWidget {
-  const _TicketView({required this.state, required this.controller});
+  const _TicketView({
+    required this.state,
+    required this.controller,
+    required this.creating,
+  });
 
   static const _qrSize = 200.0;
 
   final VtcVettingDeskState state;
   final VtcVettingDeskController controller;
+
+  /// Whether the ticket is being created, so none is on show yet.
+  final bool creating;
 
   @override
   Widget build(BuildContext context) {
@@ -433,12 +453,49 @@ class _TicketView extends StatelessWidget {
       );
     }
 
+    if (creating) return _TicketProgress(step: state.ticketStep);
+
     // The ticket ran out or was used up, with no applicant to vet.
     return OnboardingButton(
       key: const Key('vtc_vetter_new_ticket'),
       label: l10n.vtcVetterNewTicket,
       isLoading: state.busy,
       onPressed: controller.createTicket,
+    );
+  }
+}
+
+/// Creating the ticket, step by step: each step done, under way, or still
+/// to come.
+class _TicketProgress extends StatelessWidget {
+  const _TicketProgress({required this.step});
+
+  /// The step under way; none yet means the first is about to start.
+  final VtcTicketStep? step;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final current = step ?? VtcTicketStep.values.first;
+    return Column(
+      key: const Key('vtc_vetter_ticket_progress'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 8,
+      children: [
+        for (final step in VtcTicketStep.values)
+          VtcProgressLine(
+            key: Key('vtc_vetter_ticket_step_${step.name}'),
+            title: switch (step) {
+              VtcTicketStep.checkingCard => l10n.vtcVetterStepCard,
+              VtcTicketStep.creating => l10n.vtcVetterStepTicket,
+            },
+            stage: switch (step.index.compareTo(current.index)) {
+              < 0 => VtcTrailStage.done,
+              0 => VtcTrailStage.current,
+              _ => VtcTrailStage.next,
+            },
+          ),
+      ],
     );
   }
 }

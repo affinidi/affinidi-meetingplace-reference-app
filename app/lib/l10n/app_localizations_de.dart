@@ -4103,6 +4103,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get vtcVetterStepCard => 'Checking your vetter card is still valid';
 
   @override
+  String get vtcVetterStepTicket => 'Creating your ticket';
+
+  @override
   String vtcVetterStepRequirements(String name) {
     return 'Getting what $name asks you to check';
   }
