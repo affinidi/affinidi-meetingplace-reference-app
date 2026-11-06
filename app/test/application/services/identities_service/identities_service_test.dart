@@ -150,6 +150,12 @@ void main() {
 
       final entries = payloadOf(VtaTask.localProfilePut)['entries'] as List;
       expect(((entries.first as Map)['inline'] as Map)['value'], 'Ada 2');
+      // Worn again, so the persona discloses the new details.
+      expect(payloadOf(VtaTask.localBindingSet), {
+        'contextId': 'mpx-1',
+        'personaDid': stored.did,
+        'profileId': stored.vtaProfileId,
+      });
       expect(repository.identities.single.card.displayName, 'Ada 2');
     });
 

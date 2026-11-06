@@ -178,6 +178,7 @@ class IdentitiesService extends _$IdentitiesService {
           .read(vtcServiceProvider)
           .updateIdentity(
             contextId: identity.vtaContextId!,
+            personaDid: identity.did,
             profileId: identity.vtaProfileId!,
             profile: identity.card.toVtaProfile(),
           );

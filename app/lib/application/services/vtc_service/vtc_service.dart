@@ -286,14 +286,17 @@ class VtcService {
     profileId: profileId,
   );
 
-  /// Replaces the details of the profile [profileId] that the identity in
-  /// [contextId] wears. Throws as [createIdentity] does.
+  /// Replaces the details of the profile [profileId] that the identity
+  /// [personaDid] in [contextId] wears, which then discloses them. Throws as
+  /// [createIdentity] does.
   Future<void> updateIdentity({
     required String contextId,
+    required String personaDid,
     required String profileId,
     required VtaProfile profile,
   }) async => (await _grantedVta()).updateProfile(
     contextId: contextId,
+    personaDid: personaDid,
     profileId: profileId,
     profile: profile,
   );
