@@ -4160,6 +4160,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get vtcVetterStepSession => 'Opening a session with them';
 
   @override
+  String get vtcBackgroundHeading => 'In the background';
+
+  @override
   String get vtcVetterStepTicket => 'Creating your ticket';
 
   @override

@@ -306,10 +306,8 @@ class _Progress extends StatelessWidget {
     final l10n = context.l10n;
     VtcTrailStage stage(bool running) =>
         running ? VtcTrailStage.current : VtcTrailStage.done;
-    return Column(
+    return VtcBackgroundPanel(
       key: const Key('vtc_vetter_progress'),
-      crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: 8,
       children: [
         VtcProgressLine(
           key: const Key('vtc_vetter_progress_card'),
@@ -499,9 +497,7 @@ class _Steps<T extends Enum> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final current = step ?? steps.first;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: 8,
+    return VtcBackgroundPanel(
       children: [
         for (final step in steps)
           VtcProgressLine(

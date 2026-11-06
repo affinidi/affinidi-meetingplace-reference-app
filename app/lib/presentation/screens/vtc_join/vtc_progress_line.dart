@@ -89,3 +89,49 @@ class VtcWaitingForParty extends StatelessWidget {
     );
   }
 }
+
+/// What the phone does in the background, set apart from a page's main
+/// content: a darker, translucent panel under a small heading, [title] or
+/// "In the background", holding [children], the lines of its steps.
+class VtcBackgroundPanel extends StatelessWidget {
+  const VtcBackgroundPanel({super.key, this.title, required this.children});
+
+  final String? title;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Colors.black.withAlpha(45),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withAlpha(40)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 10, 14, 14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: 10,
+          children: [
+            Row(
+              spacing: 6,
+              children: [
+                const Icon(Icons.sync, size: 14, color: Colors.white60),
+                Flexible(
+                  child: Text(
+                    title ?? context.l10n.vtcBackgroundHeading,
+                    style: context.textTheme.labelMedium?.copyWith(
+                      color: Colors.white60,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            ...children,
+          ],
+        ),
+      ),
+    );
+  }
+}

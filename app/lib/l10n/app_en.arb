@@ -4204,6 +4204,10 @@
 	"@vtcVetterStepSession": {
 		"description": "Step of taking an applicant's request: accepting it and opening the session in which codes are compared"
 	},
+	"vtcBackgroundHeading": "In the background",
+	"@vtcBackgroundHeading": {
+		"description": "Small heading of the panel listing what the phone does in the background, apart from the page's content"
+	},
 	"vtcVetterStepTicket": "Creating your ticket",
 	"@vtcVetterStepTicket": {
 		"description": "Step of showing a vetting ticket: minting it and recording it on the desk"

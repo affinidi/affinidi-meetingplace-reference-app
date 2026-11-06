@@ -258,15 +258,10 @@ class _CardLookup extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final current = step ?? MembershipCardStep.values.first;
-    return Column(
+    return VtcBackgroundPanel(
       key: const Key('vtc_membership_card_loading'),
-      crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: 8,
+      title: l10n.vtcMembershipCardLoading,
       children: [
-        Text(
-          l10n.vtcMembershipCardLoading,
-          style: context.textTheme.titleMedium?.copyWith(color: Colors.white),
-        ),
         for (final step in MembershipCardStep.values)
           VtcProgressLine(
             key: Key('vtc_card_step_${step.name}'),

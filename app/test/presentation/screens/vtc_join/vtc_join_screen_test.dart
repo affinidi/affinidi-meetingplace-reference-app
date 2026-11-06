@@ -1399,7 +1399,21 @@ void main() {
       await askBob(tester);
 
       expect(find.text('Step 1 of 4 · Ask the vetter'), findsOneWidget);
-      expect(find.text('Sending your request to Bob'), findsOneWidget);
+      // What the phone does sits apart from what the vetter is to do.
+      expect(
+        find.descendant(
+          of: find.byType(VtcBackgroundPanel),
+          matching: find.text('Sending your request to Bob'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byType(VtcBackgroundPanel),
+          matching: find.text('Waiting for Bob to open a session'),
+        ),
+        findsNothing,
+      );
       expect(
         find.widgetWithText(
           VtcWaitingForParty,

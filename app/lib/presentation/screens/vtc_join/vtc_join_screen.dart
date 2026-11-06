@@ -1116,21 +1116,24 @@ class _VettingFlow extends StatelessWidget {
           : steps.indexWhere((step) => step.$1 == work);
       return Column(
         key: const Key('vtc_join_vetting_work'),
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 12,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          for (final (index, (_, title)) in steps.indexed)
-            if (waiting && index == current)
-              Center(child: VtcWaitingForParty(title))
-            else
-              VtcProgressLine(
-                title: title,
-                stage: switch (index.compareTo(current)) {
-                  < 0 => VtcTrailStage.done,
-                  0 => VtcTrailStage.current,
-                  _ => VtcTrailStage.next,
-                },
-              ),
+          VtcBackgroundPanel(
+            children: [
+              for (final (index, (_, title)) in steps.indexed)
+                if (!waiting || index != current)
+                  VtcProgressLine(
+                    title: title,
+                    stage: switch (index.compareTo(current)) {
+                      < 0 => VtcTrailStage.done,
+                      0 => VtcTrailStage.current,
+                      _ => VtcTrailStage.next,
+                    },
+                  ),
+            ],
+          ),
+          // What the vetter is to do is the page's content, not background.
+          if (waiting) VtcWaitingForParty(steps[current].$2),
         ],
       );
     }

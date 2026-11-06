@@ -6116,6 +6116,12 @@ abstract class AppLocalizations {
   /// **'Opening a session with them'**
   String get vtcVetterStepSession;
 
+  /// Small heading of the panel listing what the phone does in the background, apart from the page's content
+  ///
+  /// In en, this message translates to:
+  /// **'In the background'**
+  String get vtcBackgroundHeading;
+
   /// Step of showing a vetting ticket: minting it and recording it on the desk
   ///
   /// In en, this message translates to:
