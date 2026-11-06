@@ -1444,6 +1444,24 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
     });
 
+    testWidgets('calls a vetter listed without a name unnamed', (tester) async {
+      network.listedVetters = [
+        {
+          'vetterDid': network.vetterDid,
+          'methods': ['inPerson'],
+        },
+      ];
+
+      await askBob(tester);
+
+      expect(
+        find.text('Sending your request to Unnamed vetter'),
+        findsOneWidget,
+      );
+      expect(find.textContaining(network.vetterDid), findsNothing);
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+
     testWidgets('celebrates once the vetter vouched', (tester) async {
       network.vta
         ..answers[VtaTask.disclosurePreview] = {

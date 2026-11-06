@@ -1074,12 +1074,15 @@ ListedVetter? _listedVetter(VtcJoinState state, String? vetterDid) =>
     state.vetters.where((vetter) => vetter.did == vetterDid).firstOrNull;
 
 /// How [vetterDid] goes by: the name the community lists them under, else
-/// their DID.
-String _vetterName(VtcJoinState state, String? vetterDid) =>
+/// as unnamed; never their DID.
+String _vetterName(
+  AppLocalizations l10n,
+  VtcJoinState state,
+  String? vetterDid,
+) =>
     state.vetting?.requestTo(vetterDid ?? '')?.vetterName ??
     _listedVetter(state, vetterDid)?.displayName ??
-    vetterDid ??
-    '';
+    l10n.vtcVetterUnnamed;
 
 /// Being vetted by one vetter, a step a page under a progress bar: asking
 /// them, comparing the match code, sharing the details they check, and
@@ -1100,7 +1103,7 @@ class _VettingFlow extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final vetterDid = state.flowVetterDid ?? state.vetterDid;
-    final vetter = _vetterName(state, vetterDid);
+    final vetter = _vetterName(l10n, state, vetterDid);
     final work = state.vettingWork;
     final waiting = state.step == VtcJoinStep.vetting;
     final back = OnboardingTextButton(
@@ -1496,7 +1499,9 @@ class _VettingCode extends HookWidget {
       spacing: 12,
       children: [
         OnboardingTitle(
-          l10n.vtcJoinVettingCodeTitle(_vetterName(state, state.vetterDid)),
+          l10n.vtcJoinVettingCodeTitle(
+            _vetterName(l10n, state, state.vetterDid),
+          ),
         ),
         OnboardingSubtitle(l10n.vtcJoinVettingCodeIntro),
         OnboardingTextField(
@@ -1539,7 +1544,7 @@ class _ConfirmMatch extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final request = state.vetting?.requestTo(state.vetterDid ?? '');
-    final vetter = _vetterName(state, state.vetterDid);
+    final vetter = _vetterName(l10n, state, state.vetterDid);
     final code = switch (request?.session) {
       {'id': final String id} => vettingMatchCode(id),
       _ => '',
@@ -1605,7 +1610,7 @@ class _ApproveVettingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final vetter = _vetterName(state, state.vetterDid);
+    final vetter = _vetterName(l10n, state, state.vetterDid);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: 12,
