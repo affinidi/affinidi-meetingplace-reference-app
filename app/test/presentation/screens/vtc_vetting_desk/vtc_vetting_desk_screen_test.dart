@@ -178,6 +178,29 @@ void main() {
     await close(tester);
   });
 
+  testWidgets('declines while waiting for the applicant\'s details', (
+    tester,
+  ) async {
+    final ticket = (await tester.runAsync(
+      () => fixture.service.createVettingTicket(fakeVtcDid),
+    ))!;
+    await pumpDesk(tester);
+    await waitFor(tester, find.byKey(const Key('vtc_vetter_ticket_qr')));
+    await tester.runAsync(() => fixture.requestWith(ticket.spoken));
+    await check(tester);
+    await tap(tester, find.byKey(const Key('vtc_vetter_match_yes')));
+    await waitFor(tester, find.byKey(const Key('vtc_vetter_card_waiting')));
+
+    await tap(tester, find.byKey(const Key('vtc_vetter_decline')));
+    // The ticket was good once, so a new one is offered.
+    await waitFor(tester, find.byKey(const Key('vtc_vetter_show_ticket')));
+
+    final decline = (await tester.runAsync(fixture.sentToApplicant))!.last;
+    expect(decline.type, VettingTask.decline);
+    expect(find.byKey(const Key('vtc_vetter_show_ticket')), findsOneWidget);
+    await close(tester);
+  });
+
   testWidgets('says so once the vetter card was withdrawn', (tester) async {
     fixture.network.revoked.add(3);
 

@@ -321,25 +321,39 @@ class _SessionView extends HookWidget {
     }
 
     final details = claims;
+    final decline = OnboardingTextButton(
+      key: const Key('vtc_vetter_decline'),
+      label: l10n.vtcVetterDecline,
+      onPressed: () => controller.decline(requestId, code: 'couldNotVerify'),
+    );
     if (details == null) {
-      return Row(
-        key: const Key('vtc_vetter_card_waiting'),
-        mainAxisAlignment: MainAxisAlignment.center,
-        spacing: 8,
+      // The applicant may never send their details, e.g. when their
+      // identity lacks one: the vetter can always end the session.
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 12,
         children: [
-          const SizedBox.square(
-            dimension: 16,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: Colors.white70,
-            ),
+          Row(
+            key: const Key('vtc_vetter_card_waiting'),
+            mainAxisAlignment: MainAxisAlignment.center,
+            spacing: 8,
+            children: [
+              const SizedBox.square(
+                dimension: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white70,
+                ),
+              ),
+              Flexible(
+                child: Text(
+                  l10n.vtcVetterCardWaiting,
+                  style: onboardingNote(context),
+                ),
+              ),
+            ],
           ),
-          Flexible(
-            child: Text(
-              l10n.vtcVetterCardWaiting,
-              style: onboardingNote(context),
-            ),
-          ),
+          decline,
         ],
       );
     }
@@ -410,12 +424,7 @@ class _SessionView extends HookWidget {
               ? () => controller.issue(requestId, [chosen])
               : null,
         ),
-        OnboardingTextButton(
-          key: const Key('vtc_vetter_decline'),
-          label: l10n.vtcVetterDecline,
-          onPressed: () =>
-              controller.decline(requestId, code: 'couldNotVerify'),
-        ),
+        decline,
       ],
     );
   }
