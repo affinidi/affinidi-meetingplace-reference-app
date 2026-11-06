@@ -42,9 +42,34 @@ class FakeVtcNetwork implements HttpClientAdapter {
         },
       ],
     });
+    vta.otherDocuments[vetterDid] = DidDocument.fromJson({
+      ...DidKey.resolve(vetterDid).toJson(),
+      'service': [
+        {
+          'id': '$vetterDid#didcomm',
+          'type': 'DIDCommMessaging',
+          'serviceEndpoint': {
+            'uri': mediatorDid,
+            'accept': ['didcomm/v2'],
+          },
+        },
+      ],
+    });
   }
 
   final vta = FakeVta();
+
+  /// A member of the community holding its vetter role.
+  final vetterKey = Ed25519DidKeySigner.generate();
+
+  /// The vetter's DID.
+  String get vetterDid => vetterKey.did;
+
+  /// The vetters the community lists.
+  List<Map<String, dynamic>> listedVetters = [];
+
+  /// What identities sent other members through their mediators.
+  final List<ForwardMessage> sentToMembers = [];
   final _vtcKey = Ed25519DidKeySigner.generate();
   final _mediatorKey = Ed25519DidKeySigner.generate();
 
@@ -196,7 +221,146 @@ class FakeVtcNetwork implements HttpClientAdapter {
     dio: Dio()..httpClientAdapter = this,
     openVtaMailbox: vta.openMailbox,
     openMediatorInbox: _openInbox,
+    openMediatorOutbox: _openOutbox,
   );
+
+  /// Puts a [type] document the vetter signed in [persona]'s inbox, sealed
+  /// to the identity from the vetter, as vetters send them.
+  Future<TrustTaskDocument> vetterSends(
+    FakePersona persona,
+    String type,
+    Map<String, dynamic> payload, {
+    String? threadId,
+  }) async {
+    final document = await TrustTaskDocument.create(
+      type: type,
+      issuer: vetterDid,
+      recipient: persona.did,
+      threadId: threadId,
+      payload: payload,
+    ).sign(vetterKey, purpose: ProofPurpose.authentication);
+    final sealed = await EncryptedMessage.packWithAuthentication(
+      PlainTextMessage(
+        id: document.id,
+        type: Uri.parse(type),
+        from: vetterDid,
+        to: [persona.did],
+        body: document.toJson(),
+      ),
+      keyPair: vetterKey.keyPair,
+      didKeyId: DidKey.resolve(vetterDid).keyAgreement.first.id,
+      recipientDidDocuments: [persona.document],
+    );
+    inbox['message-${inbox.length + 1}'] =
+        jsonDecode(jsonEncode(sealed)) as Map<String, dynamic>;
+    return document;
+  }
+
+  /// The vetter's acceptance of [request], showing the community granted
+  /// them [role].
+  Future<TrustTaskDocument> vetterAccepts(
+    FakePersona persona,
+    Map<String, dynamic> request, {
+    String role = 'vetter',
+  }) async {
+    final roleCard = await EddsaJcs2022.sign(
+      {
+        'type': [
+          'VerifiableCredential',
+          'DTGCredential',
+          'AuthorityCredential',
+        ],
+        'issuer': fakeVtcDid,
+        'issuerScope': 'public',
+        'validFrom': '2026-01-01T00:00:00Z',
+        'validUntil': '2099-01-01T00:00:00Z',
+        'credentialSubject': {
+          'id': vetterDid,
+          'authority': {
+            'scope': fakeVtcDid,
+            'actions': ['role:$role'],
+          },
+        },
+      },
+      signer: _VtcSigner(_vtcKey),
+      purpose: ProofPurpose.assertionMethod,
+    );
+    return vetterSends(persona, VettingTask.requestResponse, {
+      'requestId': 'vr-1',
+      'eligibilityVp': await EddsaJcs2022.sign(
+        {
+          'type': ['VerifiablePresentation'],
+          'holder': vetterDid,
+          'nonce': request['id'],
+          'domain': persona.did,
+          'verifiableCredential': [roleCard],
+        },
+        signer: vetterKey,
+        purpose: ProofPurpose.authentication,
+      ),
+    }, threadId: request['id'] as String);
+  }
+
+  /// The vetter opens a session for the request they accepted.
+  Future<TrustTaskDocument> vetterOpensSession(
+    FakePersona persona, {
+    List<String> requiredClaims = const ['name.legal'],
+  }) => vetterSends(persona, VettingTask.session, {
+    'requestId': 'vr-1',
+    'challenge': 'QlScnBiVZptGM8oLBRk4S37fjuDCr381MUrrnd0cmHg',
+    'domain': fakeVtcDid,
+    'method': 'inPerson',
+    'requiredClaims': requiredClaims,
+    'expiresAt': formatTrustTaskTime(
+      DateTime.now().add(const Duration(minutes: 15)),
+    ),
+  });
+
+  /// The vetter vouches in [session] for the card named by [cardDigest] and
+  /// [identityCommitment].
+  Future<TrustTaskDocument> vetterVouches(
+    FakePersona persona, {
+    required Map<String, dynamic> session,
+    required String cardDigest,
+    required String identityCommitment,
+  }) async {
+    final statement = await EddsaJcs2022.sign(
+      {
+        'type': [
+          'VerifiableCredential',
+          'DTGCredential',
+          'StatementCredential',
+        ],
+        'id': 'urn:uuid:statement',
+        'issuer': vetterDid,
+        'validFrom': formatTrustTaskTime(DateTime.now()),
+        'validUntil': '2099-01-01T00:00:00Z',
+        'taskContext': session['id'],
+        'taskDigestMultibase': vettingDigest(session),
+        'credentialSubject': {
+          'id': persona.did,
+          'predicate': VettingStatement.predicate,
+          'object': {
+            'value': {
+              'community': fakeVtcDid,
+              'method': 'inPerson',
+              'documentClasses': ['passport'],
+              'claimsVerified': ['name.legal'],
+              'livenessConfirmed': true,
+              'identityCommitment': identityCommitment,
+              'cardDigestMultibase': cardDigest,
+              'declaredRelationship': 'none',
+            },
+          },
+        },
+      },
+      signer: vetterKey,
+      purpose: ProofPurpose.assertionMethod,
+    );
+    return vetterSends(persona, VettingTask.issue, {
+      'credential_response': {'credential': statement},
+    }, threadId: session['id'] as String);
+  }
 
   /// Delivers [credential] to [persona]'s inbox as the community does: a
   /// signed `credential-exchange/issue` document, sealed to the identity.
@@ -252,6 +416,15 @@ class FakeVtcNetwork implements HttpClientAdapter {
       signer: _VtcSigner(_vtcKey),
       purpose: ProofPurpose.assertionMethod,
     );
+  }
+
+  Future<MediatorOutbox> _openOutbox({
+    required String mediatorDid,
+    required DidDocument mediatorDocument,
+    required DidManager manager,
+  }) async {
+    if (isMediatorDown) throw StateError('mediator down');
+    return _FakeOutbox(this);
   }
 
   Future<MediatorInbox> _openInbox({
@@ -364,6 +537,9 @@ class FakeVtcNetwork implements HttpClientAdapter {
         MemberTask.renew => _renewal(request['issuer'] as String),
         _ => {'revision': 1},
       };
+    } else if (type == VettingCommunityTask.vettersList) {
+      purpose = ProofPurpose.authentication;
+      answer = {'vetters': listedVetters};
     } else if (type.startsWith(
       'https://trusttasks.org/spec/vtc/join-requests/',
     )) {
@@ -489,6 +665,19 @@ class _FakeInbox implements MediatorInbox {
     _network.inboxDeleted.addAll(ids);
     ids.forEach(_network.inbox.remove);
   }
+
+  @override
+  Future<void> close() async {}
+}
+
+class _FakeOutbox implements MediatorOutbox {
+  _FakeOutbox(this._network);
+
+  final FakeVtcNetwork _network;
+
+  @override
+  Future<void> send(ForwardMessage message) async =>
+      _network.sentToMembers.add(message);
 
   @override
   Future<void> close() async {}

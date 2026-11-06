@@ -5,6 +5,7 @@ import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_s
 import 'package:mpx_flutter_reference_app/domain/models/vtc/mock_credential_template.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_card_delivery.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_membership_entry.dart';
+import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_vetting.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/vtc/mock_credential_issuer.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/vtc/user_verification_key.dart';
@@ -1179,6 +1180,210 @@ void main() {
       expect(deliveries, isEmpty);
       expect(vtaTasks(), isNot(contains(VtaTask.exportSecret)));
       expect((await service.community(fakeVtcDid))?.isSettled, isTrue);
+    });
+  });
+
+  group('VtcService vetting', () {
+    late FakeVtcNetwork network;
+    late FakePersona persona;
+    late JoinManifest manifest;
+
+    JoinCriterion vetted() =>
+        manifest.criteria.singleWhere((criterion) => criterion.id == 'vetted');
+
+    VettingTicket ticket({String community = fakeVtcDid}) =>
+        VettingTicket.spoken(
+          community: community,
+          vetter: network.vetterDid,
+          code: 'K7QF-2M9X',
+        )!;
+
+    Future<VtcVetting> start() => service.startVetting(
+      manifest,
+      criterion: vetted(),
+      ticket: ticket(),
+      vetterName: 'Bob',
+    );
+
+    Future<VtcVettingRequest> requestAfterCheck() async =>
+        (await service.checkVetting(fakeVtcDid))!.requests.single;
+
+    setUp(() async {
+      network = FakeVtcNetwork()
+        ..joinManifest = {
+          'communityDid': fakeVtcDid,
+          'criteria': [
+            {
+              'id': 'vetted',
+              'admission': 'automatic',
+              'requirementsDigest': 'zVetted',
+              'vetting': {
+                'version': '0.1',
+                'statementType': VettingStatement.predicate,
+                'minStatements': 1,
+                'acceptedMethods': ['inPerson'],
+                'eligibleVetters': {'role': 'vetter'},
+                'requiredClaims': ['name.legal'],
+              },
+            },
+          ],
+        };
+      persona = FakePersona(mediatorDid: network.mediatorDid);
+      network.vta
+        ..persona = persona
+        ..otherDocuments[persona.did] = persona.document
+        ..answers[VtaTask.vaultUpsert] = {
+          'entry': {'id': 'entry-1'},
+        }
+        ..answers[VtaTask.disclosurePreview] = {
+          'previewId': 'preview-1',
+          'claims': [
+            {'type': 'name.legal', 'value': 'Ada Lovelace'},
+          ],
+        }
+        ..answers[VtaTask.disclosurePresent] = {'presented': true}
+        ..answerTo[VtaTask.exportSecret] = (payload) =>
+            persona.exportAnswer(payload['keyId']);
+      service = VtcService(
+        sdk: network.sdk(),
+        repository: SecureStorageVtcRepository(),
+        userVerificationKey: UserVerificationKey(keyStorage),
+        platform: 'ios',
+      );
+      await service.startLink(network.vta.did);
+      await service.checkGrant();
+      manifest = await service.readCommunity(fakeVtcDid);
+      await service.joiningIdentity(
+        manifest,
+        persona: VtaPersona(
+          did: persona.did,
+          contextId: 'mpx-ada',
+          signingKeyId: persona.signingKeyId,
+        ),
+      );
+    });
+
+    test('lists the vetters as the identity applying', () async {
+      network.listedVetters = [
+        {
+          'vetterDid': network.vetterDid,
+          'displayName': 'Bob',
+          'methods': ['inPerson'],
+        },
+      ];
+
+      final vetters = await service.vetters(manifest);
+
+      expect(vetters.single.displayName, 'Bob');
+    });
+
+    test('asks the vetter and records the request', () async {
+      final vetting = await start();
+
+      expect(network.sentToMembers.single.next, network.vetterDid);
+      expect(vetting.criterionId, 'vetted');
+      expect(vetting.vetterRole, 'vetter');
+      final request = vetting.requests.single;
+      expect(request.status, VtcVettingStatus.requested);
+      expect(request.vetterName, 'Bob');
+      expect(request.requestDocument.payload['ticket'], {'code': 'K7QF-2M9X'});
+      expect(await service.vetting(fakeVtcDid), isNotNull);
+    });
+
+    test('refuses a ticket of another community', () async {
+      await expectLater(
+        service.startVetting(
+          manifest,
+          criterion: vetted(),
+          ticket: ticket(community: 'did:web:other.example'),
+        ),
+        throwsA(
+          isA<VettingException>().having(
+            (e) => e.failure,
+            'failure',
+            VettingFailure.otherCommunity,
+          ),
+        ),
+      );
+      expect(network.sentToMembers, isEmpty);
+    });
+
+    test('is vouched for through a whole session', () async {
+      final request = (await start()).requests.single.request;
+
+      await network.vetterAccepts(persona, request);
+      expect((await requestAfterCheck()).status, VtcVettingStatus.accepted);
+
+      await network.vetterOpensSession(persona);
+      final inSession = await requestAfterCheck();
+      expect(inSession.status, VtcVettingStatus.inSession);
+
+      final preview = await service.previewVettingCard(
+        fakeVtcDid,
+        network.vetterDid,
+      );
+      expect(preview.claims.single.type, 'name.legal');
+      final afterCard = (await service.sendVettingCard(
+        fakeVtcDid,
+        network.vetterDid,
+        preview: preview,
+      )).requests.single;
+      expect(afterCard.status, VtcVettingStatus.cardSent);
+      expect(network.sentToMembers, hasLength(2));
+      expect(
+        network.vta.received.map((r) => r['type']),
+        contains(VtaTask.disclosurePresent),
+      );
+
+      await network.vetterVouches(
+        persona,
+        session: inSession.session!,
+        cardDigest: afterCard.cardDigest!,
+        identityCommitment: afterCard.identityCommitment!,
+      );
+      final vouched = await requestAfterCheck();
+      expect(vouched.status, VtcVettingStatus.vouched);
+      expect(network.inbox, isEmpty);
+
+      await service.join(manifest, criterion: vetted());
+      final submit = network.joinRequests.lastWhere(
+        (r) => r['type'] == JoinTask.submit,
+      );
+      final vp = (submit['payload'] as Map)['vp'] as Map;
+      expect(vp['verifiableCredential'], [vouched.statement]);
+    });
+
+    test('records a vetter who cannot show the role as refused', () async {
+      final request = (await start()).requests.single.request;
+      await network.vetterAccepts(persona, request, role: 'admin');
+
+      final refused = await requestAfterCheck();
+
+      expect(refused.status, VtcVettingStatus.refused);
+      expect(refused.failure, VettingFailure.notVetter);
+    });
+
+    test('records a decline, and a session the member ended', () async {
+      final request = (await start()).requests.single.request;
+      await network.vetterAccepts(persona, request);
+      await network.vetterOpensSession(persona);
+      await requestAfterCheck();
+
+      final ended = await service.abandonVetting(fakeVtcDid, network.vetterDid);
+      expect(ended.requests.single.status, VtcVettingStatus.abandoned);
+
+      await start();
+      await network.vetterAccepts(
+        persona,
+        (await service.vetting(fakeVtcDid))!.requests.single.request,
+      );
+      await network.vetterSends(persona, VettingTask.decline, {
+        'requestId': 'vr-1',
+        'code': 'couldNotVerify',
+      });
+      final declined = await requestAfterCheck();
+      expect(declined.status, VtcVettingStatus.declined);
+      expect(declined.declineCode, 'couldNotVerify');
     });
   });
 }

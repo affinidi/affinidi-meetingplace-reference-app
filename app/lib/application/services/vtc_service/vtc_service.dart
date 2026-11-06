@@ -15,6 +15,7 @@ import '../../../domain/models/vtc/vtc_identity_check.dart';
 import '../../../domain/models/vtc/vtc_left_membership.dart';
 import '../../../domain/models/vtc/vtc_membership_card.dart';
 import '../../../domain/models/vtc/vtc_membership_entry.dart';
+import '../../../domain/models/vtc/vtc_vetting.dart';
 import '../../../domain/repositories/vtc_repository.dart';
 import '../../../infrastructure/providers/vtc_sdk_provider.dart';
 import '../../../infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
@@ -395,7 +396,8 @@ class VtcService {
   ///
   /// The application is made under [criterion], or else the first way in
   /// this app supports, with [presentation] when the criterion asks for a
-  /// credential (see [joinPresentation]).
+  /// credential (see [joinPresentation]), and with the vetters' statements
+  /// gathered ([vetting]) when it asks for vetting.
   ///
   /// The first application to a community is made as [persona], one of
   /// [vtaPersonas], or else as a new persona the VTA creates; a later one
@@ -419,6 +421,9 @@ class VtcService {
     bool listInDirectory = false,
   }) async {
     final vta = await _grantedVta();
+    final statements = (criterion?.asksForVetting ?? false)
+        ? (await _repository.findVetting(manifest.communityDid))?.statements
+        : null;
     await joiningIdentity(
       manifest,
       persona: persona,
@@ -432,6 +437,7 @@ class VtcService {
       persona: await _personaSigner(vta, community),
       criterion: criterion,
       presentation: presentation,
+      vettingStatements: statements ?? const [],
       attributes: attributes,
     );
     switch (verdict) {
@@ -546,6 +552,280 @@ class VtcService {
     }
     await _repository.saveCommunity(member.settled(settled));
     return confirmed;
+  }
+
+  /// The vetters [manifest]'s community lists, asked as the identity
+  /// applying, which [joiningIdentity] records first.
+  ///
+  /// Throws as [join] does.
+  Future<List<ListedVetter>> vetters(JoinManifest manifest) async {
+    final vta = await _grantedVta();
+    final community = (await _repository.findCommunity(manifest.communityDid))!;
+    return _sdk.joinClient().listVetters(
+      manifest.communityDid,
+      agent: vta,
+      persona: await _personaSigner(vta, community),
+    );
+  }
+
+  /// The member's vetting for [communityDid], as recorded, or null.
+  Future<VtcVetting?> vetting(String communityDid) =>
+      _repository.findVetting(communityDid);
+
+  /// Asks the vetter [ticket] names to vet the identity applying to
+  /// [manifest]'s community, under [criterion], which asks for vetting.
+  /// Records the request, as the latest to that vetter, and returns the
+  /// vetting. [vetterName] is how the community lists the vetter, if known.
+  ///
+  /// Throws [VettingException] for a ticket of another community, and as
+  /// [join] does.
+  Future<VtcVetting> startVetting(
+    JoinManifest manifest, {
+    required JoinCriterion criterion,
+    required VettingTicket ticket,
+    String? vetterName,
+  }) async {
+    final requirements = criterion.vetting!;
+    final vta = await _grantedVta();
+    final member = (await _repository.findCommunity(manifest.communityDid))!;
+    final recorded = await _repository.findVetting(manifest.communityDid);
+    // A changed way in starts over: its statements count for another.
+    final vetting = recorded?.criterionId == criterion.id
+        ? recorded!
+        : VtcVetting(
+            communityDid: manifest.communityDid,
+            criterionId: criterion.id,
+            vetterRole: requirements.vetterRole,
+            salt: newCommitmentSalt(),
+          );
+    final collection = await _collection(vta, member);
+    final request = await _sdk
+        .vettingApplicant(collection.keys)
+        .request(
+          communityDid: manifest.communityDid,
+          ticket: ticket,
+          requirementsDigest: criterion.requirementsDigest,
+        );
+    final updated = vetting.withRequest(
+      VtcVettingRequest(
+        vetterDid: ticket.vetter,
+        vetterName: vetterName,
+        request: request.toJson(),
+      ),
+    );
+    await _repository.saveVetting(updated);
+    return updated;
+  }
+
+  /// Picks up what the vetters asked for [communityDid] sent the applying
+  /// identity, checks each, and records how far each vetter got: an
+  /// acceptance with their role, a session, a statement, a decline, or a
+  /// refusal. What fails a check is dropped. Returns the vetting, or null
+  /// when there is none.
+  ///
+  /// Throws as [join] does.
+  Future<VtcVetting?> checkVetting(String communityDid) async {
+    final vetting = await _repository.findVetting(communityDid);
+    final member = await _repository.findCommunity(communityDid);
+    if (vetting == null ||
+        member == null ||
+        !vetting.requests.any((request) => request.isOpen)) {
+      return vetting;
+    }
+    final vta = await _grantedVta();
+    final collection = await _collection(vta, member);
+    await collection.inbox.open();
+    final applicant = _sdk.vettingApplicant(collection.keys);
+
+    var updated = vetting;
+    for (final request in vetting.requests.where((r) => r.isOpen)) {
+      final received = await collection.inbox.peerDocuments(
+        senderDid: request.vetterDid,
+        types: VettingTask.fromVetter,
+      );
+      var advanced = request;
+      for (final peer in received) {
+        advanced = await _advance(applicant, advanced, peer.document, vetting);
+      }
+      updated = updated.withRequest(advanced);
+      try {
+        await collection.inbox.remove([
+          for (final peer in received) peer.messageId,
+        ]);
+      } on MeetingPlaceVtcSDKException {
+        // Read again next time, and recognised as already handled.
+      }
+    }
+    await _repository.saveVetting(updated);
+    return updated;
+  }
+
+  /// [request] after [document] from its vetter, or as it was when the
+  /// document does not move it on or fails a check.
+  Future<VtcVettingRequest> _advance(
+    VettingApplicant applicant,
+    VtcVettingRequest request,
+    TrustTaskDocument document,
+    VtcVetting vetting,
+  ) async {
+    final accepted = request.accepted;
+    try {
+      if (request.status == VtcVettingStatus.requested) {
+        if (document.threadId != request.requestDocument.id) return request;
+        return request.acceptedBy(
+          await applicant.accepted(
+            document,
+            request: request.requestDocument,
+            communityDid: vetting.communityDid,
+            vetterRole: vetting.vetterRole,
+          ),
+        );
+      }
+      if (accepted == null) return request;
+      if (document.type == VettingTask.session) {
+        // A new session replaces the one before, and its card.
+        applicant.openSession(
+          document,
+          vetter: accepted,
+          communityDid: vetting.communityDid,
+        );
+        return request.inSession(document);
+      }
+      if (document.type == VettingTask.decline) {
+        return request.declined(applicant.declined(document, vetter: accepted));
+      }
+      final sent = request.sentCard;
+      if (document.type == VettingTask.issue &&
+          request.status == VtcVettingStatus.cardSent &&
+          sent != null) {
+        return request.vouched(
+          await applicant.receiveStatement(
+            document,
+            session: _session(applicant, request, vetting.communityDid),
+            sent: sent,
+            communityDid: vetting.communityDid,
+          ),
+        );
+      }
+      return request;
+    } on VettingException catch (error) {
+      // Only an answer to the request itself refuses it; anything else
+      // that fails a check is dropped.
+      return request.status == VtcVettingStatus.requested
+          ? request.refused(error.failure)
+          : request;
+    }
+  }
+
+  /// Previews what the VTA would put on the card for the session the vetter
+  /// [vetterDid] opened for [communityDid]: the claims the session asks
+  /// for. Nothing leaves the VTA.
+  ///
+  /// Throws [VettingException] when the session has lapsed, and as [join]
+  /// does.
+  Future<DisclosurePreview> previewVettingCard(
+    String communityDid,
+    String vetterDid,
+  ) async {
+    final (member, vetting, request) = await _vettingOf(
+      communityDid,
+      vetterDid,
+    );
+    final vta = await _grantedVta();
+    final session = _session(
+      _sdk.vettingApplicant((await _collection(vta, member)).keys),
+      request,
+      communityDid,
+    );
+    return vta.previewDisclosure(
+      persona: _persona(member),
+      verifierDid: vetterDid,
+      requestedClaims: [...session.requiredClaims, ...session.optionalClaims],
+      purpose: 'In-person vetting for ${member.name ?? communityDid}',
+    );
+  }
+
+  /// Sends the vetter [vetterDid] the card for their session, carrying the
+  /// claims of [preview] the member approved. Call only once the member
+  /// confirmed the match code. The VTA records the disclosure.
+  ///
+  /// Throws [VettingException] when the session has lapsed, [ArgumentError]
+  /// when a claim the session requires is missing, and as [join] does.
+  Future<VtcVetting> sendVettingCard(
+    String communityDid,
+    String vetterDid, {
+    required DisclosurePreview preview,
+  }) async {
+    final (member, vetting, request) = await _vettingOf(
+      communityDid,
+      vetterDid,
+    );
+    final vta = await _grantedVta();
+    final applicant = _sdk.vettingApplicant(
+      (await _collection(vta, member)).keys,
+    );
+    final session = _session(applicant, request, communityDid);
+    await vta.presentDisclosure(
+      persona: _persona(member),
+      previewId: preview.previewId,
+    );
+    final sent = await applicant.sendCard(
+      session,
+      claims: [
+        for (final claim in preview.claims)
+          if (claim.value case final Object value)
+            VettingCardClaim(type: claim.type, value: value),
+      ],
+      salt: vetting.salt,
+      parentThreadId: request.requestDocument.id,
+    );
+    final updated = vetting.withRequest(request.cardSentAs(sent));
+    await _repository.saveVetting(updated);
+    return updated;
+  }
+
+  /// Ends the session with [vetterDid] for [communityDid] without sending a
+  /// card, e.g. because the match codes differ. Only this phone records it;
+  /// the vetter learns nothing more.
+  Future<VtcVetting> abandonVetting(
+    String communityDid,
+    String vetterDid,
+  ) async {
+    final (_, vetting, request) = await _vettingOf(communityDid, vetterDid);
+    final updated = vetting.withRequest(request.abandoned());
+    await _repository.saveVetting(updated);
+    return updated;
+  }
+
+  Future<(VtcCommunity, VtcVetting, VtcVettingRequest)> _vettingOf(
+    String communityDid,
+    String vetterDid,
+  ) async {
+    final member = await _repository.findCommunity(communityDid);
+    final vetting = await _repository.findVetting(communityDid);
+    final request = vetting?.requestTo(vetterDid);
+    if (member == null || vetting == null || request == null) {
+      throw StateError('no vetting by this vetter');
+    }
+    return (member, vetting, request);
+  }
+
+  /// The session [request]'s vetter opened, checked again as it was kept.
+  static VettingSession _session(
+    VettingApplicant applicant,
+    VtcVettingRequest request,
+    String communityDid,
+  ) {
+    final session = request.session;
+    final accepted = request.accepted;
+    if (session == null || accepted == null) {
+      throw StateError('no session open');
+    }
+    return applicant.openSession(
+      TrustTaskDocument.fromJson(session),
+      vetter: accepted,
+      communityDid: communityDid,
+    );
   }
 
   /// Previews what the VTA would disclose about [persona] for the profile
