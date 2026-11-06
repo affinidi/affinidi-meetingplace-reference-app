@@ -255,12 +255,14 @@ void main() {
       ),
     );
 
+    /// Shows the page once its vetter card check answered, rather than
+    /// waiting out [waitFor] for a desk that may never show.
     Future<void> pumpPage(WidgetTester tester, String? role) async {
       await showPage(tester, role);
-      await waitFor(
-        tester,
-        find.byKey(const Key('vtc_community_vetting_desk')),
-      );
+      for (var i = 0; i < 100 && fixture.service.vetterChecks == 0; i++) {
+        await settle(tester);
+      }
+      await tester.pump();
     }
 
     testWidgets('offers the vetting desk to a vetter', (tester) async {
@@ -340,7 +342,7 @@ void main() {
     ) async {
       fixture.network.isStatusListDown = true;
 
-      await pumpPage(tester, 'member');
+      await showPage(tester, 'member');
       await waitFor(
         tester,
         find.byKey(const Key('vtc_community_vetting_check_failed')),
@@ -359,7 +361,7 @@ void main() {
     ) async {
       fixture.network.isStatusListDown = true;
 
-      await pumpPage(tester, null);
+      await showPage(tester, null);
       await waitFor(
         tester,
         find.byKey(const Key('vtc_community_vetting_check_failed')),

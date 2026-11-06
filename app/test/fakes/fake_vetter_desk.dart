@@ -38,7 +38,7 @@ class FakeVetterDesk {
   );
 
   /// The vetter's app, linked to their VTA and a member of the community.
-  late VtcService service;
+  late CheckedVtcService service;
 
   /// Links the vetter's app to their VTA and joins the community.
   Future<void> setUp() async {
@@ -62,7 +62,7 @@ class FakeVetterDesk {
           },
       ],
     };
-    service = VtcService(
+    service = CheckedVtcService(
       sdk: network.sdk(),
       repository: SecureStorageVtcRepository(),
       userVerificationKey: UserVerificationKey(
@@ -141,4 +141,23 @@ class FakeVetterDesk {
   /// What the vetter sent the applicant, oldest first.
   Future<List<TrustTaskDocument>> sentToApplicant() =>
       network.sentTo(applicant);
+}
+
+/// A [VtcService] that counts the vetter card checks that answered, so a
+/// test can wait for the check a screen started rather than for a desk
+/// that may never show.
+class CheckedVtcService extends VtcService {
+  CheckedVtcService({
+    required super.sdk,
+    required super.repository,
+    required super.userVerificationKey,
+    super.platform,
+  });
+
+  /// How many [canVet] checks answered, or failed.
+  int vetterChecks = 0;
+
+  @override
+  Future<bool> canVet(String communityDid) =>
+      super.canVet(communityDid).whenComplete(() => vetterChecks++);
 }
