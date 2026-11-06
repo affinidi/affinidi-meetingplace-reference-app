@@ -3650,6 +3650,30 @@
 	"@vtcGroupChatHeading": {
 		"description": "Heading of where a group's chat stands, and of its link"
 	},
+	"vtcGroupChatPostingTitle": "Who can post in this chat?",
+	"@vtcGroupChatPostingTitle": {
+		"description": "Question a group's manager answers when creating its chat"
+	},
+	"vtcGroupChatPostingEveryone": "Everyone in the group",
+	"@vtcGroupChatPostingEveryone": {
+		"description": "Choice letting every member of a group post in its chat"
+	},
+	"vtcGroupChatPostingEveryoneHint": "Every member reads and posts.",
+	"@vtcGroupChatPostingEveryoneHint": {
+		"description": "What choosing that every member posts means"
+	},
+	"vtcGroupChatPostingManagers": "Only the group's managers",
+	"@vtcGroupChatPostingManagers": {
+		"description": "Choice letting only a group's managers post in its chat"
+	},
+	"vtcGroupChatPostingManagersHint": "Members only read, as in announcements.",
+	"@vtcGroupChatPostingManagersHint": {
+		"description": "What choosing that only managers post means"
+	},
+	"vtcGroupChatReadOnly": "Only the group's managers post in this chat.",
+	"@vtcGroupChatReadOnly": {
+		"description": "Shown instead of the message box in a group chat where only managers post"
+	},
 	"vtcGroupChatUnknown": "This group's chat couldn't be checked.",
 	"@vtcGroupChatUnknown": {
 		"description": "A group's chat status when its link cannot be read"

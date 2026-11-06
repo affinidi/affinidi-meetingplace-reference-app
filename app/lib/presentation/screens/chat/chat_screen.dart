@@ -84,6 +84,7 @@ import 'chat_zkp/chat_zkp_concierge_item.dart';
 import 'chat_zkp/chat_zkp_message_list_policy.dart';
 import 'chat_zkp/chat_zkp_overlay.dart';
 import 'proof_flow_controller.dart';
+import 'vtc_chat_posting_provider.dart';
 
 part 'awaiting_members_warning.dart';
 part 'call_chat_item_actions.dart';
@@ -314,11 +315,51 @@ class _ChatSection extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
               child: _ChatTypingActivityIndicator(contactId: _contactId),
             ),
-            _ChatTextEntry(contactId: _contactId),
+            _ChatEntry(_contactId),
           ],
         ),
         ChatEffect(contactId: _contactId),
       ],
+    );
+  }
+}
+
+/// The message box, or, in a community group chat where only the group's
+/// managers post, a note saying so to a member who is not one.
+class _ChatEntry extends ConsumerWidget {
+  const _ChatEntry(this._contactId);
+
+  final String _contactId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final posting = ref.watch(vtcChatPostingProvider(_contactId)).value;
+    if (posting == null || posting.canPost) {
+      return _ChatTextEntry(contactId: _contactId);
+    }
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+        child: Row(
+          key: const Key('chat_read_only'),
+          spacing: 8,
+          children: [
+            Icon(
+              Icons.campaign_outlined,
+              size: 20,
+              color: context.colorScheme.onSurfaceVariant,
+            ),
+            Expanded(
+              child: Text(
+                context.l10n.vtcGroupChatReadOnly,
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: context.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

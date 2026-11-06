@@ -79,12 +79,17 @@ class VtcGroupsController extends _$VtcGroupsController {
     state = state.copyWith(chats: statuses);
   }
 
-  /// Creates the chat of [group] as the member's current identity.
-  Future<void> createChat(VtcGroup group) => _act(group, (identity) async {
+  /// Creates the chat of [group] as the member's current identity, where
+  /// [posting] may post.
+  Future<void> createChat(
+    VtcGroup group, {
+    GroupChatPosting posting = GroupChatPosting.everyone,
+  }) => _act(group, (identity) async {
     final link = await _chats.createChat(
       communityDid,
       group,
       identity: identity,
+      posting: posting,
     );
     if (!ref.mounted) return;
     state = state.copyWith(

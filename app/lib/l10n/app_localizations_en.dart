@@ -3683,6 +3683,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vtcGroupChatHeading => 'Group chat';
 
   @override
+  String get vtcGroupChatPostingTitle => 'Who can post in this chat?';
+
+  @override
+  String get vtcGroupChatPostingEveryone => 'Everyone in the group';
+
+  @override
+  String get vtcGroupChatPostingEveryoneHint => 'Every member reads and posts.';
+
+  @override
+  String get vtcGroupChatPostingManagers => 'Only the group\'s managers';
+
+  @override
+  String get vtcGroupChatPostingManagersHint =>
+      'Members only read, as in announcements.';
+
+  @override
+  String get vtcGroupChatReadOnly =>
+      'Only the group\'s managers post in this chat.';
+
+  @override
   String get vtcGroupChatUnknown => 'This group\'s chat couldn\'t be checked.';
 
   @override

@@ -71,6 +71,7 @@ class _FakeVtcService extends Fake implements VtcService {
 
 class _FakeChats extends Fake implements VtcGroupChatService {
   final created = <String>[];
+  final postings = <GroupChatPosting>[];
   final joined = <String>[];
   VtcGroupChatFailure? joinFailure;
 
@@ -82,11 +83,14 @@ class _FakeChats extends Fake implements VtcGroupChatService {
     String communityDid,
     VtcGroup group, {
     required Identity identity,
+    GroupChatPosting posting = GroupChatPosting.everyone,
   }) async {
     created.add(group.groupId);
-    return const GroupChatLink(
+    postings.add(posting);
+    return GroupChatLink(
       mnemonic: 'identity-wg',
       controlPlaneDid: 'did:web:control-plane.example',
+      posting: posting,
     );
   }
 
@@ -166,6 +170,8 @@ void main() {
     await pumpScreen(tester);
 
     await tapVisible(tester, const Key('vtc_group_create_g1'));
+    await tester.tap(find.byKey(const Key('vtc_group_posting_everyone')));
+    await tester.pumpAndSettle();
 
     expect(chats.created, ['g1']);
     expect(find.text("Publish the chat's link"), findsOneWidget);
@@ -175,6 +181,33 @@ void main() {
     expect(service.data, contains('MeetingPlaceGroup'));
     expect(service.data, contains('identity-wg'));
     expect(service.data, contains('$_managedDid#meeting-place'));
+  });
+
+  testWidgets('asks who may post, and links only managers posting', (
+    tester,
+  ) async {
+    await pumpScreen(tester);
+
+    await tapVisible(tester, const Key('vtc_group_create_g1'));
+    expect(find.text('Who can post in this chat?'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('vtc_group_posting_managers')));
+    await tester.pumpAndSettle();
+
+    expect(chats.postings, [GroupChatPosting.managers]);
+    final service = tester.widget<SelectableText>(
+      find.byKey(const Key('vtc_group_chat_link_service')),
+    );
+    expect(service.data, contains('"post": "managers"'));
+  });
+
+  testWidgets('creates no chat when the question is dismissed', (tester) async {
+    await pumpScreen(tester);
+
+    await tapVisible(tester, const Key('vtc_group_create_g1'));
+    await tester.tapAt(const Offset(4, 4));
+    await tester.pumpAndSettle();
+
+    expect(chats.created, isEmpty);
   });
 
   testWidgets('joins a linked chat', (tester) async {

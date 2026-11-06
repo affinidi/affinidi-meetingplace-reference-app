@@ -1,3 +1,5 @@
+import 'package:meeting_place_vtc/meeting_place_vtc.dart';
+
 /// A Meeting Place group chat that follows a community group: it is known
 /// by the group's DID, and only the group's members are let in.
 ///
@@ -13,6 +15,7 @@ class VtcGroupChat {
     required this.groupDid,
     required this.name,
     required this.isOwner,
+    this.posting = GroupChatPosting.everyone,
     this.members = const {},
     this.moderators = const {},
   });
@@ -25,6 +28,7 @@ class VtcGroupChat {
     groupDid: json['groupDid'] as String,
     name: json['name'] as String,
     isOwner: json['isOwner'] as bool,
+    posting: GroupChatPosting.fromLink(json['posting']),
     members: {
       for (final MapEntry(:key, :value)
           in (json['members'] as Map<String, dynamic>? ?? const {}).entries)
@@ -53,6 +57,9 @@ class VtcGroupChat {
   /// Whether this phone owns the chat and lets members in.
   final bool isOwner;
 
+  /// Who may post in the chat, as the community's link to it says.
+  final GroupChatPosting posting;
+
   /// The chat members let in, by their DID in the chat, each with their
   /// entry id in the community's directory. The owner's record only.
   final Map<String, String> members;
@@ -61,8 +68,9 @@ class VtcGroupChat {
   /// owner's record only.
   final Set<String> moderators;
 
-  /// A copy with [members] and [moderators] replaced where given.
+  /// A copy with [posting], [members] and [moderators] replaced where given.
   VtcGroupChat copyWith({
+    GroupChatPosting? posting,
     Map<String, String>? members,
     Set<String>? moderators,
   }) => VtcGroupChat(
@@ -72,6 +80,7 @@ class VtcGroupChat {
     groupDid: groupDid,
     name: name,
     isOwner: isOwner,
+    posting: posting ?? this.posting,
     members: members ?? this.members,
     moderators: moderators ?? this.moderators,
   );
@@ -84,6 +93,7 @@ class VtcGroupChat {
     'groupDid': groupDid,
     'name': name,
     'isOwner': isOwner,
+    'posting': posting.name,
     'members': members,
     'moderators': moderators.toList(),
   };

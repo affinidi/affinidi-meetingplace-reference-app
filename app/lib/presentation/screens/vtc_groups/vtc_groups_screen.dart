@@ -96,7 +96,14 @@ class VtcGroupsScreen extends ConsumerWidget {
                       state.chats[listing.group.groupId] ??
                       VtcGroupChatStatus.unknown,
                   isBusy: state.busy.contains(listing.group.groupId),
-                  onCreate: () => controller.createChat(listing.group),
+                  onCreate: () async {
+                    final posting = await _askPosting(context);
+                    if (posting == null) return;
+                    await controller.createChat(
+                      listing.group,
+                      posting: posting,
+                    );
+                  },
                   onJoin: () => controller.joinChat(listing.group),
                 ),
             ],
@@ -272,6 +279,41 @@ class _Line extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Asks the manager who may post in the chat about to be created; null when
+/// they dismiss the question.
+Future<GroupChatPosting?> _askPosting(BuildContext context) {
+  final l10n = context.l10n;
+  return showDialog<GroupChatPosting>(
+    context: context,
+    builder: (context) => SimpleDialog(
+      title: Text(l10n.vtcGroupChatPostingTitle),
+      children: [
+        for (final (posting, title, subtitle) in [
+          (
+            GroupChatPosting.everyone,
+            l10n.vtcGroupChatPostingEveryone,
+            l10n.vtcGroupChatPostingEveryoneHint,
+          ),
+          (
+            GroupChatPosting.managers,
+            l10n.vtcGroupChatPostingManagers,
+            l10n.vtcGroupChatPostingManagersHint,
+          ),
+        ])
+          SimpleDialogOption(
+            key: Key('vtc_group_posting_${posting.name}'),
+            onPressed: () => Navigator.of(context).pop(posting),
+            child: ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(title),
+              subtitle: Text(subtitle),
+            ),
+          ),
+      ],
+    ),
+  );
 }
 
 /// The service entry the community's operator adds to the group's DID

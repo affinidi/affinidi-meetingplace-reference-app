@@ -5546,6 +5546,42 @@ abstract class AppLocalizations {
   /// **'Group chat'**
   String get vtcGroupChatHeading;
 
+  /// Question a group's manager answers when creating its chat
+  ///
+  /// In en, this message translates to:
+  /// **'Who can post in this chat?'**
+  String get vtcGroupChatPostingTitle;
+
+  /// Choice letting every member of a group post in its chat
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone in the group'**
+  String get vtcGroupChatPostingEveryone;
+
+  /// What choosing that every member posts means
+  ///
+  /// In en, this message translates to:
+  /// **'Every member reads and posts.'**
+  String get vtcGroupChatPostingEveryoneHint;
+
+  /// Choice letting only a group's managers post in its chat
+  ///
+  /// In en, this message translates to:
+  /// **'Only the group\'s managers'**
+  String get vtcGroupChatPostingManagers;
+
+  /// What choosing that only managers post means
+  ///
+  /// In en, this message translates to:
+  /// **'Members only read, as in announcements.'**
+  String get vtcGroupChatPostingManagersHint;
+
+  /// Shown instead of the message box in a group chat where only managers post
+  ///
+  /// In en, this message translates to:
+  /// **'Only the group\'s managers post in this chat.'**
+  String get vtcGroupChatReadOnly;
+
   /// A group's chat status when its link cannot be read
   ///
   /// In en, this message translates to:
