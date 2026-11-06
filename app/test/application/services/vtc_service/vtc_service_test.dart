@@ -1455,6 +1455,17 @@ void main() {
       expect(network.inbox, isEmpty);
     });
 
+    test('hands over the vetter card it checked', () async {
+      final card = await service.vetterCard(fakeVtcDid);
+
+      expect(card?.issuer, fakeVtcDid);
+      expect(card?.vetterDid, vetter.did);
+      expect(card?.validUntil, isNotNull);
+
+      network.revoked.add(3);
+      expect(await service.vetterCard(fakeVtcDid), isNull);
+    });
+
     test('remembers whether the member could vet', () async {
       expect(await service.couldVet(fakeVtcDid), isFalse);
 

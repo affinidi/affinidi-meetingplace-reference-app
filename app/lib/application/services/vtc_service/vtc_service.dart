@@ -15,6 +15,7 @@ import '../../../domain/models/vtc/vtc_identity_check.dart';
 import '../../../domain/models/vtc/vtc_left_membership.dart';
 import '../../../domain/models/vtc/vtc_membership_card.dart';
 import '../../../domain/models/vtc/vtc_membership_entry.dart';
+import '../../../domain/models/vtc/vtc_vetter_card.dart';
 import '../../../domain/models/vtc/vtc_vetter_desk.dart';
 import '../../../domain/models/vtc/vtc_vetting.dart';
 import '../../../domain/repositories/vtc_repository.dart';
@@ -874,20 +875,26 @@ class VtcService {
   /// list cannot be reached.
   ///
   /// The answer is kept for [couldVet].
-  Future<bool> canVet(String communityDid) async {
+  Future<bool> canVet(String communityDid) async =>
+      await vetterCard(communityDid) != null;
+
+  /// The member's vetter role card for [communityDid] when [canVet], else
+  /// null. Checked, and kept for [couldVet], as [canVet] is.
+  Future<VtcVetterCard?> vetterCard(String communityDid) async {
     final member = await _repository.findCommunity(communityDid);
-    if (member == null || !member.isMember) return false;
+    if (member == null || !member.isMember) return null;
     final vta = await _grantedVta();
-    final canVet =
-        await _vetterCard(vta, member) != null ||
-        (await _keepWaitingCards(vta, member) &&
-            await _vetterCard(vta, member) != null);
+    var card = await _vetterCard(vta, member);
+    if (card == null && await _keepWaitingCards(vta, member)) {
+      card = await _vetterCard(vta, member);
+    }
+    final canVet = card != null;
     // Read again: the record may have changed while the VTA answered.
     final latest = await _repository.findCommunity(communityDid);
     if (latest != null && latest.isVetter != canVet) {
       await _repository.saveCommunity(latest.withVetter(isVetter: canVet));
     }
-    return canVet;
+    return card == null ? null : VtcVetterCard.fromCredential(card);
   }
 
   /// Whether the member could vet for [communityDid] when [canVet] last
