@@ -6038,6 +6038,18 @@ abstract class AppLocalizations {
   /// **'Checking your vetter card is still valid'**
   String get vtcVetterStepCard;
 
+  /// Shown on the vetting flow as soon as an applicant's request arrives, before their session opens
+  ///
+  /// In en, this message translates to:
+  /// **'An applicant scanned your ticket'**
+  String get vtcVetterApplicantFound;
+
+  /// Step of taking an applicant's request: accepting it and opening the session in which codes are compared
+  ///
+  /// In en, this message translates to:
+  /// **'Opening a session with them'**
+  String get vtcVetterStepSession;
+
   /// Step of showing a vetting ticket: minting it and recording it on the desk
   ///
   /// In en, this message translates to:

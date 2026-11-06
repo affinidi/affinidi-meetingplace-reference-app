@@ -4114,6 +4114,14 @@
 	"@vtcVetterStepCard": {
 		"description": "Step the open vetting desk runs in the background: the vetter role card is in date and not withdrawn"
 	},
+	"vtcVetterApplicantFound": "An applicant scanned your ticket",
+	"@vtcVetterApplicantFound": {
+		"description": "Shown on the vetting flow as soon as an applicant's request arrives, before their session opens"
+	},
+	"vtcVetterStepSession": "Opening a session with them",
+	"@vtcVetterStepSession": {
+		"description": "Step of taking an applicant's request: accepting it and opening the session in which codes are compared"
+	},
 	"vtcVetterStepTicket": "Creating your ticket",
 	"@vtcVetterStepTicket": {
 		"description": "Step of showing a vetting ticket: minting it and recording it on the desk"

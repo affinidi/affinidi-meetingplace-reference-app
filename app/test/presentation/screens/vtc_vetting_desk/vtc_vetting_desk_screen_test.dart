@@ -204,7 +204,20 @@ void main() {
     expect(flowStep(tester), VtcVettingFlowStep.ticket);
     expect(waiting(tester), isTrue);
     await tester.runAsync(() => fixture.requestWith(ticket.spoken));
+    // The scan shows as step 2 as soon as it arrives, before the session.
+    final shown = <(VtcRequestStep?, VtcVettingFlowStep?)>[];
+    ProviderScope.containerOf(tester.element(desk)).listen(
+      vtcVettingDeskControllerProvider(
+        fakeVtcDid,
+      ).select((state) => (state.requestStep, state.flowStep(DateTime.now()))),
+      (_, next) => shown.add(next),
+    );
     await check(tester);
+    expect(shown, [
+      (VtcRequestStep.checkingCard, VtcVettingFlowStep.match),
+      (VtcRequestStep.openingSession, VtcVettingFlowStep.match),
+      (null, VtcVettingFlowStep.match),
+    ]);
 
     final session = (await tester.runAsync(fixture.sentToApplicant))!.last;
     expect(flowStep(tester), VtcVettingFlowStep.match);

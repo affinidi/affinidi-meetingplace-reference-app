@@ -83,6 +83,10 @@ abstract class VtcVettingDeskState with _$VtcVettingDeskState {
     /// How far creating a ticket got, while one is being created.
     VtcTicketStep? ticketStep,
 
+    /// How far taking an applicant's request got, once their scan arrived
+    /// and until their session opens.
+    VtcRequestStep? requestStep,
+
     /// Whether a step the member asked for is running.
     @Default(false) bool busy,
 
@@ -111,6 +115,7 @@ abstract class VtcVettingDeskState with _$VtcVettingDeskState {
   VtcVettingFlowStep? flowStep(DateTime now) => switch (current) {
     final session? when session.matchConfirmed => VtcVettingFlowStep.details,
     _? => VtcVettingFlowStep.match,
+    null when requestStep != null => VtcVettingFlowStep.match,
     null when ended != null => VtcVettingFlowStep.done,
     null when liveTicket(now) != null => VtcVettingFlowStep.ticket,
     null => null,

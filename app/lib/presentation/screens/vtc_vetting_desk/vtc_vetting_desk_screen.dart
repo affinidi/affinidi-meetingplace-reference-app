@@ -198,6 +198,22 @@ class VtcVettingFlowScreen extends HookConsumerWidget {
               session: ended,
               onDone: close,
             ),
+            (VtcVettingFlowStep.match, null, _) => Column(
+              key: const Key('vtc_vetter_request_progress'),
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: 12,
+              children: [
+                OnboardingSubtitle(l10n.vtcVetterApplicantFound),
+                _Steps(
+                  steps: VtcRequestStep.values,
+                  step: state.requestStep,
+                  title: (step) => switch (step) {
+                    VtcRequestStep.checkingCard => l10n.vtcVetterStepCard,
+                    VtcRequestStep.openingSession => l10n.vtcVetterStepSession,
+                  },
+                ),
+              ],
+            ),
             (_, final session?, _) => _SessionView(
               // A new applicant starts with nothing chosen or ticked.
               key: ValueKey(session.request.requestId),
@@ -453,7 +469,17 @@ class _TicketView extends StatelessWidget {
       );
     }
 
-    if (creating) return _TicketProgress(step: state.ticketStep);
+    if (creating) {
+      return _Steps(
+        key: const Key('vtc_vetter_ticket_progress'),
+        steps: VtcTicketStep.values,
+        step: state.ticketStep,
+        title: (step) => switch (step) {
+          VtcTicketStep.checkingCard => l10n.vtcVetterStepCard,
+          VtcTicketStep.creating => l10n.vtcVetterStepTicket,
+        },
+      );
+    }
 
     // The ticket ran out or was used up, with no applicant to vet.
     return OnboardingButton(
@@ -465,30 +491,33 @@ class _TicketView extends StatelessWidget {
   }
 }
 
-/// Creating the ticket, step by step: each step done, under way, or still
-/// to come.
-class _TicketProgress extends StatelessWidget {
-  const _TicketProgress({required this.step});
+/// Steps the flow takes in the background, in order: each done, under
+/// way, or still to come.
+class _Steps<T extends Enum> extends StatelessWidget {
+  const _Steps({
+    super.key,
+    required this.steps,
+    required this.step,
+    required this.title,
+  });
+
+  final List<T> steps;
 
   /// The step under way; none yet means the first is about to start.
-  final VtcTicketStep? step;
+  final T? step;
+  final String Function(T step) title;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final current = step ?? VtcTicketStep.values.first;
+    final current = step ?? steps.first;
     return Column(
-      key: const Key('vtc_vetter_ticket_progress'),
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 8,
       children: [
-        for (final step in VtcTicketStep.values)
+        for (final step in steps)
           VtcProgressLine(
-            key: Key('vtc_vetter_ticket_step_${step.name}'),
-            title: switch (step) {
-              VtcTicketStep.checkingCard => l10n.vtcVetterStepCard,
-              VtcTicketStep.creating => l10n.vtcVetterStepTicket,
-            },
+            key: Key('vtc_vetter_step_${step.name}'),
+            title: title(step),
             stage: switch (step.index.compareTo(current.index)) {
               < 0 => VtcTrailStage.done,
               0 => VtcTrailStage.current,

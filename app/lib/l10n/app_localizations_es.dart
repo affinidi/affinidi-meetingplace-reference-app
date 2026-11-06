@@ -4093,6 +4093,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get vtcVetterStepCard => 'Checking your vetter card is still valid';
 
   @override
+  String get vtcVetterApplicantFound => 'An applicant scanned your ticket';
+
+  @override
+  String get vtcVetterStepSession => 'Opening a session with them';
+
+  @override
   String get vtcVetterStepTicket => 'Creating your ticket';
 
   @override

@@ -113,6 +113,9 @@ class VtcVettingDeskController extends _$VtcVettingDeskController {
     try {
       final desk = await _service.checkVetterDesk(
         communityDid,
+        onRequestStep: (step) {
+          if (ref.mounted) state = state.copyWith(requestStep: step);
+        },
         // Read once for the desk, rather than for each applicant.
         requiredClaims: state.readingRequirements
             ? null
@@ -123,6 +126,7 @@ class VtcVettingDeskController extends _$VtcVettingDeskController {
       _fail(error, stackTrace);
     } finally {
       _checking = false;
+      if (ref.mounted) state = state.copyWith(requestStep: null);
     }
   }
 
