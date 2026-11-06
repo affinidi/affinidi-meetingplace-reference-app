@@ -4082,4 +4082,18 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get vtcJoinVettingStopMessage =>
       'The vetters\' statements and open requests on this phone are forgotten. You can start again from the community\'s page.';
+
+  @override
+  String vtcJoinVettingDetailsMissing(String identity, String details) {
+    return '$identity has no $details on your VTA, so nothing was sent. Add them to its profile, or stop vetting and choose another identity.';
+  }
+
+  @override
+  String vtcJoinApplyingIdentityNamed(String name) {
+    return 'Your identity $name';
+  }
+
+  @override
+  String get vtcJoinApplyingIdentityCreated =>
+      'The identity your VTA created for this community';
 }

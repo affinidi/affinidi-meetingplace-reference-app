@@ -6019,6 +6019,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The vetters\' statements and open requests on this phone are forgotten. You can start again from the community\'s page.'**
   String get vtcJoinVettingStopMessage;
+
+  /// The applying identity's profile on the VTA lacks details a vetting session asks for; identity is empty when unknown
+  ///
+  /// In en, this message translates to:
+  /// **'{identity} has no {details} on your VTA, so nothing was sent. Add them to its profile, or stop vetting and choose another identity.'**
+  String vtcJoinVettingDetailsMissing(String identity, String details);
+
+  /// The identity applying, by its name
+  ///
+  /// In en, this message translates to:
+  /// **'Your identity {name}'**
+  String vtcJoinApplyingIdentityNamed(String name);
+
+  /// The identity applying, when it is none of the member's own
+  ///
+  /// In en, this message translates to:
+  /// **'The identity your VTA created for this community'**
+  String get vtcJoinApplyingIdentityCreated;
 }
 
 class _AppLocalizationsDelegate

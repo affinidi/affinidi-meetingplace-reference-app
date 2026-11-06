@@ -1392,6 +1392,30 @@ void main() {
       expect(network.sentToMembers, isEmpty);
     });
 
+    test('names the details the identity lacks for a session', () async {
+      await askVetter();
+      await network.vetterAccepts(applicant, request().request);
+      await controller().checkVetting();
+      await network.vetterOpensSession(
+        applicant,
+        requiredClaims: ['name.given', 'name.family'],
+      );
+      await controller().checkVetting();
+      network.vta.answers[VtaTask.disclosurePreview] = {
+        'previewId': 'preview-1',
+        'claims': [
+          {'type': 'name.given', 'value': 'Ada'},
+        ],
+      };
+
+      await controller().confirmMatch();
+
+      expect(state().step, VtcJoinStep.failed);
+      expect(state().failure, VtcJoinFailure.detailsMissing);
+      expect(state().missingDetails, ['name.family']);
+      expect(network.sentToMembers, hasLength(1));
+    });
+
     test('is vouched for, then applies with the statement', () async {
       await askVetter();
       await network.vetterAccepts(applicant, request().request);

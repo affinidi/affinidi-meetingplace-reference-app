@@ -353,6 +353,14 @@ abstract class VtcJoinState with _$VtcJoinState {
     /// Why the last vetting step could not go ahead, shown on the overview.
     VettingFailure? vettingFailure,
 
+    /// The details a vetting session asked for that the applying identity's
+    /// profile on the VTA does not hold, by claim type.
+    @Default(<String>[]) List<String> missingDetails,
+
+    /// The name of the identity applying, when known, to say whose profile
+    /// lacks [missingDetails].
+    String? applyingIdentityName,
+
     /// The community's reason for turning the application down, if given.
     String? denialReason,
     VtcJoinFailure? failure,

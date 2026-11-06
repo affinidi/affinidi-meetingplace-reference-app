@@ -4090,5 +4090,30 @@
 	"vtcJoinVettingStopMessage": "The vetters' statements and open requests on this phone are forgotten. You can start again from the community's page.",
 	"@vtcJoinVettingStopMessage": {
 		"description": "What stopping vetting does"
+	},
+	"vtcJoinVettingDetailsMissing": "{identity} has no {details} on your VTA, so nothing was sent. Add them to its profile, or stop vetting and choose another identity.",
+	"@vtcJoinVettingDetailsMissing": {
+		"description": "The applying identity's profile on the VTA lacks details a vetting session asks for; identity is empty when unknown",
+		"placeholders": {
+			"identity": {
+				"type": "String"
+			},
+			"details": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinApplyingIdentityNamed": "Your identity {name}",
+	"@vtcJoinApplyingIdentityNamed": {
+		"description": "The identity applying, by its name",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinApplyingIdentityCreated": "The identity your VTA created for this community",
+	"@vtcJoinApplyingIdentityCreated": {
+		"description": "The identity applying, when it is none of the member's own"
 	}
 }

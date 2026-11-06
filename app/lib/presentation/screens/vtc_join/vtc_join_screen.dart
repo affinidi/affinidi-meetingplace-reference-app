@@ -182,9 +182,21 @@ class VtcJoinScreen extends HookConsumerWidget {
           onDone: close,
         ),
         VtcJoinStep.failed => _Failed(
-          message: l10n.vtcJoinFailure(
-            (state.failure ?? VtcJoinFailure.refused).name,
-          ),
+          message: switch (state.missingDetails) {
+            final missing
+                when state.failure == VtcJoinFailure.detailsMissing &&
+                    missing.isNotEmpty =>
+              l10n.vtcJoinVettingDetailsMissing(
+                switch (state.applyingIdentityName) {
+                  final name? => l10n.vtcJoinApplyingIdentityNamed(name),
+                  null => l10n.vtcJoinApplyingIdentityCreated,
+                },
+                missing.map((type) => vtcClaimTypeLabel(l10n, type)).join(', '),
+              ),
+            _ => l10n.vtcJoinFailure(
+              (state.failure ?? VtcJoinFailure.refused).name,
+            ),
+          },
           onRetry: controller.restart,
           onCancel: close,
         ),

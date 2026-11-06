@@ -715,7 +715,25 @@ class VtcJoinController extends _$VtcJoinController {
         {'requiredClaims': final List<dynamic> claims} => claims,
         _ => const <dynamic>[],
       };
-      if (!required.every(held.contains)) {
+      final missing = [
+        for (final type in required.whereType<String>())
+          if (!held.contains(type)) type,
+      ];
+      if (missing.isNotEmpty) {
+        // Claim types only, never a value.
+        ref
+            .read(appLoggerProvider)
+            .warning(
+              'Vetting card: the VTA holds ${held.toList()..sort()}, '
+              'the session asks for $required',
+              name: 'VtcJoinController',
+            );
+        state = state.copyWith(
+          missingDetails: missing,
+          applyingIdentityName: await _applyingIdentityName(
+            manifest.communityDid,
+          ),
+        );
         return _fail(VtcJoinFailure.detailsMissing);
       }
       _vettingPreview = preview;
@@ -728,6 +746,21 @@ class VtcJoinController extends _$VtcJoinController {
         ],
       );
     });
+  }
+
+  /// The name of the identity applying to [communityDid], as the member's
+  /// identities show it, or null when it is none of them.
+  Future<String?> _applyingIdentityName(String communityDid) async {
+    final personaDid = (await _service.community(communityDid))?.personaDid;
+    final name = ref
+        .read(identitiesServiceProvider)
+        .vtaPersonas
+        .where((identity) => identity.did == personaDid)
+        .firstOrNull
+        ?.card
+        .displayName
+        .trim();
+    return name == null || name.isEmpty ? null : name;
   }
 
   /// Sends the vetter the card with the details the member approved.
