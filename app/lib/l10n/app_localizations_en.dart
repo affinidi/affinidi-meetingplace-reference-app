@@ -4016,6 +4016,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get vtcVetterCardTitle => 'Vetter card';
+
+  @override
+  String get vtcVetterCardHolder => 'Vetter';
+
+  @override
   String get vtcVetterStepCard => 'Checking your vetter card is still valid';
 
   @override

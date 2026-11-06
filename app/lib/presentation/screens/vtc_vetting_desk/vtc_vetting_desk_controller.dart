@@ -53,12 +53,13 @@ class VtcVettingDeskController extends _$VtcVettingDeskController {
       );
       // Read alongside the card check; the desk shows them once read.
       unawaited(_readRequirements());
-      final canVet = await _service.canVet(communityDid);
+      final vetterCard = await _service.vetterCard(communityDid);
       state = state.copyWith(
         checkingCard: false,
-        step: canVet ? state.step : VtcVettingDeskStep.notVetter,
+        vetterCard: vetterCard,
+        step: vetterCard != null ? state.step : VtcVettingDeskStep.notVetter,
       );
-      if (!canVet) return;
+      if (vetterCard == null) return;
       _check ??= Timer.periodic(checkInterval, (_) => unawaited(check()));
       await check();
       await readIssued();

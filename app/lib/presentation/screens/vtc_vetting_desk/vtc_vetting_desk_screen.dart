@@ -9,6 +9,7 @@ import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import '../../widgets/qr/qr_code_view.dart';
 import '../vtc_join/vtc_claim_type_label.dart';
+import '../vtc_join/vtc_membership_card_view.dart';
 import '../vtc_join/vtc_progress_line.dart';
 import '../vtc_join/vtc_trail_step.dart';
 import 'vtc_vetting_desk_controller.dart';
@@ -90,6 +91,21 @@ class VtcVettingDeskScreen extends HookConsumerWidget {
                 )
               else
                 _TicketView(state: state, controller: controller),
+              if (state.vetterCard case final card?)
+                VtcCardView(
+                  cardKey: const Key('vtc_vetter_card'),
+                  documentKey: const Key('vtc_vetter_card_document'),
+                  communityName: communityName,
+                  title: l10n.vtcVetterCardTitle,
+                  credential: card.credential,
+                  credentialType: 'AuthorityCredential',
+                  documentIcon: Icons.how_to_reg_outlined,
+                  holderLabel: l10n.vtcVetterCardHolder,
+                  holderDid: card.vetterDid,
+                  issuer: card.issuer,
+                  validFrom: card.validFrom,
+                  validUntil: card.validUntil,
+                ),
               _IssuedList(issued: state.issued),
             ],
           },

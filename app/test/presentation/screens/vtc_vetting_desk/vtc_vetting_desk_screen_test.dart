@@ -263,6 +263,26 @@ void main() {
     await close(tester);
   });
 
+  testWidgets('shows the vetter card it checked', (tester) async {
+    final card = find.byKey(const Key('vtc_vetter_card'));
+
+    await pumpDesk(tester);
+    await tester.pump();
+    // Shown once checked, not from what the phone recorded.
+    expect(card, findsNothing);
+
+    await waitFor(tester, card);
+    expect(
+      find.descendant(of: card, matching: find.text('Vetter card')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: card, matching: find.text(fixture.vetter.did)),
+      findsOneWidget,
+    );
+    await close(tester);
+  });
+
   testWidgets('says so once the vetter card was withdrawn', (tester) async {
     fixture.network.revoked.add(3);
 
@@ -271,6 +291,7 @@ void main() {
 
     expect(find.byKey(const Key('vtc_vetter_not_vetter')), findsOneWidget);
     expect(find.byKey(const Key('vtc_vetter_show_ticket')), findsNothing);
+    expect(find.byKey(const Key('vtc_vetter_card')), findsNothing);
     await close(tester);
   });
 

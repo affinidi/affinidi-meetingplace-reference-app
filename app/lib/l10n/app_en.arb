@@ -4061,6 +4061,14 @@
 			}
 		}
 	},
+	"vtcVetterCardTitle": "Vetter card",
+	"@vtcVetterCardTitle": {
+		"description": "Title of the role card in which the community makes the member a vetter, shown on the vetting desk"
+	},
+	"vtcVetterCardHolder": "Vetter",
+	"@vtcVetterCardHolder": {
+		"description": "Label of the identity the vetter card is about"
+	},
 	"vtcVetterStepCard": "Checking your vetter card is still valid",
 	"@vtcVetterStepCard": {
 		"description": "Step the open vetting desk runs in the background: the vetter role card is in date and not withdrawn"

@@ -5990,6 +5990,18 @@ abstract class AppLocalizations {
   /// **'{failure, select, notVetter{Your vetter card is no longer valid.} other{Something went wrong. Check your connection and try again.}}'**
   String vtcVetterFailure(String failure);
 
+  /// Title of the role card in which the community makes the member a vetter, shown on the vetting desk
+  ///
+  /// In en, this message translates to:
+  /// **'Vetter card'**
+  String get vtcVetterCardTitle;
+
+  /// Label of the identity the vetter card is about
+  ///
+  /// In en, this message translates to:
+  /// **'Vetter'**
+  String get vtcVetterCardHolder;
+
   /// Step the open vetting desk runs in the background: the vetter role card is in date and not withdrawn
   ///
   /// In en, this message translates to:

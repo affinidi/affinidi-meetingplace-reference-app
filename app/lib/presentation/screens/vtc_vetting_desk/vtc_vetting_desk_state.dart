@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
+import '../../../domain/models/vtc/vtc_vetter_card.dart';
 import '../../../domain/models/vtc/vtc_vetter_desk.dart';
 
 part 'vtc_vetting_desk_state.freezed.dart';
@@ -39,6 +40,9 @@ abstract class VtcVettingDeskState with _$VtcVettingDeskState {
     /// Whether the member's vetter card is being checked, with the desk
     /// already open: it closes again if the card no longer holds.
     @Default(false) bool checkingCard,
+
+    /// The member's vetter card for the community, once checked.
+    VtcVetterCard? vetterCard,
 
     /// What the community asks of vetting, once read.
     VettingRequirements? requirements,
