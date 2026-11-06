@@ -97,6 +97,12 @@ void main() {
     await settle(tester);
   }
 
+  /// Whether the desk on show waits on the applicant.
+  bool waiting(WidgetTester tester) =>
+      ProviderScope.containerOf(tester.element(desk))
+          .read(vtcVettingDeskControllerProvider(fakeVtcDid))
+          .waitingOnApplicant(DateTime.now());
+
   /// Goes back to the ticket left open on the desk.
   Future<void> resume(WidgetTester tester) async {
     await waitFor(tester, find.byKey(const Key('vtc_vetter_resume')));
@@ -196,22 +202,26 @@ void main() {
     await pumpDesk(tester);
     await resume(tester);
     expect(flowStep(tester), VtcVettingFlowStep.ticket);
+    expect(waiting(tester), isTrue);
     await tester.runAsync(() => fixture.requestWith(ticket.spoken));
     await check(tester);
 
     final session = (await tester.runAsync(fixture.sentToApplicant))!.last;
     expect(flowStep(tester), VtcVettingFlowStep.match);
+    expect(waiting(tester), isFalse);
     expect(find.text('Step 2 of 4 · Compare codes'), findsOneWidget);
     expect(find.text(vettingMatchCode(session.id)), findsOneWidget);
     await tap(tester, find.byKey(const Key('vtc_vetter_match_yes')));
     await waitFor(tester, find.byKey(const Key('vtc_vetter_card_waiting')));
     expect(flowStep(tester), VtcVettingFlowStep.details);
+    expect(waiting(tester), isTrue);
     expect(find.text('Step 3 of 4 · Check their details'), findsOneWidget);
     expect(find.byKey(const Key('vtc_vetter_card_waiting')), findsOneWidget);
 
     await tester.runAsync(() => fixture.sendCard(session));
     await check(tester);
     expect(find.text('Ada Lovelace'), findsOneWidget);
+    expect(waiting(tester), isFalse);
     final issue = find.byKey(const Key('vtc_vetter_issue'));
     await tap(tester, issue);
     expect((await tester.runAsync(fixture.sentToApplicant))!, hasLength(2));

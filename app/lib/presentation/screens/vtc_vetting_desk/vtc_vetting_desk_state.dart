@@ -98,6 +98,14 @@ abstract class VtcVettingDeskState with _$VtcVettingDeskState {
   VtcVetterSession? get current =>
       desk?.sessions.where((session) => session.isOpen).lastOrNull;
 
+  /// Whether the vetter waits on the applicant at [now]: to scan or type in
+  /// the ticket, or to send their details.
+  bool waitingOnApplicant(DateTime now) => switch (flowStep(now)) {
+    VtcVettingFlowStep.ticket => true,
+    VtcVettingFlowStep.details => cards[current?.request.requestId] == null,
+    _ => false,
+  };
+
   /// The step of vetting an applicant the desk is at, at [now]: null while
   /// no ticket is on show and no applicant is being vetted.
   VtcVettingFlowStep? flowStep(DateTime now) => switch (current) {

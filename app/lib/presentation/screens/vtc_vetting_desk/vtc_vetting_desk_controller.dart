@@ -21,6 +21,13 @@ class VtcVettingDeskController extends _$VtcVettingDeskController {
   /// How often applicants' messages are picked up while the desk is open.
   static const checkInterval = Duration(seconds: 5);
 
+  /// How often they are picked up while the vetter waits on the applicant,
+  /// so the next step shows as soon as they act.
+  static const waitingCheckInterval = Duration(seconds: 1);
+
+  /// When applicants' messages were last picked up.
+  DateTime? _checkedAt;
+
   /// What the vetter says when the match codes differ.
   static const mismatchMessage = 'match code differs';
 
@@ -64,7 +71,10 @@ class VtcVettingDeskController extends _$VtcVettingDeskController {
         step: vetterCard != null ? state.step : VtcVettingDeskStep.notVetter,
       );
       if (vetterCard == null) return;
-      _check ??= Timer.periodic(checkInterval, (_) => unawaited(check()));
+      _check ??= Timer.periodic(
+        waitingCheckInterval,
+        (_) => unawaited(_checkWhenDue()),
+      );
       await check();
       await readIssued();
     } on Exception catch (error, stackTrace) {
@@ -83,10 +93,23 @@ class VtcVettingDeskController extends _$VtcVettingDeskController {
     }
   }
 
+  /// Picks up what applicants sent once [checkInterval] passed since the
+  /// last time, or [waitingCheckInterval] while the vetter waits on them.
+  Future<void> _checkWhenDue() async {
+    final now = clock.now();
+    final interval = state.waitingOnApplicant(now)
+        ? waitingCheckInterval
+        : checkInterval;
+    final checkedAt = _checkedAt;
+    if (checkedAt != null && now.difference(checkedAt) < interval) return;
+    await check();
+  }
+
   /// Picks up what applicants sent, and shows where each session stands.
   Future<void> check() async {
     if (_checking || state.step != VtcVettingDeskStep.open) return;
     _checking = true;
+    _checkedAt = clock.now();
     try {
       final desk = await _service.checkVetterDesk(communityDid);
       _showDesk(desk);
