@@ -285,6 +285,47 @@ void main() {
       await close(tester);
     });
 
+    testWidgets('asks a vetter without a profile to write one', (tester) async {
+      await pumpPage(tester, 'vetter');
+      final setUp = find.byKey(const Key('vtc_community_vetter_profile'));
+      await waitFor(tester, setUp);
+
+      expect(
+        find.byKey(const Key('vtc_community_vetter_profile_needed')),
+        findsOneWidget,
+      );
+
+      await tap(tester, setUp);
+      await waitFor(
+        tester,
+        find.byKey(const Key('vtc_vetter_profile_publish')),
+      );
+
+      expect(find.byType(VtcVetterProfileScreen), findsOneWidget);
+      await close(tester);
+    });
+
+    testWidgets('asks nothing once the profile was published', (tester) async {
+      await tester.runAsync(
+        () => fixture.service.publishVetterProfile(
+          fakeVtcDid,
+          const VetterProfile(methods: [VettingMethod.inPerson]),
+        ),
+      );
+
+      await pumpPage(tester, 'vetter');
+      // Long enough for the profile check that would show the prompt.
+      for (var i = 0; i < 5; i++) {
+        await settle(tester);
+      }
+
+      expect(
+        find.byKey(const Key('vtc_community_vetter_profile')),
+        findsNothing,
+      );
+      await close(tester);
+    });
+
     testWidgets('offers no vetting desk once the card is withdrawn', (
       tester,
     ) async {

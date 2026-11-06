@@ -4139,6 +4139,14 @@
 			}
 		}
 	},
+	"vtcVetterProfileNeeded": "Applicants can't find you yet. Set up your vetter profile so they know how to reach you.",
+	"@vtcVetterProfileNeeded": {
+		"description": "The member is a vetter but the community holds no profile of theirs"
+	},
+	"vtcVetterProfileSetUp": "Set up your vetter profile",
+	"@vtcVetterProfileSetUp": {
+		"description": "Button: open the vetter profile from the community page"
+	},
 	"vtcVetterCheckFailed": "Couldn't check your vetter card, so vetting isn't offered. Try again later.",
 	"@vtcVetterCheckFailed": {
 		"description": "The vetter card could not be checked on the community page"

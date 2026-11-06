@@ -4127,6 +4127,13 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get vtcVetterProfileNeeded =>
+      'Applicants can\'t find you yet. Set up your vetter profile so they know how to reach you.';
+
+  @override
+  String get vtcVetterProfileSetUp => 'Set up your vetter profile';
+
+  @override
   String get vtcVetterCheckFailed =>
       'Couldn\'t check your vetter card, so vetting isn\'t offered. Try again later.';
 

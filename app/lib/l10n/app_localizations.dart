@@ -6092,6 +6092,18 @@ abstract class AppLocalizations {
   /// **'The community would refuse this profile ({reason}).'**
   String vtcVetterProfileInvalid(String reason);
 
+  /// The member is a vetter but the community holds no profile of theirs
+  ///
+  /// In en, this message translates to:
+  /// **'Applicants can\'t find you yet. Set up your vetter profile so they know how to reach you.'**
+  String get vtcVetterProfileNeeded;
+
+  /// Button: open the vetter profile from the community page
+  ///
+  /// In en, this message translates to:
+  /// **'Set up your vetter profile'**
+  String get vtcVetterProfileSetUp;
+
   /// The vetter card could not be checked on the community page
   ///
   /// In en, this message translates to:

@@ -10,6 +10,7 @@ import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
+import '../vtc_vetter_profile/vtc_vetter_profile_screen.dart';
 import '../vtc_vetting_desk/vtc_vetting_desk_screen.dart';
 import 'vtc_card_delivery_trail.dart';
 import 'vtc_community_profile.dart';
@@ -160,7 +161,9 @@ class VtcCommunityPage extends StatelessWidget {
 }
 
 /// Opens the vetting desk, while the member's vetter card for the community
-/// at [communityDid] holds; else shows nothing.
+/// at [communityDid] holds; else shows nothing. Asks a vetter whose profile
+/// the community does not hold to write one, as applicants cannot find
+/// them until they do.
 class _VettingDeskEntry extends HookConsumerWidget {
   const _VettingDeskEntry({
     required this.communityDid,
@@ -198,9 +201,36 @@ class _VettingDeskEntry extends HookConsumerWidget {
     }
   }
 
+  /// Whether the vetter has yet to publish a profile here. Not knowing asks
+  /// nothing: the desk offers the profile anyway.
+  Future<bool> _profileNeeded(WidgetRef ref) async {
+    try {
+      return await ref
+          .read(vtcServiceProvider)
+          .vetterProfileNeeded(communityDid);
+    } on Exception catch (error, stackTrace) {
+      ref
+          .read(appLoggerProvider)
+          .error(
+            'Checking the vetter profile failed: ${error.runtimeType}',
+            stackTrace: stackTrace,
+            name: 'VtcCommunityPage',
+          );
+      return false;
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final canVet = useFuture(useMemoized(() => _canVet(ref), [communityDid]));
+    // Asked again once the profile screen closes.
+    final profileChecks = useState(0);
+    final profileNeeded = useFuture(
+      useMemoized(
+        () async => canVet.data == true && await _profileNeeded(ref),
+        [canVet.data, profileChecks.value],
+      ),
+    );
     if (canVet.hasError) {
       return OnboardingMessage(
         context.l10n.vtcVetterCheckFailed,
@@ -209,15 +239,41 @@ class _VettingDeskEntry extends HookConsumerWidget {
       );
     }
     if (canVet.data != true) return const SizedBox.shrink();
-    return OnboardingButton(
-      key: const Key('vtc_community_vetting_desk'),
-      label: context.l10n.vtcVetterStart,
-      isOutlined: true,
-      onPressed: () => VtcVettingDeskScreen.show(
-        context,
-        communityDid: communityDid,
-        communityName: communityName,
-      ),
+    final l10n = context.l10n;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 8,
+      children: [
+        if (profileNeeded.data ?? false) ...[
+          OnboardingMessage(
+            l10n.vtcVetterProfileNeeded,
+            key: const Key('vtc_community_vetter_profile_needed'),
+            isError: false,
+          ),
+          OnboardingButton(
+            key: const Key('vtc_community_vetter_profile'),
+            label: l10n.vtcVetterProfileSetUp,
+            onPressed: () async {
+              await VtcVetterProfileScreen.show(
+                context,
+                communityDid: communityDid,
+                communityName: communityName,
+              );
+              profileChecks.value++;
+            },
+          ),
+        ],
+        OnboardingButton(
+          key: const Key('vtc_community_vetting_desk'),
+          label: l10n.vtcVetterStart,
+          isOutlined: true,
+          onPressed: () => VtcVettingDeskScreen.show(
+            context,
+            communityDid: communityDid,
+            communityName: communityName,
+          ),
+        ),
+      ],
     );
   }
 }
