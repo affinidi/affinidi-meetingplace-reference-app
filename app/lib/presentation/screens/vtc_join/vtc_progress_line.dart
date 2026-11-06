@@ -12,7 +12,7 @@ class VtcProgressLine extends StatelessWidget {
   final VtcTrailStage stage;
 
   /// The size of the marker beside the line, to match its text.
-  static const _markerSize = 18.0;
+  static const _markerSize = 16.0;
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +45,7 @@ class VtcProgressLine extends StatelessWidget {
         Flexible(
           child: Text(
             title,
-            style: context.textTheme.bodyMedium?.copyWith(
+            style: context.textTheme.bodySmall?.copyWith(
               color: isNext ? Colors.white38 : Colors.white,
             ),
           ),
