@@ -3743,10 +3743,6 @@
 	"@vtcCardStepReading": {
 		"description": "Step of getting the membership card: fetching the card the member's VTA found"
 	},
-	"vtcJoinVettingTitle": "Meet a vetter",
-	"@vtcJoinVettingTitle": {
-		"description": "Title of the overview of being vetted for a community"
-	},
 	"vtcJoinVettingIntro": "{name} asks to meet you first. One of its vetters checks who you are, in person, and vouches for you.",
 	"@vtcJoinVettingIntro": {
 		"description": "What vetting means, on its overview",
@@ -4102,7 +4098,7 @@
 	"@vtcVetterBackToDesk": {
 		"description": "Leaves the last step of vetting an applicant for the vetting desk"
 	},
-	"vtcApplicantStep": "{step, select, ticket{Ask the vetter} match{Compare codes} details{Share your details} other{Done}}",
+	"vtcApplicantStep": "{step, select, meet{Meet a vetter} ticket{Ask the vetter} match{Compare codes} details{Share your details} other{Done}}",
 	"@vtcApplicantStep": {
 		"description": "Name of a step of being vetted, above the progress bar",
 		"placeholders": {

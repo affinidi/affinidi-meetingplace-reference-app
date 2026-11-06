@@ -3797,9 +3797,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get vtcCardStepReading => 'Opening your card';
 
   @override
-  String get vtcJoinVettingTitle => 'Meet a vetter';
-
-  @override
   String vtcJoinVettingIntro(String name) {
     return '$name asks to meet you first. One of its vetters checks who you are, in person, and vouches for you.';
   }
@@ -4086,6 +4083,7 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String vtcApplicantStep(String step) {
     String _temp0 = intl.Intl.selectLogic(step, {
+      'meet': 'Meet a vetter',
       'ticket': 'Ask the vetter',
       'match': 'Compare codes',
       'details': 'Share your details',

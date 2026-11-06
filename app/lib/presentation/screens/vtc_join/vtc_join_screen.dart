@@ -1204,6 +1204,8 @@ class _VettingFlow extends StatelessWidget {
           if (waiting) back,
         ],
       ),
+      // Shown by the overview, on a page of its own.
+      (VtcApplicantStep.meet, _) => const SizedBox.shrink(),
       (VtcApplicantStep.done, _) => _VettingOutcome(
         request: state.vetting?.requestTo(vetterDid ?? ''),
         vetter: vetter,
@@ -1320,7 +1322,12 @@ class _Vetting extends HookConsumerWidget {
       spacing: 12,
       children: [
         if (state.logoUrl case final logoUrl?) VtcCommunityLogo(logoUrl),
-        OnboardingTitle(l10n.vtcJoinVettingTitle),
+        OnboardingStepProgress(
+          key: const Key('vtc_join_vetting_progress'),
+          step: VtcApplicantStep.meet.index + 1,
+          total: VtcApplicantStep.values.length,
+          title: l10n.vtcApplicantStep(VtcApplicantStep.meet.name),
+        ),
         OnboardingSubtitle(l10n.vtcJoinVettingIntro(name)),
         if (requirements != null)
           GlassCard(

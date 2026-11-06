@@ -1388,7 +1388,7 @@ void main() {
     testWidgets('says what the community asks of vetting', (tester) async {
       await openVetting(tester);
 
-      expect(title('Meet a vetter'), findsOneWidget);
+      expect(find.text('Step 1 of 5 · Meet a vetter'), findsOneWidget);
       expect(find.text('0 of 2 vetters vouched for you'), findsOneWidget);
       expect(find.text('A vouch counts for 30 days'), findsOneWidget);
       expect(find.byKey(const Key('vtc_join_vetting_send')), findsNothing);
@@ -1398,7 +1398,7 @@ void main() {
     testWidgets('asks the vetter whose code the member types', (tester) async {
       await askBob(tester);
 
-      expect(find.text('Step 1 of 4 · Ask the vetter'), findsOneWidget);
+      expect(find.text('Step 2 of 5 · Ask the vetter'), findsOneWidget);
       // What the phone does sits apart from what the vetter is to do.
       expect(
         find.descendant(
@@ -1428,7 +1428,7 @@ void main() {
       await tester.ensureVisible(back);
       await tester.tap(back);
       await settle(tester);
-      expect(title('Meet a vetter'), findsOneWidget);
+      expect(find.text('Step 1 of 5 · Meet a vetter'), findsOneWidget);
       expect(find.text('Listed as Bob'), findsOneWidget);
       // The rest of what Bob published, and his DID, behind his name.
       final details = tester
@@ -1503,7 +1503,7 @@ void main() {
       await tester.pump(VtcJoinController.vettingCheckInterval);
       await settle(tester);
 
-      expect(find.text('Step 4 of 4 · Done'), findsOneWidget);
+      expect(find.text('Step 5 of 5 · Done'), findsOneWidget);
       expect(find.text('Bob vouched for you'), findsOneWidget);
       expect(find.byKey(const Key('confetti_overlay')), findsOneWidget);
       await tester.pumpWidget(const SizedBox.shrink());
@@ -1524,7 +1524,7 @@ void main() {
       await tester.pump(VtcJoinController.vettingCheckInterval);
       await settle(tester);
 
-      expect(find.text('Step 2 of 4 · Compare codes'), findsOneWidget);
+      expect(find.text('Step 3 of 5 · Compare codes'), findsOneWidget);
       expect(title('Do the codes match?'), findsOneWidget);
       expect(
         tester.widget<Text>(find.byKey(const Key('vtc_join_match_code'))).data,
@@ -1535,7 +1535,7 @@ void main() {
       await tapVisible(tester, find.byKey(const Key('vtc_join_match_no')));
       await settle(tester);
 
-      expect(find.text('Step 4 of 4 · Done'), findsOneWidget);
+      expect(find.text('Step 5 of 5 · Done'), findsOneWidget);
       expect(find.text('You ended the session with Bob'), findsOneWidget);
       expect(find.byKey(const Key('confetti_overlay')), findsNothing);
       await tapVisible(

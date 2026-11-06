@@ -5678,12 +5678,6 @@ abstract class AppLocalizations {
   /// **'Opening your card'**
   String get vtcCardStepReading;
 
-  /// Title of the overview of being vetted for a community
-  ///
-  /// In en, this message translates to:
-  /// **'Meet a vetter'**
-  String get vtcJoinVettingTitle;
-
   /// What vetting means, on its overview
   ///
   /// In en, this message translates to:
@@ -6023,7 +6017,7 @@ abstract class AppLocalizations {
   /// Name of a step of being vetted, above the progress bar
   ///
   /// In en, this message translates to:
-  /// **'{step, select, ticket{Ask the vetter} match{Compare codes} details{Share your details} other{Done}}'**
+  /// **'{step, select, meet{Meet a vetter} ticket{Ask the vetter} match{Compare codes} details{Share your details} other{Done}}'**
   String vtcApplicantStep(String step);
 
   /// Being vetted, in the background: reading the vetters the community lists

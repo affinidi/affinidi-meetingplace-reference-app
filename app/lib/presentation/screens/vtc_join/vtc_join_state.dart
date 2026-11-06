@@ -74,6 +74,11 @@ enum VtcJoinStep {
 
 /// A step of being vetted by one vetter, from their ticket on, in order.
 enum VtcApplicantStep {
+  /// Meeting a vetter: the overview of what the community asks and the
+  /// vetters asked so far. A page of its own, never
+  /// [VtcJoinState.applicantStep].
+  meet,
+
   /// Scanning the vetter's ticket or typing their code, and asking them.
   ticket,
 
