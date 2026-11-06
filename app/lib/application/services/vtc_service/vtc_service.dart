@@ -594,6 +594,7 @@ class VtcService {
   /// [manifest]'s community, under [criterion], which asks for vetting.
   /// Records the request, as the latest to that vetter, and returns the
   /// vetting. [vetterName] is how the community lists the vetter, if known.
+  /// Each step is reported to [onStep] as it starts.
   ///
   /// Throws [VettingException] for a ticket of another community, and as
   /// [join] does.
@@ -602,6 +603,7 @@ class VtcService {
     required JoinCriterion criterion,
     required VettingTicket ticket,
     String? vetterName,
+    void Function(VtcVettingWork step)? onStep,
   }) async {
     final requirements = criterion.vetting!;
     final vta = await _grantedVta();
@@ -616,7 +618,9 @@ class VtcService {
             vetterRole: requirements.vetterRole,
             salt: newCommitmentSalt(),
           );
+    onStep?.call(VtcVettingWork.unlockingIdentity);
     final collection = await _collection(vta, member);
+    onStep?.call(VtcVettingWork.sendingRequest);
     final request = await _sdk
         .vettingApplicant(collection.keys)
         .request(
@@ -767,12 +771,15 @@ class VtcService {
   /// claims of [preview] the member approved. Call only once the member
   /// confirmed the match code. The VTA records the disclosure.
   ///
+  /// Each step is reported to [onStep] as it starts.
+  ///
   /// Throws [VettingException] when the session has lapsed, [ArgumentError]
   /// when a claim the session requires is missing, and as [join] does.
   Future<VtcVetting> sendVettingCard(
     String communityDid,
     String vetterDid, {
     required DisclosurePreview preview,
+    void Function(VtcVettingWork step)? onStep,
   }) async {
     final (member, vetting, request) = await _vettingOf(
       communityDid,
@@ -783,10 +790,12 @@ class VtcService {
       (await _collection(vta, member)).keys,
     );
     final session = _session(applicant, request, communityDid);
+    onStep?.call(VtcVettingWork.recordingDisclosure);
     await vta.presentDisclosure(
       persona: _persona(member),
       previewId: preview.previewId,
     );
+    onStep?.call(VtcVettingWork.sendingDetails);
     final sent = await applicant.sendCard(
       session,
       claims: [

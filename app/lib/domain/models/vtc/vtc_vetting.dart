@@ -1,5 +1,27 @@
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
+/// What the phone does in the background while the member is vetted, in
+/// the order it comes.
+enum VtcVettingWork {
+  /// Reading the vetters the community lists, to pick the one at hand.
+  listingVetters,
+
+  /// Borrowing the applying identity's keys from the VTA.
+  unlockingIdentity,
+
+  /// Signing the request and sending it to the vetter.
+  sendingRequest,
+
+  /// Reading the details the vetting card would carry from the VTA.
+  preparingDetails,
+
+  /// The VTA recording what the member shares with the vetter.
+  recordingDisclosure,
+
+  /// Sending the vetter the card with the member's details.
+  sendingDetails,
+}
+
 /// Where vetting by one vetter stands.
 enum VtcVettingStatus {
   /// The request is on its way to the vetter.

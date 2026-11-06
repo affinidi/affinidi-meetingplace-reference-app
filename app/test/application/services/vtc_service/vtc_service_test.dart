@@ -1200,17 +1200,22 @@ void main() {
           code: 'K7QF-2M9X',
         )!;
 
+    /// What [start] and sending the card reported, in order.
+    final steps = <VtcVettingWork>[];
+
     Future<VtcVetting> start() => service.startVetting(
       manifest,
       criterion: vetted(),
       ticket: ticket(),
       vetterName: 'Bob',
+      onStep: steps.add,
     );
 
     Future<VtcVettingRequest> requestAfterCheck() async =>
         (await service.checkVetting(fakeVtcDid))!.requests.single;
 
     setUp(() async {
+      steps.clear();
       network = FakeVtcNetwork()
         ..joinManifest = {
           'communityDid': fakeVtcDid,
@@ -1312,6 +1317,10 @@ void main() {
 
     test('is vouched for through a whole session', () async {
       final request = (await start()).requests.single.request;
+      expect(steps, [
+        VtcVettingWork.unlockingIdentity,
+        VtcVettingWork.sendingRequest,
+      ]);
 
       await network.vetterAccepts(persona, request);
       expect((await requestAfterCheck()).status, VtcVettingStatus.accepted);
@@ -1325,12 +1334,18 @@ void main() {
         network.vetterDid,
       );
       expect(preview.claims.single.type, 'name.legal');
+      steps.clear();
       final afterCard = (await service.sendVettingCard(
         fakeVtcDid,
         network.vetterDid,
         preview: preview,
+        onStep: steps.add,
       )).requests.single;
       expect(afterCard.status, VtcVettingStatus.cardSent);
+      expect(steps, [
+        VtcVettingWork.recordingDisclosure,
+        VtcVettingWork.sendingDetails,
+      ]);
       expect(network.sentToMembers, hasLength(2));
       expect(
         network.vta.received.map((r) => r['type']),
