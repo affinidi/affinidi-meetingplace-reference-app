@@ -4048,6 +4048,97 @@
 			}
 		}
 	},
+	"vtcVetterProfileTitle": "Your vetter profile",
+	"@vtcVetterProfileTitle": {
+		"description": "Title of the screen where a vetter writes what applicants see about them"
+	},
+	"vtcVetterProfileOpen": "Your vetter profile",
+	"@vtcVetterProfileOpen": {
+		"description": "Opens the vetter profile from the vetting desk"
+	},
+	"vtcVetterProfileIntro": "People applying to {name} who look for a vetter see what you write here, as your own words. Nobody checks it.",
+	"@vtcVetterProfileIntro": {
+		"description": "Explains the vetter profile",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcVetterProfileListed": "List me for applicants",
+	"@vtcVetterProfileListed": {
+		"description": "Switch: whether applicants find the vetter in the community's list"
+	},
+	"vtcVetterProfileListedNote": "Off keeps your profile with the community but out of its list.",
+	"@vtcVetterProfileListedNote": {
+		"description": "Explains the listing switch"
+	},
+	"vtcVetterProfileStoredListed": "Your profile is in the community's list.",
+	"@vtcVetterProfileStoredListed": {
+		"description": "The community stored and lists the vetter's profile"
+	},
+	"vtcVetterProfileStoredHidden": "The community keeps your profile, but doesn't list it.",
+	"@vtcVetterProfileStoredHidden": {
+		"description": "The community stored the vetter's profile, unlisted"
+	},
+	"vtcVetterProfileDisplayName": "Name to be listed under",
+	"@vtcVetterProfileDisplayName": {
+		"description": "Field: the vetter's display name"
+	},
+	"vtcVetterProfileLanguages": "Languages you vet in, e.g. en, de",
+	"@vtcVetterProfileLanguages": {
+		"description": "Field: language codes, comma-separated"
+	},
+	"vtcVetterProfileCountry": "Country code, e.g. DE",
+	"@vtcVetterProfileCountry": {
+		"description": "Field: two-letter country code"
+	},
+	"vtcVetterProfileCity": "City (needs a country)",
+	"@vtcVetterProfileCity": {
+		"description": "Field: city"
+	},
+	"vtcVetterProfileContactHint": "How applicants get a ticket from you",
+	"@vtcVetterProfileContactHint": {
+		"description": "Field: where to find the vetter for a ticket"
+	},
+	"vtcVetterProfileAvailability": "When you're available",
+	"@vtcVetterProfileAvailability": {
+		"description": "Field: the vetter's availability"
+	},
+	"vtcVetterProfileMethodsHeading": "How you vet",
+	"@vtcVetterProfileMethodsHeading": {
+		"description": "Heading above the vetting methods"
+	},
+	"vtcVetterProfileMethod": "{method, select, inPerson{In person} video{On a video call} priorAcquaintance{People I already know} other{{method}}}",
+	"@vtcVetterProfileMethod": {
+		"description": "A vetting method",
+		"placeholders": {
+			"method": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcVetterProfileDocumentsHeading": "Documents you accept",
+	"@vtcVetterProfileDocumentsHeading": {
+		"description": "Heading above the documents a vetter accepts"
+	},
+	"vtcVetterProfileNoDocument": "None: I know the person",
+	"@vtcVetterProfileNoDocument": {
+		"description": "The vetter vouches without a document"
+	},
+	"vtcVetterProfilePublish": "Publish",
+	"@vtcVetterProfilePublish": {
+		"description": "Button: publish the vetter profile"
+	},
+	"vtcVetterProfileInvalid": "The community would refuse this profile ({reason}).",
+	"@vtcVetterProfileInvalid": {
+		"description": "The profile breaks the community's rules",
+		"placeholders": {
+			"reason": {
+				"type": "String"
+			}
+		}
+	},
 	"vtcVetterCheckFailed": "Couldn't check your vetter card, so vetting isn't offered. Try again later.",
 	"@vtcVetterCheckFailed": {
 		"description": "The vetter card could not be checked on the community page"

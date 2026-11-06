@@ -9,6 +9,7 @@ import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import '../../widgets/qr/qr_code_view.dart';
 import '../vtc_join/vtc_claim_type_label.dart';
+import '../vtc_vetter_profile/vtc_vetter_profile_screen.dart';
 import 'vtc_vetting_desk_controller.dart';
 import 'vtc_vetting_desk_state.dart';
 
@@ -85,6 +86,16 @@ class VtcVettingDeskScreen extends HookConsumerWidget {
                 )
               else
                 _TicketView(state: state, controller: controller),
+              OnboardingButton(
+                key: const Key('vtc_vetter_profile_open'),
+                label: l10n.vtcVetterProfileOpen,
+                isOutlined: true,
+                onPressed: () => VtcVetterProfileScreen.show(
+                  context,
+                  communityDid: communityDid,
+                  communityName: communityName,
+                ),
+              ),
               _IssuedList(issued: state.issued),
             ],
           },

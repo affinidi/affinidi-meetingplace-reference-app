@@ -5978,6 +5978,120 @@ abstract class AppLocalizations {
   /// **'{failure, select, notVetter{Your vetter card is no longer valid.} other{Something went wrong. Check your connection and try again.}}'**
   String vtcVetterFailure(String failure);
 
+  /// Title of the screen where a vetter writes what applicants see about them
+  ///
+  /// In en, this message translates to:
+  /// **'Your vetter profile'**
+  String get vtcVetterProfileTitle;
+
+  /// Opens the vetter profile from the vetting desk
+  ///
+  /// In en, this message translates to:
+  /// **'Your vetter profile'**
+  String get vtcVetterProfileOpen;
+
+  /// Explains the vetter profile
+  ///
+  /// In en, this message translates to:
+  /// **'People applying to {name} who look for a vetter see what you write here, as your own words. Nobody checks it.'**
+  String vtcVetterProfileIntro(String name);
+
+  /// Switch: whether applicants find the vetter in the community's list
+  ///
+  /// In en, this message translates to:
+  /// **'List me for applicants'**
+  String get vtcVetterProfileListed;
+
+  /// Explains the listing switch
+  ///
+  /// In en, this message translates to:
+  /// **'Off keeps your profile with the community but out of its list.'**
+  String get vtcVetterProfileListedNote;
+
+  /// The community stored and lists the vetter's profile
+  ///
+  /// In en, this message translates to:
+  /// **'Your profile is in the community\'s list.'**
+  String get vtcVetterProfileStoredListed;
+
+  /// The community stored the vetter's profile, unlisted
+  ///
+  /// In en, this message translates to:
+  /// **'The community keeps your profile, but doesn\'t list it.'**
+  String get vtcVetterProfileStoredHidden;
+
+  /// Field: the vetter's display name
+  ///
+  /// In en, this message translates to:
+  /// **'Name to be listed under'**
+  String get vtcVetterProfileDisplayName;
+
+  /// Field: language codes, comma-separated
+  ///
+  /// In en, this message translates to:
+  /// **'Languages you vet in, e.g. en, de'**
+  String get vtcVetterProfileLanguages;
+
+  /// Field: two-letter country code
+  ///
+  /// In en, this message translates to:
+  /// **'Country code, e.g. DE'**
+  String get vtcVetterProfileCountry;
+
+  /// Field: city
+  ///
+  /// In en, this message translates to:
+  /// **'City (needs a country)'**
+  String get vtcVetterProfileCity;
+
+  /// Field: where to find the vetter for a ticket
+  ///
+  /// In en, this message translates to:
+  /// **'How applicants get a ticket from you'**
+  String get vtcVetterProfileContactHint;
+
+  /// Field: the vetter's availability
+  ///
+  /// In en, this message translates to:
+  /// **'When you\'re available'**
+  String get vtcVetterProfileAvailability;
+
+  /// Heading above the vetting methods
+  ///
+  /// In en, this message translates to:
+  /// **'How you vet'**
+  String get vtcVetterProfileMethodsHeading;
+
+  /// A vetting method
+  ///
+  /// In en, this message translates to:
+  /// **'{method, select, inPerson{In person} video{On a video call} priorAcquaintance{People I already know} other{{method}}}'**
+  String vtcVetterProfileMethod(String method);
+
+  /// Heading above the documents a vetter accepts
+  ///
+  /// In en, this message translates to:
+  /// **'Documents you accept'**
+  String get vtcVetterProfileDocumentsHeading;
+
+  /// The vetter vouches without a document
+  ///
+  /// In en, this message translates to:
+  /// **'None: I know the person'**
+  String get vtcVetterProfileNoDocument;
+
+  /// Button: publish the vetter profile
+  ///
+  /// In en, this message translates to:
+  /// **'Publish'**
+  String get vtcVetterProfilePublish;
+
+  /// The profile breaks the community's rules
+  ///
+  /// In en, this message translates to:
+  /// **'The community would refuse this profile ({reason}).'**
+  String vtcVetterProfileInvalid(String reason);
+
   /// The vetter card could not be checked on the community page
   ///
   /// In en, this message translates to:

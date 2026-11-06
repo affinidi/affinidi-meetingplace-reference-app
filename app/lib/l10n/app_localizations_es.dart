@@ -4044,6 +4044,79 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get vtcVetterProfileTitle => 'Your vetter profile';
+
+  @override
+  String get vtcVetterProfileOpen => 'Your vetter profile';
+
+  @override
+  String vtcVetterProfileIntro(String name) {
+    return 'People applying to $name who look for a vetter see what you write here, as your own words. Nobody checks it.';
+  }
+
+  @override
+  String get vtcVetterProfileListed => 'List me for applicants';
+
+  @override
+  String get vtcVetterProfileListedNote =>
+      'Off keeps your profile with the community but out of its list.';
+
+  @override
+  String get vtcVetterProfileStoredListed =>
+      'Your profile is in the community\'s list.';
+
+  @override
+  String get vtcVetterProfileStoredHidden =>
+      'The community keeps your profile, but doesn\'t list it.';
+
+  @override
+  String get vtcVetterProfileDisplayName => 'Name to be listed under';
+
+  @override
+  String get vtcVetterProfileLanguages => 'Languages you vet in, e.g. en, de';
+
+  @override
+  String get vtcVetterProfileCountry => 'Country code, e.g. DE';
+
+  @override
+  String get vtcVetterProfileCity => 'City (needs a country)';
+
+  @override
+  String get vtcVetterProfileContactHint =>
+      'How applicants get a ticket from you';
+
+  @override
+  String get vtcVetterProfileAvailability => 'When you\'re available';
+
+  @override
+  String get vtcVetterProfileMethodsHeading => 'How you vet';
+
+  @override
+  String vtcVetterProfileMethod(String method) {
+    String _temp0 = intl.Intl.selectLogic(method, {
+      'inPerson': 'In person',
+      'video': 'On a video call',
+      'priorAcquaintance': 'People I already know',
+      'other': '$method',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get vtcVetterProfileDocumentsHeading => 'Documents you accept';
+
+  @override
+  String get vtcVetterProfileNoDocument => 'None: I know the person';
+
+  @override
+  String get vtcVetterProfilePublish => 'Publish';
+
+  @override
+  String vtcVetterProfileInvalid(String reason) {
+    return 'The community would refuse this profile ($reason).';
+  }
+
+  @override
   String get vtcVetterCheckFailed =>
       'Couldn\'t check your vetter card, so vetting isn\'t offered. Try again later.';
 

@@ -10,6 +10,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_community_page.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_state.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/vtc_vetter_profile/vtc_vetter_profile_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_vetting_desk/vtc_vetting_desk_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_vetting_desk/vtc_vetting_desk_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
@@ -223,6 +224,18 @@ void main() {
         reason: text,
       );
     }
+    await close(tester);
+  });
+
+  testWidgets('opens the vetter profile', (tester) async {
+    await pumpDesk(tester);
+    final open = find.byKey(const Key('vtc_vetter_profile_open'));
+    await waitFor(tester, open);
+
+    await tap(tester, open);
+    await waitFor(tester, find.byKey(const Key('vtc_vetter_profile_publish')));
+
+    expect(find.byType(VtcVetterProfileScreen), findsOneWidget);
     await close(tester);
   });
 
