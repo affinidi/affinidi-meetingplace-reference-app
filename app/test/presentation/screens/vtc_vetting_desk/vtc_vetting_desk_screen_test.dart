@@ -290,6 +290,25 @@ void main() {
     await close(tester);
   });
 
+  testWidgets('ends when the applicant ends the session', (tester) async {
+    await pumpDesk(tester);
+    final ticket = await showTicket(tester);
+    await tester.runAsync(() => fixture.requestWith(ticket.spoken));
+    await check(tester);
+    final session = (await tester.runAsync(fixture.sentToApplicant))!.last;
+
+    await tester.runAsync(
+      () => fixture.applicantSends(VettingTask.decline, {
+        'requestId': session.payload['requestId'],
+      }),
+    );
+    await check(tester);
+
+    expect(find.text('Step 4 of 4 · Done'), findsOneWidget);
+    expect(find.text('The applicant ended the session.'), findsOneWidget);
+    await close(tester);
+  });
+
   testWidgets('declines when the match codes differ', (tester) async {
     await pumpDesk(tester);
     final ticket = await showTicket(tester);

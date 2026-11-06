@@ -1542,7 +1542,9 @@ void main() {
 
       expect(state().step, VtcJoinStep.vetting);
       expect(request().status, VtcVettingStatus.abandoned);
-      expect(network.sentToMembers, hasLength(1));
+      // The request, then the decline that ends the vetter's session.
+      expect(network.sentToMembers, hasLength(2));
+      expect(network.sentToMembers.last.next, network.vetterDid);
     });
 
     test('picks up where it was when the community is opened again', () async {

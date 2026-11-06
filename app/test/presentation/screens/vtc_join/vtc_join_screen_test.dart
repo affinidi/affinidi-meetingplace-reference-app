@@ -1453,7 +1453,8 @@ void main() {
       );
       await settle(tester);
       expect(find.text('You ended the session'), findsOneWidget);
-      expect(network.sentToMembers, hasLength(1));
+      // The request, then the decline that ends the vetter's session.
+      expect(network.sentToMembers, hasLength(2));
       await tester.pumpWidget(const SizedBox.shrink());
     });
   });

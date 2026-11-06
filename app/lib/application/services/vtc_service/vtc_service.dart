@@ -812,31 +812,64 @@ class VtcService {
   }
 
   /// Ends the session with [vetterDid] for [communityDid] without sending a
-  /// card, e.g. because the match codes differ. Only this phone records it;
-  /// the vetter learns nothing more.
+  /// card, e.g. because the match codes differ, telling the vetter so their
+  /// side ends too.
   Future<VtcVetting> abandonVetting(
     String communityDid,
     String vetterDid,
   ) async {
-    final (_, vetting, request) = await _vettingOf(communityDid, vetterDid);
+    final (member, vetting, request) = await _vettingOf(
+      communityDid,
+      vetterDid,
+    );
+    await _tellVetterEnded(member, request);
     final updated = vetting.withRequest(request.abandoned());
     await _repository.saveVetting(updated);
     return updated;
   }
 
   /// Forgets the member's vetting for [communityDid] on this phone: the
-  /// statements gathered and every request, so applying starts over. The
-  /// vetters learn nothing; a vetter still waiting ends the session on
-  /// their side.
+  /// statements gathered and every request, so applying starts over. A
+  /// vetter who accepted a request still open is told it ended.
   ///
   /// Before the member ever applied, the identity recorded for applying is
   /// forgotten too, so they choose it again. A member, or one whose
   /// application is open, keeps theirs.
   Future<void> stopVetting(String communityDid) async {
+    final vetting = await _repository.findVetting(communityDid);
+    final member = await _repository.findCommunity(communityDid);
+    if (vetting != null && member != null) {
+      for (final request in vetting.requests.where((r) => r.isOpen)) {
+        await _tellVetterEnded(member, request);
+      }
+    }
     await _repository.removeVetting(communityDid);
     final community = await _repository.findCommunity(communityDid);
     if (community != null && !community.isMember && !community.isApplying) {
       await _repository.removeCommunity(communityDid);
+    }
+  }
+
+  /// Tells the vetter of [request] the member ended it, so the vetter's
+  /// session ends rather than waits. A vetter who has not accepted yet
+  /// holds no session to end. Best effort: one who cannot be reached is
+  /// left to end it on their side, and the member's choice stands.
+  Future<void> _tellVetterEnded(
+    VtcCommunity member,
+    VtcVettingRequest request,
+  ) async {
+    final accepted = request.accepted;
+    if (accepted == null || !request.isOpen) return;
+    try {
+      final vta = await _grantedVta();
+      await _sdk
+          .vettingApplicant((await _collection(vta, member)).keys)
+          .decline(
+            vetter: accepted,
+            parentThreadId: request.requestDocument.id,
+          );
+    } on MeetingPlaceVtcSDKException {
+      // The vetter ends the session on their side.
     }
   }
 
