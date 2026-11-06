@@ -5983,6 +5983,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t check your vetter card, so vetting isn\'t offered. Try again later.'**
   String get vtcVetterCheckFailed;
+
+  /// Heading of the details a community asks its vetters to check
+  ///
+  /// In en, this message translates to:
+  /// **'What {name} asks you to check'**
+  String vtcVetterRequirementsHeading(String name);
+
+  /// The ID documents a community accepts for vetting
+  ///
+  /// In en, this message translates to:
+  /// **'Accepted documents: {documents}'**
+  String vtcVetterRequirementsDocuments(String documents);
+
+  /// How a vetter checks the details
+  ///
+  /// In en, this message translates to:
+  /// **'Check each detail against an ID document, with the applicant in front of you.'**
+  String get vtcVetterRequirementsInPerson;
 }
 
 class _AppLocalizationsDelegate

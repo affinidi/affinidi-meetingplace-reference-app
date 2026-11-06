@@ -49,6 +49,7 @@ class VtcVettingDeskController extends _$VtcVettingDeskController {
       state = state.copyWith(
         step: VtcVettingDeskStep.open,
         desk: await _service.vetterDesk(communityDid),
+        requirements: await _service.vettingRequirements(communityDid),
       );
       _check ??= Timer.periodic(checkInterval, (_) => unawaited(check()));
       await check();

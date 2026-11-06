@@ -4010,4 +4010,18 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get vtcVetterCheckFailed =>
       'Couldn\'t check your vetter card, so vetting isn\'t offered. Try again later.';
+
+  @override
+  String vtcVetterRequirementsHeading(String name) {
+    return 'What $name asks you to check';
+  }
+
+  @override
+  String vtcVetterRequirementsDocuments(String documents) {
+    return 'Accepted documents: $documents';
+  }
+
+  @override
+  String get vtcVetterRequirementsInPerson =>
+      'Check each detail against an ID document, with the applicant in front of you.';
 }

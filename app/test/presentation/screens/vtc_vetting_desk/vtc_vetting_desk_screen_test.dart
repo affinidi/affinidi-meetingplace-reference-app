@@ -201,6 +201,31 @@ void main() {
     await close(tester);
   });
 
+  testWidgets('lists what the community asks the vetter to check', (
+    tester,
+  ) async {
+    final criteria = fixture.network.joinManifest['criteria'] as List;
+    final vetting =
+        (criteria.last as Map<String, dynamic>)['vetting']
+            as Map<String, dynamic>;
+    vetting
+      ..['requiredClaims'] = ['name.given', 'name.family']
+      ..['acceptedDocumentClasses'] = ['passport'];
+
+    await pumpDesk(tester);
+    await waitFor(tester, find.byKey(const Key('vtc_vetter_requirements')));
+
+    final card = find.byKey(const Key('vtc_vetter_requirements'));
+    for (final text in ['first name', 'last name', 'Passport']) {
+      expect(
+        find.descendant(of: card, matching: find.textContaining(text)),
+        findsOneWidget,
+        reason: text,
+      );
+    }
+    await close(tester);
+  });
+
   testWidgets('says so once the vetter card was withdrawn', (tester) async {
     fixture.network.revoked.add(3);
 

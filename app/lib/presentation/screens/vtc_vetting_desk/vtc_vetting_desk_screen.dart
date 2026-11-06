@@ -69,11 +69,16 @@ class VtcVettingDeskScreen extends HookConsumerWidget {
             ],
             VtcVettingDeskStep.open => [
               OnboardingSubtitle(l10n.vtcVetterIntro),
+              _Requirements(
+                requirements: state.requirements,
+                communityName: communityName,
+              ),
               if (state.current case final session?)
                 _SessionView(
                   // A new applicant starts with nothing chosen or ticked.
                   key: ValueKey(session.request.requestId),
                   session: session,
+                  documentClasses: _documentClasses(state.requirements),
                   claims: state.cards[session.request.requestId],
                   busy: state.busy,
                   controller: controller,
@@ -89,6 +94,64 @@ class VtcVettingDeskScreen extends HookConsumerWidget {
               isError: true,
             ),
           OnboardingTextButton(label: l10n.generalDone, onPressed: close),
+        ],
+      ),
+    );
+  }
+}
+
+/// The documents a vetter may say they checked: those the community
+/// accepts, of those a vetter can name, or all a vetter can name.
+List<String> _documentClasses(VettingRequirements? requirements) {
+  final accepted = requirements?.acceptedDocumentClasses;
+  final known = VettingVetter.documentClasses;
+  if (accepted == null) return known;
+  final both = known.where(accepted.contains).toList();
+  return both.isEmpty ? known : both;
+}
+
+/// What the community asks the vetter to check, as its join manifest says.
+class _Requirements extends StatelessWidget {
+  const _Requirements({
+    required this.requirements,
+    required this.communityName,
+  });
+
+  final VettingRequirements? requirements;
+  final String communityName;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final asked = requirements?.requiredClaims ?? const <String>[];
+    final details = asked.isEmpty ? const ['name.legal'] : asked;
+    final documents = requirements?.acceptedDocumentClasses;
+    return GlassCard(
+      key: const Key('vtc_vetter_requirements'),
+      title: l10n.vtcVetterRequirementsHeading(communityName),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 4,
+        children: [
+          for (final type in details)
+            OnboardingLine(
+              icon: Icons.badge_outlined,
+              title: vtcClaimTypeLabel(l10n, type),
+            ),
+          if (documents != null && documents.isNotEmpty)
+            OnboardingLine(
+              icon: Icons.description_outlined,
+              title: l10n.vtcVetterRequirementsDocuments(
+                [
+                  for (final document in documents)
+                    l10n.vtcVetterDocument(document),
+                ].join(', '),
+              ),
+            ),
+          Text(
+            l10n.vtcVetterRequirementsInPerson,
+            style: onboardingNote(context),
+          ),
         ],
       ),
     );
@@ -206,12 +269,16 @@ class _SessionView extends HookWidget {
   const _SessionView({
     super.key,
     required this.session,
+    required this.documentClasses,
     required this.claims,
     required this.busy,
     required this.controller,
   });
 
   final VtcVetterSession session;
+
+  /// The documents the vetter may say they checked.
+  final List<String> documentClasses;
   final List<VettingCardClaim>? claims;
   final bool busy;
   final VtcVettingDeskController controller;
@@ -327,7 +394,7 @@ class _SessionView extends HookWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            for (final documentClass in VettingVetter.documentClasses)
+            for (final documentClass in documentClasses)
               ChoiceChip(
                 key: Key('vtc_vetter_document_$documentClass'),
                 label: Text(l10n.vtcVetterDocument(documentClass)),

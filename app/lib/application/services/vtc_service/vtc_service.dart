@@ -1105,14 +1105,23 @@ class VtcService {
         .withSession(VtcVetterSession(request: accepted).opened(session));
   }
 
-  /// The details [communityDid]'s join manifest asks vetters to check: those
-  /// of its first way in by vetting, or the legal name.
-  Future<List<String>> _vettingClaims(String communityDid) async {
+  /// What [communityDid]'s join manifest asks of vetting: that of its first
+  /// way in by vetting, or null when none asks for vetting.
+  ///
+  /// Throws [MeetingPlaceVtcSDKException] when the community cannot be
+  /// reached.
+  Future<VettingRequirements?> vettingRequirements(String communityDid) async {
     final manifest = await _sdk.joinClient().readManifest(communityDid);
-    final claims = manifest.criteria
-        .map((criterion) => criterion.vetting?.requiredClaims)
-        .whereType<List<String>>()
+    return manifest.criteria
+        .map((criterion) => criterion.vetting)
+        .whereType<VettingRequirements>()
         .firstOrNull;
+  }
+
+  /// The details [communityDid] asks vetters to check: those of
+  /// [vettingRequirements], or the legal name.
+  Future<List<String>> _vettingClaims(String communityDid) async {
+    final claims = (await vettingRequirements(communityDid))?.requiredClaims;
     return claims == null || claims.isEmpty ? const [_legalName] : claims;
   }
 

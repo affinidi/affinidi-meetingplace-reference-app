@@ -4051,5 +4051,27 @@
 	"vtcVetterCheckFailed": "Couldn't check your vetter card, so vetting isn't offered. Try again later.",
 	"@vtcVetterCheckFailed": {
 		"description": "The vetter card could not be checked on the community page"
+	},
+	"vtcVetterRequirementsHeading": "What {name} asks you to check",
+	"@vtcVetterRequirementsHeading": {
+		"description": "Heading of the details a community asks its vetters to check",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcVetterRequirementsDocuments": "Accepted documents: {documents}",
+	"@vtcVetterRequirementsDocuments": {
+		"description": "The ID documents a community accepts for vetting",
+		"placeholders": {
+			"documents": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcVetterRequirementsInPerson": "Check each detail against an ID document, with the applicant in front of you.",
+	"@vtcVetterRequirementsInPerson": {
+		"description": "How a vetter checks the details"
 	}
 }

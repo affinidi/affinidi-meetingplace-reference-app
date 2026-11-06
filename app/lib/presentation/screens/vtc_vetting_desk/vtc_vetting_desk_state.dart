@@ -36,6 +36,9 @@ abstract class VtcVettingDeskState with _$VtcVettingDeskState {
     /// The desk as recorded: tickets and sessions.
     VtcVetterDesk? desk,
 
+    /// What the community asks of vetting, once read.
+    VettingRequirements? requirements,
+
     /// The details the applicant of each session sent on their card, by
     /// request id, once checked. Held in memory only.
     @Default(<String, List<VettingCardClaim>>{})

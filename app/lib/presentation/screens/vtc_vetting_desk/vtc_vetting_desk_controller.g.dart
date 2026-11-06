@@ -69,7 +69,7 @@ final class VtcVettingDeskControllerProvider
 }
 
 String _$vtcVettingDeskControllerHash() =>
-    r'02805e1f4423b3e717c75577d5d1919370b5bf8a';
+    r'b07b7de2292d537ddce6ca8aef66bef0857d6c21';
 
 /// Drives the member's vetting desk for one community: shows a ticket, and
 /// vets each applicant who comes with it. Only a failure's type is logged;
