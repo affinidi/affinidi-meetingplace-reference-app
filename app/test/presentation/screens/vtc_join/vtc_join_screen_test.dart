@@ -1430,6 +1430,16 @@ void main() {
       await settle(tester);
       expect(title('Meet a vetter'), findsOneWidget);
       expect(find.text('Listed as Bob'), findsOneWidget);
+      // The rest of what Bob published, and his DID, behind his name.
+      final details = tester
+          .widget<Tooltip>(
+            find.ancestor(
+              of: find.text('Listed as Bob'),
+              matching: find.byType(Tooltip),
+            ),
+          )
+          .message;
+      expect(details, 'How they vet: in person\nDID: ${network.vetterDid}');
       expect(find.text('Waiting for them to answer'), findsOneWidget);
       await tester.pumpWidget(const SizedBox.shrink());
     });

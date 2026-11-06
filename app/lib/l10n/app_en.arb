@@ -4396,5 +4396,94 @@
 	"vtcVetterProfileSetUp": "Set up your vetter profile",
 	"@vtcVetterProfileSetUp": {
 		"description": "Button: open the vetter profile from the community page"
+	},
+	"vtcVetterUnnamed": "Unnamed vetter",
+	"@vtcVetterUnnamed": {
+		"description": "A listed vetter who gave no name"
+	},
+	"vtcVetterDetailsMethods": "How they vet: {methods}",
+	"@vtcVetterDetailsMethods": {
+		"description": "Tooltip line on a vetter's name: the vetting methods they offer, comma-separated",
+		"placeholders": {
+			"methods": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcVetterDetailsMethod": "{method, select, inPerson{in person} video{on a video call} priorAcquaintance{people they already know} other{{method}}}",
+	"@vtcVetterDetailsMethod": {
+		"description": "A vetting method a vetter offers, in the tooltip on their name",
+		"placeholders": {
+			"method": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcVetterDetailsLanguages": "Languages: {languages}",
+	"@vtcVetterDetailsLanguages": {
+		"description": "Tooltip line on a vetter's name: language codes",
+		"placeholders": {
+			"languages": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcVetterDetailsPlace": "Where: {place}",
+	"@vtcVetterDetailsPlace": {
+		"description": "Tooltip line on a vetter's name: where they meet people",
+		"placeholders": {
+			"place": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcVetterDetailsDocuments": "Documents: {documents}",
+	"@vtcVetterDetailsDocuments": {
+		"description": "Tooltip line on a vetter's name: the documents they accept",
+		"placeholders": {
+			"documents": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcVetterDetailsNoDocument": "none, they know you",
+	"@vtcVetterDetailsNoDocument": {
+		"description": "A vetter vouches without a document, in the tooltip on their name"
+	},
+	"vtcVetterDetailsAvailability": "Available: {availability}",
+	"@vtcVetterDetailsAvailability": {
+		"description": "Tooltip line on a vetter's name: when they are available, in their words",
+		"placeholders": {
+			"availability": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcVetterDetailsContactHint": "Getting a ticket: {hint}",
+	"@vtcVetterDetailsContactHint": {
+		"description": "Tooltip line on a vetter's name: how to get a ticket from them, in their words",
+		"placeholders": {
+			"hint": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcVetterDetailsEvents": "Events: {events}",
+	"@vtcVetterDetailsEvents": {
+		"description": "Tooltip line on a vetter's name: events they vet at",
+		"placeholders": {
+			"events": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcVetterDetailsDid": "DID: {did}",
+	"@vtcVetterDetailsDid": {
+		"description": "Tooltip line on a vetter's name: their DID",
+		"placeholders": {
+			"did": {
+				"type": "String"
+			}
+		}
 	}
 }

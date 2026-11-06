@@ -381,11 +381,16 @@ class OnboardingLine extends StatelessWidget {
     required this.title,
     this.subtitle,
     this.trailing,
+    this.titleTooltip,
   });
 
   final IconData icon;
   final String title;
   final String? subtitle;
+
+  /// More about the title, shown when it is tapped; the title is
+  /// underlined to tell so.
+  final String? titleTooltip;
 
   /// An action at the end of the line, such as an icon button, which the
   /// line centers itself on vertically.
@@ -405,12 +410,28 @@ class OnboardingLine extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             spacing: 2,
             children: [
-              Text(
-                title,
-                style: context.textTheme.bodyMedium?.copyWith(
-                  color: Colors.white,
+              switch (titleTooltip) {
+                final tooltip? => Tooltip(
+                  message: tooltip,
+                  triggerMode: TooltipTriggerMode.tap,
+                  showDuration: const Duration(seconds: 10),
+                  child: Text(
+                    title,
+                    style: context.textTheme.bodyMedium?.copyWith(
+                      color: Colors.white,
+                      decoration: TextDecoration.underline,
+                      decorationStyle: TextDecorationStyle.dotted,
+                      decorationColor: Colors.white70,
+                    ),
+                  ),
                 ),
-              ),
+                null => Text(
+                  title,
+                  style: context.textTheme.bodyMedium?.copyWith(
+                    color: Colors.white,
+                  ),
+                ),
+              },
               if (subtitle case final subtitle?)
                 Text(subtitle, style: onboardingNote(context)),
             ],

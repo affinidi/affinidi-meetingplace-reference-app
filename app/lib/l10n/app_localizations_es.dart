@@ -4298,4 +4298,61 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get vtcVetterProfileSetUp => 'Set up your vetter profile';
+
+  @override
+  String get vtcVetterUnnamed => 'Unnamed vetter';
+
+  @override
+  String vtcVetterDetailsMethods(String methods) {
+    return 'How they vet: $methods';
+  }
+
+  @override
+  String vtcVetterDetailsMethod(String method) {
+    String _temp0 = intl.Intl.selectLogic(method, {
+      'inPerson': 'in person',
+      'video': 'on a video call',
+      'priorAcquaintance': 'people they already know',
+      'other': '$method',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String vtcVetterDetailsLanguages(String languages) {
+    return 'Languages: $languages';
+  }
+
+  @override
+  String vtcVetterDetailsPlace(String place) {
+    return 'Where: $place';
+  }
+
+  @override
+  String vtcVetterDetailsDocuments(String documents) {
+    return 'Documents: $documents';
+  }
+
+  @override
+  String get vtcVetterDetailsNoDocument => 'none, they know you';
+
+  @override
+  String vtcVetterDetailsAvailability(String availability) {
+    return 'Available: $availability';
+  }
+
+  @override
+  String vtcVetterDetailsContactHint(String hint) {
+    return 'Getting a ticket: $hint';
+  }
+
+  @override
+  String vtcVetterDetailsEvents(String events) {
+    return 'Events: $events';
+  }
+
+  @override
+  String vtcVetterDetailsDid(String did) {
+    return 'DID: $did';
+  }
 }

@@ -6325,6 +6325,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Set up your vetter profile'**
   String get vtcVetterProfileSetUp;
+
+  /// A listed vetter who gave no name
+  ///
+  /// In en, this message translates to:
+  /// **'Unnamed vetter'**
+  String get vtcVetterUnnamed;
+
+  /// Tooltip line on a vetter's name: the vetting methods they offer, comma-separated
+  ///
+  /// In en, this message translates to:
+  /// **'How they vet: {methods}'**
+  String vtcVetterDetailsMethods(String methods);
+
+  /// A vetting method a vetter offers, in the tooltip on their name
+  ///
+  /// In en, this message translates to:
+  /// **'{method, select, inPerson{in person} video{on a video call} priorAcquaintance{people they already know} other{{method}}}'**
+  String vtcVetterDetailsMethod(String method);
+
+  /// Tooltip line on a vetter's name: language codes
+  ///
+  /// In en, this message translates to:
+  /// **'Languages: {languages}'**
+  String vtcVetterDetailsLanguages(String languages);
+
+  /// Tooltip line on a vetter's name: where they meet people
+  ///
+  /// In en, this message translates to:
+  /// **'Where: {place}'**
+  String vtcVetterDetailsPlace(String place);
+
+  /// Tooltip line on a vetter's name: the documents they accept
+  ///
+  /// In en, this message translates to:
+  /// **'Documents: {documents}'**
+  String vtcVetterDetailsDocuments(String documents);
+
+  /// A vetter vouches without a document, in the tooltip on their name
+  ///
+  /// In en, this message translates to:
+  /// **'none, they know you'**
+  String get vtcVetterDetailsNoDocument;
+
+  /// Tooltip line on a vetter's name: when they are available, in their words
+  ///
+  /// In en, this message translates to:
+  /// **'Available: {availability}'**
+  String vtcVetterDetailsAvailability(String availability);
+
+  /// Tooltip line on a vetter's name: how to get a ticket from them, in their words
+  ///
+  /// In en, this message translates to:
+  /// **'Getting a ticket: {hint}'**
+  String vtcVetterDetailsContactHint(String hint);
+
+  /// Tooltip line on a vetter's name: events they vet at
+  ///
+  /// In en, this message translates to:
+  /// **'Events: {events}'**
+  String vtcVetterDetailsEvents(String events);
+
+  /// Tooltip line on a vetter's name: their DID
+  ///
+  /// In en, this message translates to:
+  /// **'DID: {did}'**
+  String vtcVetterDetailsDid(String did);
 }
 
 class _AppLocalizationsDelegate

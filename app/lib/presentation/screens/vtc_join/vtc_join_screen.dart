@@ -25,6 +25,7 @@ import 'vtc_join_state.dart';
 import 'vtc_join_trail.dart';
 import 'vtc_progress_line.dart';
 import 'vtc_trail_step.dart';
+import 'vtc_vetter_details.dart';
 
 /// Joins a community: scan its code or enter its DID, read what it asks,
 /// apply as an identity from the member's VTA. In the look of linking the
@@ -1068,14 +1069,15 @@ class _ApproveCredential extends StatelessWidget {
   }
 }
 
+/// What the community lists about [vetterDid], when its listing was read.
+ListedVetter? _listedVetter(VtcJoinState state, String? vetterDid) =>
+    state.vetters.where((vetter) => vetter.did == vetterDid).firstOrNull;
+
 /// How [vetterDid] goes by: the name the community lists them under, else
 /// their DID.
 String _vetterName(VtcJoinState state, String? vetterDid) =>
     state.vetting?.requestTo(vetterDid ?? '')?.vetterName ??
-    state.vetters
-        .where((vetter) => vetter.did == vetterDid)
-        .firstOrNull
-        ?.displayName ??
+    _listedVetter(state, vetterDid)?.displayName ??
     vetterDid ??
     '';
 
@@ -1362,8 +1364,13 @@ class _Vetting extends HookConsumerWidget {
                     title: switch (request.vetterName) {
                       // Their own choice of name, not checked.
                       final name? => l10n.vtcJoinVetterListedAs(name),
-                      null => request.vetterDid,
+                      null => l10n.vtcVetterUnnamed,
                     },
+                    titleTooltip: vtcVetterDetails(
+                      l10n,
+                      request.vetterDid,
+                      _listedVetter(state, request.vetterDid),
+                    ),
                     subtitle: [
                       l10n.vtcJoinVettingStatus(request.status.name),
                       ?request.declineMessage,
@@ -1449,7 +1456,8 @@ class _ChooseVetter extends StatelessWidget {
               onTap: () => onChoose(vetter.did),
               child: OnboardingLine(
                 icon: Icons.person_search,
-                title: vetter.displayName ?? vetter.did,
+                title: vetter.displayName ?? l10n.vtcVetterUnnamed,
+                titleTooltip: vtcVetterDetails(l10n, vetter.did, vetter),
                 subtitle: [
                   ?vetter.place,
                   ...vetter.events,
