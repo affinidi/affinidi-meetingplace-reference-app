@@ -26,19 +26,20 @@ BoxDecoration onboardingGradient(
 
 /// The blue gradient, logo header and footer of onboarding, around a
 /// scrolling [child]. With [onClose], a close button leads the header, for
-/// a screen opened over another. Without [showFooter], no "powered by"
-/// footer, e.g. for a flow with steps of its own.
+/// a screen opened over another. Without [showBranding], neither the logo
+/// header nor the "powered by" footer, e.g. for a flow with steps of its
+/// own.
 class OnboardingLayout extends StatelessWidget {
   const OnboardingLayout({
     super.key,
     required this.child,
     this.onClose,
-    this.showFooter = true,
+    this.showBranding = true,
   });
 
   final Widget child;
   final VoidCallback? onClose;
-  final bool showFooter;
+  final bool showBranding;
 
   @override
   Widget build(BuildContext context) {
@@ -71,24 +72,26 @@ class OnboardingLayout extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         SizedBox(height: isSmallLandscape ? 24 : 48),
-                        SizedBox(
-                          height: isSmallLandscape ? 64 : 96,
-                          child: Image.asset(
-                            'assets/images/meeting-place-splash-white-1024.png',
+                        if (showBranding) ...[
+                          SizedBox(
+                            height: isSmallLandscape ? 64 : 96,
+                            child: Image.asset(
+                              'assets/images/meeting-place-splash-white-1024.png',
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          context.l10n.appName,
-                          textAlign: TextAlign.center,
-                          style: context.textTheme.bodyLarge?.copyWith(
-                            color: Colors.white,
+                          const SizedBox(height: 8),
+                          Text(
+                            context.l10n.appName,
+                            textAlign: TextAlign.center,
+                            style: context.textTheme.bodyLarge?.copyWith(
+                              color: Colors.white,
+                            ),
                           ),
-                        ),
-                        SizedBox(height: isSmallLandscape ? 24 : 40),
+                          SizedBox(height: isSmallLandscape ? 24 : 40),
+                        ],
                         child,
                         const Spacer(),
-                        if (showFooter)
+                        if (showBranding)
                           Padding(
                             padding: EdgeInsets.only(
                               top: 24,

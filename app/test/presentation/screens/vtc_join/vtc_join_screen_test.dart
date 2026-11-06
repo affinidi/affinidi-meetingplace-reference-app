@@ -186,6 +186,12 @@ void main() {
         find.image(const AssetImage('assets/images/powered_by_mpx.png')),
         findsOneWidget,
       );
+      expect(
+        find.image(
+          const AssetImage('assets/images/meeting-place-splash-white-1024.png'),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('reviews, joins and leaves a community', (tester) async {
@@ -1393,9 +1399,15 @@ void main() {
       await openVetting(tester);
 
       expect(find.text('Step 1 of 5 · Meet a vetter'), findsOneWidget);
-      // The flow's steps stand in for the footer.
+      // The flow's steps stand in for the logo and the footer.
       expect(
         find.image(const AssetImage('assets/images/powered_by_mpx.png')),
+        findsNothing,
+      );
+      expect(
+        find.image(
+          const AssetImage('assets/images/meeting-place-splash-white-1024.png'),
+        ),
         findsNothing,
       );
       expect(find.text('0 of 2 vetters vouched for you'), findsOneWidget);
@@ -1410,6 +1422,12 @@ void main() {
       expect(find.text('Step 2 of 5 · Ask the vetter'), findsOneWidget);
       expect(
         find.image(const AssetImage('assets/images/powered_by_mpx.png')),
+        findsNothing,
+      );
+      expect(
+        find.image(
+          const AssetImage('assets/images/meeting-place-splash-white-1024.png'),
+        ),
         findsNothing,
       );
       // What the phone does sits apart from what the vetter is to do.
