@@ -117,6 +117,17 @@ enum VtcTicketStep {
   creating,
 }
 
+/// A step of taking an applicant's request, once their scan arrived, in
+/// order.
+enum VtcRequestStep {
+  /// Checking the member's vetter card still holds, to send it with the
+  /// answer.
+  checkingCard,
+
+  /// Accepting the request and opening a session with the applicant.
+  openingSession,
+}
+
 /// The member's vetting desk for one community where they are a vetter: the
 /// tickets they showed, and the applicants they vet.
 class VtcVetterDesk {

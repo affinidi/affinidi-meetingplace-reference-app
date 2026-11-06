@@ -974,12 +974,14 @@ class VtcService {
   ///
   /// The details asked for are [requiredClaims] when given, as
   /// [vettingClaimsOf] reads them from requirements already known; else
-  /// they are read from the community.
+  /// they are read from the community. Each step of taking a request is
+  /// reported to [onRequestStep] as it starts.
   ///
   /// Throws as [canVet] does.
   Future<VtcVetterDesk?> checkVetterDesk(
     String communityDid, {
     List<String>? requiredClaims,
+    void Function(VtcRequestStep step)? onRequestStep,
   }) async {
     var desk = await _repository.findVetterDesk(communityDid);
     final member = await _repository.findCommunity(communityDid);
@@ -1008,6 +1010,7 @@ class VtcService {
             document,
             requiredClaims:
                 requiredClaims ?? await _vettingClaims(member.communityDid),
+            onStep: onRequestStep,
           );
         }
         handled.add(peer.messageId);
@@ -1150,8 +1153,10 @@ class VtcService {
     VtcVetterDesk desk,
     TrustTaskDocument request, {
     required List<String> requiredClaims,
+    void Function(VtcRequestStep step)? onStep,
   }) async {
     final now = clock.now();
+    onStep?.call(VtcRequestStep.checkingCard);
     final taken = await vetter.takeRequest(
       request,
       tickets: desk.liveTickets(now),
@@ -1160,6 +1165,7 @@ class VtcService {
     final accepted = taken?.accepted;
     final ticket = taken?.ticket;
     if (accepted == null || ticket == null) return desk;
+    onStep?.call(VtcRequestStep.openingSession);
     final session = await vetter.openSession(
       accepted,
       requiredClaims: requiredClaims,

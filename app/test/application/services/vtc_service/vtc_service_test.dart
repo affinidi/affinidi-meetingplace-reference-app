@@ -1521,6 +1521,19 @@ void main() {
       expect(desk.sessions.single.session!.requiredClaims, ['name.given']);
     });
 
+    test('reports each step of taking a request', () async {
+      final ticket = await service.createVettingTicket(fakeVtcDid);
+      await requestWith(ticket.spoken);
+      final steps = <VtcRequestStep>[];
+
+      await service.checkVetterDesk(fakeVtcDid, onRequestStep: steps.add);
+
+      expect(steps, [
+        VtcRequestStep.checkingCard,
+        VtcRequestStep.openingSession,
+      ]);
+    });
+
     test('vets an applicant from request to statement', () async {
       final ticket = await service.createVettingTicket(fakeVtcDid);
       await requestWith(ticket.spoken);
