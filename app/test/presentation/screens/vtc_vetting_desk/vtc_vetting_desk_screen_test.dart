@@ -238,7 +238,7 @@ void main() {
   });
 
   group('the community page', () {
-    Future<void> pumpPage(WidgetTester tester, String role) async {
+    Future<void> pumpPage(WidgetTester tester, String? role) async {
       await pump(
         tester,
         Scaffold(
@@ -329,6 +329,24 @@ void main() {
         findsOneWidget,
       );
       expect(find.byKey(const Key('vtc_community_vetting_desk')), findsNothing);
+      await close(tester);
+    });
+
+    testWidgets('checks the vetter card before the role is read', (
+      tester,
+    ) async {
+      fixture.network.isStatusListDown = true;
+
+      await pumpPage(tester, null);
+      await waitFor(
+        tester,
+        find.byKey(const Key('vtc_community_vetting_check_failed')),
+      );
+
+      expect(
+        find.byKey(const Key('vtc_community_vetting_check_failed')),
+        findsOneWidget,
+      );
       await close(tester);
     });
 

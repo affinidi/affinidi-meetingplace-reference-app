@@ -39,7 +39,7 @@ String _roleName(AppLocalizations l10n, String role) =>
 /// beside it for an administrator and a vetter, the membership card it
 /// issued — or that it is on its way to the member's VTA — what the
 /// community is, then Done and [leave].
-class VtcCommunityPage extends StatelessWidget {
+class VtcCommunityPage extends HookConsumerWidget {
   const VtcCommunityPage({
     required this.state,
     required this.onDone,
@@ -50,12 +50,50 @@ class VtcCommunityPage extends StatelessWidget {
   final VoidCallback onDone;
   final Widget leave;
 
+  /// Whether the member may vet here; why not, or why it could not be
+  /// told, goes to the log, never a DID or a card.
+  Future<bool> _canVet(WidgetRef ref, String communityDid) async {
+    final logger = ref.read(appLoggerProvider);
+    try {
+      final canVet = await ref.read(vtcServiceProvider).canVet(communityDid);
+      if (!canVet) {
+        logger.info(
+          'No vetter card in date and not revoked',
+          name: 'VtcCommunityPage',
+        );
+      }
+      return canVet;
+    } on Exception catch (error, stackTrace) {
+      final reason = switch (error) {
+        MeetingPlaceVtcSDKException(:final code, :final message) =>
+          '${code.name}: $message',
+        _ => '${error.runtimeType}',
+      };
+      logger.error(
+        'Checking the vetter card failed: $reason',
+        stackTrace: stackTrace,
+        name: 'VtcCommunityPage',
+      );
+      rethrow;
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final name = state.communityName ?? '';
     final card = state.membershipCard;
     final delivery = state.cardDelivery;
+    final communityDid = state.communityDid;
+    // Whatever role the role line shows: the vetter role comes on a card of
+    // its own, checked from the start alongside the reads of the card and
+    // the role rather than after them.
+    final canVet = useFuture(
+      useMemoized(
+        () async => communityDid != null && await _canVet(ref, communityDid),
+        [communityDid],
+      ),
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: 12,
@@ -83,8 +121,15 @@ class VtcCommunityPage extends StatelessWidget {
         if (state.role case final role?)
           _RoleLine(
             role: role,
-            communityDid: state.communityDid,
+            communityDid: communityDid,
             communityName: name,
+            canVet: canVet.data == true,
+          ),
+        if (canVet.hasError)
+          OnboardingMessage(
+            l10n.vtcVetterCheckFailed,
+            key: const Key('vtc_community_vetting_check_failed'),
+            isError: true,
           ),
         const SizedBox(height: 4),
         if (card != null) ...[
@@ -147,57 +192,25 @@ class VtcCommunityPage extends StatelessWidget {
 
 /// The member's [role], with the community's settings beside it for an
 /// administrator and the vetting desk for a vetter.
-class _RoleLine extends HookConsumerWidget {
+class _RoleLine extends StatelessWidget {
   const _RoleLine({
     required this.role,
     required this.communityDid,
     required this.communityName,
+    required this.canVet,
   });
 
   final String role;
   final String? communityDid;
   final String communityName;
 
-  /// Whether the member may vet here; why not, or why it could not be
-  /// told, goes to the log, never a DID or a card.
-  Future<bool> _canVet(WidgetRef ref, String communityDid) async {
-    final logger = ref.read(appLoggerProvider);
-    try {
-      final canVet = await ref.read(vtcServiceProvider).canVet(communityDid);
-      if (!canVet) {
-        logger.info(
-          'No vetter card in date and not revoked',
-          name: 'VtcCommunityPage',
-        );
-      }
-      return canVet;
-    } on Exception catch (error, stackTrace) {
-      final reason = switch (error) {
-        MeetingPlaceVtcSDKException(:final code, :final message) =>
-          '${code.name}: $message',
-        _ => '${error.runtimeType}',
-      };
-      logger.error(
-        'Checking the vetter card failed: $reason',
-        stackTrace: stackTrace,
-        name: 'VtcCommunityPage',
-      );
-      rethrow;
-    }
-  }
+  /// Whether the member's vetter card for the community holds.
+  final bool canVet;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
     final communityDid = this.communityDid;
-    // Whatever role the line shows: the vetter role comes on a card of its
-    // own, which is checked here.
-    final canVet = useFuture(
-      useMemoized(
-        () async => communityDid != null && await _canVet(ref, communityDid),
-        [communityDid],
-      ),
-    );
     final actions = [
       if (communityDid != null && role == _adminRole)
         IconButton(
@@ -206,7 +219,7 @@ class _RoleLine extends HookConsumerWidget {
           tooltip: l10n.vtcCommunitySettings,
           onPressed: () => _showSettings(context, communityDid, communityName),
         ),
-      if (communityDid != null && canVet.data == true)
+      if (communityDid != null && canVet)
         IconButton(
           key: const Key('vtc_community_vetting_desk'),
           icon: const Icon(Icons.how_to_reg_outlined, color: Colors.white),
@@ -218,26 +231,14 @@ class _RoleLine extends HookConsumerWidget {
           ),
         ),
     ];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 12,
-      children: [
-        OnboardingLine(
-          key: const Key('vtc_community_role'),
-          icon: Icons.badge_outlined,
-          title: l10n.vtcCommunityRole,
-          subtitle: _roleName(l10n, role),
-          trailing: actions.isEmpty
-              ? null
-              : Row(mainAxisSize: MainAxisSize.min, children: actions),
-        ),
-        if (canVet.hasError)
-          OnboardingMessage(
-            l10n.vtcVetterCheckFailed,
-            key: const Key('vtc_community_vetting_check_failed'),
-            isError: true,
-          ),
-      ],
+    return OnboardingLine(
+      key: const Key('vtc_community_role'),
+      icon: Icons.badge_outlined,
+      title: l10n.vtcCommunityRole,
+      subtitle: _roleName(l10n, role),
+      trailing: actions.isEmpty
+          ? null
+          : Row(mainAxisSize: MainAxisSize.min, children: actions),
     );
   }
 }
