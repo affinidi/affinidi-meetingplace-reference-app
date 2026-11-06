@@ -18,7 +18,9 @@ mixin _$VtcVettingDeskState {
  VtcVetterDesk? get desk;/// Whether the member's vetter card is being checked, with the desk
 /// already open: it closes again if the card no longer holds.
  bool get checkingCard;/// What the community asks of vetting, once read.
- VettingRequirements? get requirements;/// The details the applicant of each session sent on their card, by
+ VettingRequirements? get requirements;/// Whether the community's join manifest, which says what it asks of
+/// vetting, is being read.
+ bool get readingRequirements;/// The details the applicant of each session sent on their card, by
 /// request id, once checked. Held in memory only.
  Map<String, List<VettingCardClaim>> get cards;/// The statements the member issued for the community, as their VTA
 /// records them, newest first.
@@ -34,16 +36,16 @@ $VtcVettingDeskStateCopyWith<VtcVettingDeskState> get copyWith => _$VtcVettingDe
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is VtcVettingDeskState&&(identical(other.step, step) || other.step == step)&&(identical(other.desk, desk) || other.desk == desk)&&(identical(other.checkingCard, checkingCard) || other.checkingCard == checkingCard)&&(identical(other.requirements, requirements) || other.requirements == requirements)&&const DeepCollectionEquality().equals(other.cards, cards)&&const DeepCollectionEquality().equals(other.issued, issued)&&(identical(other.busy, busy) || other.busy == busy)&&(identical(other.failure, failure) || other.failure == failure));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is VtcVettingDeskState&&(identical(other.step, step) || other.step == step)&&(identical(other.desk, desk) || other.desk == desk)&&(identical(other.checkingCard, checkingCard) || other.checkingCard == checkingCard)&&(identical(other.requirements, requirements) || other.requirements == requirements)&&(identical(other.readingRequirements, readingRequirements) || other.readingRequirements == readingRequirements)&&const DeepCollectionEquality().equals(other.cards, cards)&&const DeepCollectionEquality().equals(other.issued, issued)&&(identical(other.busy, busy) || other.busy == busy)&&(identical(other.failure, failure) || other.failure == failure));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,step,desk,checkingCard,requirements,const DeepCollectionEquality().hash(cards),const DeepCollectionEquality().hash(issued),busy,failure);
+int get hashCode => Object.hash(runtimeType,step,desk,checkingCard,requirements,readingRequirements,const DeepCollectionEquality().hash(cards),const DeepCollectionEquality().hash(issued),busy,failure);
 
 @override
 String toString() {
-  return 'VtcVettingDeskState(step: $step, desk: $desk, checkingCard: $checkingCard, requirements: $requirements, cards: $cards, issued: $issued, busy: $busy, failure: $failure)';
+  return 'VtcVettingDeskState(step: $step, desk: $desk, checkingCard: $checkingCard, requirements: $requirements, readingRequirements: $readingRequirements, cards: $cards, issued: $issued, busy: $busy, failure: $failure)';
 }
 
 
@@ -54,7 +56,7 @@ abstract mixin class $VtcVettingDeskStateCopyWith<$Res>  {
   factory $VtcVettingDeskStateCopyWith(VtcVettingDeskState value, $Res Function(VtcVettingDeskState) _then) = _$VtcVettingDeskStateCopyWithImpl;
 @useResult
 $Res call({
- VtcVettingDeskStep step, VtcVetterDesk? desk, bool checkingCard, VettingRequirements? requirements, Map<String, List<VettingCardClaim>> cards, List<IssuedVettingStatement> issued, bool busy, VtcVettingDeskFailure? failure
+ VtcVettingDeskStep step, VtcVetterDesk? desk, bool checkingCard, VettingRequirements? requirements, bool readingRequirements, Map<String, List<VettingCardClaim>> cards, List<IssuedVettingStatement> issued, bool busy, VtcVettingDeskFailure? failure
 });
 
 
@@ -71,13 +73,14 @@ class _$VtcVettingDeskStateCopyWithImpl<$Res>
 
 /// Create a copy of VtcVettingDeskState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? step = null,Object? desk = freezed,Object? checkingCard = null,Object? requirements = freezed,Object? cards = null,Object? issued = null,Object? busy = null,Object? failure = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? step = null,Object? desk = freezed,Object? checkingCard = null,Object? requirements = freezed,Object? readingRequirements = null,Object? cards = null,Object? issued = null,Object? busy = null,Object? failure = freezed,}) {
   return _then(_self.copyWith(
 step: null == step ? _self.step : step // ignore: cast_nullable_to_non_nullable
 as VtcVettingDeskStep,desk: freezed == desk ? _self.desk : desk // ignore: cast_nullable_to_non_nullable
 as VtcVetterDesk?,checkingCard: null == checkingCard ? _self.checkingCard : checkingCard // ignore: cast_nullable_to_non_nullable
 as bool,requirements: freezed == requirements ? _self.requirements : requirements // ignore: cast_nullable_to_non_nullable
-as VettingRequirements?,cards: null == cards ? _self.cards : cards // ignore: cast_nullable_to_non_nullable
+as VettingRequirements?,readingRequirements: null == readingRequirements ? _self.readingRequirements : readingRequirements // ignore: cast_nullable_to_non_nullable
+as bool,cards: null == cards ? _self.cards : cards // ignore: cast_nullable_to_non_nullable
 as Map<String, List<VettingCardClaim>>,issued: null == issued ? _self.issued : issued // ignore: cast_nullable_to_non_nullable
 as List<IssuedVettingStatement>,busy: null == busy ? _self.busy : busy // ignore: cast_nullable_to_non_nullable
 as bool,failure: freezed == failure ? _self.failure : failure // ignore: cast_nullable_to_non_nullable
@@ -166,10 +169,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( VtcVettingDeskStep step,  VtcVetterDesk? desk,  bool checkingCard,  VettingRequirements? requirements,  Map<String, List<VettingCardClaim>> cards,  List<IssuedVettingStatement> issued,  bool busy,  VtcVettingDeskFailure? failure)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( VtcVettingDeskStep step,  VtcVetterDesk? desk,  bool checkingCard,  VettingRequirements? requirements,  bool readingRequirements,  Map<String, List<VettingCardClaim>> cards,  List<IssuedVettingStatement> issued,  bool busy,  VtcVettingDeskFailure? failure)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _VtcVettingDeskState() when $default != null:
-return $default(_that.step,_that.desk,_that.checkingCard,_that.requirements,_that.cards,_that.issued,_that.busy,_that.failure);case _:
+return $default(_that.step,_that.desk,_that.checkingCard,_that.requirements,_that.readingRequirements,_that.cards,_that.issued,_that.busy,_that.failure);case _:
   return orElse();
 
 }
@@ -187,10 +190,10 @@ return $default(_that.step,_that.desk,_that.checkingCard,_that.requirements,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( VtcVettingDeskStep step,  VtcVetterDesk? desk,  bool checkingCard,  VettingRequirements? requirements,  Map<String, List<VettingCardClaim>> cards,  List<IssuedVettingStatement> issued,  bool busy,  VtcVettingDeskFailure? failure)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( VtcVettingDeskStep step,  VtcVetterDesk? desk,  bool checkingCard,  VettingRequirements? requirements,  bool readingRequirements,  Map<String, List<VettingCardClaim>> cards,  List<IssuedVettingStatement> issued,  bool busy,  VtcVettingDeskFailure? failure)  $default,) {final _that = this;
 switch (_that) {
 case _VtcVettingDeskState():
-return $default(_that.step,_that.desk,_that.checkingCard,_that.requirements,_that.cards,_that.issued,_that.busy,_that.failure);case _:
+return $default(_that.step,_that.desk,_that.checkingCard,_that.requirements,_that.readingRequirements,_that.cards,_that.issued,_that.busy,_that.failure);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -207,10 +210,10 @@ return $default(_that.step,_that.desk,_that.checkingCard,_that.requirements,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( VtcVettingDeskStep step,  VtcVetterDesk? desk,  bool checkingCard,  VettingRequirements? requirements,  Map<String, List<VettingCardClaim>> cards,  List<IssuedVettingStatement> issued,  bool busy,  VtcVettingDeskFailure? failure)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( VtcVettingDeskStep step,  VtcVetterDesk? desk,  bool checkingCard,  VettingRequirements? requirements,  bool readingRequirements,  Map<String, List<VettingCardClaim>> cards,  List<IssuedVettingStatement> issued,  bool busy,  VtcVettingDeskFailure? failure)?  $default,) {final _that = this;
 switch (_that) {
 case _VtcVettingDeskState() when $default != null:
-return $default(_that.step,_that.desk,_that.checkingCard,_that.requirements,_that.cards,_that.issued,_that.busy,_that.failure);case _:
+return $default(_that.step,_that.desk,_that.checkingCard,_that.requirements,_that.readingRequirements,_that.cards,_that.issued,_that.busy,_that.failure);case _:
   return null;
 
 }
@@ -222,7 +225,7 @@ return $default(_that.step,_that.desk,_that.checkingCard,_that.requirements,_tha
 
 
 class _VtcVettingDeskState extends VtcVettingDeskState {
-   _VtcVettingDeskState({this.step = VtcVettingDeskStep.loading, this.desk, this.checkingCard = false, this.requirements, final  Map<String, List<VettingCardClaim>> cards = const <String, List<VettingCardClaim>>{}, final  List<IssuedVettingStatement> issued = const <IssuedVettingStatement>[], this.busy = false, this.failure}): _cards = cards,_issued = issued,super._();
+   _VtcVettingDeskState({this.step = VtcVettingDeskStep.loading, this.desk, this.checkingCard = false, this.requirements, this.readingRequirements = true, final  Map<String, List<VettingCardClaim>> cards = const <String, List<VettingCardClaim>>{}, final  List<IssuedVettingStatement> issued = const <IssuedVettingStatement>[], this.busy = false, this.failure}): _cards = cards,_issued = issued,super._();
   
 
 @override@JsonKey() final  VtcVettingDeskStep step;
@@ -233,6 +236,9 @@ class _VtcVettingDeskState extends VtcVettingDeskState {
 @override@JsonKey() final  bool checkingCard;
 /// What the community asks of vetting, once read.
 @override final  VettingRequirements? requirements;
+/// Whether the community's join manifest, which says what it asks of
+/// vetting, is being read.
+@override@JsonKey() final  bool readingRequirements;
 /// The details the applicant of each session sent on their card, by
 /// request id, once checked. Held in memory only.
  final  Map<String, List<VettingCardClaim>> _cards;
@@ -269,16 +275,16 @@ _$VtcVettingDeskStateCopyWith<_VtcVettingDeskState> get copyWith => __$VtcVettin
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _VtcVettingDeskState&&(identical(other.step, step) || other.step == step)&&(identical(other.desk, desk) || other.desk == desk)&&(identical(other.checkingCard, checkingCard) || other.checkingCard == checkingCard)&&(identical(other.requirements, requirements) || other.requirements == requirements)&&const DeepCollectionEquality().equals(other._cards, _cards)&&const DeepCollectionEquality().equals(other._issued, _issued)&&(identical(other.busy, busy) || other.busy == busy)&&(identical(other.failure, failure) || other.failure == failure));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _VtcVettingDeskState&&(identical(other.step, step) || other.step == step)&&(identical(other.desk, desk) || other.desk == desk)&&(identical(other.checkingCard, checkingCard) || other.checkingCard == checkingCard)&&(identical(other.requirements, requirements) || other.requirements == requirements)&&(identical(other.readingRequirements, readingRequirements) || other.readingRequirements == readingRequirements)&&const DeepCollectionEquality().equals(other._cards, _cards)&&const DeepCollectionEquality().equals(other._issued, _issued)&&(identical(other.busy, busy) || other.busy == busy)&&(identical(other.failure, failure) || other.failure == failure));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,step,desk,checkingCard,requirements,const DeepCollectionEquality().hash(_cards),const DeepCollectionEquality().hash(_issued),busy,failure);
+int get hashCode => Object.hash(runtimeType,step,desk,checkingCard,requirements,readingRequirements,const DeepCollectionEquality().hash(_cards),const DeepCollectionEquality().hash(_issued),busy,failure);
 
 @override
 String toString() {
-  return 'VtcVettingDeskState(step: $step, desk: $desk, checkingCard: $checkingCard, requirements: $requirements, cards: $cards, issued: $issued, busy: $busy, failure: $failure)';
+  return 'VtcVettingDeskState(step: $step, desk: $desk, checkingCard: $checkingCard, requirements: $requirements, readingRequirements: $readingRequirements, cards: $cards, issued: $issued, busy: $busy, failure: $failure)';
 }
 
 
@@ -289,7 +295,7 @@ abstract mixin class _$VtcVettingDeskStateCopyWith<$Res> implements $VtcVettingD
   factory _$VtcVettingDeskStateCopyWith(_VtcVettingDeskState value, $Res Function(_VtcVettingDeskState) _then) = __$VtcVettingDeskStateCopyWithImpl;
 @override @useResult
 $Res call({
- VtcVettingDeskStep step, VtcVetterDesk? desk, bool checkingCard, VettingRequirements? requirements, Map<String, List<VettingCardClaim>> cards, List<IssuedVettingStatement> issued, bool busy, VtcVettingDeskFailure? failure
+ VtcVettingDeskStep step, VtcVetterDesk? desk, bool checkingCard, VettingRequirements? requirements, bool readingRequirements, Map<String, List<VettingCardClaim>> cards, List<IssuedVettingStatement> issued, bool busy, VtcVettingDeskFailure? failure
 });
 
 
@@ -306,13 +312,14 @@ class __$VtcVettingDeskStateCopyWithImpl<$Res>
 
 /// Create a copy of VtcVettingDeskState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? step = null,Object? desk = freezed,Object? checkingCard = null,Object? requirements = freezed,Object? cards = null,Object? issued = null,Object? busy = null,Object? failure = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? step = null,Object? desk = freezed,Object? checkingCard = null,Object? requirements = freezed,Object? readingRequirements = null,Object? cards = null,Object? issued = null,Object? busy = null,Object? failure = freezed,}) {
   return _then(_VtcVettingDeskState(
 step: null == step ? _self.step : step // ignore: cast_nullable_to_non_nullable
 as VtcVettingDeskStep,desk: freezed == desk ? _self.desk : desk // ignore: cast_nullable_to_non_nullable
 as VtcVetterDesk?,checkingCard: null == checkingCard ? _self.checkingCard : checkingCard // ignore: cast_nullable_to_non_nullable
 as bool,requirements: freezed == requirements ? _self.requirements : requirements // ignore: cast_nullable_to_non_nullable
-as VettingRequirements?,cards: null == cards ? _self._cards : cards // ignore: cast_nullable_to_non_nullable
+as VettingRequirements?,readingRequirements: null == readingRequirements ? _self.readingRequirements : readingRequirements // ignore: cast_nullable_to_non_nullable
+as bool,cards: null == cards ? _self._cards : cards // ignore: cast_nullable_to_non_nullable
 as Map<String, List<VettingCardClaim>>,issued: null == issued ? _self._issued : issued // ignore: cast_nullable_to_non_nullable
 as List<IssuedVettingStatement>,busy: null == busy ? _self.busy : busy // ignore: cast_nullable_to_non_nullable
 as bool,failure: freezed == failure ? _self.failure : failure // ignore: cast_nullable_to_non_nullable

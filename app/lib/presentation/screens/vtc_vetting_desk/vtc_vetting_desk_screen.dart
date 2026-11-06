@@ -69,10 +69,11 @@ class VtcVettingDeskScreen extends HookConsumerWidget {
             ],
             VtcVettingDeskStep.open => [
               OnboardingSubtitle(l10n.vtcVetterIntro),
-              _Requirements(
-                requirements: state.requirements,
-                communityName: communityName,
-              ),
+              if (!state.readingRequirements)
+                _Requirements(
+                  requirements: state.requirements,
+                  communityName: communityName,
+                ),
               if (state.current case final session?)
                 _SessionView(
                   // A new applicant starts with nothing chosen or ticked.
