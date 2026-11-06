@@ -19,6 +19,22 @@ enum VtcVettingDeskStep {
   open,
 }
 
+/// A step of vetting one applicant, from showing them a ticket, in order.
+enum VtcVettingFlowStep {
+  /// The ticket is on show, waiting for the applicant to scan or type it.
+  ticket,
+
+  /// The vetter and the applicant compare their match codes.
+  match,
+
+  /// The vetter checks the applicant's details in person, then vouches for
+  /// them or declines.
+  details,
+
+  /// The session ended: vouched for, declined, or ended by the applicant.
+  done,
+}
+
 /// Why the last step on the vetting desk could not go ahead.
 enum VtcVettingDeskFailure {
   /// The member's VTA, mediator or the community could not be reached.
@@ -60,6 +76,10 @@ abstract class VtcVettingDeskState with _$VtcVettingDeskState {
     /// records them, newest first.
     @Default(<IssuedVettingStatement>[]) List<IssuedVettingStatement> issued,
 
+    /// The session that ended while the desk was open, until the member
+    /// goes back to the desk or shows a new ticket.
+    VtcVetterSession? ended,
+
     /// Whether a step the member asked for is running.
     @Default(false) bool busy,
 
@@ -74,4 +94,14 @@ abstract class VtcVettingDeskState with _$VtcVettingDeskState {
   /// The applicant being vetted: the newest open session, or null.
   VtcVetterSession? get current =>
       desk?.sessions.where((session) => session.isOpen).lastOrNull;
+
+  /// The step of vetting an applicant the desk is at, at [now]: null while
+  /// no ticket is on show and no applicant is being vetted.
+  VtcVettingFlowStep? flowStep(DateTime now) => switch (current) {
+    final session? when session.matchConfirmed => VtcVettingFlowStep.details,
+    _? => VtcVettingFlowStep.match,
+    null when ended != null => VtcVettingFlowStep.done,
+    null when liveTicket(now) != null => VtcVettingFlowStep.ticket,
+    null => null,
+  };
 }

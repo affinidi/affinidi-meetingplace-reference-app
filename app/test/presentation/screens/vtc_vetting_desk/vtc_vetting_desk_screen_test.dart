@@ -12,6 +12,7 @@ import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_comm
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_state.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_vetting_desk/vtc_vetting_desk_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_vetting_desk/vtc_vetting_desk_screen.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/vtc_vetting_desk/vtc_vetting_desk_state.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 
 import '../../../fakes/fake_vetter_desk.dart';
@@ -94,6 +95,14 @@ void main() {
     await settle(tester);
   }
 
+  /// The step of vetting an applicant the desk on show is at.
+  VtcVettingFlowStep? flowStep(WidgetTester tester) =>
+      ProviderScope.containerOf(
+            tester.element(find.byType(VtcVettingDeskScreen)),
+          )
+          .read(vtcVettingDeskControllerProvider(fakeVtcDid))
+          .flowStep(DateTime.now());
+
   /// Closes the desk, so its checks stop, and lets the timeouts of what it
   /// asked lapse.
   Future<void> close(WidgetTester tester) async {
@@ -123,13 +132,16 @@ void main() {
     ))!;
     await pumpDesk(tester);
     await waitFor(tester, find.byKey(const Key('vtc_vetter_ticket_qr')));
+    expect(flowStep(tester), VtcVettingFlowStep.ticket);
     await tester.runAsync(() => fixture.requestWith(ticket.spoken));
     await check(tester);
 
     final session = (await tester.runAsync(fixture.sentToApplicant))!.last;
+    expect(flowStep(tester), VtcVettingFlowStep.match);
     expect(find.text(vettingMatchCode(session.id)), findsOneWidget);
     await tap(tester, find.byKey(const Key('vtc_vetter_match_yes')));
     await waitFor(tester, find.byKey(const Key('vtc_vetter_card_waiting')));
+    expect(flowStep(tester), VtcVettingFlowStep.details);
     expect(find.byKey(const Key('vtc_vetter_card_waiting')), findsOneWidget);
 
     await tester.runAsync(() => fixture.sendCard(session));
@@ -146,6 +158,7 @@ void main() {
 
     final sent = (await tester.runAsync(fixture.sentToApplicant))!;
     expect(sent.last.type, VettingTask.issue);
+    expect(flowStep(tester), VtcVettingFlowStep.done);
     expect(find.byKey(const Key('vtc_vetter_ticket_qr')), findsNothing);
     expect(
       find.descendant(

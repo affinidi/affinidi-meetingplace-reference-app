@@ -86,7 +86,7 @@ class VtcVettingDeskController extends _$VtcVettingDeskController {
     _checking = true;
     try {
       final desk = await _service.checkVetterDesk(communityDid);
-      state = state.copyWith(desk: desk, cards: _cards(desk));
+      _showDesk(desk);
     } on Exception catch (error, stackTrace) {
       _fail(error, stackTrace);
     } finally {
@@ -97,7 +97,10 @@ class VtcVettingDeskController extends _$VtcVettingDeskController {
   /// Shows a new ticket, good for one applicant for a short while.
   Future<void> createTicket() => _run(() async {
     await _service.createVettingTicket(communityDid);
-    state = state.copyWith(desk: await _service.vetterDesk(communityDid));
+    state = state.copyWith(
+      desk: await _service.vetterDesk(communityDid),
+      ended: null,
+    );
   });
 
   /// Records that the codes match, with the applicant present.
@@ -120,7 +123,7 @@ class VtcVettingDeskController extends _$VtcVettingDeskController {
           requestId,
           documentClasses: documentClasses,
         );
-        state = state.copyWith(desk: desk, cards: _cards(desk));
+        _showDesk(desk);
         await readIssued();
       });
 
@@ -133,7 +136,7 @@ class VtcVettingDeskController extends _$VtcVettingDeskController {
           code: code,
           message: message,
         );
-        state = state.copyWith(desk: desk, cards: _cards(desk));
+        _showDesk(desk);
       });
 
   /// Reads the statements the member issued, as their VTA records them.
@@ -145,6 +148,28 @@ class VtcVettingDeskController extends _$VtcVettingDeskController {
     } on Exception catch (error, stackTrace) {
       _fail(error, stackTrace);
     }
+  }
+
+  /// Goes back to the desk from a session that ended.
+  void backToDesk() => state = state.copyWith(ended: null);
+
+  /// Shows [desk], and the session that just ended on it, if one did.
+  void _showDesk(VtcVetterDesk? desk) {
+    final wasOpen = {
+      for (final session in state.desk?.sessions ?? const <VtcVetterSession>[])
+        if (session.isOpen) session.request.requestId,
+    };
+    final ended = desk?.sessions
+        .where(
+          (session) =>
+              !session.isOpen && wasOpen.contains(session.request.requestId),
+        )
+        .lastOrNull;
+    state = state.copyWith(
+      desk: desk,
+      cards: _cards(desk),
+      ended: ended ?? state.ended,
+    );
   }
 
   /// The checked cards of [desk]'s open sessions, by request id.
