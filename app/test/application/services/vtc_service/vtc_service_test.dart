@@ -1500,6 +1500,78 @@ void main() {
       expect(await service.canVet(fakeVtcDid), isFalse);
     });
 
+    group('vetter profile', () {
+      const profile = VetterProfile(
+        listed: true,
+        displayName: 'Bob',
+        languages: ['en'],
+        methods: [VettingMethod.inPerson],
+      );
+
+      test('publishes it as the member and records it', () async {
+        final desk = await service.publishVetterProfile(fakeVtcDid, profile);
+
+        final request = network.vetterProfiles.single;
+        expect(request['issuer'], vetter.did);
+        expect(request['payload'], profile.toJson());
+        final recorded = (await service.vetterDesk(fakeVtcDid))!.profile!;
+        expect(recorded.profile.toJson(), profile.toJson());
+        expect(recorded.listed, isTrue);
+        expect(recorded.updatedAt, DateTime.utc(2026, 11, 6, 9));
+        expect(recorded.roleCardId, 'urn:uuid:vetter-card');
+        expect(desk.profile!.toJson(), recorded.toJson());
+      });
+
+      test('is needed until published under the card held', () async {
+        expect(await service.vetterProfileNeeded(fakeVtcDid), isTrue);
+
+        await service.publishVetterProfile(fakeVtcDid, profile);
+
+        expect(await service.vetterProfileNeeded(fakeVtcDid), isFalse);
+      });
+
+      test('is needed again once a new card replaced the old', () async {
+        await service.publishVetterProfile(fakeVtcDid, profile);
+        final desk = (await service.vetterDesk(fakeVtcDid))!;
+        await SecureStorageVtcRepository().saveVetterDesk(
+          desk.withProfile(
+            VtcVetterProfileRecord(
+              profile: profile,
+              listed: true,
+              updatedAt: DateTime.utc(2026),
+              roleCardId: 'urn:uuid:revoked-card',
+            ),
+          ),
+        );
+
+        expect(await service.vetterProfileNeeded(fakeVtcDid), isTrue);
+      });
+
+      test('is not needed, nor sent, by a member who may not vet', () async {
+        network.revoked.add(3);
+
+        expect(await service.vetterProfileNeeded(fakeVtcDid), isFalse);
+        await expectLater(
+          service.publishVetterProfile(fakeVtcDid, profile),
+          throwsA(isA<NotVetterException>()),
+        );
+        expect(network.vetterProfiles, isEmpty);
+      });
+
+      test('reads the community saying no vetter as such', () async {
+        network.vetterProfileRefusal = (
+          403,
+          VettingCommunityTask.profileNotEligible,
+        );
+
+        await expectLater(
+          service.publishVetterProfile(fakeVtcDid, profile),
+          throwsA(isA<NotVetterException>()),
+        );
+        expect((await service.vetterDesk(fakeVtcDid))?.profile, isNull);
+      });
+    });
+
     test('mints a ticket for one applicant, for 15 minutes', () async {
       final before = DateTime.now();
       final ticket = await service.createVettingTicket(fakeVtcDid);

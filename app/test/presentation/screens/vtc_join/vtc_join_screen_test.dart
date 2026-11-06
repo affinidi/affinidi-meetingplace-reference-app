@@ -1429,7 +1429,7 @@ void main() {
       await tester.tap(back);
       await settle(tester);
       expect(title('Meet a vetter'), findsOneWidget);
-      expect(find.text('Bob'), findsOneWidget);
+      expect(find.text('Listed as Bob'), findsOneWidget);
       expect(find.text('Waiting for them to answer'), findsOneWidget);
       await tester.pumpWidget(const SizedBox.shrink());
     });

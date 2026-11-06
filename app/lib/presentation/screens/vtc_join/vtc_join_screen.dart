@@ -1359,7 +1359,11 @@ class _Vetting extends HookConsumerWidget {
                   OnboardingLine(
                     key: Key('vtc_join_vetter_${request.status.name}'),
                     icon: _vettingIcon(request.status),
-                    title: request.vetterName ?? request.vetterDid,
+                    title: switch (request.vetterName) {
+                      // Their own choice of name, not checked.
+                      final name? => l10n.vtcJoinVetterListedAs(name),
+                      null => request.vetterDid,
+                    },
                     subtitle: [
                       l10n.vtcJoinVettingStatus(request.status.name),
                       ?request.declineMessage,

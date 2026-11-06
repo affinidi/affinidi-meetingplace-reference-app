@@ -11,6 +11,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_community_page.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_state.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/vtc_vetter_profile/vtc_vetter_profile_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_vetting_desk/vtc_vetting_desk_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_vetting_desk/vtc_vetting_desk_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_vetting_desk/vtc_vetting_desk_state.dart';
@@ -434,6 +435,18 @@ void main() {
     await close(tester);
   });
 
+  testWidgets('opens the vetter profile', (tester) async {
+    await pumpDesk(tester);
+    final open = find.byKey(const Key('vtc_vetter_profile_open'));
+    await waitFor(tester, open);
+
+    await tap(tester, open);
+    await waitFor(tester, find.byKey(const Key('vtc_vetter_profile_publish')));
+
+    expect(find.byType(VtcVetterProfileScreen), findsOneWidget);
+    await close(tester);
+  });
+
   testWidgets('says so once the vetter card was withdrawn', (tester) async {
     fixture.network.revoked.add(3);
 
@@ -499,6 +512,47 @@ void main() {
       );
       expect(find.byTooltip('Vet applicants'), findsOneWidget);
       expect(find.text('Vet applicants'), findsNothing);
+      await close(tester);
+    });
+
+    testWidgets('asks a vetter without a profile to write one', (tester) async {
+      await pumpPage(tester, 'vetter');
+      final setUp = find.byKey(const Key('vtc_community_vetter_profile'));
+      await waitFor(tester, setUp);
+
+      expect(
+        find.byKey(const Key('vtc_community_vetter_profile_needed')),
+        findsOneWidget,
+      );
+
+      await tap(tester, setUp);
+      await waitFor(
+        tester,
+        find.byKey(const Key('vtc_vetter_profile_publish')),
+      );
+
+      expect(find.byType(VtcVetterProfileScreen), findsOneWidget);
+      await close(tester);
+    });
+
+    testWidgets('asks nothing once the profile was published', (tester) async {
+      await tester.runAsync(
+        () => fixture.service.publishVetterProfile(
+          fakeVtcDid,
+          const VetterProfile(methods: [VettingMethod.inPerson]),
+        ),
+      );
+
+      await pumpPage(tester, 'vetter');
+      // Long enough for the profile check that would show the prompt.
+      for (var i = 0; i < 5; i++) {
+        await settle(tester);
+      }
+
+      expect(
+        find.byKey(const Key('vtc_community_vetter_profile')),
+        findsNothing,
+      );
       await close(tester);
     });
 

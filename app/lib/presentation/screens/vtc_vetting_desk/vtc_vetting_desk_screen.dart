@@ -15,6 +15,7 @@ import '../vtc_join/vtc_claim_type_label.dart';
 import '../vtc_join/vtc_membership_card_view.dart';
 import '../vtc_join/vtc_progress_line.dart';
 import '../vtc_join/vtc_trail_step.dart';
+import '../vtc_vetter_profile/vtc_vetter_profile_screen.dart';
 import 'vtc_vetting_desk_controller.dart';
 import 'vtc_vetting_desk_state.dart';
 
@@ -112,6 +113,16 @@ class VtcVettingDeskScreen extends HookConsumerWidget {
                   validFrom: card.validFrom,
                   validUntil: card.validUntil,
                 ),
+              OnboardingButton(
+                key: const Key('vtc_vetter_profile_open'),
+                label: l10n.vtcVetterProfileOpen,
+                isOutlined: true,
+                onPressed: () => VtcVetterProfileScreen.show(
+                  context,
+                  communityDid: communityDid,
+                  communityName: communityName,
+                ),
+              ),
               _IssuedList(issued: state.issued),
             ],
           },

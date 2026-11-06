@@ -923,6 +923,16 @@ class VtcService {
   /// The member's vetter role card for [communityDid] when [canVet], else
   /// null. Checked, and kept for [couldVet], as [canVet] is.
   Future<VtcVetterCard?> vetterCard(String communityDid) async {
+    final held = await _heldVetterCard(communityDid);
+    return held == null ? null : VtcVetterCard.fromCredential(held.$3);
+  }
+
+  /// The member's vetter role card for [communityDid], as [canVet] finds
+  /// it, with the member and their VTA; null when they may not vet there.
+  /// The answer is kept for [couldVet].
+  Future<(VtcCommunity, VtaClient, Map<String, dynamic>)?> _heldVetterCard(
+    String communityDid,
+  ) async {
     final member = await _repository.findCommunity(communityDid);
     if (member == null || !member.isMember) return null;
     final vta = await _grantedVta();
@@ -936,7 +946,7 @@ class VtcService {
     if (latest != null && latest.isVetter != canVet) {
       await _repository.saveCommunity(latest.withVetter(isVetter: canVet));
     }
-    return card == null ? null : VtcVetterCard.fromCredential(card);
+    return card == null ? null : (member, vta, card);
   }
 
   /// Whether the member could vet for [communityDid] when [canVet] last
@@ -944,6 +954,64 @@ class VtcService {
   Future<bool> couldVet(String communityDid) async {
     final member = await _repository.findCommunity(communityDid);
     return member != null && member.isMember && member.isVetter;
+  }
+
+  /// Publishes [profile] as the member's vetter profile with
+  /// [communityDid], replacing what the community held, and records it on
+  /// the desk.
+  ///
+  /// Throws [NotVetterException] when the member may not vet there, or the
+  /// community says so; [MeetingPlaceVtcSDKException] with an
+  /// `invalidDocument` code for a profile the community would refuse, and
+  /// as [canVet] does.
+  Future<VtcVetterDesk> publishVetterProfile(
+    String communityDid,
+    VetterProfile profile,
+  ) async {
+    final held = await _heldVetterCard(communityDid);
+    if (held == null) throw const NotVetterException();
+    final (member, vta, roleCard) = held;
+    final PublishedVetterProfile published;
+    try {
+      published = await _sdk.joinClient().publishVetterProfile(
+        communityDid,
+        profile,
+        agent: vta,
+        persona: await _personaSigner(vta, member),
+      );
+    } on MeetingPlaceVtcSDKException catch (e) {
+      if (e.refusalCode == VettingCommunityTask.profileNotEligible) {
+        throw const NotVetterException();
+      }
+      rethrow;
+    }
+    final desk =
+        (await _repository.findVetterDesk(communityDid) ??
+                VtcVetterDesk(communityDid: communityDid))
+            .withProfile(
+              VtcVetterProfileRecord(
+                profile: profile,
+                listed: published.listed,
+                updatedAt: published.updatedAt,
+                roleCardId: roleCard['id'] as String?,
+              ),
+            );
+    await _repository.saveVetterDesk(desk);
+    return desk;
+  }
+
+  /// Whether the member may vet for [communityDid] but the community holds
+  /// no profile of theirs that this phone sent: none was, or it was sent
+  /// under a vetter role card since replaced, whose revocation deleted it.
+  /// Until they publish one, applicants cannot find them.
+  ///
+  /// Throws as [canVet] does.
+  Future<bool> vetterProfileNeeded(String communityDid) async {
+    final held = await _heldVetterCard(communityDid);
+    if (held == null) return false;
+    final (_, _, roleCard) = held;
+    final recorded = (await _repository.findVetterDesk(communityDid))?.profile;
+    return recorded == null || recorded.roleCardId != roleCard['id'];
   }
 
   /// Keeps on [vta] the cards [member]'s community sent the identity's

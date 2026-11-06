@@ -10,6 +10,7 @@ import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
+import '../vtc_vetter_profile/vtc_vetter_profile_screen.dart';
 import '../vtc_vetting_desk/vtc_vetting_desk_screen.dart';
 import 'vtc_card_delivery_trail.dart';
 import 'vtc_community_profile.dart';
@@ -147,6 +148,8 @@ class VtcCommunityPage extends HookConsumerWidget {
             communityName: name,
             canVet: offersVetting,
           ),
+        if (communityDid != null && canVet.data == true)
+          _VetterProfilePrompt(communityDid: communityDid, communityName: name),
         if (canVet.hasError)
           OnboardingMessage(
             l10n.vtcVetterCheckFailed,
@@ -241,6 +244,74 @@ class _RoleLine extends StatelessWidget {
       trailing: actions.isEmpty
           ? null
           : Row(mainAxisSize: MainAxisSize.min, children: actions),
+    );
+  }
+}
+
+/// Asks a vetter whose profile the community does not hold to write one,
+/// as applicants cannot find them until they do; else shows nothing.
+class _VetterProfilePrompt extends HookConsumerWidget {
+  const _VetterProfilePrompt({
+    required this.communityDid,
+    required this.communityName,
+  });
+
+  final String communityDid;
+  final String communityName;
+
+  /// Whether the community holds no profile of the member's; not knowing
+  /// goes to the log and asks nothing.
+  Future<bool> _profileNeeded(WidgetRef ref) async {
+    try {
+      return await ref
+          .read(vtcServiceProvider)
+          .vetterProfileNeeded(communityDid);
+    } on Exception catch (error, stackTrace) {
+      ref
+          .read(appLoggerProvider)
+          .error(
+            'Checking the vetter profile failed: ${error.runtimeType}',
+            stackTrace: stackTrace,
+            name: 'VtcCommunityPage',
+          );
+      return false;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Asked again once the profile screen closes.
+    final profileChecks = useState(0);
+    final profileNeeded = useFuture(
+      useMemoized(() => _profileNeeded(ref), [
+        communityDid,
+        profileChecks.value,
+      ]),
+    );
+    if (profileNeeded.data != true) return const SizedBox.shrink();
+    final l10n = context.l10n;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 8,
+      children: [
+        OnboardingMessage(
+          l10n.vtcVetterProfileNeeded,
+          key: const Key('vtc_community_vetter_profile_needed'),
+          isError: false,
+        ),
+        OnboardingButton(
+          key: const Key('vtc_community_vetter_profile'),
+          label: l10n.vtcVetterProfileSetUp,
+          onPressed: () async {
+            await VtcVetterProfileScreen.show(
+              context,
+              communityDid: communityDid,
+              communityName: communityName,
+            );
+            profileChecks.value++;
+          },
+        ),
+      ],
     );
   }
 }

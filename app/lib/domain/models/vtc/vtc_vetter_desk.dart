@@ -128,14 +128,61 @@ enum VtcRequestStep {
   openingSession,
 }
 
+/// The vetter profile the member last published to a community, as it
+/// answered.
+class VtcVetterProfileRecord {
+  /// Creates a [VtcVetterProfileRecord].
+  const VtcVetterProfileRecord({
+    required this.profile,
+    required this.listed,
+    required this.updatedAt,
+    this.roleCardId,
+  });
+
+  /// Restores a [VtcVetterProfileRecord] stored with [toJson].
+  factory VtcVetterProfileRecord.fromJson(Map<String, dynamic> json) =>
+      VtcVetterProfileRecord(
+        profile: VetterProfile.fromJson(
+          json['profile'] as Map<String, dynamic>,
+        ),
+        listed: json['listed'] as bool,
+        updatedAt: DateTime.parse(json['updatedAt'] as String),
+        roleCardId: json['roleCardId'] as String?,
+      );
+
+  /// The profile sent.
+  final VetterProfile profile;
+
+  /// Whether the community lists it.
+  final bool listed;
+
+  /// When the community stored it.
+  final DateTime updatedAt;
+
+  /// The vetter role card the member held when they sent it. The community
+  /// deletes the profile when it revokes that grant, so a profile sent under
+  /// another card is gone.
+  final String? roleCardId;
+
+  /// Serialises for storage.
+  Map<String, dynamic> toJson() => {
+    'profile': profile.toJson(),
+    'listed': listed,
+    'updatedAt': updatedAt.toIso8601String(),
+    'roleCardId': ?roleCardId,
+  };
+}
+
 /// The member's vetting desk for one community where they are a vetter: the
-/// tickets they showed, and the applicants they vet.
+/// tickets they showed, the applicants they vet, and the profile they
+/// published.
 class VtcVetterDesk {
   /// Creates a [VtcVetterDesk].
   const VtcVetterDesk({
     required this.communityDid,
     this.tickets = const [],
     this.sessions = const [],
+    this.profile,
   });
 
   /// Restores a [VtcVetterDesk] stored with [toJson].
@@ -149,6 +196,12 @@ class VtcVetterDesk {
       for (final session in json['sessions'] as List<dynamic>)
         VtcVetterSession.fromJson(session as Map<String, dynamic>),
     ],
+    profile: switch (json['profile']) {
+      final Map<String, dynamic> profile => VtcVetterProfileRecord.fromJson(
+        profile,
+      ),
+      _ => null,
+    },
   );
 
   /// The community's DID.
@@ -159,6 +212,9 @@ class VtcVetterDesk {
 
   /// The applicants vetted, oldest first.
   final List<VtcVetterSession> sessions;
+
+  /// The profile last published, if any.
+  final VtcVetterProfileRecord? profile;
 
   /// The tickets still live at [now].
   List<VetterTicket> liveTickets(DateTime now) => [
@@ -181,11 +237,15 @@ class VtcVetterDesk {
       ticket,
     ],
     sessions: sessions,
+    profile: profile,
   );
 
   /// With no ticket: none admits an applicant any more.
-  VtcVetterDesk withoutTickets() =>
-      VtcVetterDesk(communityDid: communityDid, sessions: sessions);
+  VtcVetterDesk withoutTickets() => VtcVetterDesk(
+    communityDid: communityDid,
+    sessions: sessions,
+    profile: profile,
+  );
 
   /// With [session] in place of any for the same request.
   VtcVetterDesk withSession(VtcVetterSession session) => VtcVetterDesk(
@@ -196,6 +256,15 @@ class VtcVetterDesk {
         if (other.request.requestId != session.request.requestId) other,
       session,
     ],
+    profile: profile,
+  );
+
+  /// With [profile] as the profile last published.
+  VtcVetterDesk withProfile(VtcVetterProfileRecord profile) => VtcVetterDesk(
+    communityDid: communityDid,
+    tickets: tickets,
+    sessions: sessions,
+    profile: profile,
   );
 
   /// Serialises for storage.
@@ -203,5 +272,6 @@ class VtcVetterDesk {
     'communityDid': communityDid,
     'tickets': [for (final ticket in tickets) ticket.toJson()],
     'sessions': [for (final session in sessions) session.toJson()],
+    if (profile case final profile?) 'profile': profile.toJson(),
   };
 }
