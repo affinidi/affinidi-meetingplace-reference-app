@@ -40,15 +40,24 @@ class VtcVettingDeskController extends _$VtcVettingDeskController {
     return VtcVettingDeskState();
   }
 
+  /// Opens the desk as recorded at once, then checks the vetter card: the
+  /// community page just offered the desk for a card that held, and a
+  /// ticket is minted only once the card is checked again.
   Future<void> _load() async {
     try {
-      if (!await _service.canVet(communityDid)) {
-        state = state.copyWith(step: VtcVettingDeskStep.notVetter);
-        return;
-      }
+      final desk = await _service.vetterDesk(communityDid);
       state = state.copyWith(
         step: VtcVettingDeskStep.open,
-        desk: await _service.vetterDesk(communityDid),
+        desk: desk,
+        checkingCard: true,
+      );
+      final canVet = await _service.canVet(communityDid);
+      state = state.copyWith(
+        checkingCard: false,
+        step: canVet ? state.step : VtcVettingDeskStep.notVetter,
+      );
+      if (!canVet) return;
+      state = state.copyWith(
         requirements: await _service.vettingRequirements(communityDid),
       );
       _check ??= Timer.periodic(checkInterval, (_) => unawaited(check()));
@@ -161,6 +170,7 @@ class VtcVettingDeskController extends _$VtcVettingDeskController {
         : VtcVettingDeskFailure.unreachable;
     state = state.copyWith(
       failure: failure,
+      checkingCard: false,
       step: failure == VtcVettingDeskFailure.notVetter
           ? VtcVettingDeskStep.notVetter
           : state.step,

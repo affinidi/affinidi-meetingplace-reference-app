@@ -7,7 +7,7 @@ part 'vtc_vetting_desk_state.freezed.dart';
 
 /// Where the member's vetting desk for a community stands.
 enum VtcVettingDeskStep {
-  /// Reading the desk and whether the member may vet.
+  /// Reading the desk as this phone recorded it.
   loading,
 
   /// The member holds no vetter role card for the community that is in
@@ -35,6 +35,10 @@ abstract class VtcVettingDeskState with _$VtcVettingDeskState {
 
     /// The desk as recorded: tickets and sessions.
     VtcVetterDesk? desk,
+
+    /// Whether the member's vetter card is being checked, with the desk
+    /// already open: it closes again if the card no longer holds.
+    @Default(false) bool checkingCard,
 
     /// What the community asks of vetting, once read.
     VettingRequirements? requirements,

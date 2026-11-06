@@ -226,6 +226,21 @@ void main() {
     await close(tester);
   });
 
+  testWidgets('opens the desk before the vetter card is checked', (
+    tester,
+  ) async {
+    fixture.network.revoked.add(3);
+
+    await pumpDesk(tester);
+    // The desk reads from this phone; the check needs the network.
+    await tester.pump();
+    expect(find.byKey(const Key('vtc_vetter_show_ticket')), findsOneWidget);
+
+    await waitFor(tester, find.byKey(const Key('vtc_vetter_not_vetter')));
+    expect(find.byKey(const Key('vtc_vetter_show_ticket')), findsNothing);
+    await close(tester);
+  });
+
   testWidgets('says so once the vetter card was withdrawn', (tester) async {
     fixture.network.revoked.add(3);
 
