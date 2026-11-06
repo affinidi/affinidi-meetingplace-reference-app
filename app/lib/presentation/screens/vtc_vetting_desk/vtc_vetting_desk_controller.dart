@@ -111,7 +111,13 @@ class VtcVettingDeskController extends _$VtcVettingDeskController {
     _checking = true;
     _checkedAt = clock.now();
     try {
-      final desk = await _service.checkVetterDesk(communityDid);
+      final desk = await _service.checkVetterDesk(
+        communityDid,
+        // Read once for the desk, rather than for each applicant.
+        requiredClaims: state.readingRequirements
+            ? null
+            : VtcService.vettingClaimsOf(state.requirements),
+      );
       _showDesk(desk);
     } on Exception catch (error, stackTrace) {
       _fail(error, stackTrace);

@@ -972,8 +972,15 @@ class VtcService {
   /// session ends; one that fails a check, and anything that belongs to no
   /// open session, is dropped.
   ///
+  /// The details asked for are [requiredClaims] when given, as
+  /// [vettingClaimsOf] reads them from requirements already known; else
+  /// they are read from the community.
+  ///
   /// Throws as [canVet] does.
-  Future<VtcVetterDesk?> checkVetterDesk(String communityDid) async {
+  Future<VtcVetterDesk?> checkVetterDesk(
+    String communityDid, {
+    List<String>? requiredClaims,
+  }) async {
     var desk = await _repository.findVetterDesk(communityDid);
     final member = await _repository.findCommunity(communityDid);
     if (desk == null || member == null) return desk;
@@ -993,7 +1000,15 @@ class VtcService {
           (session) => session.request.requestDocumentId == document.id,
         );
         if (!taken) {
-          desk = await _takeRequest(vta, member, vetter, desk, document);
+          desk = await _takeRequest(
+            vta,
+            member,
+            vetter,
+            desk,
+            document,
+            requiredClaims:
+                requiredClaims ?? await _vettingClaims(member.communityDid),
+          );
         }
         handled.add(peer.messageId);
         continue;
@@ -1133,8 +1148,9 @@ class VtcService {
     VtcCommunity member,
     VettingVetter vetter,
     VtcVetterDesk desk,
-    TrustTaskDocument request,
-  ) async {
+    TrustTaskDocument request, {
+    required List<String> requiredClaims,
+  }) async {
     final now = clock.now();
     final taken = await vetter.takeRequest(
       request,
@@ -1146,7 +1162,7 @@ class VtcService {
     if (accepted == null || ticket == null) return desk;
     final session = await vetter.openSession(
       accepted,
-      requiredClaims: await _vettingClaims(member.communityDid),
+      requiredClaims: requiredClaims,
     );
     return desk
         .withTicket(ticket, now)
@@ -1166,10 +1182,14 @@ class VtcService {
         .firstOrNull;
   }
 
-  /// The details [communityDid] asks vetters to check: those of
-  /// [vettingRequirements], or the legal name.
-  Future<List<String>> _vettingClaims(String communityDid) async {
-    final claims = (await vettingRequirements(communityDid))?.requiredClaims;
+  /// The details [communityDid] asks vetters to check, as
+  /// [vettingClaimsOf] reads them.
+  Future<List<String>> _vettingClaims(String communityDid) async =>
+      vettingClaimsOf(await vettingRequirements(communityDid));
+
+  /// The details [requirements] ask vetters to check, or the legal name.
+  static List<String> vettingClaimsOf(VettingRequirements? requirements) {
+    final claims = requirements?.requiredClaims;
     return claims == null || claims.isEmpty ? const [_legalName] : claims;
   }
 

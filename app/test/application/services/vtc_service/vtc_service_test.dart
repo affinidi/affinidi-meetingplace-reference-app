@@ -1509,6 +1509,18 @@ void main() {
       expect(steps, [VtcTicketStep.checkingCard, VtcTicketStep.creating]);
     });
 
+    test('asks the applicant for the details already known', () async {
+      final ticket = await service.createVettingTicket(fakeVtcDid);
+      await requestWith(ticket.spoken);
+
+      final desk = (await service.checkVetterDesk(
+        fakeVtcDid,
+        requiredClaims: ['name.given'],
+      ))!;
+
+      expect(desk.sessions.single.session!.requiredClaims, ['name.given']);
+    });
+
     test('vets an applicant from request to statement', () async {
       final ticket = await service.createVettingTicket(fakeVtcDid);
       await requestWith(ticket.spoken);
