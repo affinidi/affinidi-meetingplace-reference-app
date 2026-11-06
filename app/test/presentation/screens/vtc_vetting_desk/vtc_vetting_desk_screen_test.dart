@@ -225,7 +225,25 @@ void main() {
       expect(find.byKey(const Key('vtc_community_vetting_desk')), findsNothing);
     });
 
-    testWidgets('offers no vetting desk to a member', (tester) async {
+    testWidgets('offers the vetting desk to a vetter shown as a member', (
+      tester,
+    ) async {
+      // The newest role card may be the membership's, not the vetter's.
+      await pumpPage(tester, 'member');
+
+      expect(
+        find.byKey(const Key('vtc_community_vetting_desk')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('offers no vetting desk to a member who is no vetter', (
+      tester,
+    ) async {
+      fixture.network.vta.answerTo[VtaTask.credentialsQuery] = (_) => {
+        'credentials': <Object>[],
+      };
+
       await pumpPage(tester, 'member');
 
       expect(find.byKey(const Key('vtc_community_vetting_desk')), findsNothing);

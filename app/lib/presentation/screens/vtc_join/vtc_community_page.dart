@@ -24,9 +24,6 @@ const _customRolePrefix = 'custom:';
 /// community defined itself never does, whatever its name.
 const _adminRole = 'admin';
 
-/// The roles that vet applicants: built in, or as a community names it.
-const _vetterRoles = {'vetter', '${_customRolePrefix}vetter'};
-
 /// The member's [role] in plain words; a role the community defined itself
 /// by its own name, which never reads as a built-in one.
 String _roleName(AppLocalizations l10n, String role) =>
@@ -97,10 +94,9 @@ class VtcCommunityPage extends StatelessWidget {
               _ => null,
             },
           ),
-        if ((state.role, state.communityDid) case (
-          final role?,
-          final communityDid?,
-        ) when _vetterRoles.contains(role))
+        // Whatever role the line above shows: the vetter role comes on a
+        // card of its own, which the entry checks.
+        if (state.communityDid case final communityDid?)
           _VettingDeskEntry(communityDid: communityDid, communityName: name),
         const SizedBox(height: 4),
         if (card != null) ...[
