@@ -1334,11 +1334,13 @@ class VtcService {
   /// the VTA, is collected from there with keys the VTA lends, and each
   /// step of that is reported to [onCardDelivery]. The keys stay lent until
   /// [endCardCollection], the card is kept, or no check came for a while.
+  /// Looking for the card on the VTA first is reported to [onCardStep].
   ///
   /// Returns null when no application is open. Throws as [join] does.
   Future<JoinStatus?> checkApplication(
     String communityDid, {
     void Function(VtcCardDelivery delivery)? onCardDelivery,
+    void Function(MembershipCardStep step)? onCardStep,
   }) async {
     final community = await _repository.findCommunity(communityDid);
     if (community == null) return null;
@@ -1348,6 +1350,7 @@ class VtcService {
         community,
         requestId: null,
         onCardDelivery: onCardDelivery,
+        onCardStep: onCardStep,
       );
       return null;
     }
@@ -1370,6 +1373,7 @@ class VtcService {
           member,
           requestId: requestId,
           onCardDelivery: onCardDelivery,
+          onCardStep: onCardStep,
         );
       case JoinRequestStatus.rejected || JoinRequestStatus.withdrawn:
         await _repository.saveCommunity(community.rejected(status.reason));
@@ -1406,7 +1410,8 @@ class VtcService {
 
   /// Completes [member]'s admission with the membership card the community
   /// delivered: held by their VTA, or collected from the identity's inbox
-  /// and kept on the VTA, each step reported to [onCardDelivery]. When
+  /// and kept on the VTA, each step reported to [onCardDelivery], and
+  /// looking for it on the VTA to [onCardStep]. When
   /// neither holds it yet, asks the community to deliver it again and
   /// leaves the admission to settle at the next check.
   Future<void> _settleFromVta(
@@ -1414,6 +1419,7 @@ class VtcService {
     VtcCommunity member, {
     required String? requestId,
     void Function(VtcCardDelivery delivery)? onCardDelivery,
+    void Function(MembershipCardStep step)? onCardStep,
   }) async {
     final report = _DeliveryReport(member.personaDid, onCardDelivery);
     final card =
@@ -1422,6 +1428,7 @@ class VtcService {
             .membershipCard(
               member.communityDid,
               personaDid: member.personaDid,
+              onStep: onCardStep,
             ) ??
         await _collectCards(vta, member, report);
     if (card == null) {
@@ -1866,16 +1873,24 @@ class VtcService {
   /// The membership card [communityDid] issued to the member's persona
   /// there, as their VTA keeps it, or null when this phone knows no such
   /// membership or the VTA holds no card yet, e.g. while the community has
-  /// still to deliver it.
+  /// still to deliver it. Each step of finding it on the VTA is reported to
+  /// [onStep] as it starts.
   ///
   /// Throws [VtaNotLinkedException] when no VTA is linked, and
   /// [MeetingPlaceVtcSDKException] when the VTA cannot be reached.
-  Future<VtcMembershipCard?> membershipCard(String communityDid) async {
+  Future<VtcMembershipCard?> membershipCard(
+    String communityDid, {
+    void Function(MembershipCardStep step)? onStep,
+  }) async {
     final community = await _repository.findCommunity(communityDid);
     if (community == null || !community.isMember) return null;
     final card = await _sdk
         .communityImport(await _grantedVta())
-        .membershipCard(communityDid, personaDid: community.personaDid);
+        .membershipCard(
+          communityDid,
+          personaDid: community.personaDid,
+          onStep: onStep,
+        );
     return card == null ? null : VtcMembershipCard.fromCredential(card);
   }
 

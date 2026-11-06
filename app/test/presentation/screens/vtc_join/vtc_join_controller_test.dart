@@ -868,6 +868,29 @@ void main() {
         expect(state().membershipCard, isNotNull);
       });
 
+      test('says how far finding the card on the VTA got', () async {
+        network.joinVerdict = {'effect': 'refer'};
+        await controller().onScanned(fakeVtcDid);
+        await controller().join();
+        network.joinStatus = 'approved';
+        await controller().checkAgain();
+        await readDone();
+
+        vtaHoldsCard();
+        final steps = <MembershipCardStep?>[];
+        container.listen(
+          vtcJoinControllerProvider.select((state) => state.cardStep),
+          (_, next) => steps.add(next),
+        );
+        await controller().readMembershipCard();
+
+        expect(steps, [
+          MembershipCardStep.finding,
+          MembershipCardStep.reading,
+          null,
+        ]);
+      });
+
       test('is shown from the admission, before any VTA read', () async {
         await controller().onScanned(fakeVtcDid);
         await controller().join();

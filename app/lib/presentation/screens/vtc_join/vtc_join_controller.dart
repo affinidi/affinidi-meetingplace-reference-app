@@ -883,6 +883,7 @@ class VtcJoinController extends _$VtcJoinController {
       await _service.checkApplication(
         manifest.communityDid,
         onCardDelivery: _showCardDelivery,
+        onCardStep: _showCardStep,
       );
     } on MeetingPlaceVtcSDKException {
       // The next collection tries again.
@@ -998,7 +999,10 @@ class VtcJoinController extends _$VtcJoinController {
     _readingCard = true;
     _showGettingCard();
     try {
-      final card = await _service.membershipCard(manifest.communityDid);
+      final card = await _service.membershipCard(
+        manifest.communityDid,
+        onStep: _showCardStep,
+      );
       // The screen may have closed, or moved on, while the VTA answered.
       if (!ref.mounted) return;
       if (card != null && state.step == VtcJoinStep.joined) {
@@ -1014,9 +1018,20 @@ class VtcJoinController extends _$VtcJoinController {
     }
   }
 
-  /// Shows whether the card is being read or collected right now.
+  /// Shows whether the card is being read or collected right now; how far
+  /// only while it is.
   void _showGettingCard() {
-    state = state.copyWith(gettingCard: _readingCard || _collectingCard);
+    final gettingCard = _readingCard || _collectingCard;
+    state = state.copyWith(
+      gettingCard: gettingCard,
+      cardStep: gettingCard ? state.cardStep : null,
+    );
+  }
+
+  void _showCardStep(MembershipCardStep step) {
+    // The screen may have closed while the VTA answered.
+    if (!ref.mounted) return;
+    state = state.copyWith(cardStep: step);
   }
 
   /// Withdraws the open application; the screen asks the member to confirm

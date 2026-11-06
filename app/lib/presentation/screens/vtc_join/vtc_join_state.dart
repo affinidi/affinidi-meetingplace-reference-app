@@ -315,6 +315,10 @@ abstract class VtcJoinState with _$VtcJoinState {
     /// VTA, or collecting it from the community, right now.
     @Default(false) bool gettingCard,
 
+    /// How far finding the card on the member's VTA got, while
+    /// [gettingCard].
+    MembershipCardStep? cardStep,
+
     /// The community's own check of the member's identity, once their VTA
     /// holds one.
     VtcIdentityCheck? identityCheck,
