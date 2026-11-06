@@ -5,10 +5,12 @@ import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_s
 import 'package:mpx_flutter_reference_app/domain/models/vtc/mock_credential_template.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_card_delivery.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_membership_entry.dart';
+import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_vetter_desk.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_vetting.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/vtc/mock_credential_issuer.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/vtc/user_verification_key.dart';
+import 'package:ssi/ssi.dart' show ProofPurpose;
 
 import '../../../fakes/fake_persona.dart';
 import '../../../fakes/fake_vta.dart';
@@ -1384,6 +1386,255 @@ void main() {
       final declined = await requestAfterCheck();
       expect(declined.status, VtcVettingStatus.declined);
       expect(declined.declineCode, 'couldNotVerify');
+    });
+  });
+
+  group('VtcService vetter desk', () {
+    late FakeVtcNetwork network;
+    late FakePersona vetter;
+    late FakePersona applicant;
+
+    Future<TrustTaskDocument> applicantSends(
+      String type,
+      Map<String, dynamic> payload, {
+      String? threadId,
+      String? parentThreadId,
+    }) => network.memberSends(
+      applicant,
+      TrustTaskDocument.create(
+        type: type,
+        issuer: applicant.did,
+        recipient: vetter.did,
+        threadId: threadId,
+        parentThreadId: parentThreadId,
+        payload: payload,
+      ),
+    );
+
+    Future<TrustTaskDocument> requestWith(VettingTicket ticket) =>
+        applicantSends(VettingTask.request, {
+          'community': fakeVtcDid,
+          'joinDid': applicant.did,
+          'ticket': ticket.toJson(),
+        });
+
+    /// The applicant's card for [session], the vetter's session document.
+    Future<TrustTaskDocument> sendCard(TrustTaskDocument session) async {
+      final now = DateTime.now().toUtc();
+      final card = await EddsaJcs2022.sign(
+        unsignedVettingCard(
+          id: 'urn:uuid:card',
+          publisher: applicant.did,
+          audience: vetter.did,
+          community: fakeVtcDid,
+          challenge: session.payload['challenge'] as String,
+          domain: fakeVtcDid,
+          issuedAt: now,
+          validity: const Duration(minutes: 10),
+          claims: const [
+            VettingCardClaim(type: 'name.legal', value: 'Ada Lovelace'),
+          ],
+          identityTypes: const ['name.legal'],
+          salt: newCommitmentSalt(),
+        ),
+        signer: applicant,
+        purpose: ProofPurpose.assertionMethod,
+      );
+      return applicantSends(
+        VettingTask.sessionResponse,
+        {'card': card},
+        threadId: session.id,
+        parentThreadId: session.parentThreadId,
+      );
+    }
+
+    Future<List<TrustTaskDocument>> sentToApplicant() =>
+        network.sentTo(applicant);
+
+    setUp(() async {
+      network = FakeVtcNetwork()
+        ..joinManifest = {
+          'communityDid': fakeVtcDid,
+          'criteria': [
+            {
+              'id': 'open',
+              'admission': 'automatic',
+              'requirementsDigest': 'zOpen',
+            },
+            {
+              'id': 'vetted',
+              'admission': 'automatic',
+              'requirementsDigest': 'zVetted',
+              'vetting': {
+                'version': '0.1',
+                'statementType': VettingStatement.predicate,
+                'minStatements': 1,
+                'acceptedMethods': ['inPerson'],
+                'eligibleVetters': {'role': 'vetter'},
+                'requiredClaims': ['name.legal'],
+              },
+            },
+          ],
+        };
+      vetter = FakePersona(mediatorDid: network.mediatorDid);
+      applicant = FakePersona(mediatorDid: network.mediatorDid);
+      final roleCard = await network.vetterRoleCard(vetter.did);
+      network.vta
+        ..persona = vetter
+        ..otherDocuments[vetter.did] = vetter.document
+        ..otherDocuments[applicant.did] = applicant.document
+        ..answers[VtaTask.vaultUpsert] = {
+          'entry': {'id': 'entry-1'},
+        }
+        ..answers[VtaTask.credentialsGet] = {'credential': roleCard};
+      network.vta.answerTo[VtaTask.exportSecret] = (payload) =>
+          vetter.exportAnswer(payload['keyId']);
+      network.vta.answerTo[VtaTask.credentialsQuery] = (payload) => {
+        'credentials': [
+          if (payload['type'] == 'AuthorityCredential')
+            {
+              'id': 'role-1',
+              'types': ['VerifiableCredential', 'AuthorityCredential'],
+            },
+        ],
+      };
+      service = VtcService(
+        sdk: network.sdk(),
+        repository: SecureStorageVtcRepository(),
+        userVerificationKey: UserVerificationKey(keyStorage),
+        platform: 'ios',
+      );
+      await service.startLink(network.vta.did);
+      await service.checkGrant();
+      await service.join(
+        await service.readCommunity(fakeVtcDid),
+        persona: VtaPersona(
+          did: vetter.did,
+          contextId: 'mpx-bob',
+          signingKeyId: vetter.signingKeyId,
+        ),
+      );
+    });
+
+    test('lets a member vet while their vetter card holds', () async {
+      expect(await service.canVet(fakeVtcDid), isTrue);
+      expect(await service.canVet('did:web:other.example'), isFalse);
+
+      network.revoked.add(3);
+
+      expect(await service.canVet(fakeVtcDid), isFalse);
+      await expectLater(
+        service.createVettingTicket(fakeVtcDid),
+        throwsA(isA<NotVetterException>()),
+      );
+    });
+
+    test('mints a ticket and keeps it on the desk', () async {
+      final ticket = await service.createVettingTicket(fakeVtcDid, uses: 3);
+
+      final desk = (await service.vetterDesk(fakeVtcDid))!;
+      expect(desk.tickets.single.toJson(), ticket.toJson());
+      expect(ticket.usesLeft, 3);
+      expect(ticket.vetter, vetter.did);
+    });
+
+    test('vets an applicant from request to statement', () async {
+      final ticket = await service.createVettingTicket(fakeVtcDid);
+      await requestWith(ticket.spoken);
+
+      var desk = (await service.checkVetterDesk(fakeVtcDid))!;
+      final session = desk.sessions.single;
+      expect(session.status, VtcVetterSessionStatus.inSession);
+      expect(session.session!.requiredClaims, ['name.legal']);
+      expect(desk.liveTickets(DateTime.now()), isEmpty);
+      final [accepted, opened] = await sentToApplicant();
+      expect(accepted.type, VettingTask.requestResponse);
+      expect(opened.type, VettingTask.session);
+
+      final card = await sendCard(opened);
+      await service.checkVetterDesk(fakeVtcDid);
+      final requestId = session.request.requestId;
+      expect(
+        service.vettingCard(requestId)!.claims.single.value,
+        'Ada Lovelace',
+      );
+      expect(network.inbox.values, hasLength(1));
+
+      await expectLater(
+        service.issueVettingStatement(
+          fakeVtcDid,
+          requestId,
+          documentClasses: ['passport'],
+        ),
+        throwsStateError,
+      );
+      await service.confirmVettingMatch(fakeVtcDid, requestId);
+      desk = await service.issueVettingStatement(
+        fakeVtcDid,
+        requestId,
+        documentClasses: ['passport'],
+      );
+
+      expect(desk.sessions.single.status, VtcVetterSessionStatus.issued);
+      final issue = (await sentToApplicant()).last;
+      expect(issue.type, VettingTask.issue);
+      expect(issue.threadId, opened.id);
+      expect(service.vettingCard(requestId), isNull);
+      expect(network.inbox, isEmpty);
+      expect(card.payload['card'], isNotNull);
+      final [record] = await service.issuedVettingStatements(fakeVtcDid);
+      expect(record.statementId, desk.sessions.single.statementId);
+      expect('${network.vta.appState}', isNot(contains('Ada')));
+    });
+
+    test('leaves a wrong code unanswered', () async {
+      await service.createVettingTicket(fakeVtcDid);
+      await requestWith(
+        VettingTicket.withCode(
+          community: fakeVtcDid,
+          vetter: vetter.did,
+          code: '0000-0000',
+        ),
+      );
+
+      final desk = (await service.checkVetterDesk(fakeVtcDid))!;
+
+      expect(desk.sessions, isEmpty);
+      expect(desk.tickets.single.usesLeft, 1);
+      expect(await sentToApplicant(), isEmpty);
+      expect(network.inbox, isEmpty);
+    });
+
+    test('declines, and ends a session the applicant declined', () async {
+      final ticket = await service.createVettingTicket(fakeVtcDid, uses: 2);
+      await requestWith(ticket.spoken);
+      await requestWith(ticket.spoken);
+      final [first, second] = (await service.checkVetterDesk(
+        fakeVtcDid,
+      ))!.sessions;
+
+      await service.declineVetting(
+        fakeVtcDid,
+        first.request.requestId,
+        code: 'couldNotVerify',
+      );
+      await applicantSends(VettingTask.decline, {
+        'requestId': second.request.requestId,
+      });
+      final desk = (await service.checkVetterDesk(fakeVtcDid))!;
+
+      expect(
+        desk.sessionFor(first.request.requestId)!.status,
+        VtcVetterSessionStatus.declined,
+      );
+      expect(
+        desk.sessionFor(second.request.requestId)!.status,
+        VtcVetterSessionStatus.ended,
+      );
+      expect((await sentToApplicant()).last.payload, {
+        'requestId': first.request.requestId,
+        'code': 'couldNotVerify',
+      });
     });
   });
 }

@@ -362,6 +362,86 @@ class FakeVtcNetwork implements HttpClientAdapter {
     }, threadId: session['id'] as String);
   }
 
+  /// Signs [document] as [sender] and puts it in the inbox of the identity
+  /// it names, sealed from [sender] as Meeting Place sends it, e.g. an
+  /// applicant's request to a vetter. The recipient's DID document must
+  /// resolve through [vta].
+  Future<TrustTaskDocument> memberSends(
+    FakePersona sender,
+    TrustTaskDocument document,
+  ) async {
+    final signed = await document.sign(
+      sender,
+      purpose: ProofPurpose.authentication,
+    );
+    final sentBefore = sentToMembers.length;
+    await sdk().personaMessenger(await sender.keys()).send(signed);
+    inbox['message-${inbox.length + 1}'] = _sealedIn(
+      sentToMembers.removeAt(sentBefore),
+    );
+    return signed;
+  }
+
+  /// The documents identities sent [recipient], opened with its keys,
+  /// oldest first.
+  Future<List<TrustTaskDocument>> sentTo(FakePersona recipient) async {
+    final keys = await recipient.keys();
+    return [
+      for (final forward in sentToMembers)
+        if (forward.next == recipient.did)
+          TrustTaskDocument.fromJson(
+            Map<String, dynamic>.of(
+              (await DidcommMessage.unpackToPlainTextMessage(
+                    message: _sealedIn(forward),
+                    recipientDidManager: keys,
+                    expectedMessageWrappingTypes: const [
+                      MessageWrappingType.authcryptPlaintext,
+                    ],
+                  )).body ??
+                  const {},
+            ),
+          ),
+    ];
+  }
+
+  static Map<String, dynamic> _sealedIn(ForwardMessage forward) =>
+      jsonDecode(
+            utf8.decode(
+              base64Url.decode(
+                base64Url.normalize(forward.attachments!.single.data!.base64!),
+              ),
+            ),
+          )
+          as Map<String, dynamic>;
+
+  /// A role card in which the community makes [holderDid] a vetter, signed
+  /// by the community, its status at place [statusIndex] of the revocation
+  /// list.
+  Future<Map<String, dynamic>> vetterRoleCard(
+    String holderDid, {
+    int statusIndex = 3,
+    String validUntil = '2099-01-01T00:00:00Z',
+  }) => EddsaJcs2022.sign(
+    {
+      'id': 'urn:uuid:vetter-card',
+      'type': ['VerifiableCredential', 'DTGCredential', 'AuthorityCredential'],
+      'issuer': fakeVtcDid,
+      'issuerScope': 'public',
+      'validFrom': '2026-01-01T00:00:00Z',
+      'validUntil': validUntil,
+      'credentialStatus': statusEntry(statusIndex),
+      'credentialSubject': {
+        'id': holderDid,
+        'authority': {
+          'scope': fakeVtcDid,
+          'actions': ['role:vetter'],
+        },
+      },
+    },
+    signer: _VtcSigner(_vtcKey),
+    purpose: ProofPurpose.assertionMethod,
+  );
+
   /// Delivers [credential] to [persona]'s inbox as the community does: a
   /// signed `credential-exchange/issue` document, sealed to the identity.
   Future<void> deliver(

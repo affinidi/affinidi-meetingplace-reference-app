@@ -29,17 +29,20 @@ class FakePersona implements TrustTaskSigner {
         VerificationRelationship.keyAgreement: [1],
       },
     );
-    final json = DidPeer.resolve(did).toJson()
-      ..['service'] = [
-        {
-          'id': '$did#didcomm',
-          'type': didCommMessagingServiceType,
-          'serviceEndpoint': {
-            'uri': mediatorDid,
-            'accept': ['didcomm/v2'],
-          },
+    final json = DidPeer.resolve(did).toJson();
+    // did:peer:2 gives a key one purpose; a VTA's identity signs assertions
+    // with its authentication key too.
+    json['assertionMethod'] = json['authentication'];
+    json['service'] = [
+      {
+        'id': '$did#didcomm',
+        'type': didCommMessagingServiceType,
+        'serviceEndpoint': {
+          'uri': mediatorDid,
+          'accept': ['didcomm/v2'],
         },
-      ];
+      },
+    ];
     return FakePersona._(
       signing,
       Uint8List.fromList(keyAgreement.privateKey),
@@ -61,6 +64,13 @@ class FakePersona implements TrustTaskSigner {
 
   @override
   Future<Uint8List> sign(Uint8List data) => _signing.sign(data);
+
+  /// The identity's keys, as its VTA lends them.
+  Future<PersonaDidManager> keys() => PersonaDidManager.borrow(
+    document: document,
+    signingSeed: _signing.getSeed(),
+    keyAgreementKey: _keyAgreementKey,
+  );
 
   /// Ids of the identity's signing and key agreement keys.
   String get signingKeyId => verificationMethod;

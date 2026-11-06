@@ -15,6 +15,7 @@ import '../../../domain/models/vtc/vtc_identity_check.dart';
 import '../../../domain/models/vtc/vtc_left_membership.dart';
 import '../../../domain/models/vtc/vtc_membership_card.dart';
 import '../../../domain/models/vtc/vtc_membership_entry.dart';
+import '../../../domain/models/vtc/vtc_vetter_desk.dart';
 import '../../../domain/models/vtc/vtc_vetting.dart';
 import '../../../domain/repositories/vtc_repository.dart';
 import '../../../infrastructure/providers/vtc_sdk_provider.dart';
@@ -46,6 +47,13 @@ class InvalidCommunityCodeException implements Exception {
 class NotACommunityMemberException implements Exception {
   /// Creates a [NotACommunityMemberException].
   const NotACommunityMemberException();
+}
+
+/// Thrown when the member asks to vet for a community where they hold no
+/// vetter role card that is in date and not revoked.
+class NotVetterException implements Exception {
+  /// Creates a [NotVetterException].
+  const NotVetterException();
 }
 
 /// Name the phone registers with on the member's VTA.
@@ -109,6 +117,12 @@ class VtcService {
   /// Connection DIDComm keys the VTA lent, by key id, for as long as the
   /// link lasts.
   final Map<String, Future<Uint8List>> _lentConnectionKeys = {};
+
+  /// The applicants' vetting cards the member, as a vetter, checked, by
+  /// request id, with the id of the inbox message carrying each. Held in
+  /// memory only: the card's details are personal, and the message waits in
+  /// the identity's inbox until the session ends.
+  final Map<String, (String, ReceivedVettingCard)> _vettingCards = {};
 
   /// How long lent keys are held without a check before they are forgotten.
   static const _collectionIdle = Duration(minutes: 5);
@@ -826,6 +840,315 @@ class VtcService {
       vetter: accepted,
       communityDid: communityDid,
     );
+  }
+
+  /// Whether the member may vet applicants for [communityDid]: they are a
+  /// member there, and their VTA keeps a vetter role card the community
+  /// issued them that is in date and not revoked.
+  ///
+  /// Throws [VtaNotLinkedException] when no VTA is linked, and
+  /// [MeetingPlaceVtcSDKException] when the VTA or the community's status
+  /// list cannot be reached.
+  Future<bool> canVet(String communityDid) async {
+    final member = await _repository.findCommunity(communityDid);
+    if (member == null || !member.isMember) return false;
+    return await _vetterCard(await _grantedVta(), member) != null;
+  }
+
+  /// The member's vetting desk for [communityDid], as recorded, or null.
+  Future<VtcVetterDesk?> vetterDesk(String communityDid) =>
+      _repository.findVetterDesk(communityDid);
+
+  /// Mints a ticket for applicants to ask the member to vet them for
+  /// [communityDid], good for [uses] requests until [validity] has passed,
+  /// and records it on the desk.
+  ///
+  /// Throws [NotVetterException] when the member may not vet there, and as
+  /// [canVet] does.
+  Future<VetterTicket> createVettingTicket(
+    String communityDid, {
+    int uses = VetterTicket.defaultUses,
+    Duration validity = VetterTicket.defaultValidity,
+  }) async {
+    final member = await _repository.findCommunity(communityDid);
+    if (member == null || !await canVet(communityDid)) {
+      throw const NotVetterException();
+    }
+    final now = clock.now();
+    final ticket = VetterTicket.mint(
+      community: communityDid,
+      vetter: member.personaDid,
+      uses: uses,
+      validity: validity,
+      now: now,
+    );
+    final desk =
+        await _repository.findVetterDesk(communityDid) ??
+        VtcVetterDesk(communityDid: communityDid);
+    await _repository.saveVetterDesk(desk.withTicket(ticket, now));
+    return ticket;
+  }
+
+  /// Picks up what applicants sent the member, as a vetter for
+  /// [communityDid], and moves each session on: accepts a request for a
+  /// live ticket and opens its session at once, asking for the details the
+  /// community requires; checks a card; and ends a session the applicant
+  /// declined. Returns the desk, or null when there is none.
+  ///
+  /// A card is kept in memory, and its message in the inbox, until the
+  /// session ends; one that fails a check, and anything that belongs to no
+  /// open session, is dropped.
+  ///
+  /// Throws as [canVet] does.
+  Future<VtcVetterDesk?> checkVetterDesk(String communityDid) async {
+    var desk = await _repository.findVetterDesk(communityDid);
+    final member = await _repository.findCommunity(communityDid);
+    if (desk == null || member == null) return desk;
+    final (vta, collection, vetter) = await _vetter(member);
+    await collection.inbox.open();
+    final received = await collection.inbox.peerDocuments(
+      types: VettingTask.toVetter,
+    );
+
+    final handled = <String>[];
+    for (final peer in received) {
+      final document = peer.document;
+      if (document.type == VettingTask.request) {
+        // A request already taken, whose message could not be removed, is
+        // not taken again.
+        final taken = desk!.sessions.any(
+          (session) => session.request.requestDocumentId == document.id,
+        );
+        if (!taken) {
+          desk = await _takeRequest(vta, member, vetter, desk, document);
+        }
+        handled.add(peer.messageId);
+        continue;
+      }
+      final open = desk!.sessions.where((session) => session.isOpen);
+      if (open
+              .where(
+                (session) => vetter.isDeclinedBy(document, session.request),
+              )
+              .firstOrNull
+          case final session?) {
+        desk = desk.withSession(session.ended());
+        _forgetCard(session.request.requestId);
+        handled.add(peer.messageId);
+        continue;
+      }
+      final session = open
+          .map((session) => session.session)
+          .where((session) => session?.document.id == document.threadId)
+          .firstOrNull;
+      final held = session == null
+          ? null
+          : _vettingCards[session.request.requestId];
+      if (held != null && held.$1 == peer.messageId) continue;
+      if (session == null || held != null) {
+        handled.add(peer.messageId);
+        continue;
+      }
+      try {
+        if (await vetter.receiveCard(document, session: session)
+            case final card?) {
+          _vettingCards[session.request.requestId] = (peer.messageId, card);
+          continue;
+        }
+      } on VettingCardException {
+        // Dropped: the applicant may send another.
+      }
+      handled.add(peer.messageId);
+    }
+    await _repository.saveVetterDesk(desk!);
+    await _removeFromInbox(collection, handled);
+    return desk;
+  }
+
+  /// The card the applicant of [requestId] sent, as checked, or null while
+  /// none has arrived. Its details are shown for the session only.
+  ReceivedVettingCard? vettingCard(String requestId) =>
+      _vettingCards[requestId]?.$2;
+
+  /// Records that the member, as a vetter for [communityDid], confirmed with
+  /// the applicant present that the match codes of [requestId] match.
+  Future<VtcVetterDesk> confirmVettingMatch(
+    String communityDid,
+    String requestId,
+  ) async {
+    final (desk, session) = await _vetterSessionOf(communityDid, requestId);
+    final updated = desk.withSession(session.confirmed());
+    await _repository.saveVetterDesk(updated);
+    return updated;
+  }
+
+  /// Issues the applicant of [requestId] a vetting statement signed by the
+  /// member's VTA as their identity in [communityDid]: the vetter checked
+  /// the card's details in person against [documentClasses]. The VTA keeps
+  /// a record of it.
+  ///
+  /// Throws [StateError] before the card arrived or the match codes were
+  /// confirmed, and [MeetingPlaceVtcSDKException] when the VTA will not sign
+  /// or keep it, or the applicant cannot be reached.
+  Future<VtcVetterDesk> issueVettingStatement(
+    String communityDid,
+    String requestId, {
+    required List<String> documentClasses,
+  }) async {
+    final (desk, session) = await _vetterSessionOf(communityDid, requestId);
+    final card = _vettingCards[requestId];
+    final opened = session.session;
+    if (card == null || opened == null) throw StateError('no card received');
+    final member = (await _repository.findCommunity(communityDid))!;
+    final (_, collection, vetter) = await _vetter(member);
+    final issued = await vetter.issue(
+      opened,
+      card: card.$2,
+      matchConfirmed: session.matchConfirmed,
+      documentClasses: documentClasses,
+    );
+    final updated = desk.withSession(session.issued(issued.statementId));
+    await _repository.saveVetterDesk(updated);
+    _forgetCard(requestId);
+    await _removeFromInbox(collection, [card.$1]);
+    return updated;
+  }
+
+  /// Tells the applicant of [requestId] the member, as a vetter for
+  /// [communityDid], will not vouch for them, with a [code] such as
+  /// `couldNotVerify` or `notComfortable`.
+  ///
+  /// Throws [MeetingPlaceVtcSDKException] when the applicant cannot be
+  /// reached.
+  Future<VtcVetterDesk> declineVetting(
+    String communityDid,
+    String requestId, {
+    String? code,
+    String? message,
+  }) async {
+    final (desk, session) = await _vetterSessionOf(communityDid, requestId);
+    final member = (await _repository.findCommunity(communityDid))!;
+    final (_, collection, vetter) = await _vetter(member);
+    await vetter.decline(session.request, code: code, message: message);
+    final updated = desk.withSession(session.declined());
+    await _repository.saveVetterDesk(updated);
+    final card = _vettingCards[requestId];
+    _forgetCard(requestId);
+    await _removeFromInbox(collection, [?card?.$1]);
+    return updated;
+  }
+
+  /// The statements the member issued as a vetter for [communityDid], as
+  /// their VTA records them, newest first, also those issued from another
+  /// phone.
+  ///
+  /// Throws [VtaNotLinkedException] when no VTA is linked, and
+  /// [MeetingPlaceVtcSDKException] when the VTA cannot be reached.
+  Future<List<IssuedVettingStatement>> issuedVettingStatements(
+    String communityDid,
+  ) async {
+    final member = await _repository.findCommunity(communityDid);
+    if (member == null || !member.isMember) return const [];
+    final (_, _, vetter) = await _vetter(member);
+    return vetter.issuedStatements();
+  }
+
+  /// [desk] after the applicant's [request]: accepted for a live ticket,
+  /// its session opened, or as it was when refused or left unanswered.
+  Future<VtcVetterDesk> _takeRequest(
+    VtaClient vta,
+    VtcCommunity member,
+    VettingVetter vetter,
+    VtcVetterDesk desk,
+    TrustTaskDocument request,
+  ) async {
+    final now = clock.now();
+    final taken = await vetter.takeRequest(
+      request,
+      tickets: desk.liveTickets(now),
+      roleCard: await _vetterCard(vta, member),
+    );
+    final accepted = taken?.accepted;
+    final ticket = taken?.ticket;
+    if (accepted == null || ticket == null) return desk;
+    final session = await vetter.openSession(
+      accepted,
+      requiredClaims: await _vettingClaims(member.communityDid),
+    );
+    return desk
+        .withTicket(ticket, now)
+        .withSession(VtcVetterSession(request: accepted).opened(session));
+  }
+
+  /// The details [communityDid]'s join manifest asks vetters to check: those
+  /// of its first way in by vetting, or the legal name.
+  Future<List<String>> _vettingClaims(String communityDid) async {
+    final manifest = await _sdk.joinClient().readManifest(communityDid);
+    final claims = manifest.criteria
+        .map((criterion) => criterion.vetting?.requiredClaims)
+        .whereType<List<String>>()
+        .firstOrNull;
+    return claims == null || claims.isEmpty ? const [_legalName] : claims;
+  }
+
+  static const _legalName = 'name.legal';
+
+  /// The member's vetter role card for [member]'s community, in date and
+  /// not revoked, or null.
+  Future<Map<String, dynamic>?> _vetterCard(
+    VtaClient vta,
+    VtcCommunity member,
+  ) => _sdk
+      .communityImport(vta)
+      .vetterCard(
+        member.communityDid,
+        personaDid: member.personaDid,
+        statusList: _sdk.statusListClient(),
+        now: clock.now(),
+      );
+
+  /// The VTA, the identity's lent keys and inbox, and the vetter's side of
+  /// vetting as that identity, for [member]'s community.
+  Future<(VtaClient, _CardCollection, VettingVetter)> _vetter(
+    VtcCommunity member,
+  ) async {
+    final vta = await _grantedVta();
+    final collection = await _collection(vta, member);
+    return (
+      vta,
+      collection,
+      _sdk.vettingVetter(
+        communityDid: member.communityDid,
+        persona: _persona(member),
+        personaKeys: collection.keys,
+        vta: vta,
+      ),
+    );
+  }
+
+  Future<(VtcVetterDesk, VtcVetterSession)> _vetterSessionOf(
+    String communityDid,
+    String requestId,
+  ) async {
+    final desk = await _repository.findVetterDesk(communityDid);
+    final session = desk?.sessionFor(requestId);
+    if (desk == null || session == null || !session.isOpen) {
+      throw StateError('no open vetting session');
+    }
+    return (desk, session);
+  }
+
+  void _forgetCard(String requestId) => _vettingCards.remove(requestId);
+
+  static Future<void> _removeFromInbox(
+    _CardCollection collection,
+    List<String> messageIds,
+  ) async {
+    try {
+      await collection.inbox.remove(messageIds);
+    } on MeetingPlaceVtcSDKException {
+      // Read again next time, and recognised as already handled.
+    }
   }
 
   /// Previews what the VTA would disclose about [persona] for the profile

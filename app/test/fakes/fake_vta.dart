@@ -60,8 +60,13 @@ class FakeVta implements HttpClientAdapter, DidResolver {
   /// Other DID documents to resolve, such as a community's.
   final Map<String, DidDocument> otherDocuments = {};
 
-  /// When set, `vault/sign-trust-task` signs as this persona.
+  /// When set, `vault/sign-trust-task` and `keys/sign-document` sign as
+  /// this persona.
   TrustTaskSigner? persona;
+
+  /// The application records `vta/app-state` keeps, by
+  /// `contextId/namespace/key`.
+  final Map<String, Object?> appState = {};
 
   String get did => _key.did;
 
@@ -168,6 +173,15 @@ class FakeVta implements HttpClientAdapter, DidResolver {
       VtaTask.signTrustTask when persona != null => {
         'signedEnvelope': await _signAsPersona(request),
       },
+      VtaTask.signDocument when persona != null => {
+        'document': await _signDocumentAsPersona(request),
+      },
+      VtaTask.appStatePut => _putAppState(
+        request['payload'] as Map<String, dynamic>,
+      ),
+      VtaTask.appStateList => _listAppState(
+        request['payload'] as Map<String, dynamic>,
+      ),
       _ =>
         answerTo[type]?.call(request['payload'] as Map<String, dynamic>) ??
             answers[type] ??
@@ -180,6 +194,44 @@ class FakeVta implements HttpClientAdapter, DidResolver {
       threadId: request['id'] as String,
       payload: payload,
     ).sign(_key, purpose: ProofPurpose.authentication)).toJson();
+  }
+
+  Future<Map<String, dynamic>> _signDocumentAsPersona(
+    Map<String, dynamic> request,
+  ) {
+    final payload = request['payload'] as Map<String, dynamic>;
+    return EddsaJcs2022.sign(
+      payload['document'] as Map<String, dynamic>,
+      signer: persona!,
+      purpose: ProofPurpose.values.firstWhere(
+        (purpose) => purpose.value == payload['proofPurpose'],
+      ),
+    );
+  }
+
+  Map<String, dynamic> _putAppState(Map<String, dynamic> payload) {
+    final address =
+        '${payload['contextId']}/${payload['namespace']}/${payload['key']}';
+    appState[address] = payload['value'];
+    return {'version': appState.length};
+  }
+
+  Map<String, dynamic> _listAppState(Map<String, dynamic> payload) {
+    final prefix =
+        '${payload['contextId']}/${payload['namespace']}/'
+        '${payload['prefix'] ?? ''}';
+    return {
+      'records': [
+        for (final MapEntry(:key, :value) in appState.entries)
+          if (key.startsWith(prefix))
+            {
+              'key': key.substring(key.indexOf('/', key.indexOf('/') + 1) + 1),
+              'version': 1,
+              'deleted': false,
+              'value': value,
+            },
+      ],
+    };
   }
 
   DidManager? _manager;
