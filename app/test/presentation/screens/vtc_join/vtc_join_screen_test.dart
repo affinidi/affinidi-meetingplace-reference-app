@@ -109,7 +109,8 @@ void main() {
     );
   }
 
-  /// Lets the fake network answer, then the spinner give way.
+  /// Lets the fake network answer, then the spinner give way. Settles for
+  /// a second at most: a step waiting on the vetter spins until they act.
   Future<void> settle(WidgetTester tester) async {
     for (var i = 0; i < 5; i++) {
       await tester.runAsync(
@@ -117,7 +118,9 @@ void main() {
       );
       await tester.pump();
     }
-    await tester.pumpAndSettle();
+    for (var i = 0; i < 10 && tester.binding.hasScheduledFrame; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
   }
 
   /// The parties of the diagram on show, left to right.
@@ -1394,10 +1397,19 @@ void main() {
     testWidgets('asks the vetter whose code the member types', (tester) async {
       await askBob(tester);
 
+      expect(find.text('Step 1 of 4 · Ask the vetter'), findsOneWidget);
+      expect(find.text('Sending your request to Bob'), findsOneWidget);
+      expect(find.text('Waiting for Bob to open a session'), findsOneWidget);
+      expect(network.sentToMembers, hasLength(1));
+
+      // Waiting on Bob spins on, so no settling before the tap.
+      final back = find.byKey(const Key('vtc_join_vetting_back'));
+      await tester.ensureVisible(back);
+      await tester.tap(back);
+      await settle(tester);
       expect(title('Meet a vetter'), findsOneWidget);
       expect(find.text('Bob'), findsOneWidget);
       expect(find.text('Waiting for them to answer'), findsOneWidget);
-      expect(network.sentToMembers, hasLength(1));
       await tester.pumpWidget(const SizedBox.shrink());
     });
 
@@ -1411,10 +1423,11 @@ void main() {
         await network.vetterAccepts(applicant, vetting.requests.single.request);
         session = await network.vetterOpensSession(applicant);
       });
-      // The overview checks every few seconds.
-      await tester.pump(VtcJoinController.pendingCheckInterval);
+      // Waiting on the vetter, the flow checks every second.
+      await tester.pump(VtcJoinController.vettingCheckInterval);
       await settle(tester);
 
+      expect(find.text('Step 2 of 4 · Compare codes'), findsOneWidget);
       expect(title('Do the codes match?'), findsOneWidget);
       expect(
         tester.widget<Text>(find.byKey(const Key('vtc_join_match_code'))).data,
@@ -1425,6 +1438,13 @@ void main() {
       await tapVisible(tester, find.byKey(const Key('vtc_join_match_no')));
       await settle(tester);
 
+      expect(find.text('Step 4 of 4 · Done'), findsOneWidget);
+      expect(find.text('You ended the session with Bob'), findsOneWidget);
+      await tapVisible(
+        tester,
+        find.byKey(const Key('vtc_join_vetting_outcome_back')),
+      );
+      await settle(tester);
       expect(find.text('You ended the session'), findsOneWidget);
       expect(network.sentToMembers, hasLength(1));
       await tester.pumpWidget(const SizedBox.shrink());

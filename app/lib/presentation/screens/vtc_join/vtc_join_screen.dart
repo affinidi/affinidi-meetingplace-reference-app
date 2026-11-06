@@ -21,6 +21,8 @@ import 'vtc_join_controller.dart';
 import 'vtc_join_json_dialog.dart';
 import 'vtc_join_state.dart';
 import 'vtc_join_trail.dart';
+import 'vtc_progress_line.dart';
+import 'vtc_trail_step.dart';
 
 /// Joins a community: scan its code or enter its DID, read what it asks,
 /// apply as an identity from the member's VTA. In the look of linking the
@@ -55,6 +57,13 @@ class VtcJoinScreen extends HookConsumerWidget {
     final l10n = context.l10n;
     final name = state.communityName ?? '';
     void close() => Navigator.of(context).pop();
+
+    if (state.applicantStep case final step?) {
+      return OnboardingLayout(
+        onClose: close,
+        child: _VettingFlow(state: state, step: step, controller: controller),
+      );
+    }
 
     return OnboardingLayout(
       onClose: close,
@@ -100,26 +109,11 @@ class VtcJoinScreen extends HookConsumerWidget {
           },
           onDone: close,
         ),
-        VtcJoinStep.chooseVetter => _ChooseVetter(
-          state: state,
-          onChoose: controller.chooseVetter,
-          onBack: controller.backToVetting,
-        ),
-        VtcJoinStep.enterVettingCode => _VettingCode(
-          state: state,
-          onSubmit: controller.submitVettingCode,
-          onBack: controller.backToVetting,
-        ),
-        VtcJoinStep.confirmMatch => _ConfirmMatch(
-          state: state,
-          onMatch: controller.confirmMatch,
-          onMismatch: controller.declineSession,
-        ),
-        VtcJoinStep.approveVettingCard => _ApproveVettingCard(
-          state: state,
-          onShare: controller.approveVettingCard,
-          onDecline: controller.declineSession,
-        ),
+        // Shown step by step above, as being vetted by one vetter.
+        VtcJoinStep.chooseVetter ||
+        VtcJoinStep.enterVettingCode ||
+        VtcJoinStep.confirmMatch ||
+        VtcJoinStep.approveVettingCard => const SizedBox.shrink(),
         VtcJoinStep.joined => VtcCommunityPage(
           state: state,
           onDone: close,
@@ -1076,6 +1070,190 @@ String _vetterName(VtcJoinState state, String? vetterDid) =>
         ?.displayName ??
     vetterDid ??
     '';
+
+/// Being vetted by one vetter, a step a page under a progress bar: asking
+/// them, comparing the match code, sharing the details they check, and
+/// how it ended. What the phone does in the background, and what it waits
+/// for, shows as lines under the step.
+class _VettingFlow extends StatelessWidget {
+  const _VettingFlow({
+    required this.state,
+    required this.step,
+    required this.controller,
+  });
+
+  final VtcJoinState state;
+  final VtcApplicantStep step;
+  final VtcJoinController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final vetterDid = state.flowVetterDid ?? state.vetterDid;
+    final vetter = _vetterName(state, vetterDid);
+    final work = state.vettingWork;
+    final waiting = state.step == VtcJoinStep.vetting;
+    final back = OnboardingTextButton(
+      key: const Key('vtc_join_vetting_back'),
+      label: l10n.vtcApplicantBackToOverview,
+      onPressed: controller.backToVetting,
+    );
+
+    /// The lines of [steps], each done, under way or still to come: up to
+    /// the work under way, or all but the last, which is the wait, when
+    /// the phone waits on the vetter.
+    Widget lines(List<(VtcVettingWork?, String)> steps) {
+      final current = waiting
+          ? steps.length - 1
+          : steps.indexWhere((step) => step.$1 == work);
+      return Column(
+        key: const Key('vtc_join_vetting_work'),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 8,
+        children: [
+          for (final (index, (_, title)) in steps.indexed)
+            VtcProgressLine(
+              title: title,
+              stage: switch (index.compareTo(current)) {
+                < 0 => VtcTrailStage.done,
+                0 => VtcTrailStage.current,
+                _ => VtcTrailStage.next,
+              },
+            ),
+        ],
+      );
+    }
+
+    final body = switch ((step, state.step)) {
+      (_, VtcJoinStep.chooseVetter) => _ChooseVetter(
+        state: state,
+        onChoose: controller.chooseVetter,
+        onBack: controller.backToVetting,
+      ),
+      (_, VtcJoinStep.enterVettingCode) => _VettingCode(
+        state: state,
+        onSubmit: controller.submitVettingCode,
+        onBack: controller.backToVetting,
+      ),
+      (_, VtcJoinStep.confirmMatch) => _ConfirmMatch(
+        state: state,
+        onMatch: controller.confirmMatch,
+        onMismatch: controller.declineSession,
+      ),
+      (_, VtcJoinStep.approveVettingCard) => _ApproveVettingCard(
+        state: state,
+        onShare: controller.approveVettingCard,
+        onDecline: controller.declineSession,
+      ),
+      (VtcApplicantStep.ticket, _) when work == VtcVettingWork.listingVetters =>
+        lines([
+          (
+            VtcVettingWork.listingVetters,
+            l10n.vtcApplicantListingVetters(state.communityName ?? ''),
+          ),
+        ]),
+      (VtcApplicantStep.ticket, _) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 12,
+        children: [
+          lines([
+            (VtcVettingWork.unlockingIdentity, l10n.vtcApplicantUnlocking),
+            (
+              VtcVettingWork.sendingRequest,
+              l10n.vtcApplicantSendingRequest(vetter),
+            ),
+            (null, l10n.vtcApplicantWaitingSession(vetter)),
+          ]),
+          if (waiting) back,
+        ],
+      ),
+      (VtcApplicantStep.match, _) => lines([
+        (VtcVettingWork.preparingDetails, l10n.vtcApplicantPreparing),
+      ]),
+      (VtcApplicantStep.details, _) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 12,
+        children: [
+          lines([
+            (VtcVettingWork.recordingDisclosure, l10n.vtcApplicantRecording),
+            (
+              VtcVettingWork.sendingDetails,
+              l10n.vtcApplicantSendingDetails(vetter),
+            ),
+            (null, l10n.vtcApplicantWaitingCheck(vetter)),
+          ]),
+          if (waiting) back,
+        ],
+      ),
+      (VtcApplicantStep.done, _) => _VettingOutcome(
+        request: state.vetting?.requestTo(vetterDid ?? ''),
+        vetter: vetter,
+        onBack: controller.backToVetting,
+      ),
+    };
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 12,
+      children: [
+        OnboardingStepProgress(
+          key: const Key('vtc_join_vetting_progress'),
+          step: step.index + 1,
+          total: VtcApplicantStep.values.length,
+          title: l10n.vtcApplicantStep(step.name),
+        ),
+        body,
+      ],
+    );
+  }
+}
+
+/// How being vetted by one vetter ended, and the way back to the overview.
+class _VettingOutcome extends StatelessWidget {
+  const _VettingOutcome({
+    required this.request,
+    required this.vetter,
+    required this.onBack,
+  });
+
+  final VtcVettingRequest? request;
+  final String vetter;
+  final VoidCallback onBack;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final status = request?.status;
+    return Column(
+      key: const Key('vtc_join_vetting_outcome'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 12,
+      children: [
+        Icon(
+          status == VtcVettingStatus.vouched
+              ? Icons.verified
+              : Icons.do_not_disturb_on_outlined,
+          size: 72,
+          color: Colors.white,
+        ),
+        Text(
+          l10n.vtcApplicantOutcome(status?.name ?? '', vetter),
+          textAlign: TextAlign.center,
+          style: context.textTheme.titleMedium?.copyWith(color: Colors.white),
+        ),
+        if (request?.declineMessage case final message?)
+          OnboardingSubtitle(message),
+        if (request?.failure case final failure?)
+          OnboardingSubtitle(l10n.vtcJoinVettingFailure(failure.name)),
+        OnboardingButton(
+          key: const Key('vtc_join_vetting_outcome_back'),
+          label: l10n.vtcApplicantBackToOverview,
+          onPressed: onBack,
+        ),
+      ],
+    );
+  }
+}
 
 /// Being vetted for a community: what it asks of vetting in plain words,
 /// how many vetters vouched so far, where each vetter asked stands, and

@@ -4102,6 +4102,88 @@
 	"@vtcVetterBackToDesk": {
 		"description": "Leaves the last step of vetting an applicant for the vetting desk"
 	},
+	"vtcApplicantStep": "{step, select, ticket{Ask the vetter} match{Compare codes} details{Share your details} other{Done}}",
+	"@vtcApplicantStep": {
+		"description": "Name of a step of being vetted, above the progress bar",
+		"placeholders": {
+			"step": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcApplicantListingVetters": "Getting {name}'s vetters",
+	"@vtcApplicantListingVetters": {
+		"description": "Being vetted, in the background: reading the vetters the community lists",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcApplicantUnlocking": "Getting your identity ready",
+	"@vtcApplicantUnlocking": {
+		"description": "Being vetted, in the background: borrowing the applying identity's keys from the VTA"
+	},
+	"vtcApplicantSendingRequest": "Sending your request to {vetter}",
+	"@vtcApplicantSendingRequest": {
+		"description": "Being vetted, in the background: signing and sending the request to the vetter",
+		"placeholders": {
+			"vetter": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcApplicantWaitingSession": "Waiting for {vetter} to open a session",
+	"@vtcApplicantWaitingSession": {
+		"description": "Being vetted: the request is sent; the vetter's phone answers and opens the session",
+		"placeholders": {
+			"vetter": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcApplicantPreparing": "Getting the details they check from your VTA",
+	"@vtcApplicantPreparing": {
+		"description": "Being vetted, in the background: reading the details the vetting card would carry from the VTA"
+	},
+	"vtcApplicantRecording": "Recording what you share on your VTA",
+	"@vtcApplicantRecording": {
+		"description": "Being vetted, in the background: the VTA records the disclosure to the vetter"
+	},
+	"vtcApplicantSendingDetails": "Sending your details to {vetter}",
+	"@vtcApplicantSendingDetails": {
+		"description": "Being vetted, in the background: sending the vetter the card with the member's details",
+		"placeholders": {
+			"vetter": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcApplicantWaitingCheck": "Waiting for {vetter} to check your details",
+	"@vtcApplicantWaitingCheck": {
+		"description": "Being vetted: the details are sent; the vetter checks them in person and vouches or declines",
+		"placeholders": {
+			"vetter": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcApplicantOutcome": "{status, select, vouched{{vetter} vouched for you} declined{{vetter} declined to vouch for you} refused{{vetter} couldn't take your request} other{You ended the session with {vetter}}}",
+	"@vtcApplicantOutcome": {
+		"description": "How being vetted by one vetter ended, on the last step",
+		"placeholders": {
+			"status": {
+				"type": "String"
+			},
+			"vetter": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcApplicantBackToOverview": "Back to the overview",
+	"@vtcApplicantBackToOverview": {
+		"description": "Leaves being vetted by one vetter for the overview of what the community asks and the statements gathered"
+	},
 	"vtcVetterCardTitle": "Vetter card",
 	"@vtcVetterCardTitle": {
 		"description": "Title of the role card in which the community makes the member a vetter, shown on the vetting desk"

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:clock/clock.dart';
 import 'package:meeting_place_core/meeting_place_core.dart'
     show MeetingPlaceCoreSDKException;
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
@@ -104,7 +105,7 @@ class VtcJoinController extends _$VtcJoinController {
       if (waiting) {
         if (_pendingCheck == null) {
           // The first check waits its whole interval, as before.
-          _checkedAt = DateTime.now();
+          _checkedAt = clock.now();
           _pendingCheck = Timer.periodic(
             vettingCheckInterval,
             (_) => unawaited(_checkWhenDue()),
@@ -130,7 +131,7 @@ class VtcJoinController extends _$VtcJoinController {
   /// asked follows the step as it is now, not as it was when the timer
   /// was set.
   Future<void> _checkWhenDue() async {
-    final now = DateTime.now();
+    final now = clock.now();
     final interval = state.waitingOnVetter
         ? vettingCheckInterval
         : pendingCheckInterval;

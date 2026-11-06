@@ -4048,6 +4048,66 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vtcVetterBackToDesk => 'Back to the desk';
 
   @override
+  String vtcApplicantStep(String step) {
+    String _temp0 = intl.Intl.selectLogic(step, {
+      'ticket': 'Ask the vetter',
+      'match': 'Compare codes',
+      'details': 'Share your details',
+      'other': 'Done',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String vtcApplicantListingVetters(String name) {
+    return 'Getting $name\'s vetters';
+  }
+
+  @override
+  String get vtcApplicantUnlocking => 'Getting your identity ready';
+
+  @override
+  String vtcApplicantSendingRequest(String vetter) {
+    return 'Sending your request to $vetter';
+  }
+
+  @override
+  String vtcApplicantWaitingSession(String vetter) {
+    return 'Waiting for $vetter to open a session';
+  }
+
+  @override
+  String get vtcApplicantPreparing =>
+      'Getting the details they check from your VTA';
+
+  @override
+  String get vtcApplicantRecording => 'Recording what you share on your VTA';
+
+  @override
+  String vtcApplicantSendingDetails(String vetter) {
+    return 'Sending your details to $vetter';
+  }
+
+  @override
+  String vtcApplicantWaitingCheck(String vetter) {
+    return 'Waiting for $vetter to check your details';
+  }
+
+  @override
+  String vtcApplicantOutcome(String status, String vetter) {
+    String _temp0 = intl.Intl.selectLogic(status, {
+      'vouched': '$vetter vouched for you',
+      'declined': '$vetter declined to vouch for you',
+      'refused': '$vetter couldn\'t take your request',
+      'other': 'You ended the session with $vetter',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get vtcApplicantBackToOverview => 'Back to the overview';
+
+  @override
   String get vtcVetterCardTitle => 'Vetter card';
 
   @override

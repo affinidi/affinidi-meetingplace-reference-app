@@ -6020,6 +6020,72 @@ abstract class AppLocalizations {
   /// **'Back to the desk'**
   String get vtcVetterBackToDesk;
 
+  /// Name of a step of being vetted, above the progress bar
+  ///
+  /// In en, this message translates to:
+  /// **'{step, select, ticket{Ask the vetter} match{Compare codes} details{Share your details} other{Done}}'**
+  String vtcApplicantStep(String step);
+
+  /// Being vetted, in the background: reading the vetters the community lists
+  ///
+  /// In en, this message translates to:
+  /// **'Getting {name}\'s vetters'**
+  String vtcApplicantListingVetters(String name);
+
+  /// Being vetted, in the background: borrowing the applying identity's keys from the VTA
+  ///
+  /// In en, this message translates to:
+  /// **'Getting your identity ready'**
+  String get vtcApplicantUnlocking;
+
+  /// Being vetted, in the background: signing and sending the request to the vetter
+  ///
+  /// In en, this message translates to:
+  /// **'Sending your request to {vetter}'**
+  String vtcApplicantSendingRequest(String vetter);
+
+  /// Being vetted: the request is sent; the vetter's phone answers and opens the session
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for {vetter} to open a session'**
+  String vtcApplicantWaitingSession(String vetter);
+
+  /// Being vetted, in the background: reading the details the vetting card would carry from the VTA
+  ///
+  /// In en, this message translates to:
+  /// **'Getting the details they check from your VTA'**
+  String get vtcApplicantPreparing;
+
+  /// Being vetted, in the background: the VTA records the disclosure to the vetter
+  ///
+  /// In en, this message translates to:
+  /// **'Recording what you share on your VTA'**
+  String get vtcApplicantRecording;
+
+  /// Being vetted, in the background: sending the vetter the card with the member's details
+  ///
+  /// In en, this message translates to:
+  /// **'Sending your details to {vetter}'**
+  String vtcApplicantSendingDetails(String vetter);
+
+  /// Being vetted: the details are sent; the vetter checks them in person and vouches or declines
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for {vetter} to check your details'**
+  String vtcApplicantWaitingCheck(String vetter);
+
+  /// How being vetted by one vetter ended, on the last step
+  ///
+  /// In en, this message translates to:
+  /// **'{status, select, vouched{{vetter} vouched for you} declined{{vetter} declined to vouch for you} refused{{vetter} couldn\'t take your request} other{You ended the session with {vetter}}}'**
+  String vtcApplicantOutcome(String status, String vetter);
+
+  /// Leaves being vetted by one vetter for the overview of what the community asks and the statements gathered
+  ///
+  /// In en, this message translates to:
+  /// **'Back to the overview'**
+  String get vtcApplicantBackToOverview;
+
   /// Title of the role card in which the community makes the member a vetter, shown on the vetting desk
   ///
   /// In en, this message translates to:
