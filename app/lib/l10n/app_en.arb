@@ -3840,6 +3840,15 @@
 			}
 		}
 	},
+	"vtcJoinVetterListedAs": "Listed as {name}",
+	"@vtcJoinVetterListedAs": {
+		"description": "The name a vetter chose for the community's list; not checked",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
 	"vtcJoinVettingCodeTitle": "Enter {vetter}'s code",
 	"@vtcJoinVettingCodeTitle": {
 		"description": "Title of typing a vetter's code",

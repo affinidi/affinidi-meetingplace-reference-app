@@ -5762,6 +5762,12 @@ abstract class AppLocalizations {
   /// **'{name} lists no vetters. Scan your vetter\'s ticket instead.'**
   String vtcJoinNoVetters(String name);
 
+  /// The name a vetter chose for the community's list; not checked
+  ///
+  /// In en, this message translates to:
+  /// **'Listed as {name}'**
+  String vtcJoinVetterListedAs(String name);
+
   /// Title of typing a vetter's code
   ///
   /// In en, this message translates to:

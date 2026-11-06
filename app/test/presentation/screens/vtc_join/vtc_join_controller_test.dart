@@ -1365,6 +1365,38 @@ void main() {
       expect(network.sentToMembers, hasLength(1));
     });
 
+    test('names a vetter whose ticket was scanned by their listing', () async {
+      await openVetting();
+      expect(state().vetters, isEmpty);
+
+      await controller().scanVettingTicket(
+        VettingTicket.spoken(
+          community: fakeVtcDid,
+          vetter: network.vetterDid,
+          code: 'K7QF-2M9X',
+        )!.toString(),
+      );
+
+      expect(state().step, VtcJoinStep.vetting);
+      expect(request().vetterName, 'Bob');
+    });
+
+    test('asks a scanned vetter the listing does not name', () async {
+      network.listedVetters = [];
+      await openVetting();
+
+      await controller().scanVettingTicket(
+        VettingTicket.spoken(
+          community: fakeVtcDid,
+          vetter: network.vetterDid,
+          code: 'K7QF-2M9X',
+        )!.toString(),
+      );
+
+      expect(request().status, VtcVettingStatus.requested);
+      expect(request().vetterName, isNull);
+    });
+
     test('keeps a code that cannot be one, sending nothing', () async {
       await openVetting();
       await controller().enterVettingCode();

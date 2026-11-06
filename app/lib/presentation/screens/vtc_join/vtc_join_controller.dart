@@ -644,10 +644,6 @@ class VtcJoinController extends _$VtcJoinController {
     final manifest = _manifest;
     final criterion = manifest == null ? null : _chosenCriterion(manifest);
     if (manifest == null || criterion == null) return;
-    final name = state.vetters
-        .where((vetter) => vetter.did == ticket.vetter)
-        .firstOrNull
-        ?.displayName;
     state = state.copyWith(step: VtcJoinStep.working, vettingFailure: null);
     await _run(() async {
       _showVetting(
@@ -655,10 +651,33 @@ class VtcJoinController extends _$VtcJoinController {
           manifest,
           criterion: criterion,
           ticket: ticket,
-          vetterName: name,
+          vetterName: await _listedName(manifest, ticket.vetter),
         ),
       );
     });
+  }
+
+  /// The name the community lists [vetterDid] under, if any: from the
+  /// vetters already read, else read now, since a scanned ticket names only
+  /// the vetter's DID. Not finding one leaves the DID to show.
+  Future<String?> _listedName(JoinManifest manifest, String vetterDid) async {
+    String? named(List<ListedVetter> vetters) => vetters
+        .where((vetter) => vetter.did == vetterDid)
+        .firstOrNull
+        ?.displayName;
+    if (named(state.vetters) case final name?) return name;
+    try {
+      return named(await _service.vetters(manifest));
+    } on Exception catch (error, stackTrace) {
+      ref
+          .read(appLoggerProvider)
+          .error(
+            'Reading the listed vetters failed: ${error.runtimeType}',
+            stackTrace: stackTrace,
+            name: 'VtcJoinController',
+          );
+      return null;
+    }
   }
 
   /// Goes back to the vetting overview, e.g. from picking a vetter.

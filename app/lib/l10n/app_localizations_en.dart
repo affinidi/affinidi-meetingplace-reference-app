@@ -3862,6 +3862,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String vtcJoinVetterListedAs(String name) {
+    return 'Listed as $name';
+  }
+
+  @override
   String vtcJoinVettingCodeTitle(String vetter) {
     return 'Enter $vetter\'s code';
   }
