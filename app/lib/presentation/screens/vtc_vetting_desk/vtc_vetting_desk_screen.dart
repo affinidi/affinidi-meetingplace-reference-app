@@ -439,25 +439,7 @@ class _TicketView extends StatelessWidget {
               ],
             ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            spacing: 8,
-            children: [
-              const SizedBox.square(
-                dimension: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white70,
-                ),
-              ),
-              Flexible(
-                child: Text(
-                  l10n.vtcVetterWaiting,
-                  style: onboardingNote(context),
-                ),
-              ),
-            ],
-          ),
+          VtcWaitingForParty(l10n.vtcVetterWaiting),
           OnboardingButton(
             key: const Key('vtc_vetter_new_ticket'),
             label: l10n.vtcVetterNewTicket,
@@ -605,25 +587,9 @@ class _SessionView extends HookWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: 12,
         children: [
-          Row(
+          VtcWaitingForParty(
+            l10n.vtcVetterCardWaiting,
             key: const Key('vtc_vetter_card_waiting'),
-            mainAxisAlignment: MainAxisAlignment.center,
-            spacing: 8,
-            children: [
-              const SizedBox.square(
-                dimension: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white70,
-                ),
-              ),
-              Flexible(
-                child: Text(
-                  l10n.vtcVetterCardWaiting,
-                  style: onboardingNote(context),
-                ),
-              ),
-            ],
           ),
           decline,
         ],

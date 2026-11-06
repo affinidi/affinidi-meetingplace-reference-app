@@ -21,6 +21,7 @@ import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_phrase_view.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_trail.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_progress_line.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/onboarding_style/onboarding_style.dart';
 
@@ -1399,7 +1400,13 @@ void main() {
 
       expect(find.text('Step 1 of 4 · Ask the vetter'), findsOneWidget);
       expect(find.text('Sending your request to Bob'), findsOneWidget);
-      expect(find.text('Waiting for Bob to open a session'), findsOneWidget);
+      expect(
+        find.widgetWithText(
+          VtcWaitingForParty,
+          'Waiting for Bob to open a session',
+        ),
+        findsOneWidget,
+      );
       expect(network.sentToMembers, hasLength(1));
 
       // Waiting on Bob spins on, so no settling before the tap.

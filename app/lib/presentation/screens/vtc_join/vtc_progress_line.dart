@@ -54,3 +54,38 @@ class VtcProgressLine extends StatelessWidget {
     );
   }
 }
+
+/// Waiting for the other party to act, such as the vetter or the
+/// applicant: a large spinner and what is waited for, centred and set
+/// apart from the steps around it.
+class VtcWaitingForParty extends StatelessWidget {
+  const VtcWaitingForParty(this.text, {super.key});
+
+  final String text;
+
+  static const _spinnerSize = 48.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 32),
+      child: Column(
+        spacing: 20,
+        children: [
+          const SizedBox.square(
+            dimension: _spinnerSize,
+            child: CircularProgressIndicator(
+              strokeWidth: 3,
+              color: Colors.white,
+            ),
+          ),
+          Text(
+            text,
+            textAlign: TextAlign.center,
+            style: context.textTheme.titleLarge?.copyWith(color: Colors.white),
+          ),
+        ],
+      ),
+    );
+  }
+}

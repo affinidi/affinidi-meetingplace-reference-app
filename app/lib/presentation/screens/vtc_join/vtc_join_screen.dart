@@ -1099,9 +1099,9 @@ class _VettingFlow extends StatelessWidget {
       onPressed: controller.backToVetting,
     );
 
-    /// The lines of [steps], each done, under way or still to come: up to
-    /// the work under way, or all but the last, which is the wait, when
-    /// the phone waits on the vetter.
+    /// The lines of [steps], each done, under way or still to come, up to
+    /// the work under way. Once the phone waits on the vetter, the last
+    /// step, which is the wait, stands out below the steps done.
     Widget lines(List<(VtcVettingWork?, String)> steps) {
       final current = waiting
           ? steps.length - 1
@@ -1109,17 +1109,20 @@ class _VettingFlow extends StatelessWidget {
       return Column(
         key: const Key('vtc_join_vetting_work'),
         crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 8,
+        spacing: 12,
         children: [
           for (final (index, (_, title)) in steps.indexed)
-            VtcProgressLine(
-              title: title,
-              stage: switch (index.compareTo(current)) {
-                < 0 => VtcTrailStage.done,
-                0 => VtcTrailStage.current,
-                _ => VtcTrailStage.next,
-              },
-            ),
+            if (waiting && index == current)
+              Center(child: VtcWaitingForParty(title))
+            else
+              VtcProgressLine(
+                title: title,
+                stage: switch (index.compareTo(current)) {
+                  < 0 => VtcTrailStage.done,
+                  0 => VtcTrailStage.current,
+                  _ => VtcTrailStage.next,
+                },
+              ),
         ],
       );
     }
