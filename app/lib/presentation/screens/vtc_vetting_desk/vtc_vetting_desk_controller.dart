@@ -47,6 +47,8 @@ class VtcVettingDeskController extends _$VtcVettingDeskController {
   Future<void> _load() async {
     try {
       final desk = await _service.vetterDesk(communityDid);
+      // The desk may have closed while it was read.
+      if (!ref.mounted) return;
       state = state.copyWith(
         step: VtcVettingDeskStep.open,
         desk: desk,
@@ -55,6 +57,7 @@ class VtcVettingDeskController extends _$VtcVettingDeskController {
       // Read alongside the card check; the desk shows them once read.
       unawaited(_readRequirements());
       final vetterCard = await _service.vetterCard(communityDid);
+      if (!ref.mounted) return;
       state = state.copyWith(
         checkingCard: false,
         vetterCard: vetterCard,
@@ -71,13 +74,12 @@ class VtcVettingDeskController extends _$VtcVettingDeskController {
 
   Future<void> _readRequirements() async {
     try {
-      state = state.copyWith(
-        requirements: await _service.vettingRequirements(communityDid),
-      );
+      final requirements = await _service.vettingRequirements(communityDid);
+      if (ref.mounted) state = state.copyWith(requirements: requirements);
     } on Exception catch (error, stackTrace) {
       _fail(error, stackTrace);
     } finally {
-      state = state.copyWith(readingRequirements: false);
+      if (ref.mounted) state = state.copyWith(readingRequirements: false);
     }
   }
 
@@ -101,14 +103,14 @@ class VtcVettingDeskController extends _$VtcVettingDeskController {
     try {
       await _service.createVettingTicket(
         communityDid,
-        onStep: (step) => state = state.copyWith(ticketStep: step),
+        onStep: (step) {
+          if (ref.mounted) state = state.copyWith(ticketStep: step);
+        },
       );
-      state = state.copyWith(
-        desk: await _service.vetterDesk(communityDid),
-        ended: null,
-      );
+      final desk = await _service.vetterDesk(communityDid);
+      if (ref.mounted) state = state.copyWith(desk: desk, ended: null);
     } finally {
-      state = state.copyWith(ticketStep: null);
+      if (ref.mounted) state = state.copyWith(ticketStep: null);
     }
   });
 
@@ -207,11 +209,13 @@ class VtcVettingDeskController extends _$VtcVettingDeskController {
     } on Exception catch (error, stackTrace) {
       _fail(error, stackTrace);
     } finally {
-      state = state.copyWith(busy: false);
+      if (ref.mounted) state = state.copyWith(busy: false);
     }
   }
 
   void _fail(Exception error, StackTrace stackTrace) {
+    // The desk may have closed while the step ran.
+    if (!ref.mounted) return;
     ref
         .read(appLoggerProvider)
         .error(
