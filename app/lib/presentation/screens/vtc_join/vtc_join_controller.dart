@@ -702,7 +702,8 @@ class VtcJoinController extends _$VtcJoinController {
 
   /// The name the community lists [vetterDid] under, if any: from the
   /// vetters already read, else read now, since a scanned ticket names only
-  /// the vetter's DID. Not finding one leaves the DID to show.
+  /// the vetter's DID. The vetters read now are kept, for the rest of what
+  /// the vetter published. Not finding one leaves the vetter unnamed.
   Future<String?> _listedName(JoinManifest manifest, String vetterDid) async {
     String? named(List<ListedVetter> vetters) => vetters
         .where((vetter) => vetter.did == vetterDid)
@@ -710,7 +711,9 @@ class VtcJoinController extends _$VtcJoinController {
         ?.displayName;
     if (named(state.vetters) case final name?) return name;
     try {
-      return named(await _service.vetters(manifest));
+      final vetters = await _service.vetters(manifest);
+      state = state.copyWith(vetters: vetters);
+      return named(vetters);
     } on Exception catch (error, stackTrace) {
       ref
           .read(appLoggerProvider)

@@ -1403,6 +1403,8 @@ void main() {
 
       expect(state().step, VtcJoinStep.vetting);
       expect(request().vetterName, 'Bob');
+      // Kept for the rest of what Bob published.
+      expect(state().vetters.map((vetter) => vetter.did), [network.vetterDid]);
     });
 
     test('asks a scanned vetter the listing does not name', () async {
