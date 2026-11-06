@@ -6001,6 +6001,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Check each detail against an ID document, with the applicant in front of you.'**
   String get vtcVetterRequirementsInPerson;
+
+  /// Stops gathering vetters' statements, back to the community's page
+  ///
+  /// In en, this message translates to:
+  /// **'Stop vetting'**
+  String get vtcJoinVettingStopAction;
+
+  /// Title of confirming to stop vetting
+  ///
+  /// In en, this message translates to:
+  /// **'Stop vetting for {name}?'**
+  String vtcJoinVettingStopTitle(String name);
+
+  /// What stopping vetting does
+  ///
+  /// In en, this message translates to:
+  /// **'The vetters\' statements and open requests on this phone are forgotten. You can start again from the community\'s page.'**
+  String get vtcJoinVettingStopMessage;
 }
 
 class _AppLocalizationsDelegate

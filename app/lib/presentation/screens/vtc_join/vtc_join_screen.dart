@@ -88,6 +88,16 @@ class VtcJoinScreen extends HookConsumerWidget {
           onScan: controller.scanVettingTicket,
           onEnterCode: controller.enterVettingCode,
           onSend: controller.sendVettedApplication,
+          onStop: () async {
+            if (await _confirm(
+              context,
+              title: l10n.vtcJoinVettingStopTitle(name),
+              message: l10n.vtcJoinVettingStopMessage,
+              action: l10n.vtcJoinVettingStopAction,
+            )) {
+              await controller.stopVetting();
+            }
+          },
           onDone: close,
         ),
         VtcJoinStep.chooseVetter => _ChooseVetter(
@@ -1064,6 +1074,7 @@ class _Vetting extends HookConsumerWidget {
     required this.onScan,
     required this.onEnterCode,
     required this.onSend,
+    required this.onStop,
     required this.onDone,
   });
 
@@ -1071,6 +1082,9 @@ class _Vetting extends HookConsumerWidget {
   final ValueChanged<String> onScan;
   final VoidCallback onEnterCode;
   final VoidCallback onSend;
+
+  /// Stops vetting, to choose another way in or start over.
+  final VoidCallback onStop;
   final VoidCallback onDone;
 
   @override
@@ -1171,6 +1185,11 @@ class _Vetting extends HookConsumerWidget {
           label: l10n.vtcJoinVettingCodeAction,
           isOutlined: true,
           onPressed: onEnterCode,
+        ),
+        OnboardingTextButton(
+          key: const Key('vtc_join_vetting_stop'),
+          label: l10n.vtcJoinVettingStopAction,
+          onPressed: onStop,
         ),
         OnboardingTextButton(label: l10n.generalDone, onPressed: onDone),
       ],

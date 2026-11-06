@@ -662,6 +662,28 @@ class VtcJoinController extends _$VtcJoinController {
   }
 
   /// Goes back to the vetting overview, e.g. from picking a vetter.
+  /// Stops gathering vetters' statements and goes back to what the
+  /// community asks, to choose a way in again. The screen asks the member to
+  /// confirm first: what was gathered is forgotten.
+  Future<void> stopVetting() async {
+    final manifest = _manifest;
+    if (state.step != VtcJoinStep.vetting || manifest == null) return;
+    state = state.copyWith(step: VtcJoinStep.working);
+    await _run(() async {
+      await _service.stopVetting(manifest.communityDid);
+      _vettingPreview = null;
+      state = state.copyWith(
+        step: VtcJoinStep.review,
+        vetting: null,
+        vettingRequirements: null,
+        vettingProgress: null,
+        vetterDid: null,
+        vettingFailure: null,
+      );
+    });
+  }
+
+  /// Goes back to the vetting overview, e.g. from typing a vetter's code.
   void backToVetting() {
     final vetting = state.vetting;
     if (vetting == null) return;

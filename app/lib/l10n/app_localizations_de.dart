@@ -4070,4 +4070,16 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get vtcVetterRequirementsInPerson =>
       'Check each detail against an ID document, with the applicant in front of you.';
+
+  @override
+  String get vtcJoinVettingStopAction => 'Stop vetting';
+
+  @override
+  String vtcJoinVettingStopTitle(String name) {
+    return 'Stop vetting for $name?';
+  }
+
+  @override
+  String get vtcJoinVettingStopMessage =>
+      'The vetters\' statements and open requests on this phone are forgotten. You can start again from the community\'s page.';
 }

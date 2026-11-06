@@ -4073,5 +4073,22 @@
 	"vtcVetterRequirementsInPerson": "Check each detail against an ID document, with the applicant in front of you.",
 	"@vtcVetterRequirementsInPerson": {
 		"description": "How a vetter checks the details"
+	},
+	"vtcJoinVettingStopAction": "Stop vetting",
+	"@vtcJoinVettingStopAction": {
+		"description": "Stops gathering vetters' statements, back to the community's page"
+	},
+	"vtcJoinVettingStopTitle": "Stop vetting for {name}?",
+	"@vtcJoinVettingStopTitle": {
+		"description": "Title of confirming to stop vetting",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinVettingStopMessage": "The vetters' statements and open requests on this phone are forgotten. You can start again from the community's page.",
+	"@vtcJoinVettingStopMessage": {
+		"description": "What stopping vetting does"
 	}
 }

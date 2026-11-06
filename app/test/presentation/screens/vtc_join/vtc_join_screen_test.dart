@@ -1351,6 +1351,23 @@ void main() {
       await settle(tester);
     }
 
+    testWidgets('stops vetting, once confirmed, back to the community', (
+      tester,
+    ) async {
+      await openVetting(tester);
+
+      await tapVisible(tester, find.byKey(const Key('vtc_join_vetting_stop')));
+      await settle(tester);
+      await tapVisible(
+        tester,
+        find.widgetWithText(ElevatedButton, 'Stop vetting'),
+      );
+      await settle(tester);
+
+      expect(find.byKey(const Key('vtc_join_vetting_stop')), findsNothing);
+      expect(find.widgetWithText(ElevatedButton, 'Join'), findsOneWidget);
+    });
+
     testWidgets('says what the community asks of vetting', (tester) async {
       await openVetting(tester);
 

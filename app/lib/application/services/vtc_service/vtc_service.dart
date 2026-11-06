@@ -811,6 +811,13 @@ class VtcService {
     return updated;
   }
 
+  /// Forgets the member's vetting for [communityDid] on this phone: the
+  /// statements gathered and every request, so applying starts over. The
+  /// vetters learn nothing; a vetter still waiting ends the session on
+  /// their side.
+  Future<void> stopVetting(String communityDid) =>
+      _repository.removeVetting(communityDid);
+
   Future<(VtcCommunity, VtcVetting, VtcVettingRequest)> _vettingOf(
     String communityDid,
     String vetterDid,

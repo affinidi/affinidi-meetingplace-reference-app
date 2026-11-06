@@ -1327,6 +1327,21 @@ void main() {
       expect(state().vettingProgress?.satisfied, isFalse);
     });
 
+    test('stops vetting and goes back to what the community asks', () async {
+      await askVetter();
+
+      await controller().stopVetting();
+
+      expect(state().step, VtcJoinStep.review);
+      expect(state().vetting, isNull);
+      expect(await service.vetting(fakeVtcDid), isNull);
+
+      // Opened again, the community's page shows, not the old vetting.
+      container.invalidate(vtcJoinControllerProvider);
+      await controller().onScanned(fakeVtcDid);
+      expect(state().step, VtcJoinStep.review);
+    });
+
     test('asks the only vetter listed with their code', () async {
       await openVetting();
 
