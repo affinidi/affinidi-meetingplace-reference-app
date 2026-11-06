@@ -55,7 +55,12 @@ class VtaConnectionKeys implements ExternalConnectionKeys {
   /// reached or refuses.
   @override
   Future<ExternalDidKeys?> createKeys(String did) async {
-    final ({VtaConnectionKey signing, VtaConnectionKey agreement}) keys;
+    final ({
+      VtaConnectionKey signing,
+      VtaConnectionKey agreement,
+      VtaConnectionKey controlPlaneAgreement,
+    })
+    keys;
     try {
       keys = await _call(_service.createConnectionKeys);
     } on VtaSigningUnavailableException catch (error) {
@@ -69,11 +74,13 @@ class VtaConnectionKeys implements ExternalConnectionKeys {
       value: jsonEncode({
         'signing': _toJson(keys.signing),
         'agreement': _toJson(keys.agreement),
+        'controlPlaneAgreement': _toJson(keys.controlPlaneAgreement),
       }),
     );
     return ExternalDidKeys(
       signing: _toExternal(keys.signing),
       agreement: _toExternal(keys.agreement),
+      controlPlaneAgreement: _toExternal(keys.controlPlaneAgreement),
     );
   }
 
@@ -82,9 +89,14 @@ class VtaConnectionKeys implements ExternalConnectionKeys {
     final stored = await _storage.read(key: '$_keyPrefix$did');
     if (stored == null) return null;
     final json = jsonDecode(stored) as Map<String, dynamic>;
+    final controlPlane = json['controlPlaneAgreement'];
     return ExternalDidKeys(
       signing: _fromJson(json['signing'] as Map<String, dynamic>),
       agreement: _fromJson(json['agreement'] as Map<String, dynamic>),
+      // A DID made before has none.
+      controlPlaneAgreement: controlPlane is Map<String, dynamic>
+          ? _fromJson(controlPlane)
+          : null,
     );
   }
 

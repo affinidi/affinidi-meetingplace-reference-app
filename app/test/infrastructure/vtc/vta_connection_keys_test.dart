@@ -24,6 +24,13 @@ void main() {
   );
   final secret = Uint8List.fromList(List.generate(32, (i) => i + 1));
   final agreementKey = multibaseOf(secret);
+  final controlPlaneKey = toMultiBase(
+    Uint8List.fromList([
+      0x80,
+      0x24,
+      ...P256KeyPair.generate().$1.publicKey.bytes,
+    ]),
+  );
 
   late FakeVta vta;
   late VtcService service;
@@ -40,12 +47,17 @@ void main() {
         {'id': connectionKeysContextId},
       ],
     };
-    // The signing key first, then the agreement key.
+    // The signing key first, then the agreement key, then the P-256 one
+    // for the control plane.
     vta.answerTo[VtaTask.keysCreate] = (payload) => {
       'key': {
         'keyId': 'key-${++created}',
         'keyType': payload['keyType'],
-        'publicKey': created == 1 ? signingKey : agreementKey,
+        'publicKey': switch (created) {
+          1 => signingKey,
+          2 => agreementKey,
+          _ => controlPlaneKey,
+        },
       },
     };
     vta.answerTo[VtaTask.exportSecret] = (payload) => {
@@ -66,17 +78,38 @@ void main() {
       expect(created.signing.publicKey, hasLength(32));
       expect(created.agreement.keyId, 'key-2');
       expect(created.agreement.publicKey, hasLength(32));
+      expect(created.controlPlaneAgreement!.keyId, 'key-3');
+      expect(created.controlPlaneAgreement!.publicKey, hasLength(33));
 
       final found = await keys.findKeys(_connectionDid);
       expect(found!.signing.keyId, 'key-1');
       expect(found.agreement.keyId, 'key-2');
       expect(found.agreement.publicKey, created.agreement.publicKey);
+      expect(found.controlPlaneAgreement!.keyId, 'key-3');
+      expect(
+        found.controlPlaneAgreement!.publicKey,
+        created.controlPlaneAgreement!.publicKey,
+      );
 
       final stored = (await const FlutterSecureStorage().readAll()).values
           .join();
       expect(stored, contains('key-2'));
       expect(stored, isNot(contains('privateKey')));
       expect(loans(), 0);
+    });
+
+    test('finds no control plane key for a DID made before', () async {
+      await const FlutterSecureStorage().write(
+        key: 'vta_connection_keys_$_connectionDid',
+        value:
+            '{"signing":{"keyId":"key-1","publicKey":"AA=="},'
+            '"agreement":{"keyId":"key-2","publicKey":"AA=="}}',
+      );
+
+      final found = await keys.findKeys(_connectionDid);
+
+      expect(found!.agreement.keyId, 'key-2');
+      expect(found.controlPlaneAgreement, isNull);
     });
 
     test('borrows the DIDComm key once while linked', () async {

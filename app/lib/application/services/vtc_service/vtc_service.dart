@@ -294,13 +294,21 @@ class VtcService {
   );
 
   /// Creates the keys of one connection DID on the member's VTA: one that
-  /// signs its credentials, whose private key never leaves the VTA, and
-  /// one for DIDComm, which the VTA lends through [lendConnectionKey].
+  /// signs its credentials, whose private key never leaves the VTA, one for
+  /// DIDComm, and a P-256 one for DIDComm with the hosted control plane,
+  /// which cannot decrypt X25519. The VTA lends the last two through
+  /// [lendConnectionKey].
   ///
   /// Throws [VtaNotLinkedException] when no VTA is linked, and
   /// [MeetingPlaceVtcSDKException] when the VTA refuses or cannot be
   /// reached.
-  Future<({VtaConnectionKey signing, VtaConnectionKey agreement})>
+  Future<
+    ({
+      VtaConnectionKey signing,
+      VtaConnectionKey agreement,
+      VtaConnectionKey controlPlaneAgreement,
+    })
+  >
   createConnectionKeys() async => (await _grantedVta()).createConnectionKeys();
 
   /// Borrows the connection DIDComm key [keyId] from the member's VTA,
