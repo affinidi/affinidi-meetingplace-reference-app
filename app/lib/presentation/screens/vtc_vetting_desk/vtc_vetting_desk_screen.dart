@@ -198,6 +198,7 @@ class VtcVettingFlowScreen extends HookConsumerWidget {
           state.ended?.status == VtcVetterSessionStatus.issued,
       child: OnboardingLayout(
         onClose: close,
+        showFooter: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           spacing: 12,

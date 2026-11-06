@@ -182,6 +182,10 @@ void main() {
       expect(find.byKey(const Key('vtc_join_did')), findsNothing);
       expect(title('Football club'), findsOneWidget);
       expect(find.text('wants you to join'), findsOneWidget);
+      expect(
+        find.image(const AssetImage('assets/images/powered_by_mpx.png')),
+        findsOneWidget,
+      );
     });
 
     testWidgets('reviews, joins and leaves a community', (tester) async {
@@ -1389,6 +1393,11 @@ void main() {
       await openVetting(tester);
 
       expect(find.text('Step 1 of 5 · Meet a vetter'), findsOneWidget);
+      // The flow's steps stand in for the footer.
+      expect(
+        find.image(const AssetImage('assets/images/powered_by_mpx.png')),
+        findsNothing,
+      );
       expect(find.text('0 of 2 vetters vouched for you'), findsOneWidget);
       expect(find.text('A vouch counts for 30 days'), findsOneWidget);
       expect(find.byKey(const Key('vtc_join_vetting_send')), findsNothing);
@@ -1399,6 +1408,10 @@ void main() {
       await askBob(tester);
 
       expect(find.text('Step 2 of 5 · Ask the vetter'), findsOneWidget);
+      expect(
+        find.image(const AssetImage('assets/images/powered_by_mpx.png')),
+        findsNothing,
+      );
       // What the phone does sits apart from what the vetter is to do.
       expect(
         find.descendant(

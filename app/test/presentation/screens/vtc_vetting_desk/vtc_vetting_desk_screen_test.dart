@@ -182,6 +182,11 @@ void main() {
     expect(find.text('Step 1 of 4 · Show your ticket'), findsOneWidget);
     expect(find.byKey(const Key('vtc_vetter_ticket_qr')), findsOneWidget);
     expect(find.text(recorded.tickets.single.code), findsOneWidget);
+    // The flow's steps stand in for the footer.
+    expect(
+      find.image(const AssetImage('assets/images/powered_by_mpx.png')),
+      findsNothing,
+    );
     await close(tester);
   });
 

@@ -69,6 +69,7 @@ class VtcJoinScreen extends HookConsumerWidget {
             request?.status == VtcVettingStatus.vouched,
         child: OnboardingLayout(
           onClose: close,
+          showFooter: false,
           child: _VettingFlow(state: state, step: step, controller: controller),
         ),
       );
@@ -76,6 +77,8 @@ class VtcJoinScreen extends HookConsumerWidget {
 
     return OnboardingLayout(
       onClose: close,
+      // Meeting a vetter is the first step of the vetting flow.
+      showFooter: state.step != VtcJoinStep.vetting,
       child: switch (state.step) {
         VtcJoinStep.scanning => _EnterCode(onSubmit: controller.onScanned),
         VtcJoinStep.working => const Center(child: OnboardingSpinner()),

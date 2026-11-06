@@ -26,12 +26,19 @@ BoxDecoration onboardingGradient(
 
 /// The blue gradient, logo header and footer of onboarding, around a
 /// scrolling [child]. With [onClose], a close button leads the header, for
-/// a screen opened over another.
+/// a screen opened over another. Without [showFooter], no "powered by"
+/// footer, e.g. for a flow with steps of its own.
 class OnboardingLayout extends StatelessWidget {
-  const OnboardingLayout({super.key, required this.child, this.onClose});
+  const OnboardingLayout({
+    super.key,
+    required this.child,
+    this.onClose,
+    this.showFooter = true,
+  });
 
   final Widget child;
   final VoidCallback? onClose;
+  final bool showFooter;
 
   @override
   Widget build(BuildContext context) {
@@ -81,20 +88,23 @@ class OnboardingLayout extends StatelessWidget {
                         SizedBox(height: isSmallLandscape ? 24 : 40),
                         child,
                         const Spacer(),
-                        Padding(
-                          padding: EdgeInsets.only(
-                            top: 24,
-                            bottom: isSmallLandscape ? 16 : 32,
-                          ),
-                          child: Center(
-                            child: SizedBox(
-                              height: 40,
-                              child: Image.asset(
-                                'assets/images/powered_by_mpx.png',
+                        if (showFooter)
+                          Padding(
+                            padding: EdgeInsets.only(
+                              top: 24,
+                              bottom: isSmallLandscape ? 16 : 32,
+                            ),
+                            child: Center(
+                              child: SizedBox(
+                                height: 40,
+                                child: Image.asset(
+                                  'assets/images/powered_by_mpx.png',
+                                ),
                               ),
                             ),
-                          ),
-                        ),
+                          )
+                        else
+                          SizedBox(height: isSmallLandscape ? 16 : 32),
                       ],
                     ),
                   ),
