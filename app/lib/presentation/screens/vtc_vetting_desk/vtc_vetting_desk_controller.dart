@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:clock/clock.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -94,14 +95,33 @@ class VtcVettingDeskController extends _$VtcVettingDeskController {
     }
   }
 
-  /// Shows a new ticket, good for one applicant for a short while.
+  /// Shows a new ticket, good for one applicant for a short while, saying
+  /// how far creating it got.
   Future<void> createTicket() => _run(() async {
-    await _service.createVettingTicket(communityDid);
-    state = state.copyWith(
-      desk: await _service.vetterDesk(communityDid),
-      ended: null,
-    );
+    try {
+      await _service.createVettingTicket(
+        communityDid,
+        onStep: (step) => state = state.copyWith(ticketStep: step),
+      );
+      state = state.copyWith(
+        desk: await _service.vetterDesk(communityDid),
+        ended: null,
+      );
+    } finally {
+      state = state.copyWith(ticketStep: null);
+    }
   });
+
+  /// Starts vetting an applicant: creates a ticket unless one is on show,
+  /// an applicant is being vetted, or a ticket is being created already.
+  Future<void> startVetting() async {
+    if (state.flowStep(clock.now()) != null ||
+        state.ticketStep != null ||
+        state.busy) {
+      return;
+    }
+    await createTicket();
+  }
 
   /// Records that the codes match, with the applicant present.
   Future<void> confirmMatch(String requestId) => _run(() async {

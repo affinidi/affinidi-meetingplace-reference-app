@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
+import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_vetter_desk.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_community_page.dart';
@@ -116,6 +117,27 @@ void main() {
     await settle(tester);
     await tester.pump(const Duration(minutes: 10));
   }
+
+  test('says how far creating a ticket got', () async {
+    final container = ProviderContainer(
+      overrides: [vtcServiceProvider.overrideWithValue(fixture.service)],
+    );
+    addTearDown(container.dispose);
+    final provider = vtcVettingDeskControllerProvider(fakeVtcDid);
+    final steps = <VtcTicketStep?>[];
+    container.listen(
+      provider.select((state) => state.ticketStep),
+      (_, next) => steps.add(next),
+    );
+
+    await container.read(provider.notifier).startVetting();
+
+    expect(steps, [VtcTicketStep.checkingCard, VtcTicketStep.creating, null]);
+    expect(
+      container.read(provider).flowStep(DateTime.now()),
+      VtcVettingFlowStep.ticket,
+    );
+  });
 
   testWidgets('shows a ticket to scan or read out', (tester) async {
     await pumpDesk(tester);

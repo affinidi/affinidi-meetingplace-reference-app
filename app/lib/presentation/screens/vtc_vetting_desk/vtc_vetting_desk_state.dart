@@ -80,6 +80,9 @@ abstract class VtcVettingDeskState with _$VtcVettingDeskState {
     /// goes back to the desk or shows a new ticket.
     VtcVetterSession? ended,
 
+    /// How far creating a ticket got, while one is being created.
+    VtcTicketStep? ticketStep,
+
     /// Whether a step the member asked for is running.
     @Default(false) bool busy,
 
