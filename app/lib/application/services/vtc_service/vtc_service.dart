@@ -815,8 +815,17 @@ class VtcService {
   /// statements gathered and every request, so applying starts over. The
   /// vetters learn nothing; a vetter still waiting ends the session on
   /// their side.
-  Future<void> stopVetting(String communityDid) =>
-      _repository.removeVetting(communityDid);
+  ///
+  /// Before the member ever applied, the identity recorded for applying is
+  /// forgotten too, so they choose it again. A member, or one whose
+  /// application is open, keeps theirs.
+  Future<void> stopVetting(String communityDid) async {
+    await _repository.removeVetting(communityDid);
+    final community = await _repository.findCommunity(communityDid);
+    if (community != null && !community.isMember && !community.isApplying) {
+      await _repository.removeCommunity(communityDid);
+    }
+  }
 
   Future<(VtcCommunity, VtcVetting, VtcVettingRequest)> _vettingOf(
     String communityDid,

@@ -1342,6 +1342,15 @@ void main() {
       expect(state().step, VtcJoinStep.review);
     });
 
+    test('asks again which identity applies once vetting stopped', () async {
+      await askVetter();
+      expect(await service.community(fakeVtcDid), isNotNull);
+
+      await controller().stopVetting();
+
+      expect(await service.community(fakeVtcDid), isNull);
+    });
+
     test('asks the only vetter listed with their code', () async {
       await openVetting();
 
