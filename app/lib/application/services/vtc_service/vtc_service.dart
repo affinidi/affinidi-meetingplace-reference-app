@@ -962,6 +962,17 @@ class VtcService {
     return ticket;
   }
 
+  /// Cancels every ticket the member showed for [communityDid], so none
+  /// admits an applicant any more; sessions already open stay open.
+  /// Returns the desk, or null when there is none.
+  Future<VtcVetterDesk?> cancelVettingTickets(String communityDid) async {
+    final desk = await _repository.findVetterDesk(communityDid);
+    if (desk == null || desk.tickets.isEmpty) return desk;
+    final cancelled = desk.withoutTickets();
+    await _repository.saveVetterDesk(cancelled);
+    return cancelled;
+  }
+
   /// Picks up what applicants sent the member, as a vetter for
   /// [communityDid], and moves each session on: accepts a request for a
   /// live ticket and opens its session at once, asking for the details the

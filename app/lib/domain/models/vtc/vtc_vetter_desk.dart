@@ -183,6 +183,10 @@ class VtcVetterDesk {
     sessions: sessions,
   );
 
+  /// With no ticket: none admits an applicant any more.
+  VtcVetterDesk withoutTickets() =>
+      VtcVetterDesk(communityDid: communityDid, sessions: sessions);
+
   /// With [session] in place of any for the same request.
   VtcVetterDesk withSession(VtcVetterSession session) => VtcVetterDesk(
     communityDid: communityDid,

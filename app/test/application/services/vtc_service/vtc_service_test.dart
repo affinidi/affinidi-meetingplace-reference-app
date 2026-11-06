@@ -1501,6 +1501,18 @@ void main() {
       expect(ticket.vetter, vetter.did);
     });
 
+    test('cancels the tickets shown, so none admits an applicant', () async {
+      final ticket = await service.createVettingTicket(fakeVtcDid);
+
+      final desk = (await service.cancelVettingTickets(fakeVtcDid))!;
+      expect(desk.tickets, isEmpty);
+      expect((await service.vetterDesk(fakeVtcDid))!.tickets, isEmpty);
+
+      await requestWith(ticket.spoken);
+      final after = (await service.checkVetterDesk(fakeVtcDid))!;
+      expect(after.sessions, isEmpty);
+    });
+
     test('reports each step of minting a ticket', () async {
       final steps = <VtcTicketStep>[];
 
