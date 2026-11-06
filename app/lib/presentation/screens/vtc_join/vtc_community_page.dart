@@ -265,7 +265,7 @@ class _CardLookup extends StatelessWidget {
       children: [
         Text(
           l10n.vtcMembershipCardLoading,
-          style: context.textTheme.bodyMedium?.copyWith(color: Colors.white),
+          style: context.textTheme.titleMedium?.copyWith(color: Colors.white),
         ),
         for (final step in MembershipCardStep.values)
           VtcProgressLine(

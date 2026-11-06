@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../widgets/onboarding_style/onboarding_style.dart';
+import '../../../infrastructure/extensions/build_context_extensions.dart';
 import 'vtc_trail_step.dart';
 
 /// A step of something the phone does in the background: a tick once
@@ -11,27 +11,33 @@ class VtcProgressLine extends StatelessWidget {
   final String title;
   final VtcTrailStage stage;
 
+  /// The size of the marker beside the line, to match its text.
+  static const _markerSize = 20.0;
+
   @override
   Widget build(BuildContext context) {
     final isNext = stage == VtcTrailStage.next;
     return Row(
-      spacing: 8,
+      spacing: 12,
       children: [
         SizedBox.square(
-          dimension: 16,
+          dimension: _markerSize,
           child: switch (stage) {
-            VtcTrailStage.current => const CircularProgressIndicator(
-              strokeWidth: 2,
-              color: Colors.white70,
+            VtcTrailStage.current => const Padding(
+              padding: EdgeInsets.all(2),
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                color: Colors.white,
+              ),
             ),
             VtcTrailStage.done => const Icon(
               Icons.check_circle,
-              size: 16,
+              size: _markerSize,
               color: Colors.white,
             ),
             _ => const Icon(
               Icons.radio_button_unchecked,
-              size: 16,
+              size: _markerSize,
               color: Colors.white38,
             ),
           },
@@ -39,9 +45,9 @@ class VtcProgressLine extends StatelessWidget {
         Flexible(
           child: Text(
             title,
-            style: onboardingNote(
-              context,
-            )?.copyWith(color: isNext ? Colors.white38 : null),
+            style: context.textTheme.bodyLarge?.copyWith(
+              color: isNext ? Colors.white38 : Colors.white,
+            ),
           ),
         ),
       ],
