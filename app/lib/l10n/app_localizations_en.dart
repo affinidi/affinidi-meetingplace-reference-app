@@ -4018,4 +4018,8 @@ class AppLocalizationsEn extends AppLocalizations {
     });
     return '$_temp0';
   }
+
+  @override
+  String get vtcVetterCheckFailed =>
+      'Couldn\'t check your vetter card, so vetting isn\'t offered. Try again later.';
 }

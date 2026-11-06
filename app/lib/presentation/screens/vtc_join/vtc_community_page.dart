@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../application/services/identities_service/identities_service.dart';
 import '../../../application/services/vtc_service/vtc_service.dart';
 import '../../../domain/models/vtc/vtc_card_delivery.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import '../vtc_vetting_desk/vtc_vetting_desk_screen.dart';
@@ -168,12 +170,44 @@ class _VettingDeskEntry extends HookConsumerWidget {
   final String communityDid;
   final String communityName;
 
+  /// Whether the member may vet here; why not, or why it could not be
+  /// told, goes to the log, never a DID or a card.
+  Future<bool> _canVet(WidgetRef ref) async {
+    final logger = ref.read(appLoggerProvider);
+    try {
+      final canVet = await ref.read(vtcServiceProvider).canVet(communityDid);
+      if (!canVet) {
+        logger.info(
+          'No vetter card in date and not revoked',
+          name: 'VtcCommunityPage',
+        );
+      }
+      return canVet;
+    } on Exception catch (error, stackTrace) {
+      final reason = switch (error) {
+        MeetingPlaceVtcSDKException(:final code, :final message) =>
+          '${code.name}: $message',
+        _ => '${error.runtimeType}',
+      };
+      logger.error(
+        'Checking the vetter card failed: $reason',
+        stackTrace: stackTrace,
+        name: 'VtcCommunityPage',
+      );
+      rethrow;
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final service = ref.read(vtcServiceProvider);
-    final canVet = useFuture(
-      useMemoized(() => service.canVet(communityDid), [communityDid]),
-    );
+    final canVet = useFuture(useMemoized(() => _canVet(ref), [communityDid]));
+    if (canVet.hasError) {
+      return OnboardingMessage(
+        context.l10n.vtcVetterCheckFailed,
+        key: const Key('vtc_community_vetting_check_failed'),
+        isError: true,
+      );
+    }
     if (canVet.data != true) return const SizedBox.shrink();
     return OnboardingButton(
       key: const Key('vtc_community_vetting_desk'),

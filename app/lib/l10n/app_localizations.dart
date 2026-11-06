@@ -5989,6 +5989,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{failure, select, notVetter{Your vetter card is no longer valid.} other{Something went wrong. Check your connection and try again.}}'**
   String vtcVetterFailure(String failure);
+
+  /// The vetter card could not be checked on the community page
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t check your vetter card, so vetting isn\'t offered. Try again later.'**
+  String get vtcVetterCheckFailed;
 }
 
 class _AppLocalizationsDelegate

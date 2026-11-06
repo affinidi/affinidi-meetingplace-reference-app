@@ -4058,5 +4058,9 @@
 				"type": "String"
 			}
 		}
+	},
+	"vtcVetterCheckFailed": "Couldn't check your vetter card, so vetting isn't offered. Try again later.",
+	"@vtcVetterCheckFailed": {
+		"description": "The vetter card could not be checked on the community page"
 	}
 }

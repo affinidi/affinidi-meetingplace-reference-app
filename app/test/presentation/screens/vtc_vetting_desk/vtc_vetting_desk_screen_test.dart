@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_community_page.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_state.dart';
@@ -16,6 +19,12 @@ import '../../../fakes/fake_vtc_network.dart';
 
 void main() {
   late FakeVetterDesk fixture;
+
+  setUpAll(() {
+    AppLogger.initialize(
+      File('${Directory.systemTemp.path}/vtc_vetting_desk_screen_test.log'),
+    );
+  });
 
   setUp(() async {
     FlutterSecureStorage.setMockInitialValues({});
@@ -236,6 +245,25 @@ void main() {
         find.byKey(const Key('vtc_community_vetting_desk')),
         findsOneWidget,
       );
+      await close(tester);
+    });
+
+    testWidgets('says so when the vetter card cannot be checked', (
+      tester,
+    ) async {
+      fixture.network.isStatusListDown = true;
+
+      await pumpPage(tester, 'member');
+      await waitFor(
+        tester,
+        find.byKey(const Key('vtc_community_vetting_check_failed')),
+      );
+
+      expect(
+        find.byKey(const Key('vtc_community_vetting_check_failed')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('vtc_community_vetting_desk')), findsNothing);
       await close(tester);
     });
 
