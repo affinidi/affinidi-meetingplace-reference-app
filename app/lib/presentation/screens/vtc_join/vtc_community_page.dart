@@ -18,6 +18,7 @@ import 'vtc_identity_check_view.dart';
 import 'vtc_join_phrase_view.dart';
 import 'vtc_join_state.dart';
 import 'vtc_membership_card_view.dart';
+import 'vtc_trail_step.dart';
 
 /// Prefix of a role the community defined itself, as in `custom:coach`.
 const _customRolePrefix = 'custom:';
@@ -164,26 +165,7 @@ class VtcCommunityPage extends HookConsumerWidget {
         ] else if (delivery != null)
           VtcCardDeliveryTrail(delivery: delivery, communityName: name)
         else if (state.gettingCard)
-          Row(
-            key: const Key('vtc_membership_card_loading'),
-            mainAxisAlignment: MainAxisAlignment.center,
-            spacing: 8,
-            children: [
-              const SizedBox.square(
-                dimension: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white70,
-                ),
-              ),
-              Flexible(
-                child: Text(
-                  l10n.vtcMembershipCardLoading,
-                  style: onboardingNote(context),
-                ),
-              ),
-            ],
-          )
+          _CardLookup(step: state.cardStep, communityName: name)
         else
           Row(
             key: const Key('vtc_membership_card_pending'),
@@ -258,6 +240,94 @@ class _RoleLine extends StatelessWidget {
       trailing: actions.isEmpty
           ? null
           : Row(mainAxisSize: MainAxisSize.min, children: actions),
+    );
+  }
+}
+
+/// Finding the member's card on their VTA, step by step: each step done,
+/// under way, or still to come.
+class _CardLookup extends StatelessWidget {
+  const _CardLookup({required this.step, required this.communityName});
+
+  /// The step under way; none yet means the first is about to start.
+  final MembershipCardStep? step;
+  final String communityName;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final current = step ?? MembershipCardStep.values.first;
+    return Column(
+      key: const Key('vtc_membership_card_loading'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 8,
+      children: [
+        Text(
+          l10n.vtcMembershipCardLoading,
+          style: context.textTheme.bodyMedium?.copyWith(color: Colors.white),
+        ),
+        for (final step in MembershipCardStep.values)
+          _CardLookupLine(
+            key: Key('vtc_card_step_${step.name}'),
+            title: switch (step) {
+              MembershipCardStep.finding => l10n.vtcCardStepFinding(
+                communityName,
+              ),
+              MembershipCardStep.reading => l10n.vtcCardStepReading,
+            },
+            stage: switch (step.index.compareTo(current.index)) {
+              < 0 => VtcTrailStage.done,
+              0 => VtcTrailStage.current,
+              _ => VtcTrailStage.next,
+            },
+          ),
+      ],
+    );
+  }
+}
+
+/// A step of [_CardLookup]: a tick once done, a spinner while under way, a
+/// dimmed circle while still to come.
+class _CardLookupLine extends StatelessWidget {
+  const _CardLookupLine({super.key, required this.title, required this.stage});
+
+  final String title;
+  final VtcTrailStage stage;
+
+  @override
+  Widget build(BuildContext context) {
+    final isNext = stage == VtcTrailStage.next;
+    return Row(
+      spacing: 8,
+      children: [
+        SizedBox.square(
+          dimension: 16,
+          child: switch (stage) {
+            VtcTrailStage.current => const CircularProgressIndicator(
+              strokeWidth: 2,
+              color: Colors.white70,
+            ),
+            VtcTrailStage.done => const Icon(
+              Icons.check_circle,
+              size: 16,
+              color: Colors.white,
+            ),
+            _ => const Icon(
+              Icons.radio_button_unchecked,
+              size: 16,
+              color: Colors.white38,
+            ),
+          },
+        ),
+        Flexible(
+          child: Text(
+            title,
+            style: onboardingNote(
+              context,
+            )?.copyWith(color: isNext ? Colors.white38 : null),
+          ),
+        ),
+      ],
     );
   }
 }

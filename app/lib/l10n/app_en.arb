@@ -3149,7 +3149,20 @@
 	},
 	"vtcMembershipCardLoading": "Getting your membership card…",
 	"@vtcMembershipCardLoading": {
-		"description": "Shown with a spinner on the community page while the phone reads the membership card from the member's VTA or collects it from the community"
+		"description": "Heads the steps on the community page while the phone reads the membership card from the member's VTA or collects it from the community"
+	},
+	"vtcCardStepFinding": "Looking on your VTA for the card {name} issued you",
+	"@vtcCardStepFinding": {
+		"description": "Step of getting the membership card: asking the member's VTA for the card the community issued",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcCardStepReading": "Opening your card",
+	"@vtcCardStepReading": {
+		"description": "Step of getting the membership card: fetching the card the member's VTA found"
 	},
 	"vtcJoinWithdrawAction": "Withdraw application",
 	"@vtcJoinWithdrawAction": {

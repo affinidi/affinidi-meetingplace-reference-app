@@ -3292,6 +3292,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vtcMembershipCardLoading => 'Getting your membership card…';
 
   @override
+  String vtcCardStepFinding(String name) {
+    return 'Looking on your VTA for the card $name issued you';
+  }
+
+  @override
+  String get vtcCardStepReading => 'Opening your card';
+
+  @override
   String get vtcJoinWithdrawAction => 'Withdraw application';
 
   @override
