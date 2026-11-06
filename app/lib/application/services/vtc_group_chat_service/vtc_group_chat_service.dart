@@ -117,7 +117,12 @@ class VtcGroupChatService {
     await connections.publishOffer(
       PublishOfferParams(
         headline: current.name,
-        description: current.description ?? '',
+        // The control plane refuses an offer without a description, and a
+        // group need not have one.
+        description: switch (current.description?.trim()) {
+          final description? when description.isNotEmpty => description,
+          _ => current.name,
+        },
         isGroupOffer: true,
         selectedMediatorDid: environment.defaultMediatorDid,
         transport: ChannelTransport.matrix,
