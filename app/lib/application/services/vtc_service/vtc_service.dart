@@ -846,13 +846,39 @@ class VtcService {
   /// member there, and their VTA keeps a vetter role card the community
   /// issued them that is in date and not revoked.
   ///
+  /// The community sends that card to the identity's inbox when it makes
+  /// the member a vetter. While the VTA holds none, the cards waiting there
+  /// are kept on the VTA first, as a membership card is.
+  ///
   /// Throws [VtaNotLinkedException] when no VTA is linked, and
   /// [MeetingPlaceVtcSDKException] when the VTA or the community's status
   /// list cannot be reached.
   Future<bool> canVet(String communityDid) async {
     final member = await _repository.findCommunity(communityDid);
     if (member == null || !member.isMember) return false;
-    return await _vetterCard(await _grantedVta(), member) != null;
+    final vta = await _grantedVta();
+    if (await _vetterCard(vta, member) != null) return true;
+    if (!await _keepWaitingCards(vta, member)) return false;
+    return await _vetterCard(vta, member) != null;
+  }
+
+  /// Keeps on [vta] the cards [member]'s community sent the identity's
+  /// inbox, then removes them from it. Returns whether there were any.
+  Future<bool> _keepWaitingCards(VtaClient vta, VtcCommunity member) async {
+    final collection = await _collection(vta, member);
+    await collection.inbox.open();
+    final pickup = await collection.inbox.issuedCredentials(
+      issuerDid: member.communityDid,
+    );
+    if (pickup.credentials.isEmpty) return false;
+    await _keepCards(vta, [
+      for (final issued in pickup.credentials) issued.credential,
+    ], member.contextId);
+    await _removeFromInbox(collection, [
+      for (final issued in pickup.credentials) issued.messageId,
+    ]);
+    _membershipsChanged.add(null);
+    return true;
   }
 
   /// The member's vetting desk for [communityDid], as recorded, or null.

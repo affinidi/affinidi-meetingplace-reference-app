@@ -202,7 +202,6 @@ void main() {
         tester,
         find.byKey(const Key('vtc_community_vetting_desk')),
       );
-      addTearDown(() => close(tester));
     }
 
     testWidgets('offers the vetting desk to a vetter', (tester) async {
@@ -213,6 +212,7 @@ void main() {
         findsOneWidget,
       );
       expect(find.text('Vetter'), findsOneWidget);
+      await close(tester);
     });
 
     testWidgets('offers no vetting desk once the card is withdrawn', (
@@ -223,6 +223,7 @@ void main() {
       await pumpPage(tester, 'vetter');
 
       expect(find.byKey(const Key('vtc_community_vetting_desk')), findsNothing);
+      await close(tester);
     });
 
     testWidgets('offers the vetting desk to a vetter shown as a member', (
@@ -235,6 +236,7 @@ void main() {
         find.byKey(const Key('vtc_community_vetting_desk')),
         findsOneWidget,
       );
+      await close(tester);
     });
 
     testWidgets('offers no vetting desk to a member who is no vetter', (
@@ -247,6 +249,7 @@ void main() {
       await pumpPage(tester, 'member');
 
       expect(find.byKey(const Key('vtc_community_vetting_desk')), findsNothing);
+      await close(tester);
     });
   });
 }

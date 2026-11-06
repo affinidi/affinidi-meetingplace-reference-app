@@ -1426,6 +1426,43 @@ void main() {
       );
     });
 
+    test('keeps the vetter card the community sent to the inbox', () async {
+      // The VTA holds the card only once it was kept.
+      bool kept() => network.vta.received.any(
+        (task) =>
+            task['type'] == VtaTask.credentialsReceive &&
+            (task['payload'] as Map<String, dynamic>)['id'] ==
+                'urn:uuid:vetter-card',
+      );
+      network.vta.answerTo[VtaTask.credentialsQuery] = (payload) => {
+        'credentials': [
+          if (payload['type'] == 'AuthorityCredential' && kept())
+            {
+              'id': 'role-1',
+              'types': ['VerifiableCredential', 'AuthorityCredential'],
+            },
+        ],
+      };
+      final card = await network.vetterRoleCard(vetter.did);
+      await network.deliver(vetter, card);
+
+      expect(await service.canVet(fakeVtcDid), isTrue);
+
+      final receive = network.vta.received.lastWhere(
+        (task) => task['type'] == VtaTask.credentialsReceive,
+      );
+      expect((receive['payload'] as Map<String, dynamic>)['credential'], card);
+      expect(network.inbox, isEmpty);
+    });
+
+    test('cannot vet while no vetter card was sent', () async {
+      network.vta.answerTo[VtaTask.credentialsQuery] = (_) => {
+        'credentials': <Object>[],
+      };
+
+      expect(await service.canVet(fakeVtcDid), isFalse);
+    });
+
     test('mints a ticket and keeps it on the desk', () async {
       final ticket = await service.createVettingTicket(fakeVtcDid, uses: 3);
 
