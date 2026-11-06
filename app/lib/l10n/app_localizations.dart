@@ -5665,6 +5665,180 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Done'**
   String get vtcGroupChatLinkDone;
+
+  /// Title of the overview of being vetted for a community
+  ///
+  /// In en, this message translates to:
+  /// **'Meet a vetter'**
+  String get vtcJoinVettingTitle;
+
+  /// What vetting means, on its overview
+  ///
+  /// In en, this message translates to:
+  /// **'{name} asks to meet you first. One of its vetters checks who you are, in person, and vouches for you.'**
+  String vtcJoinVettingIntro(String name);
+
+  /// How many vetters vouched so far
+  ///
+  /// In en, this message translates to:
+  /// **'{have} of {needed} vetters vouched for you'**
+  String vtcJoinVettingProgress(int have, int needed);
+
+  /// A vetting method the community still needs statements by
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 more must meet you} other{{count} more must meet you}} {method, select, inPerson{in person} video{over video} priorAcquaintance{and know you already} other{}}'**
+  String vtcJoinVettingMethodNeed(int count, String method);
+
+  /// The details each vetter must check
+  ///
+  /// In en, this message translates to:
+  /// **'Vetters check: {claims}'**
+  String vtcJoinVettingChecks(String claims);
+
+  /// How long a vetter's statement counts
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{A vouch counts for 1 day} other{A vouch counts for {days} days}}'**
+  String vtcJoinVettingMaxAge(int days);
+
+  /// The statements break the community's independence rules
+  ///
+  /// In en, this message translates to:
+  /// **'These vouches don\'t all count together. Ask another vetter.'**
+  String get vtcJoinVettingNotIndependent;
+
+  /// Heading of the vetters asked
+  ///
+  /// In en, this message translates to:
+  /// **'Your vetters'**
+  String get vtcJoinVettersHeading;
+
+  /// Where vetting by one vetter stands
+  ///
+  /// In en, this message translates to:
+  /// **'{status, select, requested{Waiting for them to answer} accepted{Confirmed as a vetter · waiting for them to start} inSession{Compare the match code} cardSent{Waiting for their vouch} vouched{Vouched for you} declined{Declined to vouch} refused{Couldn\'t go ahead} abandoned{You ended the session} other{}}'**
+  String vtcJoinVettingStatus(String status);
+
+  /// Why a vetting step could not go ahead
+  ///
+  /// In en, this message translates to:
+  /// **'{reason, select, otherCommunity{This ticket is for another community.} invalidTicket{The vetter didn\'t take this ticket or code. It may have expired or been used. Ask them for a new one.} unavailable{The vetter can\'t vet you right now.} notVetter{This person couldn\'t show that the community made them a vetter, so nothing was shared.} vetterRevoked{The community no longer lets this person vet.} sessionExpired{The session has ended. Ask the vetter to start a new one.} badAnswer{The vetter\'s answer couldn\'t be checked, so it was ignored.} other{The vetter refused.}}'**
+  String vtcJoinVettingFailure(String reason);
+
+  /// Scans the QR code a vetter shows
+  ///
+  /// In en, this message translates to:
+  /// **'Scan a vetter\'s ticket'**
+  String get vtcJoinVettingScanAction;
+
+  /// Types the code a vetter reads out
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a vetter\'s code'**
+  String get vtcJoinVettingCodeAction;
+
+  /// Applies with the statements gathered
+  ///
+  /// In en, this message translates to:
+  /// **'Send application'**
+  String get vtcJoinVettingSendAction;
+
+  /// Title of picking the vetter in front of the member
+  ///
+  /// In en, this message translates to:
+  /// **'Who are you meeting?'**
+  String get vtcJoinChooseVetterTitle;
+
+  /// Picking a vetter; names are self-asserted
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the vetter in front of you. Names are the vetters\' own.'**
+  String get vtcJoinChooseVetterIntro;
+
+  /// The community lists no vetters
+  ///
+  /// In en, this message translates to:
+  /// **'{name} lists no vetters. Scan your vetter\'s ticket instead.'**
+  String vtcJoinNoVetters(String name);
+
+  /// Title of typing a vetter's code
+  ///
+  /// In en, this message translates to:
+  /// **'Enter {vetter}\'s code'**
+  String vtcJoinVettingCodeTitle(String vetter);
+
+  /// How to get a vetter's code
+  ///
+  /// In en, this message translates to:
+  /// **'Ask them to read out the code their app shows.'**
+  String get vtcJoinVettingCodeIntro;
+
+  /// Hint of the vetter code field
+  ///
+  /// In en, this message translates to:
+  /// **'Code, e.g. K7QF-2M9X'**
+  String get vtcJoinVettingCodeHint;
+
+  /// The vetter's role was checked against the community
+  ///
+  /// In en, this message translates to:
+  /// **'{vetter} is a vetter of {name} until {date}.'**
+  String vtcJoinVettingVerified(String vetter, String name, String date);
+
+  /// Title of comparing the session's match code
+  ///
+  /// In en, this message translates to:
+  /// **'Do the codes match?'**
+  String get vtcJoinMatchTitle;
+
+  /// How to compare the match code
+  ///
+  /// In en, this message translates to:
+  /// **'{vetter} sees a code too. Read yours out and check it\'s the same.'**
+  String vtcJoinMatchIntro(String vetter);
+
+  /// The match codes are the same
+  ///
+  /// In en, this message translates to:
+  /// **'They match'**
+  String get vtcJoinMatchYes;
+
+  /// The match codes differ; ends the session
+  ///
+  /// In en, this message translates to:
+  /// **'They don\'t match'**
+  String get vtcJoinMatchNo;
+
+  /// Title of approving the vetting card
+  ///
+  /// In en, this message translates to:
+  /// **'Show these details to {vetter}?'**
+  String vtcJoinVettingCardTitle(String vetter);
+
+  /// Who sees the vetting card
+  ///
+  /// In en, this message translates to:
+  /// **'Only {vetter} sees these. They check them against your ID, and the community gets their vouch, not your details.'**
+  String vtcJoinVettingCardNote(String vetter);
+
+  /// Ends the session without sending the card
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t share'**
+  String get vtcJoinVettingCardDecline;
+
+  /// Heading of the session's match code
+  ///
+  /// In en, this message translates to:
+  /// **'Your match code'**
+  String get vtcJoinMatchCodeHeading;
+
+  /// Heading of the details a vetting card carries
+  ///
+  /// In en, this message translates to:
+  /// **'Details for your vetter'**
+  String get vtcJoinVettingCardHeading;
 }
 
 class _AppLocalizationsDelegate

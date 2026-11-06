@@ -6,6 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
+import '../../../domain/models/vtc/vtc_vetting.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/services/camera_service/camera_service.dart';
 import '../../../l10n/app_localizations.dart';
@@ -81,6 +82,33 @@ class VtcJoinScreen extends HookConsumerWidget {
           state: state,
           onShare: controller.approveCredential,
           onCancel: close,
+        ),
+        VtcJoinStep.vetting => _Vetting(
+          state: state,
+          onScan: controller.scanVettingTicket,
+          onEnterCode: controller.enterVettingCode,
+          onSend: controller.sendVettedApplication,
+          onDone: close,
+        ),
+        VtcJoinStep.chooseVetter => _ChooseVetter(
+          state: state,
+          onChoose: controller.chooseVetter,
+          onBack: controller.backToVetting,
+        ),
+        VtcJoinStep.enterVettingCode => _VettingCode(
+          state: state,
+          onSubmit: controller.submitVettingCode,
+          onBack: controller.backToVetting,
+        ),
+        VtcJoinStep.confirmMatch => _ConfirmMatch(
+          state: state,
+          onMatch: controller.confirmMatch,
+          onMismatch: controller.declineSession,
+        ),
+        VtcJoinStep.approveVettingCard => _ApproveVettingCard(
+          state: state,
+          onShare: controller.approveVettingCard,
+          onDecline: controller.declineSession,
         ),
         VtcJoinStep.joined => VtcCommunityPage(
           state: state,
@@ -1011,6 +1039,368 @@ class _ApproveCredential extends StatelessWidget {
         const SizedBox(height: 12),
         OnboardingButton(label: l10n.vtcJoinShareAction, onPressed: onShare),
         OnboardingTextButton(label: l10n.generalCancel, onPressed: onCancel),
+      ],
+    );
+  }
+}
+
+/// How [vetterDid] goes by: the name the community lists them under, else
+/// their DID.
+String _vetterName(VtcJoinState state, String? vetterDid) =>
+    state.vetting?.requestTo(vetterDid ?? '')?.vetterName ??
+    state.vetters
+        .where((vetter) => vetter.did == vetterDid)
+        .firstOrNull
+        ?.displayName ??
+    vetterDid ??
+    '';
+
+/// Being vetted for a community: what it asks of vetting in plain words,
+/// how many vetters vouched so far, where each vetter asked stands, and
+/// ways to meet another.
+class _Vetting extends HookConsumerWidget {
+  const _Vetting({
+    required this.state,
+    required this.onScan,
+    required this.onEnterCode,
+    required this.onSend,
+    required this.onDone,
+  });
+
+  final VtcJoinState state;
+  final ValueChanged<String> onScan;
+  final VoidCallback onEnterCode;
+  final VoidCallback onSend;
+  final VoidCallback onDone;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final name = state.communityName ?? '';
+    final requirements = state.vettingRequirements;
+    final progress = state.vettingProgress;
+    final hasCamera = ref.watch(
+      cameraServiceProvider.select((state) => state.isAvailable ?? false),
+    );
+
+    Future<void> scan() async {
+      final data = await QrCodePicker.show(context: context);
+      if (data != null) onScan(data.trim());
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 12,
+      children: [
+        if (state.logoUrl case final logoUrl?) VtcCommunityLogo(logoUrl),
+        OnboardingTitle(l10n.vtcJoinVettingTitle),
+        OnboardingSubtitle(l10n.vtcJoinVettingIntro(name)),
+        if (requirements != null)
+          GlassCard(
+            title: l10n.vtcJoinVettingProgress(
+              progress?.counted.length ?? 0,
+              requirements.minStatements,
+            ),
+            child: Column(
+              key: const Key('vtc_join_vetting_requirements'),
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: 8,
+              children: [
+                for (final need in progress?.needs ?? const <VettingNeed>[])
+                  if (need case MoreByMethod(:final method, :final count))
+                    _Note(l10n.vtcJoinVettingMethodNeed(count, method.name)),
+                if (requirements.requiredClaims.isNotEmpty)
+                  _Note(
+                    l10n.vtcJoinVettingChecks(
+                      requirements.requiredClaims
+                          .map((type) => vtcClaimTypeLabel(l10n, type))
+                          .join(', '),
+                    ),
+                  ),
+                if (requirements.maxStatementAge case final age?)
+                  _Note(l10n.vtcJoinVettingMaxAge(age.inDays)),
+                if (progress != null &&
+                    (!progress.independent || !progress.commitmentsConsistent))
+                  _Note(l10n.vtcJoinVettingNotIndependent),
+              ],
+            ),
+          ),
+        if (state.vetting?.requests case final requests?
+            when requests.isNotEmpty)
+          GlassCard(
+            title: l10n.vtcJoinVettersHeading,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: 12,
+              children: [
+                for (final request in requests.reversed)
+                  OnboardingLine(
+                    key: Key('vtc_join_vetter_${request.status.name}'),
+                    icon: _vettingIcon(request.status),
+                    title: request.vetterName ?? request.vetterDid,
+                    subtitle: [
+                      l10n.vtcJoinVettingStatus(request.status.name),
+                      ?request.declineMessage,
+                      if (request.failure case final failure?)
+                        l10n.vtcJoinVettingFailure(failure.name),
+                    ].join(' · '),
+                  ),
+              ],
+            ),
+          ),
+        if (state.vettingFailure case final failure?)
+          OnboardingMessage(
+            l10n.vtcJoinVettingFailure(failure.name),
+            isError: true,
+          ),
+        const SizedBox(height: 12),
+        if (progress?.satisfied ?? false)
+          OnboardingButton(
+            key: const Key('vtc_join_vetting_send'),
+            label: l10n.vtcJoinVettingSendAction,
+            onPressed: onSend,
+          ),
+        OnboardingButton(
+          key: const Key('vtc_join_vetting_scan'),
+          label: l10n.vtcJoinVettingScanAction,
+          isOutlined: progress?.satisfied ?? false,
+          onPressed: hasCamera ? scan : null,
+        ),
+        OnboardingButton(
+          key: const Key('vtc_join_vetting_code'),
+          label: l10n.vtcJoinVettingCodeAction,
+          isOutlined: true,
+          onPressed: onEnterCode,
+        ),
+        OnboardingTextButton(label: l10n.generalDone, onPressed: onDone),
+      ],
+    );
+  }
+}
+
+IconData _vettingIcon(VtcVettingStatus status) => switch (status) {
+  VtcVettingStatus.vouched => Icons.verified,
+  VtcVettingStatus.declined ||
+  VtcVettingStatus.refused ||
+  VtcVettingStatus.abandoned => Icons.block,
+  VtcVettingStatus.inSession => Icons.compare_arrows,
+  _ => Icons.hourglass_top,
+};
+
+/// The vetters the community lists, to pick the one in front of the member.
+/// Their names are their own.
+class _ChooseVetter extends StatelessWidget {
+  const _ChooseVetter({
+    required this.state,
+    required this.onChoose,
+    required this.onBack,
+  });
+
+  final VtcJoinState state;
+  final ValueChanged<String> onChoose;
+  final VoidCallback onBack;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 12,
+      children: [
+        OnboardingTitle(l10n.vtcJoinChooseVetterTitle),
+        if (state.vetters.isEmpty)
+          OnboardingSubtitle(l10n.vtcJoinNoVetters(state.communityName ?? ''))
+        else ...[
+          OnboardingSubtitle(l10n.vtcJoinChooseVetterIntro),
+          for (final vetter in state.vetters)
+            InkWell(
+              key: Key('vtc_join_vetter_${vetter.did}'),
+              onTap: () => onChoose(vetter.did),
+              child: OnboardingLine(
+                icon: Icons.person_search,
+                title: vetter.displayName ?? vetter.did,
+                subtitle: [
+                  ?vetter.place,
+                  ...vetter.events,
+                  ?vetter.contactHint,
+                ].join(' · '),
+              ),
+            ),
+        ],
+        const SizedBox(height: 12),
+        OnboardingTextButton(label: l10n.generalCancel, onPressed: onBack),
+      ],
+    );
+  }
+}
+
+/// The code the vetter at hand reads out.
+class _VettingCode extends HookWidget {
+  const _VettingCode({
+    required this.state,
+    required this.onSubmit,
+    required this.onBack,
+  });
+
+  final VtcJoinState state;
+  final ValueChanged<String> onSubmit;
+  final VoidCallback onBack;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final field = useTextEditingController();
+    useListenable(field);
+    final code = field.text.trim();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 12,
+      children: [
+        OnboardingTitle(
+          l10n.vtcJoinVettingCodeTitle(_vetterName(state, state.vetterDid)),
+        ),
+        OnboardingSubtitle(l10n.vtcJoinVettingCodeIntro),
+        OnboardingTextField(
+          key: const Key('vtc_join_vetting_code_field'),
+          controller: field,
+          label: l10n.vtcJoinVettingCodeHint,
+          hint: 'K7QF-2M9X',
+          onSubmitted: onSubmit,
+        ),
+        if (state.vettingFailure case final failure?)
+          OnboardingMessage(
+            l10n.vtcJoinVettingFailure(failure.name),
+            isError: true,
+          ),
+        const SizedBox(height: 12),
+        OnboardingButton(
+          label: l10n.vtcJoinContinueAction,
+          onPressed: code.isEmpty ? null : () => onSubmit(code),
+        ),
+        OnboardingTextButton(label: l10n.generalCancel, onPressed: onBack),
+      ],
+    );
+  }
+}
+
+/// The session's match code, for the member and the vetter to compare
+/// before anything is shared, with the vetter's checked role.
+class _ConfirmMatch extends StatelessWidget {
+  const _ConfirmMatch({
+    required this.state,
+    required this.onMatch,
+    required this.onMismatch,
+  });
+
+  final VtcJoinState state;
+  final VoidCallback onMatch;
+  final VoidCallback onMismatch;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final request = state.vetting?.requestTo(state.vetterDid ?? '');
+    final vetter = _vetterName(state, state.vetterDid);
+    final code = switch (request?.session) {
+      {'id': final String id} => vettingMatchCode(id),
+      _ => '',
+    };
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 12,
+      children: [
+        OnboardingTitle(l10n.vtcJoinMatchTitle),
+        OnboardingSubtitle(l10n.vtcJoinMatchIntro(vetter)),
+        GlassCard(
+          title: l10n.vtcJoinMatchCodeHeading,
+          child: Text(
+            code,
+            key: const Key('vtc_join_match_code'),
+            textAlign: TextAlign.center,
+            style: context.textTheme.displaySmall?.copyWith(
+              color: Colors.white,
+              fontFamily: 'monospace',
+              letterSpacing: 4,
+            ),
+          ),
+        ),
+        if (request?.roleValidUntil case final until?)
+          OnboardingLine(
+            icon: Icons.verified_user,
+            title: vetter,
+            subtitle: l10n.vtcJoinVettingVerified(
+              vetter,
+              state.communityName ?? '',
+              MaterialLocalizations.of(context).formatMediumDate(until),
+            ),
+          ),
+        const SizedBox(height: 12),
+        OnboardingButton(
+          key: const Key('vtc_join_match_yes'),
+          label: l10n.vtcJoinMatchYes,
+          onPressed: onMatch,
+        ),
+        OnboardingTextButton(
+          key: const Key('vtc_join_match_no'),
+          label: l10n.vtcJoinMatchNo,
+          onPressed: onMismatch,
+        ),
+      ],
+    );
+  }
+}
+
+/// The details the vetting card would carry, as the VTA would disclose
+/// them; nothing is sent until the member approves.
+class _ApproveVettingCard extends StatelessWidget {
+  const _ApproveVettingCard({
+    required this.state,
+    required this.onShare,
+    required this.onDecline,
+  });
+
+  final VtcJoinState state;
+  final VoidCallback onShare;
+  final VoidCallback onDecline;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final vetter = _vetterName(state, state.vetterDid);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 12,
+      children: [
+        OnboardingTitle(l10n.vtcJoinVettingCardTitle(vetter)),
+        GlassCard(
+          title: l10n.vtcJoinVettingCardHeading,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: 12,
+            children: [
+              for (final detail in state.details)
+                OnboardingLine(
+                  icon: Icons.badge,
+                  title: detail.value,
+                  subtitle: vtcClaimTypeLabel(l10n, detail.type),
+                ),
+              Text(
+                l10n.vtcJoinVettingCardNote(vetter),
+                style: onboardingNote(context),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        OnboardingButton(
+          key: const Key('vtc_join_vetting_card_share'),
+          label: l10n.vtcJoinShareAction,
+          onPressed: onShare,
+        ),
+        OnboardingTextButton(
+          label: l10n.vtcJoinVettingCardDecline,
+          onPressed: onDecline,
+        ),
       ],
     );
   }

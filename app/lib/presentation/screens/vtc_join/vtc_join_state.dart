@@ -6,6 +6,7 @@ import '../../../domain/models/identity/identity.dart';
 import '../../../domain/models/vtc/vtc_card_delivery.dart';
 import '../../../domain/models/vtc/vtc_identity_check.dart';
 import '../../../domain/models/vtc/vtc_membership_card.dart';
+import '../../../domain/models/vtc/vtc_vetting.dart';
 
 part 'vtc_join_state.freezed.dart';
 
@@ -30,6 +31,23 @@ enum VtcJoinStep {
   /// The member approves presenting the credential the chosen way in asks
   /// for, as their VTA holds it.
   approveCredential,
+
+  /// The member gathers vetters' statements: what the community asks, how
+  /// far they got, and each vetter asked.
+  vetting,
+
+  /// The member picks the vetter in front of them, to type their code.
+  chooseVetter,
+
+  /// The member types the code the vetter reads out.
+  enterVettingCode,
+
+  /// The member and the vetter compare the session's match code.
+  confirmMatch,
+
+  /// The member approves the details their vetting card carries, as their
+  /// VTA would disclose them.
+  approveVettingCard,
 
   /// The member is a member, newly or already.
   joined,
@@ -107,7 +125,7 @@ enum VtcJoinUnsupported {
   /// It asks for a credential none of the member's identities holds.
   credentialMissing,
 
-  /// It asks for an in-person check.
+  /// It asks for an in-person check in a way this app cannot meet.
   vetting,
 }
 
@@ -174,7 +192,7 @@ class VtcJoinWay {
           ? VtcJoinUnsupported.credentials
           : presentable && heldBy.isEmpty
           ? VtcJoinUnsupported.credentialMissing
-          : criterion.asksForVetting
+          : criterion.asksForVetting && !criterion.asksOnlyForVetting
           ? VtcJoinUnsupported.vetting
           : null,
       credentialType: presentable
@@ -315,6 +333,25 @@ abstract class VtcJoinState with _$VtcJoinState {
     /// The last signed status request and the community's verified answer,
     /// as they were on the wire.
     TrustTaskExchange? lastCheckExchange,
+
+    /// What the chosen way in asks of vetting, when it asks for vetting.
+    VettingRequirements? vettingRequirements,
+
+    /// The member's vetting for the community, as recorded.
+    VtcVetting? vetting,
+
+    /// How far the statements gathered go towards [vettingRequirements].
+    VettingProgress? vettingProgress,
+
+    /// The vetters the community lists, to pick the one in front of the
+    /// member.
+    @Default(<ListedVetter>[]) List<ListedVetter> vetters,
+
+    /// The vetter of the session or code at hand.
+    String? vetterDid,
+
+    /// Why the last vetting step could not go ahead, shown on the overview.
+    VettingFailure? vettingFailure,
 
     /// The community's reason for turning the application down, if given.
     String? denialReason,

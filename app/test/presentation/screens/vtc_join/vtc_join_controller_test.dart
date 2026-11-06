@@ -12,6 +12,7 @@ import 'package:mpx_flutter_reference_app/application/services/identities_servic
 import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
 import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_card_delivery.dart';
+import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_vetting.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/vtc/user_verification_key.dart';
@@ -1246,6 +1247,189 @@ void main() {
       await controller().refreshRole();
 
       expect(state().role, 'member');
+    });
+  });
+
+  group('VtcJoinController vetting', () {
+    late FakePersona applicant;
+
+    VtcVettingRequest request() => state().vetting!.requests.single;
+
+    Future<void> openVetting() async {
+      await controller().onScanned(fakeVtcDid);
+      await controller().join();
+    }
+
+    Future<void> askVetter() async {
+      await openVetting();
+      await controller().enterVettingCode();
+      await controller().submitVettingCode('k7qf2m9x');
+    }
+
+    setUp(() {
+      applicant = FakePersona(mediatorDid: network.mediatorDid);
+      network
+        ..joinManifest = {
+          'communityDid': fakeVtcDid,
+          'branding': {'displayName': 'Football club'},
+          'criteria': [
+            {
+              'id': 'vetted',
+              'admission': 'automatic',
+              'requirementsDigest': 'zVetted',
+              'vetting': {
+                'version': '0.1',
+                'statementType': VettingStatement.predicate,
+                'minStatements': 1,
+                'acceptedMethods': ['inPerson'],
+                'eligibleVetters': {'role': 'vetter'},
+                'requiredClaims': ['name.legal'],
+                'maxStatementAge': 'P30D',
+              },
+            },
+          ],
+        }
+        ..listedVetters = [
+          {
+            'vetterDid': network.vetterDid,
+            'displayName': 'Bob',
+            'methods': ['inPerson'],
+          },
+        ];
+      network.vta
+        ..persona = applicant
+        ..otherDocuments[applicant.did] = applicant.document
+        ..answers[VtaTask.didsCreate] = {
+          'did': applicant.did,
+          'contextId': 'vta',
+          'signingKeyId': applicant.signingKeyId,
+        }
+        ..answers[VtaTask.disclosurePreview] = {
+          'previewId': 'preview-1',
+          'claims': [
+            {'type': 'name.legal', 'value': 'Ada Lovelace'},
+          ],
+        }
+        ..answers[VtaTask.disclosurePresent] = {'presented': true}
+        ..answerTo[VtaTask.exportSecret] = (payload) =>
+            applicant.exportAnswer(payload['keyId']);
+    });
+
+    test('offers a vetting way in and shows what it asks', () async {
+      await controller().onScanned(fakeVtcDid);
+      expect(state().ways.single.canApply, isTrue);
+
+      await controller().join();
+
+      expect(state().step, VtcJoinStep.vetting);
+      expect(state().vettingRequirements?.minStatements, 1);
+      expect(state().vettingProgress?.counted, isEmpty);
+      expect(state().vettingProgress?.satisfied, isFalse);
+    });
+
+    test('asks the only vetter listed with their code', () async {
+      await openVetting();
+
+      await controller().enterVettingCode();
+      expect(state().step, VtcJoinStep.enterVettingCode);
+      expect(state().vetterDid, network.vetterDid);
+
+      await controller().submitVettingCode('k7qf2m9x');
+      expect(state().step, VtcJoinStep.vetting);
+      expect(request().status, VtcVettingStatus.requested);
+      expect(request().vetterName, 'Bob');
+      expect(network.sentToMembers, hasLength(1));
+    });
+
+    test('keeps a code that cannot be one, sending nothing', () async {
+      await openVetting();
+      await controller().enterVettingCode();
+
+      await controller().submitVettingCode('1234');
+
+      expect(state().step, VtcJoinStep.enterVettingCode);
+      expect(state().vettingFailure, VettingFailure.invalidTicket);
+      expect(network.sentToMembers, isEmpty);
+    });
+
+    test('refuses a ticket of another community, sending nothing', () async {
+      await openVetting();
+
+      await controller().scanVettingTicket(
+        VettingTicket.spoken(
+          community: 'did:web:other.example',
+          vetter: network.vetterDid,
+          code: 'K7QF-2M9X',
+        )!.toString(),
+      );
+
+      expect(state().step, VtcJoinStep.vetting);
+      expect(state().vettingFailure, VettingFailure.otherCommunity);
+      expect(network.sentToMembers, isEmpty);
+    });
+
+    test('is vouched for, then applies with the statement', () async {
+      await askVetter();
+      await network.vetterAccepts(applicant, request().request);
+      await controller().checkVetting();
+      expect(request().status, VtcVettingStatus.accepted);
+
+      await network.vetterOpensSession(applicant);
+      await controller().checkVetting();
+      expect(state().step, VtcJoinStep.confirmMatch);
+
+      await controller().confirmMatch();
+      expect(state().step, VtcJoinStep.approveVettingCard);
+      expect(state().details.single.value, 'Ada Lovelace');
+
+      await controller().approveVettingCard();
+      expect(state().step, VtcJoinStep.vetting);
+      final sent = request();
+      expect(sent.status, VtcVettingStatus.cardSent);
+
+      await network.vetterVouches(
+        applicant,
+        session: sent.session!,
+        cardDigest: sent.cardDigest!,
+        identityCommitment: sent.identityCommitment!,
+      );
+      await controller().checkVetting();
+      expect(request().status, VtcVettingStatus.vouched);
+      expect(state().vettingProgress?.satisfied, isTrue);
+
+      await controller().sendVettedApplication();
+      expect(state().step, VtcJoinStep.joined);
+      final submit = network.joinRequests.lastWhere(
+        (r) => r['type'] == JoinTask.submit,
+      );
+      expect(
+        ((submit['payload'] as Map)['vp'] as Map)['verifiableCredential'],
+        [request().statement],
+      );
+    });
+
+    test('ends the session when the codes do not match', () async {
+      await askVetter();
+      await network.vetterAccepts(applicant, request().request);
+      await network.vetterOpensSession(applicant);
+      await controller().checkVetting();
+
+      await controller().declineSession();
+
+      expect(state().step, VtcJoinStep.vetting);
+      expect(request().status, VtcVettingStatus.abandoned);
+      expect(network.sentToMembers, hasLength(1));
+    });
+
+    test('picks up where it was when the community is opened again', () async {
+      await askVetter();
+      container.dispose();
+      useService();
+
+      await controller().onScanned(fakeVtcDid);
+
+      expect(state().step, VtcJoinStep.vetting);
+      expect(request().status, VtcVettingStatus.requested);
     });
   });
 }

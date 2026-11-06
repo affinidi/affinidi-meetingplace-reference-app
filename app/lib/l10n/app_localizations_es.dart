@@ -3786,4 +3786,163 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get vtcGroupChatLinkDone => 'Done';
+
+  @override
+  String get vtcJoinVettingTitle => 'Meet a vetter';
+
+  @override
+  String vtcJoinVettingIntro(String name) {
+    return '$name asks to meet you first. One of its vetters checks who you are, in person, and vouches for you.';
+  }
+
+  @override
+  String vtcJoinVettingProgress(int have, int needed) {
+    return '$have of $needed vetters vouched for you';
+  }
+
+  @override
+  String vtcJoinVettingMethodNeed(int count, String method) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count more must meet you',
+      one: '1 more must meet you',
+    );
+    String _temp1 = intl.Intl.selectLogic(method, {
+      'inPerson': 'in person',
+      'video': 'over video',
+      'priorAcquaintance': 'and know you already',
+      'other': '',
+    });
+    return '$_temp0 $_temp1';
+  }
+
+  @override
+  String vtcJoinVettingChecks(String claims) {
+    return 'Vetters check: $claims';
+  }
+
+  @override
+  String vtcJoinVettingMaxAge(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: 'A vouch counts for $days days',
+      one: 'A vouch counts for 1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get vtcJoinVettingNotIndependent =>
+      'These vouches don\'t all count together. Ask another vetter.';
+
+  @override
+  String get vtcJoinVettersHeading => 'Your vetters';
+
+  @override
+  String vtcJoinVettingStatus(String status) {
+    String _temp0 = intl.Intl.selectLogic(status, {
+      'requested': 'Waiting for them to answer',
+      'accepted': 'Confirmed as a vetter · waiting for them to start',
+      'inSession': 'Compare the match code',
+      'cardSent': 'Waiting for their vouch',
+      'vouched': 'Vouched for you',
+      'declined': 'Declined to vouch',
+      'refused': 'Couldn\'t go ahead',
+      'abandoned': 'You ended the session',
+      'other': '',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String vtcJoinVettingFailure(String reason) {
+    String _temp0 = intl.Intl.selectLogic(reason, {
+      'otherCommunity': 'This ticket is for another community.',
+      'invalidTicket':
+          'The vetter didn\'t take this ticket or code. It may have expired or been used. Ask them for a new one.',
+      'unavailable': 'The vetter can\'t vet you right now.',
+      'notVetter':
+          'This person couldn\'t show that the community made them a vetter, so nothing was shared.',
+      'vetterRevoked': 'The community no longer lets this person vet.',
+      'sessionExpired':
+          'The session has ended. Ask the vetter to start a new one.',
+      'badAnswer':
+          'The vetter\'s answer couldn\'t be checked, so it was ignored.',
+      'other': 'The vetter refused.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get vtcJoinVettingScanAction => 'Scan a vetter\'s ticket';
+
+  @override
+  String get vtcJoinVettingCodeAction => 'Enter a vetter\'s code';
+
+  @override
+  String get vtcJoinVettingSendAction => 'Send application';
+
+  @override
+  String get vtcJoinChooseVetterTitle => 'Who are you meeting?';
+
+  @override
+  String get vtcJoinChooseVetterIntro =>
+      'Pick the vetter in front of you. Names are the vetters\' own.';
+
+  @override
+  String vtcJoinNoVetters(String name) {
+    return '$name lists no vetters. Scan your vetter\'s ticket instead.';
+  }
+
+  @override
+  String vtcJoinVettingCodeTitle(String vetter) {
+    return 'Enter $vetter\'s code';
+  }
+
+  @override
+  String get vtcJoinVettingCodeIntro =>
+      'Ask them to read out the code their app shows.';
+
+  @override
+  String get vtcJoinVettingCodeHint => 'Code, e.g. K7QF-2M9X';
+
+  @override
+  String vtcJoinVettingVerified(String vetter, String name, String date) {
+    return '$vetter is a vetter of $name until $date.';
+  }
+
+  @override
+  String get vtcJoinMatchTitle => 'Do the codes match?';
+
+  @override
+  String vtcJoinMatchIntro(String vetter) {
+    return '$vetter sees a code too. Read yours out and check it\'s the same.';
+  }
+
+  @override
+  String get vtcJoinMatchYes => 'They match';
+
+  @override
+  String get vtcJoinMatchNo => 'They don\'t match';
+
+  @override
+  String vtcJoinVettingCardTitle(String vetter) {
+    return 'Show these details to $vetter?';
+  }
+
+  @override
+  String vtcJoinVettingCardNote(String vetter) {
+    return 'Only $vetter sees these. They check them against your ID, and the community gets their vouch, not your details.';
+  }
+
+  @override
+  String get vtcJoinVettingCardDecline => 'Don\'t share';
+
+  @override
+  String get vtcJoinMatchCodeHeading => 'Your match code';
+
+  @override
+  String get vtcJoinVettingCardHeading => 'Details for your vetter';
 }

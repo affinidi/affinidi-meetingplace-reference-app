@@ -3729,5 +3729,198 @@
 	"vtcGroupChatLinkDone": "Done",
 	"@vtcGroupChatLinkDone": {
 		"description": "Closes the dialog showing a group chat's link"
+	},
+	"vtcJoinVettingTitle": "Meet a vetter",
+	"@vtcJoinVettingTitle": {
+		"description": "Title of the overview of being vetted for a community"
+	},
+	"vtcJoinVettingIntro": "{name} asks to meet you first. One of its vetters checks who you are, in person, and vouches for you.",
+	"@vtcJoinVettingIntro": {
+		"description": "What vetting means, on its overview",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinVettingProgress": "{have} of {needed} vetters vouched for you",
+	"@vtcJoinVettingProgress": {
+		"description": "How many vetters vouched so far",
+		"placeholders": {
+			"have": {
+				"type": "int"
+			},
+			"needed": {
+				"type": "int"
+			}
+		}
+	},
+	"vtcJoinVettingMethodNeed": "{count, plural, =1{1 more must meet you} other{{count} more must meet you}} {method, select, inPerson{in person} video{over video} priorAcquaintance{and know you already} other{}}",
+	"@vtcJoinVettingMethodNeed": {
+		"description": "A vetting method the community still needs statements by",
+		"placeholders": {
+			"count": {
+				"type": "int"
+			},
+			"method": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinVettingChecks": "Vetters check: {claims}",
+	"@vtcJoinVettingChecks": {
+		"description": "The details each vetter must check",
+		"placeholders": {
+			"claims": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinVettingMaxAge": "{days, plural, =1{A vouch counts for 1 day} other{A vouch counts for {days} days}}",
+	"@vtcJoinVettingMaxAge": {
+		"description": "How long a vetter's statement counts",
+		"placeholders": {
+			"days": {
+				"type": "int"
+			}
+		}
+	},
+	"vtcJoinVettingNotIndependent": "These vouches don't all count together. Ask another vetter.",
+	"@vtcJoinVettingNotIndependent": {
+		"description": "The statements break the community's independence rules"
+	},
+	"vtcJoinVettersHeading": "Your vetters",
+	"@vtcJoinVettersHeading": {
+		"description": "Heading of the vetters asked"
+	},
+	"vtcJoinVettingStatus": "{status, select, requested{Waiting for them to answer} accepted{Confirmed as a vetter · waiting for them to start} inSession{Compare the match code} cardSent{Waiting for their vouch} vouched{Vouched for you} declined{Declined to vouch} refused{Couldn't go ahead} abandoned{You ended the session} other{}}",
+	"@vtcJoinVettingStatus": {
+		"description": "Where vetting by one vetter stands",
+		"placeholders": {
+			"status": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinVettingFailure": "{reason, select, otherCommunity{This ticket is for another community.} invalidTicket{The vetter didn't take this ticket or code. It may have expired or been used. Ask them for a new one.} unavailable{The vetter can't vet you right now.} notVetter{This person couldn't show that the community made them a vetter, so nothing was shared.} vetterRevoked{The community no longer lets this person vet.} sessionExpired{The session has ended. Ask the vetter to start a new one.} badAnswer{The vetter's answer couldn't be checked, so it was ignored.} other{The vetter refused.}}",
+	"@vtcJoinVettingFailure": {
+		"description": "Why a vetting step could not go ahead",
+		"placeholders": {
+			"reason": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinVettingScanAction": "Scan a vetter's ticket",
+	"@vtcJoinVettingScanAction": {
+		"description": "Scans the QR code a vetter shows"
+	},
+	"vtcJoinVettingCodeAction": "Enter a vetter's code",
+	"@vtcJoinVettingCodeAction": {
+		"description": "Types the code a vetter reads out"
+	},
+	"vtcJoinVettingSendAction": "Send application",
+	"@vtcJoinVettingSendAction": {
+		"description": "Applies with the statements gathered"
+	},
+	"vtcJoinChooseVetterTitle": "Who are you meeting?",
+	"@vtcJoinChooseVetterTitle": {
+		"description": "Title of picking the vetter in front of the member"
+	},
+	"vtcJoinChooseVetterIntro": "Pick the vetter in front of you. Names are the vetters' own.",
+	"@vtcJoinChooseVetterIntro": {
+		"description": "Picking a vetter; names are self-asserted"
+	},
+	"vtcJoinNoVetters": "{name} lists no vetters. Scan your vetter's ticket instead.",
+	"@vtcJoinNoVetters": {
+		"description": "The community lists no vetters",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinVettingCodeTitle": "Enter {vetter}'s code",
+	"@vtcJoinVettingCodeTitle": {
+		"description": "Title of typing a vetter's code",
+		"placeholders": {
+			"vetter": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinVettingCodeIntro": "Ask them to read out the code their app shows.",
+	"@vtcJoinVettingCodeIntro": {
+		"description": "How to get a vetter's code"
+	},
+	"vtcJoinVettingCodeHint": "Code, e.g. K7QF-2M9X",
+	"@vtcJoinVettingCodeHint": {
+		"description": "Hint of the vetter code field"
+	},
+	"vtcJoinVettingVerified": "{vetter} is a vetter of {name} until {date}.",
+	"@vtcJoinVettingVerified": {
+		"description": "The vetter's role was checked against the community",
+		"placeholders": {
+			"vetter": {
+				"type": "String"
+			},
+			"name": {
+				"type": "String"
+			},
+			"date": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinMatchTitle": "Do the codes match?",
+	"@vtcJoinMatchTitle": {
+		"description": "Title of comparing the session's match code"
+	},
+	"vtcJoinMatchIntro": "{vetter} sees a code too. Read yours out and check it's the same.",
+	"@vtcJoinMatchIntro": {
+		"description": "How to compare the match code",
+		"placeholders": {
+			"vetter": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinMatchYes": "They match",
+	"@vtcJoinMatchYes": {
+		"description": "The match codes are the same"
+	},
+	"vtcJoinMatchNo": "They don't match",
+	"@vtcJoinMatchNo": {
+		"description": "The match codes differ; ends the session"
+	},
+	"vtcJoinVettingCardTitle": "Show these details to {vetter}?",
+	"@vtcJoinVettingCardTitle": {
+		"description": "Title of approving the vetting card",
+		"placeholders": {
+			"vetter": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinVettingCardNote": "Only {vetter} sees these. They check them against your ID, and the community gets their vouch, not your details.",
+	"@vtcJoinVettingCardNote": {
+		"description": "Who sees the vetting card",
+		"placeholders": {
+			"vetter": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinVettingCardDecline": "Don't share",
+	"@vtcJoinVettingCardDecline": {
+		"description": "Ends the session without sending the card"
+	},
+	"vtcJoinMatchCodeHeading": "Your match code",
+	"@vtcJoinMatchCodeHeading": {
+		"description": "Heading of the session's match code"
+	},
+	"vtcJoinVettingCardHeading": "Details for your vetter",
+	"@vtcJoinVettingCardHeading": {
+		"description": "Heading of the details a vetting card carries"
 	}
 }

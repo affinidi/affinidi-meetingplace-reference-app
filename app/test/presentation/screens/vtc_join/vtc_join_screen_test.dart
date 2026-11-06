@@ -17,6 +17,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/services/camera_service
 import 'package:mpx_flutter_reference_app/infrastructure/vtc/user_verification_key.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_flow_diagram.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_phrase_view.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_trail.dart';
@@ -1279,6 +1280,124 @@ void main() {
       await tapVisible(tester, find.text('Retry'));
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('vtc_join_did')), findsOneWidget);
+    });
+  });
+
+  group('VtcJoinScreen vetting', () {
+    late FakePersona applicant;
+
+    setUp(() {
+      applicant = FakePersona(mediatorDid: network.mediatorDid);
+      network
+        ..joinManifest = {
+          'communityDid': fakeVtcDid,
+          'branding': {'displayName': 'Football club'},
+          'criteria': [
+            {
+              'id': 'vetted',
+              'admission': 'automatic',
+              'requirementsDigest': 'zVetted',
+              'vetting': {
+                'version': '0.1',
+                'statementType': VettingStatement.predicate,
+                'minStatements': 2,
+                'acceptedMethods': ['inPerson'],
+                'eligibleVetters': {'role': 'vetter'},
+                'requiredClaims': ['name.legal'],
+                'maxStatementAge': 'P30D',
+              },
+            },
+          ],
+        }
+        ..listedVetters = [
+          {
+            'vetterDid': network.vetterDid,
+            'displayName': 'Bob',
+            'methods': ['inPerson'],
+          },
+        ];
+      network.vta
+        ..persona = applicant
+        ..otherDocuments[applicant.did] = applicant.document
+        ..answers[VtaTask.didsCreate] = {
+          'did': applicant.did,
+          'contextId': 'vta',
+          'signingKeyId': applicant.signingKeyId,
+        }
+        ..answerTo[VtaTask.exportSecret] = (payload) =>
+            applicant.exportAnswer(payload['keyId']);
+    });
+
+    Future<void> openVetting(WidgetTester tester) async {
+      await pumpScreen(tester);
+      await enterCode(tester, fakeVtcDid);
+      await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
+      await settle(tester);
+    }
+
+    Future<void> askBob(WidgetTester tester) async {
+      await openVetting(tester);
+      await tapVisible(tester, find.byKey(const Key('vtc_join_vetting_code')));
+      await settle(tester);
+      await tester.enterText(
+        find.descendant(
+          of: find.byKey(const Key('vtc_join_vetting_code_field')),
+          matching: find.byType(EditableText),
+        ),
+        'K7QF-2M9X',
+      );
+      await tester.pump();
+      await tapVisible(tester, find.text('Continue'));
+      await settle(tester);
+    }
+
+    testWidgets('says what the community asks of vetting', (tester) async {
+      await openVetting(tester);
+
+      expect(title('Meet a vetter'), findsOneWidget);
+      expect(find.text('0 of 2 vetters vouched for you'), findsOneWidget);
+      expect(find.text('A vouch counts for 30 days'), findsOneWidget);
+      expect(find.byKey(const Key('vtc_join_vetting_send')), findsNothing);
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+
+    testWidgets('asks the vetter whose code the member types', (tester) async {
+      await askBob(tester);
+
+      expect(title('Meet a vetter'), findsOneWidget);
+      expect(find.text('Bob'), findsOneWidget);
+      expect(find.text('Waiting for them to answer'), findsOneWidget);
+      expect(network.sentToMembers, hasLength(1));
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+
+    testWidgets('shows the match code of a session to compare', (tester) async {
+      await askBob(tester);
+      final vetting = (await tester.runAsync(
+        () => service.vetting(fakeVtcDid),
+      ))!;
+      late TrustTaskDocument session;
+      await tester.runAsync(() async {
+        await network.vetterAccepts(applicant, vetting.requests.single.request);
+        session = await network.vetterOpensSession(applicant);
+      });
+      // The overview checks every few seconds.
+      await tester.pump(VtcJoinController.pendingCheckInterval);
+      await settle(tester);
+
+      expect(title('Do the codes match?'), findsOneWidget);
+      expect(
+        tester.widget<Text>(find.byKey(const Key('vtc_join_match_code'))).data,
+        vettingMatchCode(session.id),
+      );
+      expect(find.textContaining('Bob is a vetter of Football club'), findsOne);
+
+      await tapVisible(tester, find.byKey(const Key('vtc_join_match_no')));
+      await settle(tester);
+
+      expect(find.text('You ended the session'), findsOneWidget);
+      expect(network.sentToMembers, hasLength(1));
+      await tester.pumpWidget(const SizedBox.shrink());
     });
   });
 }

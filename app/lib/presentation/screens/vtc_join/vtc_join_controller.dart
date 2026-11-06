@@ -13,6 +13,7 @@ import '../../../domain/models/identity/identity.dart';
 import '../../../domain/models/vtc/vtc_card_delivery.dart';
 import '../../../domain/models/vtc/vtc_community.dart';
 import '../../../domain/models/vtc/vtc_membership_card.dart';
+import '../../../domain/models/vtc/vtc_vetting.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import 'vtc_join_state.dart';
 
@@ -47,6 +48,17 @@ class VtcJoinController extends _$VtcJoinController {
   VtaPersona? _applicant;
   List<JoinAttribute> _attributes = const [];
 
+  /// The details awaiting approval for a vetting card. Kept in memory only.
+  DisclosurePreview? _vettingPreview;
+
+  /// Whether the application now goes out with the statements gathered,
+  /// rather than gathering more.
+  bool _sendingVetted = false;
+
+  /// Whether the vetters' answers are being picked up; checks do not
+  /// overlap.
+  bool _checkingVetting = false;
+
   /// Whether the membership card is being read; reads do not overlap.
   bool _readingCard = false;
 
@@ -79,14 +91,18 @@ class VtcJoinController extends _$VtcJoinController {
     listenSelf((previous, next) {
       final waiting =
           next.step == VtcJoinStep.pending ||
-          (next.step == VtcJoinStep.joined && next.membershipCard == null);
+          (next.step == VtcJoinStep.joined && next.membershipCard == null) ||
+          (next.step == VtcJoinStep.vetting &&
+              (next.vetting?.requests.any((r) => r.isOpen) ?? false));
       if (waiting) {
         _pendingCheck ??= Timer.periodic(
           pendingCheckInterval,
           // The step as it is at each tick, not as it was when set.
-          (_) => state.step == VtcJoinStep.pending
-              ? checkAgain()
-              : collectMembershipCard(),
+          (_) => switch (state.step) {
+            VtcJoinStep.pending => checkAgain(),
+            VtcJoinStep.vetting => checkVetting(),
+            _ => collectMembershipCard(),
+          },
         );
       } else {
         _pendingCheck?.cancel();
@@ -109,6 +125,8 @@ class VtcJoinController extends _$VtcJoinController {
     _personas = const [];
     _holders = const {};
     _sharing = null;
+    _vettingPreview = null;
+    _sendingVetted = false;
     state = VtcJoinState();
   }
 
@@ -168,6 +186,17 @@ class VtcJoinController extends _$VtcJoinController {
         requestId: community?.joinRequestId,
         denialReason: community?.rejectionReason,
       );
+      // Vetting under way picks up where it was.
+      final vetting = await _service.vetting(manifest.communityDid);
+      final vetted = manifest.criteria
+          .where((criterion) => criterion.id == vetting?.criterionId)
+          .firstOrNull;
+      if (state.step == VtcJoinStep.review &&
+          vetting != null &&
+          (vetted?.asksOnlyForVetting ?? false)) {
+        state = state.copyWith(chosenWayId: vetted!.id);
+        _showVetting(vetting);
+      }
     });
   }
 
@@ -222,7 +251,9 @@ class VtcJoinController extends _$VtcJoinController {
       .where(
         (criterion) =>
             criterion.id == state.chosenWayId &&
-            (criterion.isOpen || (_holders[criterion.id]?.isNotEmpty ?? false)),
+            (criterion.isOpen ||
+                criterion.asksOnlyForVetting ||
+                (_holders[criterion.id]?.isNotEmpty ?? false)),
       )
       .firstOrNull;
 
@@ -336,6 +367,10 @@ class VtcJoinController extends _$VtcJoinController {
   /// Applies, first asking the member to approve the profile details the
   /// community asks for, when it asks for any.
   Future<void> _apply(JoinManifest manifest, {VtaPersona? persona}) async {
+    if ((_chosenCriterion(manifest)?.asksForVetting ?? false) &&
+        !_sendingVetted) {
+      return _startVetting(manifest, persona);
+    }
     if (manifest.requestedAttributes.isEmpty) {
       return _sendOrAskCredential(manifest, persona);
     }
@@ -461,6 +496,274 @@ class VtcJoinController extends _$VtcJoinController {
         JoinNeedsMore() => VtcJoinStep.needsMore,
       },
     );
+  }
+
+  /// Records the identity applying, then shows the vetting it gathers.
+  Future<void> _startVetting(JoinManifest manifest, VtaPersona? persona) async {
+    await _service.joiningIdentity(
+      manifest,
+      persona: persona,
+      listInDirectory: state.listInDirectory,
+    );
+    final criterion = _chosenCriterion(manifest)!;
+    final vetting = await _service.vetting(manifest.communityDid);
+    _showVetting(
+      vetting?.criterionId == criterion.id
+          ? vetting!
+          : VtcVetting(
+              communityDid: manifest.communityDid,
+              criterionId: criterion.id,
+              vetterRole: criterion.vetting!.vetterRole,
+              salt: '',
+            ),
+    );
+  }
+
+  /// Shows the overview of [vetting], counted against the chosen way in.
+  void _showVetting(VtcVetting vetting, {VettingFailure? failure}) {
+    final requirements = _manifest == null
+        ? null
+        : _chosenCriterion(_manifest!)?.vetting;
+    state = state.copyWith(
+      step: VtcJoinStep.vetting,
+      vetting: vetting,
+      vettingRequirements: requirements,
+      vettingProgress: requirements == null
+          ? null
+          : VettingProgress.of(
+              requirements: requirements,
+              communityDid: vetting.communityDid,
+              statements: vetting.statements,
+              now: DateTime.now(),
+            ),
+      vetterDid: null,
+      details: const [],
+      vettingFailure: failure,
+    );
+  }
+
+  /// Picks up the vetters' answers. Quietly, as [checkAgain]: a check that
+  /// fails waits for the next. A session a vetter opened is shown at once
+  /// for the member to compare its match code.
+  Future<void> checkVetting() async {
+    final manifest = _manifest;
+    if (state.step != VtcJoinStep.vetting ||
+        manifest == null ||
+        _checkingVetting) {
+      return;
+    }
+    _checkingVetting = true;
+    try {
+      final vetting = await _service.checkVetting(manifest.communityDid);
+      // The member may have moved on while the vetters' answers came in.
+      if (!ref.mounted || state.step != VtcJoinStep.vetting) return;
+      if (vetting == null) return;
+      _showVetting(vetting, failure: state.vettingFailure);
+      final session = vetting.requests
+          .where((request) => request.status == VtcVettingStatus.inSession)
+          .firstOrNull;
+      if (session != null) {
+        state = state.copyWith(
+          step: VtcJoinStep.confirmMatch,
+          vetterDid: session.vetterDid,
+        );
+      }
+    } on MeetingPlaceVtcSDKException {
+      // The next check tries again.
+    } on VtaNotLinkedException {
+      _fail(VtcJoinFailure.vtaMissing);
+    } finally {
+      _checkingVetting = false;
+    }
+  }
+
+  /// Asks the vetter whose ticket the member scanned.
+  Future<void> scanVettingTicket(String text) async {
+    if (state.step != VtcJoinStep.vetting) return;
+    final ticket = VettingTicket.parse(text);
+    if (ticket == null) {
+      state = state.copyWith(vettingFailure: VettingFailure.invalidTicket);
+      return;
+    }
+    await _requestVetter(ticket);
+  }
+
+  /// Goes on to pick the vetter in front of the member, to type their code.
+  /// A community listing one vetter needs no picking.
+  Future<void> enterVettingCode() async {
+    final manifest = _manifest;
+    if (state.step != VtcJoinStep.vetting || manifest == null) return;
+    state = state.copyWith(step: VtcJoinStep.working, vettingFailure: null);
+    await _run(() async {
+      final vetters = await _service.vetters(manifest);
+      state = state.copyWith(
+        vetters: vetters,
+        step: vetters.length == 1
+            ? VtcJoinStep.enterVettingCode
+            : VtcJoinStep.chooseVetter,
+        vetterDid: vetters.length == 1 ? vetters.single.did : null,
+      );
+    });
+  }
+
+  /// Takes [vetterDid], one the community lists, as the vetter in front of
+  /// the member.
+  void chooseVetter(String vetterDid) {
+    if (state.step != VtcJoinStep.chooseVetter ||
+        !state.vetters.any((vetter) => vetter.did == vetterDid)) {
+      return;
+    }
+    state = state.copyWith(
+      step: VtcJoinStep.enterVettingCode,
+      vetterDid: vetterDid,
+    );
+  }
+
+  /// Asks the vetter at hand with the [code] they read out.
+  Future<void> submitVettingCode(String code) async {
+    final vetterDid = state.vetterDid;
+    final communityDid = state.communityDid;
+    if (state.step != VtcJoinStep.enterVettingCode ||
+        vetterDid == null ||
+        communityDid == null) {
+      return;
+    }
+    final ticket = VettingTicket.spoken(
+      community: communityDid,
+      vetter: vetterDid,
+      code: code,
+    );
+    if (ticket == null) {
+      state = state.copyWith(vettingFailure: VettingFailure.invalidTicket);
+      return;
+    }
+    await _requestVetter(ticket);
+  }
+
+  Future<void> _requestVetter(VettingTicket ticket) async {
+    final manifest = _manifest;
+    final criterion = manifest == null ? null : _chosenCriterion(manifest);
+    if (manifest == null || criterion == null) return;
+    final name = state.vetters
+        .where((vetter) => vetter.did == ticket.vetter)
+        .firstOrNull
+        ?.displayName;
+    state = state.copyWith(step: VtcJoinStep.working, vettingFailure: null);
+    await _run(() async {
+      _showVetting(
+        await _service.startVetting(
+          manifest,
+          criterion: criterion,
+          ticket: ticket,
+          vetterName: name,
+        ),
+      );
+    });
+  }
+
+  /// Goes back to the vetting overview, e.g. from picking a vetter.
+  void backToVetting() {
+    final vetting = state.vetting;
+    if (vetting == null) return;
+    _showVetting(vetting);
+  }
+
+  /// The member confirmed the match codes are the same: shows the details
+  /// the vetting card would carry, as the VTA would disclose them.
+  Future<void> confirmMatch() async {
+    final manifest = _manifest;
+    final vetterDid = state.vetterDid;
+    if (state.step != VtcJoinStep.confirmMatch ||
+        manifest == null ||
+        vetterDid == null) {
+      return;
+    }
+    state = state.copyWith(step: VtcJoinStep.working);
+    await _run(() async {
+      final preview = await _service.previewVettingCard(
+        manifest.communityDid,
+        vetterDid,
+      );
+      final held = {
+        for (final claim in preview.claims)
+          if (claim.value != null) claim.type,
+      };
+      final session = state.vetting?.requestTo(vetterDid)?.session;
+      final required = switch (session?['payload']) {
+        {'requiredClaims': final List<dynamic> claims} => claims,
+        _ => const <dynamic>[],
+      };
+      if (!required.every(held.contains)) {
+        return _fail(VtcJoinFailure.detailsMissing);
+      }
+      _vettingPreview = preview;
+      state = state.copyWith(
+        step: VtcJoinStep.approveVettingCard,
+        details: [
+          for (final claim in preview.claims)
+            if (claim.value case final Object value)
+              VtcJoinDetail(type: claim.type, value: _shown(value)),
+        ],
+      );
+    });
+  }
+
+  /// Sends the vetter the card with the details the member approved.
+  Future<void> approveVettingCard() async {
+    final manifest = _manifest;
+    final vetterDid = state.vetterDid;
+    final preview = _vettingPreview;
+    if (state.step != VtcJoinStep.approveVettingCard ||
+        manifest == null ||
+        vetterDid == null ||
+        preview == null) {
+      return;
+    }
+    state = state.copyWith(step: VtcJoinStep.working);
+    _vettingPreview = null;
+    await _run(() async {
+      _showVetting(
+        await _service.sendVettingCard(
+          manifest.communityDid,
+          vetterDid,
+          preview: preview,
+        ),
+      );
+    });
+  }
+
+  /// Ends the session at hand without sending a card: the match codes
+  /// differ, or the member declines.
+  Future<void> declineSession() async {
+    final manifest = _manifest;
+    final vetterDid = state.vetterDid;
+    if ((state.step != VtcJoinStep.confirmMatch &&
+            state.step != VtcJoinStep.approveVettingCard) ||
+        manifest == null ||
+        vetterDid == null) {
+      return;
+    }
+    _vettingPreview = null;
+    state = state.copyWith(step: VtcJoinStep.working);
+    await _run(
+      () async => _showVetting(
+        await _service.abandonVetting(manifest.communityDid, vetterDid),
+      ),
+    );
+  }
+
+  /// Applies with the statements gathered, once they meet what the
+  /// community asks.
+  Future<void> sendVettedApplication() async {
+    final manifest = _manifest;
+    if (state.step != VtcJoinStep.vetting ||
+        manifest == null ||
+        !(state.vettingProgress?.satisfied ?? false)) {
+      return;
+    }
+    state = state.copyWith(step: VtcJoinStep.working);
+    _sendingVetted = true;
+    await _run(() => _apply(manifest));
   }
 
   /// Asks the community whether it decided on the open application. The
@@ -750,6 +1053,13 @@ class VtcJoinController extends _$VtcJoinController {
   Future<void> _run(Future<void> Function() step) async {
     try {
       await step();
+    } on VettingException catch (error) {
+      // Not logged: only what failed, which the overview shows.
+      if (state.vetting case final vetting?) {
+        _showVetting(vetting, failure: error.failure);
+      } else {
+        _fail(VtcJoinFailure.badAnswer);
+      }
     } on InvalidCommunityCodeException {
       _fail(VtcJoinFailure.invalidCode);
     } on VtaNotLinkedException {

@@ -47,7 +47,7 @@ final class VtcJoinControllerProvider
   }
 }
 
-String _$vtcJoinControllerHash() => r'7b1a1d7f76d8eed878379508bbdd232a6c3ff170';
+String _$vtcJoinControllerHash() => r'50ca80ae0a5e3eb598eaad02524100936e33a89a';
 
 /// Drives joining one community, from its scanned code to the community's
 /// answer. Only a failure's code is logged; never a DID, key or document.
