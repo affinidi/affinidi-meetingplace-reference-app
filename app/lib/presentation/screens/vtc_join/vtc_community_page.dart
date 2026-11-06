@@ -3,10 +3,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../application/services/identities_service/identities_service.dart';
+import '../../../application/services/vtc_service/vtc_service.dart';
 import '../../../domain/models/vtc/vtc_card_delivery.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
+import '../vtc_vetting_desk/vtc_vetting_desk_screen.dart';
 import 'vtc_card_delivery_trail.dart';
 import 'vtc_community_profile.dart';
 import 'vtc_flow_diagram.dart';
@@ -22,6 +24,9 @@ const _customRolePrefix = 'custom:';
 /// community defined itself never does, whatever its name.
 const _adminRole = 'admin';
 
+/// The roles that vet applicants: built in, or as a community names it.
+const _vetterRoles = {'vetter', '${_customRolePrefix}vetter'};
+
 /// The member's [role] in plain words; a role the community defined itself
 /// by its own name, which never reads as a built-in one.
 String _roleName(AppLocalizations l10n, String role) =>
@@ -32,8 +37,9 @@ String _roleName(AppLocalizations l10n, String role) =>
 /// The page of a community the member belongs to, which they come back to:
 /// a welcome right after joining, else the community's logo and name; their
 /// role, with the community's settings behind a button beside it for an
-/// administrator, the membership card it issued — or that it is on its way
-/// to the member's VTA — what the community is, then Done and [leave].
+/// administrator and the vetting desk for a vetter, the membership card it
+/// issued — or that it is on its way to the member's VTA — what the
+/// community is, then Done and [leave].
 class VtcCommunityPage extends StatelessWidget {
   const VtcCommunityPage({
     required this.state,
@@ -91,6 +97,11 @@ class VtcCommunityPage extends StatelessWidget {
               _ => null,
             },
           ),
+        if ((state.role, state.communityDid) case (
+          final role?,
+          final communityDid?,
+        ) when _vetterRoles.contains(role))
+          _VettingDeskEntry(communityDid: communityDid, communityName: name),
         const SizedBox(height: 4),
         if (card != null) ...[
           VtcMembershipCardView(
@@ -146,6 +157,37 @@ class VtcCommunityPage extends StatelessWidget {
         OnboardingButton(label: l10n.generalDone, onPressed: onDone),
         leave,
       ],
+    );
+  }
+}
+
+/// Opens the vetting desk, while the member's vetter card for the community
+/// at [communityDid] holds; else shows nothing.
+class _VettingDeskEntry extends HookConsumerWidget {
+  const _VettingDeskEntry({
+    required this.communityDid,
+    required this.communityName,
+  });
+
+  final String communityDid;
+  final String communityName;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final service = ref.read(vtcServiceProvider);
+    final canVet = useFuture(
+      useMemoized(() => service.canVet(communityDid), [communityDid]),
+    );
+    if (canVet.data != true) return const SizedBox.shrink();
+    return OnboardingButton(
+      key: const Key('vtc_community_vetting_desk'),
+      label: context.l10n.vtcVetterStart,
+      isOutlined: true,
+      onPressed: () => VtcVettingDeskScreen.show(
+        context,
+        communityDid: communityDid,
+        communityName: communityName,
+      ),
     );
   }
 }

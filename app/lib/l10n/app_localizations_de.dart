@@ -3092,6 +3092,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'moderator': 'Moderator',
       'issuer': 'Issuer',
       'member': 'Member',
+      'vetter': 'Vetter',
       'other': '$role',
     });
     return '$_temp0';
@@ -3955,4 +3956,112 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get vtcJoinVettingCardHeading => 'Details for your vetter';
+
+  @override
+  String get vtcVetterStart => 'Vet applicants';
+
+  @override
+  String vtcVetterTitle(String name) {
+    return 'Vetting for $name';
+  }
+
+  @override
+  String get vtcVetterIntro =>
+      'Show your ticket to someone who wants to join. You\'ll check their details in person.';
+
+  @override
+  String vtcVetterNotVetter(String name) {
+    return 'You can\'t vet for $name right now: your vetter card has expired or been withdrawn.';
+  }
+
+  @override
+  String get vtcVetterTicketHeading => 'Your vetting ticket';
+
+  @override
+  String get vtcVetterTicketCodeHint => 'Or read out this code';
+
+  @override
+  String vtcVetterTicketValid(int uses, String date) {
+    String _temp0 = intl.Intl.pluralLogic(
+      uses,
+      locale: localeName,
+      other: 'Good for $uses more applicants',
+      one: 'Good for 1 more applicant',
+    );
+    return '$_temp0 until $date.';
+  }
+
+  @override
+  String get vtcVetterNewTicket => 'New ticket';
+
+  @override
+  String get vtcVetterUses => 'Applicants';
+
+  @override
+  String get vtcVetterDays => 'Days valid';
+
+  @override
+  String get vtcVetterShowTicket => 'Show a vetting ticket';
+
+  @override
+  String get vtcVetterWaiting =>
+      'Waiting for someone to scan the ticket or enter the code…';
+
+  @override
+  String get vtcVetterMatchIntro =>
+      'The applicant sees a code too. Ask them to read theirs out and check it\'s the same.';
+
+  @override
+  String get vtcVetterCardWaiting => 'Waiting for the applicant\'s details…';
+
+  @override
+  String get vtcVetterCardHeading => 'Applicant\'s details';
+
+  @override
+  String get vtcVetterCardIntro =>
+      'Check these details against their ID document, with them in front of you.';
+
+  @override
+  String get vtcVetterDocumentHeading => 'Document you checked';
+
+  @override
+  String vtcVetterDocument(String document) {
+    String _temp0 = intl.Intl.selectLogic(document, {
+      'passport': 'Passport',
+      'nationalId': 'National ID card',
+      'driverLicence': 'Driving licence',
+      'other': '$document',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get vtcVetterCheckedInPerson =>
+      'I checked these details against the document, with the applicant in front of me.';
+
+  @override
+  String get vtcVetterIssue => 'Vouch for them';
+
+  @override
+  String get vtcVetterDecline => 'Decline';
+
+  @override
+  String get vtcVetterIssuedHeading => 'Statements you issued';
+
+  @override
+  String vtcVetterIssuedLine(String date, String until) {
+    return 'Issued $date, valid until $until';
+  }
+
+  @override
+  String get vtcVetterIssuedNone => 'None yet.';
+
+  @override
+  String vtcVetterFailure(String failure) {
+    String _temp0 = intl.Intl.selectLogic(failure, {
+      'notVetter': 'Your vetter card is no longer valid.',
+      'other': 'Something went wrong. Check your connection and try again.',
+    });
+    return '$_temp0';
+  }
 }

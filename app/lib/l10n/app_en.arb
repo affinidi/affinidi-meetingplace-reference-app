@@ -2925,7 +2925,7 @@
 	"@vtcCommunitySettings": {
 		"description": "Tooltip of the button next to the member's role that opens the community's settings, such as its join phrase"
 	},
-	"vtcCommunityRoleName": "{role, select, admin{Administrator} moderator{Moderator} issuer{Issuer} member{Member} other{{role}}}",
+	"vtcCommunityRoleName": "{role, select, admin{Administrator} moderator{Moderator} issuer{Issuer} member{Member} vetter{Vetter} other{{role}}}",
 	"@vtcCommunityRoleName": {
 		"description": "The member's role in a community; a role the community defined itself is shown by its own name",
 		"placeholders": {
@@ -3922,5 +3922,141 @@
 	"vtcJoinVettingCardHeading": "Details for your vetter",
 	"@vtcJoinVettingCardHeading": {
 		"description": "Heading of the details a vetting card carries"
+	},
+	"vtcVetterStart": "Vet applicants",
+	"@vtcVetterStart": {
+		"description": "Opens the vetting desk of a community where the member is a vetter"
+	},
+	"vtcVetterTitle": "Vetting for {name}",
+	"@vtcVetterTitle": {
+		"description": "Title of the vetting desk",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcVetterIntro": "Show your ticket to someone who wants to join. You'll check their details in person.",
+	"@vtcVetterIntro": {
+		"description": "What the vetting desk is for"
+	},
+	"vtcVetterNotVetter": "You can't vet for {name} right now: your vetter card has expired or been withdrawn.",
+	"@vtcVetterNotVetter": {
+		"description": "The member holds no valid vetter card for the community",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcVetterTicketHeading": "Your vetting ticket",
+	"@vtcVetterTicketHeading": {
+		"description": "Heading of the ticket's QR code"
+	},
+	"vtcVetterTicketCodeHint": "Or read out this code",
+	"@vtcVetterTicketCodeHint": {
+		"description": "Shown above the ticket's short code"
+	},
+	"vtcVetterTicketValid": "{uses, plural, =1{Good for 1 more applicant} other{Good for {uses} more applicants}} until {date}.",
+	"@vtcVetterTicketValid": {
+		"description": "How long the ticket on show still works",
+		"placeholders": {
+			"uses": {
+				"type": "int"
+			},
+			"date": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcVetterNewTicket": "New ticket",
+	"@vtcVetterNewTicket": {
+		"description": "Replaces the ticket on show with a new one"
+	},
+	"vtcVetterUses": "Applicants",
+	"@vtcVetterUses": {
+		"description": "How many applicants a new ticket is good for"
+	},
+	"vtcVetterDays": "Days valid",
+	"@vtcVetterDays": {
+		"description": "How many days a new ticket is good for"
+	},
+	"vtcVetterShowTicket": "Show a vetting ticket",
+	"@vtcVetterShowTicket": {
+		"description": "Creates a ticket and shows it"
+	},
+	"vtcVetterWaiting": "Waiting for someone to scan the ticket or enter the code…",
+	"@vtcVetterWaiting": {
+		"description": "The desk waits for an applicant"
+	},
+	"vtcVetterMatchIntro": "The applicant sees a code too. Ask them to read theirs out and check it's the same.",
+	"@vtcVetterMatchIntro": {
+		"description": "Before comparing the match code with the applicant"
+	},
+	"vtcVetterCardWaiting": "Waiting for the applicant's details…",
+	"@vtcVetterCardWaiting": {
+		"description": "The applicant has yet to send their card"
+	},
+	"vtcVetterCardHeading": "Applicant's details",
+	"@vtcVetterCardHeading": {
+		"description": "Heading of the details on the applicant's card"
+	},
+	"vtcVetterCardIntro": "Check these details against their ID document, with them in front of you.",
+	"@vtcVetterCardIntro": {
+		"description": "How to check the applicant's details"
+	},
+	"vtcVetterDocumentHeading": "Document you checked",
+	"@vtcVetterDocumentHeading": {
+		"description": "Heading of the choice of ID document"
+	},
+	"vtcVetterDocument": "{document, select, passport{Passport} nationalId{National ID card} driverLicence{Driving licence} other{{document}}}",
+	"@vtcVetterDocument": {
+		"description": "A kind of ID document a vetter checks",
+		"placeholders": {
+			"document": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcVetterCheckedInPerson": "I checked these details against the document, with the applicant in front of me.",
+	"@vtcVetterCheckedInPerson": {
+		"description": "The vetter confirms the in-person check"
+	},
+	"vtcVetterIssue": "Vouch for them",
+	"@vtcVetterIssue": {
+		"description": "Issues the vetting statement"
+	},
+	"vtcVetterDecline": "Decline",
+	"@vtcVetterDecline": {
+		"description": "Tells the applicant the vetter won't vouch"
+	},
+	"vtcVetterIssuedHeading": "Statements you issued",
+	"@vtcVetterIssuedHeading": {
+		"description": "Heading of the vetter's issued statements, kept on their VTA"
+	},
+	"vtcVetterIssuedLine": "Issued {date}, valid until {until}",
+	"@vtcVetterIssuedLine": {
+		"description": "One issued statement",
+		"placeholders": {
+			"date": {
+				"type": "String"
+			},
+			"until": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcVetterIssuedNone": "None yet.",
+	"@vtcVetterIssuedNone": {
+		"description": "The vetter has issued no statement"
+	},
+	"vtcVetterFailure": "{failure, select, notVetter{Your vetter card is no longer valid.} other{Something went wrong. Check your connection and try again.}}",
+	"@vtcVetterFailure": {
+		"description": "A vetting desk step could not go ahead",
+		"placeholders": {
+			"failure": {
+				"type": "String"
+			}
+		}
 	}
 }

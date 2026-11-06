@@ -4583,7 +4583,7 @@ abstract class AppLocalizations {
   /// The member's role in a community; a role the community defined itself is shown by its own name
   ///
   /// In en, this message translates to:
-  /// **'{role, select, admin{Administrator} moderator{Moderator} issuer{Issuer} member{Member} other{{role}}}'**
+  /// **'{role, select, admin{Administrator} moderator{Moderator} issuer{Issuer} member{Member} vetter{Vetter} other{{role}}}'**
   String vtcCommunityRoleName(String role);
 
   /// No description provided for @vtcJoinProfileHeading.
@@ -5839,6 +5839,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Details for your vetter'**
   String get vtcJoinVettingCardHeading;
+
+  /// Opens the vetting desk of a community where the member is a vetter
+  ///
+  /// In en, this message translates to:
+  /// **'Vet applicants'**
+  String get vtcVetterStart;
+
+  /// Title of the vetting desk
+  ///
+  /// In en, this message translates to:
+  /// **'Vetting for {name}'**
+  String vtcVetterTitle(String name);
+
+  /// What the vetting desk is for
+  ///
+  /// In en, this message translates to:
+  /// **'Show your ticket to someone who wants to join. You\'ll check their details in person.'**
+  String get vtcVetterIntro;
+
+  /// The member holds no valid vetter card for the community
+  ///
+  /// In en, this message translates to:
+  /// **'You can\'t vet for {name} right now: your vetter card has expired or been withdrawn.'**
+  String vtcVetterNotVetter(String name);
+
+  /// Heading of the ticket's QR code
+  ///
+  /// In en, this message translates to:
+  /// **'Your vetting ticket'**
+  String get vtcVetterTicketHeading;
+
+  /// Shown above the ticket's short code
+  ///
+  /// In en, this message translates to:
+  /// **'Or read out this code'**
+  String get vtcVetterTicketCodeHint;
+
+  /// How long the ticket on show still works
+  ///
+  /// In en, this message translates to:
+  /// **'{uses, plural, =1{Good for 1 more applicant} other{Good for {uses} more applicants}} until {date}.'**
+  String vtcVetterTicketValid(int uses, String date);
+
+  /// Replaces the ticket on show with a new one
+  ///
+  /// In en, this message translates to:
+  /// **'New ticket'**
+  String get vtcVetterNewTicket;
+
+  /// How many applicants a new ticket is good for
+  ///
+  /// In en, this message translates to:
+  /// **'Applicants'**
+  String get vtcVetterUses;
+
+  /// How many days a new ticket is good for
+  ///
+  /// In en, this message translates to:
+  /// **'Days valid'**
+  String get vtcVetterDays;
+
+  /// Creates a ticket and shows it
+  ///
+  /// In en, this message translates to:
+  /// **'Show a vetting ticket'**
+  String get vtcVetterShowTicket;
+
+  /// The desk waits for an applicant
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for someone to scan the ticket or enter the code…'**
+  String get vtcVetterWaiting;
+
+  /// Before comparing the match code with the applicant
+  ///
+  /// In en, this message translates to:
+  /// **'The applicant sees a code too. Ask them to read theirs out and check it\'s the same.'**
+  String get vtcVetterMatchIntro;
+
+  /// The applicant has yet to send their card
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the applicant\'s details…'**
+  String get vtcVetterCardWaiting;
+
+  /// Heading of the details on the applicant's card
+  ///
+  /// In en, this message translates to:
+  /// **'Applicant\'s details'**
+  String get vtcVetterCardHeading;
+
+  /// How to check the applicant's details
+  ///
+  /// In en, this message translates to:
+  /// **'Check these details against their ID document, with them in front of you.'**
+  String get vtcVetterCardIntro;
+
+  /// Heading of the choice of ID document
+  ///
+  /// In en, this message translates to:
+  /// **'Document you checked'**
+  String get vtcVetterDocumentHeading;
+
+  /// A kind of ID document a vetter checks
+  ///
+  /// In en, this message translates to:
+  /// **'{document, select, passport{Passport} nationalId{National ID card} driverLicence{Driving licence} other{{document}}}'**
+  String vtcVetterDocument(String document);
+
+  /// The vetter confirms the in-person check
+  ///
+  /// In en, this message translates to:
+  /// **'I checked these details against the document, with the applicant in front of me.'**
+  String get vtcVetterCheckedInPerson;
+
+  /// Issues the vetting statement
+  ///
+  /// In en, this message translates to:
+  /// **'Vouch for them'**
+  String get vtcVetterIssue;
+
+  /// Tells the applicant the vetter won't vouch
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get vtcVetterDecline;
+
+  /// Heading of the vetter's issued statements, kept on their VTA
+  ///
+  /// In en, this message translates to:
+  /// **'Statements you issued'**
+  String get vtcVetterIssuedHeading;
+
+  /// One issued statement
+  ///
+  /// In en, this message translates to:
+  /// **'Issued {date}, valid until {until}'**
+  String vtcVetterIssuedLine(String date, String until);
+
+  /// The vetter has issued no statement
+  ///
+  /// In en, this message translates to:
+  /// **'None yet.'**
+  String get vtcVetterIssuedNone;
+
+  /// A vetting desk step could not go ahead
+  ///
+  /// In en, this message translates to:
+  /// **'{failure, select, notVetter{Your vetter card is no longer valid.} other{Something went wrong. Check your connection and try again.}}'**
+  String vtcVetterFailure(String failure);
 }
 
 class _AppLocalizationsDelegate

@@ -10,9 +10,9 @@ import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_vetting.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/vtc/mock_credential_issuer.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/vtc/user_verification_key.dart';
-import 'package:ssi/ssi.dart' show ProofPurpose;
 
 import '../../../fakes/fake_persona.dart';
+import '../../../fakes/fake_vetter_desk.dart';
 import '../../../fakes/fake_vta.dart';
 import '../../../fakes/fake_vtc_network.dart';
 
@@ -1390,130 +1390,27 @@ void main() {
   });
 
   group('VtcService vetter desk', () {
+    late FakeVetterDesk fixture;
     late FakeVtcNetwork network;
     late FakePersona vetter;
-    late FakePersona applicant;
 
     Future<TrustTaskDocument> applicantSends(
       String type,
-      Map<String, dynamic> payload, {
-      String? threadId,
-      String? parentThreadId,
-    }) => network.memberSends(
-      applicant,
-      TrustTaskDocument.create(
-        type: type,
-        issuer: applicant.did,
-        recipient: vetter.did,
-        threadId: threadId,
-        parentThreadId: parentThreadId,
-        payload: payload,
-      ),
-    );
-
+      Map<String, dynamic> payload,
+    ) => fixture.applicantSends(type, payload);
     Future<TrustTaskDocument> requestWith(VettingTicket ticket) =>
-        applicantSends(VettingTask.request, {
-          'community': fakeVtcDid,
-          'joinDid': applicant.did,
-          'ticket': ticket.toJson(),
-        });
-
-    /// The applicant's card for [session], the vetter's session document.
-    Future<TrustTaskDocument> sendCard(TrustTaskDocument session) async {
-      final now = DateTime.now().toUtc();
-      final card = await EddsaJcs2022.sign(
-        unsignedVettingCard(
-          id: 'urn:uuid:card',
-          publisher: applicant.did,
-          audience: vetter.did,
-          community: fakeVtcDid,
-          challenge: session.payload['challenge'] as String,
-          domain: fakeVtcDid,
-          issuedAt: now,
-          validity: const Duration(minutes: 10),
-          claims: const [
-            VettingCardClaim(type: 'name.legal', value: 'Ada Lovelace'),
-          ],
-          identityTypes: const ['name.legal'],
-          salt: newCommitmentSalt(),
-        ),
-        signer: applicant,
-        purpose: ProofPurpose.assertionMethod,
-      );
-      return applicantSends(
-        VettingTask.sessionResponse,
-        {'card': card},
-        threadId: session.id,
-        parentThreadId: session.parentThreadId,
-      );
-    }
-
+        fixture.requestWith(ticket);
+    Future<TrustTaskDocument> sendCard(TrustTaskDocument session) =>
+        fixture.sendCard(session);
     Future<List<TrustTaskDocument>> sentToApplicant() =>
-        network.sentTo(applicant);
+        fixture.sentToApplicant();
 
     setUp(() async {
-      network = FakeVtcNetwork()
-        ..joinManifest = {
-          'communityDid': fakeVtcDid,
-          'criteria': [
-            {
-              'id': 'open',
-              'admission': 'automatic',
-              'requirementsDigest': 'zOpen',
-            },
-            {
-              'id': 'vetted',
-              'admission': 'automatic',
-              'requirementsDigest': 'zVetted',
-              'vetting': {
-                'version': '0.1',
-                'statementType': VettingStatement.predicate,
-                'minStatements': 1,
-                'acceptedMethods': ['inPerson'],
-                'eligibleVetters': {'role': 'vetter'},
-                'requiredClaims': ['name.legal'],
-              },
-            },
-          ],
-        };
-      vetter = FakePersona(mediatorDid: network.mediatorDid);
-      applicant = FakePersona(mediatorDid: network.mediatorDid);
-      final roleCard = await network.vetterRoleCard(vetter.did);
-      network.vta
-        ..persona = vetter
-        ..otherDocuments[vetter.did] = vetter.document
-        ..otherDocuments[applicant.did] = applicant.document
-        ..answers[VtaTask.vaultUpsert] = {
-          'entry': {'id': 'entry-1'},
-        }
-        ..answers[VtaTask.credentialsGet] = {'credential': roleCard};
-      network.vta.answerTo[VtaTask.exportSecret] = (payload) =>
-          vetter.exportAnswer(payload['keyId']);
-      network.vta.answerTo[VtaTask.credentialsQuery] = (payload) => {
-        'credentials': [
-          if (payload['type'] == 'AuthorityCredential')
-            {
-              'id': 'role-1',
-              'types': ['VerifiableCredential', 'AuthorityCredential'],
-            },
-        ],
-      };
-      service = VtcService(
-        sdk: network.sdk(),
-        repository: SecureStorageVtcRepository(),
-        userVerificationKey: UserVerificationKey(keyStorage),
-        platform: 'ios',
-      );
-      await service.startLink(network.vta.did);
-      await service.checkGrant();
-      await service.join(
-        await service.readCommunity(fakeVtcDid),
-        persona: VtaPersona(
-          did: vetter.did,
-          contextId: 'mpx-bob',
-          signingKeyId: vetter.signingKeyId,
-        ),
-      );
+      fixture = FakeVetterDesk();
+      await fixture.setUp();
+      network = fixture.network;
+      vetter = fixture.vetter;
+      service = fixture.service;
     });
 
     test('lets a member vet while their vetter card holds', () async {
