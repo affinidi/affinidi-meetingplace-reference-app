@@ -12,6 +12,7 @@ import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/services/camera_service/camera_service.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../dialogs/qr_code_picker/qr_code_picker.dart';
+import '../../effects/confetti/confetti_overlay.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import '../../widgets/swipeable_cards.dart';
 import '../../widgets/vta_identity_card.dart';
@@ -60,9 +61,15 @@ class VtcJoinScreen extends HookConsumerWidget {
     void close() => Navigator.of(context).pop();
 
     if (state.applicantStep case final step?) {
-      return OnboardingLayout(
-        onClose: close,
-        child: _VettingFlow(state: state, step: step, controller: controller),
+      final request = state.vetting?.requestTo(state.flowVetterDid ?? '');
+      return ConfettiOverlay(
+        celebrate:
+            step == VtcApplicantStep.done &&
+            request?.status == VtcVettingStatus.vouched,
+        child: OnboardingLayout(
+          onClose: close,
+          child: _VettingFlow(state: state, step: step, controller: controller),
+        ),
       );
     }
 

@@ -8,6 +8,7 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../domain/models/vtc/vtc_vetter_desk.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../effects/confetti/confetti_overlay.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import '../../widgets/qr/qr_code_view.dart';
 import '../vtc_join/vtc_claim_type_label.dart';
@@ -180,61 +181,67 @@ class VtcVettingFlowScreen extends HookConsumerWidget {
       Navigator.of(context).pop();
     }
 
-    return OnboardingLayout(
-      onClose: close,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: 12,
-        children: [
-          OnboardingStepProgress(
-            key: const Key('vtc_vetting_flow_progress'),
-            step: step.index + 1,
-            total: VtcVettingFlowStep.values.length,
-            title: l10n.vtcVettingFlowStep(step.name),
-          ),
-          OnboardingTitle(l10n.vtcVetterTitle(communityName)),
-          switch ((step, state.current, state.ended)) {
-            (VtcVettingFlowStep.done, _, final ended?) => _Outcome(
-              session: ended,
-              onDone: close,
+    return ConfettiOverlay(
+      celebrate:
+          step == VtcVettingFlowStep.done &&
+          state.ended?.status == VtcVetterSessionStatus.issued,
+      child: OnboardingLayout(
+        onClose: close,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: 12,
+          children: [
+            OnboardingStepProgress(
+              key: const Key('vtc_vetting_flow_progress'),
+              step: step.index + 1,
+              total: VtcVettingFlowStep.values.length,
+              title: l10n.vtcVettingFlowStep(step.name),
             ),
-            (VtcVettingFlowStep.match, null, _) => Column(
-              key: const Key('vtc_vetter_request_progress'),
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              spacing: 12,
-              children: [
-                OnboardingSubtitle(l10n.vtcVetterApplicantFound),
-                _Steps(
-                  steps: VtcRequestStep.values,
-                  step: state.requestStep,
-                  title: (step) => switch (step) {
-                    VtcRequestStep.checkingCard => l10n.vtcVetterStepCard,
-                    VtcRequestStep.openingSession => l10n.vtcVetterStepSession,
-                  },
-                ),
-              ],
-            ),
-            (_, final session?, _) => _SessionView(
-              // A new applicant starts with nothing chosen or ticked.
-              key: ValueKey(session.request.requestId),
-              session: session,
-              documentClasses: _documentClasses(state.requirements),
-              claims: state.cards[session.request.requestId],
-              busy: state.busy,
-              controller: controller,
-            ),
-            _ => _TicketView(
-              state: state,
-              controller: controller,
-              creating: starting.value || state.ticketStep != null,
-            ),
-          },
-          if (state.failure case final failure?)
-            OnboardingMessage(
-              l10n.vtcVetterFailure(failure.name),
-              isError: true,
-            ),
-        ],
+            OnboardingTitle(l10n.vtcVetterTitle(communityName)),
+            switch ((step, state.current, state.ended)) {
+              (VtcVettingFlowStep.done, _, final ended?) => _Outcome(
+                session: ended,
+                onDone: close,
+              ),
+              (VtcVettingFlowStep.match, null, _) => Column(
+                key: const Key('vtc_vetter_request_progress'),
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: 12,
+                children: [
+                  OnboardingSubtitle(l10n.vtcVetterApplicantFound),
+                  _Steps(
+                    steps: VtcRequestStep.values,
+                    step: state.requestStep,
+                    title: (step) => switch (step) {
+                      VtcRequestStep.checkingCard => l10n.vtcVetterStepCard,
+                      VtcRequestStep.openingSession =>
+                        l10n.vtcVetterStepSession,
+                    },
+                  ),
+                ],
+              ),
+              (_, final session?, _) => _SessionView(
+                // A new applicant starts with nothing chosen or ticked.
+                key: ValueKey(session.request.requestId),
+                session: session,
+                documentClasses: _documentClasses(state.requirements),
+                claims: state.cards[session.request.requestId],
+                busy: state.busy,
+                controller: controller,
+              ),
+              _ => _TicketView(
+                state: state,
+                controller: controller,
+                creating: starting.value || state.ticketStep != null,
+              ),
+            },
+            if (state.failure case final failure?)
+              OnboardingMessage(
+                l10n.vtcVetterFailure(failure.name),
+                isError: true,
+              ),
+          ],
+        ),
       ),
     );
   }

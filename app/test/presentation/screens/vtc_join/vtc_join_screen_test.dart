@@ -1420,6 +1420,54 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
     });
 
+    testWidgets('celebrates once the vetter vouched', (tester) async {
+      network.vta
+        ..answers[VtaTask.disclosurePreview] = {
+          'previewId': 'preview-1',
+          'claims': [
+            {'type': 'name.legal', 'value': 'Ada Lovelace'},
+          ],
+        }
+        ..answers[VtaTask.disclosurePresent] = {'presented': true};
+      await askBob(tester);
+      final vetting = (await tester.runAsync(
+        () => service.vetting(fakeVtcDid),
+      ))!;
+      await tester.runAsync(() async {
+        await network.vetterAccepts(applicant, vetting.requests.single.request);
+        await network.vetterOpensSession(applicant);
+      });
+      await tester.pump(VtcJoinController.vettingCheckInterval);
+      await settle(tester);
+      await tapVisible(tester, find.byKey(const Key('vtc_join_match_yes')));
+      await settle(tester);
+      await tapVisible(
+        tester,
+        find.byKey(const Key('vtc_join_vetting_card_share')),
+      );
+      await settle(tester);
+
+      final sent = (await tester.runAsync(
+        () => service.vetting(fakeVtcDid),
+      ))!.requests.single;
+      await tester.runAsync(
+        () => network.vetterVouches(
+          applicant,
+          session: sent.session!,
+          cardDigest: sent.cardDigest!,
+          identityCommitment: sent.identityCommitment!,
+        ),
+      );
+      await tester.pump(VtcJoinController.vettingCheckInterval);
+      await settle(tester);
+
+      expect(find.text('Step 4 of 4 · Done'), findsOneWidget);
+      expect(find.text('Bob vouched for you'), findsOneWidget);
+      expect(find.byKey(const Key('confetti_overlay')), findsOneWidget);
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(const Duration(seconds: 10));
+    });
+
     testWidgets('shows the match code of a session to compare', (tester) async {
       await askBob(tester);
       final vetting = (await tester.runAsync(
@@ -1447,6 +1495,7 @@ void main() {
 
       expect(find.text('Step 4 of 4 · Done'), findsOneWidget);
       expect(find.text('You ended the session with Bob'), findsOneWidget);
+      expect(find.byKey(const Key('confetti_overlay')), findsNothing);
       await tapVisible(
         tester,
         find.byKey(const Key('vtc_join_vetting_outcome_back')),

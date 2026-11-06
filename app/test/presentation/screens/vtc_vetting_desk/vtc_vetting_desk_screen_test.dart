@@ -276,6 +276,7 @@ void main() {
       find.text('You vouched for them. They now hold your statement.'),
       findsOneWidget,
     );
+    expect(find.byKey(const Key('confetti_overlay')), findsOneWidget);
 
     await tap(tester, find.byKey(const Key('vtc_vetter_outcome_done')));
     await waitFor(tester, find.textContaining('Issued'));
@@ -318,6 +319,7 @@ void main() {
     await tap(tester, find.byKey(const Key('vtc_vetter_match_no')));
     await waitFor(tester, find.byKey(const Key('vtc_vetter_outcome')));
     expect(find.text('You declined to vouch for them.'), findsOneWidget);
+    expect(find.byKey(const Key('confetti_overlay')), findsNothing);
 
     final decline = (await tester.runAsync(fixture.sentToApplicant))!.last;
     expect(decline.type, VettingTask.decline);
