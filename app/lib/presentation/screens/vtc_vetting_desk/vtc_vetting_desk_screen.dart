@@ -15,10 +15,10 @@ import '../vtc_join/vtc_trail_step.dart';
 import 'vtc_vetting_desk_controller.dart';
 import 'vtc_vetting_desk_state.dart';
 
-/// The member's vetting desk for a community where they are a vetter: a
-/// ticket for applicants to scan or type in, then for each applicant the
-/// match code, their details to check in person, and vouching for them or
-/// declining. Below, the statements the member issued.
+/// The member's vetting desk for a community where they are a vetter: what
+/// the community asks vetters to check, showing a ticket, which starts
+/// [VtcVettingFlowScreen], the member's vetter card, and the statements
+/// they issued.
 class VtcVettingDeskScreen extends HookConsumerWidget {
   const VtcVettingDeskScreen({
     super.key,
@@ -49,6 +49,11 @@ class VtcVettingDeskScreen extends HookConsumerWidget {
     final controller = ref.read(provider.notifier);
     final l10n = context.l10n;
     void close() => Navigator.of(context).pop();
+    Future<void> showFlow() => VtcVettingFlowScreen.show(
+      context,
+      communityDid: communityDid,
+      communityName: communityName,
+    );
 
     return OnboardingLayout(
       onClose: close,
@@ -79,18 +84,22 @@ class VtcVettingDeskScreen extends HookConsumerWidget {
                   requirements: state.requirements,
                   communityName: communityName,
                 ),
-              if (state.current case final session?)
-                _SessionView(
-                  // A new applicant starts with nothing chosen or ticked.
-                  key: ValueKey(session.request.requestId),
-                  session: session,
-                  documentClasses: _documentClasses(state.requirements),
-                  claims: state.cards[session.request.requestId],
-                  busy: state.busy,
-                  controller: controller,
+              if (state.flowStep(clock.now()) != null)
+                OnboardingButton(
+                  key: const Key('vtc_vetter_resume'),
+                  label: l10n.vtcVetterResume,
+                  onPressed: showFlow,
                 )
               else
-                _TicketView(state: state, controller: controller),
+                OnboardingButton(
+                  key: const Key('vtc_vetter_show_ticket'),
+                  label: l10n.vtcVetterShowTicket,
+                  isLoading: state.busy,
+                  onPressed: () async {
+                    await controller.createTicket();
+                    if (ref.read(provider).failure == null) await showFlow();
+                  },
+                ),
               if (state.vetterCard case final card?)
                 VtcCardView(
                   cardKey: const Key('vtc_vetter_role_card'),
@@ -117,6 +126,123 @@ class VtcVettingDeskScreen extends HookConsumerWidget {
           OnboardingTextButton(label: l10n.generalDone, onPressed: close),
         ],
       ),
+    );
+  }
+}
+
+/// Vetting one applicant, a step a page under a progress bar: the ticket
+/// for them to scan or type in, the match code, their details to check in
+/// person and vouching for them or declining, then how it ended. Closing
+/// it leaves the ticket or session open, to come back to from the desk.
+class VtcVettingFlowScreen extends ConsumerWidget {
+  const VtcVettingFlowScreen({
+    super.key,
+    required this.communityDid,
+    required this.communityName,
+  });
+
+  final String communityDid;
+  final String communityName;
+
+  static Future<void> show(
+    BuildContext context, {
+    required String communityDid,
+    required String communityName,
+  }) => Navigator.of(context).push<void>(
+    MaterialPageRoute<void>(
+      builder: (context) => VtcVettingFlowScreen(
+        communityDid: communityDid,
+        communityName: communityName,
+      ),
+    ),
+  );
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final provider = vtcVettingDeskControllerProvider(communityDid);
+    final state = ref.watch(provider);
+    final controller = ref.read(provider.notifier);
+    final l10n = context.l10n;
+    // A ticket no longer live, with no applicant, is shown again from the
+    // first step.
+    final step = state.flowStep(clock.now()) ?? VtcVettingFlowStep.ticket;
+    void close() {
+      if (step == VtcVettingFlowStep.done) controller.backToDesk();
+      Navigator.of(context).pop();
+    }
+
+    return OnboardingLayout(
+      onClose: close,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 12,
+        children: [
+          OnboardingStepProgress(
+            key: const Key('vtc_vetting_flow_progress'),
+            step: step.index + 1,
+            total: VtcVettingFlowStep.values.length,
+            title: l10n.vtcVettingFlowStep(step.name),
+          ),
+          OnboardingTitle(l10n.vtcVetterTitle(communityName)),
+          switch ((step, state.current, state.ended)) {
+            (VtcVettingFlowStep.done, _, final ended?) => _Outcome(
+              session: ended,
+              onDone: close,
+            ),
+            (_, final session?, _) => _SessionView(
+              // A new applicant starts with nothing chosen or ticked.
+              key: ValueKey(session.request.requestId),
+              session: session,
+              documentClasses: _documentClasses(state.requirements),
+              claims: state.cards[session.request.requestId],
+              busy: state.busy,
+              controller: controller,
+            ),
+            _ => _TicketView(state: state, controller: controller),
+          },
+          if (state.failure case final failure?)
+            OnboardingMessage(
+              l10n.vtcVetterFailure(failure.name),
+              isError: true,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// How an applicant's session ended, and the way back to the desk.
+class _Outcome extends StatelessWidget {
+  const _Outcome({required this.session, required this.onDone});
+
+  final VtcVetterSession session;
+  final VoidCallback onDone;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final vouched = session.status == VtcVetterSessionStatus.issued;
+    return Column(
+      key: const Key('vtc_vetter_outcome'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 12,
+      children: [
+        Icon(
+          vouched ? Icons.verified : Icons.do_not_disturb_on_outlined,
+          size: 72,
+          color: Colors.white,
+        ),
+        Text(
+          l10n.vtcVetterOutcome(session.status.name),
+          textAlign: TextAlign.center,
+          style: context.textTheme.titleMedium?.copyWith(color: Colors.white),
+        ),
+        OnboardingButton(
+          key: const Key('vtc_vetter_outcome_done'),
+          label: l10n.vtcVetterBackToDesk,
+          onPressed: onDone,
+        ),
+      ],
     );
   }
 }
@@ -307,9 +433,10 @@ class _TicketView extends StatelessWidget {
       );
     }
 
+    // The ticket ran out or was used up, with no applicant to vet.
     return OnboardingButton(
-      key: const Key('vtc_vetter_show_ticket'),
-      label: l10n.vtcVetterShowTicket,
+      key: const Key('vtc_vetter_new_ticket'),
+      label: l10n.vtcVetterNewTicket,
       isLoading: state.busy,
       onPressed: controller.createTicket,
     );

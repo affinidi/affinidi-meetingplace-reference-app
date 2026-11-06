@@ -4021,6 +4021,33 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get vtcVetterResume => 'Continue vetting';
+
+  @override
+  String vtcVettingFlowStep(String step) {
+    String _temp0 = intl.Intl.selectLogic(step, {
+      'ticket': 'Show your ticket',
+      'match': 'Compare codes',
+      'details': 'Check their details',
+      'other': 'Done',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String vtcVetterOutcome(String status) {
+    String _temp0 = intl.Intl.selectLogic(status, {
+      'issued': 'You vouched for them. They now hold your statement.',
+      'declined': 'You declined to vouch for them.',
+      'other': 'The applicant ended the session.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get vtcVetterBackToDesk => 'Back to the desk';
+
+  @override
   String get vtcVetterCardTitle => 'Vetter card';
 
   @override

@@ -76,11 +76,12 @@ void main() {
     }
   }
 
+  /// The desk, also while the vetting flow covers it.
+  final desk = find.byType(VtcVettingDeskScreen, skipOffstage: false);
+
   /// Picks up what the applicant sent, as the desk does every few seconds.
   Future<void> check(WidgetTester tester) async {
-    final container = ProviderScope.containerOf(
-      tester.element(find.byType(VtcVettingDeskScreen)),
-    );
+    final container = ProviderScope.containerOf(tester.element(desk));
     await tester.runAsync(
       () => container
           .read(vtcVettingDeskControllerProvider(fakeVtcDid).notifier)
@@ -95,11 +96,16 @@ void main() {
     await settle(tester);
   }
 
+  /// Goes back to the ticket left open on the desk.
+  Future<void> resume(WidgetTester tester) async {
+    await waitFor(tester, find.byKey(const Key('vtc_vetter_resume')));
+    await tap(tester, find.byKey(const Key('vtc_vetter_resume')));
+    await waitFor(tester, find.byKey(const Key('vtc_vetter_ticket_qr')));
+  }
+
   /// The step of vetting an applicant the desk on show is at.
   VtcVettingFlowStep? flowStep(WidgetTester tester) =>
-      ProviderScope.containerOf(
-            tester.element(find.byType(VtcVettingDeskScreen)),
-          )
+      ProviderScope.containerOf(tester.element(desk))
           .read(vtcVettingDeskControllerProvider(fakeVtcDid))
           .flowStep(DateTime.now());
 
@@ -118,11 +124,34 @@ void main() {
     await tap(tester, find.byKey(const Key('vtc_vetter_show_ticket')));
     await waitFor(tester, find.byKey(const Key('vtc_vetter_ticket_qr')));
 
-    final desk = (await tester.runAsync(
+    final recorded = (await tester.runAsync(
       () => fixture.service.vetterDesk(fakeVtcDid),
     ))!;
+    expect(find.text('Step 1 of 4 · Show your ticket'), findsOneWidget);
     expect(find.byKey(const Key('vtc_vetter_ticket_qr')), findsOneWidget);
-    expect(find.text(desk.tickets.single.code), findsOneWidget);
+    expect(find.text(recorded.tickets.single.code), findsOneWidget);
+    await close(tester);
+  });
+
+  testWidgets('keeps the ticket open when the flow is closed', (tester) async {
+    await pumpDesk(tester);
+    await waitFor(tester, find.byKey(const Key('vtc_vetter_show_ticket')));
+    await tap(tester, find.byKey(const Key('vtc_vetter_show_ticket')));
+    await waitFor(tester, find.byKey(const Key('vtc_vetter_ticket_qr')));
+
+    await tap(
+      tester,
+      find.descendant(
+        of: find.byType(VtcVettingFlowScreen),
+        matching: find.byIcon(Icons.close),
+      ),
+    );
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.byType(VtcVettingFlowScreen), findsNothing);
+    expect(find.byKey(const Key('vtc_vetter_show_ticket')), findsNothing);
+
+    await resume(tester);
+    expect(find.text('Step 1 of 4 · Show your ticket'), findsOneWidget);
     await close(tester);
   });
 
@@ -131,17 +160,19 @@ void main() {
       () => fixture.service.createVettingTicket(fakeVtcDid),
     ))!;
     await pumpDesk(tester);
-    await waitFor(tester, find.byKey(const Key('vtc_vetter_ticket_qr')));
+    await resume(tester);
     expect(flowStep(tester), VtcVettingFlowStep.ticket);
     await tester.runAsync(() => fixture.requestWith(ticket.spoken));
     await check(tester);
 
     final session = (await tester.runAsync(fixture.sentToApplicant))!.last;
     expect(flowStep(tester), VtcVettingFlowStep.match);
+    expect(find.text('Step 2 of 4 · Compare codes'), findsOneWidget);
     expect(find.text(vettingMatchCode(session.id)), findsOneWidget);
     await tap(tester, find.byKey(const Key('vtc_vetter_match_yes')));
     await waitFor(tester, find.byKey(const Key('vtc_vetter_card_waiting')));
     expect(flowStep(tester), VtcVettingFlowStep.details);
+    expect(find.text('Step 3 of 4 · Check their details'), findsOneWidget);
     expect(find.byKey(const Key('vtc_vetter_card_waiting')), findsOneWidget);
 
     await tester.runAsync(() => fixture.sendCard(session));
@@ -154,11 +185,19 @@ void main() {
     await tap(tester, find.byKey(const Key('vtc_vetter_document_passport')));
     await tap(tester, find.byKey(const Key('vtc_vetter_checked')));
     await tap(tester, issue);
-    await waitFor(tester, find.textContaining('Issued'));
+    await waitFor(tester, find.byKey(const Key('vtc_vetter_outcome')));
 
     final sent = (await tester.runAsync(fixture.sentToApplicant))!;
     expect(sent.last.type, VettingTask.issue);
     expect(flowStep(tester), VtcVettingFlowStep.done);
+    expect(find.text('Step 4 of 4 · Done'), findsOneWidget);
+    expect(
+      find.text('You vouched for them. They now hold your statement.'),
+      findsOneWidget,
+    );
+
+    await tap(tester, find.byKey(const Key('vtc_vetter_outcome_done')));
+    await waitFor(tester, find.textContaining('Issued'));
     expect(find.byKey(const Key('vtc_vetter_ticket_qr')), findsNothing);
     expect(
       find.descendant(
@@ -175,12 +214,13 @@ void main() {
       () => fixture.service.createVettingTicket(fakeVtcDid),
     ))!;
     await pumpDesk(tester);
-    await waitFor(tester, find.byKey(const Key('vtc_vetter_ticket_qr')));
+    await resume(tester);
     await tester.runAsync(() => fixture.requestWith(ticket.spoken));
     await check(tester);
 
     await tap(tester, find.byKey(const Key('vtc_vetter_match_no')));
-    await waitFor(tester, find.byKey(const Key('vtc_vetter_ticket_qr')));
+    await waitFor(tester, find.byKey(const Key('vtc_vetter_outcome')));
+    expect(find.text('You declined to vouch for them.'), findsOneWidget);
 
     final decline = (await tester.runAsync(fixture.sentToApplicant))!.last;
     expect(decline.type, VettingTask.decline);
@@ -198,13 +238,15 @@ void main() {
       () => fixture.service.createVettingTicket(fakeVtcDid),
     ))!;
     await pumpDesk(tester);
-    await waitFor(tester, find.byKey(const Key('vtc_vetter_ticket_qr')));
+    await resume(tester);
     await tester.runAsync(() => fixture.requestWith(ticket.spoken));
     await check(tester);
     await tap(tester, find.byKey(const Key('vtc_vetter_match_yes')));
     await waitFor(tester, find.byKey(const Key('vtc_vetter_card_waiting')));
 
     await tap(tester, find.byKey(const Key('vtc_vetter_decline')));
+    await waitFor(tester, find.byKey(const Key('vtc_vetter_outcome')));
+    await tap(tester, find.byKey(const Key('vtc_vetter_outcome_done')));
     // The ticket was good once, so a new one is offered.
     await waitFor(tester, find.byKey(const Key('vtc_vetter_show_ticket')));
 

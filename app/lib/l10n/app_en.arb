@@ -4076,6 +4076,32 @@
 			}
 		}
 	},
+	"vtcVetterResume": "Continue vetting",
+	"@vtcVetterResume": {
+		"description": "On the vetting desk: goes back to the ticket or applicant left open"
+	},
+	"vtcVettingFlowStep": "{step, select, ticket{Show your ticket} match{Compare codes} details{Check their details} other{Done}}",
+	"@vtcVettingFlowStep": {
+		"description": "Name of a step of vetting an applicant, above the progress bar",
+		"placeholders": {
+			"step": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcVetterOutcome": "{status, select, issued{You vouched for them. They now hold your statement.} declined{You declined to vouch for them.} other{The applicant ended the session.}}",
+	"@vtcVetterOutcome": {
+		"description": "How vetting an applicant ended, on its last step",
+		"placeholders": {
+			"status": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcVetterBackToDesk": "Back to the desk",
+	"@vtcVetterBackToDesk": {
+		"description": "Leaves the last step of vetting an applicant for the vetting desk"
+	},
 	"vtcVetterCardTitle": "Vetter card",
 	"@vtcVetterCardTitle": {
 		"description": "Title of the role card in which the community makes the member a vetter, shown on the vetting desk"

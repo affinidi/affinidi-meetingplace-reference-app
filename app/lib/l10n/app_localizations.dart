@@ -5996,6 +5996,30 @@ abstract class AppLocalizations {
   /// **'Step {step} of {total} · {title}'**
   String onboardingStepOf(int step, int total, String title);
 
+  /// On the vetting desk: goes back to the ticket or applicant left open
+  ///
+  /// In en, this message translates to:
+  /// **'Continue vetting'**
+  String get vtcVetterResume;
+
+  /// Name of a step of vetting an applicant, above the progress bar
+  ///
+  /// In en, this message translates to:
+  /// **'{step, select, ticket{Show your ticket} match{Compare codes} details{Check their details} other{Done}}'**
+  String vtcVettingFlowStep(String step);
+
+  /// How vetting an applicant ended, on its last step
+  ///
+  /// In en, this message translates to:
+  /// **'{status, select, issued{You vouched for them. They now hold your statement.} declined{You declined to vouch for them.} other{The applicant ended the session.}}'**
+  String vtcVetterOutcome(String status);
+
+  /// Leaves the last step of vetting an applicant for the vetting desk
+  ///
+  /// In en, this message translates to:
+  /// **'Back to the desk'**
+  String get vtcVetterBackToDesk;
+
   /// Title of the role card in which the community makes the member a vetter, shown on the vetting desk
   ///
   /// In en, this message translates to:
