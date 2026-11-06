@@ -12,7 +12,6 @@ import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/extensions/identities_extensions.dart';
 import '../animated_menu.dart';
 import '../profile_picture.dart';
-import '../vta_details.dart';
 
 enum IdentityCardSize { small, normal }
 
@@ -40,8 +39,6 @@ class IdentityCard extends StatelessWidget {
   final void Function(Identity identity)? onEditIdentity;
   final void Function(Identity identity)? onPublishOfferForIdentity;
 
-  static const _normalHeight = 400.0;
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
@@ -50,9 +47,7 @@ class IdentityCard extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.all(8),
         constraints: BoxConstraints(
-          minHeight: identityCardSize.isSmall ? 200 : _normalHeight,
-          // Its content scrolls, so it would otherwise fill the deck.
-          maxHeight: identityCardSize.isSmall ? double.infinity : _normalHeight,
+          minHeight: identityCardSize.isSmall ? 200 : 400,
           maxWidth: 650,
         ),
         decoration: BoxDecoration(
@@ -83,47 +78,10 @@ class IdentityCard extends StatelessWidget {
                   identity: identity,
                   identityCardSize: identityCardSize,
                 ),
-                if (identityCardSize.isSmall)
-                  _IdentityContentSection(
-                    identity: identity,
-                    identityCardSize: identityCardSize,
-                  )
-                else ...[
-                  // A card of the deck has a fixed height: its content
-                  // scrolls, so opened VTA details never cover the action
-                  // button below it.
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _IdentityContentSection(
-                            identity: identity,
-                            identityCardSize: identityCardSize,
-                          ),
-                          if (identity.isVtaPersona)
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                              ),
-                              child: VtaDetails(
-                                key: ValueKey(identity.id),
-                                contextId: identity.vtaContextId!,
-                                profileId: identity.vtaProfileId!,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  _IdentityActionButton(
-                    identity: identity,
-                    onDeleteIdentity: onDeleteIdentity,
-                    onFindOfferForIdentity: onFindOfferForIdentity,
-                    onEditIdentity: onEditIdentity,
-                    onPublishOfferForIdentity: onPublishOfferForIdentity,
-                  ),
-                ],
+                _IdentityContentSection(
+                  identity: identity,
+                  identityCardSize: identityCardSize,
+                ),
               ],
             ),
             _IdentityProfilePicture(
@@ -131,6 +89,14 @@ class IdentityCard extends StatelessWidget {
               size: identityCardSize.isSmall ? 110 : 130,
               cacheManager: cacheManager,
             ),
+            if (!identityCardSize.isSmall)
+              _IdentityActionButton(
+                identity: identity,
+                onDeleteIdentity: onDeleteIdentity,
+                onFindOfferForIdentity: onFindOfferForIdentity,
+                onEditIdentity: onEditIdentity,
+                onPublishOfferForIdentity: onPublishOfferForIdentity,
+              ),
           ],
         ),
       ),
@@ -369,8 +335,10 @@ class _IdentityActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 26),
+    return Positioned(
+      bottom: 50,
+      left: 0,
+      right: 0,
       child: Center(
         child: _ActionButton(
           identity: identity,
