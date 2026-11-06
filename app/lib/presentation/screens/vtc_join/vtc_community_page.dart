@@ -18,6 +18,7 @@ import 'vtc_identity_check_view.dart';
 import 'vtc_join_phrase_view.dart';
 import 'vtc_join_state.dart';
 import 'vtc_membership_card_view.dart';
+import 'vtc_progress_line.dart';
 import 'vtc_trail_step.dart';
 
 /// Prefix of a role the community defined itself, as in `custom:coach`.
@@ -267,7 +268,7 @@ class _CardLookup extends StatelessWidget {
           style: context.textTheme.bodyMedium?.copyWith(color: Colors.white),
         ),
         for (final step in MembershipCardStep.values)
-          _CardLookupLine(
+          VtcProgressLine(
             key: Key('vtc_card_step_${step.name}'),
             title: switch (step) {
               MembershipCardStep.finding => l10n.vtcCardStepFinding(
@@ -281,52 +282,6 @@ class _CardLookup extends StatelessWidget {
               _ => VtcTrailStage.next,
             },
           ),
-      ],
-    );
-  }
-}
-
-/// A step of [_CardLookup]: a tick once done, a spinner while under way, a
-/// dimmed circle while still to come.
-class _CardLookupLine extends StatelessWidget {
-  const _CardLookupLine({super.key, required this.title, required this.stage});
-
-  final String title;
-  final VtcTrailStage stage;
-
-  @override
-  Widget build(BuildContext context) {
-    final isNext = stage == VtcTrailStage.next;
-    return Row(
-      spacing: 8,
-      children: [
-        SizedBox.square(
-          dimension: 16,
-          child: switch (stage) {
-            VtcTrailStage.current => const CircularProgressIndicator(
-              strokeWidth: 2,
-              color: Colors.white70,
-            ),
-            VtcTrailStage.done => const Icon(
-              Icons.check_circle,
-              size: 16,
-              color: Colors.white,
-            ),
-            _ => const Icon(
-              Icons.radio_button_unchecked,
-              size: 16,
-              color: Colors.white38,
-            ),
-          },
-        ),
-        Flexible(
-          child: Text(
-            title,
-            style: onboardingNote(
-              context,
-            )?.copyWith(color: isNext ? Colors.white38 : null),
-          ),
-        ),
       ],
     );
   }
