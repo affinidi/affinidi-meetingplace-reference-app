@@ -1501,6 +1501,14 @@ void main() {
       expect(ticket.vetter, vetter.did);
     });
 
+    test('reports each step of minting a ticket', () async {
+      final steps = <VtcTicketStep>[];
+
+      await service.createVettingTicket(fakeVtcDid, onStep: steps.add);
+
+      expect(steps, [VtcTicketStep.checkingCard, VtcTicketStep.creating]);
+    });
+
     test('vets an applicant from request to statement', () async {
       final ticket = await service.createVettingTicket(fakeVtcDid);
       await requestWith(ticket.spoken);

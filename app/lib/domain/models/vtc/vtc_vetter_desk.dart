@@ -108,6 +108,15 @@ class VtcVetterSession {
   };
 }
 
+/// A step of creating a vetting ticket, in order.
+enum VtcTicketStep {
+  /// Checking the member's vetter card still holds.
+  checkingCard,
+
+  /// Creating the ticket and recording it on the desk.
+  creating,
+}
+
 /// The member's vetting desk for one community where they are a vetter: the
 /// tickets they showed, and the applicants they vet.
 class VtcVetterDesk {

@@ -933,15 +933,21 @@ class VtcService {
 
   /// Mints a ticket for an applicant to ask the member to vet them for
   /// [communityDid], good for one request within [vettingTicketValidity],
-  /// and records it on the desk.
+  /// and records it on the desk. Each step is reported to [onStep] as it
+  /// starts.
   ///
   /// Throws [NotVetterException] when the member may not vet there, and as
   /// [canVet] does.
-  Future<VetterTicket> createVettingTicket(String communityDid) async {
+  Future<VetterTicket> createVettingTicket(
+    String communityDid, {
+    void Function(VtcTicketStep step)? onStep,
+  }) async {
+    onStep?.call(VtcTicketStep.checkingCard);
     final member = await _repository.findCommunity(communityDid);
     if (member == null || !await canVet(communityDid)) {
       throw const NotVetterException();
     }
+    onStep?.call(VtcTicketStep.creating);
     final now = clock.now();
     final ticket = VetterTicket.mint(
       community: communityDid,
