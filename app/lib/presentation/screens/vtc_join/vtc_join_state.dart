@@ -1,3 +1,4 @@
+import 'package:clock/clock.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
@@ -412,13 +413,17 @@ abstract class VtcJoinState with _$VtcJoinState {
     },
     VtcJoinStep.vetting => switch (flowVetterDid) {
       null => null,
-      final vetterDid => switch (vetting?.requestTo(vetterDid)?.status) {
-        null ||
-        VtcVettingStatus.requested ||
-        VtcVettingStatus.accepted => VtcApplicantStep.ticket,
-        VtcVettingStatus.inSession => VtcApplicantStep.match,
-        VtcVettingStatus.cardSent => VtcApplicantStep.details,
-        _ => VtcApplicantStep.done,
+      final vetterDid => switch (vetting?.requestTo(vetterDid)) {
+        final request? when request.isUnansweredAt(clock.now()) =>
+          VtcApplicantStep.done,
+        final request => switch (request?.status) {
+          null ||
+          VtcVettingStatus.requested ||
+          VtcVettingStatus.accepted => VtcApplicantStep.ticket,
+          VtcVettingStatus.inSession => VtcApplicantStep.match,
+          VtcVettingStatus.cardSent => VtcApplicantStep.details,
+          _ => VtcApplicantStep.done,
+        },
       },
     },
     _ => null,

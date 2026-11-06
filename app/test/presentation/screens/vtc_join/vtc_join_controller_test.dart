@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:clock/clock.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -1530,6 +1531,20 @@ void main() {
 
       controller().backToVetting();
       expect(step(), isNull);
+    });
+
+    test('stops waiting on a vetter who never answered', () async {
+      await askVetter();
+      expect(state().applicantStep, VtcApplicantStep.ticket);
+
+      final later = DateTime.now().add(
+        VtcVettingRequest.answerWindow + const Duration(minutes: 1),
+      );
+      withClock(Clock.fixed(later), () {
+        expect(request().isUnansweredAt(clock.now()), isTrue);
+        expect(state().applicantStep, VtcApplicantStep.done);
+        expect(state().waitingOnVetter, isFalse);
+      });
     });
 
     test('ends the session when the codes do not match', () async {

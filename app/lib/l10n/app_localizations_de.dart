@@ -4145,6 +4145,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'vouched': '$vetter vouched for you',
       'declined': '$vetter declined to vouch for you',
       'refused': '$vetter couldn\'t take your request',
+      'unanswered': 'No answer from $vetter. Ask them for a new ticket.',
       'other': 'You ended the session with $vetter',
     });
     return '$_temp0';

@@ -156,6 +156,19 @@ class VtcVettingRequest {
     _ => false,
   };
 
+  /// How long a vetter has to answer a request: as long as their ticket
+  /// lasts. A typed code no ticket holds is left unanswered, so guessing
+  /// codes learns nothing; past this, no answer is coming.
+  static const answerWindow = Duration(minutes: 15);
+
+  /// Whether the vetter left the request unanswered past [answerWindow],
+  /// at [now].
+  bool isUnansweredAt(DateTime now) {
+    if (status != VtcVettingStatus.requested) return false;
+    final sentAt = DateTime.tryParse('${request['issuedAt']}');
+    return sentAt != null && now.isAfter(sentAt.add(answerWindow));
+  }
+
   /// Accepted by [vetter], who showed their role.
   VtcVettingRequest acceptedBy(AcceptedVetter vetter) => _copy(
     status: VtcVettingStatus.accepted,

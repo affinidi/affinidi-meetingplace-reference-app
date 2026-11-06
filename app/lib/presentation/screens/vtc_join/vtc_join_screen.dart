@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -1226,7 +1227,8 @@ class _VettingOutcome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final status = request?.status;
+    final unanswered = request?.isUnansweredAt(clock.now()) ?? false;
+    final status = unanswered ? null : request?.status;
     return Column(
       key: const Key('vtc_join_vetting_outcome'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1240,7 +1242,10 @@ class _VettingOutcome extends StatelessWidget {
           color: Colors.white,
         ),
         Text(
-          l10n.vtcApplicantOutcome(status?.name ?? '', vetter),
+          l10n.vtcApplicantOutcome(
+            unanswered ? 'unanswered' : status?.name ?? '',
+            vetter,
+          ),
           textAlign: TextAlign.center,
           style: context.textTheme.titleMedium?.copyWith(color: Colors.white),
         ),

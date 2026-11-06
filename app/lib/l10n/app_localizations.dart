@@ -6077,7 +6077,7 @@ abstract class AppLocalizations {
   /// How being vetted by one vetter ended, on the last step
   ///
   /// In en, this message translates to:
-  /// **'{status, select, vouched{{vetter} vouched for you} declined{{vetter} declined to vouch for you} refused{{vetter} couldn\'t take your request} other{You ended the session with {vetter}}}'**
+  /// **'{status, select, vouched{{vetter} vouched for you} declined{{vetter} declined to vouch for you} refused{{vetter} couldn\'t take your request} unanswered{No answer from {vetter}. Ask them for a new ticket.} other{You ended the session with {vetter}}}'**
   String vtcApplicantOutcome(String status, String vetter);
 
   /// Leaves being vetted by one vetter for the overview of what the community asks and the statements gathered
