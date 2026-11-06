@@ -35,6 +35,21 @@ void main() {
     exchange: exchange,
   );
 
+  group('VtcCommunity vetter', () {
+    test('is stored and restored', () {
+      final vetter = community.withVetter(isVetter: true);
+
+      expect(VtcCommunity.fromJson(vetter.toJson()).isVetter, isTrue);
+      expect(VtcCommunity.fromJson(community.toJson()).isVetter, isFalse);
+    });
+
+    test('is no vetter in records stored before it was kept', () {
+      final json = community.toJson()..remove('isVetter');
+
+      expect(VtcCommunity.fromJson(json).isVetter, isFalse);
+    });
+  });
+
   group('VtcCommunity submit exchange', () {
     test('is stored and restored as it was on the wire', () {
       final restored = VtcCommunity.fromJson(applying.toJson());

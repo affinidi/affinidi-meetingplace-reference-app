@@ -872,13 +872,29 @@ class VtcService {
   /// Throws [VtaNotLinkedException] when no VTA is linked, and
   /// [MeetingPlaceVtcSDKException] when the VTA or the community's status
   /// list cannot be reached.
+  ///
+  /// The answer is kept for [couldVet].
   Future<bool> canVet(String communityDid) async {
     final member = await _repository.findCommunity(communityDid);
     if (member == null || !member.isMember) return false;
     final vta = await _grantedVta();
-    if (await _vetterCard(vta, member) != null) return true;
-    if (!await _keepWaitingCards(vta, member)) return false;
-    return await _vetterCard(vta, member) != null;
+    final canVet =
+        await _vetterCard(vta, member) != null ||
+        (await _keepWaitingCards(vta, member) &&
+            await _vetterCard(vta, member) != null);
+    // Read again: the record may have changed while the VTA answered.
+    final latest = await _repository.findCommunity(communityDid);
+    if (latest != null && latest.isVetter != canVet) {
+      await _repository.saveCommunity(latest.withVetter(isVetter: canVet));
+    }
+    return canVet;
+  }
+
+  /// Whether the member could vet for [communityDid] when [canVet] last
+  /// answered; only what this phone recorded, so it answers at once.
+  Future<bool> couldVet(String communityDid) async {
+    final member = await _repository.findCommunity(communityDid);
+    return member != null && member.isMember && member.isVetter;
   }
 
   /// Keeps on [vta] the cards [member]'s community sent the identity's

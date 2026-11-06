@@ -14,6 +14,7 @@ class VtcCommunity {
     this.joinRequestId,
     this.listInDirectory = true,
     this.isSettled = true,
+    this.isVetter = false,
     this.rejectionReason,
     this.submitExchange,
     TrustTaskReceipt? submitReceipt,
@@ -36,6 +37,7 @@ class VtcCommunity {
       joinRequestId: json['joinRequestId'] as String?,
       listInDirectory: json['listInDirectory'] as bool? ?? true,
       isSettled: json['isSettled'] as bool? ?? true,
+      isVetter: json['isVetter'] as bool? ?? false,
       rejectionReason: json['rejectionReason'] as String?,
       submitExchange: _exchangeOf(json['submitExchange']),
       submitReceipt: _receiptOf(json['submitReceipt']),
@@ -91,6 +93,10 @@ class VtcCommunity {
   /// withdrawn. False until both succeeded; retried until then.
   final bool isSettled;
 
+  /// Whether the member's vetter card held when last checked, so the
+  /// vetting desk can be offered before the next check answers.
+  final bool isVetter;
+
   /// The community's reason for turning the last application down, in its
   /// own words, if it gave one. Kept until the next application.
   final String? rejectionReason;
@@ -140,10 +146,15 @@ class VtcCommunity {
   VtcCommunity withDirectoryChoice({required bool listInDirectory}) =>
       _copy(listInDirectory: listInDirectory);
 
+  /// This record with whether the member's vetter card held when checked.
+  VtcCommunity withVetter({required bool isVetter}) =>
+      _copy(isVetter: isVetter);
+
   VtcCommunity _copy({
     bool? isMember,
     String? joinRequestId,
     bool? isSettled,
+    bool? isVetter,
     bool? listInDirectory,
     String? rejectionReason,
     TrustTaskExchange? submitExchange,
@@ -163,6 +174,7 @@ class VtcCommunity {
       joinRequestId: isMember == null ? this.joinRequestId : joinRequestId,
       listInDirectory: listInDirectory ?? this.listInDirectory,
       isSettled: isSettled ?? this.isSettled,
+      isVetter: isVetter ?? this.isVetter,
       // A new outcome replaces the last rejection.
       rejectionReason: isMember == null
           ? this.rejectionReason
@@ -186,6 +198,7 @@ class VtcCommunity {
     'joinRequestId': ?joinRequestId,
     'listInDirectory': listInDirectory,
     'isSettled': isSettled,
+    'isVetter': isVetter,
     'rejectionReason': ?rejectionReason,
     'submitExchange': ?submitExchange?.toJson(),
     if (submitExchange == null) 'submitReceipt': ?_storedReceipt?.toJson(),

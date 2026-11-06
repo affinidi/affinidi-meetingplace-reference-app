@@ -1455,6 +1455,17 @@ void main() {
       expect(network.inbox, isEmpty);
     });
 
+    test('remembers whether the member could vet', () async {
+      expect(await service.couldVet(fakeVtcDid), isFalse);
+
+      await service.canVet(fakeVtcDid);
+      expect(await service.couldVet(fakeVtcDid), isTrue);
+
+      network.revoked.add(3);
+      await service.canVet(fakeVtcDid);
+      expect(await service.couldVet(fakeVtcDid), isFalse);
+    });
+
     test('cannot vet while no vetter card was sent', () async {
       network.vta.answerTo[VtaTask.credentialsQuery] = (_) => {
         'credentials': <Object>[],
