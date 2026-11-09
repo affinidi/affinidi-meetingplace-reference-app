@@ -15,6 +15,8 @@ import '../../../navigation/tabs/tabs.dart';
 import '../../dialogs/new_connections_menu/new_connections_menu.dart';
 import '../../dialogs/offer/delete_connection_dialog.dart';
 import '../../themes/tokens/mc_radius.dart';
+import '../../themes/tokens/mc_spacing.dart';
+import '../../widgets/common/app_card.dart';
 import '../../widgets/profile_circle_avatar.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/tab_bar_tab.dart';

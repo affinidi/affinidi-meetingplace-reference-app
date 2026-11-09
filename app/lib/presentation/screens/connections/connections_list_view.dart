@@ -21,10 +21,16 @@ class _ConnectionsListView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ListView.builder(
+    return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(
+        horizontal: McSpacing.s4,
+        vertical: McSpacing.s3,
+      ),
       itemCount: connections.length,
+      separatorBuilder: (context, index) =>
+          const SizedBox(height: McSpacing.s3),
       itemBuilder: (context, index) => _ConnectionListItem(
         connection: connections[index],
         onConnectionPress: onConnectionPress,
@@ -158,120 +164,113 @@ class _ConnectionCard extends ConsumerWidget {
           )
         : context.l10n.usesIdentity(_connection.contactCard.firstName);
 
-    return Card.outlined(
-      color: context.colorScheme.surfaceContainerLow,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(McRadius.lg),
-        side: BorderSide(color: _connection.getStatusColor(context), width: 2),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(McRadius.lg),
-        onTap: () =>
-            _onConnectionPress(connection: _connection, isSelected: isSelected),
-        onLongPress: () =>
-            _onConnectionLongPress(context: context, connection: _connection),
-        child: Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  ProfileCircleAvatar(
-                    image: _connection.contactCard.image(
-                      cacheManager: cacheManager,
-                    ),
+    // A community-page panel; status reads from the chip, not the frame.
+    return AppCard(
+      onTap: () =>
+          _onConnectionPress(connection: _connection, isSelected: isSelected),
+      onLongPress: () =>
+          _onConnectionLongPress(context: context, connection: _connection),
+      child: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: McSpacing.s3,
+              horizontal: McSpacing.s4,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                ProfileCircleAvatar(
+                  image: _connection.contactCard.image(
+                    cacheManager: cacheManager,
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 2,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                spacing: 2,
-                                children: [
-                                  Text(
-                                    name,
-                                    style: context.textTheme.labelLarge
-                                        ?.copyWith(fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 2,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              spacing: 2,
+                              children: [
+                                Text(
+                                  name,
+                                  style: context.textTheme.labelLarge?.copyWith(
+                                    fontWeight: FontWeight.w500,
                                   ),
-                                  Text(
-                                    context.l10n.connectionPhrase(
-                                      _connection.mnemonic,
-                                    ),
-                                    style: context.textTheme.labelSmall,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Chip(
-                              label: Text(
-                                _connection.localized(context),
-                                style: context.textTheme.bodySmall?.copyWith(
-                                  color: context.colorScheme.onSurface,
-                                  fontWeight: FontWeight.w500,
                                 ),
+                                Text(
+                                  context.l10n.connectionPhrase(
+                                    _connection.mnemonic,
+                                  ),
+                                  style: context.textTheme.labelSmall,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Chip(
+                            label: Text(
+                              _connection.localized(context),
+                              style: context.textTheme.bodySmall?.copyWith(
+                                color: context.colorScheme.onSurface,
+                                fontWeight: FontWeight.w500,
                               ),
-                              // Status is a border signal; the chip never
-                              // fills.
-                              side: BorderSide(
-                                color: _connection.getStatusColor(context),
-                              ),
-                              visualDensity: VisualDensity.compact,
-                              materialTapTargetSize:
-                                  MaterialTapTargetSize.shrinkWrap,
-                              padding: EdgeInsets.zero,
                             ),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          spacing: 2,
-                          children: [
-                            Text(
-                              identityText,
-                              style: context.textTheme.bodySmall,
+                            // Status is a border signal; the chip never
+                            // fills.
+                            side: BorderSide(
+                              color: _connection.getStatusColor(context),
                             ),
-                            Text(
-                              _connection.expiresAt == null
-                                  ? context.l10n.createdValidWithoutExpiration(
-                                      _connection.createdAt.timeAgo(
-                                        context.l10n,
-                                      ),
-                                    )
-                                  : context.l10n.createdValidUntil(
-                                      _connection.createdAt.timeAgo(
-                                        context.l10n,
-                                      ),
-                                      DateFormat.yMMMd(
-                                        Localizations.localeOf(
-                                          context,
-                                        ).toString(),
-                                      ).format(_connection.expiresAt!),
-                                    ),
-                              style: context.textTheme.bodySmall,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                            visualDensity: VisualDensity.compact,
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                            padding: EdgeInsets.zero,
+                          ),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 2,
+                        children: [
+                          Text(
+                            identityText,
+                            style: context.textTheme.bodySmall,
+                          ),
+                          Text(
+                            _connection.expiresAt == null
+                                ? context.l10n.createdValidWithoutExpiration(
+                                    _connection.createdAt.timeAgo(context.l10n),
+                                  )
+                                : context.l10n.createdValidUntil(
+                                    _connection.createdAt.timeAgo(context.l10n),
+                                    DateFormat.yMMMd(
+                                      Localizations.localeOf(
+                                        context,
+                                      ).toString(),
+                                    ).format(_connection.expiresAt!),
+                                  ),
+                            style: context.textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            _ConnectionTrailingWidget(
-              connection: _connection,
-              onConnectionPress: _onConnectionPress,
-            ),
-          ],
-        ),
+          ),
+          _ConnectionTrailingWidget(
+            connection: _connection,
+            onConnectionPress: _onConnectionPress,
+          ),
+        ],
       ),
     );
   }

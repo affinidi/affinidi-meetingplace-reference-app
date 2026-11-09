@@ -54,11 +54,17 @@ class _ContactsListView extends ConsumerWidget {
       contactsScreenControllerProvider.select((state) => state.contacts),
     );
 
-    return ListView.builder(
+    return ListView.separated(
       // TODO(MA): Remove shrink wrap to enable lazy loading
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(
+        horizontal: McSpacing.s4,
+        vertical: McSpacing.s3,
+      ),
       itemCount: contacts.length,
+      separatorBuilder: (context, index) =>
+          const SizedBox(height: McSpacing.s3),
       itemBuilder: (context, index) => _ContactListItem(
         contacts[index],
         onTap: onContactTap,
@@ -219,109 +225,106 @@ class _ContactTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-      child: Material(
-        color: context.colorScheme.surfaceContainerLow,
+    return Material(
+      color: context.colorScheme.surfaceContainerLow,
+      borderRadius: BorderRadius.circular(McRadius.lg),
+      child: InkWell(
         borderRadius: BorderRadius.circular(McRadius.lg),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(McRadius.lg),
-          onTap: onTap,
-          onDoubleTap: onDoubleTap,
-          onLongPress: onLongPress,
-          child: ListTile(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(McRadius.lg),
-              side: statusColor == Colors.transparent
-                  ? BorderSide(color: context.mcColors.hairline)
-                  : BorderSide(color: statusColor, width: 2),
-            ),
-            leading: SizedBox(
-              width: 60,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  _ContactAvatar(contact: contact, isList: true),
-                  if (contact.badgeCount > 0 || contact.isOobContact)
-                    Positioned(
-                      bottom: -5,
-                      right: -10,
-                      child: contact.badgeUpdateInProgress
-                          ? const SizedBox(
-                              width: 32,
-                              height: 32,
-                              child: CircularProgressIndicator.adaptive(
-                                strokeWidth: 3,
-                              ),
-                            )
-                          : _ContactNotificationBadge(
-                              origin: contact.origin,
-                              badgeCount: contact.badgeCount,
-                              isList: true,
+        onTap: onTap,
+        onDoubleTap: onDoubleTap,
+        onLongPress: onLongPress,
+        child: ListTile(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(McRadius.lg),
+            side: statusColor == Colors.transparent
+                ? BorderSide(color: context.mcColors.hairline)
+                : BorderSide(color: statusColor, width: 2),
+          ),
+          leading: SizedBox(
+            width: 60,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                _ContactAvatar(contact: contact, isList: true),
+                if (contact.badgeCount > 0 || contact.isOobContact)
+                  Positioned(
+                    bottom: -5,
+                    right: -10,
+                    child: contact.badgeUpdateInProgress
+                        ? const SizedBox(
+                            width: 32,
+                            height: 32,
+                            child: CircularProgressIndicator.adaptive(
+                              strokeWidth: 3,
                             ),
-                    )
-                  else if (contact.isNewUnopenedChannel)
-                    Positioned(
-                      bottom: -2,
-                      right: -2,
-                      child: _ContactNewChannelDotBadge(
-                        origin: contact.origin,
-                        isList: true,
-                      ),
+                          )
+                        : _ContactNotificationBadge(
+                            origin: contact.origin,
+                            badgeCount: contact.badgeCount,
+                            isList: true,
+                          ),
+                  )
+                else if (contact.isNewUnopenedChannel)
+                  Positioned(
+                    bottom: -2,
+                    right: -2,
+                    child: _ContactNewChannelDotBadge(
+                      origin: contact.origin,
+                      isList: true,
                     ),
-                ],
-              ),
+                  ),
+              ],
             ),
-            title: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 54),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  if (showCustomDisplayName) ...[
-                    Text(
-                      secondaryName!,
-                      style: context.textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w500,
-                        color: context.mcColors.highlightSecondary,
-                      ),
-                      textAlign: TextAlign.center,
-                      softWrap: true,
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
-                    const SizedBox(height: 2),
-                  ],
+          ),
+          title: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 54),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                if (showCustomDisplayName) ...[
                   Text(
-                    primaryName,
-                    style: showCustomDisplayName
-                        ? context.textTheme.labelMedium
-                        : context.textTheme.bodyMedium,
+                    secondaryName!,
+                    style: context.textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: context.mcColors.highlightSecondary,
+                    ),
+                    textAlign: TextAlign.center,
+                    softWrap: true,
+                    overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                   ),
-                  if (contactMediatorName != null &&
-                      contactMediatorName!.isNotEmpty)
-                    Text(
-                      context.l10n.connectedVia(contactMediatorName!),
-                      style: context.textTheme.labelSmall,
-                      maxLines: 1,
-                    ),
+                  const SizedBox(height: 2),
+                ],
+                Text(
+                  primaryName,
+                  style: showCustomDisplayName
+                      ? context.textTheme.labelMedium
+                      : context.textTheme.bodyMedium,
+                  maxLines: 1,
+                ),
+                if (contactMediatorName != null &&
+                    contactMediatorName!.isNotEmpty)
                   Text(
-                    context.l10n.contactAdded(dateAdded),
+                    context.l10n.connectedVia(contactMediatorName!),
                     style: context.textTheme.labelSmall,
                     maxLines: 1,
                   ),
-                ],
-              ),
+                Text(
+                  context.l10n.contactAdded(dateAdded),
+                  style: context.textTheme.labelSmall,
+                  maxLines: 1,
+                ),
+              ],
             ),
-            trailing: isEditMode
-                ? Checkbox(
-                    value: isSelected,
-                    visualDensity: VisualDensity.adaptivePlatformDensity,
-                    onChanged: onEditModeCheckChanged,
-                  )
-                : null,
           ),
+          trailing: isEditMode
+              ? Checkbox(
+                  value: isSelected,
+                  visualDensity: VisualDensity.adaptivePlatformDensity,
+                  onChanged: onEditModeCheckChanged,
+                )
+              : null,
         ),
       ),
     );
