@@ -3647,10 +3647,6 @@
 	"@vtcTrustVouchInCommunity": {
 		"description": "Starts vouching for a contact in one of the member's communities"
 	},
-	"vtcTrustYouVouched": "You vouched",
-	"@vtcTrustYouVouched": {
-		"description": "The member vouched for the contact in this community"
-	},
 	"vtcTrustTheyVouched": "{name} vouched for you",
 	"@vtcTrustTheyVouched": {
 		"description": "The contact vouched for the member in this community",
@@ -3851,14 +3847,6 @@
 	"@vtcGroupMembersNone": {
 		"description": "A group shows the member no other members"
 	},
-	"vtcTrustVouched": "Vouched",
-	"@vtcTrustVouched": {
-		"description": "Badge: the member vouched for this member"
-	},
-	"vtcTrustVouchesForYou": "Vouches for you",
-	"@vtcTrustVouchesForYou": {
-		"description": "Badge: this member vouched for the member"
-	},
 	"vtcGroupMembersUnlistedNote": "Members who chose not to be listed in the directory of {community} aren't shown.",
 	"@vtcGroupMembersUnlistedNote": {
 		"description": "Why some members of a group may be missing from its list",
@@ -3977,6 +3965,15 @@
 	"vtcVouchTrailTheVouch": "The vouch",
 	"@vtcVouchTrailTheVouch": {
 		"description": "Step: who vouched for whom"
+	},
+	"vtcTrustVouchedForEachOther": "You and {name} vouched for each other",
+	"@vtcTrustVouchedForEachOther": {
+		"description": "Both the member and another member vouched, each for the other",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
 	},
 	"vtcJoinAlreadyMember": "You're already a member of {name}.",
 	"@vtcJoinAlreadyMember": {

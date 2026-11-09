@@ -109,11 +109,18 @@ void main() {
 
     expect(find.text('Members of Identity WG'), findsOneWidget);
     expect(
-      inMember('dir_bob', find.byTooltip('Vouches for you')),
+      inMember('dir_bob', find.byTooltip('Bob vouched for you')),
       findsOneWidget,
     );
     expect(inMember('dir_bob', find.text('Vouch back')), findsOneWidget);
-    expect(inMember('dir_carol', find.byTooltip('Vouched')), findsOneWidget);
+    expect(
+      inMember('dir_carol', find.byTooltip('You vouched for Carol')),
+      findsOneWidget,
+    );
+    expect(
+      inMember('dir_dan', find.byKey(const Key('vtc_vouches'))),
+      findsNothing,
+    );
     expect(inMember('dir_carol', find.byType(FilledButton)), findsNothing);
     expect(
       inMember(
@@ -140,11 +147,15 @@ void main() {
     expect(find.text('You vouched for Bob'), findsOneWidget);
     await tester.tapAt(const Offset(10, 10));
     await tester.pumpAndSettle();
-    expect(inMember('dir_bob', find.byTooltip('Vouched')), findsOneWidget);
     expect(
-      inMember('dir_bob', find.byTooltip('Vouches for you')),
+      inMember('dir_bob', find.byTooltip('You and Bob vouched for each other')),
       findsOneWidget,
     );
+
+    await tester.tap(inMember('dir_bob', find.byKey(const Key('vtc_vouches'))));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('vtc_vouch_trail_outgoing')), findsOneWidget);
+    expect(find.byKey(const Key('vtc_vouch_trail_incoming')), findsOneWidget);
   });
 
   testWidgets('opens the signed vouch a member gave you', (tester) async {
@@ -164,7 +175,7 @@ void main() {
     };
     await pumpScreen(tester);
 
-    await tester.tap(inMember('dir_bob', find.byTooltip('Vouches for you')));
+    await tester.tap(inMember('dir_bob', find.byKey(const Key('vtc_vouches'))));
     await tester.pumpAndSettle();
 
     expect(find.text('Bob vouched for you'), findsOneWidget);

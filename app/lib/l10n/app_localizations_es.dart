@@ -3715,9 +3715,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get vtcTrustVouchInCommunity => 'Vouch in a community';
 
   @override
-  String get vtcTrustYouVouched => 'You vouched';
-
-  @override
   String vtcTrustTheyVouched(String name) {
     return '$name vouched for you';
   }
@@ -3843,12 +3840,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get vtcGroupMembersNone => 'No other members to show.';
 
   @override
-  String get vtcTrustVouched => 'Vouched';
-
-  @override
-  String get vtcTrustVouchesForYou => 'Vouches for you';
-
-  @override
   String vtcGroupMembersUnlistedNote(String community) {
     return 'Members who chose not to be listed in the directory of $community aren\'t shown.';
   }
@@ -3912,6 +3903,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get vtcVouchTrailTheVouch => 'The vouch';
+
+  @override
+  String vtcTrustVouchedForEachOther(String name) {
+    return 'You and $name vouched for each other';
+  }
 
   @override
   String vtcJoinAlreadyMember(String name) {

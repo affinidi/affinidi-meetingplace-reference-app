@@ -294,73 +294,84 @@ class VtcVouchTrail extends StatelessWidget {
   }
 }
 
-/// The vouches between the member and [name], one icon each way round: an
-/// outgoing arrow for the member's vouch, labelled [outgoingLabel], and an
-/// incoming one for [name]'s, labelled [incomingLabel]. The label is the
-/// icon's tooltip and what a screen reader says. An icon opens the story
-/// of that vouch in [communityName] ([showVouchTrail]).
-class VtcVouchIcons extends StatelessWidget {
-  const VtcVouchIcons({
+/// A handshake beside [name] when the member and [name] vouched for one
+/// another in [communityName], either way round; nothing otherwise. It
+/// opens the story of each vouch ([showVouches]).
+class VtcVouchButton extends StatelessWidget {
+  const VtcVouchButton({
     super.key,
     required this.edges,
     required this.name,
     required this.communityName,
-    required this.outgoingLabel,
-    required this.incomingLabel,
   });
 
   final VtcEdges edges;
   final String name;
   final String communityName;
-  final String outgoingLabel;
-  final String incomingLabel;
 
   @override
-  Widget build(BuildContext context) => Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      if (edges.outgoing case final edge?)
-        _icon(
-          context,
-          key: const Key('vtc_vouch_outgoing'),
-          icon: Icons.call_made,
-          label: outgoingLabel,
-          edge: edge,
-          isOwn: true,
-        ),
-      if (edges.incoming case final edge?)
-        _icon(
-          context,
-          key: const Key('vtc_vouch_incoming'),
-          icon: Icons.call_received,
-          label: incomingLabel,
-          edge: edge,
-          isOwn: false,
-        ),
-    ],
-  );
-
-  Widget _icon(
-    BuildContext context, {
-    required Key key,
-    required IconData icon,
-    required String label,
-    required PublishedRelationship edge,
-    required bool isOwn,
-  }) => IconButton(
-    key: key,
-    icon: Icon(icon, size: 20),
-    tooltip: label,
-    visualDensity: VisualDensity.compact,
-    onPressed: () => showVouchTrail(
-      context,
-      edge: edge,
-      communityName: communityName,
-      name: name,
-      isOwn: isOwn,
-    ),
-  );
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final tooltip = switch ((edges.outgoing, edges.incoming)) {
+      (null, null) => null,
+      (_?, _?) => l10n.vtcTrustVouchedForEachOther(name),
+      (_?, null) => l10n.vtcTrustDoneTitle(name),
+      (null, _?) => l10n.vtcTrustTheyVouched(name),
+    };
+    if (tooltip == null) return const SizedBox.shrink();
+    return IconButton(
+      key: const Key('vtc_vouches'),
+      icon: const Icon(Icons.handshake_outlined, size: 20),
+      tooltip: tooltip,
+      visualDensity: VisualDensity.compact,
+      onPressed: () => showVouches(
+        context,
+        edges: edges,
+        communityName: communityName,
+        name: name,
+      ),
+    );
+  }
 }
+
+/// Shows the story of each vouch in [edges] between the member and [name]
+/// in [communityName], the member's own first, as [VtcVouchTrail] draws it.
+Future<void> showVouches(
+  BuildContext context, {
+  required VtcEdges edges,
+  required String communityName,
+  required String name,
+}) => showModalBottomSheet<void>(
+  context: context,
+  useRootNavigator: true,
+  isScrollControlled: true,
+  useSafeArea: true,
+  builder: (context) => SingleChildScrollView(
+    padding: const EdgeInsets.all(16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 24,
+      children: [
+        if (edges.outgoing case final edge?)
+          VtcVouchTrail(
+            key: const Key('vtc_vouch_trail_outgoing'),
+            edge: edge,
+            communityName: communityName,
+            name: name,
+            isOwn: true,
+          ),
+        if (edges.incoming case final edge?)
+          VtcVouchTrail(
+            key: const Key('vtc_vouch_trail_incoming'),
+            edge: edge,
+            communityName: communityName,
+            name: name,
+            isOwn: false,
+          ),
+      ],
+    ),
+  ),
+);
 
 Future<bool> _confirm(
   BuildContext context, {

@@ -235,7 +235,7 @@ void main() {
       );
     await pumpPanel(tester);
     expect(find.text('Football club'), findsOneWidget);
-    expect(find.byTooltip('You vouched'), findsOneWidget);
+    expect(find.byTooltip('You vouched for Bob'), findsOneWidget);
 
     await tapText(tester, 'Withdraw');
     expect(
@@ -245,7 +245,7 @@ void main() {
     await tapText(tester, 'Withdraw');
 
     expect(service.withdrawn, ['edge-1']);
-    expect(find.byTooltip('You vouched'), findsNothing);
+    expect(find.byTooltip('You vouched for Bob'), findsNothing);
     expect(find.text('No vouches yet'), findsOneWidget);
   });
 
@@ -286,7 +286,7 @@ void main() {
       );
     await pumpPanel(tester);
 
-    await tester.tap(find.byTooltip('You vouched'));
+    await tester.tap(find.byTooltip('You vouched for Bob'));
     await tester.pumpAndSettle();
 
     expect(find.text('You vouched for Bob'), findsOneWidget);

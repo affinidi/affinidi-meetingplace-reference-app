@@ -5534,12 +5534,6 @@ abstract class AppLocalizations {
   /// **'Vouch in a community'**
   String get vtcTrustVouchInCommunity;
 
-  /// The member vouched for the contact in this community
-  ///
-  /// In en, this message translates to:
-  /// **'You vouched'**
-  String get vtcTrustYouVouched;
-
   /// The contact vouched for the member in this community
   ///
   /// In en, this message translates to:
@@ -5706,18 +5700,6 @@ abstract class AppLocalizations {
   /// **'No other members to show.'**
   String get vtcGroupMembersNone;
 
-  /// Badge: the member vouched for this member
-  ///
-  /// In en, this message translates to:
-  /// **'Vouched'**
-  String get vtcTrustVouched;
-
-  /// Badge: this member vouched for the member
-  ///
-  /// In en, this message translates to:
-  /// **'Vouches for you'**
-  String get vtcTrustVouchesForYou;
-
   /// Why some members of a group may be missing from its list
   ///
   /// In en, this message translates to:
@@ -5807,6 +5789,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The vouch'**
   String get vtcVouchTrailTheVouch;
+
+  /// Both the member and another member vouched, each for the other
+  ///
+  /// In en, this message translates to:
+  /// **'You and {name} vouched for each other'**
+  String vtcTrustVouchedForEachOther(String name);
 
   /// The scanned community is one the member belongs to
   ///

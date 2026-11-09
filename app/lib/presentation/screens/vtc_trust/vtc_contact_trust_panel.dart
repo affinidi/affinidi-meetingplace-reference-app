@@ -194,17 +194,24 @@ class _TrustRowView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: 2,
               children: [
-                Text(row.communityName, style: context.textTheme.titleSmall),
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        row.communityName,
+                        style: context.textTheme.titleSmall,
+                      ),
+                    ),
+                    if (edges != null)
+                      VtcVouchButton(
+                        edges: edges,
+                        name: name,
+                        communityName: row.communityName,
+                      ),
+                  ],
+                ),
                 for (final line in lines)
                   Text(line, style: context.textTheme.bodySmall),
-                if (edges != null)
-                  VtcVouchIcons(
-                    edges: edges,
-                    name: name,
-                    communityName: row.communityName,
-                    outgoingLabel: l10n.vtcTrustYouVouched,
-                    incomingLabel: l10n.vtcTrustTheyVouched(name),
-                  ),
               ],
             ),
           ),
