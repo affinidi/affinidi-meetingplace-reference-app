@@ -2017,7 +2017,9 @@ class VtcService {
   /// Asks [communityDid] for the member's current cards, and keeps them on
   /// their VTA when the role there changed, e.g. after an administrator
   /// promoted them: the card the community pushes on a role change may
-  /// never reach the VTA. A kept change fires [membershipsChanged].
+  /// never reach the VTA. A kept change fires [membershipsChanged]. The
+  /// renewed membership card is confirmed back to the community, as on
+  /// admission, best effort.
   ///
   /// Does nothing for a community this phone knows no membership of, or
   /// when the community no longer counts the persona as a member.
@@ -2028,13 +2030,26 @@ class VtcService {
     final community = await _repository.findCommunity(communityDid);
     if (community == null || !community.isMember) return;
     final vta = await _grantedVta();
-    final cards = await _sdk.joinClient().renew(
-      communityDid,
-      agent: vta,
-      persona: await _personaSigner(vta, community),
-    );
+    final signer = await _personaSigner(vta, community);
+    final client = _sdk.joinClient();
+    final cards = await client.renew(communityDid, agent: vta, persona: signer);
     _refreshedAt[communityDid] = DateTime.now();
     if (cards == null) return;
+
+    // A renewed card is a new one: the member's confirmation names the card
+    // by its digest, so the earlier one no longer completes the membership.
+    try {
+      await client.confirmMembership(
+        communityDid,
+        agent: vta,
+        persona: _persona(community),
+        signer: signer,
+        communityCard: cards.membership,
+      );
+    } on MeetingPlaceVtcSDKException {
+      // The community holds the membership either way; the next renewal
+      // confirms it again.
+    }
 
     final personaDid = community.personaDid;
     final heldRole = await _sdk

@@ -651,8 +651,9 @@ void main() {
         await Future<void>.delayed(Duration.zero);
         await listening.cancel();
 
-        final renewal = network.memberRequests.last;
-        expect(renewal['type'], MemberTask.renew);
+        final renewal = network.memberRequests.firstWhere(
+          (request) => request['type'] == MemberTask.renew,
+        );
         expect(renewal['issuer'], persona.did);
         expect(kept(), ['urn:uuid:vmc-renewed', 'urn:uuid:vac-renewed']);
         expect(changes, 1);
@@ -666,9 +667,47 @@ void main() {
         await Future<void>.delayed(Duration.zero);
         await listening.cancel();
 
-        expect(network.memberRequests.last['type'], MemberTask.renew);
+        expect(
+          network.memberRequests.map((request) => request['type']),
+          contains(MemberTask.renew),
+        );
         expect(kept(), isEmpty);
         expect(changes, 0);
+      });
+
+      test('confirms the renewed membership card back', () async {
+        network.memberRequests.clear();
+
+        await service.refreshMembership(fakeVtcDid);
+
+        expect(network.memberRequests.map((request) => request['type']), [
+          MemberTask.renew,
+          MemberTask.vmc,
+        ]);
+        final signed = network.vta.received.lastWhere(
+          (request) => request['type'] == VtaTask.signDocument,
+        );
+        final vc =
+            (signed['payload'] as Map)['document'] as Map<String, dynamic>;
+        expect(
+          (vc['credentialSubject'] as Map)['digestMultibase'],
+          digestMultibase({
+            'id': 'urn:uuid:vmc-renewed',
+            'type': ['VerifiableCredential', 'MembershipCredential'],
+            'issuer': fakeVtcDid,
+            'credentialSubject': {'id': persona.did},
+          }),
+          reason: 'bound to the renewed card, not the first one',
+        );
+      });
+
+      test('refreshes all the same when the confirmation is refused', () async {
+        network.refusals[MemberTask.vmc] = (409, 'vtc/members/vmc:conflict');
+        network.renewedRole = 'admin';
+
+        await service.refreshMembership(fakeVtcDid);
+
+        expect(kept(), ['urn:uuid:vmc-renewed', 'urn:uuid:vac-renewed']);
       });
 
       test('keeps the cards when the VTA holds no role card', () async {
