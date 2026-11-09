@@ -968,6 +968,12 @@ void main() {
         expect(update['issuer'], persona.did);
         expect(update['payload'], {
           'visibility': {'did': 'members'},
+          // A card with no discoverability yet is made findable.
+          'discoverability': {
+            'listing': 'findable',
+            'search': 'byName',
+            'external': false,
+          },
         });
       });
 
