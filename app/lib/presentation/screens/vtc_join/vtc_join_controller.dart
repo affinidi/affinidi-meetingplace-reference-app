@@ -163,11 +163,14 @@ class VtcJoinController extends _$VtcJoinController {
     state = state.copyWith(step: VtcJoinStep.working);
 
     await _run(() async {
-      final manifest = await _service.readCommunity(
-        await _communityDidOf(code),
-      );
+      _showOpenStep(VtcOpenStep.finding);
+      final communityDid = await _communityDidOf(code);
+      _showOpenStep(VtcOpenStep.readingRules);
+      final manifest = await _service.readCommunity(communityDid);
       _manifest = manifest;
+      _showOpenStep(VtcOpenStep.readingProfile);
       final profile = await _profileOf(manifest.communityDid);
+      _showOpenStep(VtcOpenStep.checkingMembership);
       var community = await _service.community(manifest.communityDid);
       if (community == null) {
         // A membership another app of the member holds, backed up to the
@@ -178,6 +181,7 @@ class VtcJoinController extends _$VtcJoinController {
           community = await _service.community(manifest.communityDid);
         }
       }
+      _showOpenStep(VtcOpenStep.checkingCredentials);
       _holders = await _credentialHolders(manifest, community);
       state = state.copyWith(
         step: _stepOf(community),
@@ -224,6 +228,13 @@ class VtcJoinController extends _$VtcJoinController {
         _showVetting(vetting);
       }
     });
+    // Opening ended, also when it failed: later work must not show it.
+    if (ref.mounted) state = state.copyWith(openStep: null);
+  }
+
+  void _showOpenStep(VtcOpenStep step) {
+    // The screen may have closed while the community was read.
+    if (ref.mounted) state = state.copyWith(openStep: step);
   }
 
   /// Which of the member's identities hold the credentials [manifest]'s ways

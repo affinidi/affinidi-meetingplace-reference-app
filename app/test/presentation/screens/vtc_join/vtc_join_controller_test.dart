@@ -1049,6 +1049,27 @@ void main() {
       expect(state().communityDid, fakeVtcDid);
     });
 
+    test('shows each step of opening the community, in order', () async {
+      communityOffers.phrases['my-club'] = fakeVtcDid;
+      final steps = <VtcOpenStep?>[];
+      container.listen(
+        vtcJoinControllerProvider.select((state) => state.openStep),
+        (_, step) => steps.add(step),
+      );
+
+      await controller().onScanned('my-club');
+
+      expect(steps, [...VtcOpenStep.values, null]);
+      expect(state().step, VtcJoinStep.review);
+    });
+
+    test('forgets the opening step when opening fails', () async {
+      await controller().onScanned('my-club');
+
+      expect(state().step, VtcJoinStep.failed);
+      expect(state().openStep, isNull);
+    });
+
     for (final (problem, failure) in [
       (CommunityPhraseProblem.notFound, VtcJoinFailure.phraseNotFound),
       (CommunityPhraseProblem.expired, VtcJoinFailure.phraseExpired),

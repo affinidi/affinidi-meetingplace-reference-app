@@ -72,6 +72,27 @@ enum VtcJoinStep {
   failed,
 }
 
+/// A step of opening a community from its code, in order, while the phone
+/// works in the background.
+enum VtcOpenStep {
+  /// Finding the community a join phrase stands for.
+  finding,
+
+  /// Reading what the community asks of those who join.
+  readingRules,
+
+  /// Reading the community's public profile.
+  readingProfile,
+
+  /// Checking whether the member already belongs or applied, here or in a
+  /// membership backed up to their VTA.
+  checkingMembership,
+
+  /// Asking the member's VTA which identities hold the credentials the
+  /// community asks for.
+  checkingCredentials,
+}
+
 /// A step of being vetted by one vetter, from their ticket on, in order.
 enum VtcApplicantStep {
   /// Meeting a vetter: the overview of what the community asks and the
@@ -339,6 +360,9 @@ abstract class VtcJoinState with _$VtcJoinState {
     /// How far finding the card on the member's VTA got, while
     /// [gettingCard].
     MembershipCardStep? cardStep,
+
+    /// How far opening the community got, while it opens.
+    VtcOpenStep? openStep,
 
     /// The community's own check of the member's identity, once their VTA
     /// holds one.
