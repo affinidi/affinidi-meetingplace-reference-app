@@ -5,9 +5,7 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../application/services/vtc_trust_service/vtc_trust_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
-import '../vtc_join/vtc_role_name.dart';
-import '../vtc_trust/vtc_member_avatar.dart';
-import '../vtc_trust/vtc_member_credentials.dart';
+import '../vtc_trust/vtc_member_tile.dart';
 import '../vtc_trust/vtc_vouch.dart';
 
 /// The other members of a community group, as the community's directory
@@ -88,74 +86,14 @@ class VtcGroupMembersScreen extends HookConsumerWidget {
               );
             }
             final entry = members[index - 1];
-            final name =
-                entry.displayName ?? entry.nickname ?? l10n.vtcTrustUnnamed;
-            final memberEdges = edges[entry.did] ?? const VtcEdges();
-            return ListTile(
+            return VtcMemberTile(
               key: Key('vtc_group_member_${entry.entryId}'),
-              leading: VtcMemberAvatar(
-                communityDid: communityDid,
-                entry: entry,
-              ),
-              title: Text(name),
-              subtitle: switch ((entry.role, entry.did)) {
-                (null, null) => Text(
-                  l10n.vtcTrustNotFindable(name, communityName),
-                ),
-                (final role?, null) => Text(
-                  '${vtcRoleName(l10n, role)}\n'
-                  '${l10n.vtcTrustNotFindable(name, communityName)}',
-                ),
-                (final role?, _) => Text(
-                  vtcRoleName(l10n, role),
-                  key: Key('vtc_group_member_role_${entry.entryId}'),
-                ),
-                (null, _) => null,
-              },
-              // The icons last, in a slot each, so they line up on the
-              // right in every row whether or not it offers to vouch.
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (entry.did != null && memberEdges.outgoing == null)
-                    FilledButton(
-                      onPressed: () => vouch(entry, name),
-                      child: Text(
-                        memberEdges.canVouchBack
-                            ? l10n.vtcTrustVouchBack
-                            : l10n.vtcTrustVouch,
-                      ),
-                    ),
-                  SizedBox.square(
-                    dimension: _iconSlot,
-                    child: VtcVouchButton(
-                      edges: memberEdges,
-                      name: name,
-                      communityDid: communityDid,
-                      communityName: communityName,
-                      entry: entry,
-                    ),
-                  ),
-                  SizedBox.square(
-                    dimension: _iconSlot,
-                    child: VtcMemberCredentialsButton(
-                      communityDid: communityDid,
-                      communityName: communityName,
-                      entry: entry,
-                      name: name,
-                      names: {
-                        for (final member in members)
-                          if ((
-                                member.did,
-                                member.displayName ?? member.nickname,
-                              )
-                              case (final did?, final shown?))
-                            did: shown,
-                      },
-                    ),
-                  ),
-                ],
-              ),
+              communityDid: communityDid,
+              communityName: communityName,
+              entry: entry,
+              edges: edges[entry.did] ?? const VtcEdges(),
+              names: vtcMemberNames(members),
+              onVouch: (name) => vouch(entry, name),
             );
           },
         ),
@@ -164,9 +102,6 @@ class VtcGroupMembersScreen extends HookConsumerWidget {
     );
   }
 }
-
-/// The room each icon of a member's row takes, kept when it shows none.
-const _iconSlot = 40.0;
 
 class _Message extends StatelessWidget {
   const _Message(this.text);

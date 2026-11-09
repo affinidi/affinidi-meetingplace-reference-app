@@ -88,7 +88,9 @@ void main() {
       expect(find.text(l10n.communitiesNone), findsNothing);
     });
 
-    testWidgets('opens a joined community with its channels', (tester) async {
+    testWidgets('opens a joined community with its channels and members', (
+      tester,
+    ) async {
       final l10n = await getL10n();
       await openCommunitiesTab(tester);
       await saveCommunities();
@@ -99,6 +101,16 @@ void main() {
 
       expect(find.text('Chess club'), findsOneWidget);
       expect(find.text(l10n.contactsPanelSubtitle), findsOneWidget);
+      expect(find.text(l10n.communityChannelsTab), findsOneWidget);
+      expect(find.text(l10n.communityMembersTab), findsOneWidget);
+      expect(find.text(l10n.noContactsYet), findsOneWidget);
+
+      await tester.tap(find.text(l10n.communityMembersTab));
+      await tester.pumpAndSettle();
+      expect(
+        find.text(l10n.communityMembersPrompt('Chess club')),
+        findsOneWidget,
+      );
 
       await tester.tap(find.byIcon(Icons.close));
       await tester.pumpAndSettle();

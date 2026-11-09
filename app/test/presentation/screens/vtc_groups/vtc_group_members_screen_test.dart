@@ -210,7 +210,7 @@ void main() {
     expect(
       inMember(
         'dir_anon',
-        find.byKey(const Key('vtc_group_member_role_dir_anon')),
+        find.byKey(const Key('vtc_member_role_dir_anon')),
       ),
       findsNothing,
       reason: 'no role shown, none drawn',

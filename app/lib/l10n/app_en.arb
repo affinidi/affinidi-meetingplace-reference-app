@@ -5007,5 +5007,22 @@
 	"communityPending": "Pending",
 	"@communityPending": {
 		"description": "Chip on a community the member applied to, while it decides"
+	},
+	"communityChannelsTab": "Channels",
+	"@communityChannelsTab": {
+		"description": "Tab of a community's screen listing its channels"
+	},
+	"communityMembersTab": "Members",
+	"@communityMembersTab": {
+		"description": "Tab of a community's screen to search its members"
+	},
+	"communityMembersPrompt": "Search the directory of {community} by name.",
+	"@communityMembersPrompt": {
+		"description": "Shown on a community's Members tab before the member searches",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			}
+		}
 	}
 }

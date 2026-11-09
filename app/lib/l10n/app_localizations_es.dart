@@ -4675,4 +4675,15 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get communityPending => 'Pending';
+
+  @override
+  String get communityChannelsTab => 'Channels';
+
+  @override
+  String get communityMembersTab => 'Members';
+
+  @override
+  String communityMembersPrompt(String community) {
+    return 'Search the directory of $community by name.';
+  }
 }

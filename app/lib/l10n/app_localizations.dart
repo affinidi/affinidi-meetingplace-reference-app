@@ -6845,6 +6845,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pending'**
   String get communityPending;
+
+  /// Tab of a community's screen listing its channels
+  ///
+  /// In en, this message translates to:
+  /// **'Channels'**
+  String get communityChannelsTab;
+
+  /// Tab of a community's screen to search its members
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get communityMembersTab;
+
+  /// Shown on a community's Members tab before the member searches
+  ///
+  /// In en, this message translates to:
+  /// **'Search the directory of {community} by name.'**
+  String communityMembersPrompt(String community);
 }
 
 class _AppLocalizationsDelegate
