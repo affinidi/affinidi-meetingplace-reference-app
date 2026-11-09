@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -43,9 +44,13 @@ class _FakeTrustService extends Fake implements VtcTrustService {
   /// How often the members of the member's groups were read.
   int listings = 0;
 
+  /// Holds the members of the member's groups back until completed.
+  Completer<void>? listingGate;
+
   @override
   Future<List<DirectoryEntry>> communityMembers(String communityDid) async {
     listings++;
+    await listingGate?.future;
     if (refusal case final refusal?) throw VtcTrustException(refusal);
     return groupsMembers;
   }
@@ -197,6 +202,24 @@ void main() {
     await tester.pumpAndSettle();
     expect(inMember('dir_bob', find.text('Bob')), findsOneWidget);
     expect(service.listings, 2);
+  });
+
+  testWidgets('shows that the kept members are being synced', (tester) async {
+    final container = keptMembers();
+    await showTab(tester, container);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('community_members_syncing')), findsNothing);
+    await showTab(tester, container, open: false);
+    service.listingGate = Completer();
+
+    await showTab(tester, container);
+    await tester.pump();
+
+    expect(find.byKey(const Key('community_members_syncing')), findsOneWidget);
+    expect(inMember('dir_bea', find.text('Bea')), findsOneWidget);
+    service.listingGate!.complete();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('community_members_syncing')), findsNothing);
   });
 
   testWidgets('keeps the members when syncing them fails', (tester) async {

@@ -11,6 +11,8 @@ import '../vtc_trust/vtc_member_tile.dart';
 import '../vtc_trust/vtc_vouch.dart';
 import 'community_members_controller.dart';
 
+const _syncingBarHeight = 2.0;
+
 /// The other members of a community: those of the member's groups, or
 /// those the member searches the directory for, each with the vouches
 /// between them and the member, to vouch for them. The directory answers
@@ -34,12 +36,18 @@ class CommunityMembersView extends HookConsumerWidget {
     final cache = communityMembersControllerProvider(communityDid);
     final query = useState<String?>(null);
     final reload = useState(0);
+    final syncing = useState<Future<void>?>(null);
+    Future<void> sync() => syncing.value = ref.read(cache.notifier).sync();
     useEffect(() {
       // Not while building: syncing changes what is shown.
-      Future.microtask(() => ref.read(cache.notifier).sync());
+      Future.microtask(sync);
       return null;
     }, [communityDid]);
+    final isSyncing =
+        useFuture(syncing.value).connectionState == ConnectionState.waiting;
     final listed = ref.watch(cache);
+    // Only over members already shown: until then the list itself waits.
+    final showSyncing = isSyncing && query.value == null && listed.hasValue;
     final search = useMemoized(() async {
       final text = query.value;
       if (text == null) return null;
@@ -86,7 +94,7 @@ class CommunityMembersView extends HookConsumerWidget {
       );
       if (edge == null) return;
       if (query.value == null) {
-        await ref.read(cache.notifier).sync();
+        await sync();
       } else {
         reload.value++;
       }
@@ -110,6 +118,15 @@ class CommunityMembersView extends HookConsumerWidget {
             onSubmitted: (text) =>
                 query.value = text.trim().isEmpty ? null : text.trim(),
           ),
+        ),
+        // Height kept so the list does not shift as syncing starts and ends.
+        SizedBox(
+          height: _syncingBarHeight,
+          child: showSyncing
+              ? const LinearProgressIndicator(
+                  key: Key('community_members_syncing'),
+                )
+              : null,
         ),
         Expanded(
           child: switch (loaded) {
