@@ -10,6 +10,7 @@ import '../../infrastructure/extensions/build_context_extensions.dart';
 import '../../l10n/app_localizations.dart';
 import '../themes/tokens/mc_icons.dart';
 import '../themes/tokens/mc_radius.dart';
+import '../themes/tokens/mc_spacing.dart';
 
 /// The VTA's shield, as in the trail diagrams, beside an identity's name:
 /// opens [showVtaDetails] for where the identity lives on the VTA.
@@ -110,11 +111,8 @@ class _VtaDetailsSheet extends HookConsumerWidget {
                 children: [
                   CircleAvatar(
                     radius: 20,
-                    backgroundColor: colors.primaryContainer,
-                    child: Icon(
-                      McIcons.shield,
-                      color: colors.onPrimaryContainer,
-                    ),
+                    backgroundColor: colors.secondary,
+                    child: Icon(McIcons.shield, color: colors.onSecondary),
                   ),
                   Expanded(
                     child: Text(
@@ -248,13 +246,26 @@ class _Profile extends StatelessWidget {
         ],
       );
     } else {
-      body = SelectableText(
-        _json.convert(_shortened(document, l10n)),
-        key: const Key('vta_details_profile'),
-        style: textTheme.labelSmall?.copyWith(
-          color: color,
-          fontFamily: 'monospace',
-          height: 1.4,
+      final mc = context.mcColors;
+      // A sunken panel of its own, as the JSON sheet shows a document.
+      body = DecoratedBox(
+        key: const Key('vta_details_profile_panel'),
+        decoration: BoxDecoration(
+          color: context.colorScheme.surfaceContainerLowest,
+          borderRadius: BorderRadius.circular(McRadius.lg),
+          border: Border.all(color: mc.hairline),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(McSpacing.s4),
+          child: SelectableText(
+            _json.convert(_shortened(document, l10n)),
+            key: const Key('vta_details_profile'),
+            style: textTheme.labelSmall?.copyWith(
+              color: color,
+              fontFamily: 'monospace',
+              height: 1.4,
+            ),
+          ),
         ),
       );
     }

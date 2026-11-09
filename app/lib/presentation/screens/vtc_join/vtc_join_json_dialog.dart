@@ -111,8 +111,8 @@ class _JsonSheet extends HookWidget {
                 children: [
                   CircleAvatar(
                     radius: 20,
-                    backgroundColor: colors.primaryContainer,
-                    child: Icon(icon, color: colors.onPrimaryContainer),
+                    backgroundColor: colors.secondary,
+                    child: Icon(icon, color: colors.onSecondary),
                   ),
                   Expanded(
                     child: Column(

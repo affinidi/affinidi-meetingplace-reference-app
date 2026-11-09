@@ -103,6 +103,32 @@ void main() {
       expect(profileReads(), hasLength(1));
     });
 
+    testWidgets('marks the sheet in the secondary colour', (tester) async {
+      await pump(tester);
+      await open(tester);
+
+      final badge = tester.widget<CircleAvatar>(
+        find.descendant(
+          of: find.byKey(const Key('vta_details_sheet')),
+          matching: find.byType(CircleAvatar),
+        ),
+      );
+      expect(badge.backgroundColor, AppTheme.dark.colorScheme.secondary);
+    });
+
+    testWidgets('sets the profile JSON in a panel of its own', (tester) async {
+      await pump(tester);
+      await open(tester);
+
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('vta_details_profile_panel')),
+          matching: find.byKey(const Key('vta_details_profile')),
+        ),
+        findsOneWidget,
+      );
+    });
+
     testWidgets('closes the sheet', (tester) async {
       await pump(tester);
       await open(tester);
