@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +8,7 @@ import '../../infrastructure/configuration/environment.dart';
 import '../../infrastructure/extensions/build_context_extensions.dart';
 import '../../navigation/tabs/navigation_tab_destination.dart';
 import '../../navigation/tabs/tabs.dart';
+import '../screens/credentials/membership_credentials_controller.dart';
 import '../widgets/loaders/control_plane_events_progress_indicator.dart';
 import '../widgets/settings_end_drawer.dart';
 import 'dashboard_shell_scaffold_key.dart';
@@ -44,6 +47,17 @@ class ScaffoldWithNavBar extends ConsumerWidget {
         onDestinationSelected: (visibleIndex) {
           final branchIndex = visibleBranchIndexes[visibleIndex];
           navigationShell.goBranch(branchIndex);
+          // The tab stays alive once opened: read the cards again on each
+          // return to it. Its first opening reads them already.
+          if (branchIndex == Tabs.credentials.index &&
+              branchIndex != currentIndex &&
+              ref.exists(membershipCredentialsControllerProvider)) {
+            unawaited(
+              ref
+                  .read(membershipCredentialsControllerProvider.notifier)
+                  .refresh(),
+            );
+          }
         },
         destinations: visibleTabs.map((tab) => tab.destination(l10n)).toList(),
       ),
