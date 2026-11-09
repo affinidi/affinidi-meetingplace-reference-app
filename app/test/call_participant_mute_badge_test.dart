@@ -8,7 +8,7 @@ Future<void> _pumpBadge(WidgetTester tester, Widget child) {
   return tester.pumpWidget(
     MaterialApp(
       theme: ThemeData(
-        extensions: const <ThemeExtension<dynamic>>[AppCustomColors()],
+        extensions: <ThemeExtension<dynamic>>[AppCustomColors.dark],
       ),
       home: Scaffold(body: Center(child: child)),
     ),

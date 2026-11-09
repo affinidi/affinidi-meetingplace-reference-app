@@ -1,21 +1,53 @@
 import 'package:flutter/material.dart';
 
+import 'tokens/mc_colors.dart';
+
 @immutable
 class LogColors extends ThemeExtension<LogColors> {
   const LogColors({
-    this.sdkError = const Color(0xFFD32F2F),
-    this.sdkWarning = const Color(0xFFFF9800),
-    this.sdkDebug = const Color(0xFF3F51B5),
-    this.sdkInfo = const Color(0xFF9C27B0),
-    this.sdkOther = Colors.tealAccent,
-    this.sdkContext = Colors.limeAccent,
-    this.appError = Colors.red,
-    this.appWarning = Colors.orange,
-    this.appDebug = const Color.fromARGB(255, 3, 104, 192),
-    this.appInfo = Colors.green,
-    this.appOther = Colors.lightBlue,
-    this.appContext = const Color(0xFF4CAF50),
+    required this.sdkError,
+    required this.sdkWarning,
+    required this.sdkDebug,
+    required this.sdkInfo,
+    required this.sdkOther,
+    required this.sdkContext,
+    required this.appError,
+    required this.appWarning,
+    required this.appDebug,
+    required this.appInfo,
+    required this.appOther,
+    required this.appContext,
   });
+
+  static final dark = LogColors(
+    sdkError: McColors.dark.dangerText,
+    sdkWarning: McColors.dark.warning,
+    sdkDebug: McColors.blue,
+    sdkInfo: McColors.purple,
+    sdkOther: McColors.cyan,
+    sdkContext: McColors.lime,
+    appError: McColors.dark.bad,
+    appWarning: McColors.orange,
+    appDebug: McColors.blue,
+    appInfo: McColors.dark.ok,
+    appOther: McColors.dark.highlightSecondary,
+    appContext: McColors.dark.success,
+  );
+
+  static final light = LogColors(
+    sdkError: McColors.light.dangerText,
+    sdkWarning: McColors.light.warning,
+    sdkDebug: McColors.blue,
+    sdkInfo: const Color(0xFFA236C8),
+    sdkOther: const Color(0xFF008085),
+    sdkContext: const Color(0xFF597300),
+    appError: McColors.light.bad,
+    appWarning: const Color(0xFFB27B00),
+    appDebug: McColors.blue,
+    appInfo: McColors.light.ok,
+    appOther: McColors.light.highlightSecondary,
+    appContext: McColors.light.success,
+  );
 
   final Color sdkError;
   final Color sdkWarning;

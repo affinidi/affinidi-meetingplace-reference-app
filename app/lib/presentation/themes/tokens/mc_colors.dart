@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 /// those files when the design language changes; CSS `#RRGGBBAA` and
 /// `rgba()` values are written here as `0xAARRGGBB`.
 @immutable
-class McColors {
+class McColors extends ThemeExtension<McColors> {
   const McColors._({
     required this.canvas,
     required this.panel,
@@ -136,4 +136,94 @@ class McColors {
   /// button fill.
   LinearGradient get accentGradient =>
       LinearGradient(colors: [blue, accentEnd]);
+
+  @override
+  McColors copyWith({
+    Color? canvas,
+    Color? panel,
+    Color? panel2,
+    Color? raised,
+    Color? sunken,
+    Color? overlay,
+    Color? scrim,
+    Color? textPrimary,
+    Color? textSecondary,
+    Color? textTertiary,
+    Color? textFaint,
+    Color? textOnAccent,
+    Color? hairline,
+    Color? hairlineStrong,
+    Color? control,
+    Color? ok,
+    Color? bad,
+    Color? success,
+    Color? warning,
+    Color? dangerText,
+    Color? hoverWash,
+    Color? knob,
+    Color? highlightSecondary,
+    Color? accentEnd,
+  }) {
+    return McColors._(
+      canvas: canvas ?? this.canvas,
+      panel: panel ?? this.panel,
+      panel2: panel2 ?? this.panel2,
+      raised: raised ?? this.raised,
+      sunken: sunken ?? this.sunken,
+      overlay: overlay ?? this.overlay,
+      scrim: scrim ?? this.scrim,
+      textPrimary: textPrimary ?? this.textPrimary,
+      textSecondary: textSecondary ?? this.textSecondary,
+      textTertiary: textTertiary ?? this.textTertiary,
+      textFaint: textFaint ?? this.textFaint,
+      textOnAccent: textOnAccent ?? this.textOnAccent,
+      hairline: hairline ?? this.hairline,
+      hairlineStrong: hairlineStrong ?? this.hairlineStrong,
+      control: control ?? this.control,
+      ok: ok ?? this.ok,
+      bad: bad ?? this.bad,
+      success: success ?? this.success,
+      warning: warning ?? this.warning,
+      dangerText: dangerText ?? this.dangerText,
+      hoverWash: hoverWash ?? this.hoverWash,
+      knob: knob ?? this.knob,
+      highlightSecondary: highlightSecondary ?? this.highlightSecondary,
+      accentEnd: accentEnd ?? this.accentEnd,
+    );
+  }
+
+  @override
+  McColors lerp(McColors? other, double t) {
+    if (other is! McColors) return this;
+    return McColors._(
+      canvas: Color.lerp(canvas, other.canvas, t)!,
+      panel: Color.lerp(panel, other.panel, t)!,
+      panel2: Color.lerp(panel2, other.panel2, t)!,
+      raised: Color.lerp(raised, other.raised, t)!,
+      sunken: Color.lerp(sunken, other.sunken, t)!,
+      overlay: Color.lerp(overlay, other.overlay, t)!,
+      scrim: Color.lerp(scrim, other.scrim, t)!,
+      textPrimary: Color.lerp(textPrimary, other.textPrimary, t)!,
+      textSecondary: Color.lerp(textSecondary, other.textSecondary, t)!,
+      textTertiary: Color.lerp(textTertiary, other.textTertiary, t)!,
+      textFaint: Color.lerp(textFaint, other.textFaint, t)!,
+      textOnAccent: Color.lerp(textOnAccent, other.textOnAccent, t)!,
+      hairline: Color.lerp(hairline, other.hairline, t)!,
+      hairlineStrong: Color.lerp(hairlineStrong, other.hairlineStrong, t)!,
+      control: Color.lerp(control, other.control, t)!,
+      ok: Color.lerp(ok, other.ok, t)!,
+      bad: Color.lerp(bad, other.bad, t)!,
+      success: Color.lerp(success, other.success, t)!,
+      warning: Color.lerp(warning, other.warning, t)!,
+      dangerText: Color.lerp(dangerText, other.dangerText, t)!,
+      hoverWash: Color.lerp(hoverWash, other.hoverWash, t)!,
+      knob: Color.lerp(knob, other.knob, t)!,
+      highlightSecondary: Color.lerp(
+        highlightSecondary,
+        other.highlightSecondary,
+        t,
+      )!,
+      accentEnd: Color.lerp(accentEnd, other.accentEnd, t)!,
+    );
+  }
 }

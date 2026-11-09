@@ -11,7 +11,7 @@ Future<void> _pumpTile(WidgetTester tester, Widget child) {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       theme: ThemeData(
-        extensions: const <ThemeExtension<dynamic>>[AppCustomColors()],
+        extensions: <ThemeExtension<dynamic>>[AppCustomColors.dark],
       ),
       home: Scaffold(body: Center(child: child)),
     ),

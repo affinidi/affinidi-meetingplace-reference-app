@@ -1,41 +1,43 @@
 import 'package:flutter/material.dart';
 
+import 'tokens/mc_colors.dart';
+
 @immutable
 class AppCustomColors extends ThemeExtension<AppCustomColors> {
   const AppCustomColors({
-    this._cyan,
-    this._purple,
-    this._rose,
-    this._violet,
-    this._pureWhite,
-    this._success,
-    this._warning,
-    this._grey900,
-    this._grey700,
-    this._callBubbleGrey,
-    this._whiteOverlay30,
-    this._brown,
-    this._orange,
-    this._disabledGrey,
-    this._darkGrey,
-    this._callControlSurface,
-    this._searchHintText,
-    this._searchFieldFill,
-    this._fromMeColor,
-    this._fromMeDarkColor,
-    this._credentialCardGradientStart,
-    this._credentialCardShadow,
-    this._awaitingMemberWarningText,
-    this._mediaSurfaceOverlay,
-    this._mediaSurfaceBorder,
-    this._callChatItemBackground,
-    this._callChatItemFromMeBackground,
-    this._callChatItemPendingContent,
-    this._callChatItemPendingIconContainer,
-    this._callEndAvatarGradientLight,
-    this._callEndAvatarGradientMid,
-    this._incomingCallBannerBackground,
-    this._incomingCallBannerCallTypeLabel,
+    required this.cyan,
+    required this.purple,
+    required this.rose,
+    required this.violet,
+    required this.pureWhite,
+    required this.success,
+    required this.warning,
+    required this.grey900,
+    required this.grey700,
+    required this.callBubbleGrey,
+    required this.whiteOverlay30,
+    required this.brown,
+    required this.orange,
+    required this.disabledGrey,
+    required this.darkGrey,
+    required this.callControlSurface,
+    required this.searchHintText,
+    required this.searchFieldFill,
+    required this.fromMeColor,
+    required this.fromMeDarkColor,
+    required this.credentialCardGradientStart,
+    required this.credentialCardShadow,
+    required this.awaitingMemberWarningText,
+    required this.mediaSurfaceOverlay,
+    required this.mediaSurfaceBorder,
+    required this.callChatItemBackground,
+    required this.callChatItemFromMeBackground,
+    required this.callChatItemPendingContent,
+    required this.callChatItemPendingIconContainer,
+    required this.callEndAvatarGradientLight,
+    required this.callEndAvatarGradientMid,
+    required this.incomingCallBannerBackground,
+    required this.incomingCallBannerCallTypeLabel,
   });
 
   /// Color for concierge messages in chat
@@ -49,100 +51,119 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
   static const secondaryBrand90 = Color(0xFF1D2138);
   static const utilitySuccess100 = Color(0xFF00A08D);
 
-  final Color? _cyan;
-  final Color? _purple;
-  final Color? _rose;
-  final Color? _violet;
-  final Color? _pureWhite;
-  final Color? _success;
-  final Color? _warning;
-  final Color? _grey900;
-  final Color? _grey700;
-  final Color? _callBubbleGrey;
-  final Color? _whiteOverlay30;
-  final Color? _brown;
-  final Color? _orange;
-  final Color? _disabledGrey;
-  final Color? _darkGrey;
-  final Color? _callControlSurface;
-  final Color? _searchHintText;
-  final Color? _searchFieldFill;
-  final Color? _fromMeColor;
-  final Color? _fromMeDarkColor;
-  final Color? _credentialCardGradientStart;
-  final Color? _credentialCardShadow;
-  final Color? _awaitingMemberWarningText;
-  final Color? _mediaSurfaceOverlay;
-  final Color? _mediaSurfaceBorder;
-  final Color? _callChatItemBackground;
-  final Color? _callChatItemFromMeBackground;
-  final Color? _callChatItemPendingContent;
-  final Color? _callChatItemPendingIconContainer;
-  final Color? _callEndAvatarGradientLight;
-  final Color? _callEndAvatarGradientMid;
-  final Color? _incomingCallBannerBackground;
-  final Color? _incomingCallBannerCallTypeLabel;
+  // Calls stay dark in both modes, like the video they sit on.
+  static const _callSurface = Color(0xFF222223);
+  static const _callTextTertiary = Color(0xFF747D8E);
 
-  Color get cyan => _cyan ?? Colors.cyan;
-  Color get purple => _purple ?? Colors.purple;
-  Color get rose => _rose ?? const Color.fromARGB(255, 211, 31, 130);
-  Color get violet => _violet ?? const Color.fromARGB(255, 184, 31, 211);
-  Color get pureWhite => _pureWhite ?? const Color.fromARGB(255, 255, 255, 255);
-  Color get success => _success ?? const Color(0xFF4CAF50);
-  Color get warning => _warning ?? const Color.fromARGB(255, 217, 154, 6);
-  Color get brown => _brown ?? Colors.brown;
-  Color get orange => _orange ?? Colors.orange;
-  Color get grey900 => _grey900 ?? const Color(0xFF212121);
-  Color get grey700 => _grey700 ?? const Color(0xFF636363);
-  Color get callBubbleGrey => _callBubbleGrey ?? const Color(0xFF2E3035);
-  Color get whiteOverlay30 =>
-      _whiteOverlay30 ?? const Color.fromARGB(30, 255, 255, 255);
-  Color get disabledGrey =>
-      _disabledGrey ?? const Color.fromARGB(100, 180, 180, 180);
-  Color get darkGrey => _darkGrey ?? const Color.fromARGB(255, 49, 49, 51);
-  Color get callControlSurface =>
-      _callControlSurface ?? const Color(0xFF25272A);
-  Color get searchHintText => _searchHintText ?? const Color(0xFFBDBDBD);
-  Color get searchFieldFill => _searchFieldFill ?? const Color(0xFF1C1C1E);
-  Color get fromMeColor =>
-      _fromMeColor ?? const Color.fromARGB(255, 3, 104, 192);
-  Color get fromMeDarkColor => _fromMeDarkColor ?? const Color(0xFF020B1A);
-  Color get credentialCardGradientStart =>
-      _credentialCardGradientStart ?? const Color(0xFF040822);
-  Color get credentialCardShadow =>
-      _credentialCardShadow ?? const Color.fromARGB(64, 0, 0, 0);
-  Color get awaitingMemberWarningText =>
-      _awaitingMemberWarningText ?? const Color(0xFFEEEEEE);
-  Color get mediaSurfaceOverlay =>
-      _mediaSurfaceOverlay ?? const Color.fromARGB(178, 18, 18, 20);
-  Color get mediaSurfaceBorder =>
-      _mediaSurfaceBorder ?? const Color.fromARGB(52, 255, 255, 255);
-  Color get callChatItemBackground =>
-      _callChatItemBackground ?? const Color.fromARGB(255, 37, 39, 42);
-  Color get callChatItemFromMeBackground =>
-      _callChatItemFromMeBackground ?? const Color.fromARGB(255, 17, 46, 83);
-  Color get callChatItemPendingContent =>
-      _callChatItemPendingContent ?? const Color.fromARGB(255, 114, 114, 114);
-  Color get callChatItemPendingIconContainer =>
-      _callChatItemPendingIconContainer ??
-      const Color.fromARGB(255, 25, 63, 114);
-  Color get callEndAvatarGradientLight =>
-      _callEndAvatarGradientLight ?? const Color.fromARGB(51, 255, 255, 255);
-  Color get callEndAvatarGradientMid =>
-      _callEndAvatarGradientMid ?? const Color.fromARGB(26, 255, 255, 255);
-  Color get incomingCallBannerBackground =>
-      _incomingCallBannerBackground ?? const Color.fromARGB(255, 37, 39, 42);
-  Color get incomingCallBannerCallTypeLabel =>
-      _incomingCallBannerCallTypeLabel ??
-      const Color.fromARGB(255, 114, 114, 114);
+  static final dark = AppCustomColors(
+    cyan: McColors.cyan,
+    purple: McColors.purple,
+    rose: McColors.pink,
+    violet: const Color(0xFFB74DDE),
+    pureWhite: const Color(0xFFFFFFFF),
+    success: McColors.dark.success,
+    warning: McColors.dark.warning,
+    grey900: McColors.dark.raised,
+    grey700: McColors.dark.textTertiary,
+    callBubbleGrey: _callSurface,
+    whiteOverlay30: McColors.dark.hairline,
+    brown: const Color(0xFF8F6100),
+    orange: McColors.orange,
+    disabledGrey: McColors.dark.textTertiary,
+    darkGrey: _callSurface,
+    callControlSurface: _callSurface,
+    searchHintText: McColors.dark.textTertiary,
+    searchFieldFill: McColors.dark.panel,
+    fromMeColor: McColors.blue,
+    fromMeDarkColor: const Color(0xFF0A182A),
+    credentialCardGradientStart: const Color(0xFF000717),
+    credentialCardShadow: const Color(0x40000000),
+    awaitingMemberWarningText: McColors.dark.textPrimary,
+    mediaSurfaceOverlay: const Color(0xBF0E0E0F),
+    mediaSurfaceBorder: const Color(0x33F4F6FB),
+    callChatItemBackground: _callSurface,
+    callChatItemFromMeBackground: McColors.blueDeep,
+    callChatItemPendingContent: _callTextTertiary,
+    callChatItemPendingIconContainer: const Color(0xFF1C2A3B),
+    callEndAvatarGradientLight: const Color(0x33F4F6FB),
+    callEndAvatarGradientMid: const Color(0x1AF4F6FB),
+    incomingCallBannerBackground: _callSurface,
+    incomingCallBannerCallTypeLabel: _callTextTertiary,
+  );
+
+  static final light = AppCustomColors(
+    cyan: const Color(0xFF008085),
+    purple: McColors.purple,
+    rose: const Color(0xFFC71788),
+    violet: const Color(0xFFA236C8),
+    pureWhite: const Color(0xFFFFFFFF),
+    success: McColors.light.success,
+    warning: McColors.light.warning,
+    grey900: McColors.light.raised,
+    grey700: McColors.light.textTertiary,
+    callBubbleGrey: McColors.light.panel2,
+    whiteOverlay30: McColors.light.hairline,
+    brown: const Color(0xFF8F6100),
+    orange: const Color(0xFFB27B00),
+    disabledGrey: McColors.light.textTertiary,
+    darkGrey: _callSurface,
+    callControlSurface: _callSurface,
+    searchHintText: McColors.light.textTertiary,
+    searchFieldFill: McColors.light.panel,
+    fromMeColor: McColors.blue,
+    fromMeDarkColor: McColors.blueDeep,
+    credentialCardGradientStart: const Color(0xFF000717),
+    credentialCardShadow: const Color(0x1A000000),
+    awaitingMemberWarningText: McColors.light.textPrimary,
+    mediaSurfaceOverlay: const Color(0xBF0E0E0F),
+    mediaSurfaceBorder: const Color(0x33F4F6FB),
+    callChatItemBackground: _callSurface,
+    callChatItemFromMeBackground: McColors.blueDeep,
+    callChatItemPendingContent: _callTextTertiary,
+    callChatItemPendingIconContainer: const Color(0xFF1C2A3B),
+    callEndAvatarGradientLight: const Color(0x33F4F6FB),
+    callEndAvatarGradientMid: const Color(0x1AF4F6FB),
+    incomingCallBannerBackground: _callSurface,
+    incomingCallBannerCallTypeLabel: _callTextTertiary,
+  );
+
+  final Color cyan;
+  final Color purple;
+  final Color rose;
+  final Color violet;
+  final Color pureWhite;
+  final Color success;
+  final Color warning;
+  final Color grey900;
+  final Color grey700;
+  final Color callBubbleGrey;
+  final Color whiteOverlay30;
+  final Color brown;
+  final Color orange;
+  final Color disabledGrey;
+  final Color darkGrey;
+  final Color callControlSurface;
+  final Color searchHintText;
+  final Color searchFieldFill;
+  final Color fromMeColor;
+  final Color fromMeDarkColor;
+  final Color credentialCardGradientStart;
+  final Color credentialCardShadow;
+  final Color awaitingMemberWarningText;
+  final Color mediaSurfaceOverlay;
+  final Color mediaSurfaceBorder;
+  final Color callChatItemBackground;
+  final Color callChatItemFromMeBackground;
+  final Color callChatItemPendingContent;
+  final Color callChatItemPendingIconContainer;
+  final Color callEndAvatarGradientLight;
+  final Color callEndAvatarGradientMid;
+  final Color incomingCallBannerBackground;
+  final Color incomingCallBannerCallTypeLabel;
 
   @override
   AppCustomColors copyWith({
     Color? cyan,
-    Color? callChatItemBackground,
-    Color? callChatItemFromMeBackground,
-    Color? callChatItemPendingContent,
-    Color? callChatItemPendingIconContainer,
     Color? purple,
     Color? rose,
     Color? violet,
@@ -167,54 +188,61 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
     Color? awaitingMemberWarningText,
     Color? mediaSurfaceOverlay,
     Color? mediaSurfaceBorder,
+    Color? callChatItemBackground,
+    Color? callChatItemFromMeBackground,
+    Color? callChatItemPendingContent,
+    Color? callChatItemPendingIconContainer,
     Color? callEndAvatarGradientLight,
     Color? callEndAvatarGradientMid,
     Color? incomingCallBannerBackground,
     Color? incomingCallBannerCallTypeLabel,
   }) {
     return AppCustomColors(
-      cyan: cyan ?? _cyan,
-      purple: purple ?? _purple,
-      rose: rose ?? _rose,
-      violet: violet ?? _violet,
-      pureWhite: pureWhite ?? _pureWhite,
-      success: success ?? _success,
-      warning: warning ?? _warning,
-      grey900: grey900 ?? _grey900,
-      grey700: grey700 ?? _grey700,
-      callBubbleGrey: callBubbleGrey ?? _callBubbleGrey,
-      whiteOverlay30: whiteOverlay30 ?? _whiteOverlay30,
-      brown: brown ?? _brown,
-      orange: orange ?? _orange,
-      disabledGrey: disabledGrey ?? _disabledGrey,
-      darkGrey: darkGrey ?? _darkGrey,
-      callControlSurface: callControlSurface ?? _callControlSurface,
-      searchHintText: searchHintText ?? _searchHintText,
-      searchFieldFill: searchFieldFill ?? _searchFieldFill,
-      fromMeColor: fromMeColor ?? _fromMeColor,
-      fromMeDarkColor: fromMeDarkColor ?? _fromMeDarkColor,
+      cyan: cyan ?? this.cyan,
+      purple: purple ?? this.purple,
+      rose: rose ?? this.rose,
+      violet: violet ?? this.violet,
+      pureWhite: pureWhite ?? this.pureWhite,
+      success: success ?? this.success,
+      warning: warning ?? this.warning,
+      grey900: grey900 ?? this.grey900,
+      grey700: grey700 ?? this.grey700,
+      callBubbleGrey: callBubbleGrey ?? this.callBubbleGrey,
+      whiteOverlay30: whiteOverlay30 ?? this.whiteOverlay30,
+      brown: brown ?? this.brown,
+      orange: orange ?? this.orange,
+      disabledGrey: disabledGrey ?? this.disabledGrey,
+      darkGrey: darkGrey ?? this.darkGrey,
+      callControlSurface: callControlSurface ?? this.callControlSurface,
+      searchHintText: searchHintText ?? this.searchHintText,
+      searchFieldFill: searchFieldFill ?? this.searchFieldFill,
+      fromMeColor: fromMeColor ?? this.fromMeColor,
+      fromMeDarkColor: fromMeDarkColor ?? this.fromMeDarkColor,
       credentialCardGradientStart:
-          credentialCardGradientStart ?? _credentialCardGradientStart,
-      credentialCardShadow: credentialCardShadow ?? _credentialCardShadow,
+          credentialCardGradientStart ?? this.credentialCardGradientStart,
+      credentialCardShadow: credentialCardShadow ?? this.credentialCardShadow,
       awaitingMemberWarningText:
-          awaitingMemberWarningText ?? _awaitingMemberWarningText,
-      mediaSurfaceOverlay: mediaSurfaceOverlay ?? _mediaSurfaceOverlay,
-      mediaSurfaceBorder: mediaSurfaceBorder ?? _mediaSurfaceBorder,
-      callChatItemBackground: callChatItemBackground ?? _callChatItemBackground,
+          awaitingMemberWarningText ?? this.awaitingMemberWarningText,
+      mediaSurfaceOverlay: mediaSurfaceOverlay ?? this.mediaSurfaceOverlay,
+      mediaSurfaceBorder: mediaSurfaceBorder ?? this.mediaSurfaceBorder,
+      callChatItemBackground:
+          callChatItemBackground ?? this.callChatItemBackground,
       callChatItemFromMeBackground:
-          callChatItemFromMeBackground ?? _callChatItemFromMeBackground,
+          callChatItemFromMeBackground ?? this.callChatItemFromMeBackground,
       callChatItemPendingContent:
-          callChatItemPendingContent ?? _callChatItemPendingContent,
+          callChatItemPendingContent ?? this.callChatItemPendingContent,
       callChatItemPendingIconContainer:
-          callChatItemPendingIconContainer ?? _callChatItemPendingIconContainer,
+          callChatItemPendingIconContainer ??
+          this.callChatItemPendingIconContainer,
       callEndAvatarGradientLight:
-          callEndAvatarGradientLight ?? _callEndAvatarGradientLight,
+          callEndAvatarGradientLight ?? this.callEndAvatarGradientLight,
       callEndAvatarGradientMid:
-          callEndAvatarGradientMid ?? _callEndAvatarGradientMid,
+          callEndAvatarGradientMid ?? this.callEndAvatarGradientMid,
       incomingCallBannerBackground:
-          incomingCallBannerBackground ?? _incomingCallBannerBackground,
+          incomingCallBannerBackground ?? this.incomingCallBannerBackground,
       incomingCallBannerCallTypeLabel:
-          incomingCallBannerCallTypeLabel ?? _incomingCallBannerCallTypeLabel,
+          incomingCallBannerCallTypeLabel ??
+          this.incomingCallBannerCallTypeLabel,
     );
   }
 
@@ -222,95 +250,95 @@ class AppCustomColors extends ThemeExtension<AppCustomColors> {
   AppCustomColors lerp(AppCustomColors? other, double t) {
     if (other is! AppCustomColors) return this;
     return AppCustomColors(
-      cyan: Color.lerp(_cyan, other._cyan, t),
-      purple: Color.lerp(_purple, other._purple, t),
-      rose: Color.lerp(_rose, other._rose, t),
-      violet: Color.lerp(_violet, other._violet, t),
-      pureWhite: Color.lerp(_pureWhite, other._pureWhite, t),
-      success: Color.lerp(_success, other._success, t),
-      warning: Color.lerp(_warning, other._warning, t),
-      grey900: Color.lerp(_grey900, other._grey900, t),
-      grey700: Color.lerp(_grey700, other._grey700, t),
-      callBubbleGrey: Color.lerp(_callBubbleGrey, other._callBubbleGrey, t),
-      whiteOverlay30: Color.lerp(_whiteOverlay30, other._whiteOverlay30, t),
-      brown: Color.lerp(_brown, other._brown, t),
-      orange: Color.lerp(_orange, other._orange, t),
-      disabledGrey: Color.lerp(_disabledGrey, other._disabledGrey, t),
-      darkGrey: Color.lerp(_darkGrey, other._darkGrey, t),
+      cyan: Color.lerp(cyan, other.cyan, t)!,
+      purple: Color.lerp(purple, other.purple, t)!,
+      rose: Color.lerp(rose, other.rose, t)!,
+      violet: Color.lerp(violet, other.violet, t)!,
+      pureWhite: Color.lerp(pureWhite, other.pureWhite, t)!,
+      success: Color.lerp(success, other.success, t)!,
+      warning: Color.lerp(warning, other.warning, t)!,
+      grey900: Color.lerp(grey900, other.grey900, t)!,
+      grey700: Color.lerp(grey700, other.grey700, t)!,
+      callBubbleGrey: Color.lerp(callBubbleGrey, other.callBubbleGrey, t)!,
+      whiteOverlay30: Color.lerp(whiteOverlay30, other.whiteOverlay30, t)!,
+      brown: Color.lerp(brown, other.brown, t)!,
+      orange: Color.lerp(orange, other.orange, t)!,
+      disabledGrey: Color.lerp(disabledGrey, other.disabledGrey, t)!,
+      darkGrey: Color.lerp(darkGrey, other.darkGrey, t)!,
       callControlSurface: Color.lerp(
-        _callControlSurface,
-        other._callControlSurface,
+        callControlSurface,
+        other.callControlSurface,
         t,
-      ),
-      searchHintText: Color.lerp(_searchHintText, other._searchHintText, t),
-      searchFieldFill: Color.lerp(_searchFieldFill, other._searchFieldFill, t),
-      fromMeColor: Color.lerp(_fromMeColor, other._fromMeColor, t),
-      fromMeDarkColor: Color.lerp(_fromMeDarkColor, other._fromMeDarkColor, t),
+      )!,
+      searchHintText: Color.lerp(searchHintText, other.searchHintText, t)!,
+      searchFieldFill: Color.lerp(searchFieldFill, other.searchFieldFill, t)!,
+      fromMeColor: Color.lerp(fromMeColor, other.fromMeColor, t)!,
+      fromMeDarkColor: Color.lerp(fromMeDarkColor, other.fromMeDarkColor, t)!,
       credentialCardGradientStart: Color.lerp(
-        _credentialCardGradientStart,
-        other._credentialCardGradientStart,
+        credentialCardGradientStart,
+        other.credentialCardGradientStart,
         t,
-      ),
+      )!,
       credentialCardShadow: Color.lerp(
-        _credentialCardShadow,
-        other._credentialCardShadow,
+        credentialCardShadow,
+        other.credentialCardShadow,
         t,
-      ),
+      )!,
       awaitingMemberWarningText: Color.lerp(
-        _awaitingMemberWarningText,
-        other._awaitingMemberWarningText,
+        awaitingMemberWarningText,
+        other.awaitingMemberWarningText,
         t,
-      ),
+      )!,
       mediaSurfaceOverlay: Color.lerp(
-        _mediaSurfaceOverlay,
-        other._mediaSurfaceOverlay,
+        mediaSurfaceOverlay,
+        other.mediaSurfaceOverlay,
         t,
-      ),
+      )!,
       mediaSurfaceBorder: Color.lerp(
-        _mediaSurfaceBorder,
-        other._mediaSurfaceBorder,
+        mediaSurfaceBorder,
+        other.mediaSurfaceBorder,
         t,
-      ),
+      )!,
       callChatItemBackground: Color.lerp(
-        _callChatItemBackground,
-        other._callChatItemBackground,
+        callChatItemBackground,
+        other.callChatItemBackground,
         t,
-      ),
+      )!,
       callChatItemFromMeBackground: Color.lerp(
-        _callChatItemFromMeBackground,
-        other._callChatItemFromMeBackground,
+        callChatItemFromMeBackground,
+        other.callChatItemFromMeBackground,
         t,
-      ),
+      )!,
       callChatItemPendingContent: Color.lerp(
-        _callChatItemPendingContent,
-        other._callChatItemPendingContent,
+        callChatItemPendingContent,
+        other.callChatItemPendingContent,
         t,
-      ),
+      )!,
       callChatItemPendingIconContainer: Color.lerp(
-        _callChatItemPendingIconContainer,
-        other._callChatItemPendingIconContainer,
+        callChatItemPendingIconContainer,
+        other.callChatItemPendingIconContainer,
         t,
-      ),
+      )!,
       callEndAvatarGradientLight: Color.lerp(
-        _callEndAvatarGradientLight,
-        other._callEndAvatarGradientLight,
+        callEndAvatarGradientLight,
+        other.callEndAvatarGradientLight,
         t,
-      ),
+      )!,
       callEndAvatarGradientMid: Color.lerp(
-        _callEndAvatarGradientMid,
-        other._callEndAvatarGradientMid,
+        callEndAvatarGradientMid,
+        other.callEndAvatarGradientMid,
         t,
-      ),
+      )!,
       incomingCallBannerBackground: Color.lerp(
-        _incomingCallBannerBackground,
-        other._incomingCallBannerBackground,
+        incomingCallBannerBackground,
+        other.incomingCallBannerBackground,
         t,
-      ),
+      )!,
       incomingCallBannerCallTypeLabel: Color.lerp(
-        _incomingCallBannerCallTypeLabel,
-        other._incomingCallBannerCallTypeLabel,
+        incomingCallBannerCallTypeLabel,
+        other.incomingCallBannerCallTypeLabel,
         t,
-      ),
+      )!,
     );
   }
 }

@@ -18,7 +18,7 @@ const _credentialId = 'test-vrc-id';
 Widget _buildApp({required Widget home}) => MaterialApp(
   localizationsDelegates: AppLocalizations.localizationsDelegates,
   supportedLocales: AppLocalizations.supportedLocales,
-  theme: ThemeData(extensions: const [AppCustomColors()]),
+  theme: ThemeData(extensions: [AppCustomColors.dark]),
   home: home,
 );
 

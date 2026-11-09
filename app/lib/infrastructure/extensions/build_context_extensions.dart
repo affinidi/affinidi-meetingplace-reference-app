@@ -7,6 +7,7 @@ import '../../presentation/themes/destructive_elevated_button_style.dart';
 import '../../presentation/themes/log_colors.dart';
 import '../../presentation/themes/qr_scanner_theme.dart';
 import '../../presentation/themes/rounded_input_decoration.dart';
+import '../../presentation/themes/tokens/mc_colors.dart';
 
 /// Extension on [BuildContext] to easily access theme properties
 extension BuildContextExtensions on BuildContext {
@@ -28,6 +29,9 @@ extension BuildContextExtensions on BuildContext {
   /// Returns the custom colors defined in the theme
   AppCustomColors get customColors =>
       Theme.of(this).extension<AppCustomColors>()!;
+
+  /// Returns the Mission Control colour tokens for the current mode
+  McColors get mcColors => Theme.of(this).extension<McColors>()!;
 
   /// Returns the log colors defined in the theme
   LogColors get logColors => Theme.of(this).extension<LogColors>()!;

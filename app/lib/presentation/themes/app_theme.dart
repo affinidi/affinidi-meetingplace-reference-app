@@ -7,10 +7,11 @@ import 'destructive_elevated_button_style.dart';
 import 'log_colors.dart';
 import 'qr_scanner_theme.dart';
 import 'rounded_input_decoration.dart';
+import 'tokens/mc_colors.dart';
 
 class AppTheme {
   static final darkColorScheme = AppColorScheme.dark;
-  static final _customColors = const AppCustomColors();
+  static final _customColors = AppCustomColors.dark;
 
   static final _roundedInputDecorationBorder = OutlineInputBorder(
     borderRadius: BorderRadius.circular(30),
@@ -22,7 +23,8 @@ class AppTheme {
     colorScheme: darkColorScheme,
     extensions: <ThemeExtension<dynamic>>[
       _customColors,
-      const LogColors(),
+      LogColors.dark,
+      McColors.dark,
       QRScannerTheme(colorScheme: darkColorScheme),
       ChatInputDecoration(
         InputDecoration(
