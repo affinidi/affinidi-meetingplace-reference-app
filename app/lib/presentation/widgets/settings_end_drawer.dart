@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../infrastructure/extensions/build_context_extensions.dart';
 import '../../navigation/routes/route_paths.dart';
 import '../../navigation/tabs/tabs.dart';
+import '../themes/tokens/mc_icons.dart';
 
 /// Right-side drawer with shortcuts to Settings, the call log and the test
 /// credentials this phone can issue.
@@ -43,7 +44,7 @@ class SettingsEndDrawer extends StatelessWidget {
             Align(
               alignment: Alignment.topRight,
               child: IconButton(
-                icon: Icon(Icons.close, color: mc.textPrimary, size: 24),
+                icon: Icon(McIcons.close, color: mc.textPrimary, size: 24),
                 tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
                 onPressed: () => Navigator.of(context).pop(),
               ),
@@ -51,21 +52,25 @@ class SettingsEndDrawer extends StatelessWidget {
             ListTile(
               minLeadingWidth: 20,
               horizontalTitleGap: 8,
-              leading: Icon(Icons.settings, color: mc.textPrimary, size: 20),
+              leading: Icon(McIcons.settings, color: mc.textPrimary, size: 20),
               title: Text(title, style: itemStyle),
               onTap: () => _openSettings(context),
             ),
             ListTile(
               minLeadingWidth: 20,
               horizontalTitleGap: 8,
-              leading: Icon(Icons.history, color: mc.textPrimary, size: 20),
+              leading: Icon(McIcons.callLog, color: mc.textPrimary, size: 20),
               title: Text(l10n.callLogScreenTitle, style: itemStyle),
               onTap: () => _openCallLog(context),
             ),
             ListTile(
               minLeadingWidth: 20,
               horizontalTitleGap: 8,
-              leading: Icon(Icons.science, color: mc.textPrimary, size: 20),
+              leading: Icon(
+                McIcons.mockCredentials,
+                color: mc.textPrimary,
+                size: 20,
+              ),
               title: Text(l10n.mockCredentialsTitle, style: itemStyle),
               onTap: () => _openMockCredentials(context),
             ),

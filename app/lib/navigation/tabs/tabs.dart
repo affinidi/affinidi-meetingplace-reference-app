@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../application/services/notification_service/notification_counter_type.dart';
+import '../../presentation/themes/tokens/mc_icons.dart';
 
 enum Tabs {
   contacts(serviceKey: NotificationCounterType.contacts),
@@ -16,17 +17,14 @@ enum Tabs {
   /// The tab's symbol, shared by its navigation item and its section
   /// header.
   IconData get iconData => switch (this) {
-    Tabs.connections => Icons.compare_arrows,
-    Tabs.contacts => Icons.groups,
-    Tabs.identities => Icons.fingerprint,
-    Tabs.rCards => Icons.credit_card,
-    Tabs.credentials => Icons.verified_user,
+    Tabs.connections => McIcons.connections,
+    Tabs.contacts => McIcons.communities,
+    Tabs.identities => McIcons.identities,
+    Tabs.rCards => McIcons.rCards,
+    Tabs.credentials => McIcons.credentials,
   };
 
-  Widget get icon => this == Tabs.connections
-      // The arrows read small at the default size.
-      ? Icon(iconData, size: 32)
-      : Icon(iconData);
+  Widget get icon => Icon(iconData);
 }
 
 enum TabTitleKey {

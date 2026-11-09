@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../infrastructure/extensions/build_context_extensions.dart';
 import '../scaffolds/dashboard_shell_scaffold_key.dart';
+import '../themes/tokens/mc_icons.dart';
 import '../themes/tokens/mc_spacing.dart';
 
 /// Opens a main section: its icon and title, a muted lead and the
@@ -69,7 +70,7 @@ class SectionHeader extends StatelessWidget {
                   key: const Key('section_header_back'),
                   padding: EdgeInsets.zero,
                   tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-                  icon: const Icon(Icons.arrow_back),
+                  icon: const Icon(McIcons.back),
                   color: mc.textSecondary,
                   onPressed: onBack,
                 ),
@@ -111,7 +112,7 @@ class SectionHeader extends StatelessWidget {
               dimension: _actionSize,
               child: IconButton(
                 padding: EdgeInsets.zero,
-                icon: Icon(onClose != null ? Icons.close : Icons.menu),
+                icon: Icon(onClose != null ? McIcons.close : McIcons.menu),
                 color: mc.textSecondary,
                 onPressed: onClose ?? _openSettingsDrawer,
               ),

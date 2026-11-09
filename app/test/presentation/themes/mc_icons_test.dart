@@ -21,6 +21,7 @@ void main() {
   test('draws every icon from Phosphor in its line weight', () {
     const icons = [
       McIcons.contacts,
+      McIcons.communities,
       McIcons.connections,
       McIcons.identities,
       McIcons.rCards,
@@ -29,6 +30,7 @@ void main() {
       McIcons.callLog,
       McIcons.mockCredentials,
       McIcons.add,
+      McIcons.back,
       McIcons.close,
       McIcons.copy,
       McIcons.delete,

@@ -15,6 +15,9 @@ abstract final class McIcons {
   /// Phosphor `chat-circle`.
   static const IconData contacts = IconData(0xe168, fontFamily: fontFamily);
 
+  /// Phosphor `users-three`.
+  static const IconData communities = IconData(0xe68e, fontFamily: fontFamily);
+
   /// Phosphor `arrows-left-right`.
   static const IconData connections = IconData(0xe0a0, fontFamily: fontFamily);
 
@@ -42,6 +45,9 @@ abstract final class McIcons {
   // Actions
   /// Phosphor `plus`.
   static const IconData add = IconData(0xe3d4, fontFamily: fontFamily);
+
+  /// Phosphor `arrow-left`.
+  static const IconData back = IconData(0xe058, fontFamily: fontFamily);
 
   /// Phosphor `x`.
   static const IconData close = IconData(0xe4f6, fontFamily: fontFamily);

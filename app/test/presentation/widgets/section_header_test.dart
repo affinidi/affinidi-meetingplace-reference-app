@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/section_header.dart';
 
 void main() {
@@ -16,7 +17,7 @@ void main() {
         theme: theme ?? AppTheme.dark,
         home: Scaffold(
           body: SectionHeader(
-            icon: Icons.compare_arrows,
+            icon: McIcons.connections,
             title: 'Connections',
             subtitle: subtitle,
             showProgress: showProgress,
@@ -34,10 +35,10 @@ void main() {
     testWidgets('shows the title and lead in the $name theme', (tester) async {
       await pumpHeader(tester, theme: theme);
 
-      expect(find.byIcon(Icons.compare_arrows), findsOneWidget);
+      expect(find.byIcon(McIcons.connections), findsOneWidget);
       expect(find.text('Connections'), findsOneWidget);
       expect(find.text('Who you are connected with'), findsOneWidget);
-      expect(find.byIcon(Icons.menu), findsOneWidget);
+      expect(find.byIcon(McIcons.menu), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
   }
@@ -56,7 +57,7 @@ void main() {
     var closed = false;
     await pumpHeader(tester, onClose: () => closed = true);
 
-    await tester.tap(find.byIcon(Icons.close));
+    await tester.tap(find.byIcon(McIcons.close));
 
     expect(closed, isTrue);
   });
@@ -69,11 +70,11 @@ void main() {
 
     final progress = find.byKey(const Key('section_header_progress'));
     expect(progress, findsOneWidget);
-    await tester.tap(find.byIcon(Icons.close));
+    await tester.tap(find.byIcon(McIcons.close));
     expect(closed, 1);
     expect(
       tester.getCenter(progress).dx,
-      lessThan(tester.getCenter(find.byIcon(Icons.close)).dx),
+      lessThan(tester.getCenter(find.byIcon(McIcons.close)).dx),
     );
   });
 
@@ -81,13 +82,13 @@ void main() {
     await pumpHeader(tester);
 
     expect(find.byType(CircularProgressIndicator), findsNothing);
-    expect(find.byIcon(Icons.menu), findsOneWidget);
+    expect(find.byIcon(McIcons.menu), findsOneWidget);
   });
 
   testWidgets('centres the icon on the title line', (tester) async {
     await pumpHeader(tester);
 
-    final icon = tester.getCenter(find.byIcon(Icons.compare_arrows));
+    final icon = tester.getCenter(find.byIcon(McIcons.connections));
     final title = tester.getRect(find.text('Connections'));
     final lineHeight =
         AppTheme.dark.textTheme.headlineSmall!.fontSize! *

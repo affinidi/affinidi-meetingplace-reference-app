@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_community.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 
 import '../../../fakes/fake_identities.dart';
 import '../../../utils/app.dart';
@@ -129,7 +130,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('section_header_back')), findsOneWidget);
-      expect(find.byIcon(Icons.menu), findsOneWidget);
+      expect(find.byIcon(McIcons.menu), findsOneWidget);
 
       // As the system's back button does.
       await tester.binding.handlePopRoute();

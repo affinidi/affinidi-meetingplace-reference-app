@@ -8,6 +8,7 @@ import '../../../domain/models/call_log/call_log_entry.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../navigation/routes/route_paths.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_spacing.dart';
 import '../../widgets/common/app_card.dart';
 import '../../widgets/section_header.dart';
@@ -35,7 +36,7 @@ class CallLogScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SectionHeader(
-            icon: Icons.history,
+            icon: McIcons.callLog,
             title: l10n.callLogScreenTitle,
             subtitle: l10n.callLogScreenSubtitle,
             onClose: () {
