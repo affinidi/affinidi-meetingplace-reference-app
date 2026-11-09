@@ -62,6 +62,14 @@ void main() {
     expect(closed, isTrue);
   });
 
+  testWidgets('labels the action for screen readers', (tester) async {
+    await pumpHeader(tester);
+    expect(find.byTooltip('Open navigation menu'), findsOneWidget);
+
+    await pumpHeader(tester, onClose: () {});
+    expect(find.byTooltip('Close'), findsOneWidget);
+  });
+
   testWidgets('shows progress beside the action, which stays usable', (
     tester,
   ) async {

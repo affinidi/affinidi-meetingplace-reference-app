@@ -114,6 +114,9 @@ class SectionHeader extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 icon: Icon(onClose != null ? McIcons.close : McIcons.menu),
                 color: mc.textSecondary,
+                tooltip: onClose != null
+                    ? MaterialLocalizations.of(context).closeButtonTooltip
+                    : MaterialLocalizations.of(context).openAppDrawerTooltip,
                 onPressed: onClose ?? _openSettingsDrawer,
               ),
             ),
