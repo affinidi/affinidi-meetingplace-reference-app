@@ -44,53 +44,78 @@ class IdentityCard extends StatelessWidget {
   final void Function(Identity identity)? onEditIdentity;
   final void Function(Identity identity)? onPublishOfferForIdentity;
 
+  /// The picture's diameter; its upper half hangs above the card.
+  double get _pictureSize => identityCardSize.isSmall ? 64 : 96;
+
   @override
   Widget build(BuildContext context) {
     // A Mission Control product card: a large panel that carries the
-    // identity's own colour as its corner wash, behind the picture.
+    // identity's own colour as its corner wash, with the picture centred
+    // over its upper edge, as on a VTA identity card.
     return Center(
       child: Container(
         margin: const EdgeInsets.all(8),
+        padding: EdgeInsets.only(top: _pictureSize / 2),
         constraints: BoxConstraints(
           minHeight: identityCardSize.isSmall ? 200 : 400,
           maxWidth: 650,
         ),
-        child: AppCard(
-          accent: identity.getCardColor(context.colorScheme),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(McRadius.xl),
-            side: BorderSide(color: context.mcColors.hairline),
-          ),
-          child: Stack(
-            children: [
-              Column(
-                mainAxisSize: MainAxisSize.min,
+        child: Stack(
+          // The card keeps the slot's height; the picture hangs above it.
+          fit: StackFit.passthrough,
+          clipBehavior: Clip.none,
+          children: [
+            AppCard(
+              accent: identity.getCardColor(context.colorScheme),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(McRadius.xl),
+                side: BorderSide(color: context.mcColors.hairline),
+              ),
+              child: Stack(
                 children: [
-                  _IdentityHeader(
-                    identity: identity,
-                    identityCardSize: identityCardSize,
+                  // Scrolls when a small card's slot is shorter than its
+                  // details.
+                  SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _IdentityHeader(
+                          identity: identity,
+                          identityCardSize: identityCardSize,
+                          pictureSize: _pictureSize,
+                        ),
+                        _IdentityContentSection(
+                          identity: identity,
+                          identityCardSize: identityCardSize,
+                        ),
+                      ],
+                    ),
                   ),
-                  _IdentityContentSection(
-                    identity: identity,
-                    identityCardSize: identityCardSize,
-                  ),
+                  if (!identityCardSize.isSmall)
+                    _IdentityActionButton(
+                      identity: identity,
+                      onDeleteIdentity: onDeleteIdentity,
+                      onFindOfferForIdentity: onFindOfferForIdentity,
+                      onEditIdentity: onEditIdentity,
+                      onPublishOfferForIdentity: onPublishOfferForIdentity,
+                    ),
                 ],
               ),
-              _IdentityProfilePicture(
-                identity: identity,
-                size: identityCardSize.isSmall ? 110 : 130,
-                cacheManager: cacheManager,
-              ),
-              if (!identityCardSize.isSmall)
-                _IdentityActionButton(
+            ),
+            Positioned(
+              top: -_pictureSize / 2,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: _IdentityProfilePicture(
                   identity: identity,
-                  onDeleteIdentity: onDeleteIdentity,
-                  onFindOfferForIdentity: onFindOfferForIdentity,
-                  onEditIdentity: onEditIdentity,
-                  onPublishOfferForIdentity: onPublishOfferForIdentity,
+                  size: _pictureSize,
+                  cacheManager: cacheManager,
                 ),
-            ],
-          ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -101,10 +126,14 @@ class _IdentityHeader extends StatelessWidget {
   const _IdentityHeader({
     required this.identity,
     required this.identityCardSize,
+    required this.pictureSize,
   });
 
   final Identity identity;
   final IdentityCardSize identityCardSize;
+
+  /// The picture over the card's upper edge, which the header starts under.
+  final double pictureSize;
 
   @override
   Widget build(BuildContext context) {
@@ -112,55 +141,44 @@ class _IdentityHeader extends StatelessWidget {
     final mc = context.mcColors;
     final l10n = context.l10n;
 
-    final rightInset = identityCardSize.isSmall ? 130.0 : 150.0;
-
-    // A section head: the kind of identity as an eyebrow, then its name.
-    return Container(
-      constraints: BoxConstraints(
-        minHeight: identityCardSize.isSmall ? 45 : 90,
-      ),
-      padding: EdgeInsets.fromLTRB(20, 16, rightInset, 14),
-      child: Row(
+    // A section head under the picture: the kind of identity as an
+    // eyebrow, then its name with the VTA's shield beside it.
+    return Padding(
+      padding: EdgeInsets.fromLTRB(20, pictureSize / 2 + 8, 20, 4),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 4,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              spacing: 4,
-              children: [
-                Text(
-                  identity.getSubtitle(l10n: l10n).toUpperCase(),
-                  style: McTypography.eyebrow.copyWith(color: mc.textSecondary),
-                  maxLines: 2,
+          Text(
+            identity.getSubtitle(l10n: l10n).toUpperCase(),
+            style: McTypography.eyebrow.copyWith(color: mc.textSecondary),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Flexible(
+                child: Text(
+                  identity.getDisplayName(l10n: l10n),
+                  style:
+                      (identityCardSize.isSmall
+                              ? textTheme.titleMedium
+                              : textTheme.titleLarge)
+                          ?.copyWith(color: mc.textPrimary),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  softWrap: true,
                 ),
-                // The VTA's shield beside the name, for an identity there.
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        identity.getDisplayName(l10n: l10n),
-                        style:
-                            (identityCardSize.isSmall
-                                    ? textTheme.titleMedium
-                                    : textTheme.titleLarge)
-                                ?.copyWith(color: mc.textPrimary),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    if (identity.isVtaPersona)
-                      VtaDetailsButton(
-                        contextId: identity.vtaContextId!,
-                        profileId: identity.vtaProfileId!,
-                        color: mc.textSecondary,
-                      ),
-                  ],
+              ),
+              if (identity.isVtaPersona)
+                VtaDetailsButton(
+                  contextId: identity.vtaContextId!,
+                  profileId: identity.vtaProfileId!,
+                  color: mc.textSecondary,
                 ),
-              ],
-            ),
+            ],
           ),
         ],
       ),
@@ -181,13 +199,9 @@ class _IdentityProfilePicture extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      top: 10,
-      right: 10,
-      child: ProfilePicture(
-        image: identity.profileImage(cacheManager: cacheManager),
-        size: size,
-      ),
+    return ProfilePicture(
+      image: identity.profileImage(cacheManager: cacheManager),
+      size: size,
     );
   }
 }
@@ -205,8 +219,8 @@ class _IdentityContentSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: identityCardSize.isSmall
-          ? const EdgeInsets.only(top: 4, left: 20, right: 20)
-          : const EdgeInsets.only(top: 48, left: 24, right: 24),
+          ? const EdgeInsets.only(top: 8, left: 20, right: 20)
+          : const EdgeInsets.only(top: 12, left: 24, right: 24),
       child: _IdentityContent(
         identity: identity,
         identityCardSize: identityCardSize,

@@ -7,6 +7,7 @@ import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_colors.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/common/app_card.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/identity_picker/identity_card.dart';
+import 'package:mpx_flutter_reference_app/presentation/widgets/profile_picture.dart';
 
 import '../../../fakes/fake_cache_manager.dart';
 import '../../../fakes/fake_identities.dart';
@@ -34,6 +35,19 @@ void main() {
 
     final card = tester.widget<AppCard>(find.byType(AppCard));
     expect(card.accent, AppTheme.dark.colorScheme.primary);
+  });
+
+  testWidgets('centres the picture over the upper edge', (tester) async {
+    await pumpCard(tester, FakeIdentities.secondaryIdentity);
+
+    final picture = tester.getRect(find.byType(ProfilePicture));
+    final card = tester.getRect(find.byType(AppCard));
+    final name = tester.getRect(find.text('Jane Doe'));
+    expect(picture.center.dx, moreOrLessEquals(card.center.dx, epsilon: 1));
+    expect(picture.top, lessThan(card.top));
+    expect(picture.bottom, greaterThan(card.top));
+    expect(picture.bottom, lessThan(name.top));
+    expect(name.center.dx, moreOrLessEquals(card.center.dx, epsilon: 1));
   });
 
   testWidgets('opens with the kind of identity as an eyebrow', (tester) async {
