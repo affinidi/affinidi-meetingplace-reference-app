@@ -2762,10 +2762,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get vtcSignInMenuTitle => 'Sign in to community';
 
   @override
-  String get vtcSignInMenuSubtitle =>
-      'Approve a sign-in code from your community\'s website';
-
-  @override
   String get vtcSignInUseMembership => 'Use this membership';
 
   @override

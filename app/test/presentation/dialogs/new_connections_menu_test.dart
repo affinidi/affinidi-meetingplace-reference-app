@@ -12,11 +12,9 @@ class _NoCamera extends CameraService {
   CameraServiceState build() => CameraServiceState(isAvailable: false);
 }
 
-Future<NewConnectionsMenuOption?> _select(
-  WidgetTester tester,
-  String title,
-) async {
-  NewConnectionsMenuOption? selection;
+/// Opens the menu; its selection lands in the returned holder once made.
+Future<List<NewConnectionsMenuOption?>> _open(WidgetTester tester) async {
+  final selection = <NewConnectionsMenuOption?>[];
   await tester.pumpWidget(
     ProviderScope(
       overrides: [cameraServiceProvider.overrideWith(_NoCamera.new)],
@@ -27,7 +25,7 @@ Future<NewConnectionsMenuOption?> _select(
           builder: (context) => Scaffold(
             body: TextButton(
               onPressed: () async {
-                selection = await NewConnectionsMenu.show(context: context);
+                selection.add(await NewConnectionsMenu.show(context: context));
               },
               child: const Text('open'),
             ),
@@ -39,19 +37,27 @@ Future<NewConnectionsMenuOption?> _select(
 
   await tester.tap(find.text('open'));
   await tester.pumpAndSettle();
+  return selection;
+}
+
+Future<NewConnectionsMenuOption?> _select(
+  WidgetTester tester,
+  String title,
+) async {
+  final selection = await _open(tester);
   await tester.ensureVisible(find.text(title));
   await tester.pumpAndSettle();
   await tester.tap(find.text(title));
   await tester.pumpAndSettle();
-  return selection;
+  return selection.single;
 }
 
 void main() {
-  testWidgets('offers signing in to a community', (tester) async {
-    expect(
-      await _select(tester, 'Sign in to community'),
-      NewConnectionsMenuOption.signInToCommunity,
-    );
+  testWidgets('leaves signing in to a community to its page', (tester) async {
+    await _open(tester);
+
+    expect(find.text('Join a community'), findsOneWidget);
+    expect(find.text('Sign in to community'), findsNothing);
   });
 
   testWidgets('offers joining a community', (tester) async {

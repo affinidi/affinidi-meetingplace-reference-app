@@ -2709,7 +2709,6 @@
 	"identityDeleteConfirmMessage": "Its persona is deleted from your VTA, and its DID can never be used again.",
 	"linkedVtaUnlinkAction": "Remove",
 	"vtcSignInMenuTitle": "Sign in to community",
-	"vtcSignInMenuSubtitle": "Approve a sign-in code from your community's website",
 	"vtcSignInUseMembership": "Use this membership",
 	"vtcSignInEnterNumber": "Enter the two-digit number shown in your browser.",
 	"vtcSignInNumberLabel": "Number",

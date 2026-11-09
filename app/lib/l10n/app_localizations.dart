@@ -4136,12 +4136,6 @@ abstract class AppLocalizations {
   /// **'Sign in to community'**
   String get vtcSignInMenuTitle;
 
-  /// No description provided for @vtcSignInMenuSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Approve a sign-in code from your community\'s website'**
-  String get vtcSignInMenuSubtitle;
-
   /// No description provided for @vtcSignInUseMembership.
   ///
   /// In en, this message translates to:
