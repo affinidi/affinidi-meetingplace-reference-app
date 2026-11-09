@@ -33,6 +33,7 @@ class McColors extends ThemeExtension<McColors> {
     required this.knob,
     required this.highlightSecondary,
     required this.accentEnd,
+    required this.insetTop,
   });
 
   static const blue = Color(0xFF3464FD);
@@ -72,6 +73,7 @@ class McColors extends ThemeExtension<McColors> {
     knob: Color(0xFF222223),
     highlightSecondary: cyan,
     accentEnd: cyan,
+    insetTop: Color(0x14F4F6FB),
   );
 
   static const light = McColors._(
@@ -99,6 +101,8 @@ class McColors extends ThemeExtension<McColors> {
     knob: Color(0xFFCBD5E1),
     highlightSecondary: blueDeep,
     accentEnd: Color(0xFF008085),
+    // Light panels lift with shadow instead.
+    insetTop: Color(0x00000000),
   );
 
   final Color canvas;
@@ -132,6 +136,9 @@ class McColors extends ThemeExtension<McColors> {
   final Color highlightSecondary;
   final Color accentEnd;
 
+  /// The 1px lit top edge that makes a panel feel raised.
+  final Color insetTop;
+
   /// Reserved for one accent per heading and thin top accents; never a
   /// button fill.
   LinearGradient get accentGradient =>
@@ -163,6 +170,7 @@ class McColors extends ThemeExtension<McColors> {
     Color? knob,
     Color? highlightSecondary,
     Color? accentEnd,
+    Color? insetTop,
   }) {
     return McColors._(
       canvas: canvas ?? this.canvas,
@@ -189,6 +197,7 @@ class McColors extends ThemeExtension<McColors> {
       knob: knob ?? this.knob,
       highlightSecondary: highlightSecondary ?? this.highlightSecondary,
       accentEnd: accentEnd ?? this.accentEnd,
+      insetTop: insetTop ?? this.insetTop,
     );
   }
 
@@ -224,6 +233,7 @@ class McColors extends ThemeExtension<McColors> {
         t,
       )!,
       accentEnd: Color.lerp(accentEnd, other.accentEnd, t)!,
+      insetTop: Color.lerp(insetTop, other.insetTop, t)!,
     );
   }
 }

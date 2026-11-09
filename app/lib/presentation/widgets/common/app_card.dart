@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../infrastructure/extensions/build_context_extensions.dart';
+
 /// A panel card, as on the community page; colour, hairline border and
-/// radius come from the card theme. With [onTap], [onLongPress] or
-/// [onDoubleTap] the whole panel responds, with ink clipped to its shape.
+/// radius come from the card theme, and a 1px lit top edge raises it off
+/// the canvas. With [onTap], [onLongPress] or [onDoubleTap] the whole panel
+/// responds, with ink clipped to its shape.
 class AppCard extends StatelessWidget {
   const AppCard({
     super.key,
@@ -28,11 +31,18 @@ class AppCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final content = Padding(padding: padding ?? EdgeInsets.zero, child: child);
+    final content = DecoratedBox(
+      position: DecorationPosition.foreground,
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: context.mcColors.insetTop)),
+      ),
+      child: Padding(padding: padding ?? EdgeInsets.zero, child: child),
+    );
     return Card(
       shape: shape,
       elevation: elevation,
-      clipBehavior: _isInteractive ? Clip.antiAlias : null,
+      // Clipped so the lit edge follows the rounded top corners.
+      clipBehavior: Clip.antiAlias,
       child: _isInteractive
           ? InkWell(
               onTap: onTap,
