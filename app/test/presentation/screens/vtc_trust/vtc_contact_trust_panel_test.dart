@@ -264,6 +264,27 @@ void main() {
     expect(service.vouched, [_bob]);
   });
 
+  testWidgets('opens the signed vouch the member gave', (tester) async {
+    service
+      ..stored.add(linkToBob())
+      ..outgoing = const PublishedRelationship(
+        id: 'edge-1',
+        issuerDid: _me,
+        subjectDid: _bob,
+        vrcDigestMultibase: 'zQm1',
+        vrc: {
+          'type': ['VerifiableCredential', 'RelationshipCredential'],
+          'issuer': _me,
+        },
+      );
+    await pumpPanel(tester);
+
+    await tapText(tester, 'You vouched');
+
+    expect(find.text('Your vouch for Bob'), findsOneWidget);
+    expect(find.byKey(const Key('vtc_vouch_json')), findsOneWidget);
+  });
+
   testWidgets('says why a vouch did not work', (tester) async {
     service
       ..stored.add(linkToBob())

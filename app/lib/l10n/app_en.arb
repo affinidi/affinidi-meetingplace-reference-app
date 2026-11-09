@@ -3901,6 +3901,24 @@
 			}
 		}
 	},
+	"vtcTrustYourVouchDocument": "Your vouch for {name}",
+	"@vtcTrustYourVouchDocument": {
+		"description": "Title of the member's signed vouch for another member",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcTrustTheirVouchDocument": "{name}'s vouch for you",
+	"@vtcTrustTheirVouchDocument": {
+		"description": "Title of another member's signed vouch for the member",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
 	"vtcJoinAlreadyMember": "You're already a member of {name}.",
 	"@vtcJoinAlreadyMember": {
 		"description": "The scanned community is one the member belongs to",

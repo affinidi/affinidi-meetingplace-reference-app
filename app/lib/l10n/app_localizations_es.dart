@@ -3869,6 +3869,16 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String vtcTrustYourVouchDocument(String name) {
+    return 'Your vouch for $name';
+  }
+
+  @override
+  String vtcTrustTheirVouchDocument(String name) {
+    return '$name\'s vouch for you';
+  }
+
+  @override
   String vtcJoinAlreadyMember(String name) {
     return 'You\'re already a member of $name.';
   }

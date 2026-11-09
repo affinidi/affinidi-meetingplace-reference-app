@@ -179,8 +179,6 @@ class _TrustRowView extends StatelessWidget {
           community: row.communityName,
           name: name,
         ),
-      if (edges?.outgoing != null) l10n.vtcTrustYouVouched,
-      if (edges?.incoming != null) l10n.vtcTrustTheyVouched(name),
       if (edges != null && edges.outgoing == null && edges.incoming == null)
         l10n.vtcTrustNoVouch,
     ];
@@ -199,6 +197,13 @@ class _TrustRowView extends StatelessWidget {
                 Text(row.communityName, style: context.textTheme.titleSmall),
                 for (final line in lines)
                   Text(line, style: context.textTheme.bodySmall),
+                if (edges != null)
+                  VtcVouchChips(
+                    edges: edges,
+                    name: name,
+                    outgoingLabel: l10n.vtcTrustYouVouched,
+                    incomingLabel: l10n.vtcTrustTheyVouched(name),
+                  ),
               ],
             ),
           ),

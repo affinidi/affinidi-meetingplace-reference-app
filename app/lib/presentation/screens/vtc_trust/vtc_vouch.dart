@@ -5,6 +5,7 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import '../../../application/services/vtc_trust_service/vtc_trust_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../l10n/app_localizations.dart';
+import '../vtc_join/vtc_join_json_dialog.dart';
 import '../vtc_join/vtc_trail_step.dart';
 
 /// What [failure] means to the member, about [name] in [community].
@@ -170,6 +171,76 @@ class VtcVouchTrail extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+/// The vouches between the member and [name], one chip each way round,
+/// labelled [outgoingLabel] and [incomingLabel]. A chip opens the signed
+/// credential the community keeps for that vouch.
+class VtcVouchChips extends StatelessWidget {
+  const VtcVouchChips({
+    super.key,
+    required this.edges,
+    required this.name,
+    required this.outgoingLabel,
+    required this.incomingLabel,
+  });
+
+  final VtcEdges edges;
+  final String name;
+  final String outgoingLabel;
+  final String incomingLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Wrap(
+      spacing: 8,
+      runSpacing: 4,
+      children: [
+        if (edges.outgoing case final edge?)
+          _chip(
+            context,
+            key: const Key('vtc_vouch_outgoing'),
+            label: outgoingLabel,
+            title: l10n.vtcTrustYourVouchDocument(name),
+            edge: edge,
+          ),
+        if (edges.incoming case final edge?)
+          _chip(
+            context,
+            key: const Key('vtc_vouch_incoming'),
+            label: incomingLabel,
+            title: l10n.vtcTrustTheirVouchDocument(name),
+            edge: edge,
+          ),
+      ],
+    );
+  }
+
+  static Widget _chip(
+    BuildContext context, {
+    required Key key,
+    required String label,
+    required String title,
+    required PublishedRelationship edge,
+  }) {
+    final vrc = edge.vrc;
+    return ActionChip(
+      key: key,
+      avatar: const Icon(Icons.handshake_outlined, size: 16),
+      label: Text(label),
+      visualDensity: VisualDensity.compact,
+      onPressed: vrc == null
+          ? null
+          : () => showVtcJoinJson(
+              context,
+              title: title,
+              json: vrc,
+              icon: Icons.handshake_outlined,
+              textKey: const Key('vtc_vouch_json'),
+            ),
     );
   }
 }

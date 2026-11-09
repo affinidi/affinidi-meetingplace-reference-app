@@ -137,10 +137,33 @@ void main() {
     expect(find.text('You vouched for Bob'), findsOneWidget);
     await tester.tapAt(const Offset(10, 10));
     await tester.pumpAndSettle();
-    expect(
-      inMember('dir_bob', find.text('Vouched · Vouches for you')),
-      findsOneWidget,
-    );
+    expect(inMember('dir_bob', find.text('Vouched')), findsOneWidget);
+    expect(inMember('dir_bob', find.text('Vouches for you')), findsOneWidget);
+  });
+
+  testWidgets('opens the signed vouch a member gave you', (tester) async {
+    service.edges = {
+      _bob: const VtcEdges(
+        incoming: PublishedRelationship(
+          id: 'edge-0',
+          issuerDid: _bob,
+          subjectDid: _me,
+          vrcDigestMultibase: 'zQm0',
+          vrc: {
+            'type': ['VerifiableCredential', 'RelationshipCredential'],
+            'issuer': _bob,
+          },
+        ),
+      ),
+    };
+    await pumpScreen(tester);
+
+    await tester.tap(inMember('dir_bob', find.text('Vouches for you')));
+    await tester.pumpAndSettle();
+
+    expect(find.text("Bob's vouch for you"), findsOneWidget);
+    expect(find.byKey(const Key('vtc_vouch_json')), findsOneWidget);
+    expect(find.textContaining('RelationshipCredential'), findsWidgets);
   });
 
   testWidgets('says when there is nobody else to show', (tester) async {

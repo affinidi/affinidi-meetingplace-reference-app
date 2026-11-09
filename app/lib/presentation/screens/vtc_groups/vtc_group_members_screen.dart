@@ -87,19 +87,22 @@ class VtcGroupMembersScreen extends HookConsumerWidget {
             final name =
                 entry.displayName ?? entry.nickname ?? l10n.vtcTrustUnnamed;
             final memberEdges = edges[entry.did] ?? const VtcEdges();
-            final badges = [
-              if (memberEdges.outgoing != null) l10n.vtcTrustVouched,
-              if (memberEdges.incoming != null) l10n.vtcTrustVouchesForYou,
-            ];
+            final hasVouches =
+                memberEdges.outgoing != null || memberEdges.incoming != null;
             return ListTile(
               key: Key('vtc_group_member_${entry.entryId}'),
               leading: const Icon(Icons.person_outline),
               title: Text(name),
               subtitle: entry.did == null
                   ? Text(l10n.vtcTrustNotFindable(name, communityName))
-                  : badges.isEmpty
-                  ? null
-                  : Text(badges.join(' · ')),
+                  : hasVouches
+                  ? VtcVouchChips(
+                      edges: memberEdges,
+                      name: name,
+                      outgoingLabel: l10n.vtcTrustVouched,
+                      incomingLabel: l10n.vtcTrustVouchesForYou,
+                    )
+                  : null,
               trailing: entry.did == null || memberEdges.outgoing != null
                   ? null
                   : FilledButton(

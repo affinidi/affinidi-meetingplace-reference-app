@@ -5742,6 +5742,18 @@ abstract class AppLocalizations {
   /// **'Members of {community} see you as {name}, the name of the identity you joined with.'**
   String vtcDirectoryNameShown(String community, String name);
 
+  /// Title of the member's signed vouch for another member
+  ///
+  /// In en, this message translates to:
+  /// **'Your vouch for {name}'**
+  String vtcTrustYourVouchDocument(String name);
+
+  /// Title of another member's signed vouch for the member
+  ///
+  /// In en, this message translates to:
+  /// **'{name}\'s vouch for you'**
+  String vtcTrustTheirVouchDocument(String name);
+
   /// The scanned community is one the member belongs to
   ///
   /// In en, this message translates to:
