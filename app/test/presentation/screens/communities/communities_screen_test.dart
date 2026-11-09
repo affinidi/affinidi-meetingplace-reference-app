@@ -4,6 +4,7 @@ import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_community.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/build_context_extensions.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/credentials/membership_credentials_list.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/vtc_sign_in/vtc_sign_in_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/common/app_card.dart';
 
@@ -152,6 +153,21 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text(l10n.communitiesSubtitle), findsOneWidget);
+    });
+
+    testWidgets('signs in to a community from its page', (tester) async {
+      await openCommunitiesTab(tester);
+      await saveCommunities();
+      await pullToRefresh(tester);
+      await tester.tap(find.text('Chess club'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('community_sign_in_button')));
+      // The code scanner keeps animating, so it never settles.
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.byType(VtcSignInScreen), findsOneWidget);
     });
 
     testWidgets('goes back to the communities, keeping the settings menu', (

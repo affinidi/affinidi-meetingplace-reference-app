@@ -96,6 +96,12 @@ class _ActionsBar extends ConsumerWidget {
                 },
               ),
             IconButton(
+              key: const Key('community_sign_in_button'),
+              tooltip: l10n.vtcSignInMenuTitle,
+              icon: const Icon(McIcons.login),
+              onPressed: () => VtcSignInScreen.show(context),
+            ),
+            IconButton(
               icon: Icon(
                 McIcons.delete,
                 color: isEditMode ? colorScheme.primary : null,
