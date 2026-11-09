@@ -992,6 +992,29 @@ class VtcService {
     return held.isNotEmpty;
   }
 
+  /// Until when the credential of the group [groupDid] of [communityDid]
+  /// that the member's VTA keeps for their identity there holds, or null when
+  /// it keeps none. Throws as [memberGroups] does.
+  Future<DateTime?> groupCredentialValidUntil(
+    String communityDid, {
+    required String groupDid,
+  }) async {
+    final community = await _memberCommunity(communityDid);
+    final held = await (await _grantedVta()).findCredentials(
+      type: GroupAdmissionVerifier.membershipType,
+      issuerDid: groupDid,
+      subjectDid: community.personaDid,
+    );
+    return held
+        .map((credential) => credential.validUntil)
+        .nonNulls
+        .fold<DateTime?>(
+          null,
+          (latest, until) =>
+              latest == null || until.isAfter(latest) ? until : latest,
+        );
+  }
+
   /// Has the member's VTA prove to the chat of the group [groupDid] of
   /// [communityDid] that the member belongs to the group, bound to
   /// [memberDid], the DID the member joins the chat as. Null when the VTA
@@ -1281,10 +1304,16 @@ class VtcService {
             ),
     ];
     final leftKeys = {for (final entry in leftEntries) entry.key};
+    final communityDids = {
+      for (final community in communities) community.communityDid,
+    };
     final heldEntries = [
       for (final StoredCredential(:record, credential: json) in held)
         if (VtcMembershipCard.fromCredential(json) case final card?)
-          if (card.issuer != mockIssuer)
+          // A community group's credential is shown with its group, not as
+          // a community: a group's DID issued it, and it has no status list.
+          if (card.issuer != mockIssuer &&
+              (communityDids.contains(card.issuer) || card.isRevocable))
             VtcMembershipEntry(
               card: card,
               stored: record,

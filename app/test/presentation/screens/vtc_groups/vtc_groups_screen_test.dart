@@ -62,6 +62,12 @@ class _FakeVtcService extends Fake implements VtcService {
   }) async => 0;
 
   @override
+  Future<DateTime?> groupCredentialValidUntil(
+    String communityDid, {
+    required String groupDid,
+  }) async => groupDid == _managedDid ? DateTime.utc(2026, 12, 9) : null;
+
+  @override
   Future<GroupChatLink?> groupChatLink(String groupDid) async =>
       groupDid == _linkedDid
       ? const GroupChatLink(
@@ -164,6 +170,7 @@ void main() {
     expect(find.text('Manager'), findsOneWidget);
     expect(find.byKey(const Key('vtc_group_create_g1')), findsOneWidget);
     expect(find.byKey(const Key('vtc_group_join_g2')), findsOneWidget);
+    expect(find.text('Valid until Dec 9, 2026'), findsOneWidget);
   });
 
   testWidgets('shows the link to publish once the chat is created', (

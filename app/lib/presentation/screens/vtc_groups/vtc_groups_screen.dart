@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../application/services/vtc_group_chat_service/vtc_group_chat_service.dart';
@@ -97,6 +98,8 @@ class VtcGroupsScreen extends ConsumerWidget {
                       state.chats[listing.group.groupId] ??
                       VtcGroupChatStatus.unknown,
                   isBusy: state.busy.contains(listing.group.groupId),
+                  credentialUntil:
+                      state.credentialsUntil[listing.group.groupId],
                   onCreate: () async {
                     final posting = await _askPosting(context);
                     if (posting == null) return;
@@ -157,11 +160,16 @@ class _GroupCard extends StatelessWidget {
     required this.isBusy,
     required this.onCreate,
     required this.onJoin,
+    this.credentialUntil,
   });
 
   final VtcGroup group;
   final VtcGroupChatStatus status;
   final bool isBusy;
+
+  /// Until when the member's credential of the group holds, when their VTA
+  /// keeps one.
+  final DateTime? credentialUntil;
   final VoidCallback onCreate;
   final VoidCallback onJoin;
 
@@ -205,6 +213,14 @@ class _GroupCard extends StatelessWidget {
               icon: Icons.badge_outlined,
               title: l10n.vtcCommunityRole,
               subtitle: l10n.vtcGroupManager,
+            ),
+          if (credentialUntil case final until?)
+            _Line(
+              icon: Icons.verified_outlined,
+              title: l10n.vtcGroupCredential,
+              subtitle: l10n.vtcGroupCredentialUntil(
+                DateFormat.yMMMd(l10n.localeName).format(until.toLocal()),
+              ),
             ),
           _Line(
             icon: Icons.forum_outlined,

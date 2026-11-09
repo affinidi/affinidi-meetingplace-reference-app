@@ -15,7 +15,9 @@ T _$identity<T>(T value) => value;
 mixin _$VtcGroupsState {
 
  bool get isLoading; List<VtcGroupListing> get groups;/// Each group's chat, by group id.
- Map<String, VtcGroupChatStatus> get chats;/// Groups with an action under way, by id.
+ Map<String, VtcGroupChatStatus> get chats;/// Until when the member's credential of each group holds, by group id;
+/// a group missing has none on the member's VTA yet.
+ Map<String, DateTime> get credentialsUntil;/// Groups with an action under way, by id.
  Set<String> get busy;/// The link to publish for the chat just created, and its group's DID.
  GroupChatLink? get createdLink; String? get createdForGroupDid; VtcGroupsFailure? get failure;/// Why the last create or join did not go ahead.
  VtcGroupChatFailure? get chatFailure;/// Whether the last create or join failed for another reason.
@@ -30,16 +32,16 @@ $VtcGroupsStateCopyWith<VtcGroupsState> get copyWith => _$VtcGroupsStateCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is VtcGroupsState&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&const DeepCollectionEquality().equals(other.groups, groups)&&const DeepCollectionEquality().equals(other.chats, chats)&&const DeepCollectionEquality().equals(other.busy, busy)&&(identical(other.createdLink, createdLink) || other.createdLink == createdLink)&&(identical(other.createdForGroupDid, createdForGroupDid) || other.createdForGroupDid == createdForGroupDid)&&(identical(other.failure, failure) || other.failure == failure)&&(identical(other.chatFailure, chatFailure) || other.chatFailure == chatFailure)&&(identical(other.actionFailed, actionFailed) || other.actionFailed == actionFailed));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is VtcGroupsState&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&const DeepCollectionEquality().equals(other.groups, groups)&&const DeepCollectionEquality().equals(other.chats, chats)&&const DeepCollectionEquality().equals(other.credentialsUntil, credentialsUntil)&&const DeepCollectionEquality().equals(other.busy, busy)&&(identical(other.createdLink, createdLink) || other.createdLink == createdLink)&&(identical(other.createdForGroupDid, createdForGroupDid) || other.createdForGroupDid == createdForGroupDid)&&(identical(other.failure, failure) || other.failure == failure)&&(identical(other.chatFailure, chatFailure) || other.chatFailure == chatFailure)&&(identical(other.actionFailed, actionFailed) || other.actionFailed == actionFailed));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,isLoading,const DeepCollectionEquality().hash(groups),const DeepCollectionEquality().hash(chats),const DeepCollectionEquality().hash(busy),createdLink,createdForGroupDid,failure,chatFailure,actionFailed);
+int get hashCode => Object.hash(runtimeType,isLoading,const DeepCollectionEquality().hash(groups),const DeepCollectionEquality().hash(chats),const DeepCollectionEquality().hash(credentialsUntil),const DeepCollectionEquality().hash(busy),createdLink,createdForGroupDid,failure,chatFailure,actionFailed);
 
 @override
 String toString() {
-  return 'VtcGroupsState(isLoading: $isLoading, groups: $groups, chats: $chats, busy: $busy, createdLink: $createdLink, createdForGroupDid: $createdForGroupDid, failure: $failure, chatFailure: $chatFailure, actionFailed: $actionFailed)';
+  return 'VtcGroupsState(isLoading: $isLoading, groups: $groups, chats: $chats, credentialsUntil: $credentialsUntil, busy: $busy, createdLink: $createdLink, createdForGroupDid: $createdForGroupDid, failure: $failure, chatFailure: $chatFailure, actionFailed: $actionFailed)';
 }
 
 
@@ -50,7 +52,7 @@ abstract mixin class $VtcGroupsStateCopyWith<$Res>  {
   factory $VtcGroupsStateCopyWith(VtcGroupsState value, $Res Function(VtcGroupsState) _then) = _$VtcGroupsStateCopyWithImpl;
 @useResult
 $Res call({
- bool isLoading, List<VtcGroupListing> groups, Map<String, VtcGroupChatStatus> chats, Set<String> busy, GroupChatLink? createdLink, String? createdForGroupDid, VtcGroupsFailure? failure, VtcGroupChatFailure? chatFailure, bool actionFailed
+ bool isLoading, List<VtcGroupListing> groups, Map<String, VtcGroupChatStatus> chats, Map<String, DateTime> credentialsUntil, Set<String> busy, GroupChatLink? createdLink, String? createdForGroupDid, VtcGroupsFailure? failure, VtcGroupChatFailure? chatFailure, bool actionFailed
 });
 
 
@@ -67,12 +69,13 @@ class _$VtcGroupsStateCopyWithImpl<$Res>
 
 /// Create a copy of VtcGroupsState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? isLoading = null,Object? groups = null,Object? chats = null,Object? busy = null,Object? createdLink = freezed,Object? createdForGroupDid = freezed,Object? failure = freezed,Object? chatFailure = freezed,Object? actionFailed = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? isLoading = null,Object? groups = null,Object? chats = null,Object? credentialsUntil = null,Object? busy = null,Object? createdLink = freezed,Object? createdForGroupDid = freezed,Object? failure = freezed,Object? chatFailure = freezed,Object? actionFailed = null,}) {
   return _then(_self.copyWith(
 isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,groups: null == groups ? _self.groups : groups // ignore: cast_nullable_to_non_nullable
 as List<VtcGroupListing>,chats: null == chats ? _self.chats : chats // ignore: cast_nullable_to_non_nullable
-as Map<String, VtcGroupChatStatus>,busy: null == busy ? _self.busy : busy // ignore: cast_nullable_to_non_nullable
+as Map<String, VtcGroupChatStatus>,credentialsUntil: null == credentialsUntil ? _self.credentialsUntil : credentialsUntil // ignore: cast_nullable_to_non_nullable
+as Map<String, DateTime>,busy: null == busy ? _self.busy : busy // ignore: cast_nullable_to_non_nullable
 as Set<String>,createdLink: freezed == createdLink ? _self.createdLink : createdLink // ignore: cast_nullable_to_non_nullable
 as GroupChatLink?,createdForGroupDid: freezed == createdForGroupDid ? _self.createdForGroupDid : createdForGroupDid // ignore: cast_nullable_to_non_nullable
 as String?,failure: freezed == failure ? _self.failure : failure // ignore: cast_nullable_to_non_nullable
@@ -163,10 +166,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool isLoading,  List<VtcGroupListing> groups,  Map<String, VtcGroupChatStatus> chats,  Set<String> busy,  GroupChatLink? createdLink,  String? createdForGroupDid,  VtcGroupsFailure? failure,  VtcGroupChatFailure? chatFailure,  bool actionFailed)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool isLoading,  List<VtcGroupListing> groups,  Map<String, VtcGroupChatStatus> chats,  Map<String, DateTime> credentialsUntil,  Set<String> busy,  GroupChatLink? createdLink,  String? createdForGroupDid,  VtcGroupsFailure? failure,  VtcGroupChatFailure? chatFailure,  bool actionFailed)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _VtcGroupsState() when $default != null:
-return $default(_that.isLoading,_that.groups,_that.chats,_that.busy,_that.createdLink,_that.createdForGroupDid,_that.failure,_that.chatFailure,_that.actionFailed);case _:
+return $default(_that.isLoading,_that.groups,_that.chats,_that.credentialsUntil,_that.busy,_that.createdLink,_that.createdForGroupDid,_that.failure,_that.chatFailure,_that.actionFailed);case _:
   return orElse();
 
 }
@@ -184,10 +187,10 @@ return $default(_that.isLoading,_that.groups,_that.chats,_that.busy,_that.create
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool isLoading,  List<VtcGroupListing> groups,  Map<String, VtcGroupChatStatus> chats,  Set<String> busy,  GroupChatLink? createdLink,  String? createdForGroupDid,  VtcGroupsFailure? failure,  VtcGroupChatFailure? chatFailure,  bool actionFailed)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool isLoading,  List<VtcGroupListing> groups,  Map<String, VtcGroupChatStatus> chats,  Map<String, DateTime> credentialsUntil,  Set<String> busy,  GroupChatLink? createdLink,  String? createdForGroupDid,  VtcGroupsFailure? failure,  VtcGroupChatFailure? chatFailure,  bool actionFailed)  $default,) {final _that = this;
 switch (_that) {
 case _VtcGroupsState():
-return $default(_that.isLoading,_that.groups,_that.chats,_that.busy,_that.createdLink,_that.createdForGroupDid,_that.failure,_that.chatFailure,_that.actionFailed);case _:
+return $default(_that.isLoading,_that.groups,_that.chats,_that.credentialsUntil,_that.busy,_that.createdLink,_that.createdForGroupDid,_that.failure,_that.chatFailure,_that.actionFailed);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -204,10 +207,10 @@ return $default(_that.isLoading,_that.groups,_that.chats,_that.busy,_that.create
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool isLoading,  List<VtcGroupListing> groups,  Map<String, VtcGroupChatStatus> chats,  Set<String> busy,  GroupChatLink? createdLink,  String? createdForGroupDid,  VtcGroupsFailure? failure,  VtcGroupChatFailure? chatFailure,  bool actionFailed)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool isLoading,  List<VtcGroupListing> groups,  Map<String, VtcGroupChatStatus> chats,  Map<String, DateTime> credentialsUntil,  Set<String> busy,  GroupChatLink? createdLink,  String? createdForGroupDid,  VtcGroupsFailure? failure,  VtcGroupChatFailure? chatFailure,  bool actionFailed)?  $default,) {final _that = this;
 switch (_that) {
 case _VtcGroupsState() when $default != null:
-return $default(_that.isLoading,_that.groups,_that.chats,_that.busy,_that.createdLink,_that.createdForGroupDid,_that.failure,_that.chatFailure,_that.actionFailed);case _:
+return $default(_that.isLoading,_that.groups,_that.chats,_that.credentialsUntil,_that.busy,_that.createdLink,_that.createdForGroupDid,_that.failure,_that.chatFailure,_that.actionFailed);case _:
   return null;
 
 }
@@ -219,7 +222,7 @@ return $default(_that.isLoading,_that.groups,_that.chats,_that.busy,_that.create
 
 
 class _VtcGroupsState implements VtcGroupsState {
-  const _VtcGroupsState({this.isLoading = true, final  List<VtcGroupListing> groups = const <VtcGroupListing>[], final  Map<String, VtcGroupChatStatus> chats = const <String, VtcGroupChatStatus>{}, final  Set<String> busy = const <String>{}, this.createdLink, this.createdForGroupDid, this.failure, this.chatFailure, this.actionFailed = false}): _groups = groups,_chats = chats,_busy = busy;
+  const _VtcGroupsState({this.isLoading = true, final  List<VtcGroupListing> groups = const <VtcGroupListing>[], final  Map<String, VtcGroupChatStatus> chats = const <String, VtcGroupChatStatus>{}, final  Map<String, DateTime> credentialsUntil = const <String, DateTime>{}, final  Set<String> busy = const <String>{}, this.createdLink, this.createdForGroupDid, this.failure, this.chatFailure, this.actionFailed = false}): _groups = groups,_chats = chats,_credentialsUntil = credentialsUntil,_busy = busy;
   
 
 @override@JsonKey() final  bool isLoading;
@@ -237,6 +240,17 @@ class _VtcGroupsState implements VtcGroupsState {
   if (_chats is EqualUnmodifiableMapView) return _chats;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableMapView(_chats);
+}
+
+/// Until when the member's credential of each group holds, by group id;
+/// a group missing has none on the member's VTA yet.
+ final  Map<String, DateTime> _credentialsUntil;
+/// Until when the member's credential of each group holds, by group id;
+/// a group missing has none on the member's VTA yet.
+@override@JsonKey() Map<String, DateTime> get credentialsUntil {
+  if (_credentialsUntil is EqualUnmodifiableMapView) return _credentialsUntil;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_credentialsUntil);
 }
 
 /// Groups with an action under way, by id.
@@ -267,16 +281,16 @@ _$VtcGroupsStateCopyWith<_VtcGroupsState> get copyWith => __$VtcGroupsStateCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _VtcGroupsState&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&const DeepCollectionEquality().equals(other._groups, _groups)&&const DeepCollectionEquality().equals(other._chats, _chats)&&const DeepCollectionEquality().equals(other._busy, _busy)&&(identical(other.createdLink, createdLink) || other.createdLink == createdLink)&&(identical(other.createdForGroupDid, createdForGroupDid) || other.createdForGroupDid == createdForGroupDid)&&(identical(other.failure, failure) || other.failure == failure)&&(identical(other.chatFailure, chatFailure) || other.chatFailure == chatFailure)&&(identical(other.actionFailed, actionFailed) || other.actionFailed == actionFailed));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _VtcGroupsState&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&const DeepCollectionEquality().equals(other._groups, _groups)&&const DeepCollectionEquality().equals(other._chats, _chats)&&const DeepCollectionEquality().equals(other._credentialsUntil, _credentialsUntil)&&const DeepCollectionEquality().equals(other._busy, _busy)&&(identical(other.createdLink, createdLink) || other.createdLink == createdLink)&&(identical(other.createdForGroupDid, createdForGroupDid) || other.createdForGroupDid == createdForGroupDid)&&(identical(other.failure, failure) || other.failure == failure)&&(identical(other.chatFailure, chatFailure) || other.chatFailure == chatFailure)&&(identical(other.actionFailed, actionFailed) || other.actionFailed == actionFailed));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,isLoading,const DeepCollectionEquality().hash(_groups),const DeepCollectionEquality().hash(_chats),const DeepCollectionEquality().hash(_busy),createdLink,createdForGroupDid,failure,chatFailure,actionFailed);
+int get hashCode => Object.hash(runtimeType,isLoading,const DeepCollectionEquality().hash(_groups),const DeepCollectionEquality().hash(_chats),const DeepCollectionEquality().hash(_credentialsUntil),const DeepCollectionEquality().hash(_busy),createdLink,createdForGroupDid,failure,chatFailure,actionFailed);
 
 @override
 String toString() {
-  return 'VtcGroupsState(isLoading: $isLoading, groups: $groups, chats: $chats, busy: $busy, createdLink: $createdLink, createdForGroupDid: $createdForGroupDid, failure: $failure, chatFailure: $chatFailure, actionFailed: $actionFailed)';
+  return 'VtcGroupsState(isLoading: $isLoading, groups: $groups, chats: $chats, credentialsUntil: $credentialsUntil, busy: $busy, createdLink: $createdLink, createdForGroupDid: $createdForGroupDid, failure: $failure, chatFailure: $chatFailure, actionFailed: $actionFailed)';
 }
 
 
@@ -287,7 +301,7 @@ abstract mixin class _$VtcGroupsStateCopyWith<$Res> implements $VtcGroupsStateCo
   factory _$VtcGroupsStateCopyWith(_VtcGroupsState value, $Res Function(_VtcGroupsState) _then) = __$VtcGroupsStateCopyWithImpl;
 @override @useResult
 $Res call({
- bool isLoading, List<VtcGroupListing> groups, Map<String, VtcGroupChatStatus> chats, Set<String> busy, GroupChatLink? createdLink, String? createdForGroupDid, VtcGroupsFailure? failure, VtcGroupChatFailure? chatFailure, bool actionFailed
+ bool isLoading, List<VtcGroupListing> groups, Map<String, VtcGroupChatStatus> chats, Map<String, DateTime> credentialsUntil, Set<String> busy, GroupChatLink? createdLink, String? createdForGroupDid, VtcGroupsFailure? failure, VtcGroupChatFailure? chatFailure, bool actionFailed
 });
 
 
@@ -304,12 +318,13 @@ class __$VtcGroupsStateCopyWithImpl<$Res>
 
 /// Create a copy of VtcGroupsState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? isLoading = null,Object? groups = null,Object? chats = null,Object? busy = null,Object? createdLink = freezed,Object? createdForGroupDid = freezed,Object? failure = freezed,Object? chatFailure = freezed,Object? actionFailed = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? isLoading = null,Object? groups = null,Object? chats = null,Object? credentialsUntil = null,Object? busy = null,Object? createdLink = freezed,Object? createdForGroupDid = freezed,Object? failure = freezed,Object? chatFailure = freezed,Object? actionFailed = null,}) {
   return _then(_VtcGroupsState(
 isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,groups: null == groups ? _self._groups : groups // ignore: cast_nullable_to_non_nullable
 as List<VtcGroupListing>,chats: null == chats ? _self._chats : chats // ignore: cast_nullable_to_non_nullable
-as Map<String, VtcGroupChatStatus>,busy: null == busy ? _self._busy : busy // ignore: cast_nullable_to_non_nullable
+as Map<String, VtcGroupChatStatus>,credentialsUntil: null == credentialsUntil ? _self._credentialsUntil : credentialsUntil // ignore: cast_nullable_to_non_nullable
+as Map<String, DateTime>,busy: null == busy ? _self._busy : busy // ignore: cast_nullable_to_non_nullable
 as Set<String>,createdLink: freezed == createdLink ? _self.createdLink : createdLink // ignore: cast_nullable_to_non_nullable
 as GroupChatLink?,createdForGroupDid: freezed == createdForGroupDid ? _self.createdForGroupDid : createdForGroupDid // ignore: cast_nullable_to_non_nullable
 as String?,failure: freezed == failure ? _self.failure : failure // ignore: cast_nullable_to_non_nullable

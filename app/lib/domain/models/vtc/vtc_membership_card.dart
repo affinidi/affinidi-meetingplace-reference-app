@@ -69,6 +69,10 @@ class VtcMembershipCard {
   /// The credential exactly as the VTA keeps it.
   final Map<String, dynamic> credential;
 
+  /// Whether the issuer can revoke the card, through a status list it names:
+  /// a community's card can, a community group's credential cannot.
+  bool get isRevocable => credential['credentialStatus'] != null;
+
   static DateTime? _time(Object? value) =>
       value is String ? DateTime.tryParse(value) : null;
 }

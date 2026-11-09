@@ -47,6 +47,10 @@ abstract class VtcGroupsState with _$VtcGroupsState {
     @Default(<String, VtcGroupChatStatus>{})
     Map<String, VtcGroupChatStatus> chats,
 
+    /// Until when the member's credential of each group holds, by group id;
+    /// a group missing has none on the member's VTA yet.
+    @Default(<String, DateTime>{}) Map<String, DateTime> credentialsUntil,
+
     /// Groups with an action under way, by id.
     @Default(<String>{}) Set<String> busy,
 

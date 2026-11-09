@@ -3678,6 +3678,19 @@
 	"@vtcGroupChatReadOnly": {
 		"description": "Shown instead of the message box in a group chat where only managers post"
 	},
+	"vtcGroupCredential": "Group credential",
+	"@vtcGroupCredential": {
+		"description": "Heading of the member's credential of a community group"
+	},
+	"vtcGroupCredentialUntil": "Valid until {date}",
+	"@vtcGroupCredentialUntil": {
+		"description": "Until when the member's credential of a community group holds",
+		"placeholders": {
+			"date": {
+				"type": "String"
+			}
+		}
+	},
 	"vtcGroupChatUnknown": "This group's chat couldn't be checked.",
 	"@vtcGroupChatUnknown": {
 		"description": "A group's chat status when its link cannot be read"

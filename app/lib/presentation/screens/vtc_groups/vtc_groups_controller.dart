@@ -69,6 +69,20 @@ class VtcGroupsController extends _$VtcGroupsController {
     } on MeetingPlaceVtcSDKException catch (error) {
       _log('collecting group credentials', error.code.name);
     }
+    final credentialsUntil = <String, DateTime>{};
+    for (final listing in groups) {
+      try {
+        if (await _vtc.groupCredentialValidUntil(
+              communityDid,
+              groupDid: listing.group.groupDid,
+            )
+            case final until?) {
+          credentialsUntil[listing.group.groupId] = until;
+        }
+      } on MeetingPlaceVtcSDKException catch (error) {
+        _log('reading a group credential', error.code.name);
+      }
+    }
     final chats = await _chats.chats();
     final statuses = <String, VtcGroupChatStatus>{};
     for (final listing in groups) {
@@ -83,7 +97,7 @@ class VtcGroupsController extends _$VtcGroupsController {
       };
     }
     if (!ref.mounted) return;
-    state = state.copyWith(chats: statuses);
+    state = state.copyWith(chats: statuses, credentialsUntil: credentialsUntil);
   }
 
   /// Creates the chat of [group] as the member's current identity, where
