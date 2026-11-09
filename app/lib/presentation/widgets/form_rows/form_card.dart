@@ -5,7 +5,8 @@ import '../../themes/tokens/mc_spacing.dart';
 import '../common/app_card.dart';
 
 /// A titled panel of form rows, as the community page's cards: the title
-/// sits inside the panel, in line with the rows below it.
+/// sits inside the panel, in line with the rows below it, and the last row
+/// keeps its distance from the bottom edge.
 class FormCard extends StatelessWidget {
   const FormCard({
     super.key,
@@ -21,6 +22,9 @@ class FormCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppCard(
+      // Rows end flush (a ListTile's own inset, or a hint's 4px), so the
+      // panel adds the rest of its bottom inset.
+      padding: const EdgeInsets.only(bottom: McSpacing.s3),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
