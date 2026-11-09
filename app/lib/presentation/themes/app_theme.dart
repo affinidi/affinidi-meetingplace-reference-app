@@ -233,7 +233,11 @@ class AppTheme {
         selectedColor: mc.textPrimary,
         iconColor: mc.textSecondary,
         textColor: mc.textPrimary,
-        titleTextStyle: textTheme.bodyLarge,
+        // Affinidi Sans sits about 2px low in a 1.45 line; even leading puts
+        // the title on the leading icon's centre line.
+        titleTextStyle: textTheme.bodyLarge?.copyWith(
+          leadingDistribution: TextLeadingDistribution.even,
+        ),
         subtitleTextStyle: textTheme.bodySmall?.copyWith(
           color: mc.textSecondary,
         ),
@@ -418,7 +422,10 @@ class AppTheme {
           foregroundColor: mc.highlightSecondary,
           disabledForegroundColor: mc.textTertiary,
           shape: const StadiumBorder(),
-          textStyle: textTheme.labelLarge,
+          // Centres the label on an icon, as on list tiles.
+          textStyle: textTheme.labelLarge?.copyWith(
+            leadingDistribution: TextLeadingDistribution.even,
+          ),
         ),
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(

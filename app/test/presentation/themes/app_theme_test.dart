@@ -61,6 +61,19 @@ void main() {
         expect(theme.chipTheme.side?.color, mc.hairlineStrong);
       });
 
+      test('centres list tile and text button labels on their icons', () {
+        expect(
+          theme.listTileTheme.titleTextStyle?.leadingDistribution,
+          TextLeadingDistribution.even,
+        );
+        expect(
+          theme.textButtonTheme.style?.textStyle
+              ?.resolve({})
+              ?.leadingDistribution,
+          TextLeadingDistribution.even,
+        );
+      });
+
       test('rounds standalone fields to the input radius', () {
         final decoration = theme
             .extension<RoundedInputDecoration>()!
