@@ -16,6 +16,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/services/camera_service
 import 'package:mpx_flutter_reference_app/infrastructure/services/camera_service/camera_service_state.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/vtc/user_verification_key.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_findable_view.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_flow_diagram.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_phrase_view.dart';
@@ -363,13 +364,17 @@ void main() {
       });
 
       for (final role in ['member', 'custom:admin']) {
-        testWidgets('offers no settings to the role $role', (tester) async {
+        testWidgets('offers the role $role settings without the join phrase', (
+          tester,
+        ) async {
           vtaHoldsRole(role);
 
           await joinCommunity(tester);
+          await tester.tap(find.byKey(const Key('vtc_community_settings')));
+          await settle(tester);
 
-          expect(find.byKey(const Key('vtc_community_role')), findsOneWidget);
-          expect(find.byKey(const Key('vtc_community_settings')), findsNothing);
+          expect(find.byType(VtcFindableView), findsOneWidget);
+          expect(find.byType(VtcJoinPhraseView), findsNothing);
         });
       }
 

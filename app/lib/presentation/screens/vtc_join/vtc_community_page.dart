@@ -196,8 +196,8 @@ class VtcCommunityPage extends HookConsumerWidget {
   }
 }
 
-/// The member's [role], with the community's settings beside it for an
-/// administrator and the vetting desk for a vetter.
+/// The member's [role], with the community's settings beside it and the
+/// vetting desk for a vetter.
 class _RoleLine extends StatelessWidget {
   const _RoleLine({
     required this.role,
@@ -218,12 +218,17 @@ class _RoleLine extends StatelessWidget {
     final l10n = context.l10n;
     final communityDid = this.communityDid;
     final actions = [
-      if (communityDid != null && role == _adminRole)
+      if (communityDid != null)
         IconButton(
           key: const Key('vtc_community_settings'),
           icon: const Icon(Icons.settings_outlined, color: Colors.white),
           tooltip: l10n.vtcCommunitySettings,
-          onPressed: () => _showSettings(context, communityDid, communityName),
+          onPressed: () => _showSettings(
+            context,
+            communityDid,
+            communityName,
+            isAdmin: role == _adminRole,
+          ),
         ),
       if (communityDid != null && canVet)
         IconButton(
@@ -382,20 +387,24 @@ class _WithAbout extends StatelessWidget {
 
 /// Opens the settings of the community at [communityDid]: for now its join
 /// phrase.
+/// The community's settings for the member: how other members find them,
+/// and, for an administrator, the community's join phrase.
 Future<void> _showSettings(
   BuildContext context,
   String communityDid,
-  String communityName,
-) => _showSheet(
+  String communityName, {
+  required bool isAdmin,
+}) => _showSheet(
   context,
   Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     spacing: 16,
     children: [
-      VtcJoinPhraseView(
-        communityDid: communityDid,
-        communityName: communityName,
-      ),
+      if (isAdmin)
+        VtcJoinPhraseView(
+          communityDid: communityDid,
+          communityName: communityName,
+        ),
       VtcFindableView(communityDid: communityDid, communityName: communityName),
     ],
   ),
