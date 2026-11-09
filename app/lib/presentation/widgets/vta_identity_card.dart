@@ -265,27 +265,37 @@ class _DidMetadata extends StatelessWidget {
           child: Icon(McIcons.identities, size: 14, color: mc.textTertiary),
         ),
         Expanded(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              bool fits(String text) {
-                final painter = TextPainter(
-                  text: TextSpan(text: text, style: style),
-                  maxLines: 1,
-                  textScaler: textScaler,
-                  textDirection: textDirection,
-                )..layout(maxWidth: constraints.maxWidth);
-                final overflows = painter.didExceedMaxLines;
-                painter.dispose();
-                return !overflows;
-              }
+          // An empty line sizes the row, so a layout that measures its
+          // children's intrinsic height, such as the onboarding layout's,
+          // never asks the LayoutBuilder, which cannot answer.
+          child: Stack(
+            children: [
+              Text('', maxLines: 1, style: style),
+              Positioned.fill(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    bool fits(String text) {
+                      final painter = TextPainter(
+                        text: TextSpan(text: text, style: style),
+                        maxLines: 1,
+                        textScaler: textScaler,
+                        textDirection: textDirection,
+                      )..layout(maxWidth: constraints.maxWidth);
+                      final overflows = painter.didExceedMaxLines;
+                      painter.dispose();
+                      return !overflows;
+                    }
 
-              return Text(
-                _shown(fits),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: style,
-              );
-            },
+                    return Text(
+                      _shown(fits),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: style,
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
         ),
       ],
