@@ -7002,6 +7002,12 @@ abstract class AppLocalizations {
   /// **'Info'**
   String get communityInfoTab;
 
+  /// Tab of a community's screen with the member's role and membership card there
+  ///
+  /// In en, this message translates to:
+  /// **'Membership'**
+  String get communityMembershipTab;
+
   /// Tab of a community's screen with the member's settings there, such as letting members find them
   ///
   /// In en, this message translates to:
