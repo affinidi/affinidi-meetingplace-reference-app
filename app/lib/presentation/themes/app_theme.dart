@@ -267,6 +267,25 @@ class AppTheme {
           ),
         ),
       ),
+      // A raised panel whose open edge is a hairline, over the shared scrim.
+      drawerTheme: DrawerThemeData(
+        backgroundColor: mc.raised,
+        surfaceTintColor: Colors.transparent,
+        scrimColor: mc.scrim,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: const BorderRadius.horizontal(
+            right: Radius.circular(McRadius.lg),
+          ),
+          side: BorderSide(color: mc.hairline),
+        ),
+        endShape: RoundedRectangleBorder(
+          borderRadius: const BorderRadius.horizontal(
+            left: Radius.circular(McRadius.lg),
+          ),
+          side: BorderSide(color: mc.hairline),
+        ),
+      ),
       popupMenuTheme: PopupMenuThemeData(
         color: mc.raised,
         surfaceTintColor: Colors.transparent,

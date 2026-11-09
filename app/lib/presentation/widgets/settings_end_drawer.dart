@@ -5,6 +5,7 @@ import '../../infrastructure/extensions/build_context_extensions.dart';
 import '../../navigation/routes/route_paths.dart';
 import '../../navigation/tabs/tabs.dart';
 import '../themes/tokens/mc_icons.dart';
+import '../themes/tokens/mc_spacing.dart';
 
 /// Right-side drawer with shortcuts to Settings, the call log and the test
 /// credentials this phone can issue.
@@ -26,17 +27,15 @@ class SettingsEndDrawer extends StatelessWidget {
     GoRouter.of(context).push(RoutePaths.mockCredentials);
   }
 
+  static const _closeIconSize = 24.0;
+  static const _itemIconSize = 20.0;
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final title = l10n.tabsTitle(TabTitleKey.settings.name);
-    final mc = context.mcColors;
-    final itemStyle = context.textTheme.titleMedium?.copyWith(
-      color: mc.textPrimary,
-    );
 
     return Drawer(
-      backgroundColor: mc.raised,
       child: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -44,39 +43,54 @@ class SettingsEndDrawer extends StatelessWidget {
             Align(
               alignment: Alignment.topRight,
               child: IconButton(
-                icon: Icon(McIcons.close, color: mc.textPrimary, size: 24),
+                icon: const Icon(McIcons.close, size: _closeIconSize),
+                color: context.mcColors.textSecondary,
                 tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
                 onPressed: () => Navigator.of(context).pop(),
               ),
             ),
-            ListTile(
-              minLeadingWidth: 20,
-              horizontalTitleGap: 8,
-              leading: Icon(McIcons.settings, color: mc.textPrimary, size: 20),
-              title: Text(title, style: itemStyle),
+            _DrawerItem(
+              icon: McIcons.settings,
+              label: title,
               onTap: () => _openSettings(context),
             ),
-            ListTile(
-              minLeadingWidth: 20,
-              horizontalTitleGap: 8,
-              leading: Icon(McIcons.callLog, color: mc.textPrimary, size: 20),
-              title: Text(l10n.callLogScreenTitle, style: itemStyle),
+            _DrawerItem(
+              icon: McIcons.callLog,
+              label: l10n.callLogScreenTitle,
               onTap: () => _openCallLog(context),
             ),
-            ListTile(
-              minLeadingWidth: 20,
-              horizontalTitleGap: 8,
-              leading: Icon(
-                McIcons.mockCredentials,
-                color: mc.textPrimary,
-                size: 20,
-              ),
-              title: Text(l10n.mockCredentialsTitle, style: itemStyle),
+            _DrawerItem(
+              icon: McIcons.mockCredentials,
+              label: l10n.mockCredentialsTitle,
               onTap: () => _openMockCredentials(context),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+/// One shortcut row; colours and type come from the list tile theme.
+class _DrawerItem extends StatelessWidget {
+  const _DrawerItem({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      minLeadingWidth: SettingsEndDrawer._itemIconSize,
+      horizontalTitleGap: McSpacing.s2,
+      leading: Icon(icon, size: SettingsEndDrawer._itemIconSize),
+      title: Text(label),
+      onTap: onTap,
     );
   }
 }
