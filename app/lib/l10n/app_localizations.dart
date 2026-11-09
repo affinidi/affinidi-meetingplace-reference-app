@@ -7002,6 +7002,12 @@ abstract class AppLocalizations {
   /// **'Info'**
   String get communityInfoTab;
 
+  /// Tab of a community's screen with the member's settings there, such as letting members find them
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get communitySettingsTab;
+
   /// Note on a community's Info tab when its public profile cannot be read
   ///
   /// In en, this message translates to:
