@@ -1,3 +1,5 @@
+import 'package:meeting_place_vtc/meeting_place_vtc.dart';
+
 import '../models/vtc/linked_vta.dart';
 import '../models/vtc/vtc_community.dart';
 import '../models/vtc/vtc_group_chat.dart';
@@ -33,6 +35,14 @@ abstract interface class VtcRepository {
 
   /// Records [left], replacing a record of the same [VtcLeftMembership.key].
   Future<void> saveLeftMembership(VtcLeftMembership left);
+
+  /// The membership cards the VTA held when last read, to show before it
+  /// answers again; none when never read, or what was kept is unreadable.
+  Future<List<StoredCredential>> membershipCards();
+
+  /// Keeps [cards] as the membership cards the VTA holds, replacing those
+  /// kept before.
+  Future<void> saveMembershipCards(List<StoredCredential> cards);
 
   /// The member's vetting for [communityDid], or null when none is recorded.
   Future<VtcVetting?> findVetting(String communityDid);
@@ -74,8 +84,9 @@ abstract interface class VtcRepository {
   /// Forgets every contact linked to a member of [communityDid].
   Future<void> removeMemberLinks(String communityDid);
 
-  /// Forgets the linked VTA, every community, every left membership, all
-  /// vetting, every vetting desk and every contact linked to a member.
+  /// Forgets the linked VTA, every community, every left membership, the
+  /// membership cards kept, all vetting, every vetting desk and every
+  /// contact linked to a member.
   ///
   /// Keeps the group chats: a chat this phone owns lets in only a group's
   /// members, and must keep refusing everyone else while no VTA is linked.

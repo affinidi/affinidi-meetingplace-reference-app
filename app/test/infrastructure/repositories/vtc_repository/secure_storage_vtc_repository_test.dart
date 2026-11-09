@@ -74,6 +74,65 @@ void main() {
     });
   });
 
+  group('SecureStorageVtcRepository membership cards', () {
+    final card = StoredCredential(
+      record: HeldCredential(
+        id: 'vault-1',
+        types: const ['VerifiableCredential', 'MembershipCredential'],
+        issuerDid: 'did:webvh:community',
+        validFrom: DateTime.utc(2026, 11),
+        validUntil: DateTime.utc(2027, 11),
+        purpose: 'membership',
+        status: 'valid',
+      ),
+      credential: const {
+        'id': 'urn:uuid:card',
+        'issuer': 'did:webvh:community',
+      },
+    );
+
+    test('keeps the cards as the VTA described them', () async {
+      await SecureStorageVtcRepository().saveMembershipCards([card]);
+
+      final kept =
+          (await SecureStorageVtcRepository().membershipCards()).single;
+      expect(kept.credential, card.credential);
+      expect(kept.record.id, 'vault-1');
+      expect(kept.record.types, card.record.types);
+      expect(kept.record.issuerDid, 'did:webvh:community');
+      expect(kept.record.validFrom, DateTime.utc(2026, 11));
+      expect(kept.record.validUntil, DateTime.utc(2027, 11));
+      expect(kept.record.purpose, 'membership');
+      expect(kept.record.status, 'valid');
+    });
+
+    test('replaces the cards kept before', () async {
+      final repository = SecureStorageVtcRepository();
+      await repository.saveMembershipCards([card]);
+
+      await repository.saveMembershipCards(const []);
+
+      expect(await repository.membershipCards(), isEmpty);
+    });
+
+    test('forgets the cards when cleared', () async {
+      final repository = SecureStorageVtcRepository();
+      await repository.saveMembershipCards([card]);
+
+      await repository.clear();
+
+      expect(await repository.membershipCards(), isEmpty);
+    });
+
+    test('keeps no cards when what was kept is unreadable', () async {
+      FlutterSecureStorage.setMockInitialValues({
+        'vtc_membership_cards': '[{"id": 1}]',
+      });
+
+      expect(await SecureStorageVtcRepository().membershipCards(), isEmpty);
+    });
+  });
+
   group('SecureStorageVtcRepository vetting', () {
     VtcVetting vetting(String communityDid) => VtcVetting(
       communityDid: communityDid,

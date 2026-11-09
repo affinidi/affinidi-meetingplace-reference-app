@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../domain/models/vtc/linked_vta.dart';
 import '../../../domain/models/vtc/vtc_community.dart';
@@ -12,8 +13,8 @@ import '../../../domain/models/vtc/vtc_vetting.dart';
 import '../../../domain/repositories/vtc_repository.dart';
 
 /// [VtcRepository] in the platform keystore, because the link carries the
-/// manager key and a left membership the member's DID and card: this
-/// device only, never synchronised or backed up.
+/// manager key, and a left membership or a kept membership card the
+/// member's DID and card: this device only, never synchronised or backed up.
 class SecureStorageVtcRepository implements VtcRepository {
   /// Creates a [SecureStorageVtcRepository].
   SecureStorageVtcRepository([FlutterSecureStorage? storage])
@@ -29,6 +30,7 @@ class SecureStorageVtcRepository implements VtcRepository {
   static const _linkedVtaKey = 'vtc_linked_vta';
   static const _communitiesKey = 'vtc_communities';
   static const _leftMembershipsKey = 'vtc_left_memberships';
+  static const _membershipCardsKey = 'vtc_membership_cards';
   static const _groupChatsKey = 'vtc_group_chats';
   static const _memberLinksKey = 'vtc_member_links';
   static const _vettingsKey = 'vtc_vettings';
@@ -93,6 +95,71 @@ class SecureStorageVtcRepository implements VtcRepository {
       ]),
     );
   }
+
+  @override
+  Future<List<StoredCredential>> membershipCards() async {
+    final json = await _storage.read(key: _membershipCardsKey);
+    if (json == null) return const [];
+    final Object? decoded;
+    try {
+      decoded = jsonDecode(json);
+    } on FormatException {
+      return const [];
+    }
+    // A card kept in another shape is left out: the next read from the VTA
+    // replaces them all.
+    return [
+      if (decoded is List<dynamic>)
+        for (final card in decoded) ?_storedCredentialFromJson(card),
+    ];
+  }
+
+  @override
+  Future<void> saveMembershipCards(List<StoredCredential> cards) =>
+      _storage.write(
+        key: _membershipCardsKey,
+        value: jsonEncode([
+          for (final card in cards) _storedCredentialToJson(card),
+        ]),
+      );
+
+  static Map<String, dynamic> _storedCredentialToJson(StoredCredential card) {
+    final record = card.record;
+    return {
+      'id': record.id,
+      'types': record.types,
+      'issuerDid': ?record.issuerDid,
+      'validFrom': ?record.validFrom?.toIso8601String(),
+      'validUntil': ?record.validUntil?.toIso8601String(),
+      'purpose': ?record.purpose,
+      'status': ?record.status,
+      'credential': card.credential,
+    };
+  }
+
+  static StoredCredential? _storedCredentialFromJson(Object? json) =>
+      switch (json) {
+        {
+          'id': final String id,
+          'types': final List<dynamic> types,
+          'credential': final Map<String, dynamic> credential,
+        } =>
+          StoredCredential(
+            record: HeldCredential(
+              id: id,
+              types: List.unmodifiable(types.whereType<String>()),
+              issuerDid: _stringOf(json['issuerDid']),
+              validFrom: DateTime.tryParse('${json['validFrom']}'),
+              validUntil: DateTime.tryParse('${json['validUntil']}'),
+              purpose: _stringOf(json['purpose']),
+              status: _stringOf(json['status']),
+            ),
+            credential: credential,
+          ),
+        _ => null,
+      };
+
+  static String? _stringOf(Object? value) => value is String ? value : null;
 
   @override
   Future<List<VtcGroupChat>> groupChats() async {
@@ -207,6 +274,7 @@ class SecureStorageVtcRepository implements VtcRepository {
     await _storage.delete(key: _linkedVtaKey);
     await _storage.delete(key: _communitiesKey);
     await _storage.delete(key: _leftMembershipsKey);
+    await _storage.delete(key: _membershipCardsKey);
     await _storage.delete(key: _vettingsKey);
     await _storage.delete(key: _vetterDesksKey);
     await _storage.delete(key: _memberLinksKey);
