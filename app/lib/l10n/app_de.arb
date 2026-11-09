@@ -51,7 +51,6 @@
 	"contactDeleteHeading": "Kontakt löschen",
 	"contactDeletePrompt": "{amount, plural, =0{Möchten Sie diesen Kanal wirklich löschen?} =1{Möchten Sie diesen Kanal wirklich löschen?} other{Möchten Sie wirklich {amount} ausgewählte Kanäle löschen?}}",
 	"contactOrigin": "{origin, select, directInteractive{Direkt Interaktiv} individualOfferPublished{Einladung zum Treffpunkt angeboten} individualOfferRequested{Einladung zum Treffpunkt akzeptiert} groupOfferPublished{Gruppeneinladung zum Treffpunkt angeboten} groupOfferRequested{Gruppeneinladung zum Treffpunkt akzeptiert} unknown{Unbekannt} other{Unbekannt}}",
-	"contactsFilterLabel": "{filter, select, any{Beliebig} person{Person} group{Gruppe} service{KI-Agent} business{Unternehmen} other{}}",
 	"contactsPanelSubtitle": "Tippen Sie auf einen Kontakt, um zu chatten, doppeltippen Sie, um Details anzuzeigen, tippen und halten Sie ihn gedrückt, um ihn zu löschen.",
 	"contactStatus": "{status, select, pendingApproval{Ausstehende Genehmigung} pendingInauguration{Verbindung wird hergestellt} approved{Aktiver Kontakt} rejected{Abgelehnt} error{Fehler} deleted{Gelöscht} active{Aktiver Kanal} unknown{Unbekannt} other{Unbekannt}}",
 	"createdValidUntil": "Angelegt {createdTimeAgo}, gültig bis {validUntilDate}",

@@ -141,6 +141,10 @@ void main() {
       expect(find.text(l10n.communityChannelsTab), findsOneWidget);
       expect(find.text(l10n.communityMembersTab), findsOneWidget);
       expect(find.text(l10n.noContactsYet), findsOneWidget);
+      // Channels are not filtered by kind.
+      for (final kind in ['Any', 'Person', 'Group', 'AI Agent']) {
+        expect(find.text(kind), findsNothing, reason: kind);
+      }
 
       await tester.tap(find.text(l10n.communityMembersTab));
       await tester.pumpAndSettle();

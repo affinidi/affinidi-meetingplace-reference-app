@@ -694,12 +694,6 @@ abstract class AppLocalizations {
   /// **'Tap a channel to chat, double-tap to view details, tap and hold to delete.'**
   String get contactsPanelSubtitle;
 
-  /// No description provided for @contactsFilterLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'{filter, select, any{Any} person{Person} group{Group} service{AI Agent} business{Business} other{}}'**
-  String contactsFilterLabel(String filter);
-
   /// No description provided for @noContactsYet.
   ///
   /// In en, this message translates to:

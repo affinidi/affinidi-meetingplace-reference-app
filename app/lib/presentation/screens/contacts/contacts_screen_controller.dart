@@ -9,10 +9,8 @@ import '../../../domain/models/contact_card/contact_card_field_definition.dart';
 import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_status.dart';
 import '../../../domain/models/mediator/mediator.dart';
-import '../../../infrastructure/extensions/contacts_screen_filter_extensions.dart';
 import '../../../infrastructure/extensions/string_list_extensions.dart';
 import '../../widgets/async_loaders/async_loading_controller.dart';
-import 'contacts_screen_filter.dart';
 import 'contacts_screen_state.dart';
 
 part 'contacts_screen_controller.g.dart';
@@ -63,8 +61,8 @@ class ContactsScreenController extends _$ContactsScreenController {
         Future.microtask(() async {
           if (_isDisposed) return;
 
-          final filteredContacts = _applyCurrentFilter(next);
-          state = state.copyWith(contacts: _sortContacts(filteredContacts));
+          final communityContacts = _communityContacts(next);
+          state = state.copyWith(contacts: _sortContacts(communityContacts));
           _updateContactMediators(newContacts);
           // A group chat just joined is recorded once its contact is made.
           if (newIds.isNotEmpty) await _readCommunityChannels();
@@ -113,7 +111,7 @@ class ContactsScreenController extends _$ContactsScreenController {
     state = state.copyWith(communityOfferLinks: offerLinks);
     state = state.copyWith(
       contacts: _sortContacts(
-        _applyCurrentFilter(ref.read(contactsServiceProvider).contacts),
+        _communityContacts(ref.read(contactsServiceProvider).contacts),
       ),
     );
   }
@@ -175,18 +173,6 @@ class ContactsScreenController extends _$ContactsScreenController {
     if (state.contacts != allContacts) {
       state = state.copyWith(contacts: _sortContacts(allContacts));
     }
-  }
-
-  Future<void> applyFilter(ContactsScreenFilter filter) async {
-    final allContacts = _communityContacts();
-    final filteredContacts = allContacts.where((contact) {
-      return filter.categories.contains(contact.category);
-    }).toList();
-
-    state = state.copyWith(
-      filter: filter,
-      contacts: _sortContacts(filteredContacts),
-    );
   }
 
   void deselectContact(Contact contact) {
@@ -252,17 +238,6 @@ class ContactsScreenController extends _$ContactsScreenController {
     }
 
     state = state.copyWith(contactMediators: contactMediators);
-  }
-
-  List<Contact> _applyCurrentFilter(List<Contact> contacts) {
-    final communityContacts = _communityContacts(contacts);
-    if (state.filter == ContactsScreenFilter.any) {
-      return communityContacts;
-    }
-
-    return communityContacts
-        .where((contact) => state.filter.categories.contains(contact.category))
-        .toList();
   }
 
   /// Those of [contacts], else of all contacts, that are channels of the

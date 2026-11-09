@@ -24,12 +24,10 @@ import '../../themes/tokens/mc_radius.dart';
 import '../../themes/tokens/mc_spacing.dart';
 import '../../widgets/action_button.dart';
 import '../../widgets/async_loaders/modal_async_loading_status.dart';
-import '../../widgets/filter_tab_bar.dart';
 import '../../widgets/profile_circle_avatar.dart';
 import '../chat/chat_screen_controller.dart';
 import '../vtc_sign_in/vtc_sign_in_screen.dart';
 import 'contacts_screen_controller.dart';
-import 'contacts_screen_filter.dart';
 
 part 'actions_bar.dart';
 part 'contact_avatar.dart';
@@ -39,7 +37,6 @@ part 'contacts_layout.dart';
 part 'contacts_list_view.dart';
 part 'contacts_search_field.dart';
 part 'delete_contact_dialog.dart';
-part 'filters_bar.dart';
 
 class ContactsScreen extends ConsumerWidget {
   const ContactsScreen({super.key});
@@ -55,7 +52,6 @@ class ContactsScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _FiltersBar(),
           Padding(
             padding: const EdgeInsets.all(2),
             child: _ActionsBar(

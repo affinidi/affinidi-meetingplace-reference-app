@@ -495,19 +495,6 @@ class AppLocalizationsEs extends AppLocalizations {
       'Toca un contacto para chatear, toca dos veces para ver los detalles, toca y mantén presionado para eliminar.';
 
   @override
-  String contactsFilterLabel(String filter) {
-    String _temp0 = intl.Intl.selectLogic(filter, {
-      'any': 'Cualquiera',
-      'person': 'Persona',
-      'group': 'Grupo',
-      'service': 'Agente de IA',
-      'business': 'Negocio',
-      'other': '',
-    });
-    return '$_temp0';
-  }
-
-  @override
   String get noContactsYet => 'No hay contactos en esta vista';
 
   @override

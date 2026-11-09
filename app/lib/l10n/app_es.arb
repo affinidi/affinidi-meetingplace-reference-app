@@ -51,7 +51,6 @@
 	"contactDeleteHeading": "Eliminar contacto",
 	"contactDeletePrompt": "{amount, plural, =0{¿Está seguro de que desea eliminar este canal?} =1{¿Está seguro de que desea eliminar este canal?} other{¿Está seguro de que desea eliminar los {amount} canales seleccionados?}}",
 	"contactOrigin": "{origin, select, directInteractive{Interacción Directa} individualOfferPublished{Invitación a Lugar de Encuentro Ofrecida} individualOfferRequested{Invitación a Lugar de Encuentro Aceptada} groupOfferPublished{Invitación de Grupo a Lugar de Encuentro Ofrecida} groupOfferRequested{Invitación de Grupo a Lugar de Encuentro Aceptada} unknown{Desconocido} other{Desconocido}}",
-	"contactsFilterLabel": "{filter, select, any{Cualquiera} person{Persona} group{Grupo} service{Agente de IA} business{Negocio} other{}}",
 	"contactsPanelSubtitle": "Toca un contacto para chatear, toca dos veces para ver los detalles, toca y mantén presionado para eliminar.",
 	"contactStatus": "{status, select, pendingApproval{Pendiente de Aprobación} pendingInauguration{Estableciendo Conexión} approved{Contacto Activo} rejected{Rechazado} error{Error} deleted{Eliminado} active{Canal Activo} unknown{Desconocido} other{Desconocido}}",
 	"createdValidUntil": "Creado {createdTimeAgo}, válido hasta {validUntilDate}",

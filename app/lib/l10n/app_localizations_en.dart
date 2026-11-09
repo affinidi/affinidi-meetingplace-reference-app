@@ -488,19 +488,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Tap a channel to chat, double-tap to view details, tap and hold to delete.';
 
   @override
-  String contactsFilterLabel(String filter) {
-    String _temp0 = intl.Intl.selectLogic(filter, {
-      'any': 'Any',
-      'person': 'Person',
-      'group': 'Group',
-      'service': 'AI Agent',
-      'business': 'Business',
-      'other': '',
-    });
-    return '$_temp0';
-  }
-
-  @override
   String get noContactsYet => 'No channels in this view';
 
   @override

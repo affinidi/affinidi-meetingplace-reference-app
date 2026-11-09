@@ -502,19 +502,6 @@ class AppLocalizationsDe extends AppLocalizations {
       'Tippen Sie auf einen Kontakt, um zu chatten, doppeltippen Sie, um Details anzuzeigen, tippen und halten Sie ihn gedrückt, um ihn zu löschen.';
 
   @override
-  String contactsFilterLabel(String filter) {
-    String _temp0 = intl.Intl.selectLogic(filter, {
-      'any': 'Beliebig',
-      'person': 'Person',
-      'group': 'Gruppe',
-      'service': 'KI-Agent',
-      'business': 'Unternehmen',
-      'other': '',
-    });
-    return '$_temp0';
-  }
-
-  @override
   String get noContactsYet => 'Keine Kontakte in dieser Ansicht';
 
   @override

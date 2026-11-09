@@ -5,7 +5,6 @@ import '../../../domain/models/contacts/contact_status.dart';
 import '../../../domain/models/contacts/contact_type.dart';
 import '../../../domain/models/identity/identity.dart';
 import '../../../domain/models/mediator/mediator.dart';
-import 'contacts_screen_filter.dart';
 
 part 'contacts_screen_state.freezed.dart';
 
@@ -20,7 +19,6 @@ abstract class ContactsScreenState with _$ContactsScreenState {
     @Default([]) List<Contact> contacts,
     @Default([]) List<Contact> selectedContacts,
     @Default({}) Map<String, Mediator> contactMediators,
-    @Default(ContactsScreenFilter.any) ContactsScreenFilter filter,
     Identity? identity,
 
     /// The community whose channels are shown.
