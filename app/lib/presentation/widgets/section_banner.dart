@@ -80,11 +80,11 @@ class SectionBanner extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(title, style: context.textTheme.headlineMedium),
+                      Text(title, style: context.textTheme.titleLarge),
                       Text(
                         subtitle,
                         maxLines: 3,
-                        style: context.textTheme.headlineSmall,
+                        style: context.textTheme.bodySmall,
                       ),
                     ],
                   ),
