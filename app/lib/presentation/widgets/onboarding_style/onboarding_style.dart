@@ -7,25 +7,6 @@ import '../../themes/tokens/mc_radius.dart';
 import '../../themes/tokens/mc_typography.dart';
 import '../common/app_card.dart';
 
-/// The accent glow of onboarding, rising from the bottom of the canvas
-/// behind the linking and joining steps.
-BoxDecoration onboardingGradient(
-  BuildContext context, {
-  required double radius,
-  BorderRadius? borderRadius,
-}) {
-  final mc = context.mcColors;
-  final glow = mc.accentGradient.colors.first.withValues(alpha: 0.3);
-  return BoxDecoration(
-    borderRadius: borderRadius,
-    gradient: RadialGradient(
-      center: Alignment.bottomCenter,
-      radius: radius,
-      colors: [Color.alphaBlend(glow, mc.canvas), mc.canvas],
-    ),
-  );
-}
-
 /// Shows [child] in a raised sheet.
 Future<void> showOnboardingSheet(BuildContext context, Widget child) {
   const radius = BorderRadius.vertical(top: Radius.circular(McRadius.xl));
@@ -49,32 +30,7 @@ Future<void> showOnboardingSheet(BuildContext context, Widget child) {
   );
 }
 
-/// The canvas with the accent glow rising from its bottom, behind
-/// onboarding, the community page and the main tabs. The glow reaches
-/// further on wide screens so it still lifts the middle of the page.
-class GlowBackdrop extends StatelessWidget {
-  const GlowBackdrop({super.key, required this.child});
-
-  static const _wideScreenWidth = 1024.0;
-  static const _wideGlowRadius = 6.0;
-  static const _glowRadius = 2.0;
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final isWide = MediaQuery.sizeOf(context).width > _wideScreenWidth;
-    return DecoratedBox(
-      decoration: onboardingGradient(
-        context,
-        radius: isWide ? _wideGlowRadius : _glowRadius,
-      ),
-      child: child,
-    );
-  }
-}
-
-/// The blue gradient, logo header and footer of onboarding, around a
+/// The logo header and footer of onboarding on the black canvas, around a
 /// scrolling [child]. With [onClose], a close button leads the header, for
 /// a screen opened over another. Without [showBranding], neither the logo
 /// header nor the "powered by" footer, e.g. for a flow with steps of its
@@ -101,85 +57,80 @@ class OnboardingLayout extends StatelessWidget {
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      body: GlowBackdrop(
-        child: SafeArea(
-          child: Stack(
-            children: [
-              SingleChildScrollView(
-                keyboardDismissBehavior:
-                    ScrollViewKeyboardDismissBehavior.onDrag,
-                padding: const EdgeInsets.symmetric(horizontal: 32),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight:
-                        media.size.height -
-                        media.padding.top -
-                        media.padding.bottom,
-                  ),
-                  child: IntrinsicHeight(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        SizedBox(height: isSmallLandscape ? 24 : 48),
-                        if (showBranding) ...[
-                          SizedBox(
-                            height: isSmallLandscape ? 64 : 96,
-                            child: Image.asset(
-                              'assets/images/meeting-place-splash-white-1024.png',
-                              color: mc.textPrimary,
-                              colorBlendMode: BlendMode.modulate,
-                            ),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            SingleChildScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight:
+                      media.size.height -
+                      media.padding.top -
+                      media.padding.bottom,
+                ),
+                child: IntrinsicHeight(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      SizedBox(height: isSmallLandscape ? 24 : 48),
+                      if (showBranding) ...[
+                        SizedBox(
+                          height: isSmallLandscape ? 64 : 96,
+                          child: Image.asset(
+                            'assets/images/meeting-place-splash-white-1024.png',
+                            color: mc.textPrimary,
+                            colorBlendMode: BlendMode.modulate,
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            context.l10n.appName,
-                            textAlign: TextAlign.center,
-                            style: context.textTheme.bodyLarge?.copyWith(
-                              color: mc.textPrimary,
-                            ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          context.l10n.appName,
+                          textAlign: TextAlign.center,
+                          style: context.textTheme.bodyLarge?.copyWith(
+                            color: mc.textPrimary,
                           ),
-                          SizedBox(height: isSmallLandscape ? 24 : 40),
-                        ],
-                        child,
-                        const Spacer(),
-                        if (showBranding)
-                          Padding(
-                            padding: EdgeInsets.only(
-                              top: 24,
-                              bottom: isSmallLandscape ? 16 : 32,
-                            ),
-                            child: Center(
-                              child: SizedBox(
-                                height: 40,
-                                child: Image.asset(
-                                  'assets/images/powered_by_mpx.png',
-                                  color: mc.textPrimary,
-                                  colorBlendMode: BlendMode.modulate,
-                                ),
+                        ),
+                        SizedBox(height: isSmallLandscape ? 24 : 40),
+                      ],
+                      child,
+                      const Spacer(),
+                      if (showBranding)
+                        Padding(
+                          padding: EdgeInsets.only(
+                            top: 24,
+                            bottom: isSmallLandscape ? 16 : 32,
+                          ),
+                          child: Center(
+                            child: SizedBox(
+                              height: 40,
+                              child: Image.asset(
+                                'assets/images/powered_by_mpx.png',
+                                color: mc.textPrimary,
+                                colorBlendMode: BlendMode.modulate,
                               ),
                             ),
-                          )
-                        else
-                          SizedBox(height: isSmallLandscape ? 16 : 32),
-                      ],
-                    ),
+                          ),
+                        )
+                      else
+                        SizedBox(height: isSmallLandscape ? 16 : 32),
+                    ],
                   ),
                 ),
               ),
-              if (onClose case final onClose?)
-                Positioned(
-                  top: 4,
-                  left: 4,
-                  child: IconButton(
-                    icon: Icon(Icons.close, color: mc.textPrimary),
-                    tooltip: MaterialLocalizations.of(
-                      context,
-                    ).closeButtonTooltip,
-                    onPressed: onClose,
-                  ),
+            ),
+            if (onClose case final onClose?)
+              Positioned(
+                top: 4,
+                left: 4,
+                child: IconButton(
+                  icon: Icon(Icons.close, color: mc.textPrimary),
+                  tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                  onPressed: onClose,
                 ),
-            ],
-          ),
+              ),
+          ],
         ),
       ),
     );

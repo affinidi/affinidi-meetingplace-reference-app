@@ -14,7 +14,7 @@ import 'vta_link_screen_controller.dart';
 /// Links the member's VTA in the look of onboarding: scan or paste the VTA
 /// host's enrolment code and compare codes, or enter the VTA's DID and show
 /// the administrator what to grant; then wait for the grant, and cancel or
-/// remove the link. Meant to sit on [onboardingGradient].
+/// remove the link. Meant to sit on the canvas or a panel.
 ///
 /// Messages are shown in place: a SnackBar would sit under the settings
 /// drawer.

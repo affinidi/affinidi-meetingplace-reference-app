@@ -11,7 +11,6 @@ import '../../navigation/tabs/tabs.dart';
 import '../screens/credentials/membership_credentials_controller.dart';
 import '../themes/tokens/mc_colors.dart';
 import '../widgets/loaders/control_plane_events_progress_indicator.dart';
-import '../widgets/onboarding_style/onboarding_style.dart';
 import '../widgets/settings_end_drawer.dart';
 import 'dashboard_shell_scaffold_key.dart';
 
@@ -36,14 +35,12 @@ class ScaffoldWithNavBar extends ConsumerWidget {
     return Scaffold(
       key: dashboardShellScaffoldKey,
       endDrawer: const SettingsEndDrawer(),
-      body: GlowBackdrop(
-        child: SafeArea(
-          child: Column(
-            children: [
-              const ControlPlaneEventsProgressIndicator(),
-              Expanded(child: navigationShell),
-            ],
-          ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            const ControlPlaneEventsProgressIndicator(),
+            Expanded(child: navigationShell),
+          ],
         ),
       ),
       bottomNavigationBar: DecoratedBox(

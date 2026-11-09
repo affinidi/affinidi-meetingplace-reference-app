@@ -1,28 +1,16 @@
 import 'package:flutter/material.dart';
 
-import '../../themes/tokens/mc_radius.dart';
-import '../../widgets/onboarding_style/onboarding_style.dart';
+import '../../widgets/common/app_card.dart';
 import 'vta_link_content.dart';
 
-/// The linking steps on the blue of onboarding, as a card that fits the
-/// settings drawer.
+/// The linking steps as a panel that fits the settings drawer.
 class VtaLinkPanel extends StatelessWidget {
   const VtaLinkPanel({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: onboardingGradient(
-        context,
-        radius: 2,
-        borderRadius: BorderRadius.circular(McRadius.lg),
-      ),
-      // The settings route has no Scaffold: without a Material, text falls
-      // back to the underlined debug style and buttons have no ink.
-      child: const Material(
-        type: MaterialType.transparency,
-        child: Padding(padding: EdgeInsets.all(20), child: VtaLinkContent()),
-      ),
-    );
+    // The card is a Material, so the settings route, which has no
+    // Scaffold, still gets text styles and ink.
+    return const AppCard(padding: EdgeInsets.all(20), child: VtaLinkContent());
   }
 }
