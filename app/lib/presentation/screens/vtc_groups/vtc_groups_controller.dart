@@ -42,6 +42,13 @@ class VtcGroupsController extends _$VtcGroupsController {
         failure: VtcGroupsFailure.vtaMissing,
       );
       return;
+    } on NotACommunityMemberException {
+      if (!ref.mounted) return;
+      state = state.copyWith(
+        isLoading: false,
+        failure: VtcGroupsFailure.notAMember,
+      );
+      return;
     } on MeetingPlaceVtcSDKException catch (error) {
       _log('reading groups', error.code.name);
       if (!ref.mounted) return;

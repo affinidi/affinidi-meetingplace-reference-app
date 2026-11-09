@@ -5528,6 +5528,12 @@ abstract class AppLocalizations {
   /// **'Link your VTA to see your groups.'**
   String get vtcGroupsVtaMissing;
 
+  /// Shown instead of a community's groups when the phone holds no confirmed membership of it
+  ///
+  /// In en, this message translates to:
+  /// **'This phone hasn\'t confirmed your membership yet. Open the community to check, then try again.'**
+  String get vtcGroupsNotAMember;
+
   /// Shown when the community or the VTA cannot be reached
   ///
   /// In en, this message translates to:

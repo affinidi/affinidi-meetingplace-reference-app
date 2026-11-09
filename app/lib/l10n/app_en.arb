@@ -3638,6 +3638,10 @@
 	"@vtcGroupsVtaMissing": {
 		"description": "Shown when no VTA is linked, so groups cannot be read"
 	},
+	"vtcGroupsNotAMember": "This phone hasn't confirmed your membership yet. Open the community to check, then try again.",
+	"@vtcGroupsNotAMember": {
+		"description": "Shown instead of a community's groups when the phone holds no confirmed membership of it"
+	},
 	"vtcGroupsUnreachable": "Your groups couldn't be loaded. Check your connection and try again.",
 	"@vtcGroupsUnreachable": {
 		"description": "Shown when the community or the VTA cannot be reached"

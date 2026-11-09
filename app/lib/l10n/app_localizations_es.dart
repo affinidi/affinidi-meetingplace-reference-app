@@ -3709,6 +3709,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get vtcGroupsVtaMissing => 'Link your VTA to see your groups.';
 
   @override
+  String get vtcGroupsNotAMember =>
+      'This phone hasn\'t confirmed your membership yet. Open the community to check, then try again.';
+
+  @override
   String get vtcGroupsUnreachable =>
       'Your groups couldn\'t be loaded. Check your connection and try again.';
 

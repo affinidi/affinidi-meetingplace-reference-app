@@ -74,6 +74,7 @@ class VtcGroupsScreen extends ConsumerWidget {
         VtcGroupsState(failure: final failure?) => _Message(switch (failure) {
           VtcGroupsFailure.vtaMissing => l10n.vtcGroupsVtaMissing,
           VtcGroupsFailure.unreachable => l10n.vtcGroupsUnreachable,
+          VtcGroupsFailure.notAMember => l10n.vtcGroupsNotAMember,
         }),
         VtcGroupsState(groups: []) => _Message(l10n.vtcGroupsNone),
         _ => SingleChildScrollView(

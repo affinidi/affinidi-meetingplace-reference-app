@@ -30,6 +30,10 @@ enum VtcGroupsFailure {
 
   /// The community or the VTA could not be reached.
   unreachable,
+
+  /// This phone holds no confirmed membership of the community yet, such as
+  /// right after a request is approved, before the app has heard of it.
+  notAMember,
 }
 
 /// The member's groups in one community, and their chats.

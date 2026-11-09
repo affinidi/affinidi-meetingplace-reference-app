@@ -43,10 +43,12 @@ const _linked = VtcGroup(
 
 class _FakeVtcService extends Fake implements VtcService {
   bool isVtaMissing = false;
+  bool isNotYetMember = false;
 
   @override
   Future<List<VtcGroupListing>> memberGroups(String communityDid) async {
     if (isVtaMissing) throw const VtaNotLinkedException();
+    if (isNotYetMember) throw const NotACommunityMemberException();
     return const [
       VtcGroupListing(group: _managed, standing: GroupStanding.member),
       VtcGroupListing(group: _linked, standing: GroupStanding.member),
@@ -229,6 +231,21 @@ void main() {
       find.text(
         "Your VTA doesn't have this group's membership credential yet. "
         'Try again later.',
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('says the membership is not confirmed yet instead of '
+      'failing', (tester) async {
+    vtc.isNotYetMember = true;
+
+    await pumpScreen(tester);
+
+    expect(
+      find.text(
+        "This phone hasn't confirmed your membership yet. Open the community "
+        'to check, then try again.',
       ),
       findsOneWidget,
     );
