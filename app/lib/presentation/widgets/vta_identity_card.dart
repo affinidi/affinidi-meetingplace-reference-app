@@ -234,7 +234,7 @@ class _Avatar extends StatelessWidget {
   }
 }
 
-/// The identity's DID, its start and end only, set small and muted as
+/// The identity's DID, its start and last part only, set small and muted as
 /// metadata rather than as a detail of the profile.
 class _DidMetadata extends StatelessWidget {
   const _DidMetadata({required this.did});
@@ -252,11 +252,11 @@ class _DidMetadata extends StatelessWidget {
           padding: const EdgeInsets.only(top: 1),
           child: Icon(McIcons.identities, size: 14, color: mc.textTertiary),
         ),
-        // Its start and end, as DIDs are shown elsewhere; the middle tells
-        // identities apart no better.
+        // Its start and its last part, which names the identity; the middle
+        // tells identities apart no better.
         Expanded(
           child: Text(
-            did.topAndTail(),
+            did.topAndLastPart(),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: McTypography.code.copyWith(

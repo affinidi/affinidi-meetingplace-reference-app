@@ -81,7 +81,7 @@ void main() {
       expect(find.byIcon(McIcons.person), findsOneWidget);
     });
 
-    testWidgets('shows the DID by its start and end at the foot', (
+    testWidgets('shows the DID by its start and last part at the foot', (
       tester,
     ) async {
       const longDid =
@@ -95,7 +95,7 @@ void main() {
         ),
       );
 
-      const shown = 'did:webvh:QmPEQV...lovelace';
+      const shown = 'did:webvh:QmPEQVM1JPTyrv...:ada-lovelace';
       expect(find.text(longDid), findsNothing);
       final did = tester.widget<Text>(find.text(shown));
       expect(did.maxLines, 1);
@@ -219,7 +219,7 @@ void main() {
     ) async {
       await _pump(tester, const VtaIdentityCard(did: _did));
 
-      expect(find.text(_did.topAndTail()), findsOneWidget);
+      expect(find.text(_did.topAndLastPart()), findsOneWidget);
       expect(find.byIcon(McIcons.email), findsNothing);
     });
 
