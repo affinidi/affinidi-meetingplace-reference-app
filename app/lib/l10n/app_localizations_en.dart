@@ -3009,6 +3009,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vtcJoinShowManifest => 'Show the community\'s manifest';
 
   @override
+  String vtcJoinWayKind(String kind) {
+    String _temp0 = intl.Intl.selectLogic(kind, {
+      'automatic': 'Automatic',
+      'other': 'Reviewed',
+    });
+    return '$_temp0';
+  }
+
+  @override
   String get vtcJoinWayAutomatic => 'You become a member when you apply';
 
   @override

@@ -25,8 +25,11 @@ import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_progress_line.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_trail_step.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_colors.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_elevation.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_radius.dart';
+import 'package:mpx_flutter_reference_app/presentation/widgets/common/app_card.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/onboarding_style/onboarding_style.dart';
 
 import '../../../fakes/fake_identities.dart';
@@ -1334,6 +1337,56 @@ void main() {
         findsOneWidget,
       );
       expect(join().onPressed, isNull);
+    });
+
+    testWidgets('draws ways in as identity cards', (tester) async {
+      network.joinManifest = {
+        ...network.joinManifest,
+        'criteria': [
+          {
+            'id': 'open',
+            'admission': 'review',
+            'requirementsDigest': 'zOpen',
+          },
+          {
+            'id': 'invited',
+            'admission': 'automatic',
+            'requirementsDigest': 'zInvited',
+            'invitationRequired': true,
+          },
+        ],
+      };
+      await pumpScreen(tester);
+      await enterCode(tester, fakeVtcDid);
+      final deck = find.byKey(const Key('vtc_join_ways'));
+      AppCard topCard() => tester.widget(
+        find.descendant(of: deck, matching: find.byType(AppCard)).last,
+      );
+
+      expect(
+        find.descendant(of: deck, matching: find.text('REVIEWED')),
+        findsOneWidget,
+      );
+      expect(topCard().accent, McColors.blue);
+      expect(
+        (topCard().shape! as RoundedRectangleBorder).borderRadius,
+        BorderRadius.circular(McRadius.xl),
+      );
+
+      await swipeWays(tester);
+
+      expect(
+        find.descendant(
+          of: deck,
+          matching: find.text('Not supported yet: needs an invitation'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        topCard().accent,
+        isNull,
+        reason: 'no wash for an unsupported way',
+      );
     });
 
     testWidgets('shows a single way in as a deck of one', (tester) async {

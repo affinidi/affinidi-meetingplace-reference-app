@@ -14,9 +14,12 @@ import '../../../infrastructure/services/camera_service/camera_service.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../dialogs/qr_code_picker/qr_code_picker.dart';
 import '../../effects/confetti/confetti_overlay.dart';
+import '../../themes/tokens/mc_colors.dart';
 import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
+import '../../themes/tokens/mc_spacing.dart';
 import '../../themes/tokens/mc_typography.dart';
+import '../../widgets/common/app_card.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import '../../widgets/swipeable_cards.dart';
 import '../../widgets/vta_identity_card.dart';
@@ -784,8 +787,9 @@ class _WaysIn extends StatelessWidget {
   final VtcJoinState state;
   final ValueChanged<String> onChoose;
 
-  /// Room for a way's icon, title and a few lines of the community's words.
-  static const _deckHeight = 180.0;
+  /// Room for a way's eyebrow, title and a few lines of the community's
+  /// words; longer ones scroll inside the card.
+  static const _deckHeight = 220.0;
 
   @override
   Widget build(BuildContext context) {
@@ -822,60 +826,117 @@ class _WaysIn extends StatelessWidget {
   }
 }
 
-/// A way in, as a card in the deck of ways in: what admission under it
-/// takes, or why this app cannot apply under it yet.
+/// A way in, as a card in the deck of ways in, styled as a small identity
+/// card: the kind of admission as an eyebrow over what it takes, or why
+/// this app cannot apply under it yet, the way's
+/// symbol in a ring at the top end, and what it asks for below. A way this
+/// app supports carries the blue corner wash.
 class _WayCard extends StatelessWidget {
   const _WayCard(this.way);
 
   final VtcJoinWay way;
 
-  static const _radius = BorderRadius.all(Radius.circular(McRadius.lg));
-
-  /// Blurs the card stacked behind, as the identity deck does.
+  static const _symbolSize = 48.0;
   static const _blurSigma = 20.0;
 
   @override
   Widget build(BuildContext context) {
     final mc = context.mcColors;
-    return ClipRRect(
-      borderRadius: _radius,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: _blurSigma, sigmaY: _blurSigma),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: context.colorScheme.surfaceContainerHigh,
-            borderRadius: _radius,
-            border: Border.all(color: mc.hairlineStrong),
-          ),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              spacing: 8,
-              children: [
-                Icon(_iconOf(way), size: 28, color: mc.textPrimary),
-                Text(
-                  _titleOf(context.l10n, way),
-                  textAlign: TextAlign.center,
-                  style: context.textTheme.titleSmall?.copyWith(
-                    color: mc.textPrimary,
-                    fontWeight: FontWeight.w500,
+    final textTheme = context.textTheme;
+    final l10n = context.l10n;
+    final supported = way.unsupported == null;
+    final details = <(IconData, String)>[
+      if (way.credentialType case final type?)
+        (McIcons.credentials, l10n.vtcJoinWayWithCredential(type)),
+      if (way.description case final description?) (McIcons.info, description),
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.all(McSpacing.s2),
+      // Blurred behind, as the identity deck is, so the card stacked behind
+      // cannot be read through the panel.
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(McRadius.xl),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: _blurSigma, sigmaY: _blurSigma),
+          child: AppCard(
+            accent: supported ? McColors.blue : null,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(McRadius.xl),
+              side: BorderSide(color: mc.hairline),
+            ),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(
+                McSpacing.s5,
+                McSpacing.s4,
+                McSpacing.s5,
+                McSpacing.s4,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: McSpacing.s3,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: McSpacing.s3,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: McSpacing.s1,
+                          children: [
+                            Text(
+                              l10n.vtcJoinWayKind(_kindOf(way)).toUpperCase(),
+                              style: McTypography.eyebrow.copyWith(
+                                color: mc.textSecondary,
+                              ),
+                            ),
+                            // A sentence, not a name: shown whole.
+                            Text(
+                              _titleOf(l10n, way),
+                              style: textTheme.titleMedium?.copyWith(
+                                color: supported
+                                    ? mc.textPrimary
+                                    : mc.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        width: _symbolSize,
+                        height: _symbolSize,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: context.colorScheme.surfaceContainerHigh,
+                          border: Border.all(color: mc.hairline),
+                        ),
+                        child: Icon(
+                          _iconOf(way),
+                          size: _symbolSize / 2,
+                          color: supported ? mc.textPrimary : mc.textTertiary,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                if (way.credentialType case final type?)
-                  Text(
-                    context.l10n.vtcJoinWayWithCredential(type),
-                    textAlign: TextAlign.center,
-                    style: context.textTheme.bodySmall?.copyWith(
-                      color: mc.textPrimary,
+                  for (final (icon, value) in details)
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: McSpacing.s2,
+                      children: [
+                        Icon(icon, size: 16, color: mc.textSecondary),
+                        Expanded(
+                          child: Text(
+                            value,
+                            style: textTheme.bodySmall?.copyWith(
+                              color: mc.textPrimary,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                if (way.description case final description?)
-                  Text(
-                    description,
-                    textAlign: TextAlign.center,
-                    style: onboardingNote(context),
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -883,6 +944,9 @@ class _WayCard extends StatelessWidget {
     );
   }
 }
+
+/// The kind of admission [way] offers, for its card's eyebrow.
+String _kindOf(VtcJoinWay way) => way.automatic ? 'automatic' : 'reviewed';
 
 IconData _iconOf(VtcJoinWay way) => way.unsupported != null
     ? McIcons.block

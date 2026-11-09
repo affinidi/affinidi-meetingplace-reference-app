@@ -4526,6 +4526,12 @@ abstract class AppLocalizations {
   /// **'Show the community\'s manifest'**
   String get vtcJoinShowManifest;
 
+  /// Eyebrow on a way-in card: the kind of admission it offers
+  ///
+  /// In en, this message translates to:
+  /// **'{kind, select, automatic{Automatic} other{Reviewed}}'**
+  String vtcJoinWayKind(String kind);
+
   /// No description provided for @vtcJoinWayAutomatic.
   ///
   /// In en, this message translates to:

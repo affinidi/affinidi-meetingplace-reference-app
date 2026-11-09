@@ -2908,6 +2908,15 @@
 		"description": "Title of the dialog showing the community's join manifest as it sent it"
 	},
 	"vtcJoinShowManifest": "Show the community's manifest",
+	"vtcJoinWayKind": "{kind, select, automatic{Automatic} other{Reviewed}}",
+	"@vtcJoinWayKind": {
+		"description": "Eyebrow on a way-in card: the kind of admission it offers",
+		"placeholders": {
+			"kind": {
+				"type": "String"
+			}
+		}
+	},
 	"vtcJoinWayAutomatic": "You become a member when you apply",
 	"vtcJoinWayReviewed": "The administrators review your application",
 	"vtcJoinWayUnsupported": "{reason, select, invitation{Not supported yet: needs an invitation} credentials{Not supported yet: needs credentials} vetting{Not supported yet: needs an in-person check} other{Not supported yet}}",
