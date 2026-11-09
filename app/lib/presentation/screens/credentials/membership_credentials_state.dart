@@ -16,7 +16,12 @@ enum MembershipCredentialsFailure {
 @Freezed(fromJson: false, toJson: false)
 abstract class MembershipCredentialsState with _$MembershipCredentialsState {
   factory MembershipCredentialsState({
+    /// Whether there is nothing to show yet: no cards kept on this phone,
+    /// and the VTA not read.
     @Default(true) bool isLoading,
+
+    /// Whether the cards are being read from the VTA again.
+    @Default(false) bool isSyncing,
 
     /// The member's membership cards: held on their VTA, then left.
     @Default(<VtcMembershipEntry>[]) List<VtcMembershipEntry> entries,

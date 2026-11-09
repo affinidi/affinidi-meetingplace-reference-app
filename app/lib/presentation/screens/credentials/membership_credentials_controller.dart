@@ -23,41 +23,74 @@ class MembershipCredentialsController
     // whenever a card is kept or a membership left.
     final changes = _service.membershipsChanged.listen((_) => refresh());
     ref.onDispose(changes.cancel);
-    Future.microtask(refresh);
+    Future.microtask(_start);
     return MembershipCredentialsState();
   }
 
-  /// Reads the cards from the VTA again, then checks each with its
-  /// community.
-  Future<void> refresh() async {
-    state = state.copyWith(isLoading: true, failure: null);
-    final List<VtcMembershipEntry> entries;
+  /// Shows the cards kept on this phone, then reads the VTA again.
+  Future<void> _start() async {
+    List<VtcMembershipEntry> saved;
     try {
-      entries = await _service.membershipCredentials();
-    } on VtaNotLinkedException {
-      if (!ref.mounted) return;
-      state = state.copyWith(
-        isLoading: false,
-        failure: MembershipCredentialsFailure.vtaMissing,
-      );
-      return;
-    } on MeetingPlaceVtcSDKException catch (error) {
-      _log(error.code);
-      if (!ref.mounted) return;
-      state = state.copyWith(
-        isLoading: false,
-        failure: MembershipCredentialsFailure.unreachable,
-      );
-      return;
+      saved = await _service.savedMembershipCredentials();
+    } on Exception {
+      // Nothing kept can be shown: the VTA is read all the same.
+      saved = const [];
     }
     if (!ref.mounted) return;
+    // A read of the VTA that already ended shows newer cards.
+    if (saved.isNotEmpty && state.readAt == null && state.entries.isEmpty) {
+      state = state.copyWith(isLoading: false, entries: saved);
+    }
+    await refresh();
+  }
+
+  /// Reads the cards from the VTA again, then checks each with its
+  /// community. Does nothing while a read is under way. When the VTA does
+  /// not answer, the cards shown stay, and are checked if not yet.
+  Future<void> refresh() async {
+    if (state.isSyncing) return;
     state = state.copyWith(
-      isLoading: false,
+      isSyncing: true,
+      isLoading: state.entries.isEmpty,
+      failure: null,
+    );
+    final entries = await _read();
+    if (!ref.mounted) return;
+    if (entries == null) {
+      await Future.wait([
+        for (final entry in state.entries)
+          if (!state.statuses.containsKey(entry.key)) check(entry.key),
+      ]);
+      return;
+    }
+    state = state.copyWith(
       entries: entries,
       readAt: DateTime.now(),
       statuses: const {},
     );
     await Future.wait([for (final entry in entries) check(entry.key)]);
+  }
+
+  /// The cards on the VTA, or null when it cannot be read, with why.
+  Future<List<VtcMembershipEntry>?> _read() async {
+    MembershipCredentialsFailure? failure;
+    try {
+      return await _service.membershipCredentials();
+    } on VtaNotLinkedException {
+      failure = MembershipCredentialsFailure.vtaMissing;
+    } on MeetingPlaceVtcSDKException catch (error) {
+      _log(error.code);
+      failure = MembershipCredentialsFailure.unreachable;
+    } finally {
+      if (ref.mounted) {
+        state = state.copyWith(
+          isSyncing: false,
+          isLoading: false,
+          failure: failure,
+        );
+      }
+    }
+    return null;
   }
 
   /// Asks the community of the card [key] whether it still holds it.

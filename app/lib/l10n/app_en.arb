@@ -1679,6 +1679,10 @@
 	"@membershipCredentialsUnreachable": {
 		"description": "Shown instead of membership cards when the VTA cannot be reached"
 	},
+	"membershipCredentialsSaved": "Your VTA couldn't be reached. Showing the cards saved on this phone.",
+	"@membershipCredentialsSaved": {
+		"description": "Shown above the membership cards kept on the phone when the VTA cannot be reached"
+	},
 	"membershipCredentialsNone": "No membership cards yet. Join a community to get one.",
 	"@membershipCredentialsNone": {
 		"description": "Shown when the member holds no membership card"

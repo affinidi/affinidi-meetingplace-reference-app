@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -136,7 +137,7 @@ void main() {
     network.revoked.add(2);
   });
 
-  Future<void> pumpScreen(WidgetTester tester) async {
+  Future<void> pumpScreen(WidgetTester tester, {bool settles = true}) async {
     await tester.binding.setSurfaceSize(const Size(800, 1400));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
@@ -162,10 +163,97 @@ void main() {
         ),
       ),
     );
-    await settle(tester);
+    if (settles) await settle(tester);
   }
 
   Finder chip(String key) => find.byKey(Key('membership_status_$key'));
+  final syncing = find.byKey(const Key('section_banner_progress'));
+
+  /// Keeps the chess card on this phone, as the VTA last described it.
+  Future<void> keepChessCard() =>
+      SecureStorageVtcRepository().saveMembershipCards([
+        StoredCredential(
+          record: const HeldCredential(
+            id: 'vault-chess',
+            types: ['VerifiableCredential', 'MembershipCredential'],
+          ),
+          credential: chessCard,
+        ),
+      ]);
+
+  /// Lets the screen and the fakes run a little, without waiting for them
+  /// to finish.
+  Future<void> run(WidgetTester tester) async {
+    for (var i = 0; i < 5; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 20)),
+      );
+      await tester.pump(const Duration(milliseconds: 20));
+    }
+  }
+
+  group('reading the VTA again', () {
+    late Completer<void> answering;
+
+    setUp(() {
+      answering = Completer<void>();
+      network.vta.heldUntil = answering.future;
+    });
+
+    testWidgets('shows the cards kept on this phone meanwhile', (tester) async {
+      await keepChessCard();
+
+      await pumpScreen(tester, settles: false);
+      await run(tester);
+
+      expect(find.text('Chess club'), findsOneWidget);
+      expect(syncing, findsOneWidget);
+      expect(find.byIcon(Icons.menu), findsOneWidget);
+
+      answering.complete();
+      await settle(tester);
+
+      expect(syncing, findsNothing);
+      expect(find.text('Chess club'), findsOneWidget);
+    });
+
+    testWidgets('shows a spinner in place of cards when none is kept', (
+      tester,
+    ) async {
+      // Not even the card of the membership left.
+      await const FlutterSecureStorage().delete(key: 'vtc_left_memberships');
+
+      await pumpScreen(tester, settles: false);
+      await run(tester);
+
+      expect(syncing, findsOneWidget);
+      expect(find.text('Chess club'), findsNothing);
+      expect(find.byType(CircularProgressIndicator), findsNWidgets(2));
+
+      answering.complete();
+      await settle(tester);
+
+      expect(find.text('Chess club'), findsOneWidget);
+    });
+  });
+
+  testWidgets('keeps the cards kept on this phone when the VTA is down', (
+    tester,
+  ) async {
+    await keepChessCard();
+    network.vta.isDown = true;
+
+    await pumpScreen(tester);
+
+    expect(find.text('Chess club'), findsOneWidget);
+    expect(find.text('Football club'), findsOneWidget);
+    expect(
+      find.text(
+        "Your VTA couldn't be reached. Showing the cards saved on this phone.",
+      ),
+      findsOneWidget,
+    );
+  });
 
   testWidgets('lists membership cards under All and Memberships', (
     tester,
@@ -491,7 +579,10 @@ void main() {
     expect(find.text('Chess club'), findsOneWidget);
   });
 
-  testWidgets('says when no VTA can be reached', (tester) async {
+  testWidgets('says when no VTA can be reached, and no card is kept', (
+    tester,
+  ) async {
+    await const FlutterSecureStorage().delete(key: 'vtc_left_memberships');
     network.vta.isDown = true;
 
     await pumpScreen(tester);

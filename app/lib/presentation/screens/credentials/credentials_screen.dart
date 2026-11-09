@@ -50,6 +50,7 @@ class CredentialsScreen extends HookConsumerWidget {
               SectionBanner(
                 title: l10n.tabsTitle(Tabs.credentials.name),
                 subtitle: l10n.verifiableCredentialWallet,
+                showProgress: memberships.isSyncing,
               ),
               TabBar(
                 padding: const EdgeInsets.symmetric(horizontal: 8),

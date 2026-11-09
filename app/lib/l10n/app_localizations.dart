@@ -2746,6 +2746,12 @@ abstract class AppLocalizations {
   /// **'Your VTA couldn\'t be reached, so your membership cards can\'t be shown.'**
   String get membershipCredentialsUnreachable;
 
+  /// Shown above the membership cards kept on the phone when the VTA cannot be reached
+  ///
+  /// In en, this message translates to:
+  /// **'Your VTA couldn\'t be reached. Showing the cards saved on this phone.'**
+  String get membershipCredentialsSaved;
+
   /// Shown when the member holds no membership card
   ///
   /// In en, this message translates to:

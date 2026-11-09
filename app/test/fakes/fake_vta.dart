@@ -45,6 +45,9 @@ class FakeVta implements HttpClientAdapter, DidResolver {
   /// When true, the VTA's mediator cannot be reached.
   bool isDown = false;
 
+  /// When set, tasks reach the VTA only once it completes.
+  Future<void>? heldUntil;
+
   final _key = Ed25519DidKeySigner.generate();
   final _mediatorKey = Ed25519DidKeySigner.generate();
   late final DidDocument document;
@@ -123,6 +126,7 @@ class FakeVta implements HttpClientAdapter, DidResolver {
   Future<void> _receive(ForwardMessage forward) async {
     // A mediator answers on a later turn of the event loop, as I/O does.
     await Future<void>.delayed(Duration.zero);
+    if (heldUntil case final held?) await held;
     if (isDown) throw StateError('mediator down');
     final data = forward.attachments!.single.data!.base64!;
     final sealed =

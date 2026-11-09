@@ -89,25 +89,27 @@ class SectionBanner extends StatelessWidget {
                     ],
                   ),
                 ),
-                (showProgress != null && showProgress!)
-                    ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator.adaptive(),
-                      )
-                    : SizedBox(
-                        width: 40,
-                        height: 40,
-                        child: IconButton(
-                          padding: EdgeInsets.zero,
-                          icon: Icon(
-                            onClose != null ? Icons.close : Icons.menu,
-                            color: colorScheme.onSurface.withValues(alpha: 0.5),
-                            size: 28,
-                          ),
-                          onPressed: onClose ?? _openSettingsDrawer,
-                        ),
-                      ),
+                // Beside the menu, which stays usable while work goes on.
+                if (showProgress ?? false)
+                  const SizedBox(
+                    key: Key('section_banner_progress'),
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator.adaptive(strokeWidth: 2),
+                  ),
+                SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    icon: Icon(
+                      onClose != null ? Icons.close : Icons.menu,
+                      color: colorScheme.onSurface.withValues(alpha: 0.5),
+                      size: 28,
+                    ),
+                    onPressed: onClose ?? _openSettingsDrawer,
+                  ),
+                ),
               ],
             ),
           ),

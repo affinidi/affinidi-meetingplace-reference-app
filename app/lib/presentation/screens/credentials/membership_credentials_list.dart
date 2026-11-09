@@ -29,19 +29,17 @@ class MembershipCredentialsList extends ConsumerWidget {
         child: Center(child: CircularProgressIndicator.adaptive()),
       );
     }
-    final message = switch (state.failure) {
-      MembershipCredentialsFailure.vtaMissing =>
-        l10n.membershipCredentialsVtaMissing,
-      MembershipCredentialsFailure.unreachable =>
-        l10n.membershipCredentialsUnreachable,
-      null when state.entries.isEmpty => l10n.membershipCredentialsNone,
-      null => null,
-    };
-    if (message != null) {
+    if (state.entries.isEmpty) {
       return Padding(
         padding: const EdgeInsets.all(24),
         child: Text(
-          message,
+          switch (state.failure) {
+            MembershipCredentialsFailure.vtaMissing =>
+              l10n.membershipCredentialsVtaMissing,
+            MembershipCredentialsFailure.unreachable =>
+              l10n.membershipCredentialsUnreachable,
+            null => l10n.membershipCredentialsNone,
+          },
           textAlign: TextAlign.center,
           style: context.textTheme.bodyLarge?.copyWith(
             color: context.colorScheme.onSurfaceVariant,
@@ -50,12 +48,28 @@ class MembershipCredentialsList extends ConsumerWidget {
       );
     }
 
+    // The cards kept on this phone stay shown when the VTA cannot be read.
+    final note = switch (state.failure) {
+      MembershipCredentialsFailure.vtaMissing =>
+        l10n.membershipCredentialsVtaMissing,
+      MembershipCredentialsFailure.unreachable =>
+        l10n.membershipCredentialsSaved,
+      null => null,
+    };
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: 12,
         children: [
+          if (note != null)
+            Text(
+              note,
+              key: const Key('membership_credentials_note'),
+              style: context.textTheme.bodySmall?.copyWith(
+                color: context.colorScheme.onSurfaceVariant,
+              ),
+            ),
           for (final entry in state.entries)
             MembershipCredentialRow(
               key: Key('membership_credential_${entry.key}'),

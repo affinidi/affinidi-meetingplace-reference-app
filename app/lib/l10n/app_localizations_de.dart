@@ -1850,6 +1850,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'Your VTA couldn\'t be reached, so your membership cards can\'t be shown.';
 
   @override
+  String get membershipCredentialsSaved =>
+      'Your VTA couldn\'t be reached. Showing the cards saved on this phone.';
+
+  @override
   String get membershipCredentialsNone =>
       'No membership cards yet. Join a community to get one.';
 
