@@ -1,7 +1,6 @@
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../application/services/identities_service/identities_service.dart';
 import '../../../application/services/vtc_group_chat_service/vtc_group_chat_service.dart';
 import '../../../application/services/vtc_service/vtc_service.dart';
 import '../../../domain/models/identity/identity.dart';
@@ -138,10 +137,15 @@ class VtcGroupsController extends _$VtcGroupsController {
     VtcGroup group,
     Future<void> Function(Identity identity) action,
   ) async {
-    final identity = ref.read(
-      identitiesServiceProvider.currentIdentityOrPrimary,
-    );
-    if (identity == null || state.busy.contains(group.groupId)) return;
+    if (state.busy.contains(group.groupId)) return;
+    // The identity that is the member acts in the group's chat, not
+    // whichever identity is current.
+    final identity = await _chats.memberIdentity(communityDid);
+    if (!ref.mounted) return;
+    if (identity == null) {
+      state = state.copyWith(chatFailure: VtcGroupChatFailure.memberNotHere);
+      return;
+    }
     state = state.copyWith(
       busy: {...state.busy, group.groupId},
       chatFailure: null,

@@ -83,8 +83,17 @@ class _FakeChats extends Fake implements VtcGroupChatService {
   final joined = <String>[];
   VtcGroupChatFailure? joinFailure;
 
+  /// The identity that is the member here: not the current one.
+  Identity? member = FakeIdentities.secondaryIdentity;
+
+  /// The identities the chats were created and joined as, by their id.
+  final actedAs = <String>[];
+
   @override
   Future<List<VtcGroupChat>> chats() async => const [];
+
+  @override
+  Future<Identity?> memberIdentity(String communityDid) async => member;
 
   @override
   Future<GroupChatLink> createChat(
@@ -95,6 +104,7 @@ class _FakeChats extends Fake implements VtcGroupChatService {
   }) async {
     created.add(group.groupId);
     postings.add(posting);
+    actedAs.add(identity.id);
     return GroupChatLink(
       mnemonic: 'identity-wg',
       controlPlaneDid: 'did:web:control-plane.example',
@@ -112,6 +122,7 @@ class _FakeChats extends Fake implements VtcGroupChatService {
       throw VtcGroupChatException(failure);
     }
     joined.add(group.groupId);
+    actedAs.add(identity.id);
   }
 }
 
@@ -217,6 +228,41 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(chats.created, isEmpty);
+  });
+
+  testWidgets('creates and joins as the identity that is the member, not '
+      'the current one', (tester) async {
+    await pumpScreen(tester);
+
+    await tapVisible(tester, const Key('vtc_group_create_g1'));
+    await tester.tap(find.byKey(const Key('vtc_group_posting_everyone')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Done'));
+    await tester.pumpAndSettle();
+    await tapVisible(tester, const Key('vtc_group_join_g2'));
+
+    expect(chats.actedAs, [
+      FakeIdentities.secondaryIdentity.id,
+      FakeIdentities.secondaryIdentity.id,
+    ]);
+  });
+
+  testWidgets('joins as nobody when the member is not on this phone', (
+    tester,
+  ) async {
+    chats.member = null;
+    await pumpScreen(tester);
+
+    await tapVisible(tester, const Key('vtc_group_join_g2'));
+
+    expect(chats.joined, isEmpty);
+    expect(
+      find.text(
+        "The identity that is your membership of this community isn't on "
+        'this phone.',
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('joins a linked chat', (tester) async {

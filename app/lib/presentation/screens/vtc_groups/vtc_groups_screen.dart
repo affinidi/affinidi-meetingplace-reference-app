@@ -129,6 +129,7 @@ class VtcGroupsScreen extends ConsumerWidget {
       VtcGroupChatFailure.otherMeetingPlace => l10n.vtcGroupChatElsewhere,
       VtcGroupChatFailure.notTheGroupsChat => l10n.vtcGroupChatNotTheGroups,
       VtcGroupChatFailure.noGroupCredential => l10n.vtcGroupChatNoCredential,
+      VtcGroupChatFailure.memberNotHere => l10n.vtcGroupChatMemberNotHere,
     };
   }
 }

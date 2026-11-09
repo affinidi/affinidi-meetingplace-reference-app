@@ -3743,6 +3743,10 @@
 	"@vtcGroupChatNotTheGroups": {
 		"description": "Shown when the linked offer is not for the group's DID"
 	},
+	"vtcGroupChatMemberNotHere": "The identity that is your membership of this community isn't on this phone.",
+	"@vtcGroupChatMemberNotHere": {
+		"description": "Why a group chat could not be created or joined: the member identity is on another phone"
+	},
 	"vtcGroupChatNoCredential": "Your VTA doesn't have this group's membership credential yet. Try again later.",
 	"@vtcGroupChatNoCredential": {
 		"description": "Shown when the member's VTA keeps no credential of the group"

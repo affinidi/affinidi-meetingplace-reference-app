@@ -5678,6 +5678,12 @@ abstract class AppLocalizations {
   /// **'The linked chat isn\'t this group\'s. Ask one of its managers.'**
   String get vtcGroupChatNotTheGroups;
 
+  /// Why a group chat could not be created or joined: the member identity is on another phone
+  ///
+  /// In en, this message translates to:
+  /// **'The identity that is your membership of this community isn\'t on this phone.'**
+  String get vtcGroupChatMemberNotHere;
+
   /// Shown when the member's VTA keeps no credential of the group
   ///
   /// In en, this message translates to:

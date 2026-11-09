@@ -98,6 +98,11 @@ class _FakeVtcService extends Fake implements VtcService {
   Future<List<VtcCommunity>> memberships() async => communities;
 
   @override
+  Future<VtcCommunity?> community(String communityDid) async => communities
+      .where((community) => community.communityDid == communityDid)
+      .firstOrNull;
+
+  @override
   Future<List<VtcGroupListing>> memberGroups(String communityDid) async =>
       groupsOf[communityDid] ?? const [];
 
@@ -532,6 +537,11 @@ void main() {
       await joining.joinGroupChats();
 
       expect(joining.joined, [(_communityDid, 'announcements', member.id)]);
+    });
+
+    test('names the identity that is the member as the one to act', () async {
+      expect((await joining.memberIdentity(_communityDid))?.id, member.id);
+      expect(await joining.memberIdentity('did:webvh:QmOther:x'), isNull);
     });
 
     test('leaves a community whose member is not on this phone', () async {

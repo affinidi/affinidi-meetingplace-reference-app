@@ -3807,6 +3807,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'The linked chat isn\'t this group\'s. Ask one of its managers.';
 
   @override
+  String get vtcGroupChatMemberNotHere =>
+      'The identity that is your membership of this community isn\'t on this phone.';
+
+  @override
   String get vtcGroupChatNoCredential =>
       'Your VTA doesn\'t have this group\'s membership credential yet. Try again later.';
 

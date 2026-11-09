@@ -6,6 +6,7 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../domain/models/identity/identity.dart';
 import '../../../domain/models/vtc/vtc_chat_posting.dart';
+import '../../../domain/models/vtc/vtc_community.dart';
 import '../../../domain/models/vtc/vtc_group_chat.dart';
 import '../../../domain/repositories/vtc_repository.dart';
 import '../../../infrastructure/configuration/environment.dart';
@@ -40,6 +41,10 @@ enum VtcGroupChatFailure {
 
   /// The member's VTA keeps no credential of the group yet.
   noGroupCredential,
+
+  /// The identity that is the member of the community is not on this
+  /// phone, so no other identity may act for it in the group's chat.
+  memberNotHere,
 }
 
 /// A community group chat that could not be created or joined.
@@ -85,6 +90,22 @@ class VtcGroupChatService {
 
   /// Every chat this phone owns or joined that follows a community group.
   Future<List<VtcGroupChat>> chats() => _repository.groupChats();
+
+  /// The identity on this phone that is the member of [communityDid], which
+  /// creates and joins the chats of its groups whichever identity is
+  /// current: null when the phone holds no membership of it, or the
+  /// identity is not on this phone.
+  Future<Identity?> memberIdentity(String communityDid) async {
+    final community = await _vtc.community(communityDid);
+    if (community == null || !community.isMember) return null;
+    return _identityOf(community);
+  }
+
+  Identity? _identityOf(VtcCommunity community) => _ref
+      .read(identitiesServiceProvider)
+      .identities
+      .where((identity) => identity.did == community.personaDid)
+      .firstOrNull;
 
   /// Creates the chat of the group [group] of [communityDid] as [identity],
   /// known by the group's DID, where [posting] may post, and returns the link
@@ -256,11 +277,8 @@ class VtcGroupChatService {
     final joined = {
       for (final chat in await _repository.groupChats()) chat.groupDid,
     };
-    final identities = _ref.read(identitiesServiceProvider).identities;
     for (final community in await _vtc.memberships()) {
-      final identity = identities
-          .where((identity) => identity.did == community.personaDid)
-          .firstOrNull;
+      final identity = _identityOf(community);
       if (identity == null) continue;
       final List<VtcGroupListing> listings;
       try {
