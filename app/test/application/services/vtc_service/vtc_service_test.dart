@@ -7,6 +7,7 @@ import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_s
 import 'package:mpx_flutter_reference_app/domain/models/vtc/mock_credential_template.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_card_delivery.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_community.dart';
+import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_left_membership.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_member_link.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_membership_entry.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_vetter_desk.dart';
@@ -863,6 +864,14 @@ void main() {
         await service.leave(fakeVtcDid);
 
         expect(await repository.memberLinks(), isEmpty);
+      });
+
+      test('reports each step of leaving, in order', () async {
+        final steps = <VtcLeaveStep>[];
+
+        await service.leave(fakeVtcDid, onStep: steps.add);
+
+        expect(steps, VtcLeaveStep.values);
       });
 
       test('keeps the card and the signed answer once left', () async {

@@ -13,6 +13,7 @@ import 'package:mpx_flutter_reference_app/application/services/identities_servic
 import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
 import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_card_delivery.dart';
+import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_left_membership.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_vetting.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
@@ -1182,6 +1183,20 @@ void main() {
       expect(await service.community(fakeVtcDid), isNull);
     });
 
+    test('shows each step of leaving, then forgets it', () async {
+      await service.join(await service.readCommunity(fakeVtcDid));
+      await controller().onScanned(fakeVtcDid);
+      final steps = <VtcLeaveStep?>[];
+      container.listen(
+        vtcJoinControllerProvider.select((state) => state.leaveStep),
+        (_, step) => steps.add(step),
+      );
+
+      await controller().leave();
+
+      expect(steps, [...VtcLeaveStep.values, null]);
+    });
+
     test('says when the member is the last administrator', () async {
       network.leaveRefusal = (409, 'conflict');
       await service.join(await service.readCommunity(fakeVtcDid));
@@ -1191,6 +1206,7 @@ void main() {
 
       expect(state().failure, VtcJoinFailure.lastAdministrator);
       expect((await service.community(fakeVtcDid))?.isMember, isTrue);
+      expect(state().leaveStep, isNull);
     });
 
     test('leaves nothing before the community is joined', () async {

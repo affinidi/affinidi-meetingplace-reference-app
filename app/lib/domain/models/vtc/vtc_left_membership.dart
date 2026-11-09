@@ -1,5 +1,18 @@
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
+/// A step of leaving a community, in order, as the phone works on it.
+enum VtcLeaveStep {
+  /// Reading the membership card from the member's VTA, to keep a record.
+  readingCard,
+
+  /// Telling the community the member leaves, signed as their identity.
+  tellingCommunity,
+
+  /// Archiving the card on the VTA, so a later scan does not offer the
+  /// membership back.
+  archivingCard,
+}
+
 /// A membership the member ended: the card the community had issued, the
 /// community's signed answer to their leaving, and the last status list
 /// that showed the card's state. Kept on this phone once the community and

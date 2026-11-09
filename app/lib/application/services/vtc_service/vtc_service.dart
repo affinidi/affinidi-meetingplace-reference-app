@@ -2263,18 +2263,24 @@ class VtcService {
   /// [MeetingPlaceVtcSDKException] when the VTA or the community refuses or
   /// cannot be reached, e.g. with HTTP status 409 when the persona is the
   /// community's last administrator; the community is then kept, and no
-  /// left membership recorded.
-  Future<void> leave(String communityDid) async {
+  /// left membership recorded. Each step is reported to [onStep] as it
+  /// starts.
+  Future<void> leave(
+    String communityDid, {
+    void Function(VtcLeaveStep step)? onStep,
+  }) async {
     final community = await _repository.findCommunity(communityDid);
     if (community == null) return;
 
     final vta = await _grantedVta();
     final cards = _sdk.communityImport(vta);
+    onStep?.call(VtcLeaveStep.readingCard);
     final card = await cards.membershipCard(
       communityDid,
       personaDid: community.personaDid,
     );
     TrustTaskExchange? leaveExchange;
+    onStep?.call(VtcLeaveStep.tellingCommunity);
     try {
       final receipt = await _sdk.joinClient().leave(
         communityDid,
@@ -2296,6 +2302,7 @@ class VtcService {
       ),
     );
     // Else the VTA backup would offer the membership back on the next scan.
+    onStep?.call(VtcLeaveStep.archivingCard);
     await cards.archiveMembershipCards(
       communityDid,
       personaDid: community.personaDid,

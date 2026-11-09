@@ -6,6 +6,7 @@ import '../../../application/services/vtc_service/vtc_service.dart';
 import '../../../domain/models/identity/identity.dart';
 import '../../../domain/models/vtc/vtc_card_delivery.dart';
 import '../../../domain/models/vtc/vtc_identity_check.dart';
+import '../../../domain/models/vtc/vtc_left_membership.dart';
 import '../../../domain/models/vtc/vtc_membership_card.dart';
 import '../../../domain/models/vtc/vtc_vetting.dart';
 
@@ -363,6 +364,9 @@ abstract class VtcJoinState with _$VtcJoinState {
 
     /// How far opening the community got, while it opens.
     VtcOpenStep? openStep,
+
+    /// How far leaving the community got, while the member leaves.
+    VtcLeaveStep? leaveStep,
 
     /// The community's own check of the member's identity, once their VTA
     /// holds one.

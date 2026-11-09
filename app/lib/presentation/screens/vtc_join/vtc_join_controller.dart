@@ -13,6 +13,7 @@ import '../../../application/services/vtc_service/vtc_service.dart';
 import '../../../domain/models/identity/identity.dart';
 import '../../../domain/models/vtc/vtc_card_delivery.dart';
 import '../../../domain/models/vtc/vtc_community.dart';
+import '../../../domain/models/vtc/vtc_left_membership.dart';
 import '../../../domain/models/vtc/vtc_membership_card.dart';
 import '../../../domain/models/vtc/vtc_vetting.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
@@ -1188,13 +1189,20 @@ class VtcJoinController extends _$VtcJoinController {
 
     await _run(() async {
       try {
-        await _service.leave(manifest.communityDid);
+        await _service.leave(manifest.communityDid, onStep: _showLeaveStep);
       } on MeetingPlaceVtcSDKException catch (error) {
         if (error.httpStatus != _lastAdministratorStatus) rethrow;
         return _fail(VtcJoinFailure.lastAdministrator);
       }
       state = state.copyWith(step: VtcJoinStep.left);
     });
+    // Leaving ended, also when it failed: later work must not show it.
+    if (ref.mounted) state = state.copyWith(leaveStep: null);
+  }
+
+  void _showLeaveStep(VtcLeaveStep step) {
+    // The screen may have closed while the community answered.
+    if (ref.mounted) state = state.copyWith(leaveStep: step);
   }
 
   /// How a community refuses the leave of its last administrator.
