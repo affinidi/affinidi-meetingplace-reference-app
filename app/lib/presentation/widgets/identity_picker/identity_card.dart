@@ -44,8 +44,16 @@ class IdentityCard extends StatelessWidget {
   final void Function(Identity identity)? onEditIdentity;
   final void Function(Identity identity)? onPublishOfferForIdentity;
 
-  /// The picture's diameter; its upper half hangs above the card.
-  double get _pictureSize => identityCardSize.isSmall ? 64 : 96;
+  /// The picture's diameter on a normal card; its upper half hangs above
+  /// the card, and a card sharing the deck leaves the same room.
+  static const pictureSize = 96.0;
+  static const _smallPictureSize = 64.0;
+
+  /// The room around the card in its slot.
+  static const margin = 8.0;
+
+  double get _pictureSize =>
+      identityCardSize.isSmall ? _smallPictureSize : pictureSize;
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +62,7 @@ class IdentityCard extends StatelessWidget {
     // over its upper edge, as on a VTA identity card.
     return Center(
       child: Container(
-        margin: const EdgeInsets.all(8),
+        margin: const EdgeInsets.all(margin),
         padding: EdgeInsets.only(top: _pictureSize / 2),
         constraints: BoxConstraints(
           minHeight: identityCardSize.isSmall ? 200 : 400,

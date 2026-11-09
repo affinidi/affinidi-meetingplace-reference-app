@@ -4,6 +4,7 @@ import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../common/app_card.dart';
+import 'identity_card.dart';
 
 class IdentityPlaceholderCard extends StatelessWidget {
   const IdentityPlaceholderCard(this.onTap);
@@ -19,7 +20,11 @@ class IdentityPlaceholderCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Center(
+        // Framed as an identity card, so the two line up in a deck: the
+        // same margin, and the room the identity's picture hangs into.
         child: Container(
+          margin: const EdgeInsets.all(IdentityCard.margin),
+          padding: const EdgeInsets.only(top: IdentityCard.pictureSize / 2),
           constraints: const BoxConstraints(minHeight: 400, maxWidth: 650),
           width: double.infinity,
           height: 400,

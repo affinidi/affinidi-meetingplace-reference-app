@@ -7,7 +7,9 @@ import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_colors.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/common/app_card.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/identity_picker/identity_card.dart';
+import 'package:mpx_flutter_reference_app/presentation/widgets/identity_picker/identity_placeholder_card.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/profile_picture.dart';
+import 'package:pie_menu/pie_menu.dart';
 
 import '../../../fakes/fake_cache_manager.dart';
 import '../../../fakes/fake_identities.dart';
@@ -102,5 +104,45 @@ void main() {
     await pumpCard(tester, FakeIdentities.primaryIdentity);
 
     expect(find.byKey(const Key('vta_details_toggle')), findsNothing);
+  });
+
+  testWidgets('lines up with the add-identity card in a deck', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.dark,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 430,
+                  child: PieCanvas(
+                    child: IdentityCard(
+                      identity: FakeIdentities.secondaryIdentity,
+                      cacheManager: FakeCacheManager(),
+                    ),
+                  ),
+                ),
+              ),
+              const Expanded(
+                child: SizedBox(
+                  height: 430,
+                  child: IdentityPlaceholderCard(null),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final [identity, add] = tester
+        .widgetList(find.byType(AppCard))
+        .map((card) => tester.getRect(find.byWidget(card)))
+        .toList();
+    expect(add.top, identity.top);
+    expect(add.bottom, identity.bottom);
   });
 }
