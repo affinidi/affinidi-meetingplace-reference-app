@@ -4,6 +4,7 @@ import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_colors.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_spacing.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/badged_icon.dart';
 
 void main() {
@@ -47,6 +48,16 @@ void main() {
       expect(find.text('3'), findsOneWidget);
     });
   }
+
+  testWidgets('centres the count on the icon corner', (tester) async {
+    final badgeTheme = AppTheme.dark.badgeTheme;
+
+    expect(badgeTheme.offset, const Offset(McSpacing.s3, -McSpacing.s1));
+    expect(
+      badgeTheme.textStyle?.leadingDistribution,
+      TextLeadingDistribution.even,
+    );
+  });
 
   testWidgets('reads the count as new items', (tester) async {
     await pumpIcon(tester, theme: AppTheme.dark, count: 3);

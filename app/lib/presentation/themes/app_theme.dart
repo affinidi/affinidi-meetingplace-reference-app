@@ -165,11 +165,15 @@ class AppTheme {
         ),
       ),
       // A count is news, not an error: the blue signal, never a red fill.
+      // It sits on the icon's top-end corner; even leading centres the
+      // digits, which Affinidi Sans otherwise sets low in the pill.
       badgeTheme: BadgeThemeData(
         backgroundColor: McColors.blue,
         textColor: McColors.textOnPrimary,
-        textStyle: textTheme.labelSmall,
-        offset: const Offset(McSpacing.s4, 0),
+        textStyle: textTheme.labelSmall?.copyWith(
+          leadingDistribution: TextLeadingDistribution.even,
+        ),
+        offset: const Offset(McSpacing.s3, -McSpacing.s1),
       ),
       iconTheme: IconThemeData(color: mc.textSecondary),
       inputDecorationTheme: InputDecorationTheme(
