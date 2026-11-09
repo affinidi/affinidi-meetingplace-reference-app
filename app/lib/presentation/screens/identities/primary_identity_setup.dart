@@ -49,14 +49,9 @@ class _PrimaryIdentitySetup extends ConsumerWidget {
             l10n.setupPrimaryIdentityTitle,
             style: context.textTheme.titleLarge,
           ),
-          Container(
+          // The fields are a FormCard panel already; no second frame.
+          SizedBox(
             width: ScreensizeHelper.getConstrainedWidth(context),
-            padding: const EdgeInsets.all(0),
-            decoration: BoxDecoration(
-              color: context.colorScheme.surfaceContainerLow,
-              border: Border.all(color: context.mcColors.hairline),
-              borderRadius: BorderRadius.circular(McRadius.md),
-            ),
             child: IdentityFormFields(
               identityId,
               formKey: formKey,
