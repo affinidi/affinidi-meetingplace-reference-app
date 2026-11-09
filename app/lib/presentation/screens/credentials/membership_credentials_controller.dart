@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/widgets.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -23,6 +26,12 @@ class MembershipCredentialsController
     // whenever a card is kept or a membership left.
     final changes = _service.membershipsChanged.listen((_) => refresh());
     ref.onDispose(changes.cancel);
+    // A community issues and revokes cards on its own time, and tells the
+    // phone nothing: read again whenever the app comes back.
+    final lifecycle = AppLifecycleListener(
+      onResume: () => unawaited(refresh()),
+    );
+    ref.onDispose(lifecycle.dispose);
     Future.microtask(_start);
     return MembershipCredentialsState();
   }

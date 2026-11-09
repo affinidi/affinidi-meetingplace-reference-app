@@ -237,6 +237,28 @@ void main() {
     });
   });
 
+  testWidgets('reads the cards again when the app comes back', (tester) async {
+    await pumpScreen(tester);
+    int queries() => network.vta.received
+        .where((task) => task['type'] == VtaTask.credentialsQuery)
+        .length;
+    final before = queries();
+
+    for (final state in const [
+      AppLifecycleState.inactive,
+      AppLifecycleState.hidden,
+      AppLifecycleState.paused,
+      AppLifecycleState.hidden,
+      AppLifecycleState.inactive,
+      AppLifecycleState.resumed,
+    ]) {
+      tester.binding.handleAppLifecycleStateChanged(state);
+    }
+    await settle(tester);
+
+    expect(queries(), before + 1);
+  });
+
   testWidgets('keeps the cards kept on this phone when the VTA is down', (
     tester,
   ) async {
