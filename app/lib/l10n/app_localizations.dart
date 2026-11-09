@@ -6162,6 +6162,42 @@ abstract class AppLocalizations {
   /// **'Done'**
   String get vtcGroupChatLinkDone;
 
+  /// Heading over the steps of opening a community from its code
+  ///
+  /// In en, this message translates to:
+  /// **'Opening the community…'**
+  String get vtcOpenLoading;
+
+  /// Step of opening a community: finding the community a join phrase stands for
+  ///
+  /// In en, this message translates to:
+  /// **'Finding the community'**
+  String get vtcOpenStepFinding;
+
+  /// Step of opening a community: reading its join manifest
+  ///
+  /// In en, this message translates to:
+  /// **'Reading what it asks of those who join'**
+  String get vtcOpenStepRules;
+
+  /// Step of opening a community: reading the profile it publishes
+  ///
+  /// In en, this message translates to:
+  /// **'Reading its profile'**
+  String get vtcOpenStepProfile;
+
+  /// Step of opening a community: checking this phone and the member's VTA backup for a membership or application
+  ///
+  /// In en, this message translates to:
+  /// **'Checking whether you already belong, here or on your VTA'**
+  String get vtcOpenStepMembership;
+
+  /// Step of opening a community: asking the member's VTA which identities hold the credentials the community asks for
+  ///
+  /// In en, this message translates to:
+  /// **'Asking your VTA which of your identities hold what it asks for'**
+  String get vtcOpenStepCredentials;
+
   /// Step of getting the membership card: asking the member's VTA for the card the community issued
   ///
   /// In en, this message translates to:

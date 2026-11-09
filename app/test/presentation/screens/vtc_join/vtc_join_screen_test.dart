@@ -23,6 +23,7 @@ import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_trail.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_progress_line.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_trail_step.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_elevation.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
@@ -182,6 +183,31 @@ void main() {
   }
 
   group('VtcJoinScreen', () {
+    testWidgets('shows the steps of opening the community', (tester) async {
+      await pumpScreen(tester, communityDid: fakeVtcDid);
+      await tester.pump();
+
+      expect(find.byKey(const Key('vtc_join_opening')), findsOneWidget);
+      expect(find.text('Opening the community…'), findsOneWidget);
+      expect(
+        find.byKey(const Key('vtc_open_step_checkingCredentials')),
+        findsOneWidget,
+      );
+      final finding = tester.widget<VtcProgressLine>(
+        find.byKey(const Key('vtc_open_step_finding')),
+      );
+      expect(
+        finding.stage,
+        VtcTrailStage.done,
+        reason: 'a DID needs no search',
+      );
+
+      await settle(tester);
+
+      expect(find.byKey(const Key('vtc_join_opening')), findsNothing);
+      expect(title('Football club'), findsOneWidget);
+    });
+
     testWidgets('opens a given community without a code', (tester) async {
       await pumpScreen(tester, communityDid: fakeVtcDid);
       await settle(tester);

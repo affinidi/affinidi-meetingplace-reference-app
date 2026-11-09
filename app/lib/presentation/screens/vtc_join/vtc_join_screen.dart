@@ -84,7 +84,10 @@ class VtcJoinScreen extends HookConsumerWidget {
       showBranding: state.step != VtcJoinStep.vetting,
       child: switch (state.step) {
         VtcJoinStep.scanning => _EnterCode(onSubmit: controller.onScanned),
-        VtcJoinStep.working => const Center(child: OnboardingSpinner()),
+        VtcJoinStep.working => switch (state.openStep) {
+          final step? => Center(child: _Opening(step: step)),
+          null => const Center(child: OnboardingSpinner()),
+        },
         VtcJoinStep.review => _Review(
           state: state,
           onJoin: controller.join,
@@ -1789,6 +1792,42 @@ class _Failed extends StatelessWidget {
         const SizedBox(height: 12),
         OnboardingButton(label: l10n.generalRetry, onPressed: onRetry),
         OnboardingTextButton(label: l10n.generalCancel, onPressed: onCancel),
+      ],
+    );
+  }
+}
+
+/// Opening a community, step by step: each step done, under way, or still
+/// to come.
+class _Opening extends StatelessWidget {
+  const _Opening({required this.step});
+
+  /// The step under way.
+  final VtcOpenStep step;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return VtcBackgroundPanel(
+      key: const Key('vtc_join_opening'),
+      title: l10n.vtcOpenLoading,
+      children: [
+        for (final each in VtcOpenStep.values)
+          VtcProgressLine(
+            key: Key('vtc_open_step_${each.name}'),
+            title: switch (each) {
+              VtcOpenStep.finding => l10n.vtcOpenStepFinding,
+              VtcOpenStep.readingRules => l10n.vtcOpenStepRules,
+              VtcOpenStep.readingProfile => l10n.vtcOpenStepProfile,
+              VtcOpenStep.checkingMembership => l10n.vtcOpenStepMembership,
+              VtcOpenStep.checkingCredentials => l10n.vtcOpenStepCredentials,
+            },
+            stage: switch (each.index.compareTo(step.index)) {
+              < 0 => VtcTrailStage.done,
+              0 => VtcTrailStage.current,
+              _ => VtcTrailStage.next,
+            },
+          ),
       ],
     );
   }

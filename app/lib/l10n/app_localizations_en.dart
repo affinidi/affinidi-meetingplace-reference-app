@@ -4108,6 +4108,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vtcGroupChatLinkDone => 'Done';
 
   @override
+  String get vtcOpenLoading => 'Opening the community…';
+
+  @override
+  String get vtcOpenStepFinding => 'Finding the community';
+
+  @override
+  String get vtcOpenStepRules => 'Reading what it asks of those who join';
+
+  @override
+  String get vtcOpenStepProfile => 'Reading its profile';
+
+  @override
+  String get vtcOpenStepMembership =>
+      'Checking whether you already belong, here or on your VTA';
+
+  @override
+  String get vtcOpenStepCredentials =>
+      'Asking your VTA which of your identities hold what it asks for';
+
+  @override
   String vtcCardStepFinding(String name) {
     return 'Looking on your VTA for the card $name issued you';
   }

@@ -4295,6 +4295,30 @@
 	"@vtcGroupChatLinkDone": {
 		"description": "Closes the dialog showing a group chat's link"
 	},
+	"vtcOpenLoading": "Opening the community…",
+	"@vtcOpenLoading": {
+		"description": "Heading over the steps of opening a community from its code"
+	},
+	"vtcOpenStepFinding": "Finding the community",
+	"@vtcOpenStepFinding": {
+		"description": "Step of opening a community: finding the community a join phrase stands for"
+	},
+	"vtcOpenStepRules": "Reading what it asks of those who join",
+	"@vtcOpenStepRules": {
+		"description": "Step of opening a community: reading its join manifest"
+	},
+	"vtcOpenStepProfile": "Reading its profile",
+	"@vtcOpenStepProfile": {
+		"description": "Step of opening a community: reading the profile it publishes"
+	},
+	"vtcOpenStepMembership": "Checking whether you already belong, here or on your VTA",
+	"@vtcOpenStepMembership": {
+		"description": "Step of opening a community: checking this phone and the member's VTA backup for a membership or application"
+	},
+	"vtcOpenStepCredentials": "Asking your VTA which of your identities hold what it asks for",
+	"@vtcOpenStepCredentials": {
+		"description": "Step of opening a community: asking the member's VTA which identities hold the credentials the community asks for"
+	},
 	"vtcCardStepFinding": "Looking on your VTA for the card {name} issued you",
 	"@vtcCardStepFinding": {
 		"description": "Step of getting the membership card: asking the member's VTA for the card the community issued",
