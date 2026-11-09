@@ -328,6 +328,19 @@ class VtcGroupChatService {
     );
   }
 
+  /// The offer links of the chats of [communityDid]'s groups this phone
+  /// owns or joined: a contact whose offer link is among them is one of the
+  /// community's channels. A chat Meeting Place no longer holds is left out.
+  Future<Set<String>> chatOfferLinks(String communityDid) async {
+    final sdk = await _ref.read(meetingPlaceSdkProvider.future);
+    return {
+      for (final chat in await _repository.groupChats())
+        if (chat.communityDid == communityDid)
+          if (await sdk.findGroupById(chat.chatGroupId) case final group?)
+            group.offerLink,
+    };
+  }
+
   /// Starts deciding requests to join the chats this phone owns as they
   /// arrive. Idempotent.
   Future<void> start() async {

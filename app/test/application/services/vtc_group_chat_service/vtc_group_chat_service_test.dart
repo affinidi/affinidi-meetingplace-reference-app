@@ -168,6 +168,12 @@ class _FakeSdk extends Fake implements MeetingPlaceMatrixSDK {
 
   @override
   Future<Set<String>> groupModerators(Channel channel) async => chatModerators;
+
+  /// The chats Meeting Place holds, by their id.
+  Map<String, Group> groups = const {};
+
+  @override
+  Future<Group?> findGroupById(String groupId) async => groups[groupId];
 }
 
 /// Records the chats it is asked to join instead of joining them.
@@ -471,6 +477,56 @@ void main() {
         await service.postingIn(_chatChannel(), chatGroupId: 'other'),
         isNull,
       );
+    });
+  });
+
+  group('VtcGroupChatService.chatOfferLinks', () {
+    Group chatGroup(String id) => Group(
+      id: id,
+      did: '$_groupDid-$id',
+      offerLink: 'offer://$id',
+      created: DateTime.utc(2026, 11),
+      members: const [],
+    );
+
+    setUp(() async {
+      await repository.saveGroupChat(
+        const VtcGroupChat(
+          chatGroupId: 'chat-2',
+          communityDid: _communityDid,
+          groupId: 'g2',
+          groupDid: '$_groupDid-g2',
+          name: 'Board',
+          isOwner: false,
+        ),
+      );
+      await repository.saveGroupChat(
+        const VtcGroupChat(
+          chatGroupId: 'chat-elsewhere',
+          communityDid: 'did:webvh:QmOther:vtc.example',
+          groupId: 'g1',
+          groupDid: 'did:webvh:QmOther:vtc.example:group-dids:g1',
+          name: 'Elsewhere',
+          isOwner: false,
+        ),
+      );
+      sdk.groups = {
+        for (final id in ['chat-1', 'chat-2', 'chat-elsewhere'])
+          id: chatGroup(id),
+      };
+    });
+
+    test("names the chats of the community's groups only", () async {
+      expect(await service.chatOfferLinks(_communityDid), {
+        'offer://chat-1',
+        'offer://chat-2',
+      });
+    });
+
+    test('leaves out a chat Meeting Place no longer holds', () async {
+      sdk.groups = {'chat-2': chatGroup('chat-2')};
+
+      expect(await service.chatOfferLinks(_communityDid), {'offer://chat-2'});
     });
   });
 
