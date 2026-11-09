@@ -5282,6 +5282,12 @@ abstract class AppLocalizations {
   /// **'Couldn\'t reach the inbox. Trying again'**
   String get vtcDeliverySignedInFailed;
 
+  /// Delivery step detail: signing in to the identity's inbox takes no Trust Task
+  ///
+  /// In en, this message translates to:
+  /// **'None: the inbox is signed in to and read over DIDComm'**
+  String get vtcDeliveryInboxNoTask;
+
   /// Label of the mediator holding the identity's inbox
   ///
   /// In en, this message translates to:

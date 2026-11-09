@@ -3534,6 +3534,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'Couldn\'t reach the inbox. Trying again';
 
   @override
+  String get vtcDeliveryInboxNoTask =>
+      'None: the inbox is signed in to and read over DIDComm';
+
+  @override
   String get vtcDeliveryMediator => 'Mediator';
 
   @override

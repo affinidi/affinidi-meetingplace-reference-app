@@ -112,9 +112,14 @@ void main() {
       expect(find.text('$personaDid#key-1'), findsOneWidget);
       expect(find.text('Key agreement key'), findsOneWidget);
       expect(find.text('$personaDid#key-2'), findsOneWidget);
+      expect(find.text(VtaTask.exportSecret), findsOneWidget);
 
       await open(tester, 'vtc_delivery_inbox');
       expect(find.text(mediatorDid), findsOneWidget);
+      expect(
+        find.text('None: the inbox is signed in to and read over DIDComm'),
+        findsOneWidget,
+      );
 
       await open(tester, 'vtc_delivery_pickup');
       expect(find.text(communityDid), findsOneWidget);
@@ -122,7 +127,11 @@ void main() {
       expect(find.text('eddsa-jcs-2022'), findsOneWidget);
       expect(find.text('$communityDid#key-0'), findsOneWidget);
 
+      await open(tester, 'vtc_delivery_kept');
+      expect(find.text(VtaTask.credentialsReceive), findsOneWidget);
+
       await open(tester, 'vtc_delivery_confirmed');
+      expect(find.text(VtaTask.signDocument), findsOneWidget);
       expect(find.text(MemberTask.vmc), findsOneWidget);
     });
 

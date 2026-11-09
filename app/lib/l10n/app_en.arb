@@ -3418,6 +3418,10 @@
 	"@vtcDeliverySignedInFailed": {
 		"description": "Delivery step summary: the mediator could not be reached"
 	},
+	"vtcDeliveryInboxNoTask": "None: the inbox is signed in to and read over DIDComm",
+	"@vtcDeliveryInboxNoTask": {
+		"description": "Delivery step detail: signing in to the identity's inbox takes no Trust Task"
+	},
 	"vtcDeliveryMediator": "Mediator",
 	"@vtcDeliveryMediator": {
 		"description": "Label of the mediator holding the identity's inbox"

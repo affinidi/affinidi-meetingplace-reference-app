@@ -60,6 +60,7 @@ class VtcCardDeliveryTrail extends StatelessWidget {
             done: l10n.vtcDeliveryKeysLentSummary,
             failed: l10n.vtcDeliveryKeysFailed,
           ),
+          tasks: const [VtaTask.exportSecret],
           details: [
             VtcTrailDetail(
               Icons.fingerprint,
@@ -95,6 +96,13 @@ class VtcCardDeliveryTrail extends StatelessWidget {
             failed: l10n.vtcDeliverySignedInFailed,
           ),
           details: [
+            // Said outright, so a step without one is not mistaken for a
+            // gap in the trail.
+            VtcTrailDetail(
+              Icons.assignment_outlined,
+              l10n.vtcJoinTrailTask,
+              l10n.vtcDeliveryInboxNoTask,
+            ),
             if (delivery.mediatorDid case final did?)
               VtcTrailDetail(
                 Icons.hub_outlined,
@@ -115,7 +123,7 @@ class VtcCardDeliveryTrail extends StatelessWidget {
             done: l10n.vtcDeliveryPickedUpSummary(communityName),
             waiting: l10n.vtcDeliveryWaiting(communityName),
           ),
-          tasks: [if (issue != null) issue.type],
+          tasks: [issue?.type ?? credentialIssueTask],
           details: [
             if (issue != null) ...[
               VtcTrailDetail(
@@ -162,6 +170,7 @@ class VtcCardDeliveryTrail extends StatelessWidget {
                 : l10n.vtcDeliveryKeptSummary,
             failed: l10n.vtcDeliveryKeptFailed,
           ),
+          tasks: const [VtaTask.credentialsReceive],
         ),
         VtcTrailStep(
           key: const Key('vtc_delivery_confirmed'),
@@ -174,11 +183,9 @@ class VtcCardDeliveryTrail extends StatelessWidget {
             done: l10n.vtcDeliveryConfirmedSummary,
             failed: l10n.vtcDeliveryConfirmedFailed,
           ),
-          tasks: [
-            if (delivery.status(VtcDeliveryStep.confirmed) ==
-                VtcDeliveryStatus.done)
-              MemberTask.vmc,
-          ],
+          // The VTA signs the member's own membership credential, which the
+          // community is then sent.
+          tasks: const [VtaTask.signDocument, MemberTask.vmc],
           isLast: true,
         ),
       ],
