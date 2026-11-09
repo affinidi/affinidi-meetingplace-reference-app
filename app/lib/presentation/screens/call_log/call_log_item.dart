@@ -58,47 +58,47 @@ class _CallLogItem extends StatelessWidget {
 
     final participantsLabel = entry.resolveParticipantsLabel(l10n);
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            Icon(
-              entry.mediaType == CallMediaType.audio
-                  ? Icons.call
-                  : Icons.videocam,
-              color: colorScheme.onSurface,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    entry.displayLabel,
-                    style: textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+    return AppCard(
+      padding: const EdgeInsets.symmetric(
+        horizontal: McSpacing.s4,
+        vertical: McSpacing.s3,
+      ),
+      child: Row(
+        children: [
+          Icon(
+            entry.mediaType == CallMediaType.audio
+                ? Icons.call
+                : Icons.videocam,
+            color: colorScheme.onSurface,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  entry.displayLabel,
+                  style: textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
                   ),
-                  Text(statusText, style: textTheme.labelSmall),
-                  if (participantsLabel != null)
-                    Text(participantsLabel, style: textTheme.labelSmall),
-                ],
-              ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(statusText, style: textTheme.labelSmall),
+                if (participantsLabel != null)
+                  Text(participantsLabel, style: textTheme.labelSmall),
+              ],
             ),
-            const SizedBox(width: 12),
-            Text(
-              DateFormat.MMMd(
-                l10n.localeName,
-              ).add_jm().format(entry.timestamp.toLocal()),
-              style: textTheme.labelSmall,
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            DateFormat.MMMd(
+              l10n.localeName,
+            ).add_jm().format(entry.timestamp.toLocal()),
+            style: textTheme.labelSmall,
+          ),
+        ],
       ),
     );
   }

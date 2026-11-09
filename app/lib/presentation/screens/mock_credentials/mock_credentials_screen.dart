@@ -6,7 +6,9 @@ import '../../../domain/models/identity/identity.dart';
 import '../../../domain/models/vtc/mock_credential_template.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../navigation/routes/route_paths.dart';
+import '../../themes/tokens/mc_spacing.dart';
 import '../../themes/tokens/mc_typography.dart';
+import '../../widgets/common/app_card.dart';
 import '../../widgets/section_header.dart';
 import 'mock_credentials_controller.dart';
 import 'mock_credentials_state.dart';
@@ -96,7 +98,10 @@ class MockCredentialsScreen extends ConsumerWidget {
               child: RefreshIndicator(
                 onRefresh: controller.refresh,
                 child: ListView(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: McSpacing.s4,
+                    vertical: McSpacing.s3,
+                  ),
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(bottom: 12),
@@ -161,10 +166,11 @@ class _TemplateCard extends StatelessWidget {
     final colorScheme = context.colorScheme;
     final textTheme = context.textTheme;
     final onCard = colorScheme.onSurface;
-    return Card(
-      key: Key('mock_credential_${template.id}'),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: McSpacing.s3),
+      child: AppCard(
+        key: Key('mock_credential_${template.id}'),
+        padding: const EdgeInsets.all(McSpacing.s4),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 6,

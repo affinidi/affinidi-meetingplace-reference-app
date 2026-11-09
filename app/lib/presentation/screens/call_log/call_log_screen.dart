@@ -8,6 +8,8 @@ import '../../../domain/models/call_log/call_log_entry.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../navigation/routes/route_paths.dart';
+import '../../themes/tokens/mc_spacing.dart';
+import '../../widgets/common/app_card.dart';
 import '../../widgets/section_header.dart';
 import '../chat/audio_video_call/rules/call_chat_item_rules.dart';
 import 'call_log_screen_controller.dart';
@@ -73,9 +75,14 @@ class CallLogScreen extends ConsumerWidget {
             )
           else
             Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.all(8.0),
+              child: ListView.separated(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: McSpacing.s4,
+                  vertical: McSpacing.s3,
+                ),
                 itemCount: entries.length,
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: McSpacing.s3),
                 itemBuilder: (context, index) =>
                     _CallLogItem(entry: entries[index]),
               ),

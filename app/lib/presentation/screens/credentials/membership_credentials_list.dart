@@ -8,6 +8,8 @@ import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../themes/tokens/mc_colors.dart';
 import '../../themes/tokens/mc_radius.dart';
+import '../../themes/tokens/mc_spacing.dart';
+import '../../widgets/common/app_card.dart';
 import 'membership_credentials_controller.dart';
 import 'membership_credentials_state.dart';
 
@@ -105,7 +107,6 @@ class MembershipCredentialRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final colors = context.colorScheme;
-    final mc = context.mcColors;
     final identity = membershipIdentityName(context, ref, entry);
     final date = DateFormat.yMMMd(l10n.localeName);
     final when = switch ((entry.left, entry.card.validUntil)) {
@@ -118,52 +119,42 @@ class MembershipCredentialRow extends ConsumerWidget {
       _ => null,
     };
 
-    return Material(
-      color: colors.surfaceContainerLow,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(McRadius.lg),
-        side: BorderSide(color: mc.hairline),
+    return AppCard(
+      onTap: onTap,
+      padding: const EdgeInsets.symmetric(
+        horizontal: McSpacing.s4,
+        vertical: McSpacing.s3,
       ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            spacing: 12,
-            children: [
-              Icon(Icons.card_membership_outlined, color: colors.onSurface),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 4,
-                  children: [
-                    Text(
-                      entry.communityName ?? l10n.membershipCredentialUnnamed,
-                      style: context.textTheme.titleMedium?.copyWith(
-                        color: colors.onSurface,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      [
-                        l10n.membershipCredentialAs(identity),
-                        ?when,
-                      ].join(' · '),
-                      style: context.textTheme.bodySmall?.copyWith(
-                        color: colors.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
+      child: Row(
+        spacing: 12,
+        children: [
+          Icon(Icons.card_membership_outlined, color: colors.onSurface),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 4,
+              children: [
+                Text(
+                  entry.communityName ?? l10n.membershipCredentialUnnamed,
+                  style: context.textTheme.titleMedium?.copyWith(
+                    color: colors.onSurface,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-              ),
-              MembershipStatusChip(
-                key: Key('membership_status_${entry.key}'),
-                status: status,
-              ),
-            ],
+                Text(
+                  [l10n.membershipCredentialAs(identity), ?when].join(' · '),
+                  style: context.textTheme.bodySmall?.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
+          MembershipStatusChip(
+            key: Key('membership_status_${entry.key}'),
+            status: status,
+          ),
+        ],
       ),
     );
   }
