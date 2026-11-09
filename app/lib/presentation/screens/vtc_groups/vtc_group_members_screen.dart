@@ -5,6 +5,7 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../application/services/vtc_trust_service/vtc_trust_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../vtc_join/vtc_role_name.dart';
 import '../vtc_trust/vtc_member_credentials.dart';
 import '../vtc_trust/vtc_vouch.dart';
 
@@ -92,9 +93,20 @@ class VtcGroupMembersScreen extends HookConsumerWidget {
               key: Key('vtc_group_member_${entry.entryId}'),
               leading: const Icon(Icons.person_outline),
               title: Text(name),
-              subtitle: entry.did == null
-                  ? Text(l10n.vtcTrustNotFindable(name, communityName))
-                  : null,
+              subtitle: switch ((entry.role, entry.did)) {
+                (null, null) => Text(
+                  l10n.vtcTrustNotFindable(name, communityName),
+                ),
+                (final role?, null) => Text(
+                  '${vtcRoleName(l10n, role)}\n'
+                  '${l10n.vtcTrustNotFindable(name, communityName)}',
+                ),
+                (final role?, _) => Text(
+                  vtcRoleName(l10n, role),
+                  key: Key('vtc_group_member_role_${entry.entryId}'),
+                ),
+                (null, _) => null,
+              },
               // The icons last, in a slot each, so they line up on the
               // right in every row whether or not it offers to vouch.
               trailing: Row(

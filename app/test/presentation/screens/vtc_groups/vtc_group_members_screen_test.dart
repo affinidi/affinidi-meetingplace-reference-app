@@ -32,9 +32,19 @@ PublishedRelationship _edge(String id, String issuer, String subject) =>
 /// A group's members and the vouches with them.
 class _FakeTrustService extends Fake implements VtcTrustService {
   List<DirectoryEntry> members = const [
-    DirectoryEntry(entryId: 'dir_bob', displayName: 'Bob', did: _bob),
-    DirectoryEntry(entryId: 'dir_carol', displayName: 'Carol', did: _carol),
-    DirectoryEntry(entryId: 'dir_dan', displayName: 'Dan'),
+    DirectoryEntry(
+      entryId: 'dir_bob',
+      displayName: 'Bob',
+      did: _bob,
+      role: 'moderator',
+    ),
+    DirectoryEntry(
+      entryId: 'dir_carol',
+      displayName: 'Carol',
+      did: _carol,
+      role: 'custom:coach',
+    ),
+    DirectoryEntry(entryId: 'dir_dan', displayName: 'Dan', role: 'member'),
     DirectoryEntry(entryId: 'dir_anon', did: 'did:webvh:QmAnon:vta.example'),
   ];
   Map<String, VtcEdges> edges = {
@@ -125,7 +135,9 @@ void main() {
     expect(
       inMember(
         'dir_dan',
-        find.text("Dan hasn't let members of Football club find them yet."),
+        find.textContaining(
+          "Dan hasn't let members of Football club find them yet.",
+        ),
       ),
       findsOneWidget,
     );
@@ -163,6 +175,34 @@ void main() {
           )
           .dx,
       moreOrLessEquals(credentials.dx),
+    );
+  });
+
+  testWidgets('shows each member\'s role under their name', (tester) async {
+    await pumpScreen(tester);
+
+    expect(inMember('dir_bob', find.text('Moderator')), findsOneWidget);
+    expect(
+      inMember('dir_carol', find.text('coach')),
+      findsOneWidget,
+      reason: 'a role the community defined, by its own name',
+    );
+    expect(
+      inMember(
+        'dir_dan',
+        find.text(
+          "Member\nDan hasn't let members of Football club find them yet.",
+        ),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      inMember(
+        'dir_anon',
+        find.byKey(const Key('vtc_group_member_role_dir_anon')),
+      ),
+      findsNothing,
+      reason: 'no role shown, none drawn',
     );
   });
 

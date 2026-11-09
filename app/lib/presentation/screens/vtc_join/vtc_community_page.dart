@@ -8,7 +8,6 @@ import '../../../application/services/vtc_service/vtc_service.dart';
 import '../../../domain/models/vtc/vtc_card_delivery.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
-import '../../../l10n/app_localizations.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import '../vtc_vetter_profile/vtc_vetter_profile_screen.dart';
 import '../vtc_vetting_desk/vtc_vetting_desk_screen.dart';
@@ -21,21 +20,12 @@ import 'vtc_join_phrase_view.dart';
 import 'vtc_join_state.dart';
 import 'vtc_membership_card_view.dart';
 import 'vtc_progress_line.dart';
+import 'vtc_role_name.dart';
 import 'vtc_trail_step.dart';
-
-/// Prefix of a role the community defined itself, as in `custom:coach`.
-const _customRolePrefix = 'custom:';
 
 /// The built-in role that manages the community's join phrase; a role the
 /// community defined itself never does, whatever its name.
 const _adminRole = 'admin';
-
-/// The member's [role] in plain words; a role the community defined itself
-/// by its own name, which never reads as a built-in one.
-String _roleName(AppLocalizations l10n, String role) =>
-    role.startsWith(_customRolePrefix)
-    ? role.substring(_customRolePrefix.length)
-    : l10n.vtcCommunityRoleName(role);
 
 /// The page of a community the member belongs to, which they come back to:
 /// a welcome right after joining, else the community's logo and name; their
@@ -246,7 +236,7 @@ class _RoleLine extends StatelessWidget {
       key: const Key('vtc_community_role'),
       icon: Icons.badge_outlined,
       title: l10n.vtcCommunityRole,
-      subtitle: _roleName(l10n, role),
+      subtitle: vtcRoleName(l10n, role),
       trailing: actions.isEmpty
           ? null
           : Row(mainAxisSize: MainAxisSize.min, children: actions),
