@@ -3657,6 +3657,22 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get vtcFindableHeading => 'Let members find you';
+
+  @override
+  String vtcFindableIntro(String name) {
+    return 'Let members of $name find you to vouch for you. They\'ll see the identity you joined with.';
+  }
+
+  @override
+  String vtcFindableNotAllowed(String name) {
+    return '$name doesn\'t let members show this.';
+  }
+
+  @override
+  String get vtcFindableFailed => 'Couldn\'t change this. Try again.';
+
+  @override
   String vtcJoinAlreadyMember(String name) {
     return 'You\'re already a member of $name.';
   }

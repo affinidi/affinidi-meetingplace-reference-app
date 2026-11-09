@@ -14,6 +14,7 @@ import '../vtc_vetter_profile/vtc_vetter_profile_screen.dart';
 import '../vtc_vetting_desk/vtc_vetting_desk_screen.dart';
 import 'vtc_card_delivery_trail.dart';
 import 'vtc_community_profile.dart';
+import 'vtc_findable_view.dart';
 import 'vtc_flow_diagram.dart';
 import 'vtc_identity_check_view.dart';
 import 'vtc_join_phrase_view.dart';
@@ -387,7 +388,17 @@ Future<void> _showSettings(
   String communityName,
 ) => _showSheet(
   context,
-  VtcJoinPhraseView(communityDid: communityDid, communityName: communityName),
+  Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    spacing: 16,
+    children: [
+      VtcJoinPhraseView(
+        communityDid: communityDid,
+        communityName: communityName,
+      ),
+      VtcFindableView(communityDid: communityDid, communityName: communityName),
+    ],
+  ),
 );
 
 /// Shows [child] in a sheet on the onboarding gradient.

@@ -5498,6 +5498,30 @@ abstract class AppLocalizations {
   /// **'{reason, select, taken{That phrase is already taken in Meeting Place. Try another.} other{The phrase couldn\'t be published or withdrawn. Try again.}}'**
   String vtcJoinPhraseFailure(String reason);
 
+  /// Heading of the switch that lets other members find the member to vouch for them
+  ///
+  /// In en, this message translates to:
+  /// **'Let members find you'**
+  String get vtcFindableHeading;
+
+  /// What letting other members find you does
+  ///
+  /// In en, this message translates to:
+  /// **'Let members of {name} find you to vouch for you. They\'ll see the identity you joined with.'**
+  String vtcFindableIntro(String name);
+
+  /// The community does not let members show the identity they joined with
+  ///
+  /// In en, this message translates to:
+  /// **'{name} doesn\'t let members show this.'**
+  String vtcFindableNotAllowed(String name);
+
+  /// Reading or changing whether members can find you failed
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t change this. Try again.'**
+  String get vtcFindableFailed;
+
   /// The scanned community is one the member belongs to
   ///
   /// In en, this message translates to:
