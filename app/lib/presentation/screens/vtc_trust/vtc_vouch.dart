@@ -269,6 +269,7 @@ class VtcVouchTrail extends HookConsumerWidget {
                   ? l10n.vtcTrustSignedSummary(communityName)
                   : l10n.vtcVouchTrailSignedTheirSummary(name, communityName),
               highlights: [communityName],
+              tasks: const [VtaTask.signDocument],
               details: [
                 if (proof['cryptosuite'] case final String cryptosuite)
                   VtcTrailDetail(
@@ -305,6 +306,7 @@ class VtcVouchTrail extends HookConsumerWidget {
               ),
               summary: l10n.vtcVouchTrailStoredSummary(communityName),
               highlights: [communityName],
+              tasks: const [RelationshipTask.publish],
               details: [
                 VtcTrailDetail(
                   Icons.tag,

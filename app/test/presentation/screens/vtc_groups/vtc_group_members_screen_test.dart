@@ -208,10 +208,7 @@ void main() {
       findsOneWidget,
     );
     expect(
-      inMember(
-        'dir_anon',
-        find.byKey(const Key('vtc_member_role_dir_anon')),
-      ),
+      inMember('dir_anon', find.byKey(const Key('vtc_member_role_dir_anon'))),
       findsNothing,
       reason: 'no role shown, none drawn',
     );
@@ -376,8 +373,10 @@ void main() {
     expect(flow('vouched'), ['Bob', 'You']);
     await expand('signed');
     expect(flow('signed'), ["Bob's VTA", 'Bob']);
+    expect(find.text(VtaTask.signDocument), findsOneWidget);
     await expand('stored');
     expect(flow('stored'), ['Bob', 'Football club']);
+    expect(find.text(RelationshipTask.publish), findsOneWidget);
 
     await tester.ensureVisible(find.byKey(const Key('vtc_vouch_record')));
     await tester.tap(find.byKey(const Key('vtc_vouch_record')));
