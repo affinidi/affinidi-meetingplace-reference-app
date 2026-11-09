@@ -158,8 +158,8 @@ class _ContactGridItem extends ConsumerWidget {
                         Text(
                           secondaryName,
                           style: context.textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: context.colorScheme.primary,
+                            fontWeight: FontWeight.w500,
+                            color: context.mcColors.highlightSecondary,
                           ),
                           textAlign: TextAlign.center,
                           softWrap: true,

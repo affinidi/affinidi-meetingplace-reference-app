@@ -24,7 +24,8 @@ class _OfferDetailsActionBar extends ConsumerWidget {
             loadingMessage: l10n.deleting,
           ),
           ElevatedLoadingButton(
-            color: context.colorScheme.error,
+            color: context.mcColors.dangerText,
+            isOutlined: true,
             child: Text(l10n.generalDelete),
             onPressed: () async {
               if (!context.mounted) return;

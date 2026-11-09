@@ -59,7 +59,6 @@ class _CallLogItem extends StatelessWidget {
     final participantsLabel = entry.resolveParticipantsLabel(l10n);
 
     return Card(
-      color: colorScheme.inverseSurface.withValues(alpha: 0.5),
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -80,7 +79,7 @@ class _CallLogItem extends StatelessWidget {
                   Text(
                     entry.displayLabel,
                     style: textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

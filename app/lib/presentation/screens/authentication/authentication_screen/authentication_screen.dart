@@ -53,6 +53,8 @@ class AuthenticationScreen extends HookConsumerWidget {
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
+      // Brand splash: blue in both modes with white logo assets, so content
+      // uses the on-primary colour rather than the mode's text colours.
       body: Container(
         decoration: BoxDecoration(
           gradient: RadialGradient(
@@ -82,7 +84,12 @@ class AuthenticationScreen extends HookConsumerWidget {
                           ),
                         ),
                         const SizedBox(height: 5),
-                        Text(l10n.appName, style: textTheme.bodyLarge),
+                        Text(
+                          l10n.appName,
+                          style: textTheme.bodyLarge?.copyWith(
+                            color: colorScheme.onPrimary,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -92,10 +99,14 @@ class AuthenticationScreen extends HookConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         if (state.isLoading)
-                          const SizedBox(
+                          SizedBox(
                             width: 20,
                             height: 20,
-                            child: CircularProgressIndicator.adaptive(),
+                            child: CircularProgressIndicator.adaptive(
+                              valueColor: AlwaysStoppedAnimation(
+                                colorScheme.onPrimary,
+                              ),
+                            ),
                           ),
                         if (!state.isLoading && state.isError) ...[
                           Padding(
@@ -105,7 +116,9 @@ class AuthenticationScreen extends HookConsumerWidget {
                                 Text(
                                   state.error ?? l10n.toProtectData,
                                   textAlign: TextAlign.center,
-                                  style: context.textTheme.bodyMedium,
+                                  style: textTheme.bodyMedium?.copyWith(
+                                    color: colorScheme.onPrimary,
+                                  ),
                                 ),
                                 SizedBox(
                                   height: isSmallScreenLandscape ? 8 : 12,
@@ -113,8 +126,10 @@ class AuthenticationScreen extends HookConsumerWidget {
                                 Text(
                                   platformInstruction(context),
                                   textAlign: TextAlign.center,
-                                  style: context.textTheme.bodyMedium?.copyWith(
-                                    color: Colors.white70,
+                                  style: textTheme.bodyMedium?.copyWith(
+                                    color: colorScheme.onPrimary.withValues(
+                                      alpha: 0.7,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -129,19 +144,21 @@ class AuthenticationScreen extends HookConsumerWidget {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.refresh,
-                                  color: Colors.white,
+                                  color: colorScheme.onPrimary,
                                   size: 18,
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
                                   l10n.generalRetry,
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: isSmallScreenLandscape ? 14 : 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                  style:
+                                      (isSmallScreenLandscape
+                                              ? textTheme.labelLarge
+                                              : textTheme.titleSmall)
+                                          ?.copyWith(
+                                            color: colorScheme.onPrimary,
+                                          ),
                                 ),
                               ],
                             ),

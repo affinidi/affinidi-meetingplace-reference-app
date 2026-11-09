@@ -32,7 +32,7 @@ class _OfferDetailsPhrase extends ConsumerWidget {
                         .read(controllerProvider.notifier)
                         .toggleShowQrView,
                     icon: CircleAvatar(
-                      backgroundColor: context.customColors.darkGrey,
+                      backgroundColor: context.colorScheme.surfaceContainerHigh,
                       radius: 18,
                       child: Icon(
                         Icons.qr_code,

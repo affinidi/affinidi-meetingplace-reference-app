@@ -124,12 +124,13 @@ class _ProfilePictures extends ConsumerWidget {
                     Text(
                       context.l10n.trustedBy(score),
                       style: textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
                 ),
-                backgroundColor: colorScheme.primary,
+                // Opaque so the chip reads over the overlapping pictures.
+                backgroundColor: colorScheme.surfaceContainerHigh,
               ),
             ),
           ),

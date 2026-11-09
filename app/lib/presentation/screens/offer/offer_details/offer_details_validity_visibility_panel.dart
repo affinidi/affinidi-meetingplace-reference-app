@@ -37,7 +37,7 @@ class _OfferDetailsValidityVisibilityPanel extends ConsumerWidget {
             helperText: helperText,
             labelStyle: context.textTheme.bodyMedium,
           ),
-          Divider(color: context.customColors.whiteOverlay30, height: 10),
+          Divider(color: context.mcColors.hairline, height: 10),
           FormRowIconText(
             icon: Icons.replay_5_sharp,
             iconColor: context.customColors.rose,

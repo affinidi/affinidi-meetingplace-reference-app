@@ -155,12 +155,13 @@ class _ProfilePictureWithScore extends ConsumerWidget {
                 Text(
                   context.l10n.trustedBy(score!),
                   style: context.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
             ),
-            backgroundColor: colorScheme.primary,
+            // Opaque so the chip reads over the profile picture.
+            backgroundColor: colorScheme.surfaceContainerHigh,
           ),
       ],
     );
@@ -210,7 +211,7 @@ class _OfferName extends ConsumerWidget {
     return Text(
       offerName!,
       style: context.textTheme.bodyMedium?.copyWith(
-        fontWeight: FontWeight.bold,
+        fontWeight: FontWeight.w500,
       ),
       textAlign: TextAlign.center,
     );
@@ -231,13 +232,21 @@ class _ErrorSection extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
+    final dangerText = context.mcColors.dangerText;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
-      child: ColoredBox(
-        color: context.colorScheme.errorContainer,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: dangerText.withValues(alpha: 0.12),
+          border: Border.all(color: dangerText),
+        ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Text(context.l10n.error(error), textAlign: TextAlign.center),
+          child: Text(
+            context.l10n.error(error),
+            textAlign: TextAlign.center,
+            style: TextStyle(color: dangerText),
+          ),
         ),
       ),
     );

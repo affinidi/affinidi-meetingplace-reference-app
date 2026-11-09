@@ -20,7 +20,6 @@ class _RemoveMemberDialog extends ConsumerWidget {
       SnackBar(
         content: Text(context.l10n.removeMemberSuccess),
         duration: const Duration(seconds: 2),
-        backgroundColor: context.customColors.success,
       ),
     );
   }

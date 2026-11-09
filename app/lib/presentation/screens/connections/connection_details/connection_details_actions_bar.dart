@@ -31,7 +31,8 @@ class _ActionBar extends ConsumerWidget {
           ElevatedLoadingButton(
             child: Text(context.l10n.generalReject),
             onPressed: rejectContact,
-            color: context.colorScheme.error,
+            color: context.mcColors.dangerText,
+            isOutlined: true,
           ),
           ElevatedLoadingButton(
             child: Text(context.l10n.generalApprove),

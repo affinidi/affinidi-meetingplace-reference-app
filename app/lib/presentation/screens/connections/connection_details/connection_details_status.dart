@@ -21,10 +21,13 @@ class _Status extends ConsumerWidget {
             ? context.l10n.groupContactStatus(contact?.status.name ?? '')
             : context.l10n.contactStatus(contact?.status.name ?? ''),
         style: context.textTheme.bodyLarge?.copyWith(
-          fontWeight: FontWeight.bold,
+          fontWeight: FontWeight.w500,
         ),
       ),
-      backgroundColor: contact?.getStatusColor(context),
+      // Status is a border signal; the chip never fills.
+      side: BorderSide(
+        color: contact?.getStatusColor(context) ?? context.mcColors.hairline,
+      ),
     );
   }
 }

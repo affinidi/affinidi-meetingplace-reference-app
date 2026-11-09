@@ -77,18 +77,19 @@ class _ConnectionListItem extends ConsumerWidget {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.symmetric(horizontal: 24),
         decoration: BoxDecoration(
-          color: context.colorScheme.error,
-          borderRadius: BorderRadius.circular(15),
+          color: context.mcColors.dangerText.withValues(alpha: 0.12),
+          border: Border.all(color: context.mcColors.dangerText),
+          borderRadius: BorderRadius.circular(McRadius.lg),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           spacing: 5,
           children: [
-            Icon(Icons.delete, color: context.colorScheme.onError),
+            Icon(Icons.delete, color: context.mcColors.dangerText),
             Text(
               context.l10n.generalDelete,
               style: context.textTheme.bodySmall?.copyWith(
-                color: context.colorScheme.onError,
+                color: context.mcColors.dangerText,
               ),
             ),
           ],
@@ -158,13 +159,13 @@ class _ConnectionCard extends ConsumerWidget {
         : context.l10n.usesIdentity(_connection.contactCard.firstName);
 
     return Card.outlined(
-      color: context.customColors.whiteOverlay30,
+      color: context.colorScheme.surfaceContainerLow,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(McRadius.lg),
         side: BorderSide(color: _connection.getStatusColor(context), width: 2),
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(McRadius.lg),
         onTap: () =>
             _onConnectionPress(connection: _connection, isSelected: isSelected),
         onLongPress: () =>
@@ -198,7 +199,7 @@ class _ConnectionCard extends ConsumerWidget {
                                   Text(
                                     name,
                                     style: context.textTheme.labelLarge
-                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                        ?.copyWith(fontWeight: FontWeight.w500),
                                   ),
                                   Text(
                                     context.l10n.connectionPhrase(
@@ -215,11 +216,13 @@ class _ConnectionCard extends ConsumerWidget {
                                 _connection.localized(context),
                                 style: context.textTheme.bodySmall?.copyWith(
                                   color: context.colorScheme.onSurface,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
-                              backgroundColor: _connection.getStatusColor(
-                                context,
+                              // Status is a border signal; the chip never
+                              // fills.
+                              side: BorderSide(
+                                color: _connection.getStatusColor(context),
                               ),
                               visualDensity: VisualDensity.compact,
                               materialTapTargetSize:
@@ -324,7 +327,7 @@ class _ConnectionTrailingWidget extends ConsumerWidget {
               icon: Icon(
                 Icons.chevron_right,
                 size: 24,
-                color: context.colorScheme.onSurface.withValues(alpha: 0.7),
+                color: context.mcColors.textSecondary,
               ),
             )
           : const SizedBox.shrink(),

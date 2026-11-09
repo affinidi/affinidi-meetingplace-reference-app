@@ -42,7 +42,7 @@ class _OfferDetailsInfoPanel extends ConsumerWidget {
           const Divider(),
           FormRowIconTitle(
             icon: Icons.format_list_bulleted_rounded,
-            iconColor: Colors.deepOrange,
+            iconColor: context.customColors.orange,
             label: context.l10n.generalMnemonic,
             value: mnemonic ?? '',
             isCopiable: true,
@@ -50,7 +50,7 @@ class _OfferDetailsInfoPanel extends ConsumerWidget {
           const Divider(),
           FormRowIconTitle(
             icon: Icons.merge_type,
-            iconColor: Colors.indigo,
+            iconColor: context.customColors.purple,
             label: context.l10n.generalConnectionType,
             value: type?.name ?? '',
             isCopiable: true,

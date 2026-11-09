@@ -154,18 +154,19 @@ class _ContactListItem extends ConsumerWidget {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.symmetric(horizontal: 24),
         decoration: BoxDecoration(
-          color: context.colorScheme.error,
-          borderRadius: BorderRadius.circular(15),
+          color: context.mcColors.dangerText.withValues(alpha: 0.12),
+          border: Border.all(color: context.mcColors.dangerText),
+          borderRadius: BorderRadius.circular(McRadius.lg),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.delete, color: context.colorScheme.onError),
+            Icon(Icons.delete, color: context.mcColors.dangerText),
             Text(
               key: const Key('dismissible_delete_text'),
               context.l10n.generalDelete,
               style: context.textTheme.bodySmall?.copyWith(
-                color: context.colorScheme.onError,
+                color: context.mcColors.dangerText,
               ),
             ),
           ],
@@ -221,17 +222,19 @@ class _ContactTile extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
       child: Material(
-        color: context.theme.cardColor,
-        borderRadius: BorderRadius.circular(15),
+        color: context.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(McRadius.lg),
         child: InkWell(
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(McRadius.lg),
           onTap: onTap,
           onDoubleTap: onDoubleTap,
           onLongPress: onLongPress,
           child: ListTile(
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-              side: BorderSide(color: statusColor, width: 2),
+              borderRadius: BorderRadius.circular(McRadius.lg),
+              side: statusColor == Colors.transparent
+                  ? BorderSide(color: context.mcColors.hairline)
+                  : BorderSide(color: statusColor, width: 2),
             ),
             leading: SizedBox(
               width: 60,
@@ -279,8 +282,8 @@ class _ContactTile extends StatelessWidget {
                     Text(
                       secondaryName!,
                       style: context.textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: context.colorScheme.primary,
+                        fontWeight: FontWeight.w500,
+                        color: context.mcColors.highlightSecondary,
                       ),
                       textAlign: TextAlign.center,
                       softWrap: true,

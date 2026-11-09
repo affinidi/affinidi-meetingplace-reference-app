@@ -21,11 +21,9 @@ class _ContactNotificationBadge extends StatelessWidget {
     final textStyle = isList
         ? context.textTheme.labelMedium?.copyWith(
             color: context.colorScheme.onPrimary,
-            fontWeight: FontWeight.bold,
           )
         : context.textTheme.titleMedium?.copyWith(
             color: context.colorScheme.onPrimary,
-            fontWeight: FontWeight.bold,
           );
     final isOobContact = origin == ContactOrigin.directInteractive;
     final badgeColor = isOobContact
@@ -45,9 +43,9 @@ class _ContactNotificationBadge extends StatelessWidget {
       alignment: Alignment.center,
       padding: isOobContact ? null : padding,
       child: isOobContact
-          ? const Icon(
+          ? Icon(
               Icons.notifications_off_outlined,
-              color: Colors.white,
+              color: context.mcColors.textPrimary,
               size: 14,
             )
           : Text(

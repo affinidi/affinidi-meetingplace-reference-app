@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact_status.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/extensions/build_context_extensions.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_extensions.dart';
 import 'package:mpx_flutter_reference_app/navigation/routes/dashboard_routes.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/contacts/contacts_screen_controller.dart';
@@ -96,6 +97,25 @@ void main() {
 
       expect(findSearchIcon(), findsOneWidget);
     });
+  });
+
+  group('When rendering under each theme mode', () {
+    for (final brightness in Brightness.values) {
+      testWidgets('should render grid and list views in ${brightness.name} '
+          'mode', (tester) async {
+        tester.platformDispatcher.platformBrightnessTestValue = brightness;
+        addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
+
+        await navigateToContactsScreen(tester);
+        expect(tester.takeException(), isNull);
+        expect(find.byType(GridView), findsOneWidget);
+
+        await tester.tap(findListViewToggle());
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        expect(find.byType(ListView), findsOneWidget);
+      });
+    }
   });
 
   group('When displaying contacts in grid view', () {
@@ -585,8 +605,10 @@ void main() {
 
         final listTile = tester.widget<ListTile>(activeContactTile);
         final shape = listTile.shape as RoundedRectangleBorder;
+        final context = tester.element(activeContactTile);
 
-        expect(shape.side.color, Colors.transparent);
+        // No status signal: the tile falls back to the theme hairline.
+        expect(shape.side.color, context.mcColors.hairline);
       },
     );
 

@@ -6,6 +6,7 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../themes/tokens/mc_colors.dart';
 import 'onboarding_controller.dart';
 
 class _OnboardingPageContent {
@@ -56,6 +57,7 @@ class OnboardingScreen extends HookConsumerWidget {
       return null;
     }, []);
 
+    // Over media: the onboarding video backdrop stays dark in both modes.
     if (state.isLoading || state.videoPlayerControllers.isEmpty) {
       return const Scaffold(backgroundColor: Colors.black, body: SizedBox());
     }
@@ -90,6 +92,7 @@ class OnboardingScreen extends HookConsumerWidget {
                       ),
                     ),
                   ),
+                  // Over media: stays light in both modes.
                   SafeArea(
                     child: Align(
                       alignment: Alignment.bottomCenter,
@@ -152,6 +155,7 @@ class OnboardingScreen extends HookConsumerWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    // Over media: stays light in both modes.
                     SmoothPageIndicator(
                       controller: controller.pageController,
                       count: state.videoPlayerControllers.length,
@@ -172,11 +176,7 @@ class OnboardingScreen extends HookConsumerWidget {
                       maintainState: true,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: context.colorScheme.primary,
                           padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
                         ),
                         onPressed: controller.onFinishOnboarding,
                         child: SizedBox(
@@ -184,10 +184,8 @@ class OnboardingScreen extends HookConsumerWidget {
                           child: Text(
                             context.l10n.setUpMyIdentity,
                             textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
+                            style: context.textTheme.titleMedium?.copyWith(
+                              color: McColors.textOnPrimary,
                             ),
                           ),
                         ),

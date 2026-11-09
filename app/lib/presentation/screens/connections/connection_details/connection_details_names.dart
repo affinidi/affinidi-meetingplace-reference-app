@@ -27,9 +27,7 @@ class _Names extends ConsumerWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.right,
-              style: context.textTheme.headlineLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: context.textTheme.headlineLarge,
             ),
           ),
         if (otherPartyDisplayName.isNotEmpty && myDisplayName.isNotEmpty)
@@ -48,9 +46,7 @@ class _Names extends ConsumerWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.left,
-              style: context.textTheme.headlineLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: context.textTheme.headlineLarge,
             ),
           ),
       ],

@@ -18,7 +18,7 @@ class _OfferDetailsName extends ConsumerWidget {
 
     return Text(
       offerName!,
-      style: context.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+      style: context.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
       textAlign: TextAlign.center,
     );
   }

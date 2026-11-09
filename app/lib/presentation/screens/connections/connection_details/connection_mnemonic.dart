@@ -43,7 +43,8 @@ class _ConnectionMnenomicPanel extends ConsumerWidget {
                       child: IconButton(
                         onPressed: controller.toggleShowQrView,
                         icon: CircleAvatar(
-                          backgroundColor: Colors.white,
+                          backgroundColor:
+                              context.colorScheme.surfaceContainerHigh,
                           radius: 18,
                           child: Icon(
                             Icons.qr_code,

@@ -67,13 +67,17 @@ class _GroupMembersEmptyRoom extends ConsumerWidget {
 
     if (hasMembersAvailableToChat) return const SizedBox.shrink();
 
+    final mc = context.mcColors;
     return Container(
       width: double.infinity,
-      color: const Color.fromARGB(255, 244, 165, 68),
+      decoration: BoxDecoration(
+        color: mc.warning.withValues(alpha: 0.12),
+        border: Border.all(color: mc.warning),
+      ),
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       child: Text(
         context.l10n.groupNoMembersToChat,
-        style: const TextStyle(color: Colors.black, fontSize: 12),
+        style: context.textTheme.bodySmall?.copyWith(color: mc.textPrimary),
         textAlign: TextAlign.center,
       ),
     );
@@ -97,6 +101,10 @@ class _GroupMembersList extends ConsumerWidget {
       provider.select((state) => state.isDebugMode),
     );
     final cacheManager = ref.read(cacheManagerProvider);
+    final mc = context.mcColors;
+    final secondaryStyle = context.textTheme.bodySmall?.copyWith(
+      color: mc.textSecondary,
+    );
 
     String getMemberText(GroupMember member) {
       final isYou = (member.did == contact?.channelDid);
@@ -133,7 +141,7 @@ class _GroupMembersList extends ConsumerWidget {
           ),
           title: Text(
             getMemberText(member),
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+            style: context.textTheme.labelMedium,
           ),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -141,21 +149,17 @@ class _GroupMembersList extends ConsumerWidget {
               if (isDebugMode) ...[
                 Text(
                   member.did.topAndTail(),
-                  style: const TextStyle(fontSize: 12, color: Colors.white70),
+                  style: McTypography.code.copyWith(color: mc.textSecondary),
                 ),
-                Text(
-                  member.status.name,
-                  style: const TextStyle(fontSize: 12, color: Colors.white70),
-                ),
+                Text(member.status.name, style: secondaryStyle),
               ],
               Text(
                 isDeleted
                     ? context.l10n.groupMemberExited
                     : '''${context.l10n.generalJoined} ${member.dateAdded.timeAgo(context.l10n)}''',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: isDeleted ? Colors.red : Colors.white70,
-                ),
+                style: isDeleted
+                    ? secondaryStyle?.copyWith(color: mc.dangerText)
+                    : secondaryStyle,
               ),
             ],
           ),

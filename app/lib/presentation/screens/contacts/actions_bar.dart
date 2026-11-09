@@ -31,6 +31,7 @@ class _ActionsBar extends ConsumerWidget {
         .length;
 
     final colorScheme = context.colorScheme;
+    final mc = context.mcColors;
     final l10n = context.l10n;
 
     Future<void> deleteSelectedContacts() async {
@@ -53,7 +54,7 @@ class _ActionsBar extends ConsumerWidget {
                 Icons.grid_view,
                 color: shouldShowGrid
                     ? colorScheme.onSurface
-                    : colorScheme.onSurface.withValues(alpha: 0.7),
+                    : mc.textSecondary,
               ),
               onPressed: () {
                 controller.toggleGridView(true);
@@ -65,7 +66,7 @@ class _ActionsBar extends ConsumerWidget {
                 Icons.list,
                 color: !shouldShowGrid
                     ? colorScheme.onSurface
-                    : colorScheme.onSurface.withValues(alpha: 0.7),
+                    : mc.textSecondary,
               ),
               onPressed: () {
                 controller.toggleGridView(false);
@@ -77,7 +78,7 @@ class _ActionsBar extends ConsumerWidget {
                 Icons.filter_list_alt,
                 color: shouldShowFilter
                     ? colorScheme.primary
-                    : colorScheme.onSurface.withValues(alpha: 0.7),
+                    : mc.textSecondary,
               ),
               onPressed: controller.toggleFilterVisibility,
             ),

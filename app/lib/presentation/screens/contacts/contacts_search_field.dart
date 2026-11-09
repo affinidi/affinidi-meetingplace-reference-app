@@ -9,6 +9,7 @@ class _ContactsSearchField extends HookConsumerWidget {
     final searchTextController = useTextEditingController();
     final text = useListenable(searchTextController).text;
     final colorScheme = context.colorScheme;
+    final mc = context.mcColors;
     final shouldShowFilter = ref.watch(
       contactsScreenControllerProvider.select(
         (state) => state.shouldShowFilter,
@@ -29,8 +30,8 @@ class _ContactsSearchField extends HookConsumerWidget {
       child: Container(
         height: 35,
         decoration: BoxDecoration(
-          border: Border.all(color: colorScheme.outline, width: 0.8),
-          borderRadius: BorderRadius.circular(20.0),
+          border: Border.all(color: mc.hairlineStrong, width: 0.8),
+          borderRadius: BorderRadius.circular(McRadius.lg),
           color: colorScheme.surface,
         ),
         child: Row(
@@ -46,7 +47,7 @@ class _ContactsSearchField extends HookConsumerWidget {
                   style: context.textTheme.bodyMedium,
                   decoration: InputDecoration(
                     hintText: context.l10n.filter,
-                    hintStyle: TextStyle(color: colorScheme.outline),
+                    hintStyle: TextStyle(color: mc.textTertiary),
                     border: InputBorder.none,
                     isDense: true,
                     contentPadding: EdgeInsets.zero,

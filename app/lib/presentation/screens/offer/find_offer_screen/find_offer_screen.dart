@@ -127,9 +127,7 @@ class FindOfferScreen extends HookConsumerWidget {
                 const OfferBanner(),
                 Text(
                   context.l10n.connectWithPersonAiServiceBusiness,
-                  style: context.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: context.textTheme.titleLarge,
                   textAlign: TextAlign.center,
                 ),
                 if (identities.isNotEmpty)
