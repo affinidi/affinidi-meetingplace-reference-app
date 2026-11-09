@@ -152,7 +152,12 @@ class MediaScreen extends HookConsumerWidget {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!context.mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(context.l10n.attachmentTooLarge(maxMb))),
+            SnackBar(
+              content: Text(
+                context.l10n.attachmentTooLarge(maxMb),
+                style: TextStyle(color: context.mcColors.dangerText),
+              ),
+            ),
           );
           navigator.pop(MediaReviewResult.empty());
         });
@@ -165,7 +170,12 @@ class MediaScreen extends HookConsumerWidget {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!context.mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(context.l10n.unsupportedFileType)),
+            SnackBar(
+              content: Text(
+                context.l10n.unsupportedFileType,
+                style: TextStyle(color: context.mcColors.dangerText),
+              ),
+            ),
           );
           navigator.pop(MediaReviewResult.empty());
         });
@@ -173,6 +183,7 @@ class MediaScreen extends HookConsumerWidget {
       return null;
     }, [state.unsupportedFileType]);
 
+    // Camera preview: stays dark in both modes.
     return Scaffold(
       backgroundColor: Colors.black,
       body: Builder(
@@ -311,6 +322,7 @@ class _CameraCaptureButton extends StatelessWidget {
           child: Container(
             width: 78,
             height: 78,
+            // Over the camera preview: stays light in both modes.
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(color: Colors.white, width: 4),

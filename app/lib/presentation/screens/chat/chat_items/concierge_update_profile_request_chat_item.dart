@@ -90,16 +90,12 @@ class _ConciergeUpdateProfileRequestChatItem extends ConsumerWidget {
             : Container(
                 constraints: const BoxConstraints(maxWidth: 600),
                 padding: const EdgeInsets.all(10),
-                decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                  gradient: RadialGradient(
-                    center: Alignment.bottomCenter,
-                    radius: 2,
-                    colors: [
-                      Color.fromARGB(255, 76, 76, 76),
-                      Color.fromARGB(255, 31, 31, 31),
-                    ],
+                decoration: BoxDecoration(
+                  color: context.colorScheme.surfaceContainerHigh,
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(McRadius.md),
                   ),
+                  border: Border.all(color: context.mcColors.hairline),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -107,10 +103,9 @@ class _ConciergeUpdateProfileRequestChatItem extends ConsumerWidget {
                     Text(
                       l10n.genWordConciergeMessage,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
+                      style: context.textTheme.bodySmall?.copyWith(
+                        color: context.mcColors.textPrimary,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     Text(
@@ -118,75 +113,50 @@ class _ConciergeUpdateProfileRequestChatItem extends ConsumerWidget {
                           ? l10n.chatRequestPermissionToUpdateProfileGroup
                           : l10n.chatRequestPermissionToUpdateProfile,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                      style: context.textTheme.bodySmall?.copyWith(
+                        color: context.mcColors.textPrimary,
+                      ),
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Padding(
                           padding: const EdgeInsets.only(top: 10, right: 10),
-                          child: TextButton(
-                            style: TextButton.styleFrom(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                               minimumSize: const Size(80, 25),
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(8),
-                                ),
-                                side: BorderSide(color: Colors.white, width: 1),
-                              ),
                             ),
                             onPressed: () async {
                               await updateContactDetails();
                             },
-                            child: Text(
-                              l10n.genWordYes,
-                              style: const TextStyle(color: Colors.white),
-                            ),
+                            child: Text(l10n.genWordYes),
                           ),
                         ),
                         Padding(
                           padding: const EdgeInsets.only(top: 10, right: 10),
-                          child: TextButton(
-                            style: TextButton.styleFrom(
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
                               padding: EdgeInsets.zero,
                               minimumSize: const Size(80, 25),
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(8),
-                                ),
-                                side: BorderSide(color: Colors.white, width: 1),
-                              ),
                             ),
                             onPressed: () async {
                               await askMeLater();
                             },
-                            child: Text(
-                              l10n.genWordLater,
-                              style: const TextStyle(color: Colors.white),
-                            ),
+                            child: Text(l10n.genWordLater),
                           ),
                         ),
                         Padding(
                           padding: const EdgeInsets.only(top: 10),
-                          child: TextButton(
-                            style: TextButton.styleFrom(
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
                               padding: EdgeInsets.zero,
                               minimumSize: const Size(80, 25),
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(8),
-                                ),
-                                side: BorderSide(color: Colors.white, width: 1),
-                              ),
                             ),
                             onPressed: () async {
                               await cancelUpdatingContactDetails();
                             },
-                            child: Text(
-                              l10n.genWordNo,
-                              style: const TextStyle(color: Colors.white),
-                            ),
+                            child: Text(l10n.genWordNo),
                           ),
                         ),
                       ],

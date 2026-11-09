@@ -54,12 +54,12 @@ class _ChatContactDisplayName extends ConsumerWidget {
                         overflow: TextOverflow.ellipsis,
                         style: hasDisplayName
                             ? context.textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: context.theme.colorScheme.onPrimary,
+                                fontWeight: FontWeight.w500,
+                                color: context.mcColors.textPrimary,
                               )
                             : context.textTheme.bodyLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: context.theme.colorScheme.onPrimary,
+                                fontWeight: FontWeight.w500,
+                                color: context.mcColors.textPrimary,
                               ),
                       ),
                     ),
@@ -76,10 +76,7 @@ class _ChatContactDisplayName extends ConsumerWidget {
                     context.l10n.chatScreenTapForMemberDetails,
                     key: const Key('group_member_details_hint'),
                     style: context.textTheme.labelMedium?.copyWith(
-                      color: context.theme.colorScheme.onPrimary.withValues(
-                        alpha: 0.8,
-                      ),
-                      fontSize: 12,
+                      color: context.mcColors.textSecondary,
                     ),
                   ),
               ],
@@ -104,7 +101,7 @@ class _IndividualChatName extends ConsumerWidget {
       fullName,
       key: const Key('individual_chat_name'),
       style: context.textTheme.labelMedium?.copyWith(
-        color: context.theme.colorScheme.onPrimary.withValues(alpha: 0.8),
+        color: context.mcColors.textSecondary,
       ),
     );
   }
@@ -155,7 +152,7 @@ class _ChatContactImage extends ConsumerWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(100.0),
             ),
-            elevation: 5,
+            elevation: 0,
             child: ProfileCircleAvatar(image: displayImage),
           ),
         ),
@@ -193,9 +190,9 @@ class _ChatContactImage extends ConsumerWidget {
                 ),
               ),
               alignment: Alignment.center,
-              child: const Icon(
+              child: Icon(
                 Icons.notifications_off_outlined,
-                color: Colors.white,
+                color: context.mcColors.textPrimary,
                 size: 10,
               ),
             ),

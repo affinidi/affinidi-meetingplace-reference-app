@@ -35,12 +35,13 @@ Future<void> _openChat(
   await navigateToChat(tester, chatSdk: chatSdk);
 }
 
-// Background colour of the reaction chip that contains [emoji].
-Color _chipColor(WidgetTester tester, String emoji) {
+// Selection never fills, so my reaction is marked by its outline colour.
+Color _chipBorderColor(WidgetTester tester, String emoji) {
   final container = tester.widget<Container>(
     find.ancestor(of: find.text(emoji), matching: find.byType(Container)).first,
   );
-  return (container.decoration! as BoxDecoration).color!;
+  final border = (container.decoration! as BoxDecoration).border! as Border;
+  return border.top.color;
 }
 
 void main() {
@@ -95,7 +96,10 @@ void main() {
         ]),
       );
 
-      expect(_chipColor(tester, '😀'), isNot(_chipColor(tester, '❤')));
+      expect(
+        _chipBorderColor(tester, '😀'),
+        isNot(_chipBorderColor(tester, '❤')),
+      );
     });
   });
 

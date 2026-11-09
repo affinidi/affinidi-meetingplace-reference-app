@@ -132,7 +132,8 @@ class _CallDraggableMiniGrid extends HookWidget {
           margin: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: colors.grey900.withValues(alpha: 0.9),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(McRadius.md),
+            // Floats over video, so a soft shadow keeps it separated.
             boxShadow: [
               BoxShadow(
                 color: colors.grey900.withValues(alpha: 0.5),

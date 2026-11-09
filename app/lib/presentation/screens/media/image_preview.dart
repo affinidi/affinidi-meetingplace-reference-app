@@ -10,6 +10,7 @@ class ImagePreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Over media (black viewer): stays light-on-dark in both modes.
     if (imageBytes == null) {
       return Center(
         child: Padding(

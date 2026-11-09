@@ -18,6 +18,7 @@ class ImageViewScreen extends ConsumerStatefulWidget {
 class _ImageViewScreenState extends ConsumerState<ImageViewScreen> {
   @override
   Widget build(BuildContext context) {
+    // Over media: stays dark in both modes.
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(

@@ -573,7 +573,7 @@ void main() {
 
       expect(colors.iconContainer, colorScheme.error.withAlpha(50));
       expect(colors.icon, colorScheme.error);
-      expect(colors.content, colorScheme.onSurfaceVariant);
+      expect(colors.content, customColors.callChatItemPendingContent);
     });
 
     test('returns error colors for declined', () {
@@ -601,7 +601,7 @@ void main() {
 
       expect(colors.iconContainer, chatColor.withAlpha(50));
       expect(colors.icon, chatColor);
-      expect(colors.content, colorScheme.onSurface);
+      expect(colors.content, customColors.pureWhite);
     });
 
     test('returns correct colors for ended from other', () {

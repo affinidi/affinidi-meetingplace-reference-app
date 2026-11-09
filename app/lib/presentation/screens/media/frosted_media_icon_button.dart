@@ -25,6 +25,7 @@ class FrostedMediaIconButton extends StatelessWidget {
     return ClipOval(
       child: BackdropFilter(
         filter: ui.ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        // Over media: stays light-on-dark in both modes.
         child: Material(
           color: backgroundColor ?? Colors.black.withValues(alpha: 0.44),
           shape: const CircleBorder(),

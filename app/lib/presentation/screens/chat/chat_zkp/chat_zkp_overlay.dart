@@ -23,23 +23,21 @@ class ChatZkpOverlay extends ConsumerWidget {
 
     if (state.isVerifyingProof) {
       return InfoBanner(
-        backgroundColor: Colors.blue.shade700,
         onDismiss: () {},
         child: Row(
           children: [
             const SizedBox(
               width: 20,
               height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-              ),
+              child: CircularProgressIndicator(strokeWidth: 2),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 context.l10n.proofFlowVerifyingProof(contactName),
-                style: const TextStyle(color: Colors.white, fontSize: 14),
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: context.mcColors.textPrimary,
+                ),
               ),
             ),
           ],
@@ -48,12 +46,12 @@ class ChatZkpOverlay extends ConsumerWidget {
     }
 
     final error = state.verificationError;
+    final mc = context.mcColors;
     if (error == null) {
       return const SizedBox.shrink();
     }
 
     return InfoBanner(
-      backgroundColor: Colors.red.shade700,
       onDismiss: () {
         ref
             .read(proofFlowControllerProvider(contactId).notifier)
@@ -61,14 +59,13 @@ class ChatZkpOverlay extends ConsumerWidget {
       },
       child: Row(
         children: [
-          const Icon(Icons.error, color: Colors.white, size: 20),
+          Icon(Icons.error, color: mc.dangerText, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               context.l10n.proofFlowVerificationFailed(contactName),
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 14,
+              style: context.textTheme.bodyMedium?.copyWith(
+                color: mc.dangerText,
                 fontWeight: FontWeight.w600,
               ),
             ),

@@ -6,7 +6,7 @@ import 'package:meeting_place_credentials/meeting_place_credentials.dart'
     show LivenessZkpAttachmentParser;
 
 import '../../../../domain/models/chat/encryption_notice.dart';
-import '../../../themes/app_custom_colors.dart';
+import '../../../../infrastructure/extensions/build_context_extensions.dart';
 
 sealed class ChatZkpMessageListPolicy {
   factory ChatZkpMessageListPolicy.fromMessages({
@@ -64,7 +64,7 @@ sealed class ChatZkpMessageListPolicy {
     required int index,
   });
 
-  Color bubbleColor(ColorScheme colorScheme, chat.ChatItem item);
+  Color bubbleColor(BuildContext context, chat.ChatItem item);
 }
 
 final class _Disabled extends ChatZkpMessageListPolicy {
@@ -89,8 +89,8 @@ final class _Disabled extends ChatZkpMessageListPolicy {
   );
 
   @override
-  Color bubbleColor(ColorScheme colorScheme, chat.ChatItem item) =>
-      _standardBubbleColor(colorScheme, item);
+  Color bubbleColor(BuildContext context, chat.ChatItem item) =>
+      _standardBubbleColor(context, item);
 }
 
 final class _Enabled extends ChatZkpMessageListPolicy {
@@ -193,9 +193,9 @@ final class _Enabled extends ChatZkpMessageListPolicy {
   }
 
   @override
-  Color bubbleColor(ColorScheme colorScheme, chat.ChatItem item) {
+  Color bubbleColor(BuildContext context, chat.ChatItem item) {
     if (_isHumanZkpConcierge(item)) return Colors.transparent;
-    return _standardBubbleColor(colorScheme, item);
+    return _standardBubbleColor(context, item);
   }
 }
 
@@ -220,16 +220,15 @@ EdgeInsets _standardBubbleMargin(
   );
 }
 
-Color _standardBubbleColor(ColorScheme colorScheme, chat.ChatItem item) {
-  if (item.type == chat.ChatItemType.conciergeMessage) {
-    return AppCustomColors.conciergeMessageColor;
-  }
-  if (item.type == chat.ChatItemType.eventMessage) {
+Color _standardBubbleColor(BuildContext context, chat.ChatItem item) {
+  // Concierge items draw their own panel card, so the bubble stays clear.
+  if (item.type == chat.ChatItemType.conciergeMessage ||
+      item.type == chat.ChatItemType.eventMessage) {
     return Colors.transparent;
   }
-  if (item.isFromMe) {
-    if (item.status == chat.ChatItemStatus.error) return Colors.red;
-    return colorScheme.primary;
+  // A failed message from me keeps a neutral bubble; the list marks the error.
+  if (item.isFromMe && item.status != chat.ChatItemStatus.error) {
+    return context.colorScheme.primary;
   }
-  return const Color.fromARGB(248, 107, 65, 162);
+  return context.customColors.callBubbleGrey;
 }

@@ -171,6 +171,7 @@ class _IndividualVideoCallScaffold extends StatelessWidget {
         .firstOrNull;
 
     return Scaffold(
+      // Over video: stays dark in both modes.
       backgroundColor: Colors.black,
       body: GestureDetector(
         behavior: HitTestBehavior.opaque,
@@ -257,6 +258,7 @@ class _IndividualVideoCallStage extends StatelessWidget {
       );
     }
 
+    // Video area: stays dark in both modes.
     return ColoredBox(
       color: Colors.black,
       child: VideoCallPeerPlaceholder(

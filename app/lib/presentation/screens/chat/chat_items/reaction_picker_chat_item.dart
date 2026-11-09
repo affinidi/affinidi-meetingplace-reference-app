@@ -16,8 +16,9 @@ class _ReactionPickerChatItem extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.fromLTRB(20, 0, 20, 0),
         decoration: BoxDecoration(
-          color: Colors.grey.shade900,
-          borderRadius: BorderRadius.circular(20.0),
+          color: context.colorScheme.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(McRadius.lg),
+          border: Border.all(color: context.mcColors.hairline),
         ),
         child: Container(
           padding: const EdgeInsets.fromLTRB(10, 6, 10, 6),

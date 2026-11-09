@@ -57,7 +57,7 @@ class _RingingStateView extends StatelessWidget {
           Text(
             context.l10n.groupCallWaitingForOthers,
             textAlign: TextAlign.center,
-            style: textTheme.headlineSmall?.copyWith(color: colors.pureWhite),
+            style: textTheme.bodySmall?.copyWith(color: colors.pureWhite),
           ),
           const SizedBox(height: 8),
           Builder(

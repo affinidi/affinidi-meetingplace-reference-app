@@ -26,13 +26,15 @@ class _AwaitingMembersWarning extends ConsumerWidget {
     return Container(
       width: MediaQuery.of(context).size.width,
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      color: Colors.grey.shade700,
+      decoration: BoxDecoration(
+        color: context.colorScheme.surfaceContainerLow,
+        border: Border(bottom: BorderSide(color: context.mcColors.hairline)),
+      ),
       child: Text(
         message,
-        style: TextStyle(
+        style: context.textTheme.bodySmall?.copyWith(
           color: context.customColors.awaitingMemberWarningText,
           fontWeight: FontWeight.w300,
-          fontSize: 12,
         ),
         textAlign: TextAlign.center,
       ),

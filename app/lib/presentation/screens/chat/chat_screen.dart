@@ -56,6 +56,8 @@ import '../../../navigation/routes/dashboard_routes.dart';
 import '../../effects/balloon/ballon_effect.dart';
 import '../../effects/confetti/confetti_effect.dart';
 import '../../effects/screen_effect.dart';
+import '../../themes/tokens/mc_colors.dart';
+import '../../themes/tokens/mc_radius.dart';
 import '../../validators/max_length_validator_type.dart';
 import '../../validators/zalgo_text_validator.dart';
 import '../../widgets/async_loaders/modal_async_loading_status.dart';
@@ -183,9 +185,14 @@ class ChatScreen extends HookConsumerWidget {
       ).select((s) => s.signingErrorCode),
       (_, code) {
         if (code == null) return;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(context.l10n.error(code))));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.l10n.error(code),
+              style: TextStyle(color: context.mcColors.dangerText),
+            ),
+          ),
+        );
         ref
             .read(chatScreenControllerProvider(_contactId).notifier)
             .clearSigningError();
@@ -207,20 +214,6 @@ class ChatScreen extends HookConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: context.colorScheme.primary,
-        foregroundColor: Colors.white,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: RadialGradient(
-              center: Alignment.bottomCenter,
-              radius: 1,
-              colors: [
-                context.colorScheme.primary,
-                const Color.fromARGB(159, 5, 19, 94),
-              ],
-            ),
-          ),
-        ),
         title: _ChatContactDisplayName(contactId: _contactId),
         centerTitle: true,
         actions: [

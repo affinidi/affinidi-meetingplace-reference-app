@@ -15,6 +15,9 @@ class FakeAppCustomColors implements AppCustomColors {
   @override
   Color get callChatItemPendingContent => Colors.orange;
 
+  @override
+  Color get pureWhite => Colors.white;
+
   // Stub all other required methods
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);

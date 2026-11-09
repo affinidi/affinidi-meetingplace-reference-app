@@ -129,7 +129,7 @@ class _ParticipantTile extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(McRadius.lg),
         child: ColoredBox(
           color: context.customColors.callControlSurface,
           child: SizedBox(

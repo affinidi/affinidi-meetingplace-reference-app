@@ -8,6 +8,7 @@ class BottomMediaBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
+      // Over media: stays dark in both modes.
       child: Container(
         decoration: const BoxDecoration(
           color: Color.fromARGB(150, 0, 0, 0),

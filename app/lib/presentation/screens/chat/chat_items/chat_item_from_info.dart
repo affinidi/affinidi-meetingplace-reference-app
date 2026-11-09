@@ -35,7 +35,9 @@ class _ChatItemFromInfo extends ConsumerWidget {
         DateFormat.MMMd().format(dateCreated),
         DateFormat.jm().format(dateCreated),
       ),
-      style: const TextStyle(color: Colors.grey, fontSize: 12),
+      style: context.textTheme.bodySmall?.copyWith(
+        color: context.mcColors.textSecondary,
+      ),
       textAlign: _chatItem.isFromMe ? TextAlign.end : TextAlign.start,
     );
   }

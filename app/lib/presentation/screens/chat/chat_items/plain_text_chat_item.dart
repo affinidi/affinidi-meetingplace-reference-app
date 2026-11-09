@@ -85,6 +85,12 @@ class _PlainTextChatItem extends ConsumerWidget {
       );
     }
 
+    // Matches the bubble fill chosen in chat_message_list.dart.
+    final isOnPrimary = chatItem.isFromMe && !_isFromMeError(chatItem);
+    final mutedColor = isOnPrimary
+        ? McColors.textOnPrimary.withValues(alpha: 0.7)
+        : context.mcColors.textSecondary;
+
     if (chatItem.isDeleted || chatItem.isDeletedLocally) {
       final label = chatItem.isDeletedLocally
           ? context.l10n.chatMessageDeletedLocallyTombstone
@@ -93,9 +99,8 @@ class _PlainTextChatItem extends ConsumerWidget {
         padding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
         child: Text(
           label,
-          style: const TextStyle(
-            color: Colors.white70,
-            fontSize: 14,
+          style: context.textTheme.bodyMedium?.copyWith(
+            color: mutedColor,
             fontStyle: FontStyle.italic,
           ),
         ),
@@ -141,6 +146,7 @@ class _PlainTextChatItem extends ConsumerWidget {
                 text: chatItem.value,
                 shouldScaleEmojis: shouldScaleEmojis,
                 isEdited: chatItem.editedAt != null,
+                isOnPrimary: isOnPrimary,
               ),
             ),
         ],
@@ -154,14 +160,21 @@ class _TextMessage extends StatelessWidget {
     required this._text,
     required this._shouldScaleEmojis,
     required this._isEdited,
+    required this._isOnPrimary,
   });
 
   final String _text;
   final bool _shouldScaleEmojis;
   final bool _isEdited;
+  final bool _isOnPrimary;
 
   @override
   Widget build(BuildContext context) {
+    final mc = context.mcColors;
+    final textColor = _isOnPrimary ? McColors.textOnPrimary : mc.textPrimary;
+    final editedColor = _isOnPrimary
+        ? McColors.textOnPrimary.withValues(alpha: 0.6)
+        : mc.textTertiary;
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
       child: Container(
@@ -173,18 +186,17 @@ class _TextMessage extends StatelessWidget {
             Text(
               _text,
               textAlign: _text.length < 6 ? TextAlign.center : TextAlign.start,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: _shouldScaleEmojis ? 42.0 : 14.0,
-                fontWeight: FontWeight.bold,
+              style: context.textTheme.bodyMedium?.copyWith(
+                color: textColor,
+                fontSize: _shouldScaleEmojis ? 42.0 : null,
+                fontWeight: FontWeight.w500,
               ),
             ),
             if (_isEdited)
               Text(
                 context.l10n.chatMessageEditedLabel,
-                style: const TextStyle(
-                  color: Colors.white54,
-                  fontSize: 11,
+                style: context.textTheme.labelSmall?.copyWith(
+                  color: editedColor,
                   fontStyle: FontStyle.italic,
                 ),
               ),

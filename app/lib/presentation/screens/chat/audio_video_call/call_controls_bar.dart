@@ -98,6 +98,7 @@ class _ControlButton extends StatelessWidget {
   ({Color container, Color icon}) _resolveColors(BuildContext context) {
     final colors = context.customColors;
     final colorScheme = context.colorScheme;
+    // Call surface: these controls stay dark in both modes.
     const gray = Color.fromARGB(255, 37, 39, 42);
 
     return switch ((isEndCall, isDisabled, isMic, isActive)) {

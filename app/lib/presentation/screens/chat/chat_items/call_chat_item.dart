@@ -95,7 +95,7 @@ class _CallChatItem extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           decoration: BoxDecoration(
             color: colors.background,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(McRadius.lg),
             border: Border.all(color: _chatItemColor, width: 1),
           ),
           child: Row(

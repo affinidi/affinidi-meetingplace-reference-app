@@ -52,9 +52,14 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
         .read(livenessCheckScreenControllerProvider(widget.contactId).notifier)
         .generateCredential(context);
     if (!mounted || error == null) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(_localizeLivenessError(error))));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          _localizeLivenessError(error),
+          style: TextStyle(color: context.mcColors.dangerText),
+        ),
+      ),
+    );
   }
 
   Future<void> _handleGenerateProof() async {
@@ -67,9 +72,14 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
       Navigator.of(context).pop();
       return;
     }
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(_localizeLivenessError(error))));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          _localizeLivenessError(error),
+          style: TextStyle(color: context.mcColors.dangerText),
+        ),
+      ),
+    );
   }
 
   Future<void> _pauseAndPop() async {
@@ -143,25 +153,11 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: context.colorScheme.primary,
-        foregroundColor: Colors.white,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: RadialGradient(
-              center: Alignment.bottomCenter,
-              radius: 1,
-              colors: [
-                context.colorScheme.primary,
-                const Color.fromARGB(159, 5, 19, 94),
-              ],
-            ),
-          ),
-        ),
         title: Text(
           appBarTitle,
           style: context.textTheme.bodyLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+            fontWeight: FontWeight.w500,
+            color: context.mcColors.textPrimary,
           ),
         ),
         centerTitle: true,

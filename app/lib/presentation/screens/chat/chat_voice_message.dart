@@ -192,7 +192,10 @@ class _VoiceRecorder extends HookWidget {
           if (!context.mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(context.l10n.voiceMessagePermissionDenied),
+              content: Text(
+                context.l10n.voiceMessagePermissionDenied,
+                style: TextStyle(color: context.mcColors.dangerText),
+              ),
               action: SnackBarAction(
                 label: context.l10n.cameraOpenSettings,
                 onPressed: () => unawaited(openAppSettings()),
@@ -266,7 +269,12 @@ class _VoiceRecorder extends HookWidget {
         );
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.voiceMessageRecordingFailed)),
+          SnackBar(
+            content: Text(
+              context.l10n.voiceMessageRecordingFailed,
+              style: TextStyle(color: context.mcColors.dangerText),
+            ),
+          ),
         );
       }
     }
@@ -297,7 +305,12 @@ class _VoiceRecorder extends HookWidget {
         await deleteDraftFile(draft);
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.voiceMessageSendFailed)),
+          SnackBar(
+            content: Text(
+              context.l10n.voiceMessageSendFailed,
+              style: TextStyle(color: context.mcColors.dangerText),
+            ),
+          ),
         );
       }
     }
@@ -439,11 +452,13 @@ class _VoiceInputPill extends StatelessWidget {
       progressIndicator: _VoiceProgressDots(
         levels: _levels,
         progress: _progress,
-        color: Colors.white,
+        color: McColors.textOnPrimary,
       ),
       durationText: Text(
         _formatVoiceDuration(_duration),
-        style: const TextStyle(color: Colors.white, fontSize: 14),
+        style: context.textTheme.bodyMedium?.copyWith(
+          color: McColors.textOnPrimary,
+        ),
       ),
     );
   }
@@ -467,7 +482,7 @@ class _VoiceInputPillFrame extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
         color: context.colorScheme.primary,
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(McRadius.full),
       ),
       child: Row(
         children: [
@@ -541,7 +556,7 @@ class _VoicePlaybackProgressDots extends ConsumerWidget {
     return _VoiceProgressDots(
       levels: levels,
       progress: progress,
-      color: Colors.white,
+      color: McColors.textOnPrimary,
     );
   }
 }
@@ -568,7 +583,9 @@ class _VoicePlaybackDurationText extends ConsumerWidget {
 
     return Text(
       _formatVoiceDuration(duration),
-      style: const TextStyle(color: Colors.white, fontSize: 14),
+      style: context.textTheme.bodyMedium?.copyWith(
+        color: McColors.textOnPrimary,
+      ),
     );
   }
 }
@@ -587,7 +604,7 @@ class _VoiceControlButton extends StatelessWidget {
       child: IconButton(
         visualDensity: VisualDensity.compact,
         padding: EdgeInsets.zero,
-        style: IconButton.styleFrom(backgroundColor: Colors.white),
+        style: IconButton.styleFrom(backgroundColor: McColors.textOnPrimary),
         onPressed: _onPressed,
         icon: Icon(_icon, color: context.colorScheme.primary, size: 20),
       ),

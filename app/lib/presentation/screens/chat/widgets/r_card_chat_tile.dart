@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../themes/tokens/mc_radius.dart';
 
 // TODO (earl): Rename to `RcardChatItem` for consistency
 class RCardChatTile extends StatelessWidget {
@@ -27,16 +28,12 @@ class RCardChatTile extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(McRadius.lg),
           child: Container(
             decoration: BoxDecoration(
               border: Border.all(color: chatItemColor, width: 2.0),
-              borderRadius: BorderRadius.circular(16),
-              gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: [Colors.black, chatItemColor],
-              ),
+              borderRadius: BorderRadius.circular(McRadius.lg),
+              color: context.colorScheme.surfaceContainerLow,
             ),
             child: Stack(
               fit: StackFit.expand,
@@ -51,6 +48,11 @@ class RCardChatTile extends StatelessWidget {
                       child: SvgPicture.asset(
                         'assets/images/R.svg',
                         width: 180,
+                        // The asset is drawn in white; tint it per mode.
+                        colorFilter: ColorFilter.mode(
+                          context.mcColors.textPrimary,
+                          BlendMode.srcIn,
+                        ),
                         fit: BoxFit.contain,
                       ),
                     ),
@@ -69,7 +71,7 @@ class RCardChatTile extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: context.textTheme.titleSmall?.copyWith(
-                            color: Colors.white,
+                            color: context.mcColors.textPrimary,
                             fontWeight: FontWeight.normal,
                           ),
                         ),
@@ -77,7 +79,7 @@ class RCardChatTile extends StatelessWidget {
                       Text(
                         context.l10n.rCardTitle,
                         style: context.textTheme.titleSmall?.copyWith(
-                          color: Colors.white,
+                          color: context.mcColors.textPrimary,
                           fontWeight: FontWeight.w800,
                         ),
                       ),

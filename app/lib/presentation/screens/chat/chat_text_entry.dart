@@ -47,8 +47,11 @@ class _ChatTextEntry extends HookConsumerWidget {
         _ChatEffectOptions.show(context: context, contactId: _contactId);
 
     final inputBorder = OutlineInputBorder(
+      borderSide: BorderSide(color: context.mcColors.hairlineStrong, width: 1),
+      borderRadius: BorderRadius.circular(McRadius.full),
+    );
+    final focusedInputBorder = inputBorder.copyWith(
       borderSide: BorderSide(color: context.colorScheme.primary, width: 1),
-      borderRadius: BorderRadius.circular(32.0),
     );
     final inputTextStyle = context.textTheme.bodyLarge?.copyWith(
       overflow: TextOverflow.ellipsis,
@@ -149,7 +152,7 @@ class _ChatTextEntry extends HookConsumerWidget {
                       decoration: context.chatInputDecoration.copyWith(
                         isDense: true,
                         enabledBorder: inputBorder,
-                        focusedBorder: inputBorder,
+                        focusedBorder: focusedInputBorder,
                         border: inputBorder,
                         contentPadding: const EdgeInsets.only(
                           left: 16,
@@ -175,22 +178,26 @@ class _ChatTextEntry extends HookConsumerWidget {
                                 color: shouldDisable
                                     ? context.theme.disabledColor
                                     : context.colorScheme.primary,
-                                borderRadius: BorderRadius.circular(4),
+                                borderRadius: BorderRadius.circular(
+                                  McRadius.xs,
+                                ),
                                 child: InkWell(
                                   key: const Key('chat_gif_button'),
                                   onTap: shouldDisable
                                       ? null
                                       : handleEffectSelection,
-                                  borderRadius: BorderRadius.circular(4),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
+                                  borderRadius: BorderRadius.circular(
+                                    McRadius.xs,
+                                  ),
+                                  child: const Padding(
+                                    padding: EdgeInsets.symmetric(
                                       horizontal: 6,
                                       vertical: 4,
                                     ),
                                     child: Text(
                                       'GIF',
                                       style: TextStyle(
-                                        color: context.colorScheme.surface,
+                                        color: McColors.textOnPrimary,
                                         fontSize: 8,
                                         fontWeight: FontWeight.w700,
                                       ),

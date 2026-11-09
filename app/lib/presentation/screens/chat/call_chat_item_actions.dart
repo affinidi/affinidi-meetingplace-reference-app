@@ -42,7 +42,9 @@ class _CallChatItemActions extends ConsumerWidget {
     }
 
     return ClipRRect(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      borderRadius: const BorderRadius.vertical(
+        top: Radius.circular(McRadius.lg),
+      ),
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: context.colorScheme.surfaceContainerHigh,
@@ -59,18 +61,21 @@ class _CallChatItemActions extends ConsumerWidget {
                   displayName,
                   textAlign: TextAlign.center,
                   style: context.textTheme.titleMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                    color: context.mcColors.textPrimary,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Material(
-                  color: Colors.white.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12),
+                  color: context.colorScheme.surfaceContainerLow,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(McRadius.md),
+                    side: BorderSide(color: context.mcColors.hairline),
+                  ),
                   child: InkWell(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(McRadius.md),
                     onTap: call,
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
@@ -81,15 +86,14 @@ class _CallChatItemActions extends ConsumerWidget {
                         children: [
                           Icon(
                             isAudioOnly ? Icons.call : Icons.videocam,
-                            color: Colors.white,
+                            color: context.mcColors.textPrimary,
                             size: 24,
                           ),
                           const SizedBox(width: 12),
                           Text(
                             context.l10n.videoCallTitle,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
+                            style: context.textTheme.titleMedium?.copyWith(
+                              color: context.mcColors.textPrimary,
                             ),
                           ),
                         ],

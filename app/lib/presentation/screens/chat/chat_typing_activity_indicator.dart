@@ -28,7 +28,9 @@ class _ChatTypingActivityIndicator extends ConsumerWidget {
                 membersTyping.join(', '),
                 membersTyping.length,
               ),
-              style: const TextStyle(color: Colors.blueGrey, fontSize: 14),
+              style: context.textTheme.bodyMedium?.copyWith(
+                color: context.mcColors.textSecondary,
+              ),
             ),
             const SizedBox(width: 4),
             const _TypingIndicator(),
@@ -80,7 +82,7 @@ class _TypingIndicator extends HookWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.blueGrey.withAlpha(
+                    color: context.mcColors.textSecondary.withAlpha(
                       (animation.value * 255).toInt(),
                     ),
                     shape: BoxShape.circle,

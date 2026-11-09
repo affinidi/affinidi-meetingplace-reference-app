@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../domain/models/contact_card/contact_card.dart';
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../themes/tokens/mc_radius.dart';
 
 /// Reusable participant tile for group audio calls.
 ///
@@ -117,7 +118,7 @@ class _SelfIndicator extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
       decoration: BoxDecoration(
         color: context.customColors.cyan,
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(McRadius.xs),
       ),
       child: Text(
         context.l10n.you,

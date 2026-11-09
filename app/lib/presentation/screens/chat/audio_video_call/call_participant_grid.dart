@@ -20,7 +20,6 @@ class _CallParticipantTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.customColors;
-    final colorScheme = context.colorScheme;
     final textTheme = context.textTheme;
     final cacheManager = ref.read(cacheManagerProvider);
     final participantDid = participant.did;
@@ -84,8 +83,9 @@ class _CallParticipantTile extends ConsumerWidget {
                 left: 8,
                 child: Text(
                   displayName,
+                  // Over video: stays light in both modes.
                   style: textTheme.labelSmall?.copyWith(
-                    color: colorScheme.onSurface,
+                    color: colors.pureWhite,
                     shadows: const [Shadow(blurRadius: 4)],
                   ),
                 ),

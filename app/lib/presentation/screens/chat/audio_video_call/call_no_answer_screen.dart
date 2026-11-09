@@ -37,6 +37,10 @@ class _CallNoAnswerScreen extends ConsumerWidget {
     final backgroundColor = isAudioOnly
         ? colorScheme.surface
         : colors.callControlSurface;
+    // The video variant sits on the call surface, which stays dark.
+    final foregroundColor = isAudioOnly
+        ? colorScheme.onSurface
+        : colors.pureWhite;
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -55,7 +59,7 @@ class _CallNoAnswerScreen extends ConsumerWidget {
                   Text(
                     peerName,
                     style: textTheme.headlineLarge?.copyWith(
-                      color: colorScheme.onSurface,
+                      color: foregroundColor,
                       fontWeight: FontWeight.w600,
                     ),
                     textAlign: TextAlign.center,
@@ -64,8 +68,8 @@ class _CallNoAnswerScreen extends ConsumerWidget {
                   if (message != null)
                     Text(
                       message!,
-                      style: textTheme.headlineMedium?.copyWith(
-                        color: colorScheme.onSurface.withValues(alpha: 0.7),
+                      style: textTheme.titleLarge?.copyWith(
+                        color: foregroundColor.withValues(alpha: 0.7),
                         fontWeight: FontWeight.w500,
                       ),
                       textAlign: TextAlign.center,
@@ -89,6 +93,7 @@ class _CallNoAnswerScreen extends ConsumerWidget {
                 cancelContainerColor: isAudioOnly
                     ? colors.callControlSurface
                     : colorScheme.surface,
+                labelColor: foregroundColor,
               ),
             ),
           ],
@@ -127,12 +132,14 @@ class _CallNoAnswerActionBar extends StatelessWidget {
     required this.onCancel,
     required this.onCallAgain,
     required this.cancelContainerColor,
+    required this.labelColor,
   });
 
   final bool isAudioOnly;
   final VoidCallback onCancel;
   final VoidCallback onCallAgain;
   final Color cancelContainerColor;
+  final Color labelColor;
 
   @override
   Widget build(BuildContext context) {
@@ -150,8 +157,9 @@ class _CallNoAnswerActionBar extends StatelessWidget {
             _CallNoAnswerActionButton(
               icon: Icons.close,
               label: l10n.videoCallCancel,
-              iconColor: colorScheme.onSurface,
+              iconColor: isAudioOnly ? colors.pureWhite : colorScheme.onSurface,
               containerColor: cancelContainerColor,
+              labelColor: labelColor,
               onTap: onCancel,
             ),
             const SizedBox(width: 80),
@@ -160,6 +168,7 @@ class _CallNoAnswerActionBar extends StatelessWidget {
               label: l10n.videoCallAgain,
               iconColor: colors.pureWhite,
               containerColor: colors.success,
+              labelColor: labelColor,
               onTap: onCallAgain,
             ),
           ],
@@ -175,6 +184,7 @@ class _CallNoAnswerActionButton extends StatelessWidget {
     required this.label,
     required this.iconColor,
     required this.containerColor,
+    required this.labelColor,
     required this.onTap,
   });
 
@@ -182,12 +192,12 @@ class _CallNoAnswerActionButton extends StatelessWidget {
   final String label;
   final Color iconColor;
   final Color containerColor;
+  final Color labelColor;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final textTheme = context.textTheme;
-    final colorScheme = context.colorScheme;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -208,7 +218,7 @@ class _CallNoAnswerActionButton extends StatelessWidget {
         Text(
           label,
           style: textTheme.bodyMedium?.copyWith(
-            color: colorScheme.onSurface,
+            color: labelColor,
             fontWeight: FontWeight.w500,
           ),
           textAlign: TextAlign.center,

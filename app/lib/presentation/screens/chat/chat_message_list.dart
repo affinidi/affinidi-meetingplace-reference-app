@@ -247,10 +247,12 @@ class _ChatMessageList extends HookConsumerWidget {
                                           ),
                                     child: Text(
                                       thisItemStatus,
-                                      style: const TextStyle(
-                                        color: Colors.blueGrey,
-                                        fontSize: 12,
-                                      ),
+                                      style: context.textTheme.bodySmall
+                                          ?.copyWith(
+                                            color: _isFromMeError(chatItem)
+                                                ? context.mcColors.dangerText
+                                                : context.mcColors.textTertiary,
+                                          ),
                                     ),
                                   ),
                                 )
@@ -280,28 +282,22 @@ chat.ChatItemStatus consolidateChatItemStatus(chat.ChatItem chatItem) {
   return chatItem.status;
 }
 
-Color _callBubbleColor(BuildContext context, chat.ChatItem chatItem) {
-  final colorScheme = context.colorScheme;
-  if (chatItem.isFromMe) {
-    if (chatItem.status == chat.ChatItemStatus.error) {
-      return colorScheme.error;
-    }
-    return colorScheme.primary;
-  }
+bool _isFromMeError(chat.ChatItem chatItem) =>
+    chatItem.isFromMe && chatItem.status == chat.ChatItemStatus.error;
 
+/// Only my sent messages fill blue; a failed one stays neutral like the
+/// others' bubbles and is marked by [_bubbleBorder] instead of a red fill.
+Color _bubbleColor(BuildContext context, chat.ChatItem chatItem) {
+  if (chatItem.isFromMe && !_isFromMeError(chatItem)) {
+    return context.colorScheme.primary;
+  }
   return context.customColors.callBubbleGrey;
 }
 
-Color _rCardBubbleColor(ColorScheme colorScheme, chat.ChatItem chatItem) {
-  if (chatItem.isFromMe) {
-    if (chatItem.status == chat.ChatItemStatus.error) {
-      return Colors.red;
-    }
-    return colorScheme.primary;
-  }
-
-  return const Color.fromARGB(248, 107, 65, 162);
-}
+BoxBorder? _bubbleBorder(BuildContext context, chat.ChatItem chatItem) =>
+    _isFromMeError(chatItem)
+    ? Border.all(color: context.mcColors.dangerText)
+    : null;
 
 bool _isCallOnlyMessage(chat.ChatItem chatItem) {
   if (chatItem is! chat.Message) return false;
@@ -362,7 +358,7 @@ class _RCardBubble extends StatelessWidget {
       }
     }
 
-    final chatItemColor = _rCardBubbleColor(context.colorScheme, chatItem);
+    final chatItemColor = _bubbleColor(context, chatItem);
 
     final margin =
         chatItem is EncryptionNotice ||
@@ -383,10 +379,9 @@ class _RCardBubble extends StatelessWidget {
     final bubble = Container(
       margin: margin,
       decoration: BoxDecoration(
-        color: isCredentialOnly && !chatItem.isFromMe
-            ? context.customColors.callBubbleGrey
-            : chatItemColor,
-        borderRadius: BorderRadius.circular(isCredentialOnly ? 20.0 : 16.0),
+        color: chatItemColor,
+        border: _bubbleBorder(context, chatItem),
+        borderRadius: BorderRadius.circular(McRadius.lg),
       ),
       child: isCredentialOnly
           ? Padding(
@@ -432,7 +427,7 @@ class _CallBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final chatItemColor = _callBubbleColor(context, chatItem);
+    final chatItemColor = _bubbleColor(context, chatItem);
 
     final margin = EdgeInsets.fromLTRB(
       chatItem.isFromMe ? 60 : 0,
@@ -449,7 +444,8 @@ class _CallBubble extends StatelessWidget {
       margin: margin,
       decoration: BoxDecoration(
         color: chatItemColor,
-        borderRadius: BorderRadius.circular(20.0),
+        border: _bubbleBorder(context, chatItem),
+        borderRadius: BorderRadius.circular(McRadius.lg),
       ),
       child: Padding(
         padding: const EdgeInsets.all(3),
@@ -488,7 +484,7 @@ class _ZkpBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bubbleColor = policy.bubbleColor(context.colorScheme, chatItem);
+    final bubbleColor = policy.bubbleColor(context, chatItem);
     return Container(
       margin: policy.bubbleMargin(
         item: chatItem,
@@ -497,7 +493,8 @@ class _ZkpBubble extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: bubbleColor,
-        borderRadius: BorderRadius.circular(16.0),
+        border: _bubbleBorder(context, chatItem),
+        borderRadius: BorderRadius.circular(McRadius.lg),
       ),
       child: ChatItem(
         chatItem: chatItem,

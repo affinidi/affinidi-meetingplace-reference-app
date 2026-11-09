@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../../themes/tokens/mc_radius.dart';
 import '../../../../widgets/bottom_sheet_menu.dart';
 import '../../../../widgets/profile_circle_avatar.dart';
 import 'call_participant.dart';
@@ -54,9 +55,11 @@ class CallParticipantListSheet extends StatelessWidget {
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
 
     return ClipRRect(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      borderRadius: const BorderRadius.vertical(
+        top: Radius.circular(McRadius.xl),
+      ),
       child: ColoredBox(
-        color: context.customColors.callControlSurface,
+        color: context.mcColors.raised,
         child: BottomSheetMenu(
           showHandle: true,
           itemCount: 1,
@@ -146,7 +149,7 @@ class _ParticipantRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: context.customColors.callBubbleGrey,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(McRadius.mdLg),
       ),
       child: Row(
         children: [

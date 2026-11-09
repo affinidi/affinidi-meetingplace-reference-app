@@ -9,7 +9,6 @@ class _NotificationsUnavailableWarning extends ConsumerWidget {
   void _showNotificationInfoBottomSheet(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: context.colorScheme.inverseSurface,
       useRootNavigator: true,
       isScrollControlled: true,
       showDragHandle: true,
@@ -95,7 +94,7 @@ class _NotificationsUnavailableWarning extends ConsumerWidget {
                 textAlign: TextAlign.left,
                 text: TextSpan(
                   style: context.textTheme.bodyMedium?.copyWith(
-                    color: Colors.white,
+                    color: context.mcColors.textPrimary,
                   ),
                   children: [
                     TextSpan(

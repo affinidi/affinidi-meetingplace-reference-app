@@ -52,9 +52,8 @@ class _ChatMediaOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
-    final foregroundColor = item.enabled
-        ? colorScheme.primary
-        : context.theme.disabledColor;
+    final mc = context.mcColors;
+    final foregroundColor = item.enabled ? mc.textPrimary : mc.textTertiary;
 
     return Semantics(
       button: true,
@@ -63,7 +62,7 @@ class _ChatMediaOption extends StatelessWidget {
       child: Material(
         type: MaterialType.transparency,
         child: InkWell(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(McRadius.lg),
           onTap: item.onTap,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
@@ -76,8 +75,9 @@ class _ChatMediaOption extends StatelessWidget {
                   height: 72,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: colorScheme.surface,
+                    color: colorScheme.surfaceContainerHigh,
                     shape: BoxShape.circle,
+                    border: Border.all(color: mc.hairline),
                   ),
                   child: item.isBalloon
                       ? ColorFiltered(
@@ -95,9 +95,8 @@ class _ChatMediaOption extends StatelessWidget {
                 Text(
                   item.label,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: context.textTheme.titleMedium?.copyWith(
                     color: foregroundColor,
-                    fontSize: 18,
                     fontWeight: FontWeight.w500,
                   ),
                   overflow: TextOverflow.ellipsis,

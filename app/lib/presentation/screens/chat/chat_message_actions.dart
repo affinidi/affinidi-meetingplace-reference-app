@@ -65,7 +65,10 @@ class _ChatMessageActions extends ConsumerWidget {
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(context.l10n.chatMessageEditFailed),
+            content: Text(
+              context.l10n.chatMessageEditFailed,
+              style: TextStyle(color: context.mcColors.dangerText),
+            ),
             duration: const Duration(seconds: 2),
           ),
         );
@@ -83,7 +86,10 @@ class _ChatMessageActions extends ConsumerWidget {
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(context.l10n.chatMessageDeleteFailed),
+            content: Text(
+              context.l10n.chatMessageDeleteFailed,
+              style: TextStyle(color: context.mcColors.dangerText),
+            ),
             duration: const Duration(seconds: 2),
           ),
         );
@@ -161,11 +167,15 @@ class _ChatMessageActionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final baseColor = _item.isDestructive ? Colors.redAccent : Colors.white;
+    final mc = context.mcColors;
+    final baseColor = _item.isDestructive ? mc.dangerText : mc.textPrimary;
     final color = _item.enabled ? baseColor : baseColor.withValues(alpha: 0.4);
     return ListTile(
       leading: Icon(_item.icon, color: color, size: 28),
-      title: Text(_item.label, style: TextStyle(color: color, fontSize: 18)),
+      title: Text(
+        _item.label,
+        style: context.textTheme.titleMedium?.copyWith(color: color),
+      ),
       enabled: _item.enabled,
       onTap: _item.enabled ? _item.onTap : null,
     );

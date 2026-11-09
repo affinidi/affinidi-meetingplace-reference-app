@@ -74,23 +74,18 @@ class _ReactionChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    // Pair each background with its matching on-color so the count stays
-    // readable: own reactions use the accent colour, others a raised surface
-    // that is visible against the dark chat background.
-    final backgroundColor = isMine
-        ? colorScheme.primary
-        : colorScheme.surfaceContainerHigh;
-    final foregroundColor = isMine
-        ? colorScheme.onPrimary
-        : colorScheme.onSurface;
+    final mc = context.mcColors;
+    // Selection never fills: own reactions are marked by a blue outline.
+    final borderColor = isMine ? colorScheme.primary : mc.hairline;
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
         decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(12),
+          color: colorScheme.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(McRadius.md),
+          border: Border.all(color: borderColor),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -100,10 +95,9 @@ class _ReactionChip extends StatelessWidget {
               const SizedBox(width: 4),
               Text(
                 '$count',
-                style: TextStyle(
-                  fontSize: 13,
+                style: context.textTheme.labelMedium?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: foregroundColor,
+                  color: mc.textPrimary,
                 ),
               ),
             ],

@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../infrastructure/extensions/duration_extensions.dart';
+import '../../../themes/tokens/mc_radius.dart';
 import '../../../widgets/call_ended/call_ended_controller.dart';
 import '../../../widgets/profile_circle_avatar.dart';
 
@@ -33,6 +34,7 @@ class CallEndedScreen extends ConsumerWidget {
     final callEndedController = ref.read(callEndedControllerProvider.notifier);
     final colorScheme = context.colorScheme;
     final textTheme = context.textTheme;
+    final mc = context.mcColors;
     final hasErrorMessage = errorMessage != null && errorMessage!.isNotEmpty;
 
     return Scaffold(
@@ -60,7 +62,7 @@ class CallEndedScreen extends ConsumerWidget {
                         ? context.l10n.videoCallCallFailed
                         : context.l10n.videoCallCallEnded,
                     style: textTheme.titleLarge?.copyWith(
-                      color: colorScheme.onSurface.withValues(alpha: 0.7),
+                      color: mc.textSecondary,
                       fontWeight: FontWeight.w500,
                     ),
                     textAlign: TextAlign.center,
@@ -70,7 +72,7 @@ class CallEndedScreen extends ConsumerWidget {
                     Text(
                       Duration(seconds: durationSeconds).label,
                       style: textTheme.titleMedium?.copyWith(
-                        color: colorScheme.onSurface.withValues(alpha: 0.5),
+                        color: mc.textTertiary,
                         fontWeight: FontWeight.w400,
                       ),
                       textAlign: TextAlign.center,
@@ -82,8 +84,9 @@ class CallEndedScreen extends ConsumerWidget {
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
                       child: DecoratedBox(
                         decoration: BoxDecoration(
-                          color: colorScheme.error,
-                          borderRadius: BorderRadius.circular(20),
+                          color: mc.dangerText.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(McRadius.lg),
+                          border: Border.all(color: mc.dangerText),
                         ),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
@@ -92,16 +95,13 @@ class CallEndedScreen extends ConsumerWidget {
                           ),
                           child: Row(
                             children: [
-                              Icon(
-                                Icons.error_outline,
-                                color: colorScheme.onError,
-                              ),
+                              Icon(Icons.error_outline, color: mc.dangerText),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
                                   errorMessage!,
                                   style: textTheme.bodyMedium?.copyWith(
-                                    color: colorScheme.onError,
+                                    color: mc.dangerText,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),

@@ -19,7 +19,7 @@ class _ErrorScaffold extends StatelessWidget {
         child: Text(
           errorMessage,
           style: context.textTheme.bodyMedium?.copyWith(
-            color: context.customColors.rose,
+            color: context.mcColors.dangerText,
           ),
           textAlign: TextAlign.center,
         ),

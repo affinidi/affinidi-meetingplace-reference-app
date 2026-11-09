@@ -11,6 +11,7 @@ import '../../../../domain/models/contact_card/contact_card.dart';
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/providers/cache_manager_provider.dart';
+import '../../../themes/tokens/mc_radius.dart';
 import '../../../widgets/call/call_overlay_widgets.dart';
 import '../../../widgets/call/call_participant_mute_badge.dart';
 import '../../../widgets/call/call_top_bar_widget.dart';
@@ -90,6 +91,7 @@ class _GroupVideoCallScreenState extends ConsumerState<GroupVideoCallScreen> {
     );
 
     return Scaffold(
+      // Over video: stays dark in both modes.
       backgroundColor: Colors.black,
       body: GestureDetector(
         behavior: HitTestBehavior.opaque,

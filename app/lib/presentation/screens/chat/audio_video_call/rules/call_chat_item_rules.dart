@@ -319,6 +319,8 @@ CallChatItemColors resolveCallChatItemColors({
   required ColorScheme colorScheme,
   required AppCustomColors customColors,
 }) {
+  // Call cards stay dark in both modes, so their copy uses the fixed call
+  // colours rather than the mode-aware onSurface roles.
   final background = isFromMe
       ? customColors.callChatItemFromMeBackground
       : customColors.callChatItemBackground;
@@ -346,7 +348,7 @@ CallChatItemColors resolveCallChatItemColors({
         background: background,
         iconContainer: colorScheme.error.withAlpha(50),
         icon: colorScheme.error,
-        content: colorScheme.onSurfaceVariant,
+        content: customColors.callChatItemPendingContent,
       );
     case CallStatus.inProgress:
     case CallStatus.ended:
@@ -356,7 +358,7 @@ CallChatItemColors resolveCallChatItemColors({
             ? chatItemColor.withAlpha(50)
             : colorScheme.surface,
         icon: isFromMe ? chatItemColor : colorScheme.onSurface,
-        content: colorScheme.onSurface,
+        content: customColors.pureWhite,
       );
   }
 }

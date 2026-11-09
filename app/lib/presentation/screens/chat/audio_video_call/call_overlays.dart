@@ -28,10 +28,9 @@ void _showCallSnackBar(
         content: Text(
           message,
           style: context.textTheme.bodyMedium?.copyWith(
-            color: context.colorScheme.onInverseSurface,
+            color: context.mcColors.dangerText,
           ),
         ),
-        backgroundColor: context.colorScheme.error,
         duration: duration,
       ),
     );

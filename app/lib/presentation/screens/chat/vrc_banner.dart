@@ -21,6 +21,7 @@ class _VrcBanner extends ConsumerWidget {
     final otherPartyFirstName = ref.watch(provider.otherPartyName);
     final l10n = context.l10n;
     final colorScheme = context.colorScheme;
+    final mc = context.mcColors;
     final textScheme = context.textTheme;
 
     if (!shouldShowVrcBanner || (otherPartyFirstName?.isEmpty ?? true)) {
@@ -55,15 +56,18 @@ class _VrcBanner extends ConsumerWidget {
     return Container(
       width: MediaQuery.of(context).size.width,
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      color: Colors.grey.shade700,
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerLow,
+        border: Border(bottom: BorderSide(color: mc.hairline)),
+      ),
       child: Column(
         spacing: 8,
         children: [
           Text(
             l10n.verifyRelationshipPrompt(otherPartyFirstName!),
             style: textScheme.bodyMedium!.copyWith(
-              color: colorScheme.onSurface.withValues(alpha: 0.8),
-              fontWeight: FontWeight.bold,
+              color: mc.textPrimary,
+              fontWeight: FontWeight.w500,
             ),
             textAlign: TextAlign.center,
           ),
@@ -72,39 +76,22 @@ class _VrcBanner extends ConsumerWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.only(right: 10),
-                child: TextButton(
+                child: ElevatedButton(
                   onPressed: startVrcExchange,
-                  style: TextButton.styleFrom(
-                    backgroundColor: colorScheme.onSurface,
+                  style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                     minimumSize: const Size(80, 25),
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(8)),
-                      side: BorderSide(color: Colors.white, width: 1),
-                    ),
                   ),
-                  child: Text(
-                    l10n.generateVrc,
-                    style: TextStyle(
-                      color: colorScheme.surface.withValues(alpha: 0.8),
-                    ),
-                  ),
+                  child: Text(l10n.generateVrc),
                 ),
               ),
-              TextButton(
+              OutlinedButton(
                 onPressed: doLater,
-                style: TextButton.styleFrom(
+                style: OutlinedButton.styleFrom(
                   padding: EdgeInsets.zero,
                   minimumSize: const Size(80, 25),
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(8)),
-                    side: BorderSide(color: Colors.white, width: 1),
-                  ),
                 ),
-                child: Text(
-                  l10n.doLater,
-                  style: const TextStyle(color: Colors.white),
-                ),
+                child: Text(l10n.doLater),
               ),
             ],
           ),

@@ -7,6 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../infrastructure/configuration/environment.dart';
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../navigation/navigator.dart';
+import '../../../themes/tokens/mc_colors.dart';
+import '../../../themes/tokens/mc_radius.dart';
 import '../image_preview.dart';
 import '../media_screen/media_screen.dart';
 import 'media_review_controller.dart';
@@ -74,6 +76,7 @@ class _MediaReviewScreenState extends ConsumerState<MediaReviewScreen> {
   Widget build(BuildContext context) {
     final customColors = context.customColors;
 
+    // Over media: white/black stay fixed in both modes on this screen.
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -100,7 +103,7 @@ class _MediaReviewScreenState extends ConsumerState<MediaReviewScreen> {
                     ),
                     if (_isSending)
                       ClipRRect(
-                        borderRadius: BorderRadius.circular(18),
+                        borderRadius: BorderRadius.circular(McRadius.lg),
                         child: BackdropFilter(
                           filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
                           child: Container(
@@ -110,7 +113,7 @@ class _MediaReviewScreenState extends ConsumerState<MediaReviewScreen> {
                             ),
                             decoration: BoxDecoration(
                               color: customColors.mediaSurfaceOverlay,
-                              borderRadius: BorderRadius.circular(18),
+                              borderRadius: BorderRadius.circular(McRadius.lg),
                               border: Border.all(
                                 color: customColors.mediaSurfaceBorder,
                               ),
@@ -128,11 +131,11 @@ class _MediaReviewScreenState extends ConsumerState<MediaReviewScreen> {
                                 const SizedBox(width: 8),
                                 Text(
                                   context.l10n.sending,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                  style: context.textTheme.labelMedium
+                                      ?.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                 ),
                               ],
                             ),
@@ -152,13 +155,13 @@ class _MediaReviewScreenState extends ConsumerState<MediaReviewScreen> {
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 child: widget.useChatSemantics
                     ? ClipRRect(
-                        borderRadius: BorderRadius.circular(28),
+                        borderRadius: BorderRadius.circular(McRadius.xl),
                         child: BackdropFilter(
                           filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
                           child: Container(
                             decoration: BoxDecoration(
                               color: customColors.mediaSurfaceOverlay,
-                              borderRadius: BorderRadius.circular(28),
+                              borderRadius: BorderRadius.circular(McRadius.xl),
                               border: Border.all(
                                 color: customColors.mediaSurfaceBorder,
                               ),
@@ -184,7 +187,7 @@ class _MediaReviewScreenState extends ConsumerState<MediaReviewScreen> {
                                     backgroundColor: Theme.of(
                                       context,
                                     ).colorScheme.primary,
-                                    foregroundColor: Colors.white,
+                                    foregroundColor: McColors.textOnPrimary,
                                     onPressed: _isSending
                                         ? null
                                         : () => _submitResult(success: true),
@@ -200,7 +203,7 @@ class _MediaReviewScreenState extends ConsumerState<MediaReviewScreen> {
                         key: const Key('media_review_submit_button'),
                         icon: Icons.check_rounded,
                         backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Colors.white,
+                        foregroundColor: McColors.textOnPrimary,
                         onPressed: _isSending
                             ? null
                             : () => _submitResult(success: true),
@@ -289,7 +292,7 @@ class _MessageInput extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(McRadius.xl),
         border: Border.all(color: customColors.mediaSurfaceBorder),
       ),
       child: TextField(

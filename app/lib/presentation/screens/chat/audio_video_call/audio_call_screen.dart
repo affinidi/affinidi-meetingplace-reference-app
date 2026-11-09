@@ -351,6 +351,7 @@ class _AudioCallBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Call surface: stays dark in both modes, like the video calls.
     return Container(color: Colors.black);
   }
 }
@@ -388,7 +389,6 @@ class _IndividualAudioMutedPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.customColors;
-    final colorScheme = context.colorScheme;
     final textTheme = context.textTheme;
     final label = peerName.isEmpty
         ? context.l10n.videoCallMuted
@@ -398,12 +398,12 @@ class _IndividualAudioMutedPill extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
         color: colors.darkGrey,
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(McRadius.full),
       ),
       child: Text(
         label,
         style: textTheme.labelLarge?.copyWith(
-          color: colorScheme.onSurface,
+          color: colors.pureWhite,
           fontWeight: FontWeight.w500,
         ),
         textAlign: TextAlign.center,
@@ -455,8 +455,8 @@ class _SinglePeerGroupAudioParticipant extends ConsumerWidget {
       height: double.infinity,
       decoration: BoxDecoration(
         color: colors.grey900,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.24)),
+        borderRadius: BorderRadius.circular(McRadius.xl),
+        border: Border.all(color: context.mcColors.hairline),
       ),
       child: Stack(
         children: [

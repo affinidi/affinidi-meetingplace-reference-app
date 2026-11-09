@@ -68,6 +68,7 @@ class _VideoPlayerScreenState extends State<_VideoPlayerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Over media: stays dark in both modes.
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(

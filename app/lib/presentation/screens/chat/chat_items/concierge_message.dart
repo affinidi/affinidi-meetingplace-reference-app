@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
-import '../../../themes/app_custom_colors.dart';
+import '../../../themes/tokens/mc_radius.dart';
 
 class ConciergeMessage extends StatelessWidget {
   const ConciergeMessage({
@@ -28,19 +28,13 @@ class ConciergeMessage extends StatelessWidget {
 
     final hasActions = _actions != null && _actions.isNotEmpty;
 
-    final textStyle = hasActions
-        ? const TextStyle(color: Colors.white, fontSize: 14)
-        : Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface);
+    final textStyle = context.textTheme.bodyMedium?.copyWith(
+      color: context.mcColors.textPrimary,
+    );
 
     final headerStyle = hasActions
-        ? const TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
-          )
-        : textStyle?.copyWith(fontSize: 14);
+        ? textStyle?.copyWith(fontWeight: FontWeight.w400)
+        : textStyle;
 
     final messageContent = Column(
       crossAxisAlignment: _fullWidth
@@ -86,16 +80,10 @@ class ConciergeMessage extends StatelessWidget {
 
     if (hasActions) {
       content = Container(
-        decoration: const BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(10)),
-          gradient: RadialGradient(
-            center: Alignment.bottomCenter,
-            radius: 2,
-            colors: [
-              AppCustomColors.conciergeCardGradientStart,
-              AppCustomColors.conciergeCardGradientEnd,
-            ],
-          ),
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerHigh,
+          borderRadius: const BorderRadius.all(Radius.circular(McRadius.md)),
+          border: Border.all(color: context.mcColors.hairline),
         ),
         child: content,
       );

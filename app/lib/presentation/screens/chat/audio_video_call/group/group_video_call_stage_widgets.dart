@@ -75,7 +75,10 @@ class _FocusedParticipantStage extends StatelessWidget {
       return stage;
     }
 
-    return ClipRRect(borderRadius: BorderRadius.circular(28), child: stage);
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(McRadius.xl),
+      child: stage,
+    );
   }
 }
 
@@ -212,6 +215,7 @@ class _PeerParticipantStage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Video stage: stays dark in both modes.
     if (peerParticipant.hasVideo) {
       return ColoredBox(
         color: Colors.black,
