@@ -32,7 +32,7 @@ class _ContactsSearchField extends HookConsumerWidget {
         decoration: BoxDecoration(
           border: Border.all(color: mc.hairlineStrong, width: 0.8),
           borderRadius: BorderRadius.circular(McRadius.lg),
-          color: colorScheme.surface,
+          color: colorScheme.surfaceContainerLow,
         ),
         child: Row(
           children: [

@@ -77,96 +77,93 @@ class RCardsScreen extends HookConsumerWidget {
       await SharePlus.instance.share(params);
     }
 
-    return ColoredBox(
-      color: colorScheme.surface,
-      child: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SectionHeader(
-              title: l10n.tabsTitle(Tabs.rCards.name),
-              subtitle: l10n.rCardsPanelSubtitle,
-            ),
-            Row(
-              children: [
-                if (isSearchActive)
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: TextField(
-                        controller: searchController,
-                        onChanged: controller.search,
-                        style: TextStyle(color: colorScheme.onSurface),
-                        decoration: InputDecoration(
-                          hintText: l10n.generalSearch,
-                          hintStyle: TextStyle(
-                            color: customColors.searchHintText,
-                          ),
-                          filled: true,
-                          fillColor: customColors.searchFieldFill,
-                          isDense: true,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 10,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(McRadius.lg),
-                            borderSide: BorderSide.none,
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(McRadius.lg),
-                            borderSide: BorderSide.none,
-                          ),
+    return SafeArea(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SectionHeader(
+            title: l10n.tabsTitle(Tabs.rCards.name),
+            subtitle: l10n.rCardsPanelSubtitle,
+          ),
+          Row(
+            children: [
+              if (isSearchActive)
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: TextField(
+                      controller: searchController,
+                      onChanged: controller.search,
+                      style: TextStyle(color: colorScheme.onSurface),
+                      decoration: InputDecoration(
+                        hintText: l10n.generalSearch,
+                        hintStyle: TextStyle(
+                          color: customColors.searchHintText,
+                        ),
+                        filled: true,
+                        fillColor: customColors.searchFieldFill,
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(McRadius.lg),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(McRadius.lg),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              else ...[
+                _FiltersBar(),
+                const Spacer(),
+              ],
+              IconButton(
+                onPressed: controller.toggleSearch,
+                icon: Icon(Icons.search, color: colorScheme.onSurface),
+              ),
+              IconButton(
+                onPressed: hasAnyCards ? exportAll : null,
+                icon: Icon(
+                  Icons.download_outlined,
+                  color: hasAnyCards
+                      ? colorScheme.onSurface
+                      : context.mcColors.textTertiary,
+                ),
+              ),
+            ],
+          ),
+          Expanded(
+            child: cards.isNotEmpty
+                ? ScrollConfiguration(
+                    behavior: ScrollConfiguration.of(context).copyWith(
+                      overscroll: true,
+                      physics: const AlwaysScrollableScrollPhysics(
+                        parent: ClampingScrollPhysics(),
+                      ),
+                      scrollbars: false,
+                    ),
+                    child: StretchingOverscrollIndicator(
+                      axisDirection: AxisDirection.down,
+                      child: SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(
+                          parent: ClampingScrollPhysics(),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+                          child: _RCardsDeckWidget(cards: cards),
                         ),
                       ),
                     ),
                   )
-                else ...[
-                  _FiltersBar(),
-                  const Spacer(),
-                ],
-                IconButton(
-                  onPressed: controller.toggleSearch,
-                  icon: Icon(Icons.search, color: colorScheme.onSurface),
-                ),
-                IconButton(
-                  onPressed: hasAnyCards ? exportAll : null,
-                  icon: Icon(
-                    Icons.download_outlined,
-                    color: hasAnyCards
-                        ? colorScheme.onSurface
-                        : context.mcColors.textTertiary,
-                  ),
-                ),
-              ],
-            ),
-            Expanded(
-              child: cards.isNotEmpty
-                  ? ScrollConfiguration(
-                      behavior: ScrollConfiguration.of(context).copyWith(
-                        overscroll: true,
-                        physics: const AlwaysScrollableScrollPhysics(
-                          parent: ClampingScrollPhysics(),
-                        ),
-                        scrollbars: false,
-                      ),
-                      child: StretchingOverscrollIndicator(
-                        axisDirection: AxisDirection.down,
-                        child: SingleChildScrollView(
-                          physics: const AlwaysScrollableScrollPhysics(
-                            parent: ClampingScrollPhysics(),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
-                            child: _RCardsDeckWidget(cards: cards),
-                          ),
-                        ),
-                      ),
-                    )
-                  : const _EmptyStateWidget(),
-            ),
-          ],
-        ),
+                : const _EmptyStateWidget(),
+          ),
+        ],
       ),
     );
   }
