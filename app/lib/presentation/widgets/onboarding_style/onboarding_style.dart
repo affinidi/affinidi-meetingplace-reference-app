@@ -5,6 +5,7 @@ import '../../helpers/screensize_helper.dart';
 import '../../themes/tokens/mc_colors.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../../themes/tokens/mc_typography.dart';
+import '../common/app_card.dart';
 
 /// The accent glow of onboarding, rising from the bottom of the canvas
 /// behind the linking and joining steps.
@@ -376,35 +377,28 @@ class GlassCard extends StatelessWidget {
       title,
       style: context.textTheme.titleSmall?.copyWith(color: mc.textPrimary),
     );
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: context.colorScheme.surfaceContainerLow,
-        border: Border.all(color: mc.hairline),
-        borderRadius: BorderRadius.circular(McRadius.lg),
-      ),
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(20, onCopy == null ? 16 : 8, 8, 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (onCopy case final onCopy?)
-              Row(
-                children: [
-                  Expanded(child: titleText),
-                  IconButton(
-                    icon: Icon(Icons.copy, size: 18, color: mc.textSecondary),
-                    tooltip: copyLabel,
-                    onPressed: onCopy,
-                  ),
-                ],
-              )
-            else ...[
-              titleText,
-              const SizedBox(height: 8),
-            ],
-            Padding(padding: const EdgeInsets.only(right: 12), child: child),
+    return AppCard(
+      padding: EdgeInsets.fromLTRB(20, onCopy == null ? 16 : 8, 8, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (onCopy case final onCopy?)
+            Row(
+              children: [
+                Expanded(child: titleText),
+                IconButton(
+                  icon: Icon(Icons.copy, size: 18, color: mc.textSecondary),
+                  tooltip: copyLabel,
+                  onPressed: onCopy,
+                ),
+              ],
+            )
+          else ...[
+            titleText,
+            const SizedBox(height: 8),
           ],
-        ),
+          Padding(padding: const EdgeInsets.only(right: 12), child: child),
+        ],
       ),
     );
   }

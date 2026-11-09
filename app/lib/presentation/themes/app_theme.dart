@@ -228,13 +228,14 @@ class AppTheme {
         ),
         leadingAndTrailingTextStyle: textTheme.labelLarge,
       ),
+      // Panels, as on the community page.
       cardTheme: CardThemeData(
         color: scheme.surfaceContainerLow,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(McRadius.md),
+          borderRadius: BorderRadius.circular(McRadius.lg),
           side: BorderSide(color: mc.hairline),
         ),
       ),

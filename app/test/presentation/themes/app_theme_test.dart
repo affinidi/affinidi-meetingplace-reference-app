@@ -41,6 +41,12 @@ void main() {
         expect(theme.navigationBarTheme.indicatorColor, Colors.transparent);
       });
 
+      test('draws cards as hairline panels', () {
+        final shape = theme.cardTheme.shape! as RoundedRectangleBorder;
+        expect(shape.borderRadius, BorderRadius.circular(McRadius.lg));
+        expect(shape.side.color, mc.hairline);
+      });
+
       test('outlines chips with a hairline and no fill', () {
         expect(theme.chipTheme.backgroundColor, Colors.transparent);
         expect(theme.chipTheme.side?.color, mc.hairlineStrong);
