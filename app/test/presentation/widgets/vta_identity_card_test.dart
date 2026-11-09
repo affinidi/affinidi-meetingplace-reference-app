@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image/image.dart' as img;
@@ -9,7 +10,6 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contact_card/contact_card.dart';
 import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
-import 'package:mpx_flutter_reference_app/infrastructure/extensions/did_extensions.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/cache_manager_provider.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
@@ -81,12 +81,12 @@ void main() {
       expect(find.byIcon(McIcons.person), findsOneWidget);
     });
 
-    testWidgets('shows the DID by its start and last part at the foot', (
+    testWidgets('shows the DID on one line, up to its last part', (
       tester,
     ) async {
       const longDid =
           'did:webvh:QmPEQVM1JPTyrvEgBcDXwjK4TeyLGSX1PxjgyeAisdWM1p:'
-          'webvh.example.com:people:ada-lovelace';
+          'vta.example.com:mpx-01JC5ZQ8D3WX4N7Q2K9T6V1B0M';
       await _pump(
         tester,
         VtaIdentityCard(
@@ -95,19 +95,20 @@ void main() {
         ),
       );
 
-      const shown = 'did:webvh:QmPEQVM1JPTyrv...:ada-lovelace';
-      expect(find.text(longDid), findsNothing);
-      final did = tester.widget<Text>(find.text(shown));
-      expect(did.maxLines, 2);
-      final context = tester.element(find.text(shown));
+      final shown = find.textContaining(':mpx-01JC5ZQ8D3WX4N7Q2K9T6V1B0M');
+      final did = tester.widget<Text>(shown);
+      expect(did.data, startsWith('did:webvh:'));
+      expect(did.data, contains('...:mpx-01JC5ZQ8D3WX4N7Q2K9T6V1B0M'));
+      expect(did.maxLines, 1);
       expect(
-        did.style?.fontSize,
-        Theme.of(context).textTheme.labelSmall?.fontSize,
+        tester.renderObject<RenderParagraph>(shown).didExceedMaxLines,
+        isFalse,
+        reason: 'the start gives way, never the last part',
       );
       expect(did.style?.fontFamily, 'monospace');
       expect(find.byIcon(McIcons.identities), findsOneWidget);
       expect(
-        tester.getTopLeft(find.text(shown)).dy,
+        tester.getTopLeft(shown).dy,
         greaterThan(tester.getTopLeft(find.text('+44 20')).dy),
       );
     });
@@ -219,7 +220,7 @@ void main() {
     ) async {
       await _pump(tester, const VtaIdentityCard(did: _did));
 
-      expect(find.text(_did.topAndLastPart()), findsOneWidget);
+      expect(find.text(_did), findsOneWidget, reason: 'short enough whole');
       expect(find.byIcon(McIcons.email), findsNothing);
     });
 

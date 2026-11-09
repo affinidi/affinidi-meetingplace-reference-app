@@ -234,16 +234,28 @@ class _Avatar extends StatelessWidget {
   }
 }
 
-/// The identity's DID, its start and last part only, set small and muted as
-/// metadata rather than as a detail of the profile.
+/// The identity's DID on one line, set small and muted as metadata rather
+/// than as a detail of the profile: its method, as much of its start as the
+/// line holds, and all of it from the last colon, which names the identity.
 class _DidMetadata extends StatelessWidget {
   const _DidMetadata({required this.did});
 
   final String did;
 
+  /// The most of the start shown, as elsewhere for a DID's start.
+  static const _maxStart = 24;
+
   @override
   Widget build(BuildContext context) {
     final mc = context.mcColors;
+    final style = McTypography.code.copyWith(
+      color: mc.textTertiary,
+      fontSize: context.textTheme.labelSmall?.fontSize,
+      height: 1.4,
+    );
+    final textScaler = MediaQuery.textScalerOf(context);
+    final textDirection = Directionality.of(context);
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 6,
@@ -252,22 +264,44 @@ class _DidMetadata extends StatelessWidget {
           padding: const EdgeInsets.only(top: 1),
           child: Icon(McIcons.identities, size: 14, color: mc.textTertiary),
         ),
-        // Its start and its last part, which names the identity; the middle
-        // tells identities apart no better.
         Expanded(
-          child: Text(
-            did.topAndLastPart(),
-            // Room for a long last part, which is never cut.
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: McTypography.code.copyWith(
-              color: mc.textTertiary,
-              fontSize: context.textTheme.labelSmall?.fontSize,
-              height: 1.4,
-            ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              bool fits(String text) {
+                final painter = TextPainter(
+                  text: TextSpan(text: text, style: style),
+                  maxLines: 1,
+                  textScaler: textScaler,
+                  textDirection: textDirection,
+                )..layout(maxWidth: constraints.maxWidth);
+                final overflows = painter.didExceedMaxLines;
+                painter.dispose();
+                return !overflows;
+              }
+
+              return Text(
+                _shown(fits),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: style,
+              );
+            },
           ),
         ),
       ],
     );
+  }
+
+  /// The DID whole if it [fits], else with its start cut back, down to its
+  /// method, until it does.
+  String _shown(bool Function(String text) fits) {
+    if (fits(did)) return did;
+    // However narrow, `did:method:` stays.
+    final minStart = did.indexOf(':', 'did:'.length) + 1;
+    for (var start = _maxStart; start > minStart; start--) {
+      final shown = did.topAndLastPart(charCountTop: start);
+      if (fits(shown)) return shown;
+    }
+    return did.topAndLastPart(charCountTop: minStart);
   }
 }
