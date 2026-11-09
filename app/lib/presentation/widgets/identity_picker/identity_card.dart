@@ -10,6 +10,7 @@ import '../../../domain/models/identity/identity.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/extensions/identities_extensions.dart';
+import '../../themes/tokens/mc_radius.dart';
 import '../animated_menu.dart';
 import '../profile_picture.dart';
 
@@ -59,15 +60,8 @@ class IdentityCard extends StatelessWidget {
               colorScheme.surface,
             ],
           ),
-          borderRadius: BorderRadius.circular(25.0),
+          borderRadius: BorderRadius.circular(McRadius.xl),
           border: Border.all(color: identity.getCardColor(colorScheme)),
-          boxShadow: [
-            BoxShadow(
-              color: colorScheme.shadow.withValues(alpha: 0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
         ),
         child: Stack(
           children: [
@@ -127,8 +121,8 @@ class _IdentityHeader extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(25.0),
-          topRight: Radius.circular(25.0),
+          topLeft: Radius.circular(McRadius.xl),
+          topRight: Radius.circular(McRadius.xl),
         ),
         gradient: identity.getLinearGradient(colorScheme),
       ),
@@ -144,8 +138,8 @@ class _IdentityHeader extends StatelessWidget {
               children: [
                 Text(
                   identity.getDisplayName(l10n: l10n),
+                  // On the identity's own card colour.
                   style: textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
                     color: colorScheme.onPrimary,
                   ),
                   maxLines: 1,

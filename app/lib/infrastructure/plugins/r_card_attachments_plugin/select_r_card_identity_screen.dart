@@ -39,12 +39,7 @@ class _SelectRCardIdentityScreenState
         : identities.indexOf(_selected!);
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: colorScheme.primary,
-        foregroundColor: Colors.white,
-        centerTitle: true,
-        title: Text(l10n.selectIdentityTitle),
-      ),
+      appBar: AppBar(centerTitle: true, title: Text(l10n.selectIdentityTitle)),
       body: SafeArea(
         child: Column(
           children: [
@@ -65,7 +60,7 @@ class _SelectRCardIdentityScreenState
                       child: Text(
                         l10n.selectIdentityInstruction,
                         style: context.textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurface.withValues(alpha: 0.75),
+                          color: context.mcColors.textSecondary,
                         ),
                       ),
                     ),

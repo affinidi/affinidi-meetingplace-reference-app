@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../infrastructure/extensions/build_context_extensions.dart';
 import '../../infrastructure/extensions/scroll_controller_extensions.dart';
+import '../themes/tokens/mc_radius.dart';
 
 class BottomSheetMenu extends HookWidget {
   BottomSheetMenu({
@@ -47,14 +48,14 @@ class BottomSheetMenu extends HookWidget {
               height: 4,
               margin: const EdgeInsets.symmetric(vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.grey[600],
-                borderRadius: BorderRadius.circular(2.5),
+                color: context.mcColors.hairlineStrong,
+                borderRadius: BorderRadius.circular(McRadius.xs),
               ),
             ),
           ),
         if (header != null)
           ColoredBox(
-            color: colors.inverseSurface,
+            color: colors.surfaceContainerHigh,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
               child: Text(header!, textAlign: TextAlign.center),

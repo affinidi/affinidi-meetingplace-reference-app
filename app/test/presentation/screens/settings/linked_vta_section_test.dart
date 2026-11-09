@@ -38,7 +38,7 @@ void main() {
           ),
         ],
         child: MaterialApp(
-          theme: theme,
+          theme: theme ?? AppTheme.dark,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           // As in the app: the settings live in an end drawer.

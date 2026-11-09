@@ -45,7 +45,8 @@ class CallTopBarWidget extends ConsumerWidget {
     );
     final isRinging = phase != CallUiPhase.inCall;
 
-    final colorScheme = context.colorScheme;
+    // Over the call video, which stays dark in both modes.
+    final onCall = context.customColors.pureWhite;
     final textTheme = context.textTheme;
 
     return Padding(
@@ -65,10 +66,7 @@ class CallTopBarWidget extends ConsumerWidget {
                 children: [
                   Text(
                     peerName,
-                    style: textTheme.headlineMedium?.copyWith(
-                      color: colorScheme.onSurface,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: textTheme.titleLarge?.copyWith(color: onCall),
                     textAlign: TextAlign.center,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -84,9 +82,7 @@ class CallTopBarWidget extends ConsumerWidget {
                       CallUiPhase.ended => context.l10n.videoCallCalling,
                     },
                     style: textTheme.titleMedium?.copyWith(
-                      color: isRinging
-                          ? colorScheme.onSurface.withAlpha(153)
-                          : colorScheme.onSurface,
+                      color: isRinging ? onCall.withAlpha(153) : onCall,
                     ),
                     textAlign: TextAlign.center,
                     maxLines: 1,

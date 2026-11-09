@@ -33,6 +33,7 @@ class CameraPermissionInstruction extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final colorScheme = context.colorScheme;
+    final mc = context.mcColors;
     final instruction = _platformInstruction(context);
 
     return Scaffold(
@@ -45,10 +46,8 @@ class CameraPermissionInstruction extends StatelessWidget {
             children: [
               Text(
                 l10n.cameraAccessDenied,
-                style: TextStyle(
-                  color: colorScheme.onSurface,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                style: context.textTheme.titleMedium?.copyWith(
+                  color: mc.textPrimary,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -57,9 +56,8 @@ class CameraPermissionInstruction extends StatelessWidget {
                 Text(
                   instruction,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: colorScheme.onSurfaceVariant.withAlpha(180),
-                    fontSize: 15,
+                  style: context.textTheme.bodyMedium?.copyWith(
+                    color: mc.textSecondary,
                   ),
                 ),
               ],
@@ -67,15 +65,9 @@ class CameraPermissionInstruction extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
-                  icon: Icon(Icons.settings, color: colorScheme.onSurface),
-                  label: Text(
-                    l10n.cameraOpenSettings,
-                    style: TextStyle(color: colorScheme.onSurface),
-                  ),
+                  icon: const Icon(Icons.settings),
+                  label: Text(l10n.cameraOpenSettings),
                   style: OutlinedButton.styleFrom(
-                    side: BorderSide(
-                      color: colorScheme.onSurface.withAlpha(180),
-                    ),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   onPressed: onOpenSettings,
@@ -85,16 +77,9 @@ class CameraPermissionInstruction extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  icon: Icon(Icons.refresh, color: colorScheme.onSurface),
-                  label: Text(
-                    l10n.generalRetry,
-                    style: TextStyle(
-                      color: colorScheme.onPrimary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  icon: const Icon(Icons.refresh),
+                  label: Text(l10n.generalRetry),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: colorScheme.primary,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   onPressed: onRetry,
@@ -104,10 +89,7 @@ class CameraPermissionInstruction extends StatelessWidget {
                 const SizedBox(height: 12),
                 TextButton(
                   onPressed: onCancel,
-                  child: Text(
-                    l10n.generalCancel,
-                    style: TextStyle(color: colorScheme.primary),
-                  ),
+                  child: Text(l10n.generalCancel),
                 ),
               ],
             ],

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../presentation/themes/tokens/mc_colors.dart';
+import '../../../presentation/themes/tokens/mc_radius.dart';
 import '../../extensions/build_context_extensions.dart';
 
 class VrcAttachmentWidget extends StatelessWidget {
@@ -12,7 +14,7 @@ class VrcAttachmentWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colorScheme = context.colorScheme;
+    final mc = context.mcColors;
 
     return SizedBox(
       height: height,
@@ -21,14 +23,9 @@ class VrcAttachmentWidget extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: const Alignment(-0.5, -1.3),
-              end: const Alignment(0.342, 2.2),
-              colors: [Colors.black, colorScheme.primary],
-              stops: const [0.4, 1.075],
-            ),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: colorScheme.primary, width: 1),
+            color: context.colorScheme.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(McRadius.lg),
+            border: Border.all(color: mc.hairline),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -36,14 +33,14 @@ class VrcAttachmentWidget extends StatelessWidget {
               Container(
                 width: 48,
                 height: 48,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  color: colorScheme.primary.withAlpha(50),
+                  color: McColors.controlHoverWash,
                 ),
                 child: Icon(
                   Icons.verified_user,
                   size: 24,
-                  color: colorScheme.primary,
+                  color: mc.highlightSecondary,
                 ),
               ),
               const SizedBox(width: 12),
@@ -54,8 +51,8 @@ class VrcAttachmentWidget extends StatelessWidget {
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                   style: context.textTheme.bodyMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
+                    color: mc.textPrimary,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ),

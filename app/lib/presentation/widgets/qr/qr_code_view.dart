@@ -8,6 +8,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_radius.dart';
+import '../../themes/tokens/mc_spacing.dart';
 
 class QrCodeView extends StatelessWidget {
   QrCodeView({super.key, required this.data, this.size});
@@ -44,20 +46,31 @@ class QrCodeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Dark modules on white with a quiet zone in both modes, so the code
+    // scans reliably and exports as a standalone image.
     return RepaintBoundary(
       key: _qrKey,
-      child: QrImageView(
-        data: data,
-        version: QrVersions.auto,
-        size: size ?? context.qrScannerTheme.iconSize * 3,
-        gapless: true,
-        dataModuleStyle: QrDataModuleStyle(
-          color: context.colorScheme.primary,
-          dataModuleShape: QrDataModuleShape.circle,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(McRadius.md),
         ),
-        eyeStyle: QrEyeStyle(
-          color: context.colorScheme.primary,
-          eyeShape: QrEyeShape.circle,
+        child: Padding(
+          padding: const EdgeInsets.all(McSpacing.s3),
+          child: QrImageView(
+            data: data,
+            version: QrVersions.auto,
+            size: size ?? context.qrScannerTheme.iconSize * 3,
+            gapless: true,
+            dataModuleStyle: const QrDataModuleStyle(
+              color: Colors.black,
+              dataModuleShape: QrDataModuleShape.circle,
+            ),
+            eyeStyle: const QrEyeStyle(
+              color: Colors.black,
+              eyeShape: QrEyeShape.circle,
+            ),
+          ),
         ),
       ),
     );

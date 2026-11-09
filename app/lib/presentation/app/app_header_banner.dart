@@ -44,9 +44,8 @@ class AppHeaderBanner extends ConsumerWidget {
           )
         : originalMq;
 
-    final bannerColor = activeCallBannerActive
-        ? context.customColors.success
-        : context.colorScheme.error;
+    // Matches the call banners, which stay dark in both modes.
+    final bannerColor = context.customColors.callControlSurface;
 
     return Stack(
       children: [

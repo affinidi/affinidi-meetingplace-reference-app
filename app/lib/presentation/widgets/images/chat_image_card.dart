@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 
 import '../../screens/media/image_view_screen/image_view_screen.dart';
+import '../../themes/tokens/mc_radius.dart';
 
 /// A tappable 200×200 image card for chat attachments.
 ///
@@ -27,12 +28,12 @@ class ChatImageCard extends StatelessWidget {
           );
         },
         child: Card(
-          color: const Color.fromARGB(0, 10, 10, 10),
+          color: Colors.transparent,
           clipBehavior: Clip.hardEdge,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
+            borderRadius: BorderRadius.circular(McRadius.md),
           ),
-          elevation: 5,
+          elevation: 0,
           child: Image.memory(_imageBytes, fit: BoxFit.cover),
         ),
       ),

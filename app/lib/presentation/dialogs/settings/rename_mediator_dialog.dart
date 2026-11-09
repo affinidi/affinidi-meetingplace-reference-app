@@ -61,17 +61,10 @@ class _RenameMediatorDialogState extends ConsumerState<RenameMediatorDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(null),
-          child: Text(
-            context.l10n.generalCancel,
-            style: TextStyle(color: context.colorScheme.onSurface),
-          ),
+          child: Text(context.l10n.generalCancel),
         ),
         ElevatedButton(
           onPressed: _onDone,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: context.colorScheme.primary,
-            foregroundColor: Colors.white,
-          ),
           child: Text(context.l10n.generalDone),
         ),
       ],

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../infrastructure/extensions/build_context_extensions.dart';
+import '../themes/tokens/mc_radius.dart';
 
 class MnemonicPill extends StatelessWidget {
   const MnemonicPill({
@@ -22,7 +23,6 @@ class MnemonicPill extends StatelessWidget {
       SnackBar(
         content: Text(context.l10n.copiedToClipboard),
         duration: const Duration(seconds: 2),
-        backgroundColor: context.customColors.success,
       ),
     );
   }
@@ -38,7 +38,7 @@ class MnemonicPill extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(McRadius.sm),
           onTap: isCopiable
               ? () async => await _copyToClipboard(context, mnemonic)
               : null,
@@ -51,13 +51,7 @@ class MnemonicPill extends StatelessWidget {
                   .split(' ')
                   .map(
                     (word) => Chip(
-                      label: Text(
-                        word,
-                        style: context.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      backgroundColor: context.colorScheme.secondary,
+                      label: Text(word, style: context.textTheme.titleLarge),
                     ),
                   ),
               ?suffix,

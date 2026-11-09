@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../infrastructure/extensions/build_context_extensions.dart';
+
 class ProfileCircleAvatar extends StatelessWidget {
   const ProfileCircleAvatar({super.key, this.image, this.radius, this.child});
 
@@ -9,7 +11,7 @@ class ProfileCircleAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _AvatarGradientContainer(
+    return _AvatarContainer(
       child: CircleAvatar(
         backgroundColor: Colors.transparent,
         radius: radius,
@@ -20,26 +22,18 @@ class ProfileCircleAvatar extends StatelessWidget {
   }
 }
 
-class _AvatarGradientContainer extends StatelessWidget {
-  const _AvatarGradientContainer({this.child});
+class _AvatarContainer extends StatelessWidget {
+  const _AvatarContainer({this.child});
 
   final Widget? child;
 
   @override
   Widget build(BuildContext context) {
-    final base = Theme.of(context).colorScheme.surfaceContainerHigh;
-
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: RadialGradient(
-          colors: [
-            Color.lerp(base, Colors.white, 0.3)!,
-            Color.lerp(base, Colors.white, 0.1)!,
-            base,
-          ],
-          stops: const [0.0, 0.5, 1.0],
-        ),
+        color: context.colorScheme.surfaceContainerHigh,
+        border: Border.all(color: context.mcColors.hairline),
       ),
       child: child,
     );

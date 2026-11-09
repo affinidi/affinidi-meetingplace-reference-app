@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../themes/app_custom_colors.dart';
+import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_radius.dart';
 
 class CredentialCard extends StatelessWidget {
   const CredentialCard({
@@ -16,8 +17,8 @@ class CredentialCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final customColors = Theme.of(context).extension<AppCustomColors>()!;
+    final mc = context.mcColors;
+    final textTheme = context.textTheme;
 
     return GestureDetector(
       onTap: onTap,
@@ -25,25 +26,9 @@ class CredentialCard extends StatelessWidget {
         height: 208,
         child: Container(
           decoration: BoxDecoration(
-            border: Border.all(color: colorScheme.primary, width: 1),
-            borderRadius: BorderRadius.circular(16),
-            gradient: LinearGradient(
-              begin: const Alignment(-0.5, -0.866),
-              end: const Alignment(0.5, 0.866),
-              colors: [
-                customColors.credentialCardGradientStart,
-                colorScheme.primary,
-              ],
-              stops: const [0.5705, 0.9362],
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: customColors.credentialCardShadow,
-                offset: const Offset(0, 25),
-                blurRadius: 50,
-                spreadRadius: -12,
-              ),
-            ],
+            color: context.colorScheme.surfaceContainerLow,
+            border: Border.all(color: mc.hairline),
+            borderRadius: BorderRadius.circular(McRadius.lg),
           ),
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -53,17 +38,15 @@ class CredentialCard extends StatelessWidget {
               children: [
                 Text(
                   topLeftText,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Colors.white,
+                  style: textTheme.titleLarge?.copyWith(
+                    color: mc.textSecondary,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
                 Text(
                   bottomLeftText,
-                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 24,
+                  style: textTheme.headlineSmall?.copyWith(
+                    color: mc.textPrimary,
                   ),
                 ),
               ],

@@ -6,6 +6,7 @@ import '../../../../infrastructure/extensions/duration_extensions.dart';
 import '../../../../navigation/navigator.dart';
 import '../../../../navigation/routes/dashboard_routes.dart';
 import '../../../screens/chat/audio_video_call/rules/call_ui_rules.dart';
+import '../../../themes/tokens/mc_colors.dart';
 import 'active_call_controller.dart';
 
 /// Banner shown between status bar and AppBar when a call is minimized.
@@ -21,8 +22,10 @@ class ActiveCallBanner extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
+    // Call UI stays dark in both modes, so its status colours are the dark
+    // mode's.
     final colors = context.customColors;
-    final colorScheme = context.colorScheme;
+    final onCall = colors.pureWhite;
     final l10n = context.l10n;
 
     final phase = resolveCallUiPhase(
@@ -45,7 +48,7 @@ class ActiveCallBanner extends ConsumerWidget {
 
     final textStyle = (context.textTheme.bodyLarge ?? const TextStyle())
         .copyWith(
-          color: Colors.white,
+          color: onCall,
           fontWeight: FontWeight.w600,
           decoration: TextDecoration.none,
         );
@@ -53,7 +56,7 @@ class ActiveCallBanner extends ConsumerWidget {
     return Container(
       width: double.infinity,
       height: height,
-      color: colors.success,
+      color: colors.callControlSurface,
       child: Row(
         children: [
           Padding(
@@ -63,7 +66,7 @@ class ActiveCallBanner extends ConsumerWidget {
               semanticsLabel: callState.isMicEnabled
                   ? l10n.videoCallMute
                   : l10n.videoCallUnmute,
-              backgroundColor: colorScheme.onSurface.withAlpha(50),
+              backgroundColor: onCall.withAlpha(50),
               onTap: bannerController.toggleMic,
             ),
           ),
@@ -84,7 +87,7 @@ class ActiveCallBanner extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(callIcon, color: colorScheme.onSurface, size: 24),
+                  Icon(callIcon, color: McColors.dark.ok, size: 24),
                   const SizedBox(width: 8),
                   Flexible(
                     child: Text(
@@ -96,17 +99,13 @@ class ActiveCallBanner extends ConsumerWidget {
                   ),
                   Text(
                     ' - ',
-                    style: textStyle.copyWith(
-                      color: colorScheme.onSurface.withAlpha(204),
-                    ),
+                    style: textStyle.copyWith(color: onCall.withAlpha(204)),
                   ),
                   Text(
                     showDuration
                         ? Duration(seconds: callState.callDurationSeconds).label
                         : statusLabel,
-                    style: textStyle.copyWith(
-                      color: colorScheme.onSurface.withAlpha(204),
-                    ),
+                    style: textStyle.copyWith(color: onCall.withAlpha(204)),
                     maxLines: 1,
                   ),
                 ],
@@ -118,7 +117,9 @@ class ActiveCallBanner extends ConsumerWidget {
             child: _BannerIconButton(
               icon: Icons.call_end,
               semanticsLabel: l10n.videoCallEnd,
-              backgroundColor: colorScheme.error,
+              backgroundColor: McColors.dark.dangerText.withValues(alpha: 0.12),
+              foregroundColor: McColors.dark.dangerText,
+              borderColor: McColors.dark.dangerText,
               onTap: bannerController.hangUp,
             ),
           ),
@@ -134,11 +135,15 @@ class _BannerIconButton extends StatelessWidget {
     required this.semanticsLabel,
     required this.backgroundColor,
     required this.onTap,
+    this.foregroundColor,
+    this.borderColor,
   });
 
   final IconData icon;
   final String semanticsLabel;
   final Color backgroundColor;
+  final Color? foregroundColor;
+  final Color? borderColor;
   final VoidCallback onTap;
 
   @override
@@ -159,8 +164,15 @@ class _BannerIconButton extends StatelessWidget {
               decoration: BoxDecoration(
                 color: backgroundColor,
                 shape: BoxShape.circle,
+                border: borderColor == null
+                    ? null
+                    : Border.all(color: borderColor!),
               ),
-              child: Icon(icon, color: context.colorScheme.onSurface, size: 18),
+              child: Icon(
+                icon,
+                color: foregroundColor ?? context.customColors.pureWhite,
+                size: 18,
+              ),
             ),
           ),
         ),

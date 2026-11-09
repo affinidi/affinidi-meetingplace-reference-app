@@ -4,6 +4,7 @@ import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 import '../../domain/models/contact_card/contact_card.dart';
 import '../../domain/models/contact_card/contact_card_field_definition.dart';
 import '../../infrastructure/extensions/build_context_extensions.dart';
+import '../themes/tokens/mc_radius.dart';
 
 class ContactCardView extends StatelessWidget {
   const ContactCardView({super.key, required this.card});
@@ -60,7 +61,7 @@ class _IdentityFieldListView extends StatelessWidget {
             height: 24,
             decoration: BoxDecoration(
               color: field.iconColor(context.customColors, context.colorScheme),
-              borderRadius: BorderRadius.circular(6.0),
+              borderRadius: BorderRadius.circular(McRadius.xs),
             ),
             child: Icon(field.icon, size: 18),
           ),

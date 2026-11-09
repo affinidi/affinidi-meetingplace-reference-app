@@ -27,6 +27,7 @@ class VideoCallBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     final peer = peerParticipant;
     if (peer == null || !peer.hasVideo) {
+      // Over media: stays dark in both modes, like the video it replaces.
       return ColoredBox(
         color: Colors.black,
         child: VideoCallPeerPlaceholder(

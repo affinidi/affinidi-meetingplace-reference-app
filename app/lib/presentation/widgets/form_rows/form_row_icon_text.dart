@@ -33,7 +33,6 @@ class FormRowIconText extends StatelessWidget {
       SnackBar(
         content: Text(context.l10n.copiedToClipboard),
         duration: const Duration(seconds: 2),
-        backgroundColor: context.customColors.success,
       ),
     );
   }

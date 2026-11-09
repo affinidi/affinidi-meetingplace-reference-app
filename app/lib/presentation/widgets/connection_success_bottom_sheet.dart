@@ -9,6 +9,7 @@ import '../../infrastructure/extensions/build_context_extensions.dart';
 import '../../infrastructure/providers/cache_manager_provider.dart';
 import '../../navigation/routes/dashboard_routes.dart';
 import '../painting/cached_base64_image.dart';
+import '../themes/tokens/mc_radius.dart';
 import '../widgets/images/default_profile_image.dart';
 import 'profile_circle_avatar.dart';
 
@@ -19,7 +20,6 @@ class ConnectionSuccessBottomSheet extends ConsumerWidget {
 
   static void show({required BuildContext context, required Channel channel}) {
     showModalBottomSheet<void>(
-      backgroundColor: Colors.black,
       context: context,
       isDismissible: true,
       useSafeArea: true,
@@ -36,6 +36,7 @@ class ConnectionSuccessBottomSheet extends ConsumerWidget {
         ? CachedBase64Image(card!.profilePic, cacheManager: cacheManager)
         : defaultProfileImage;
     final l10n = context.l10n;
+    final mc = context.mcColors;
 
     void startChatting() {
       final channelDid = channel.otherPartyPermanentChannelDid;
@@ -58,16 +59,10 @@ class ConnectionSuccessBottomSheet extends ConsumerWidget {
           children: [
             Container(
               height: 180,
-              decoration: const BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(10)),
-                gradient: RadialGradient(
-                  center: Alignment.bottomCenter,
-                  radius: 1.3,
-                  colors: [
-                    Color.fromARGB(249, 3, 104, 192),
-                    Color.fromARGB(120, 5, 19, 94),
-                  ],
-                ),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(McRadius.md),
+                color: context.colorScheme.surfaceContainerLow,
+                border: Border.all(color: mc.hairline),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -90,10 +85,8 @@ class ConnectionSuccessBottomSheet extends ConsumerWidget {
                           child: Text(
                             l10n.oobConnectedTo(card.firstName),
                             maxLines: 3,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              color: Colors.white,
+                            style: context.textTheme.titleSmall?.copyWith(
+                              color: mc.textPrimary,
                             ),
                           ),
                         ),
@@ -107,13 +100,7 @@ class ConnectionSuccessBottomSheet extends ConsumerWidget {
               right: 25,
               child: ElevatedButton(
                 onPressed: startChatting,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(249, 3, 104, 192),
-                ),
-                child: Text(
-                  l10n.oobChatTo,
-                  style: const TextStyle(color: Colors.white),
-                ),
+                child: Text(l10n.oobChatTo),
               ),
             ),
           ],

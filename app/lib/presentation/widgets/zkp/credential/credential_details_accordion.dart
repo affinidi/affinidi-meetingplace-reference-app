@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../themes/tokens/mc_radius.dart';
 import 'credential_card_components.dart';
 
 /// Displays credential field rows grouped under a titled section.
@@ -24,7 +25,7 @@ class CredentialDetailsAccordion extends StatelessWidget {
         Text(
           title,
           style: context.textTheme.bodyLarge?.copyWith(
-            color: Colors.white,
+            color: context.mcColors.textPrimary,
             fontWeight: FontWeight.w500,
             letterSpacing: 0.07,
             height: 1.0,
@@ -49,24 +50,22 @@ class _SectionHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(30),
-        color: context.colorScheme.primary,
+        borderRadius: BorderRadius.circular(McRadius.full),
+        border: Border.all(color: context.mcColors.hairlineStrong),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             Icons.info_outline,
-            color: context.colorScheme.onSurface,
+            color: context.mcColors.textSecondary,
             size: 12,
           ),
           const SizedBox(width: 4),
           Text(
             title,
-            style: TextStyle(
-              color: context.colorScheme.onSurface,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
+            style: context.textTheme.labelMedium?.copyWith(
+              color: context.mcColors.textPrimary,
             ),
           ),
         ],
@@ -89,7 +88,7 @@ class _DetailsContainer extends StatelessWidget {
           for (var i = 0; i < rows.length; i++) ...[
             _DetailRow(row: rows[i]),
             if (i != rows.length - 1)
-              Divider(color: context.colorScheme.primary, height: 16),
+              Divider(color: context.mcColors.hairline, height: 16),
           ],
         ],
       ),
@@ -104,6 +103,7 @@ class _DetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final mc = context.mcColors;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -116,16 +116,17 @@ class _DetailRow extends StatelessWidget {
                 width: 100,
                 child: Text(
                   '${row.label}:',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w500,
+                  style: context.textTheme.labelLarge?.copyWith(
+                    color: mc.textSecondary,
                   ),
                 ),
               ),
               Expanded(
                 child: Text(
                   row.value,
-                  style: const TextStyle(color: Colors.white),
+                  style: context.textTheme.bodyMedium?.copyWith(
+                    color: mc.textPrimary,
+                  ),
                 ),
               ),
             ],
@@ -165,17 +166,17 @@ class _DetailSubRow extends StatelessWidget {
             width: 80,
             child: Text(
               '$label:',
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.7),
-                fontWeight: FontWeight.w400,
-                fontSize: 12,
+              style: context.textTheme.bodySmall?.copyWith(
+                color: context.mcColors.textSecondary,
               ),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(color: Colors.white, fontSize: 12),
+              style: context.textTheme.bodySmall?.copyWith(
+                color: context.mcColors.textPrimary,
+              ),
             ),
           ),
         ],

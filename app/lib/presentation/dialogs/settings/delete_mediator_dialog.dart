@@ -29,10 +29,7 @@ class DeleteMediatorDialog extends ConsumerWidget {
         ),
         ElevatedButton(
           onPressed: () => Navigator.of(context).pop(true),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: context.colorScheme.error,
-            foregroundColor: Colors.white,
-          ),
+          style: context.destructiveElevatedButtonStyle,
           child: Text(l10n.generalDelete),
         ),
       ],

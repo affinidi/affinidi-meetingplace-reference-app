@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_radius.dart';
 
 class LabelIcon extends StatelessWidget {
   const LabelIcon({super.key, required this.label, this.icon, this.iconColor});
@@ -13,7 +14,7 @@ class LabelIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     if (icon != null && iconColor != null) {
       return ClipRRect(
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(McRadius.xs),
         child: Container(
           width: 24,
           height: 24,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_radius.dart';
 
 class IdentityPlaceholderCard extends StatelessWidget {
   const IdentityPlaceholderCard(this.onTap);
@@ -21,9 +22,9 @@ class IdentityPlaceholderCard extends StatelessWidget {
           width: double.infinity,
           height: 400,
           decoration: BoxDecoration(
-            color: colorScheme.surface,
-            borderRadius: BorderRadius.circular(25.0),
-            border: Border.all(color: colorScheme.outline),
+            color: colorScheme.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(McRadius.xl),
+            border: Border.all(color: context.mcColors.hairline),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -36,7 +37,7 @@ class IdentityPlaceholderCard extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 l10n.addNewIdentityAlias,
-                style: textTheme.headlineMedium?.copyWith(
+                style: textTheme.titleLarge?.copyWith(
                   color: colorScheme.onSurface,
                 ),
               ),

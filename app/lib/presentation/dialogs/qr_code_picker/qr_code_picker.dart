@@ -46,25 +46,31 @@ class QrCodePicker extends ConsumerWidget {
 
     if (isCameraAvailable == null) {
       logger.info('Detecting camera', name: _logKey);
-      return const Scaffold(
+      return Scaffold(
         body: Center(
-          child: CupertinoActivityIndicator(color: Colors.white, radius: 20),
+          child: CupertinoActivityIndicator(
+            color: context.mcColors.textPrimary,
+            radius: 20,
+          ),
         ),
       );
     }
 
     if (!isCameraAvailable) {
       logger.info('Camera not available', name: _logKey);
+      final mc = context.mcColors;
       return Scaffold(
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.camera_alt, color: Colors.white, size: 64),
+              Icon(Icons.camera_alt, color: mc.textPrimary, size: 64),
               const SizedBox(height: 16),
               Text(
                 l10n.cameraNotAvailable,
-                style: const TextStyle(color: Colors.white, fontSize: 16),
+                style: context.textTheme.bodyLarge?.copyWith(
+                  color: mc.textPrimary,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
@@ -73,13 +79,7 @@ class QrCodePicker extends ConsumerWidget {
                   if (!context.mounted) return;
                   Navigator.of(context).pop();
                 },
-                child: Text(
-                  context.l10n.goBack,
-                  style: TextStyle(
-                    color: context.colorScheme.primary,
-                    fontSize: 16,
-                  ),
-                ),
+                child: Text(context.l10n.goBack),
               ),
             ],
           ),
@@ -142,7 +142,6 @@ class _QrPermissionViewState extends ConsumerState<_QrPermissionView> {
   Widget build(BuildContext context) {
     if (_status == null) {
       return const Scaffold(
-        backgroundColor: Colors.black,
         body: Center(child: CircularProgressIndicator.adaptive()),
       );
     }
@@ -213,6 +212,7 @@ class _QRScannerScreen extends HookConsumerWidget {
               onDetect: onCodeDetected,
             ),
           ),
+          // Over media: the scanner cut-out stays light in both modes.
           ColorFiltered(
             colorFilter: const ColorFilter.mode(
               Color.fromARGB(100, 255, 255, 255),

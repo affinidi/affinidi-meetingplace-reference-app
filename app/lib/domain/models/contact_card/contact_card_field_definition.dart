@@ -97,7 +97,7 @@ class ContactCardFieldDefinitions {
     ContactCardFieldDefinition(
       key: ContactCardFieldKey.firstName,
       icon: Icons.person,
-      iconColor: (customColors, colorScheme) => Colors.blue,
+      iconColor: (customColors, colorScheme) => colorScheme.primary,
       keyboardType: null,
       textCapitalization: TextCapitalization.sentences,
       autocorrect: true,
@@ -144,7 +144,7 @@ class ContactCardFieldDefinitions {
     ContactCardFieldDefinition(
       key: ContactCardFieldKey.email,
       icon: Icons.email,
-      iconColor: (customColors, colorScheme) => Colors.blue,
+      iconColor: (customColors, colorScheme) => colorScheme.primary,
       keyboardType: TextInputType.emailAddress,
       textCapitalization: TextCapitalization.none,
       autocorrect: false,
@@ -170,7 +170,7 @@ class ContactCardFieldDefinitions {
     ContactCardFieldDefinition(
       key: ContactCardFieldKey.mobile,
       icon: Icons.phone,
-      iconColor: (customColors, colorScheme) => Colors.green,
+      iconColor: (customColors, colorScheme) => customColors.success,
       keyboardType: TextInputType.phone,
       textCapitalization: TextCapitalization.none,
       autocorrect: false,

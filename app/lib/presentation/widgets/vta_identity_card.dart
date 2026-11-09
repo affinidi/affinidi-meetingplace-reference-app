@@ -7,11 +7,13 @@ import '../../domain/models/identity/identity.dart';
 import '../../infrastructure/extensions/build_context_extensions.dart';
 import '../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../infrastructure/providers/cache_manager_provider.dart';
+import '../themes/tokens/mc_radius.dart';
+import '../themes/tokens/mc_typography.dart';
 import 'onboarding_style/onboarding_style.dart';
 import 'vta_details.dart';
 
-/// A VTA identity as a card in the shape of an MPX identity card, frosted
-/// glass over the gradient: its picture centred over the card's upper edge,
+/// A VTA identity as a card in the shape of an MPX identity card, a panel
+/// over the gradient: its picture centred over the card's upper edge,
 /// its name, the details its profile holds, its full DID as metadata, and
 /// where it lives on the VTA, collapsed. A null [did] is the new identity
 /// the VTA would create.
@@ -33,7 +35,7 @@ class VtaIdentityCard extends ConsumerWidget {
   /// a way into a community that asks for one; marked under its name.
   final bool missingCredential;
 
-  static const _radius = Radius.circular(25);
+  static const _radius = Radius.circular(McRadius.xl);
 
   /// The picture straddles the card's upper edge by half its height.
   static const _avatarRadius = 40.0;
@@ -45,6 +47,7 @@ class VtaIdentityCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final textTheme = context.textTheme;
+    final mc = context.mcColors;
     final did = this.did;
     final identity = this.identity;
     final card = identity?.card;
@@ -70,24 +73,17 @@ class VtaIdentityCard extends ConsumerWidget {
         fit: StackFit.passthrough,
         clipBehavior: Clip.none,
         children: [
-          // Frosted glass: the gradient shows through, blurred enough that
-          // the card stacked behind it in a deck cannot be read.
+          // A panel, blurred behind as well so the card stacked behind it in
+          // a deck cannot be read.
           ClipRRect(
             borderRadius: const BorderRadius.all(_radius),
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: _blurSigma, sigmaY: _blurSigma),
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.white.withAlpha(60),
-                      Colors.white.withAlpha(25),
-                    ],
-                  ),
+                  color: context.colorScheme.surfaceContainerLow,
                   borderRadius: const BorderRadius.all(_radius),
-                  border: Border.all(color: Colors.white.withAlpha(90)),
+                  border: Border.all(color: mc.hairline),
                 ),
                 // Sized to its content, or filling a slot such as a card in a
                 // deck, where the opened VTA details scroll.
@@ -113,8 +109,7 @@ class VtaIdentityCard extends ConsumerWidget {
                         overflow: TextOverflow.ellipsis,
                         textAlign: TextAlign.center,
                         style: textTheme.titleMedium?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
+                          color: mc.textPrimary,
                         ),
                       ),
                       if (missingCredential)
@@ -126,13 +121,12 @@ class VtaIdentityCard extends ConsumerWidget {
                             Icon(
                               Icons.error_outline,
                               size: 16,
-                              color: context.colorScheme.error,
+                              color: mc.dangerText,
                             ),
                             Text(
                               l10n.vtcJoinCredentialMissing,
                               style: textTheme.labelMedium?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
+                                color: mc.dangerText,
                               ),
                             ),
                           ],
@@ -142,7 +136,7 @@ class VtaIdentityCard extends ConsumerWidget {
                           l10n.vtcJoinNewIdentityHost,
                           textAlign: TextAlign.center,
                           style: textTheme.labelMedium?.copyWith(
-                            color: Colors.white70,
+                            color: mc.textSecondary,
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -156,21 +150,15 @@ class VtaIdentityCard extends ConsumerWidget {
                         for (final (icon, value) in details)
                           _Detail(icon: icon, value: value),
                         if (details.isNotEmpty)
-                          Divider(
-                            height: 12,
-                            color: Colors.white.withAlpha(50),
-                          ),
+                          Divider(height: 12, color: mc.hairline),
                         _DidMetadata(did: did),
                         if (identity != null && identity.isVtaPersona) ...[
-                          Divider(
-                            height: 12,
-                            color: Colors.white.withAlpha(50),
-                          ),
+                          Divider(height: 12, color: mc.hairline),
                           VtaDetails(
                             key: ValueKey(identity.id),
                             contextId: identity.vtaContextId!,
                             profileId: identity.vtaProfileId!,
-                            color: Colors.white,
+                            color: mc.textSecondary,
                           ),
                         ],
                       ],
@@ -197,7 +185,7 @@ class VtaIdentityCard extends ConsumerWidget {
   }
 }
 
-/// The identity's picture in a frosted ring, or [icon] when it has none.
+/// The identity's picture in a hairline ring, or [icon] when it has none.
 class _Avatar extends StatelessWidget {
   const _Avatar({required this.picture, required this.icon});
 
@@ -206,31 +194,21 @@ class _Avatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final mc = context.mcColors;
     return Container(
       padding: const EdgeInsets.all(VtaIdentityCard._avatarRing),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Color.alphaBlend(
-          Colors.white.withAlpha(90),
-          context.colorScheme.primary,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(40),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: colorScheme.surfaceContainerLow,
+        border: Border.all(color: mc.hairline),
       ),
       child: CircleAvatar(
         radius: VtaIdentityCard._avatarRadius - VtaIdentityCard._avatarRing,
-        backgroundColor: Color.alphaBlend(
-          Colors.white.withAlpha(50),
-          context.colorScheme.primary,
-        ),
+        backgroundColor: colorScheme.surfaceContainerHigh,
         backgroundImage: picture,
         child: picture == null
-            ? Icon(icon, size: 36, color: Colors.white)
+            ? Icon(icon, size: 36, color: mc.textSecondary)
             : null,
       ),
     );
@@ -246,16 +224,19 @@ class _Detail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final mc = context.mcColors;
     return Row(
       spacing: 8,
       children: [
-        Icon(icon, size: 16, color: Colors.white70),
+        Icon(icon, size: 16, color: mc.textSecondary),
         Expanded(
           child: Text(
             value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: context.textTheme.bodyMedium?.copyWith(color: Colors.white),
+            style: context.textTheme.bodyMedium?.copyWith(
+              color: mc.textPrimary,
+            ),
           ),
         ),
       ],
@@ -272,20 +253,21 @@ class _DidMetadata extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final mc = context.mcColors;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 6,
       children: [
-        const Padding(
-          padding: EdgeInsets.only(top: 1),
-          child: Icon(Icons.fingerprint, size: 14, color: Colors.white54),
+        Padding(
+          padding: const EdgeInsets.only(top: 1),
+          child: Icon(Icons.fingerprint, size: 14, color: mc.textTertiary),
         ),
         Expanded(
           child: Text(
             did,
-            style: context.textTheme.labelSmall?.copyWith(
-              color: Colors.white60,
-              fontFamily: 'monospace',
+            style: McTypography.code.copyWith(
+              color: mc.textTertiary,
+              fontSize: context.textTheme.labelSmall?.fontSize,
               height: 1.4,
             ),
           ),

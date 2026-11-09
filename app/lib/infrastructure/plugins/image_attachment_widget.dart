@@ -7,6 +7,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 
 import '../../presentation/screens/media/image_view_screen/image_view_screen.dart';
+import '../../presentation/themes/tokens/mc_radius.dart';
+import '../extensions/build_context_extensions.dart';
 import 'attachment_plugin_cache.dart';
 
 class ImageAttachmentWidget extends StatefulHookWidget {
@@ -150,20 +152,17 @@ class _LoadingImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
+    return SizedBox(
       height: 200,
       width: 200,
       child: Card(
-        color: Color.fromARGB(0, 10, 10, 10),
+        color: context.colorScheme.surfaceContainerHigh,
         clipBehavior: Clip.hardEdge,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(10.0)),
-        ),
-        elevation: 5,
-        child: DecoratedBox(
-          decoration: BoxDecoration(color: Color.fromARGB(255, 36, 42, 56)),
-          child: Center(
-            child: Icon(Icons.image_outlined, size: 36, color: Colors.white54),
+        child: Center(
+          child: Icon(
+            Icons.image_outlined,
+            size: 36,
+            color: context.mcColors.textTertiary,
           ),
         ),
       ),
@@ -203,12 +202,11 @@ class _ResolvedImage extends StatelessWidget {
           );
         },
         child: Card(
-          color: const Color.fromARGB(0, 10, 10, 10),
+          color: Colors.transparent,
           clipBehavior: Clip.hardEdge,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
+            borderRadius: BorderRadius.circular(McRadius.md),
           ),
-          elevation: 5,
           child: Image(fit: BoxFit.cover, image: MemoryImage(imageBytes)),
         ),
       ),

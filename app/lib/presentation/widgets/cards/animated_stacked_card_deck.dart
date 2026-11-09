@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_radius.dart';
+
 /// A reusable animated stacked card deck widget that displays multiple cards
 /// in an overlapping stack layout with sophisticated animations.
 ///
@@ -291,10 +294,11 @@ class _AnimatedStackedCardDeckState<T> extends State<AnimatedStackedCardDeck<T>>
                 child: Container(
                   height: widget.cardHeight,
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(
+                    // Recede into the canvas, dark or light.
+                    color: context.mcColors.canvas.withValues(
                       alpha: _overlayAnimations[index].value * overlayOpacity,
                     ),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(McRadius.lg),
                   ),
                 ),
               );

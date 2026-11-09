@@ -95,7 +95,10 @@ class OngoingGroupCallBannerView extends StatelessWidget {
               children: [
                 Text(
                   context.l10n.videoCallOngoingCall(data.participantCount),
-                  style: context.textTheme.bodyMedium,
+                  // Call UI stays dark in both modes.
+                  style: context.textTheme.bodyMedium?.copyWith(
+                    color: context.customColors.pureWhite,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

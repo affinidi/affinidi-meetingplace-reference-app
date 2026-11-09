@@ -8,6 +8,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../application/services/vtc_service/vtc_service.dart';
 import '../../infrastructure/extensions/build_context_extensions.dart';
 import '../../l10n/app_localizations.dart';
+import '../themes/tokens/mc_radius.dart';
 
 /// Where an identity lives on the member's VTA: its context, its profile,
 /// and the profile as the VTA keeps it. Collapsed until the member opens it;
@@ -50,7 +51,7 @@ class VtaDetails extends HookConsumerWidget {
         InkWell(
           key: const Key('vta_details_toggle'),
           onTap: toggle,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(McRadius.sm),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 6),
             child: Row(

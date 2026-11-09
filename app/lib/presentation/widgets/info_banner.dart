@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../infrastructure/extensions/build_context_extensions.dart';
+import '../themes/tokens/mc_colors.dart';
+import '../themes/tokens/mc_radius.dart';
 
 class InfoBanner extends StatelessWidget {
   const InfoBanner({
@@ -23,20 +25,22 @@ class InfoBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
+    final mc = context.mcColors;
 
     return Container(
       margin: margin,
       padding: padding,
       decoration: BoxDecoration(
-        color: backgroundColor ?? colorScheme.primary.withAlpha(80),
-        borderRadius: BorderRadius.circular(12),
+        color: backgroundColor ?? colorScheme.surfaceContainerLow,
+        border: Border.all(color: mc.hairline),
+        borderRadius: BorderRadius.circular(McRadius.md),
       ),
       child: Stack(
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Icon(icon, color: colorScheme.primary, size: 40),
+              Icon(icon, color: McColors.blue, size: 40),
               const SizedBox(width: 12),
               Expanded(
                 child: Padding(
@@ -50,11 +54,7 @@ class InfoBanner extends StatelessWidget {
             top: -10,
             right: -8,
             child: IconButton(
-              icon: Icon(
-                Icons.close,
-                color: colorScheme.onSurface.withValues(alpha: 0.6),
-                size: 28,
-              ),
+              icon: Icon(Icons.close, color: mc.textTertiary, size: 28),
               onPressed: onDismiss,
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),

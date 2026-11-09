@@ -302,6 +302,8 @@ class _DocumentAttachmentWidgetState extends State<_DocumentAttachmentWidget> {
     final size = widget.attachment.byteCount;
     final sizeLabel = size != null ? _formatBytes(size) : '';
     final isLoaded = _bytes != null;
+    final mc = context.mcColors;
+    final textTheme = context.textTheme;
 
     return SizedBox(
       width: 220,
@@ -310,19 +312,15 @@ class _DocumentAttachmentWidgetState extends State<_DocumentAttachmentWidget> {
             ? _openDocument
             : (_hasFailed ? _download : (_isDownloading ? null : _download)),
         child: Card(
-          color: Colors.grey.shade900,
+          color: context.colorScheme.surfaceContainerHigh,
           clipBehavior: Clip.hardEdge,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          elevation: 3,
           child: Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
               children: [
                 Icon(
                   _iconForMimeType(widget.attachment.mediaType),
-                  color: Colors.white70,
+                  color: mc.textSecondary,
                   size: 32,
                 ),
                 const SizedBox(width: 8),
@@ -333,10 +331,8 @@ class _DocumentAttachmentWidgetState extends State<_DocumentAttachmentWidget> {
                     children: [
                       Text(
                         filename,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
+                        style: textTheme.labelLarge?.copyWith(
+                          color: mc.textPrimary,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -344,9 +340,8 @@ class _DocumentAttachmentWidgetState extends State<_DocumentAttachmentWidget> {
                       if (sizeLabel.isNotEmpty)
                         Text(
                           sizeLabel,
-                          style: const TextStyle(
-                            color: Colors.white54,
-                            fontSize: 11,
+                          style: textTheme.labelSmall?.copyWith(
+                            color: mc.textTertiary,
                           ),
                         ),
                       if (!isLoaded && !_hasFailed)
@@ -356,9 +351,8 @@ class _DocumentAttachmentWidgetState extends State<_DocumentAttachmentWidget> {
                             _isDownloading
                                 ? context.l10n.loading
                                 : context.l10n.documentTapToDownload,
-                            style: const TextStyle(
-                              color: Colors.white38,
-                              fontSize: 10,
+                            style: textTheme.labelSmall?.copyWith(
+                              color: mc.textTertiary,
                             ),
                           ),
                         ),
@@ -367,9 +361,8 @@ class _DocumentAttachmentWidgetState extends State<_DocumentAttachmentWidget> {
                           padding: const EdgeInsets.only(top: 4),
                           child: Text(
                             context.l10n.mediaDownloadFailedTapToRetry,
-                            style: const TextStyle(
-                              color: Colors.redAccent,
-                              fontSize: 10,
+                            style: textTheme.labelSmall?.copyWith(
+                              color: mc.dangerText,
                             ),
                           ),
                         ),
@@ -382,18 +375,14 @@ class _DocumentAttachmentWidgetState extends State<_DocumentAttachmentWidget> {
                     height: 16,
                     child: _isDownloading
                         ? const CircularProgressIndicator(strokeWidth: 2)
-                        : const Icon(
+                        : Icon(
                             Icons.download,
-                            color: Colors.white54,
+                            color: mc.textTertiary,
                             size: 16,
                           ),
                   ),
                 if (_hasFailed)
-                  const Icon(
-                    Icons.error_outline,
-                    color: Colors.redAccent,
-                    size: 16,
-                  ),
+                  Icon(Icons.error_outline, color: mc.dangerText, size: 16),
               ],
             ),
           ),

@@ -9,14 +9,11 @@ import '../../../infrastructure/providers/app_logger_provider.dart';
 import 'async_loading_controller.dart';
 import 'async_loading_status_error_localizer.dart';
 
+/// The message text colour; the snack bar itself follows the theme.
 class LoadingMessageStyleTheme {
-  LoadingMessageStyleTheme({
-    required this.color,
-    required this.backgroundColor,
-  });
+  LoadingMessageStyleTheme({required this.color});
 
   final Color color;
-  final Color backgroundColor;
 }
 
 enum LoadingMessageStyle {
@@ -27,20 +24,10 @@ enum LoadingMessageStyle {
   LoadingMessageStyleTheme theme(BuildContext context) {
     switch (this) {
       case LoadingMessageStyle.complete:
-        return LoadingMessageStyleTheme(
-          backgroundColor: context.customColors.success,
-          color: context.colorScheme.onErrorContainer,
-        );
       case LoadingMessageStyle.progress:
-        return LoadingMessageStyleTheme(
-          backgroundColor: context.colorScheme.primary,
-          color: context.colorScheme.onErrorContainer,
-        );
+        return LoadingMessageStyleTheme(color: context.mcColors.textPrimary);
       case LoadingMessageStyle.error:
-        return LoadingMessageStyleTheme(
-          backgroundColor: context.colorScheme.errorContainer,
-          color: context.colorScheme.onErrorContainer,
-        );
+        return LoadingMessageStyleTheme(color: context.mcColors.dangerText);
     }
   }
 }
@@ -112,7 +99,6 @@ class ModalAsyncLoadingStatus extends HookConsumerWidget
           successMessage,
           style: context.textTheme.bodyMedium?.copyWith(color: theme.color),
         ),
-        backgroundColor: theme.backgroundColor,
       ),
     );
   }
@@ -135,7 +121,6 @@ class ModalAsyncLoadingStatus extends HookConsumerWidget
             color: errorTheme.color,
           ),
         ),
-        backgroundColor: errorTheme.backgroundColor,
       ),
     );
   }

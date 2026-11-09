@@ -9,6 +9,7 @@ import '../../../application/services/identities_service/identities_service.dart
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/providers/cache_manager_provider.dart';
+import '../../themes/tokens/mc_radius.dart';
 import '../profile_circle_avatar.dart';
 import 'video_call_pip_overlay.dart' show VideoCallPiPOverlay;
 
@@ -117,7 +118,7 @@ class VideoCallPiPWindow extends HookConsumerWidget {
   static const double _windowWidth = 120;
   static const double _cameraHeight = 180;
   static const double _offHeight = 120;
-  static const double _cornerRadius = 12;
+  static const double _cornerRadius = McRadius.md;
   static const double _margin = 16;
 
   /// Approximate height of the controls bar (padding + pill + safe-area
@@ -205,13 +206,7 @@ class VideoCallPiPWindow extends HookConsumerWidget {
           decoration: BoxDecoration(
             color: colors.callControlSurface,
             borderRadius: BorderRadius.circular(_cornerRadius),
-            boxShadow: [
-              BoxShadow(
-                color: colors.grey900.withValues(alpha: 0.5),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            border: Border.all(color: colors.mediaSurfaceBorder),
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(_cornerRadius),

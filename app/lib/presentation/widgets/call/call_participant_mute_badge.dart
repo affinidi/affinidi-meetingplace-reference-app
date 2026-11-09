@@ -14,6 +14,7 @@ class CallParticipantMuteBadge extends StatelessWidget {
       width: size,
       height: size,
       alignment: Alignment.center,
+      // Over media: stays dark in both modes.
       decoration: const BoxDecoration(
         shape: BoxShape.circle,
         color: Colors.black,

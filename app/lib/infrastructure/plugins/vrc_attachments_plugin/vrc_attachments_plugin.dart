@@ -15,6 +15,7 @@ import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/extensions/vrc_extensions.dart';
 import '../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../../presentation/screens/verifiable_credential/verifiable_credential_screen.dart';
+import '../../../presentation/themes/tokens/mc_radius.dart';
 import '../../../presentation/widgets/buttons/elevated_loading_button.dart';
 import '../../../presentation/widgets/identity_picker/identity_picker.dart';
 import '../../../presentation/widgets/profile_picture.dart';

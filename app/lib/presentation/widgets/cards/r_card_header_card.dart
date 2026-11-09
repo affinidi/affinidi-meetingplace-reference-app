@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_radius.dart';
 
 class RCardHeaderCard extends StatelessWidget {
   const RCardHeaderCard({super.key, required this.name, this.avatarImage});
@@ -14,19 +15,16 @@ class RCardHeaderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
+    final mc = context.mcColors;
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(McRadius.lg),
       child: Container(
         constraints: const BoxConstraints.tightFor(height: height),
         decoration: BoxDecoration(
-          border: Border.all(color: colorScheme.primary),
-          borderRadius: BorderRadius.circular(16),
-          gradient: LinearGradient(
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-            colors: [Colors.black, colorScheme.primary],
-          ),
+          color: colorScheme.surfaceContainerLow,
+          border: Border.all(color: mc.hairline),
+          borderRadius: BorderRadius.circular(McRadius.lg),
         ),
         child: Stack(
           fit: StackFit.expand,
@@ -57,27 +55,25 @@ class RCardHeaderCard extends StatelessWidget {
                           name,
                           softWrap: true,
                           style: context.textTheme.titleLarge?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
+                            color: mc.textPrimary,
                           ),
                         ),
                       ),
                       const SizedBox(width: 12),
                       CircleAvatar(
                         radius: 26,
-                        backgroundColor: Colors.black,
+                        backgroundColor: colorScheme.surfaceContainerHigh,
                         foregroundImage: avatarImage,
                         child: avatarImage == null
-                            ? const Icon(Icons.person, color: Colors.white)
+                            ? Icon(Icons.person, color: mc.textSecondary)
                             : null,
                       ),
                     ],
                   ),
                   Text(
                     context.l10n.rCardTitle,
-                    style: context.textTheme.headlineMedium?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
+                    style: context.textTheme.titleLarge?.copyWith(
+                      color: mc.textPrimary,
                     ),
                   ),
                 ],

@@ -9,7 +9,10 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 
 import '../../../application/services/voice_playback_service/voice_playback_service.dart';
+import '../../../presentation/themes/tokens/mc_colors.dart';
+import '../../../presentation/themes/tokens/mc_radius.dart';
 import '../../../presentation/widgets/profile_circle_avatar.dart';
+import '../../extensions/build_context_extensions.dart';
 
 const _voiceMessageMimeTypeWav = 'audio/wav';
 
@@ -39,6 +42,7 @@ class VoiceAttachmentBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final foreground = _bubbleForeground(context, chatItemColor);
     return _VoiceAttachmentBubbleFrame(
       chatItemColor: chatItemColor,
       avatar: ProfileCircleAvatar(
@@ -48,7 +52,7 @@ class VoiceAttachmentBubble extends StatelessWidget {
         child: avatarImage == null
             ? Icon(
                 isFromMe ? Icons.person : Icons.person_outline,
-                color: Colors.white,
+                color: context.mcColors.textSecondary,
                 size: 30,
               )
             : null,
@@ -59,28 +63,28 @@ class VoiceAttachmentBubble extends StatelessWidget {
         constraints: const BoxConstraints.tightFor(width: 32, height: 32),
         onPressed: isLoading ? null : onPressed,
         icon: isLoading
-            ? const SizedBox(
+            ? SizedBox(
                 width: 22,
                 height: 22,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  color: foreground,
                 ),
               )
             : Icon(
                 isPlaying ? Icons.pause : Icons.play_arrow,
-                color: Colors.white,
+                color: foreground,
                 size: 30,
               ),
       ),
       progressIndicator: _VoiceAttachmentProgressDots(
         levels: levels,
         progress: progress,
-        color: Colors.white,
+        color: foreground,
       ),
       durationText: Text(
         _formatVoiceDuration(duration),
-        style: const TextStyle(color: Colors.white, fontSize: 13),
+        style: const TextStyle(fontSize: 13),
       ),
     );
   }
@@ -151,7 +155,7 @@ class VoiceAttachmentPlaybackBubble extends HookConsumerWidget {
           child: avatarImage == null
               ? Icon(
                   isFromMe ? Icons.person : Icons.person_outline,
-                  color: Colors.white,
+                  color: context.mcColors.textSecondary,
                   size: 30,
                 )
               : null,
@@ -190,6 +194,12 @@ class VoiceAttachmentPlaybackBubble extends HookConsumerWidget {
   }
 }
 
+/// White on the blue bubble or a dark one, the text colour on a light one.
+Color _bubbleForeground(BuildContext context, Color bubbleColor) =>
+    ThemeData.estimateBrightnessForColor(bubbleColor) == Brightness.dark
+    ? McColors.textOnPrimary
+    : context.mcColors.textPrimary;
+
 class _VoiceAttachmentBubbleFrame extends StatelessWidget {
   const _VoiceAttachmentBubbleFrame({
     required this.chatItemColor,
@@ -207,22 +217,29 @@ class _VoiceAttachmentBubbleFrame extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final foreground = _bubbleForeground(context, chatItemColor);
     return Container(
       width: 260,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: chatItemColor,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(McRadius.xl),
       ),
-      child: Row(
-        children: [
-          avatar,
-          const SizedBox(width: 12),
-          control,
-          Expanded(child: progressIndicator),
-          const SizedBox(width: 8),
-          durationText,
-        ],
+      child: IconTheme.merge(
+        data: IconThemeData(color: foreground),
+        child: DefaultTextStyle.merge(
+          style: TextStyle(color: foreground),
+          child: Row(
+            children: [
+              avatar,
+              const SizedBox(width: 12),
+              control,
+              Expanded(child: progressIndicator),
+              const SizedBox(width: 8),
+              durationText,
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -363,7 +380,8 @@ class _ScopedVoiceAttachmentPlaybackButton extends ConsumerWidget {
       },
       icon: Icon(
         isPlaying ? Icons.pause : Icons.play_arrow,
-        color: Colors.white,
+        // Inside the bubble frame, which sets the foreground.
+        color: IconTheme.of(context).color,
         size: 30,
       ),
     );
@@ -388,7 +406,7 @@ class _ScopedVoiceAttachmentProgressDots extends ConsumerWidget {
     return _VoiceAttachmentProgressDots(
       levels: levels,
       progress: progress,
-      color: Colors.white,
+      color: IconTheme.of(context).color!,
     );
   }
 }
@@ -410,7 +428,7 @@ class _ScopedVoiceAttachmentDurationText extends ConsumerWidget {
 
     return Text(
       _formatVoiceDuration(duration),
-      style: const TextStyle(color: Colors.white, fontSize: 13),
+      style: const TextStyle(fontSize: 13),
     );
   }
 }

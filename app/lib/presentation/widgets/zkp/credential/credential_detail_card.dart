@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../themes/tokens/mc_radius.dart';
 import 'credential_detail_row.dart';
 
 /// Reusable container card for displaying credential details
 ///
 /// Features:
 /// - Header with icon, title, and subtitle
-/// - Gradient background
+/// - Panel background
 /// - Content area for credential details
-/// - Colored border
+/// - Hairline border
 class CredentialDetailCard extends StatelessWidget {
   const CredentialDetailCard({
     super.key,
@@ -28,16 +29,16 @@ class CredentialDetailCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
+    final mc = context.mcColors;
     final textTheme = context.textTheme;
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.circular(25.0),
-          border: Border.all(color: colorScheme.primary, width: 1),
+          color: context.colorScheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(McRadius.xl),
+          border: Border.all(color: mc.hairline),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -46,26 +47,14 @@ class CredentialDetailCard extends StatelessWidget {
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: const Alignment(-0.5, -1.3),
-                  end: const Alignment(0.342, 2.2),
-                  colors: [
-                    colorScheme.primary,
-                    colorScheme.primary.withValues(alpha: 0.7),
-                  ],
-                  stops: const [0.4, 1.075],
-                ),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  topRight: Radius.circular(24),
-                ),
+                border: Border(bottom: BorderSide(color: mc.hairline)),
               ),
               padding: const EdgeInsets.all(16.0),
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.verified_rounded,
-                    color: Colors.white,
+                    color: mc.highlightSecondary,
                     size: 24,
                   ),
                   const SizedBox(width: 12),
@@ -76,15 +65,13 @@ class CredentialDetailCard extends StatelessWidget {
                         Text(
                           title,
                           style: textTheme.titleMedium?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
+                            color: mc.textPrimary,
                           ),
                         ),
                         Text(
                           subtitle,
-                          style: textTheme.bodySmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
+                          style: textTheme.labelMedium?.copyWith(
+                            color: mc.textSecondary,
                           ),
                         ),
                       ],
@@ -107,7 +94,7 @@ class CredentialDetailCard extends StatelessWidget {
                           value: details[i].value,
                         ),
                         if (i < details.length - 1)
-                          Divider(color: colorScheme.primary, height: 16),
+                          Divider(color: mc.hairline, height: 16),
                       ],
                     ],
                   ),

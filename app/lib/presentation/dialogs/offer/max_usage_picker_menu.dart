@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../widgets/bottom_sheet_menu.dart';
 
 class MaxUsagePickerMenu extends StatelessWidget {
@@ -17,7 +16,6 @@ class MaxUsagePickerMenu extends StatelessWidget {
   }) {
     return showModalBottomSheet<int>(
       context: context,
-      backgroundColor: context.colorScheme.inverseSurface,
       builder: (context) {
         return MaxUsagePickerMenu(
           maxValue: maxValue,

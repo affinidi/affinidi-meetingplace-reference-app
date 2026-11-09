@@ -29,9 +29,13 @@ class SettingsEndDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final title = l10n.tabsTitle(TabTitleKey.settings.name);
+    final mc = context.mcColors;
+    final itemStyle = context.textTheme.titleMedium?.copyWith(
+      color: mc.textPrimary,
+    );
 
     return Drawer(
-      backgroundColor: Colors.black,
+      backgroundColor: mc.raised,
       child: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -39,7 +43,7 @@ class SettingsEndDrawer extends StatelessWidget {
             Align(
               alignment: Alignment.topRight,
               child: IconButton(
-                icon: const Icon(Icons.close, color: Colors.white, size: 24),
+                icon: Icon(Icons.close, color: mc.textPrimary, size: 24),
                 tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
                 onPressed: () => Navigator.of(context).pop(),
               ),
@@ -47,41 +51,22 @@ class SettingsEndDrawer extends StatelessWidget {
             ListTile(
               minLeadingWidth: 20,
               horizontalTitleGap: 8,
-              leading: const Icon(
-                Icons.settings,
-                color: Colors.white,
-                size: 20,
-              ),
-              title: Text(
-                title,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(color: Colors.white),
-              ),
+              leading: Icon(Icons.settings, color: mc.textPrimary, size: 20),
+              title: Text(title, style: itemStyle),
               onTap: () => _openSettings(context),
             ),
             ListTile(
               minLeadingWidth: 20,
               horizontalTitleGap: 8,
-              leading: const Icon(Icons.history, color: Colors.white, size: 20),
-              title: Text(
-                l10n.callLogScreenTitle,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(color: Colors.white),
-              ),
+              leading: Icon(Icons.history, color: mc.textPrimary, size: 20),
+              title: Text(l10n.callLogScreenTitle, style: itemStyle),
               onTap: () => _openCallLog(context),
             ),
             ListTile(
               minLeadingWidth: 20,
               horizontalTitleGap: 8,
-              leading: const Icon(Icons.science, color: Colors.white, size: 20),
-              title: Text(
-                l10n.mockCredentialsTitle,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(color: Colors.white),
-              ),
+              leading: Icon(Icons.science, color: mc.textPrimary, size: 20),
+              title: Text(l10n.mockCredentialsTitle, style: itemStyle),
               onTap: () => _openMockCredentials(context),
             ),
           ],

@@ -47,12 +47,7 @@ class SelectVrcIdentityScreenState
     final isResponder = widget.role == VrcExchangeRole.responder;
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: colorScheme.primary,
-        foregroundColor: Colors.white,
-        centerTitle: true,
-        title: Text(l10n.selectIdentityTitle),
-      ),
+      appBar: AppBar(centerTitle: true, title: Text(l10n.selectIdentityTitle)),
       body: SafeArea(
         child: Column(
           children: [
@@ -210,8 +205,8 @@ class _OtherPartyIdentityCard extends ConsumerWidget {
       child: Container(
         height: 200,
         decoration: BoxDecoration(
-          border: Border.all(color: colorScheme.outline.withValues(alpha: 0.5)),
-          borderRadius: BorderRadius.circular(25.0),
+          border: Border.all(color: context.mcColors.hairline),
+          borderRadius: BorderRadius.circular(McRadius.xl),
         ),
         child: Stack(
           children: [

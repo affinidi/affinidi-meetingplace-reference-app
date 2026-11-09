@@ -19,6 +19,7 @@ import '../../screens/chat/audio_video_call/audio_video_call_screen.dart'
     show AudioVideoCallScreen;
 import '../../screens/chat/audio_video_call/audio_video_call_screen_controller.dart';
 import '../../screens/chat/audio_video_call/rules/call_ui_rules.dart';
+import '../../themes/tokens/mc_radius.dart';
 import '../banners/active_call/active_call_controller.dart';
 import '../profile_circle_avatar.dart';
 import 'video_call_peer_placeholder.dart';
@@ -259,14 +260,14 @@ class _MinimizedLocalInset extends ConsumerWidget {
         height: _height,
         decoration: BoxDecoration(
           color: context.customColors.callControlSurface,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(McRadius.md),
           border: Border.all(
-            color: context.customColors.whiteOverlay30,
+            color: context.customColors.mediaSurfaceBorder,
             width: 1,
           ),
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(McRadius.md),
           child: cameraOn
               ? AudioVideoCallView(
                   session: session,

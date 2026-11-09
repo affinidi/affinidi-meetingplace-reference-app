@@ -42,13 +42,17 @@ class NoConnectionBanner extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
+    final mc = context.mcColors;
     return Container(
       width: context.mediaQuery.size.width,
       padding: const EdgeInsets.symmetric(vertical: 4),
-      color: context.colorScheme.error,
+      decoration: BoxDecoration(
+        color: mc.dangerText.withValues(alpha: 0.12),
+        border: Border(bottom: BorderSide(color: mc.dangerText)),
+      ),
       child: Text(
         context.l10n.networkDisconnected,
-        style: context.textTheme.labelMedium,
+        style: context.textTheme.labelMedium?.copyWith(color: mc.dangerText),
         textAlign: TextAlign.center,
       ),
     );

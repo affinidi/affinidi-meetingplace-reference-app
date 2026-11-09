@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/models/contacts/contact.dart';
-import '../../infrastructure/extensions/build_context_extensions.dart';
 import '../../navigation/navigator.dart' as app_navigator;
 import '../../navigation/routes/dashboard_routes.dart';
 import '../widgets/bottom_sheet_menu.dart';
@@ -17,7 +16,6 @@ class ConnectionSuccessDialog extends ConsumerWidget {
     required Contact contact,
   }) {
     return showModalBottomSheet<void>(
-      backgroundColor: context.colorScheme.inverseSurface,
       useRootNavigator: true,
       isScrollControlled: true,
       showDragHandle: true,

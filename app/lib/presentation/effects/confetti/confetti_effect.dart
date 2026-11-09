@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 
+import '../../themes/tokens/mc_colors.dart';
 import '../screen_effect.dart';
 
 class ConfettiEffect extends StatefulWidget {
@@ -56,11 +57,11 @@ class _ConfettiEffectState extends State<ConfettiEffect>
             particleDrag: 0.03,
             shouldLoop: false,
             colors: const [
-              Colors.green,
-              Colors.blue,
-              Colors.pink,
-              Colors.orange,
-              Colors.purple,
+              McColors.lime,
+              McColors.blue,
+              McColors.pink,
+              McColors.orange,
+              McColors.purple,
             ],
             // Remove the createParticlePath parameter to use default
             // rectangular confetti

@@ -4,7 +4,7 @@ import '../../../infrastructure/extensions/box_constraints_extensions.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../screens/chat/liveness_credential_view_data.dart';
 import '../../screens/credentials/credential_details_screen.dart';
-import '../../themes/app_custom_colors.dart';
+import '../../themes/tokens/mc_radius.dart';
 import '../cards/credential_card.dart';
 import '../credentials/liveness_credential_details_table.dart';
 import '../loaders/linear_progress_indicator.dart' as custom_loader;
@@ -23,8 +23,7 @@ class ZkpLoader extends StatelessWidget {
       height: size,
       child: CircularProgressIndicator(
         strokeWidth: 8,
-        color: Theme.of(context).colorScheme.primary,
-        backgroundColor: AppCustomColors.primaryBrand10,
+        backgroundColor: context.mcColors.hairline,
       ),
     );
   }
@@ -38,28 +37,24 @@ class ZkpInfoBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final mc = context.mcColors;
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(8),
+        color: context.colorScheme.surfaceContainerLow,
+        border: Border.all(color: mc.hairline),
+        borderRadius: BorderRadius.circular(McRadius.sm),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
-            Icons.info,
-            color: AppCustomColors.secondaryBrand90,
-            size: 20,
-          ),
+          Icon(Icons.info, color: mc.textSecondary, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               message,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                color: AppCustomColors.secondaryBrand90,
-                fontWeight: FontWeight.w400,
-                fontSize: 14,
+              style: context.textTheme.bodyMedium?.copyWith(
+                color: mc.textSecondary,
               ),
             ),
           ),
@@ -142,12 +137,12 @@ class VcNotFoundStepView extends StatelessWidget {
                               ? CrossAxisAlignment.stretch
                               : CrossAxisAlignment.start,
                           children: [
-                            const Align(
+                            Align(
                               alignment: Alignment.topCenter,
                               child: Icon(
                                 Icons.search_off,
                                 size: 80,
-                                color: AppCustomColors.primaryBrand10,
+                                color: context.mcColors.textTertiary,
                               ),
                             ),
                             isCompactScreen ? text : Expanded(child: text),
@@ -173,14 +168,8 @@ class VcNotFoundStepView extends StatelessWidget {
                     height: 48,
                     child: ElevatedButton(
                       onPressed: onCancel,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        foregroundColor: Colors.white,
-                      ),
-                      child: Text(
-                        context.l10n.cancel,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
+                      style: context.destructiveElevatedButtonStyle,
+                      child: Text(context.l10n.cancel),
                     ),
                   ),
                 ),
@@ -190,10 +179,7 @@ class VcNotFoundStepView extends StatelessWidget {
                     height: 48,
                     child: ElevatedButton(
                       onPressed: onGenerate,
-                      child: Text(
-                        context.l10n.generateCredential,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
+                      child: Text(context.l10n.generateCredential),
                     ),
                   ),
                 ),
@@ -228,7 +214,6 @@ class GeneratingVcStepView extends StatelessWidget {
               textAlign: TextAlign.center,
               style: textTheme.titleLarge?.copyWith(
                 color: colorScheme.onSurface,
-                fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 24),
@@ -255,7 +240,7 @@ class VcGeneratedStepView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final bodyStyle = context.textTheme.bodyLarge;
 
     return SafeArea(
       child: Padding(
@@ -279,11 +264,11 @@ class VcGeneratedStepView extends StatelessWidget {
                           children: [
                             Text(
                               context.l10n.mockLivenessCredentialGenerated,
-                              style: const TextStyle(fontSize: 16),
+                              style: bodyStyle,
                             ),
                             Text(
                               context.l10n.mockLivenessCredentialNext,
-                              style: const TextStyle(fontSize: 16),
+                              style: bodyStyle,
                             ),
                           ],
                         );
@@ -297,12 +282,12 @@ class VcGeneratedStepView extends StatelessWidget {
                               ? CrossAxisAlignment.stretch
                               : CrossAxisAlignment.start,
                           children: [
-                            const Align(
+                            Align(
                               alignment: Alignment.topCenter,
                               child: Icon(
                                 Icons.check_circle,
                                 size: 80,
-                                color: AppCustomColors.utilitySuccess100,
+                                color: context.mcColors.success,
                               ),
                             ),
                             isCompactScreen
@@ -340,13 +325,7 @@ class VcGeneratedStepView extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: onDoLater,
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: colorScheme.primary),
-                    ),
-                    child: Text(
-                      context.l10n.doLater,
-                      style: const TextStyle(color: Colors.white),
-                    ),
+                    child: Text(context.l10n.doLater),
                   ),
                 ),
                 Expanded(
@@ -400,7 +379,9 @@ class VcDetailsStepView extends StatelessWidget {
             Center(
               child: Text(
                 context.l10n.generatingZeroKnowledgeProof,
-                style: const TextStyle(fontSize: 14, color: Colors.black87),
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: context.mcColors.textSecondary,
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -410,14 +391,7 @@ class VcDetailsStepView extends StatelessWidget {
               Expanded(
                 child: ElevatedButton(
                   onPressed: isGenerating ? null : onCancel,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    foregroundColor: Colors.white,
-                    disabledBackgroundColor: Colors.red.withValues(alpha: 0.5),
-                    disabledForegroundColor: Colors.white.withValues(
-                      alpha: 0.5,
-                    ),
-                  ),
+                  style: context.destructiveElevatedButtonStyle,
                   child: Text(context.l10n.cancel),
                 ),
               ),

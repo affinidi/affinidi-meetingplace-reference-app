@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../infrastructure/extensions/build_context_extensions.dart';
+import '../themes/tokens/mc_radius.dart';
 
 class TabBarTab extends StatelessWidget {
   const TabBarTab({super.key, required this.label});
@@ -20,7 +21,7 @@ class TabBarTab extends StatelessWidget {
           constraints: const BoxConstraints(minWidth: _tabBarMinimumWidth),
           decoration: BoxDecoration(
             color: colorScheme.surfaceContainerHigh,
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(McRadius.md),
           ),
           child: Text(
             label,

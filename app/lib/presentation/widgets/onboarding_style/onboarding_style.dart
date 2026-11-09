@@ -1,25 +1,26 @@
 import 'package:flutter/material.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
-import '../../../infrastructure/extensions/color_extensions.dart';
 import '../../helpers/screensize_helper.dart';
+import '../../themes/tokens/mc_colors.dart';
+import '../../themes/tokens/mc_radius.dart';
+import '../../themes/tokens/mc_typography.dart';
 
-/// The blue gradient of onboarding, behind the linking and joining steps.
+/// The accent glow of onboarding, rising from the bottom of the canvas
+/// behind the linking and joining steps.
 BoxDecoration onboardingGradient(
   BuildContext context, {
   required double radius,
   BorderRadius? borderRadius,
 }) {
-  final colorScheme = context.colorScheme;
+  final mc = context.mcColors;
+  final glow = mc.accentGradient.colors.first.withValues(alpha: 0.3);
   return BoxDecoration(
     borderRadius: borderRadius,
     gradient: RadialGradient(
       center: Alignment.bottomCenter,
       radius: radius,
-      colors: [
-        colorScheme.primary.withLightness(0.3),
-        colorScheme.primary.withAlpha(249),
-      ],
+      colors: [Color.alphaBlend(glow, mc.canvas), mc.canvas],
     ),
   );
 }
@@ -63,6 +64,7 @@ class OnboardingLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
+    final mc = context.mcColors;
     final isSmallLandscape =
         ScreensizeHelper().isSmallScreen(context) &&
         ScreensizeHelper().isLandscape(context);
@@ -96,6 +98,8 @@ class OnboardingLayout extends StatelessWidget {
                             height: isSmallLandscape ? 64 : 96,
                             child: Image.asset(
                               'assets/images/meeting-place-splash-white-1024.png',
+                              color: mc.textPrimary,
+                              colorBlendMode: BlendMode.modulate,
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -103,7 +107,7 @@ class OnboardingLayout extends StatelessWidget {
                             context.l10n.appName,
                             textAlign: TextAlign.center,
                             style: context.textTheme.bodyLarge?.copyWith(
-                              color: Colors.white,
+                              color: mc.textPrimary,
                             ),
                           ),
                           SizedBox(height: isSmallLandscape ? 24 : 40),
@@ -121,6 +125,8 @@ class OnboardingLayout extends StatelessWidget {
                                 height: 40,
                                 child: Image.asset(
                                   'assets/images/powered_by_mpx.png',
+                                  color: mc.textPrimary,
+                                  colorBlendMode: BlendMode.modulate,
                                 ),
                               ),
                             ),
@@ -137,7 +143,7 @@ class OnboardingLayout extends StatelessWidget {
                   top: 4,
                   left: 4,
                   child: IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white),
+                    icon: Icon(Icons.close, color: mc.textPrimary),
                     tooltip: MaterialLocalizations.of(
                       context,
                     ).closeButtonTooltip,
@@ -152,7 +158,7 @@ class OnboardingLayout extends StatelessWidget {
   }
 }
 
-/// A step's heading, white and bold on the gradient.
+/// A step's heading, bold on the gradient.
 class OnboardingTitle extends StatelessWidget {
   const OnboardingTitle(this.text, {super.key, this.trailing});
 
@@ -179,23 +185,14 @@ class OnboardingTitle extends StatelessWidget {
       ),
       textAlign: TextAlign.center,
       style: context.textTheme.headlineMedium?.copyWith(
-        color: Colors.white,
-        fontWeight: FontWeight.bold,
+        color: context.mcColors.textPrimary,
         height: 1.3,
-        letterSpacing: -0.5,
-        shadows: [
-          Shadow(
-            color: Colors.black.withAlpha(120),
-            offset: const Offset(0, 2),
-            blurRadius: 8,
-          ),
-        ],
       ),
     );
   }
 }
 
-/// Text under a heading, muted white on the gradient.
+/// Text under a heading, muted on the gradient.
 class OnboardingSubtitle extends StatelessWidget {
   const OnboardingSubtitle(this.text, {super.key});
 
@@ -206,12 +203,14 @@ class OnboardingSubtitle extends StatelessWidget {
     return Text(
       text,
       textAlign: TextAlign.center,
-      style: context.textTheme.bodyMedium?.copyWith(color: Colors.white70),
+      style: context.textTheme.bodyMedium?.copyWith(
+        color: context.mcColors.textSecondary,
+      ),
     );
   }
 }
 
-/// A text input, frosted white on the gradient.
+/// A text input, a panel on the gradient.
 class OnboardingTextField extends StatelessWidget {
   const OnboardingTextField({
     super.key,
@@ -233,8 +232,9 @@ class OnboardingTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = context.textTheme;
+    final mc = context.mcColors;
     OutlineInputBorder border(Color color) => OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(McRadius.md),
       borderSide: BorderSide(color: color),
     );
     return TextField(
@@ -245,29 +245,30 @@ class OnboardingTextField extends StatelessWidget {
       keyboardType: TextInputType.url,
       textInputAction: TextInputAction.go,
       onSubmitted: onSubmitted,
-      style: textTheme.bodyMedium?.copyWith(color: Colors.white),
-      cursorColor: Colors.white,
+      style: textTheme.bodyMedium?.copyWith(color: mc.textPrimary),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: textTheme.bodyMedium?.copyWith(color: Colors.white70),
-        floatingLabelStyle: textTheme.bodyMedium?.copyWith(color: Colors.white),
+        labelStyle: textTheme.bodyMedium?.copyWith(color: mc.textSecondary),
+        floatingLabelStyle: textTheme.bodyMedium?.copyWith(
+          color: mc.textPrimary,
+        ),
         hintText: hint,
-        hintStyle: textTheme.bodyMedium?.copyWith(color: Colors.white38),
+        hintStyle: textTheme.bodyMedium?.copyWith(color: mc.textTertiary),
         filled: true,
-        fillColor: Colors.white.withAlpha(25),
+        fillColor: context.colorScheme.surfaceContainerLow,
         suffixIcon: suffixIcon,
-        suffixIconColor: Colors.white,
-        border: border(Colors.white.withAlpha(76)),
-        enabledBorder: border(Colors.white.withAlpha(76)),
-        disabledBorder: border(Colors.white.withAlpha(40)),
-        focusedBorder: border(Colors.white),
+        suffixIconColor: mc.textSecondary,
+        border: border(mc.hairlineStrong),
+        enabledBorder: border(mc.hairlineStrong),
+        disabledBorder: border(mc.hairline),
+        focusedBorder: border(McColors.blue),
       ),
     );
   }
 }
 
-/// The primary action: white, with the primary colour as text. Outlined, it
-/// is a white frame for a secondary action such as removing a link.
+/// The primary action, in the theme's primary button style. Outlined, it is
+/// a frame for a secondary action such as removing a link.
 class OnboardingButton extends StatelessWidget {
   const OnboardingButton({
     super.key,
@@ -286,41 +287,23 @@ class OnboardingButton extends StatelessWidget {
   Widget build(BuildContext context) {
     if (isLoading) return const Center(child: OnboardingSpinner());
     const padding = EdgeInsets.symmetric(vertical: 16);
-    final shape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12),
-    );
-    final text = Text(
-      label,
-      style: const TextStyle(fontWeight: FontWeight.bold),
-    );
+    final text = Text(label);
     if (isOutlined) {
       return OutlinedButton(
         onPressed: onPressed,
-        style: OutlinedButton.styleFrom(
-          foregroundColor: Colors.white,
-          side: const BorderSide(color: Colors.white),
-          padding: padding,
-          shape: shape,
-        ),
+        style: OutlinedButton.styleFrom(padding: padding),
         child: text,
       );
     }
     return ElevatedButton(
       onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.white,
-        foregroundColor: context.colorScheme.primary,
-        disabledBackgroundColor: Colors.white.withAlpha(60),
-        disabledForegroundColor: Colors.white70,
-        padding: padding,
-        shape: shape,
-      ),
+      style: ElevatedButton.styleFrom(padding: padding),
       child: text,
     );
   }
 }
 
-/// A less prominent action, such as Cancel: white text on the gradient.
+/// A less prominent action, such as Cancel: plain text on the gradient.
 class OnboardingTextButton extends StatelessWidget {
   const OnboardingTextButton({
     super.key,
@@ -335,13 +318,15 @@ class OnboardingTextButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextButton(
       onPressed: onPressed,
-      style: TextButton.styleFrom(foregroundColor: Colors.white),
+      style: TextButton.styleFrom(
+        foregroundColor: context.mcColors.textPrimary,
+      ),
       child: Text(label),
     );
   }
 }
 
-/// A frosted card with a title, [child], and a copy action when [onCopy] is
+/// A panel card with a title, [child], and a copy action when [onCopy] is
 /// given.
 class GlassCard extends StatelessWidget {
   const GlassCard({
@@ -359,18 +344,16 @@ class GlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final mc = context.mcColors;
     final titleText = Text(
       title,
-      style: const TextStyle(
-        color: Colors.white,
-        fontWeight: FontWeight.bold,
-        fontSize: 15,
-      ),
+      style: context.textTheme.titleSmall?.copyWith(color: mc.textPrimary),
     );
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: Colors.white.withAlpha(25),
-        borderRadius: BorderRadius.circular(16),
+        color: context.colorScheme.surfaceContainerLow,
+        border: Border.all(color: mc.hairline),
+        borderRadius: BorderRadius.circular(McRadius.lg),
       ),
       child: Padding(
         padding: EdgeInsets.fromLTRB(20, onCopy == null ? 16 : 8, 8, 16),
@@ -382,7 +365,7 @@ class GlassCard extends StatelessWidget {
                 children: [
                   Expanded(child: titleText),
                   IconButton(
-                    icon: const Icon(Icons.copy, size: 18, color: Colors.white),
+                    icon: Icon(Icons.copy, size: 18, color: mc.textSecondary),
                     tooltip: copyLabel,
                     onPressed: onCopy,
                   ),
@@ -401,10 +384,10 @@ class GlassCard extends StatelessWidget {
 }
 
 /// Small print on the gradient, such as a note under a card.
-TextStyle? onboardingNote(BuildContext context) =>
-    context.textTheme.bodySmall?.copyWith(color: Colors.white70);
+TextStyle? onboardingNote(BuildContext context) => context.textTheme.bodySmall
+    ?.copyWith(color: context.mcColors.textSecondary);
 
-/// A line in a glass card: a white icon, a title, and an optional
+/// A line in a glass card: an icon, a title, and an optional
 /// explanation.
 class OnboardingLine extends StatelessWidget {
   const OnboardingLine({
@@ -430,13 +413,14 @@ class OnboardingLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final mc = context.mcColors;
     return Row(
       crossAxisAlignment: trailing == null
           ? CrossAxisAlignment.start
           : CrossAxisAlignment.center,
       spacing: 12,
       children: [
-        Icon(icon, size: 20, color: Colors.white),
+        Icon(icon, size: 20, color: mc.textPrimary),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -450,17 +434,17 @@ class OnboardingLine extends StatelessWidget {
                   child: Text(
                     title,
                     style: context.textTheme.bodyMedium?.copyWith(
-                      color: Colors.white,
+                      color: mc.textPrimary,
                       decoration: TextDecoration.underline,
                       decorationStyle: TextDecorationStyle.dotted,
-                      decorationColor: Colors.white70,
+                      decorationColor: mc.textSecondary,
                     ),
                   ),
                 ),
                 null => Text(
                   title,
                   style: context.textTheme.bodyMedium?.copyWith(
-                    color: Colors.white,
+                    color: mc.textPrimary,
                   ),
                 ),
               },
@@ -487,16 +471,15 @@ class MonospaceDid extends StatelessWidget {
     return SelectableText(
       did,
       key: textKey,
-      style: context.textTheme.bodySmall?.copyWith(
-        color: Colors.white,
-        fontFamily: 'monospace',
+      style: McTypography.code.copyWith(
+        color: context.mcColors.textPrimary,
         height: 1.4,
       ),
     );
   }
 }
 
-/// A message in place on the gradient: frosted, or the error colours.
+/// A message in place on the gradient: a panel, or the error colours.
 class OnboardingMessage extends StatelessWidget {
   const OnboardingMessage(
     this.text, {
@@ -512,12 +495,16 @@ class OnboardingMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
+    final mc = context.mcColors;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: isError
             ? colorScheme.errorContainer
-            : Colors.white.withAlpha(25),
-        borderRadius: BorderRadius.circular(12),
+            : colorScheme.surfaceContainerLow,
+        border: Border.all(
+          color: isError ? mc.dangerText.withValues(alpha: 0.55) : mc.hairline,
+        ),
+        borderRadius: BorderRadius.circular(McRadius.md),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -526,7 +513,7 @@ class OnboardingMessage extends StatelessWidget {
           key: textKey,
           textAlign: TextAlign.center,
           style: context.textTheme.bodyMedium?.copyWith(
-            color: isError ? colorScheme.onErrorContainer : Colors.white,
+            color: isError ? colorScheme.onErrorContainer : mc.textPrimary,
           ),
         ),
       ),
@@ -534,7 +521,7 @@ class OnboardingMessage extends StatelessWidget {
   }
 }
 
-/// A white progress spinner for the gradient.
+/// A progress spinner for the gradient, in the theme's progress colour.
 class OnboardingSpinner extends StatelessWidget {
   const OnboardingSpinner({super.key, this.strokeWidth = 4});
 
@@ -542,14 +529,11 @@ class OnboardingSpinner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CircularProgressIndicator(
-      strokeWidth: strokeWidth,
-      color: Colors.white,
-    );
+    return CircularProgressIndicator(strokeWidth: strokeWidth);
   }
 }
 
-/// Where a flow of [total] steps stands: a thin white bar filled up to
+/// Where a flow of [total] steps stands: a thin bar filled up to
 /// [step], counted from 1, under the step's [title].
 class OnboardingStepProgress extends StatelessWidget {
   const OnboardingStepProgress({
@@ -574,13 +558,8 @@ class OnboardingStepProgress extends StatelessWidget {
           style: onboardingNote(context),
         ),
         ClipRRect(
-          borderRadius: BorderRadius.circular(2),
-          child: LinearProgressIndicator(
-            value: step / total,
-            minHeight: 4,
-            color: Colors.white,
-            backgroundColor: Colors.white24,
-          ),
+          borderRadius: BorderRadius.circular(McRadius.xs),
+          child: LinearProgressIndicator(value: step / total, minHeight: 4),
         ),
       ],
     );

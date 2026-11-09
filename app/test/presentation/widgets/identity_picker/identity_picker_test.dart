@@ -3,6 +3,7 @@ import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/identity_picker/identity_picker.dart';
 
 import '../../../fakes/fake_cache_manager.dart';
@@ -13,6 +14,7 @@ void main() {
     final deleted = <Identity>[];
     await tester.pumpWidget(
       MaterialApp(
+        theme: AppTheme.dark,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(

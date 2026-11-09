@@ -136,7 +136,7 @@ class _VideoAttachmentWidgetState extends ConsumerState<VideoAttachmentWidget> {
                 const SizedBox(height: 4),
                 Text(
                   context.l10n.mediaTapToRetry,
-                  style: const TextStyle(fontSize: 11),
+                  style: context.textTheme.labelSmall,
                 ),
               ],
             ),
@@ -145,6 +145,7 @@ class _VideoAttachmentWidgetState extends ConsumerState<VideoAttachmentWidget> {
       );
     }
 
+    final mc = context.mcColors;
     final bytes = _bytes;
     if (bytes == null) {
       return SizedBox(
@@ -153,21 +154,21 @@ class _VideoAttachmentWidgetState extends ConsumerState<VideoAttachmentWidget> {
         child: GestureDetector(
           onTap: _isDownloading ? null : _download,
           child: Card(
-            color: const Color.fromARGB(0, 10, 10, 10),
+            color: context.colorScheme.surfaceContainerHigh,
             clipBehavior: Clip.hardEdge,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10.0),
-            ),
-            elevation: 5,
             child: Center(
               child: _isDownloading
                   ? const CircularProgressIndicator()
-                  : const Column(
+                  : Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.video_file, color: Colors.white70, size: 48),
-                        SizedBox(height: 8),
-                        Icon(Icons.download, color: Colors.white70, size: 24),
+                        Icon(
+                          Icons.video_file,
+                          color: mc.textSecondary,
+                          size: 48,
+                        ),
+                        const SizedBox(height: 8),
+                        Icon(Icons.download, color: mc.textSecondary, size: 24),
                       ],
                     ),
             ),
@@ -182,16 +183,12 @@ class _VideoAttachmentWidgetState extends ConsumerState<VideoAttachmentWidget> {
       child: GestureDetector(
         onTap: () => unawaited(_openPlayer()),
         child: Card(
-          color: const Color.fromARGB(0, 10, 10, 10),
+          color: context.colorScheme.surfaceContainerHigh,
           clipBehavior: Clip.hardEdge,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          elevation: 5,
-          child: const Center(
+          child: Center(
             child: Icon(
               Icons.play_circle_outline,
-              color: Colors.white,
+              color: mc.textPrimary,
               size: 56,
             ),
           ),

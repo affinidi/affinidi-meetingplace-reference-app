@@ -27,7 +27,6 @@ class NewConnectionsMenu extends StatelessWidget {
     required BuildContext context,
     Identity? currentIdentity,
   }) => showModalBottomSheet<NewConnectionsMenuOption>(
-    backgroundColor: context.colorScheme.inverseSurface,
     useRootNavigator: true,
     isScrollControlled: true,
     showDragHandle: true,

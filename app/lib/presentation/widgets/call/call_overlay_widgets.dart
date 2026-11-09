@@ -16,7 +16,6 @@ class CallTopBarActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.customColors;
-    final colorScheme = context.colorScheme;
 
     return GestureDetector(
       onTap: onPressed,
@@ -27,7 +26,7 @@ class CallTopBarActionButton extends StatelessWidget {
           color: colors.darkGrey,
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, color: colorScheme.onSurface, size: 22),
+        child: Icon(icon, color: colors.pureWhite, size: 22),
       ),
     );
   }

@@ -20,7 +20,6 @@ class MediatorPickerMenu extends HookConsumerWidget {
     required Map<String, String> mediators,
   }) {
     return showModalBottomSheet<String>(
-      backgroundColor: context.colorScheme.inverseSurface,
       useRootNavigator: true,
       isScrollControlled: true,
       showDragHandle: true,

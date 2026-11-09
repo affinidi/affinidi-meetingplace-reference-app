@@ -8,7 +8,7 @@ import 'package:mpx_flutter_reference_app/domain/models/vrc/vrc_credential.dart'
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/verifiable_credential/verifiable_credential_screen.dart';
-import 'package:mpx_flutter_reference_app/presentation/themes/app_custom_colors.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 
 import 'fakes/fake_vrc_service.dart';
 import 'utils/app.dart';
@@ -18,7 +18,7 @@ const _credentialId = 'test-vrc-id';
 Widget _buildApp({required Widget home}) => MaterialApp(
   localizationsDelegates: AppLocalizations.localizationsDelegates,
   supportedLocales: AppLocalizations.supportedLocales,
-  theme: ThemeData(extensions: [AppCustomColors.dark]),
+  theme: AppTheme.dark,
   home: home,
 );
 

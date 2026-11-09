@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../infrastructure/extensions/build_context_extensions.dart';
-
+/// A panel card; colour, hairline border and radius come from the card
+/// theme.
 class AppCard extends StatelessWidget {
   const AppCard({
     super.key,
@@ -19,7 +19,6 @@ class AppCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: context.colorScheme.inverseSurface.withValues(alpha: 0.5),
       shape: shape,
       elevation: elevation,
       child: Padding(

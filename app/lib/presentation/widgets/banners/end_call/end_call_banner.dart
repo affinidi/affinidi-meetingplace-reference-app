@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../navigation/navigator.dart';
 import '../../../../navigation/routes/dashboard_routes.dart';
+import '../../../themes/tokens/mc_colors.dart';
 import 'end_call_banner_controller.dart';
 
 /// Banner shown when the user dismisses a missed or declined call screen.
@@ -21,7 +22,10 @@ class EndCallBanner extends ConsumerWidget {
     final bannerState = ref.watch(endCallBannerControllerProvider);
     if (bannerState == null) return const SizedBox.shrink();
 
-    final colorScheme = context.colorScheme;
+    // Call UI stays dark in both modes; the ended call is the danger icon,
+    // not a red fill.
+    final colors = context.customColors;
+    final onCall = colors.pureWhite;
     final l10n = context.l10n;
     final controller = ref.read(endCallBannerControllerProvider.notifier);
 
@@ -33,7 +37,7 @@ class EndCallBanner extends ConsumerWidget {
 
     final textStyle = (context.textTheme.bodyLarge ?? const TextStyle())
         .copyWith(
-          color: colorScheme.onError,
+          color: onCall,
           fontWeight: FontWeight.w600,
           decoration: TextDecoration.none,
         );
@@ -55,7 +59,7 @@ class EndCallBanner extends ConsumerWidget {
         child: Container(
           width: double.infinity,
           height: height,
-          color: colorScheme.error,
+          color: colors.callControlSurface,
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () {
@@ -73,7 +77,7 @@ class EndCallBanner extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(callIcon, color: colorScheme.onError, size: 24),
+                Icon(callIcon, color: McColors.dark.dangerText, size: 24),
                 const SizedBox(width: 8),
                 Flexible(
                   child: Text(
@@ -85,16 +89,12 @@ class EndCallBanner extends ConsumerWidget {
                 ),
                 Text(
                   ' - ',
-                  style: textStyle.copyWith(
-                    color: colorScheme.onError.withAlpha(204),
-                  ),
+                  style: textStyle.copyWith(color: onCall.withAlpha(204)),
                 ),
                 Flexible(
                   child: Text(
                     statusLabel,
-                    style: textStyle.copyWith(
-                      color: colorScheme.onError.withAlpha(204),
-                    ),
+                    style: textStyle.copyWith(color: onCall.withAlpha(204)),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),

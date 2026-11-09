@@ -7,7 +7,8 @@ import 'build_context_extensions.dart';
 extension ContactOriginExtensions on ContactOrigin {
   /// Return a color representing this origin.
   ///
-  /// Uses the theme's primary color for common origins, falls back to blueGrey.
+  /// Uses the theme's primary color for common origins, falls back to the
+  /// tertiary text colour.
   Color color(BuildContext context) {
     final colorScheme = context.colorScheme;
 
@@ -18,7 +19,7 @@ extension ContactOriginExtensions on ContactOrigin {
       case ContactOrigin.individualOfferRequested:
         return colorScheme.primary;
       default:
-        return Colors.blueGrey;
+        return context.mcColors.textTertiary;
     }
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../themes/tokens/mc_radius.dart';
 
 /// Data model for a single detail row in a credential card.
 class CredentialDetailRowData {
@@ -32,13 +33,14 @@ class CredentialCardContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final customColors = context.customColors;
+    final mc = context.mcColors;
+    final textTheme = context.textTheme;
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.black,
-        borderRadius: BorderRadius.circular(25.0),
-        border: Border.all(color: customColors.fromMeColor, width: 1),
+        color: context.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(McRadius.xl),
+        border: Border.all(color: mc.hairline),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -47,26 +49,14 @@ class CredentialCardContainer extends StatelessWidget {
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                stops: const [0.1647, 0.8365],
-                colors: [
-                  customColors.fromMeColor,
-                  customColors.fromMeDarkColor,
-                ],
-              ),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(24),
-                topRight: Radius.circular(24),
-              ),
+              border: Border(bottom: BorderSide(color: mc.hairline)),
             ),
             padding: const EdgeInsets.all(16.0),
             child: Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.verified_rounded,
-                  color: Colors.white,
+                  color: mc.highlightSecondary,
                   size: 24,
                 ),
                 const SizedBox(width: 12),
@@ -76,18 +66,14 @@ class CredentialCardContainer extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                        style: textTheme.titleMedium?.copyWith(
+                          color: mc.textPrimary,
                         ),
                       ),
                       Text(
                         subtitle,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
+                        style: textTheme.labelMedium?.copyWith(
+                          color: mc.textSecondary,
                         ),
                       ),
                     ],

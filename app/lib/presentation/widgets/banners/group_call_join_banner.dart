@@ -7,6 +7,7 @@ import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../screens/chat/audio_video_call/audio_video_call_screen.dart';
 import '../../screens/chat/audio_video_call/rules/call_ui_rules.dart';
 import '../../screens/chat/chat_screen_controller.dart';
+import '../../themes/tokens/mc_colors.dart';
 import 'active_call/active_call_controller.dart';
 
 class GroupCallJoinBanner extends ConsumerWidget {
@@ -30,18 +31,21 @@ class GroupCallJoinBanner extends ConsumerWidget {
       chatScreenControllerProvider(contactId).select((s) => s.isCallSupported),
     );
 
+    // Call UI stays dark in both modes, so it takes the dark mode's accent.
     return Container(
       width: double.infinity,
       color: context.customColors.darkGrey,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
         children: [
-          Icon(Icons.videocam, color: context.colorScheme.onSurface, size: 20),
+          Icon(Icons.videocam, color: context.customColors.pureWhite, size: 20),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               context.l10n.videoCallGroupCallActive,
-              style: context.textTheme.bodyMedium,
+              style: context.textTheme.bodyMedium?.copyWith(
+                color: context.customColors.pureWhite,
+              ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -61,7 +65,7 @@ class GroupCallJoinBanner extends ConsumerWidget {
                   }
                 : null,
             style: TextButton.styleFrom(
-              foregroundColor: context.customColors.success,
+              foregroundColor: McColors.dark.highlightSecondary,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               minimumSize: Size.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -69,7 +73,7 @@ class GroupCallJoinBanner extends ConsumerWidget {
             child: Text(
               context.l10n.videoCallGroupCallJoin,
               style: context.textTheme.labelMedium?.copyWith(
-                color: context.customColors.success,
+                color: McColors.dark.highlightSecondary,
               ),
             ),
           ),

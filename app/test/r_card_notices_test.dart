@@ -13,12 +13,14 @@ import 'package:mpx_flutter_reference_app/presentation/screens/chat/chat_items/c
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/chat_items/chat_r_card_sent_notice.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/chat_items/chat_r_card_updated_by_me_notice.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/chat_items/chat_r_cards_exchanged_notice.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 import 'package:ssi/ssi.dart';
 
 import 'fakes/fake_r_cards_service.dart';
 import 'utils/app.dart';
 
 Widget _l10n(Widget child) => MaterialApp(
+  theme: AppTheme.dark,
   localizationsDelegates: AppLocalizations.localizationsDelegates,
   supportedLocales: AppLocalizations.supportedLocales,
   home: Scaffold(body: child),

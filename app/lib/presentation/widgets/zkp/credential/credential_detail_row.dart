@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../infrastructure/extensions/build_context_extensions.dart';
+
 /// Data model for a single detail row in a credential
 class CredentialDetailRowData {
   const CredentialDetailRowData({required this.label, required this.value});
@@ -21,6 +23,8 @@ class CredentialDetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final mc = context.mcColors;
+    final textTheme = context.textTheme;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -30,17 +34,13 @@ class CredentialDetailRow extends StatelessWidget {
             width: 100,
             child: Text(
               '$label:',
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w500,
-                fontSize: 14,
-              ),
+              style: textTheme.labelLarge?.copyWith(color: mc.textSecondary),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(color: Colors.white, fontSize: 14),
+              style: textTheme.bodyMedium?.copyWith(color: mc.textPrimary),
             ),
           ),
         ],

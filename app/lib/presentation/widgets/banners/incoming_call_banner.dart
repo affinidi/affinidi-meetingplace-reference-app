@@ -8,6 +8,8 @@ import '../../../application/services/incoming_call_service/incoming_call_notifi
 import '../../../domain/models/contacts/contact_type.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../screens/chat/audio_video_call/audio_video_call_screen_controller.dart';
+import '../../themes/tokens/mc_colors.dart';
+import '../../themes/tokens/mc_radius.dart';
 import '../banners/active_call/active_call_controller.dart';
 import '../banners/incoming_call/incoming_call_banner_controller.dart';
 
@@ -120,7 +122,7 @@ class _IncomingCallBannerState extends ConsumerState<IncomingCallBanner>
         child: SlideTransition(
           position: _slideAnimation,
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(McRadius.lg),
             child: Container(
               color: context.customColors.incomingCallBannerBackground,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -151,7 +153,7 @@ class _IncomingCallBannerState extends ConsumerState<IncomingCallBanner>
                         Text(
                           callerName,
                           style: context.textTheme.titleLarge?.copyWith(
-                            color: context.colorScheme.onSurface,
+                            color: context.customColors.pureWhite,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -163,7 +165,10 @@ class _IncomingCallBannerState extends ConsumerState<IncomingCallBanner>
                   if (!isGroup)
                     _ActionButton(
                       icon: Icons.call_end,
-                      color: context.colorScheme.error,
+                      // Call UI stays dark, so decline is the dark mode's
+                      // danger outline, never a red fill.
+                      color: McColors.dark.dangerText,
+                      isOutlined: true,
                       semanticsLabel: context.l10n.incomingCallBannerDecline,
                       onTap: () => bannerNotifier.dismiss(callId: event.callId),
                     ),
@@ -172,7 +177,7 @@ class _IncomingCallBannerState extends ConsumerState<IncomingCallBanner>
                     TextButton(
                       onPressed: onJoinOrAccept,
                       style: TextButton.styleFrom(
-                        foregroundColor: context.customColors.success,
+                        foregroundColor: McColors.dark.highlightSecondary,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 12,
                           vertical: 4,
@@ -183,14 +188,14 @@ class _IncomingCallBannerState extends ConsumerState<IncomingCallBanner>
                       child: Text(
                         context.l10n.videoCallGroupCallJoin,
                         style: context.textTheme.labelMedium?.copyWith(
-                          color: context.customColors.success,
+                          color: McColors.dark.highlightSecondary,
                         ),
                       ),
                     )
                   else
                     _ActionButton(
                       icon: Icons.call,
-                      color: context.colorScheme.primary,
+                      color: McColors.blue,
                       semanticsLabel: context.l10n.incomingCallBannerAccept,
                       onTap: onJoinOrAccept,
                     ),
@@ -210,10 +215,12 @@ class _ActionButton extends StatelessWidget {
     required this.color,
     required this.semanticsLabel,
     required this.onTap,
+    this.isOutlined = false,
   });
 
   final IconData icon;
   final Color color;
+  final bool isOutlined;
   final String semanticsLabel;
   final VoidCallback onTap;
 
@@ -224,10 +231,19 @@ class _ActionButton extends StatelessWidget {
       button: true,
       child: GestureDetector(
         onTap: onTap,
-        child: CircleAvatar(
-          radius: 18,
-          backgroundColor: color,
-          child: Icon(icon, color: context.colorScheme.onPrimary, size: 18),
+        child: Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: isOutlined ? color.withValues(alpha: 0.12) : color,
+            border: isOutlined ? Border.all(color: color) : null,
+          ),
+          child: Icon(
+            icon,
+            color: isOutlined ? color : McColors.textOnPrimary,
+            size: 18,
+          ),
         ),
       ),
     );

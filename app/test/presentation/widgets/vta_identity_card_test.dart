@@ -12,6 +12,7 @@ import 'package:mpx_flutter_reference_app/domain/models/contact_card/contact_car
 import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/cache_manager_provider.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/vta_identity_card.dart';
 
 import '../../fakes/fake_cache_manager.dart';
@@ -45,6 +46,7 @@ Future<void> _pump(WidgetTester tester, VtaIdentityCard card) =>
           cacheManagerProvider.overrideWith((ref) => FakeCacheManager()),
         ],
         child: MaterialApp(
+          theme: AppTheme.dark,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(body: card),
@@ -240,6 +242,7 @@ void main() {
             vtcServiceProvider.overrideWithValue(vtc!),
           ],
           child: MaterialApp(
+            theme: AppTheme.dark,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             home: Scaffold(

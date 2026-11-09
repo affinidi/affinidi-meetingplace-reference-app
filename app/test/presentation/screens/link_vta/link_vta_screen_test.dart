@@ -15,6 +15,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/vtc/user_verification_k
 import 'package:mpx_flutter_reference_app/infrastructure/vtc/vta_enrolment_client.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/link_vta/link_vta_screen.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 
 import '../../../fakes/fake_vta.dart';
 import '../../../fakes/fake_vta_host.dart';
@@ -23,7 +24,7 @@ void main() {
   late FakeVta vta;
   late FakeVtaHost host;
 
-  Future<void> pumpScreen(WidgetTester tester) async {
+  Future<void> pumpScreen(WidgetTester tester, {ThemeData? theme}) async {
     tester.view
       ..physicalSize = const Size(1179, 2556)
       ..devicePixelRatio = 3;
@@ -49,10 +50,11 @@ void main() {
             const VtaLinkTiming(interval: Duration(hours: 1)),
           ),
         ],
-        child: const MaterialApp(
+        child: MaterialApp(
+          theme: theme ?? AppTheme.dark,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: LinkVtaScreen(),
+          home: const LinkVtaScreen(),
         ),
       ),
     );
@@ -86,6 +88,19 @@ void main() {
       };
     host = FakeVtaHost(vtaDid: vta.did);
   });
+
+  for (final (name, theme) in [
+    ('light', AppTheme.light),
+    ('dark', AppTheme.dark),
+  ]) {
+    testWidgets('renders in the $name theme', (tester) async {
+      await pumpScreen(tester, theme: theme);
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Connect your VTA'), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    });
+  }
 
   testWidgets('asks for the VTA DID', (tester) async {
     await pumpScreen(tester);

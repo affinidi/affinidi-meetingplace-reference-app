@@ -3,7 +3,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../screens/chat/chat_items/concierge_message.dart';
-import '../../themes/app_custom_colors.dart';
+import '../../themes/tokens/mc_colors.dart';
+import '../../themes/tokens/mc_radius.dart';
 
 /// Types of ZKP notices that can be displayed
 enum ZkpNoticeType {
@@ -136,7 +137,7 @@ class _ZkpBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
+    final mc = context.mcColors;
     final textTheme = context.textTheme;
 
     return Align(
@@ -157,17 +158,10 @@ class _ZkpBadge extends StatelessWidget {
                 0,
               ),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: const Alignment(-0.5, -1.3),
-            end: const Alignment(0.342, 2.2),
-            colors: [Colors.black, colorScheme.primary],
-            stops: const [0.4, 1.075],
-          ),
-          borderRadius: BorderRadius.circular(20),
+          color: context.colorScheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(McRadius.lg),
           border: Border.all(
-            color: isFromMe
-                ? colorScheme.primary
-                : colorScheme.surfaceContainerHigh,
+            color: isFromMe ? McColors.blue : mc.hairline,
             width: 4,
           ),
         ),
@@ -178,23 +172,20 @@ class _ZkpBadge extends StatelessWidget {
             Container(
               width: 40,
               height: 40,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 shape: BoxShape.circle,
-                color: colorScheme.primary.withAlpha(77),
+                color: McColors.controlHoverWash,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.how_to_reg,
                 size: 22,
-                color: Colors.white,
+                color: mc.highlightSecondary,
               ),
             ),
             const SizedBox(width: 12),
             Text(
               context.l10n.humanZkpAbbreviated,
-              style: textTheme.bodyMedium?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-              ),
+              style: textTheme.labelLarge?.copyWith(color: mc.textPrimary),
             ),
           ],
         ),
@@ -216,47 +207,35 @@ class _ProofRequestNotice extends StatelessWidget {
   final VoidCallback? onGenerateProof;
   final VoidCallback? onDoLater;
 
-  static const _cardDecoration = BoxDecoration(
-    borderRadius: BorderRadius.all(Radius.circular(10)),
-    gradient: RadialGradient(
-      center: Alignment.bottomCenter,
-      radius: 2,
-      colors: [
-        AppCustomColors.conciergeCardGradientStart,
-        AppCustomColors.conciergeCardGradientEnd,
-      ],
-    ),
-  );
-
-  static final _outlineButtonShape = RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(8),
-    side: const BorderSide(color: Colors.white),
-  );
-
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final mc = context.mcColors;
+    final textTheme = context.textTheme;
+    final outlineButtonShape = StadiumBorder(
+      side: BorderSide(color: mc.hairlineStrong),
+    );
 
     return Container(
       constraints: const BoxConstraints(maxWidth: 600),
       padding: const EdgeInsets.all(10),
-      decoration: _cardDecoration,
+      decoration: BoxDecoration(
+        color: context.colorScheme.surfaceContainerLow,
+        border: Border.all(color: mc.hairline),
+        borderRadius: BorderRadius.circular(McRadius.md),
+      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Text(
             l10n.genWordConciergeMessage,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
+            style: textTheme.labelMedium?.copyWith(color: mc.textPrimary),
           ),
           Text(
             l10n.zkpNoticeRequest(contactName ?? l10n.proofFlowThisContact),
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white, fontSize: 12),
+            style: textTheme.bodySmall?.copyWith(color: mc.textSecondary),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -266,19 +245,14 @@ class _ProofRequestNotice extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 10, right: 10),
                   child: TextButton(
                     style: TextButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: AppCustomColors.conciergeActionOnWhite,
+                      backgroundColor: McColors.blue,
+                      foregroundColor: McColors.textOnPrimary,
                       padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                       minimumSize: const Size(80, 25),
-                      shape: _outlineButtonShape,
+                      shape: const StadiumBorder(),
                     ),
                     onPressed: onGenerateProof,
-                    child: Text(
-                      l10n.generateProof,
-                      style: const TextStyle(
-                        color: AppCustomColors.conciergeActionOnWhite,
-                      ),
-                    ),
+                    child: Text(l10n.generateProof),
                   ),
                 ),
               if (onDoLater != null)
@@ -286,15 +260,13 @@ class _ProofRequestNotice extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 10),
                   child: TextButton(
                     style: TextButton.styleFrom(
+                      foregroundColor: mc.textPrimary,
                       padding: EdgeInsets.zero,
                       minimumSize: const Size(80, 25),
-                      shape: _outlineButtonShape,
+                      shape: outlineButtonShape,
                     ),
                     onPressed: onDoLater,
-                    child: Text(
-                      l10n.doLater,
-                      style: const TextStyle(color: Colors.white),
-                    ),
+                    child: Text(l10n.doLater),
                   ),
                 ),
             ],
