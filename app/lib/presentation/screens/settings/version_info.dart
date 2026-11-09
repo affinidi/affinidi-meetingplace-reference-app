@@ -54,21 +54,15 @@ class _VersionInfoSectionState extends ConsumerState<_VersionInfoSection> {
             if (!isDebugMode) {
               controller.toggleDebugMode();
 
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  backgroundColor: context.customColors.success,
-                  content: Text(l10n.easterEggEnabled),
-                ),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(l10n.easterEggEnabled)));
             } else {
               controller.toggleDebugMode();
 
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  backgroundColor: colorScheme.primary,
-                  content: Text(l10n.debugModeDisabled),
-                ),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(l10n.debugModeDisabled)));
             }
 
             _tapCount = 0;
@@ -83,7 +77,7 @@ class _VersionInfoSectionState extends ConsumerState<_VersionInfoSection> {
               prefix: Row(
                 children: [
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(6.0),
+                    borderRadius: BorderRadius.circular(McRadius.xs),
                     child: Container(
                       height: 24.0,
                       width: 24.0,

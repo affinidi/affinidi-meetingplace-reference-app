@@ -12,6 +12,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_reposi
 import 'package:mpx_flutter_reference_app/infrastructure/vtc/user_verification_key.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/settings/linked_vta_section.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 
 import '../../../fakes/fake_vta.dart';
 
@@ -26,7 +27,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Future<void> pumpSection(WidgetTester tester) async {
+  Future<void> pumpSection(WidgetTester tester, {ThemeData? theme}) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -37,6 +38,7 @@ void main() {
           ),
         ],
         child: MaterialApp(
+          theme: theme,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           // As in the app: the settings live in an end drawer.
@@ -94,6 +96,19 @@ void main() {
   });
 
   group('LinkedVtaSection', () {
+    for (final (name, theme) in [
+      ('light', AppTheme.light),
+      ('dark', AppTheme.dark),
+    ]) {
+      testWidgets('renders in the $name theme', (tester) async {
+        await pumpSection(tester, theme: theme);
+
+        expect(tester.takeException(), isNull);
+        expect(find.byKey(const Key('vta_did_field')), findsOneWidget);
+        await unmount(tester);
+      });
+    }
+
     testWidgets('shows what to grant, and that it waits', (tester) async {
       vta.answers[VtaTask.whoAmI] = {
         'roles': ['reader'],

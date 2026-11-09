@@ -23,7 +23,11 @@ class _DebugSettingsSection extends ConsumerWidget {
         FormCard(
           title: context.l10n.debugSettingsTitle,
           child: ListTile(
-            leading: const Icon(Icons.terminal, color: Colors.white, size: 20),
+            leading: Icon(
+              Icons.terminal,
+              color: context.mcColors.textPrimary,
+              size: 20,
+            ),
             title: Text(context.l10n.debugPanelTitle),
             subtitle: Text(context.l10n.debugPanelSubtitle),
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),

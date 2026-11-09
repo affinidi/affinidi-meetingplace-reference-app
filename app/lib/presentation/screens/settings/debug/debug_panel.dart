@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../infrastructure/loggers/app_logger/app_log_entry.dart';
 import '../../../../infrastructure/loggers/app_logger/log_constants.dart';
+import '../../../themes/tokens/mc_typography.dart';
 import 'debug_panel_controller.dart';
 
 class DebugPanel extends HookConsumerWidget {
@@ -26,12 +27,9 @@ class DebugPanel extends HookConsumerWidget {
 
     Clipboard.setData(ClipboardData(text: buffer.toString()));
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(context.l10n.debugPanelLogsCopied),
-        backgroundColor: context.colorScheme.primary,
-      ),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(context.l10n.debugPanelLogsCopied)));
   }
 
   @override
@@ -118,11 +116,8 @@ class _LogsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    final textTheme = context.textTheme;
-
     return Container(
-      color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+      color: context.colorScheme.surfaceContainerLow,
       child: Scrollbar(
         controller: scrollController,
         thumbVisibility: true,
@@ -133,12 +128,8 @@ class _LogsList extends StatelessWidget {
           controller: scrollController,
           padding: const EdgeInsets.all(8),
           itemCount: logs.length,
-          itemBuilder: (context, index) => _LogEntry(
-            log: logs[index],
-            textTheme: textTheme,
-            colorScheme: colorScheme,
-            controller: controller,
-          ),
+          itemBuilder: (context, index) =>
+              _LogEntry(log: logs[index], controller: controller),
         ),
       ),
     );
@@ -146,16 +137,9 @@ class _LogsList extends StatelessWidget {
 }
 
 class _LogEntry extends StatelessWidget {
-  const _LogEntry({
-    required this.log,
-    required this.textTheme,
-    required this.colorScheme,
-    required this.controller,
-  });
+  const _LogEntry({required this.log, required this.controller});
 
   final AppLogEntry log;
-  final TextTheme textTheme;
-  final ColorScheme colorScheme;
   final DebugPanelController controller;
 
   static final _timeFormatter = DateFormat.Hms();
@@ -185,6 +169,7 @@ class _LogEntry extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final logColors = context.logColors;
+    final mc = context.mcColors;
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 1),
@@ -192,17 +177,16 @@ class _LogEntry extends StatelessWidget {
       child: RichText(
         softWrap: true,
         text: TextSpan(
-          style: textTheme.bodySmall?.copyWith(
-            fontFamily: 'FiraMono',
+          style: McTypography.code.copyWith(
             height: 1.4,
-            color: colorScheme.onSurface,
+            color: mc.textPrimary,
             fontSize: 10,
           ),
           children: [
             TextSpan(
               text: '[${_timeFormatter.format(log.timestamp)}] ',
               style: TextStyle(
-                color: colorScheme.onSurface.withValues(alpha: 0.6),
+                color: mc.textSecondary,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -214,7 +198,7 @@ class _LogEntry extends StatelessWidget {
                   loggerName: log.loggerName,
                   context: context,
                 ),
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
               ),
             ),
             TextSpan(
@@ -228,7 +212,7 @@ class _LogEntry extends StatelessWidget {
             ),
             TextSpan(
               text: log.message.trim(),
-              style: TextStyle(color: colorScheme.onSurface),
+              style: TextStyle(color: mc.textPrimary),
             ),
           ],
         ),
@@ -242,7 +226,7 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
+    final mc = context.mcColors;
     final textTheme = context.textTheme;
     final l10n = context.l10n;
 
@@ -250,24 +234,16 @@ class _EmptyState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.terminal,
-            size: 64,
-            color: colorScheme.onSurface.withValues(alpha: 0.5),
-          ),
+          Icon(Icons.terminal, size: 64, color: mc.textTertiary),
           const SizedBox(height: 16),
           Text(
             l10n.debugPanelNoLogs,
-            style: textTheme.titleMedium?.copyWith(
-              color: colorScheme.onSurface.withValues(alpha: 0.7),
-            ),
+            style: textTheme.titleMedium?.copyWith(color: mc.textSecondary),
           ),
           const SizedBox(height: 8),
           Text(
             l10n.debugPanelLogsAppearMessage,
-            style: textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurface.withValues(alpha: 0.5),
-            ),
+            style: textTheme.bodyMedium?.copyWith(color: mc.textTertiary),
             textAlign: TextAlign.center,
           ),
         ],
@@ -289,14 +265,15 @@ class _DebugFAB extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
+    final mc = context.mcColors;
 
+    // A scroll helper, not the primary action: raised surface, no blue fill.
     return FloatingActionButton(
       onPressed: isAtBottom ? onScrollToTop : onScrollToBottom,
-      backgroundColor: Colors.white.withValues(alpha: 0.4),
-      elevation: 2,
+      backgroundColor: context.colorScheme.surfaceContainerHigh,
+      elevation: 0,
       mini: true,
-      shape: const CircleBorder(),
+      shape: CircleBorder(side: BorderSide(color: mc.hairlineStrong)),
       child: AnimatedSwitcher(
         duration: const Duration(milliseconds: 200),
         child: Icon(
@@ -304,7 +281,7 @@ class _DebugFAB extends StatelessWidget {
               ? Icons.keyboard_arrow_up_rounded
               : Icons.keyboard_arrow_down_rounded,
           key: ValueKey(isAtBottom),
-          color: colorScheme.onPrimary,
+          color: mc.textPrimary,
         ),
       ),
     );

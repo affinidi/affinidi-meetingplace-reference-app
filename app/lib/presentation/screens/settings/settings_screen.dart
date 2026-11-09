@@ -13,6 +13,7 @@ import '../../../navigation/tabs/tabs.dart';
 import '../../dialogs/qr_code_picker/qr_code_picker.dart';
 import '../../dialogs/settings/delete_mediator_dialog.dart';
 import '../../dialogs/settings/rename_mediator_dialog.dart';
+import '../../themes/tokens/mc_radius.dart';
 import '../../widgets/async_loaders/modal_async_loading_status.dart';
 import '../../widgets/form_rows/form_card.dart';
 import '../../widgets/form_rows/form_row_toggle.dart';

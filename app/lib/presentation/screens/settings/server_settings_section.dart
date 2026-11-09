@@ -38,7 +38,7 @@ class _ServerSettingsSection extends ConsumerWidget {
                     return RadioListTile(
                       radioSide: BorderSide(
                         width: 0.8,
-                        color: Colors.grey.shade600,
+                        color: context.mcColors.control,
                       ),
                       value: did,
                       title: Row(
@@ -67,7 +67,9 @@ class _ServerSettingsSection extends ConsumerWidget {
                 title: Center(
                   child: Text(
                     context.l10n.scanCustomMediatorQrCode,
-                    style: TextStyle(color: context.colorScheme.secondary),
+                    style: TextStyle(
+                      color: context.mcColors.highlightSecondary,
+                    ),
                   ),
                 ),
                 onTap: () async {
@@ -113,7 +115,6 @@ class _ServerSettingsSection extends ConsumerWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(context.l10n.renamedMediatorSuccess(newName)),
-              backgroundColor: context.customColors.success,
             ),
           );
         }
@@ -121,8 +122,10 @@ class _ServerSettingsSection extends ConsumerWidget {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(context.l10n.failedToRenameMediator(e.toString())),
-              backgroundColor: context.colorScheme.error,
+              content: Text(
+                context.l10n.failedToRenameMediator(e.toString()),
+                style: TextStyle(color: context.mcColors.dangerText),
+              ),
             ),
           );
         }
@@ -145,18 +148,17 @@ class _ServerSettingsSection extends ConsumerWidget {
 
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(context.l10n.deletedMediatorSuccess(name)),
-              backgroundColor: context.customColors.success,
-            ),
+            SnackBar(content: Text(context.l10n.deletedMediatorSuccess(name))),
           );
         }
       } catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(context.l10n.failedToDeleteMediator(e.toString())),
-              backgroundColor: context.colorScheme.error,
+              content: Text(
+                context.l10n.failedToDeleteMediator(e.toString()),
+                style: TextStyle(color: context.mcColors.dangerText),
+              ),
             ),
           );
         }
