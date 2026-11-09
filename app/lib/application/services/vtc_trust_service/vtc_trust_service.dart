@@ -1,0 +1,281 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meeting_place_vtc/meeting_place_vtc.dart';
+
+import '../../../domain/models/vtc/vtc_community.dart';
+import '../../../domain/models/vtc/vtc_member_link.dart';
+import '../../../domain/repositories/vtc_repository.dart';
+import '../../../infrastructure/loggers/app_logger/app_logger.dart';
+import '../../../infrastructure/providers/app_logger_provider.dart';
+import '../../../infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
+import '../vtc_service/vtc_service.dart';
+
+/// Why vouching for a member, or finding one, did not work.
+enum VtcTrustFailure {
+  /// The phone no longer holds a membership of the community.
+  notMember,
+
+  /// The member vouched for is no member of the community any more.
+  contactNotMember,
+
+  /// The member has not let other members find them.
+  notFindable,
+
+  /// A search too short for the community.
+  searchTooShort,
+
+  /// The community did not accept the VTA's signature.
+  proofRejected,
+
+  /// The community's rules do not allow it.
+  notAllowed,
+
+  /// The community asks to try again later.
+  tryLater,
+
+  /// No VTA is linked to sign with.
+  vtaUnavailable,
+
+  /// The community or the VTA could not be reached.
+  network,
+
+  /// Anything else.
+  failed,
+}
+
+/// Vouching for a member, or finding one, that did not work.
+class VtcTrustException implements Exception {
+  /// Creates a [VtcTrustException].
+  const VtcTrustException(this.failure);
+
+  /// Why.
+  final VtcTrustFailure failure;
+
+  @override
+  String toString() => 'VtcTrustException(${failure.name})';
+}
+
+/// The vouches between the member and one other member of a community.
+class VtcEdges {
+  /// Creates a [VtcEdges].
+  const VtcEdges({this.outgoing, this.incoming});
+
+  /// The member's vouch for the other member.
+  final PublishedRelationship? outgoing;
+
+  /// The other member's vouch for the member.
+  final PublishedRelationship? incoming;
+
+  /// Whether the other member vouched for the member and has not been
+  /// vouched for back.
+  bool get canVouchBack => incoming != null && outgoing == null;
+}
+
+/// Vouching for other members of the communities the member belongs to:
+/// finding them in the community's directory, remembering which member a
+/// contact is, and publishing, reading and withdrawing vouches.
+///
+/// A vouch names the identities the two joined the community with, never
+/// a Meeting Place DID. The member only ever withdraws their own vouches,
+/// and vouching again while one stands publishes nothing, as a new vouch
+/// would replace the standing one. Never logs a DID or a name.
+class VtcTrustService {
+  /// Creates a [VtcTrustService].
+  VtcTrustService(this._ref, {VtcRepository? repository})
+    : _repository = repository ?? SecureStorageVtcRepository();
+
+  static const _logKey = 'VtcTrustService';
+
+  final Ref _ref;
+  final VtcRepository _repository;
+
+  VtcService get _vtc => _ref.read(vtcServiceProvider);
+
+  AppLogger get _logger => _ref.read(appLoggerProvider);
+
+  /// The communities the member can vouch in: those they are a member of.
+  Future<List<VtcCommunity>> communities() async => [
+    ...(await _repository.communities()).where((c) => c.isMember),
+  ];
+
+  /// The communities in which the member picked who the contact
+  /// [channelDid] is.
+  Future<List<VtcMemberLink>> links(String channelDid) =>
+      _repository.memberLinks(channelDid: channelDid);
+
+  /// The other members of [communityDid] whose entries match [query].
+  ///
+  /// Throws [VtcTrustException].
+  Future<List<DirectoryEntry>> findMembers(
+    String communityDid, {
+    required String query,
+  }) => _guard('finding members', () async {
+    final me = await _personaDid(communityDid);
+    final found = await _vtc.searchMembers(communityDid, query: query);
+    return [...found.where((entry) => entry.did != me)];
+  });
+
+  /// Remembers that the contact [channelDid] is the member of [entry] in
+  /// [communityDid].
+  ///
+  /// Throws [VtcTrustException] with [VtcTrustFailure.notFindable] when the
+  /// entry shows no DID to vouch for.
+  Future<VtcMemberLink> link({
+    required String channelDid,
+    required String communityDid,
+    required DirectoryEntry entry,
+  }) async {
+    final personaDid = entry.did;
+    if (personaDid == null) {
+      throw const VtcTrustException(VtcTrustFailure.notFindable);
+    }
+    final link = VtcMemberLink(
+      communityDid: communityDid,
+      channelDid: channelDid,
+      entryId: entry.entryId,
+      personaDid: personaDid,
+      name: entry.displayName ?? entry.nickname ?? '',
+      linkedAt: DateTime.now(),
+    );
+    await _repository.saveMemberLink(link);
+    return link;
+  }
+
+  /// The vouches between the member and [personaDid] in [communityDid].
+  ///
+  /// Throws [VtcTrustException].
+  Future<VtcEdges> edgesWith(String communityDid, String personaDid) async =>
+      (await edgesByMember(communityDid))[personaDid] ?? const VtcEdges();
+
+  /// The vouches between the member and every other member of
+  /// [communityDid], by that member's DID.
+  ///
+  /// Throws [VtcTrustException].
+  Future<Map<String, VtcEdges>> edgesByMember(String communityDid) =>
+      _guard('reading vouches', () async {
+        final me = await _personaDid(communityDid);
+        final edges = <String, VtcEdges>{};
+        for (final edge in await _vtc.relationshipsOf(communityDid)) {
+          if (edge.issuerDid == me) {
+            final other = edges[edge.subjectDid] ?? const VtcEdges();
+            edges[edge.subjectDid] = VtcEdges(
+              outgoing: edge,
+              incoming: other.incoming,
+            );
+          } else if (edge.subjectDid == me) {
+            final other = edges[edge.issuerDid] ?? const VtcEdges();
+            edges[edge.issuerDid] = VtcEdges(
+              outgoing: other.outgoing,
+              incoming: edge,
+            );
+          }
+        }
+        return edges;
+      });
+
+  /// Vouches for [personaDid] in [communityDid], or returns the member's
+  /// standing vouch for them without publishing another.
+  ///
+  /// Throws [VtcTrustException].
+  Future<PublishedRelationship> vouch(
+    String communityDid, {
+    required String personaDid,
+  }) async {
+    final standing = (await edgesWith(communityDid, personaDid)).outgoing;
+    if (standing != null) return standing;
+    return _guard(
+      'vouching',
+      () => _vtc.publishRelationship(communityDid, subjectDid: personaDid),
+    );
+  }
+
+  /// Withdraws [edge], the member's own vouch in [communityDid].
+  ///
+  /// Throws [ArgumentError] for a vouch the member did not make, and
+  /// [VtcTrustException].
+  Future<void> withdraw(String communityDid, PublishedRelationship edge) async {
+    final me = await _guard('withdrawing', () => _personaDid(communityDid));
+    if (edge.issuerDid != me) {
+      throw ArgumentError.value(edge.id, 'edge', 'is not the member\'s');
+    }
+    await _guard(
+      'withdrawing',
+      () => _vtc.withdrawRelationship(communityDid, id: edge.id),
+    );
+  }
+
+  /// Whether other members of [communityDid] can find the member.
+  ///
+  /// Throws [VtcTrustException].
+  Future<bool> isFindable(String communityDid) => _guard(
+    'reading the directory card',
+    () async =>
+        (await _vtc.myDirectoryCard(communityDid)).isDidVisibleToMembers,
+  );
+
+  /// Lets other members of [communityDid] find the member when
+  /// [findable], or stops them otherwise.
+  ///
+  /// Throws [VtcTrustException], with [VtcTrustFailure.notAllowed] when the
+  /// community does not let members be found.
+  Future<void> setFindable(String communityDid, {required bool findable}) =>
+      _guard(
+        'changing the directory card',
+        () => _vtc.setFindableByMembers(communityDid, findable: findable),
+      );
+
+  Future<String> _personaDid(String communityDid) async {
+    final community = await _repository.findCommunity(communityDid);
+    if (community == null || !community.isMember) {
+      throw const NotACommunityMemberException();
+    }
+    return community.personaDid;
+  }
+
+  Future<T> _guard<T>(String action, Future<T> Function() run) async {
+    try {
+      return await run();
+    } on VtcTrustException {
+      rethrow;
+    } on NotACommunityMemberException {
+      throw _failed(action, VtcTrustFailure.notMember);
+    } on VtaNotLinkedException {
+      throw _failed(action, VtcTrustFailure.vtaUnavailable);
+    } on MeetingPlaceVtcSDKException catch (error) {
+      throw _failed(action, _failureOf(error), code: error.refusalCode);
+    }
+  }
+
+  VtcTrustException _failed(
+    String action,
+    VtcTrustFailure failure, {
+    String? code,
+  }) {
+    _logger.warning('Failed $action: ${code ?? failure.name}', name: _logKey);
+    return VtcTrustException(failure);
+  }
+
+  static VtcTrustFailure _failureOf(MeetingPlaceVtcSDKException error) =>
+      switch (error.code) {
+        MeetingPlaceVtcSDKErrorCode.refused => switch (error.refusalCode) {
+          RelationshipTask.subjectNotMember => VtcTrustFailure.contactNotMember,
+          RelationshipTask.vrcInvalid => VtcTrustFailure.proofRejected,
+          DirectoryTask.queryTooShort => VtcTrustFailure.searchTooShort,
+          DirectoryTask.aboveCeiling ||
+          'permissionDenied' => VtcTrustFailure.notAllowed,
+          'unavailable' => VtcTrustFailure.tryLater,
+          final code? when code.endsWith(':rateLimited') =>
+            VtcTrustFailure.tryLater,
+          _ => VtcTrustFailure.failed,
+        },
+        MeetingPlaceVtcSDKErrorCode.transportFailed ||
+        MeetingPlaceVtcSDKErrorCode.didResolutionFailed =>
+          VtcTrustFailure.network,
+        _ => VtcTrustFailure.failed,
+      };
+}
+
+/// The app's [VtcTrustService].
+final vtcTrustServiceProvider = Provider<VtcTrustService>(
+  VtcTrustService.new,
+  name: 'vtcTrustServiceProvider',
+);
