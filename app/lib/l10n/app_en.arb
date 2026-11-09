@@ -3313,6 +3313,32 @@
 	"@vtcJoinTrailCardSummary": {
 		"description": "Trail step summary: when the membership card comes and where it is kept"
 	},
+	"vtcJoinTrailWithdrawn": "Withdrawn, signed by your VTA",
+	"@vtcJoinTrailWithdrawn": {
+		"description": "Trail step: the member's VTA signed the withdrawal of the application"
+	},
+	"vtcJoinTrailWithdrawnSummary": "{name} confirmed it · its signed answer verified",
+	"@vtcJoinTrailWithdrawnSummary": {
+		"description": "Trail step summary: the named community confirmed the withdrawal, and its signed answer was verified",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinTrailWithdrawnNotHeld": "{name} no longer held it open",
+	"@vtcJoinTrailWithdrawnNotHeld": {
+		"description": "Trail step summary: the named community no longer held the application open, so there is no signed answer",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinTrailWithdrawnDocument": "Your withdrawal and its receipt",
+	"@vtcJoinTrailWithdrawnDocument": {
+		"description": "Title of the sheet that shows the signed withdrawal and the community's answer"
+	},
 	"vtcJoinTrailIdentity": "Identity",
 	"@vtcJoinTrailIdentity": {
 		"description": "Label of the DID the member applied as"

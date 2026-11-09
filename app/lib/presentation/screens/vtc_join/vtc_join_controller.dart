@@ -1129,8 +1129,9 @@ class VtcJoinController extends _$VtcJoinController {
     state = state.copyWith(step: VtcJoinStep.working);
 
     await _run(() async {
+      final TrustTaskExchange? exchange;
       try {
-        await _service.withdraw(manifest.communityDid);
+        exchange = await _service.withdraw(manifest.communityDid);
       } on MeetingPlaceVtcSDKException catch (error) {
         if (!(error.refusalCode?.endsWith(':alreadyDecided') ?? false)) {
           rethrow;
@@ -1146,6 +1147,7 @@ class VtcJoinController extends _$VtcJoinController {
       }
       state = state.copyWith(
         step: VtcJoinStep.withdrawn,
+        withdrawExchange: exchange,
         submitExchange: null,
         submitReceipt: null,
         requestId: null,
@@ -1160,7 +1162,7 @@ class VtcJoinController extends _$VtcJoinController {
   /// withdrawing.
   void applyAgain() {
     if (state.step != VtcJoinStep.withdrawn) return;
-    state = state.copyWith(step: VtcJoinStep.review);
+    state = state.copyWith(step: VtcJoinStep.review, withdrawExchange: null);
   }
 
   static String _shown(Object value) =>

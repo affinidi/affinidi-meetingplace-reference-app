@@ -167,6 +167,10 @@ class VtcJoinScreen extends HookConsumerWidget {
         VtcJoinStep.withdrawn => _Outcome(
           icon: Icons.undo,
           message: l10n.vtcJoinWithdrawn(name),
+          trail: VtcWithdrawStep(
+            communityName: name,
+            exchange: state.withdrawExchange,
+          ),
           onDone: close,
           secondary: OnboardingButton(
             label: l10n.vtcJoinApplyAgain,
@@ -1723,12 +1727,16 @@ class _Outcome extends StatelessWidget {
     required this.icon,
     required this.message,
     required this.onDone,
+    this.trail,
     this.secondary,
   });
 
   final IconData icon;
   final String message;
   final VoidCallback onDone;
+
+  /// How the outcome came about, under [message].
+  final Widget? trail;
   final Widget? secondary;
 
   @override
@@ -1744,6 +1752,7 @@ class _Outcome extends StatelessWidget {
           textAlign: TextAlign.center,
           style: context.textTheme.titleMedium?.copyWith(color: Colors.white),
         ),
+        ?trail,
         const SizedBox(height: 12),
         OnboardingButton(label: context.l10n.generalDone, onPressed: onDone),
         ?secondary,

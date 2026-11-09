@@ -770,9 +770,11 @@ void main() {
       expect(state().requestId, isNull);
       expect(state().lastCheckExchange, isNull);
       expect(network.joinRequests.last['type'], JoinTask.withdraw);
+      expect(state().withdrawExchange?.receipt.type, JoinTask.withdraw);
 
       controller().applyAgain();
       expect(state().step, VtcJoinStep.review);
+      expect(state().withdrawExchange, isNull);
 
       await controller().join();
       expect(state().step, VtcJoinStep.pending);

@@ -290,6 +290,62 @@ class VtcJoinTrail extends StatelessWidget {
   }
 }
 
+/// The withdraw, as a step of the application's trail: signed by the
+/// member's VTA and confirmed by the community, its signed [exchange]
+/// behind an icon. Without one, the community no longer held the
+/// application open, and there is nothing to show.
+class VtcWithdrawStep extends StatelessWidget {
+  const VtcWithdrawStep({
+    super.key,
+    required this.communityName,
+    this.exchange,
+  });
+
+  final String communityName;
+  final TrustTaskExchange? exchange;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final receipt = exchange?.receipt;
+    String time(DateTime at) =>
+        DateFormat.yMMMd(l10n.localeName).add_Hm().format(at.toLocal());
+    return VtcTrailStep(
+      key: const Key('vtc_join_trail_withdrawn'),
+      icon: Icons.undo,
+      stage: VtcTrailStage.done,
+      title: l10n.vtcJoinTrailWithdrawn,
+      summary: receipt == null
+          ? l10n.vtcJoinTrailWithdrawnNotHeld(communityName)
+          : l10n.vtcJoinTrailWithdrawnSummary(communityName),
+      highlights: [communityName],
+      tasks: const [VtaTask.signTrustTask, JoinTask.withdraw],
+      details: [
+        if (receipt != null) ...[
+          if (receipt.signedAt case final at?)
+            VtcTrailDetail(Icons.schedule, l10n.vtcJoinTrailSignedAt, time(at)),
+          VtcTrailDetail(
+            Icons.groups_outlined,
+            l10n.vtcJoinTrailAnsweredBy,
+            receipt.answeredBy,
+            isId: true,
+          ),
+          if (receipt.answeredAt case final at?)
+            VtcTrailDetail(
+              Icons.schedule,
+              l10n.vtcJoinTrailAnsweredAt,
+              time(at),
+            ),
+        ],
+      ],
+      document: exchange?.toJson(),
+      documentTitle: l10n.vtcJoinTrailWithdrawnDocument,
+      documentKey: const Key('vtc_join_trail_withdrawn_document'),
+      isLast: true,
+    );
+  }
+}
+
 /// The presentation [submit] carries, as the application holds it.
 Map<String, dynamic>? _presentationOf(TrustTaskExchange? submit) =>
     switch (submit?.request.payload['vp']) {

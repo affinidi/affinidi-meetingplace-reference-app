@@ -2218,16 +2218,20 @@ class VtcService {
   /// [VtaNotLinkedException] when no VTA is linked, and
   /// [MeetingPlaceVtcSDKException] when the VTA or the community refuses or
   /// cannot be reached; the application is then kept.
-  Future<void> withdraw(String communityDid) async {
+  ///
+  /// Returns the signed withdraw and the community's verified answer, or
+  /// null when there was nothing for the community to withdraw.
+  Future<TrustTaskExchange?> withdraw(String communityDid) async {
     final community = await _repository.findCommunity(communityDid);
     final requestId = community?.joinRequestId;
     if (community == null || !community.isApplying || requestId == null) {
-      return;
+      return null;
     }
 
     final vta = await _grantedVta();
+    TrustTaskExchange? exchange;
     try {
-      await _sdk.joinClient().withdraw(
+      exchange = await _sdk.joinClient().withdraw(
         communityDid,
         requestId: requestId,
         agent: vta,
@@ -2242,6 +2246,7 @@ class VtcService {
       if (!code.endsWith(':notFound')) rethrow;
     }
     await _repository.saveCommunity(community.withApplication(isMember: false));
+    return exchange;
   }
 
   /// Leaves [communityDid] as the persona the member joined it with: the

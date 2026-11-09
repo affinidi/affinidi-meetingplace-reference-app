@@ -5132,6 +5132,30 @@ abstract class AppLocalizations {
   /// **'Issued once you\'re admitted, and kept on your VTA'**
   String get vtcJoinTrailCardSummary;
 
+  /// Trail step: the member's VTA signed the withdrawal of the application
+  ///
+  /// In en, this message translates to:
+  /// **'Withdrawn, signed by your VTA'**
+  String get vtcJoinTrailWithdrawn;
+
+  /// Trail step summary: the named community confirmed the withdrawal, and its signed answer was verified
+  ///
+  /// In en, this message translates to:
+  /// **'{name} confirmed it · its signed answer verified'**
+  String vtcJoinTrailWithdrawnSummary(String name);
+
+  /// Trail step summary: the named community no longer held the application open, so there is no signed answer
+  ///
+  /// In en, this message translates to:
+  /// **'{name} no longer held it open'**
+  String vtcJoinTrailWithdrawnNotHeld(String name);
+
+  /// Title of the sheet that shows the signed withdrawal and the community's answer
+  ///
+  /// In en, this message translates to:
+  /// **'Your withdrawal and its receipt'**
+  String get vtcJoinTrailWithdrawnDocument;
+
   /// Label of the DID the member applied as
   ///
   /// In en, this message translates to:

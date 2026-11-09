@@ -568,12 +568,15 @@ void main() {
       });
 
       test('withdraws the open application as the persona', () async {
-        await service.withdraw(fakeVtcDid);
+        final exchange = await service.withdraw(fakeVtcDid);
 
         final request = network.joinRequests.last;
         expect(request['type'], JoinTask.withdraw);
         expect(request['issuer'], persona.did);
         expect(request['payload'], {'requestId': 'request-1'});
+        // The signed withdraw and the community's answer, as on the wire.
+        expect(exchange?.request.toJson(), request);
+        expect(exchange?.answer.payload['status'], 'withdrawn');
         final community = await service.community(fakeVtcDid);
         expect(community?.isApplying, isFalse);
         expect(community?.isMember, isFalse);
@@ -584,7 +587,8 @@ void main() {
       test('forgets an application the community no longer holds', () async {
         network.withdrawRefusal = 'vtc/join-requests/withdraw:notFound';
 
-        await service.withdraw(fakeVtcDid);
+        // Nothing withdrawn, so nothing signed by the community to keep.
+        expect(await service.withdraw(fakeVtcDid), isNull);
 
         expect((await service.community(fakeVtcDid))?.isApplying, isFalse);
       });

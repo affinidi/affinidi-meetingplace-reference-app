@@ -461,4 +461,66 @@ void main() {
       expect(find.text(JoinTask.submit), findsNothing);
     });
   });
+
+  group('VtcWithdrawStep', () {
+    final withdrawal = exchange(
+      type: JoinTask.withdraw,
+      id: 'urn:uuid:withdraw',
+      payload: {'requestId': 'request-1'},
+      answer: {'requestId': 'request-1', 'status': 'withdrawn'},
+      signedAt: '2026-11-04T10:20:00Z',
+      answeredAt: '2026-11-04T10:20:00Z',
+    );
+
+    Future<void> pumpStep(WidgetTester tester, TrustTaskExchange? exchange) =>
+        tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.dark,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: SingleChildScrollView(
+                child: VtcWithdrawStep(
+                  communityName: 'Football club',
+                  exchange: exchange,
+                ),
+              ),
+            ),
+          ),
+        );
+
+    testWidgets('shows the signed withdraw and its tasks', (tester) async {
+      await pumpStep(tester, withdrawal);
+
+      expect(find.text('Withdrawn, signed by your VTA'), findsOneWidget);
+      expect(
+        find.text('Football club confirmed it · its signed answer verified'),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.byKey(const Key('vtc_join_trail_withdrawn')));
+      await tester.pumpAndSettle();
+      expect(find.text('Trust Tasks'), findsOneWidget);
+      expect(find.text(VtaTask.signTrustTask), findsOneWidget);
+      expect(find.text(JoinTask.withdraw), findsOneWidget);
+      expect(find.text('did:webvh:community'), findsOneWidget);
+
+      await tester.tap(
+        find.byKey(const Key('vtc_join_trail_withdrawn_document')),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Your withdrawal and its receipt'), findsOneWidget);
+      final json = tester.widget<SelectableText>(
+        find.byKey(const Key('vtc_join_json')),
+      );
+      expect(jsonDecode(json.textSpan!.toPlainText()), withdrawal.toJson());
+    });
+
+    testWidgets('says the community no longer held it open', (tester) async {
+      await pumpStep(tester, null);
+
+      expect(find.text('Football club no longer held it open'), findsOneWidget);
+      expect(find.byIcon(Icons.receipt_long_outlined), findsNothing);
+    });
+  });
 }

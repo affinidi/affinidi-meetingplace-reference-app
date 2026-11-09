@@ -359,6 +359,10 @@ abstract class VtcJoinState with _$VtcJoinState {
     /// as they were on the wire.
     TrustTaskExchange? lastCheckExchange,
 
+    /// The signed withdraw and the community's verified answer, once the
+    /// member withdrew the application on this screen.
+    TrustTaskExchange? withdrawExchange,
+
     /// What the chosen way in asks of vetting, when it asks for vetting.
     VettingRequirements? vettingRequirements,
 

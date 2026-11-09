@@ -3401,6 +3401,22 @@ class AppLocalizationsEn extends AppLocalizations {
       'Issued once you\'re admitted, and kept on your VTA';
 
   @override
+  String get vtcJoinTrailWithdrawn => 'Withdrawn, signed by your VTA';
+
+  @override
+  String vtcJoinTrailWithdrawnSummary(String name) {
+    return '$name confirmed it · its signed answer verified';
+  }
+
+  @override
+  String vtcJoinTrailWithdrawnNotHeld(String name) {
+    return '$name no longer held it open';
+  }
+
+  @override
+  String get vtcJoinTrailWithdrawnDocument => 'Your withdrawal and its receipt';
+
+  @override
   String get vtcJoinTrailIdentity => 'Identity';
 
   @override
