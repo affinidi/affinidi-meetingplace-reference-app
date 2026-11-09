@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../../domain/models/vtc/vtc_membership_card.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../themes/tokens/mc_colors.dart';
+import '../../themes/tokens/mc_elevation.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import 'vtc_detail_line.dart';
@@ -108,119 +109,133 @@ class VtcCardView extends StatelessWidget {
     String date(DateTime at) =>
         DateFormat.yMMMd(l10n.localeName).format(at.toLocal());
 
-    return ClipRRect(
-      borderRadius: const BorderRadius.all(_radius),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: _blurSigma, sigmaY: _blurSigma),
-        child: DecoratedBox(
-          key: cardKey,
-          // A theme surface rather than a dark branded card: its details
-          // are the shared VtcDetailLine, which follows the theme.
-          decoration: BoxDecoration(
-            color: context.colorScheme.surfaceContainerLow,
-            borderRadius: const BorderRadius.all(_radius),
-            border: Border.all(color: mc.hairlineStrong),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 8, 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              spacing: 14,
-              children: [
-                Row(
-                  spacing: 12,
+    // The featured card of its page: Mission Control's card glow under it,
+    // outside the clip so the glow is not cut off.
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.all(_radius),
+        boxShadow: McElevation.glowCard(context.theme.brightness),
+      ),
+      child: ClipRRect(
+        borderRadius: const BorderRadius.all(_radius),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: _blurSigma, sigmaY: _blurSigma),
+          child: DecoratedBox(
+            key: cardKey,
+            // A theme surface rather than a dark branded card: its details
+            // are the shared VtcDetailLine, which follows the theme.
+            decoration: BoxDecoration(
+              color: context.colorScheme.surfaceContainerLow,
+              borderRadius: const BorderRadius.all(_radius),
+              border: Border.all(color: mc.hairlineStrong),
+            ),
+            child: DecoratedBox(
+              position: DecorationPosition.foreground,
+              decoration: BoxDecoration(
+                border: Border(top: BorderSide(color: mc.insetTop)),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 8, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  spacing: 14,
                   children: [
-                    _Logo(url: logoUrl, size: _logoSize),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        spacing: 2,
-                        children: [
-                          Text(
-                            communityName,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: textTheme.titleMedium?.copyWith(
-                              color: mc.textPrimary,
-                              fontWeight: FontWeight.w500,
-                            ),
+                    Row(
+                      spacing: 12,
+                      children: [
+                        _Logo(url: logoUrl, size: _logoSize),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            spacing: 2,
+                            children: [
+                              Text(
+                                communityName,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: textTheme.titleMedium?.copyWith(
+                                  color: mc.textPrimary,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              Text(title, style: onboardingNote(context)),
+                            ],
                           ),
-                          Text(title, style: onboardingNote(context)),
-                        ],
-                      ),
+                        ),
+                        IconButton(
+                          key: documentKey,
+                          icon: Icon(
+                            Icons.receipt_long_outlined,
+                            color: mc.textPrimary,
+                          ),
+                          tooltip: l10n.vtcMembershipCardShow,
+                          onPressed: () => showVtcJoinJson(
+                            context,
+                            title: title,
+                            json: credential,
+                            icon: documentIcon,
+                            subtitle: credentialType,
+                          ),
+                        ),
+                      ],
                     ),
-                    IconButton(
-                      key: documentKey,
-                      icon: Icon(
-                        Icons.receipt_long_outlined,
-                        color: mc.textPrimary,
+                    for (final (icon, label) in chips)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: _Chip(icon: icon, label: label),
                       ),
-                      tooltip: l10n.vtcMembershipCardShow,
-                      onPressed: () => showVtcJoinJson(
-                        context,
-                        title: title,
-                        json: credential,
-                        icon: documentIcon,
-                        subtitle: credentialType,
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        spacing: 12,
+                        children: [
+                          VtcDetailLine(
+                            icon: Icons.fingerprint,
+                            label: holderLabel,
+                            value: holderDid,
+                            isId: true,
+                          ),
+                          VtcDetailLine(
+                            icon: Icons.groups_outlined,
+                            label: l10n.vtcMembershipCardIssuedBy,
+                            value: issuer,
+                            isId: true,
+                          ),
+                          if (validFrom case final from?)
+                            VtcDetailLine(
+                              icon: Icons.event_available_outlined,
+                              label: l10n.vtcMembershipCardValidFrom,
+                              value: date(from),
+                            ),
+                          if (validUntil case final until?)
+                            VtcDetailLine(
+                              icon: Icons.event_busy_outlined,
+                              label: l10n.vtcMembershipCardValidUntil,
+                              value: date(until),
+                            ),
+                          Row(
+                            spacing: 8,
+                            children: [
+                              Icon(
+                                Icons.cloud_done_outlined,
+                                size: 16,
+                                color: mc.textSecondary,
+                              ),
+                              Expanded(
+                                child: Text(
+                                  l10n.vtcMembershipCardKept,
+                                  style: onboardingNote(context),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-                for (final (icon, label) in chips)
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: _Chip(icon: icon, label: label),
-                  ),
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    spacing: 12,
-                    children: [
-                      VtcDetailLine(
-                        icon: Icons.fingerprint,
-                        label: holderLabel,
-                        value: holderDid,
-                        isId: true,
-                      ),
-                      VtcDetailLine(
-                        icon: Icons.groups_outlined,
-                        label: l10n.vtcMembershipCardIssuedBy,
-                        value: issuer,
-                        isId: true,
-                      ),
-                      if (validFrom case final from?)
-                        VtcDetailLine(
-                          icon: Icons.event_available_outlined,
-                          label: l10n.vtcMembershipCardValidFrom,
-                          value: date(from),
-                        ),
-                      if (validUntil case final until?)
-                        VtcDetailLine(
-                          icon: Icons.event_busy_outlined,
-                          label: l10n.vtcMembershipCardValidUntil,
-                          value: date(until),
-                        ),
-                      Row(
-                        spacing: 8,
-                        children: [
-                          Icon(
-                            Icons.cloud_done_outlined,
-                            size: 16,
-                            color: mc.textSecondary,
-                          ),
-                          Expanded(
-                            child: Text(
-                              l10n.vtcMembershipCardKept,
-                              style: onboardingNote(context),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),

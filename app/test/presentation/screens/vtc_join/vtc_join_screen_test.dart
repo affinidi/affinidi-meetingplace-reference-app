@@ -24,6 +24,7 @@ import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_trail.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_progress_line.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_elevation.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/onboarding_style/onboarding_style.dart';
 
 import '../../../fakes/fake_identities.dart';
@@ -522,6 +523,27 @@ void main() {
         (network.joinVerdict['with'] as Map)['vmc'] = card;
         return card;
       }
+
+      testWidgets('lifts the card on the brand glow', (tester) async {
+        vtaHoldsCard();
+        await pumpScreen(tester);
+        await enterCode(tester, fakeVtcDid);
+        await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
+        await settle(tester);
+
+        final glow = tester.widget<DecoratedBox>(
+          find
+              .ancestor(
+                of: find.byKey(const Key('vtc_membership_card')),
+                matching: find.byType(DecoratedBox),
+              )
+              .last,
+        );
+        expect(
+          (glow.decoration as BoxDecoration).boxShadow,
+          McElevation.glowCard(Brightness.dark),
+        );
+      });
 
       testWidgets('shows the card the community issued', (tester) async {
         final card = vtaHoldsCard();
