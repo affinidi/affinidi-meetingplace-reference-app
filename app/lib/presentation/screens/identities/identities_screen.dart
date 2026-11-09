@@ -13,6 +13,7 @@ import '../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../../navigation/routes/dashboard_routes.dart';
 import '../../../navigation/tabs/tabs.dart';
 import '../../helpers/screensize_helper.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../../widgets/action_button.dart';
 import '../../widgets/buttons/elevated_loading_button.dart';
@@ -173,7 +174,7 @@ class _ActionsBar extends ConsumerWidget {
           children: [
             IconButton(
               icon: Icon(
-                Icons.filter_list_alt,
+                McIcons.filter,
                 // Selection is the text tier, never blue.
                 color: shouldShowFilter
                     ? context.mcColors.textPrimary
@@ -187,7 +188,7 @@ class _ActionsBar extends ConsumerWidget {
         Row(
           children: [
             IconButton(
-              icon: const Icon(Icons.delete),
+              icon: const Icon(McIcons.delete),
               onPressed: canDelete
                   ? () async {
                       if (!context.mounted) return;
@@ -202,7 +203,7 @@ class _ActionsBar extends ConsumerWidget {
                     }
                   : null,
             ),
-            IconButton(icon: const Icon(Icons.add), onPressed: onAddIdentity),
+            IconButton(icon: const Icon(McIcons.add), onPressed: onAddIdentity),
           ],
         ),
       ],
@@ -268,7 +269,11 @@ class _SearchField extends HookConsumerWidget {
             ),
             if (text.isNotEmpty)
               IconButton(
-                icon: Icon(Icons.clear, color: colorScheme.onSurface, size: 20),
+                icon: Icon(
+                  McIcons.close,
+                  color: colorScheme.onSurface,
+                  size: 20,
+                ),
                 onPressed: () {
                   searchTextController.clear();
                   controller.clearSearch();

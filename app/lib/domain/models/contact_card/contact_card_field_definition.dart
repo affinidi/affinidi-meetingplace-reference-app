@@ -6,6 +6,7 @@ import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/extensions/map_path_extensions.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../presentation/themes/app_custom_colors.dart';
+import '../../../presentation/themes/tokens/mc_icons.dart';
 import '../../../presentation/validators/max_length_validator_type.dart';
 import '../../../presentation/validators/zalgo_text_validator.dart';
 import 'contact_card.dart';
@@ -96,7 +97,7 @@ class ContactCardFieldDefinitions {
   static final List<ContactCardFieldDefinition> values = List.unmodifiable([
     ContactCardFieldDefinition(
       key: ContactCardFieldKey.firstName,
-      icon: Icons.person,
+      icon: McIcons.person,
       iconColor: (customColors, colorScheme) => colorScheme.primary,
       keyboardType: null,
       textCapitalization: TextCapitalization.sentences,
@@ -120,7 +121,7 @@ class ContactCardFieldDefinitions {
     ),
     ContactCardFieldDefinition(
       key: ContactCardFieldKey.lastName,
-      icon: Icons.badge,
+      icon: McIcons.badge,
       iconColor: (customColors, colorScheme) => customColors.purple,
       keyboardType: null,
       textCapitalization: TextCapitalization.sentences,
@@ -143,7 +144,7 @@ class ContactCardFieldDefinitions {
     ),
     ContactCardFieldDefinition(
       key: ContactCardFieldKey.email,
-      icon: Icons.email,
+      icon: McIcons.email,
       iconColor: (customColors, colorScheme) => colorScheme.primary,
       keyboardType: TextInputType.emailAddress,
       textCapitalization: TextCapitalization.none,
@@ -169,7 +170,7 @@ class ContactCardFieldDefinitions {
     ),
     ContactCardFieldDefinition(
       key: ContactCardFieldKey.mobile,
-      icon: Icons.phone,
+      icon: McIcons.phone,
       iconColor: (customColors, colorScheme) => customColors.success,
       keyboardType: TextInputType.phone,
       textCapitalization: TextCapitalization.none,

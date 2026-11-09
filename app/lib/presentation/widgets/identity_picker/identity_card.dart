@@ -10,6 +10,7 @@ import '../../../domain/models/identity/identity.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/extensions/identities_extensions.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../../themes/tokens/mc_typography.dart';
 import '../animated_menu.dart';
@@ -377,28 +378,26 @@ class _ActionButton extends HookWidget {
 
     return [
       _ActionItem(
-        icon: Icons.delete,
+        icon: McIcons.delete,
         // A destructive menu item speaks in danger text.
         color: isPrimary ? mc.textTertiary : mc.dangerText,
         action: _ActionButtonConfig.delete,
         isEnabled: !isPrimary,
       ),
       _ActionItem(
-        icon: Icons.receipt,
+        icon: McIcons.findOffer,
         color: mc.textPrimary,
         action: _ActionButtonConfig.connect,
-        assetPath: 'assets/icons/receive.png',
       ),
       _ActionItem(
-        icon: Icons.edit,
+        icon: McIcons.edit,
         color: mc.textPrimary,
         action: _ActionButtonConfig.edit,
       ),
       _ActionItem(
-        icon: Icons.publish,
+        icon: McIcons.publishOffer,
         color: mc.textPrimary,
         action: _ActionButtonConfig.publish,
-        assetPath: 'assets/icons/publish.png',
       ),
     ];
   }
@@ -536,14 +535,12 @@ class _ActionItem {
     required this.icon,
     required this.color,
     required this.action,
-    this.assetPath,
     this.isEnabled = true,
   });
 
   final IconData icon;
   final Color color;
   final int action;
-  final String? assetPath;
   final bool isEnabled;
 }
 
@@ -567,12 +564,7 @@ class _ActionMenuItem extends StatelessWidget {
           color: action.isEnabled ? mc.hairlineStrong : mc.hairline,
         ),
       ),
-      child: action.assetPath != null
-          ? Padding(
-              padding: const EdgeInsets.all(14.0),
-              child: Image.asset(action.assetPath!, color: action.color),
-            )
-          : Icon(action.icon, color: action.color, size: 28),
+      child: Icon(action.icon, color: action.color, size: 28),
     );
   }
 }

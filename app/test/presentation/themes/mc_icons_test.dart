@@ -36,6 +36,7 @@ void main() {
       McIcons.filter,
       McIcons.findOffer,
       McIcons.menu,
+      McIcons.search,
       McIcons.publishOffer,
       McIcons.person,
       McIcons.badge,

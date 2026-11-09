@@ -64,6 +64,9 @@ abstract final class McIcons {
   /// Phosphor `list`.
   static const IconData menu = IconData(0xe2f0, fontFamily: fontFamily);
 
+  /// Phosphor `magnifying-glass`.
+  static const IconData search = IconData(0xe30c, fontFamily: fontFamily);
+
   /// Phosphor `share-network`.
   static const IconData publishOffer = IconData(0xe408, fontFamily: fontFamily);
 

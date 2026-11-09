@@ -8,6 +8,7 @@ import '../../../../domain/models/contact_card/contact_card_field_definition.dar
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/providers/cache_manager_provider.dart';
+import '../../../themes/tokens/mc_icons.dart';
 import '../../../validators/input_validators.dart';
 import '../../../widgets/form_rows/form_card.dart';
 import '../../../widgets/form_rows/form_row_text_field.dart';
@@ -120,7 +121,7 @@ class IdentityFormFields extends ConsumerWidget {
               order: NumericFocusOrder((identityFields.length + 1).toDouble()),
               child: ListTile(
                 leading: LabelIcon(
-                  icon: Icons.phone,
+                  icon: McIcons.phone,
                   iconColor: context.colorScheme.primary,
                   label: mobileField.label(context.l10n),
                 ),
@@ -160,7 +161,7 @@ class IdentityFormFields extends ConsumerWidget {
                           locale: Localizations.localeOf(context).languageCode,
                           searchBoxDecoration: InputDecoration(
                             hintText: context.l10n.filter,
-                            prefixIcon: const Icon(Icons.search),
+                            prefixIcon: const Icon(McIcons.search),
                           ),
                           inputDecoration: InputDecoration(
                             hintText: context.l10n.enterMobile,

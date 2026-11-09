@@ -9,6 +9,7 @@ import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../infrastructure/extensions/identities_extensions.dart';
 import '../../../../infrastructure/extensions/widget_ref_extensions.dart';
 import '../../../../infrastructure/providers/cache_manager_provider.dart';
+import '../../../themes/tokens/mc_icons.dart';
 import '../../../widgets/buttons/elevated_loading_button.dart';
 import '../../../widgets/form_rows/form_card.dart';
 import '../../../widgets/form_rows/form_row_text_field.dart';
@@ -108,7 +109,7 @@ class _PersonaSection extends ConsumerWidget {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.copy, size: 18),
+                  icon: const Icon(McIcons.copy, size: 18),
                   tooltip: l10n.identityPersonaCopyDid,
                   visualDensity: VisualDensity.compact,
                   onPressed: () async {

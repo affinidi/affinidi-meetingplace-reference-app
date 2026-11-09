@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../common/app_card.dart';
 
@@ -31,7 +32,7 @@ class IdentityPlaceholderCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
-                  Icons.fingerprint,
+                  McIcons.identities,
                   color: colorScheme.onSurfaceVariant,
                   size: 100,
                 ),
