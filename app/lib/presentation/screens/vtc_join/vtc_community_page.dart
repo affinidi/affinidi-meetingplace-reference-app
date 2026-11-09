@@ -75,6 +75,7 @@ class VtcCommunityPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
+    final mc = context.mcColors;
     final name = state.communityName ?? '';
     final card = state.membershipCard;
     final delivery = state.cardDelivery;
@@ -113,13 +114,12 @@ class VtcCommunityPage extends HookConsumerWidget {
               key: const Key('vtc_community_name'),
               textAlign: TextAlign.center,
               style: context.textTheme.titleLarge?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+                color: mc.textPrimary,
               ),
             ),
           ),
         ] else ...[
-          const Icon(Icons.verified, size: 72, color: Colors.white),
+          Icon(Icons.verified, size: 72, color: mc.success),
           const SizedBox(height: 4),
           _WithAbout(
             state: state,
@@ -127,7 +127,7 @@ class VtcCommunityPage extends HookConsumerWidget {
               l10n.vtcJoinJoined(name),
               textAlign: TextAlign.center,
               style: context.textTheme.titleMedium?.copyWith(
-                color: Colors.white,
+                color: mc.textPrimary,
               ),
             ),
           ),
@@ -167,7 +167,7 @@ class VtcCommunityPage extends HookConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             spacing: 8,
             children: [
-              const Icon(Icons.hourglass_top, size: 16, color: Colors.white70),
+              Icon(Icons.hourglass_top, size: 16, color: mc.textSecondary),
               Flexible(
                 child: Text(
                   l10n.vtcMembershipCardOnItsWay,
@@ -207,11 +207,12 @@ class _RoleLine extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final communityDid = this.communityDid;
+    final iconColor = context.mcColors.textPrimary;
     final actions = [
       if (communityDid != null)
         IconButton(
           key: const Key('vtc_community_settings'),
-          icon: const Icon(Icons.settings_outlined, color: Colors.white),
+          icon: Icon(Icons.settings_outlined, color: iconColor),
           tooltip: l10n.vtcCommunitySettings,
           onPressed: () => _showSettings(
             context,
@@ -223,7 +224,7 @@ class _RoleLine extends StatelessWidget {
       if (communityDid != null && canVet)
         IconButton(
           key: const Key('vtc_community_vetting_desk'),
-          icon: const Icon(Icons.how_to_reg_outlined, color: Colors.white),
+          icon: Icon(Icons.how_to_reg_outlined, color: iconColor),
           tooltip: l10n.vtcVetterStart,
           onPressed: () => VtcVettingDeskScreen.show(
             context,
@@ -365,7 +366,7 @@ class _WithAbout extends StatelessWidget {
         Flexible(child: child),
         IconButton(
           key: const Key('vtc_community_about'),
-          icon: const Icon(Icons.info_outline, color: Colors.white),
+          icon: Icon(Icons.info_outline, color: context.mcColors.textSecondary),
           tooltip: context.l10n.vtcJoinProfileHeading,
           onPressed: () =>
               showOnboardingSheet(context, VtcCommunityProfile(state: state)),
@@ -451,6 +452,7 @@ class _CardArrival extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final expanded = useState(false);
+    final mc = context.mcColors;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: 8,
@@ -463,18 +465,18 @@ class _CardArrival extends HookWidget {
             child: Row(
               spacing: 8,
               children: [
-                const Icon(Icons.route_outlined, color: Colors.white),
+                Icon(Icons.route_outlined, color: mc.textSecondary),
                 Expanded(
                   child: Text(
                     context.l10n.vtcDeliveryHeading,
                     style: context.textTheme.bodyMedium?.copyWith(
-                      color: Colors.white,
+                      color: mc.textPrimary,
                     ),
                   ),
                 ),
                 Icon(
                   expanded.value ? Icons.expand_less : Icons.expand_more,
-                  color: Colors.white,
+                  color: mc.textSecondary,
                 ),
               ],
             ),

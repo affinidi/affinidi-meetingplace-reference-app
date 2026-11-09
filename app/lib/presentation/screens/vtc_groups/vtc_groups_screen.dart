@@ -9,6 +9,9 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import '../../../application/services/vtc_group_chat_service/vtc_group_chat_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../themes/tokens/mc_radius.dart';
+import '../../themes/tokens/mc_spacing.dart';
+import '../../themes/tokens/mc_typography.dart';
 import 'vtc_group_members_screen.dart';
 import 'vtc_groups_controller.dart';
 import 'vtc_groups_state.dart';
@@ -56,10 +59,7 @@ class VtcGroupsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          l10n.vtcGroupsTitle,
-          style: context.textTheme.headlineMedium,
-        ),
+        title: Text(l10n.vtcGroupsTitle, style: context.textTheme.titleLarge),
         actions: [
           IconButton(
             key: const Key('vtc_groups_refresh'),
@@ -86,12 +86,7 @@ class VtcGroupsScreen extends ConsumerWidget {
             spacing: 16,
             children: [
               if (communityName case final name?)
-                Text(
-                  name,
-                  style: context.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                Text(name, style: context.textTheme.titleLarge),
               for (final listing in state.groups)
                 _GroupCard(
                   group: listing.group,
@@ -188,9 +183,6 @@ class _GroupCard extends StatelessWidget {
   /// Opens the group's members, to vouch for them.
   final VoidCallback onMembers;
 
-  static const _radius = 16.0;
-  static const _tint = 20;
-
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -201,10 +193,13 @@ class _GroupCard extends StatelessWidget {
     final canJoin = status == VtcGroupChatStatus.linked;
     return Container(
       key: Key('vtc_group_${group.groupId}'),
-      padding: const EdgeInsets.all(16),
+      // The hairline border takes its width from the padding, so the
+      // content keeps its size.
+      padding: const EdgeInsets.all(16 - McSpacing.hairline),
       decoration: BoxDecoration(
-        color: Colors.white.withAlpha(_tint),
-        borderRadius: BorderRadius.circular(_radius),
+        color: context.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(McRadius.lg),
+        border: Border.all(color: context.mcColors.hairline),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -213,7 +208,7 @@ class _GroupCard extends StatelessWidget {
           Text(
             group.name,
             style: context.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w500,
             ),
           ),
           if (group.description case final description?)
@@ -381,8 +376,8 @@ class _ChatLinkDialog extends StatelessWidget {
             SelectableText(
               service,
               key: const Key('vtc_group_chat_link_service'),
-              style: context.textTheme.bodySmall?.copyWith(
-                fontFamily: 'monospace',
+              style: McTypography.code.copyWith(
+                color: context.mcColors.textPrimary,
               ),
             ),
           ],

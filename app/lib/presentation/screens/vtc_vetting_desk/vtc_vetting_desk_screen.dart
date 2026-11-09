@@ -9,6 +9,8 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import '../../../domain/models/vtc/vtc_vetter_desk.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../effects/confetti/confetti_overlay.dart';
+import '../../themes/tokens/mc_spacing.dart';
+import '../../themes/tokens/mc_typography.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import '../../widgets/qr/qr_code_view.dart';
 import '../vtc_join/vtc_claim_type_label.dart';
@@ -66,9 +68,7 @@ class VtcVettingDeskScreen extends HookConsumerWidget {
           OnboardingTitle(l10n.vtcVetterTitle(communityName)),
           ...switch (state.step) {
             VtcVettingDeskStep.loading => [
-              const Center(
-                child: CircularProgressIndicator(color: Colors.white),
-              ),
+              const Center(child: CircularProgressIndicator()),
             ],
             VtcVettingDeskStep.notVetter => [
               OnboardingMessage(
@@ -278,12 +278,16 @@ class _Outcome extends StatelessWidget {
         Icon(
           vouched ? Icons.verified : Icons.do_not_disturb_on_outlined,
           size: 72,
-          color: Colors.white,
+          color: vouched
+              ? context.mcColors.success
+              : context.mcColors.textSecondary,
         ),
         Text(
           l10n.vtcVetterOutcome(session.status.name),
           textAlign: TextAlign.center,
-          style: context.textTheme.titleMedium?.copyWith(color: Colors.white),
+          style: context.textTheme.titleMedium?.copyWith(
+            color: context.mcColors.textPrimary,
+          ),
         ),
         OnboardingButton(
           key: const Key('vtc_vetter_outcome_done'),
@@ -415,20 +419,15 @@ class _TicketView extends StatelessWidget {
             child: Column(
               spacing: 12,
               children: [
-                ColoredBox(
-                  color: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    // A fixed size: the layout measures its content's
-                    // height, which the QR code cannot report.
-                    child: SizedBox.square(
-                      dimension: _qrSize,
-                      child: QrCodeView(
-                        key: const Key('vtc_vetter_ticket_qr'),
-                        data: '${ticket.scanned}',
-                        size: _qrSize,
-                      ),
-                    ),
+                // A fixed size: the layout measures its content's height,
+                // which the QR code cannot report. It includes the view's
+                // quiet zone on both sides.
+                SizedBox.square(
+                  dimension: _qrSize + 2 * McSpacing.s3,
+                  child: QrCodeView(
+                    key: const Key('vtc_vetter_ticket_qr'),
+                    data: '${ticket.scanned}',
+                    size: _qrSize,
                   ),
                 ),
                 Text(
@@ -438,9 +437,9 @@ class _TicketView extends StatelessWidget {
                 SelectableText(
                   ticket.code,
                   key: const Key('vtc_vetter_ticket_code'),
-                  style: context.textTheme.headlineMedium?.copyWith(
-                    color: Colors.white,
-                    fontFamily: 'monospace',
+                  style: McTypography.code.copyWith(
+                    fontSize: context.textTheme.titleLarge?.fontSize,
+                    color: context.mcColors.textPrimary,
                     letterSpacing: 4,
                   ),
                 ),
@@ -567,9 +566,9 @@ class _SessionView extends HookWidget {
               session.session?.matchCode ?? '',
               key: const Key('vtc_vetter_match_code'),
               textAlign: TextAlign.center,
-              style: context.textTheme.displaySmall?.copyWith(
-                color: Colors.white,
-                fontFamily: 'monospace',
+              style: McTypography.code.copyWith(
+                fontSize: context.textTheme.displaySmall?.fontSize,
+                color: context.mcColors.textPrimary,
                 letterSpacing: 4,
               ),
             ),
@@ -635,7 +634,9 @@ class _SessionView extends HookWidget {
         ),
         Text(
           l10n.vtcVetterDocumentHeading,
-          style: context.textTheme.titleSmall?.copyWith(color: Colors.white),
+          style: context.textTheme.titleSmall?.copyWith(
+            color: context.mcColors.textPrimary,
+          ),
         ),
         // A column, not a wrap: the layout measures its content's height as
         // if a wrap fitted on one line.

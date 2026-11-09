@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_radius.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import 'vtc_join_state.dart';
 
@@ -16,7 +17,7 @@ class VtcCommunityLogo extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(McRadius.md),
         child: Image.network(
           url.toString(),
           key: const Key('vtc_join_logo'),
@@ -41,6 +42,7 @@ class VtcCommunityProfile extends HookWidget {
     final l10n = context.l10n;
     final did = state.communityDid ?? '';
     final copied = useState(false);
+    final mc = context.mcColors;
 
     Future<void> copyDid() async {
       await Clipboard.setData(ClipboardData(text: did));
@@ -58,7 +60,7 @@ class VtcCommunityProfile extends HookWidget {
               Text(
                 description,
                 style: context.textTheme.bodyMedium?.copyWith(
-                  color: Colors.white,
+                  color: mc.textPrimary,
                 ),
               ),
             if (state.website case final website?)
@@ -77,7 +79,7 @@ class VtcCommunityProfile extends HookWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: 12,
               children: [
-                const Icon(Icons.fingerprint, size: 20, color: Colors.white),
+                Icon(Icons.fingerprint, size: 20, color: mc.textSecondary),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,7 +88,7 @@ class VtcCommunityProfile extends HookWidget {
                       Text(
                         l10n.vtcJoinDidHint,
                         style: context.textTheme.bodyMedium?.copyWith(
-                          color: Colors.white,
+                          color: mc.textPrimary,
                         ),
                       ),
                       MonospaceDid(
@@ -102,7 +104,7 @@ class VtcCommunityProfile extends HookWidget {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.copy, size: 18, color: Colors.white),
+                  icon: Icon(Icons.copy, size: 18, color: mc.textSecondary),
                   tooltip: l10n.linkedVtaCopyDid,
                   visualDensity: VisualDensity.compact,
                   onPressed: copyDid,

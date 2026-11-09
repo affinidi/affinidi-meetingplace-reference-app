@@ -89,7 +89,11 @@ void main() {
     await service.checkGrant();
   });
 
-  Future<void> pumpScreen(WidgetTester tester, {String? communityDid}) async {
+  Future<void> pumpScreen(
+    WidgetTester tester, {
+    String? communityDid,
+    ThemeData? theme,
+  }) async {
     await tester.binding.setSurfaceSize(const Size(400, 900));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
@@ -102,7 +106,7 @@ void main() {
           cameraServiceProvider.overrideWith(_NoCamera.new),
         ],
         child: MaterialApp(
-          theme: AppTheme.dark,
+          theme: theme ?? AppTheme.dark,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: VtcJoinScreen(code: communityDid),
@@ -194,6 +198,19 @@ void main() {
         findsOneWidget,
       );
     });
+
+    for (final (name, theme) in [
+      ('dark', AppTheme.dark),
+      ('light', AppTheme.light),
+    ]) {
+      testWidgets('renders the review in the $name theme', (tester) async {
+        await pumpScreen(tester, communityDid: fakeVtcDid, theme: theme);
+        await settle(tester);
+
+        expect(title('Football club'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      });
+    }
 
     testWidgets('reviews, joins and leaves a community', (tester) async {
       await pumpScreen(tester);

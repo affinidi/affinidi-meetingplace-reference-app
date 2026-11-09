@@ -54,9 +54,7 @@ class VtcVetterProfileScreen extends HookConsumerWidget {
           OnboardingTitle(l10n.vtcVetterProfileTitle),
           ...switch (state.step) {
             VtcVetterProfileStep.loading => [
-              const Center(
-                child: CircularProgressIndicator(color: Colors.white),
-              ),
+              const Center(child: CircularProgressIndicator()),
             ],
             VtcVetterProfileStep.notVetter => [
               OnboardingMessage(
@@ -155,7 +153,9 @@ class _ProfileForm extends HookWidget {
 
     Widget heading(String text) => Text(
       text,
-      style: context.textTheme.titleSmall?.copyWith(color: Colors.white),
+      style: context.textTheme.titleSmall?.copyWith(
+        color: context.mcColors.textPrimary,
+      ),
     );
 
     return Column(
@@ -181,7 +181,7 @@ class _ProfileForm extends HookWidget {
                 children: [
                   Text(
                     l10n.vtcVetterProfileListed,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: context.mcColors.textPrimary),
                   ),
                   Text(
                     l10n.vtcVetterProfileListedNote,
@@ -194,7 +194,6 @@ class _ProfileForm extends HookWidget {
               key: const Key('vtc_vetter_profile_listed'),
               value: listed.value,
               onChanged: (value) => listed.value = value,
-              activeTrackColor: Colors.white,
             ),
           ],
         ),

@@ -91,18 +91,10 @@ class VtcJoinPhraseView extends HookConsumerWidget {
               key: const Key('vtc_join_phrase_text'),
               textAlign: TextAlign.center,
               style: context.textTheme.titleMedium?.copyWith(
-                color: Colors.white,
+                color: context.mcColors.textPrimary,
               ),
             ),
-            Center(
-              child: ColoredBox(
-                color: Colors.white,
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: QrCodeView(data: offer.mnemonic, size: 160),
-                ),
-              ),
-            ),
+            Center(child: QrCodeView(data: offer.mnemonic, size: 160)),
             Text(
               l10n.vtcJoinPhrasePublished(communityName, offer.mnemonic),
               style: onboardingNote(context),
@@ -146,10 +138,7 @@ class VtcJoinPhraseView extends HookConsumerWidget {
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: context.colorScheme.error,
-              foregroundColor: Colors.white,
-            ),
+            style: context.destructiveElevatedButtonStyle,
             child: Text(l10n.vtcJoinPhraseWithdrawAction),
           ),
         ],

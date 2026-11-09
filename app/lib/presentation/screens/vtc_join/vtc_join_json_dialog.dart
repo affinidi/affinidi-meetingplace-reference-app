@@ -5,6 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_colors.dart';
+import '../../themes/tokens/mc_radius.dart';
+import '../../themes/tokens/mc_typography.dart';
 
 /// Shows [json] in a sheet under [title], with [icon] and an optional
 /// [subtitle] such as the document's Trust Task type: indented, coloured by
@@ -49,13 +52,14 @@ class _JsonSheet extends HookWidget {
   final String? subtitle;
   final Key textKey;
 
-  static const _radius = Radius.circular(24);
+  static const _radius = Radius.circular(McRadius.xl);
   static const _copiedFor = Duration(seconds: 2);
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final colors = context.colorScheme;
+    final mc = context.mcColors;
     final textTheme = context.textTheme;
     final copied = useState(false);
     final text = useMemoized(
@@ -63,8 +67,8 @@ class _JsonSheet extends HookWidget {
       [json],
     );
     final spans = useMemoized(
-      () => (_JsonSpans(_JsonColors.of(colors))..value(json, 0)).spans,
-      [json, colors],
+      () => (_JsonSpans(_JsonColors.of(mc))..value(json, 0)).spans,
+      [json, mc],
     );
 
     Future<void> copy() async {
@@ -81,8 +85,9 @@ class _JsonSheet extends HookWidget {
       maxChildSize: 0.95,
       builder: (context, scrollController) => DecoratedBox(
         decoration: BoxDecoration(
-          color: colors.surfaceContainerHigh,
+          color: mc.raised,
           borderRadius: const BorderRadius.vertical(top: _radius),
+          border: Border(top: BorderSide(color: mc.hairline)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -93,8 +98,8 @@ class _JsonSheet extends HookWidget {
                 width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: colors.onSurfaceVariant.withAlpha(100),
-                  borderRadius: BorderRadius.circular(2),
+                  color: mc.hairlineStrong,
+                  borderRadius: BorderRadius.circular(McRadius.xs),
                 ),
               ),
             ),
@@ -116,7 +121,7 @@ class _JsonSheet extends HookWidget {
                         Text(
                           title,
                           style: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                         if (subtitle case final subtitle?)
@@ -124,9 +129,8 @@ class _JsonSheet extends HookWidget {
                             subtitle,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: textTheme.bodySmall?.copyWith(
-                              color: colors.onSurfaceVariant,
-                              fontFamily: 'monospace',
+                            style: McTypography.code.copyWith(
+                              color: mc.textSecondary,
                             ),
                           ),
                       ],
@@ -154,8 +158,8 @@ class _JsonSheet extends HookWidget {
                 margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 decoration: BoxDecoration(
                   color: _JsonColors.background(colors),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: colors.onSurface.withAlpha(40)),
+                  borderRadius: BorderRadius.circular(McRadius.lg),
+                  border: Border.all(color: mc.hairline),
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: SingleChildScrollView(
@@ -164,9 +168,8 @@ class _JsonSheet extends HookWidget {
                   child: SelectableText.rich(
                     TextSpan(children: spans),
                     key: textKey,
-                    style: textTheme.bodySmall?.copyWith(
-                      color: colors.onSurface,
-                      fontFamily: 'monospace',
+                    style: McTypography.code.copyWith(
+                      color: mc.textPrimary,
                       height: 1.5,
                     ),
                   ),
@@ -180,13 +183,10 @@ class _JsonSheet extends HookWidget {
   }
 }
 
-/// The colours of each kind of JSON token, on the dark panel they are
-/// drawn on.
-///
-/// The app's scheme is seeded light and only partly made dark, so its
-/// container and accent colours are a light theme's: a white panel under
-/// white punctuation, and dark accents. The panel and tokens are therefore
-/// chosen here, light on dark.
+/// The colours of each kind of JSON token, on the sunken panel they are
+/// drawn on: Mission Control text tokens, readable in both modes. Strings
+/// stay neutral; the status tokens that would tint them are too faint as
+/// copy on the light panel.
 class _JsonColors {
   const _JsonColors({
     required this.key,
@@ -195,18 +195,16 @@ class _JsonColors {
     required this.punctuation,
   });
 
-  factory _JsonColors.of(ColorScheme colors) => _JsonColors(
-    key: colors.secondary,
-    string: Colors.lightGreen.shade300,
-    literal: Colors.amber.shade300,
-    punctuation: colors.onSurface.withAlpha(_punctuationAlpha),
+  factory _JsonColors.of(McColors mc) => _JsonColors(
+    key: mc.highlightSecondary,
+    string: mc.textPrimary,
+    literal: mc.warning,
+    // Readable, but steps back from the values.
+    punctuation: mc.textSecondary,
   );
 
   /// The panel the document is drawn on.
-  static Color background(ColorScheme colors) => colors.surface;
-
-  /// Punctuation stays readable but steps back from the values.
-  static const _punctuationAlpha = 190;
+  static Color background(ColorScheme colors) => colors.surfaceContainerLowest;
 
   final Color key;
   final Color string;

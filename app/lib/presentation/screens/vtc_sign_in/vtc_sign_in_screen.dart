@@ -9,6 +9,9 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import '../../../application/services/identities_service/identities_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../dialogs/qr_code_picker/qr_code_picker.dart';
+import '../../themes/tokens/mc_colors.dart';
+import '../../themes/tokens/mc_radius.dart';
+import '../../themes/tokens/mc_typography.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import '../../widgets/vta_identity_card.dart';
 import 'vtc_sign_in_controller.dart';
@@ -91,8 +94,10 @@ class VtcSignInScreen extends ConsumerWidget {
     );
   }
 
-  static TextStyle? _outcomeStyle(BuildContext context) =>
-      context.textTheme.titleMedium?.copyWith(color: Colors.white);
+  static TextStyle? _outcomeStyle(BuildContext context) => context
+      .textTheme
+      .titleMedium
+      ?.copyWith(color: context.mcColors.textPrimary);
 
   static String _failureMessage(BuildContext context, VtcSignInState state) {
     final l10n = context.l10n;
@@ -316,9 +321,9 @@ class _DigitBoxes extends HookWidget {
       return KeyEventResult.handled;
     }
 
-    final textTheme = context.textTheme;
+    final mc = context.mcColors;
     OutlineInputBorder border(Color color) => OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(McRadius.md),
       borderSide: BorderSide(color: color),
     );
 
@@ -345,15 +350,14 @@ class _DigitBoxes extends HookWidget {
                     LengthLimitingTextInputFormatter(length - i),
                   ],
                   onChanged: (text) => changed(i, text),
-                  style: textTheme.headlineSmall?.copyWith(color: Colors.white),
-                  cursorColor: Colors.white,
+                  style: McTypography.code.copyWith(color: mc.textPrimary),
                   decoration: InputDecoration(
                     filled: true,
-                    fillColor: Colors.white.withAlpha(25),
+                    fillColor: context.colorScheme.surfaceContainerLow,
                     contentPadding: const EdgeInsets.symmetric(vertical: 14),
-                    border: border(Colors.white.withAlpha(76)),
-                    enabledBorder: border(Colors.white.withAlpha(76)),
-                    focusedBorder: border(Colors.white),
+                    border: border(mc.hairlineStrong),
+                    enabledBorder: border(mc.hairlineStrong),
+                    focusedBorder: border(McColors.blue),
                   ),
                 ),
               ),
@@ -478,7 +482,7 @@ class _Outcome extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: 12,
       children: [
-        Icon(icon, size: 72, color: Colors.white),
+        Icon(icon, size: 72, color: context.mcColors.textPrimary),
         const SizedBox(height: 4),
         message,
         const SizedBox(height: 12),

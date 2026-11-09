@@ -25,9 +25,9 @@ BoxDecoration onboardingGradient(
   );
 }
 
-/// Shows [child] in a sheet on the onboarding gradient.
+/// Shows [child] in a raised sheet.
 Future<void> showOnboardingSheet(BuildContext context, Widget child) {
-  const radius = BorderRadius.vertical(top: Radius.circular(24));
+  const radius = BorderRadius.vertical(top: Radius.circular(McRadius.xl));
   return showModalBottomSheet<void>(
     context: context,
     useRootNavigator: true,
@@ -35,7 +35,11 @@ Future<void> showOnboardingSheet(BuildContext context, Widget child) {
     useSafeArea: true,
     backgroundColor: Colors.transparent,
     builder: (context) => DecoratedBox(
-      decoration: onboardingGradient(context, radius: 2, borderRadius: radius),
+      decoration: BoxDecoration(
+        color: context.mcColors.raised,
+        borderRadius: radius,
+        border: Border(top: BorderSide(color: context.mcColors.hairline)),
+      ),
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
         child: child,

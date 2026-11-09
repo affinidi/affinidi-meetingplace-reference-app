@@ -5,13 +5,15 @@ import 'package:intl/intl.dart';
 
 import '../../../domain/models/vtc/vtc_membership_card.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_colors.dart';
+import '../../themes/tokens/mc_radius.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import 'vtc_detail_line.dart';
 import 'vtc_join_json_dialog.dart';
 
-/// The membership card a community issued, as a frosted card on the
-/// gradient: the community, what the card states, and the credential in
-/// full behind an icon.
+/// The membership card a community issued, as a card on the page: the
+/// community, what the card states, and the credential in full behind an
+/// icon.
 class VtcMembershipCardView extends StatelessWidget {
   const VtcMembershipCardView({
     super.key,
@@ -49,7 +51,7 @@ class VtcMembershipCardView extends StatelessWidget {
   }
 }
 
-/// A card a community issued, as a frosted card on the gradient: the
+/// A card a community issued, as a card on the page: the
 /// community and [title], what the card states, whom it is about and for
 /// how long, and the [credential] in full behind an icon.
 class VtcCardView extends StatelessWidget {
@@ -94,7 +96,7 @@ class VtcCardView extends StatelessWidget {
   final DateTime? validFrom;
   final DateTime? validUntil;
 
-  static const _radius = Radius.circular(20);
+  static const _radius = Radius.circular(McRadius.lg);
   static const _blurSigma = 20.0;
   static const _logoSize = 44.0;
 
@@ -102,6 +104,7 @@ class VtcCardView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final textTheme = context.textTheme;
+    final mc = context.mcColors;
     String date(DateTime at) =>
         DateFormat.yMMMd(l10n.localeName).format(at.toLocal());
 
@@ -111,14 +114,12 @@ class VtcCardView extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: _blurSigma, sigmaY: _blurSigma),
         child: DecoratedBox(
           key: cardKey,
+          // A theme surface rather than a dark branded card: its details
+          // are the shared VtcDetailLine, which follows the theme.
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Colors.white.withAlpha(70), Colors.white.withAlpha(25)],
-            ),
+            color: context.colorScheme.surfaceContainerLow,
             borderRadius: const BorderRadius.all(_radius),
-            border: Border.all(color: Colors.white.withAlpha(110)),
+            border: Border.all(color: mc.hairlineStrong),
           ),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 8, 16),
@@ -140,8 +141,8 @@ class VtcCardView extends StatelessWidget {
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: textTheme.titleMedium?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
+                              color: mc.textPrimary,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                           Text(title, style: onboardingNote(context)),
@@ -150,9 +151,9 @@ class VtcCardView extends StatelessWidget {
                     ),
                     IconButton(
                       key: documentKey,
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.receipt_long_outlined,
-                        color: Colors.white,
+                        color: mc.textPrimary,
                       ),
                       tooltip: l10n.vtcMembershipCardShow,
                       onPressed: () => showVtcJoinJson(
@@ -203,10 +204,10 @@ class VtcCardView extends StatelessWidget {
                       Row(
                         spacing: 8,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.cloud_done_outlined,
                             size: 16,
-                            color: Colors.white70,
+                            color: mc.textSecondary,
                           ),
                           Expanded(
                             child: Text(
@@ -238,15 +239,13 @@ class _Logo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fallback = Icon(
-      Icons.groups,
-      color: context.colorScheme.primary,
-      size: size / 2,
-    );
+    final fallback = Icon(Icons.groups, color: McColors.blue, size: size / 2);
     final url = this.url;
     return Container(
       width: size,
       height: size,
+      // A white ring in both modes: community logos are drawn for a light
+      // ground.
       decoration: const BoxDecoration(
         shape: BoxShape.circle,
         color: Colors.white,
@@ -263,7 +262,7 @@ class _Logo extends StatelessWidget {
   }
 }
 
-/// A small frosted label, such as what else the card states.
+/// A small outlined label, such as what else the card states.
 class _Chip extends StatelessWidget {
   const _Chip({required this.icon, required this.label});
 
@@ -272,11 +271,11 @@ class _Chip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final mc = context.mcColors;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: Colors.white.withAlpha(30),
-        border: Border.all(color: Colors.white.withAlpha(90)),
-        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: mc.hairlineStrong),
+        borderRadius: BorderRadius.circular(McRadius.full),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -284,10 +283,12 @@ class _Chip extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           spacing: 6,
           children: [
-            Icon(icon, size: 14, color: Colors.white),
+            Icon(icon, size: 14, color: mc.textSecondary),
             Text(
               label,
-              style: context.textTheme.bodySmall?.copyWith(color: Colors.white),
+              style: context.textTheme.bodySmall?.copyWith(
+                color: mc.textPrimary,
+              ),
             ),
           ],
         ),

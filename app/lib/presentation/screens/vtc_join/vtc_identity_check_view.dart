@@ -87,7 +87,6 @@ class VtcIdentityCheckView extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: TextButton.icon(
               key: const Key('vtc_identity_check_document'),
-              style: TextButton.styleFrom(foregroundColor: Colors.white),
               icon: const Icon(Icons.receipt_long_outlined),
               label: Text(l10n.vtcIdentityCheckShow),
               onPressed: () => showVtcJoinJson(

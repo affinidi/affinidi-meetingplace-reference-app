@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_colors.dart';
+import '../../themes/tokens/mc_radius.dart';
 import 'vtc_trail_step.dart';
 
 /// A step of something the phone does in the background: a tick once
@@ -16,6 +18,7 @@ class VtcProgressLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final mc = context.mcColors;
     final isNext = stage == VtcTrailStage.next;
     return Row(
       spacing: 12,
@@ -27,18 +30,18 @@ class VtcProgressLine extends StatelessWidget {
               padding: EdgeInsets.all(2),
               child: CircularProgressIndicator(
                 strokeWidth: 2.5,
-                color: Colors.white,
+                color: McColors.blue,
               ),
             ),
             VtcTrailStage.done => const Icon(
               Icons.check_circle,
               size: _markerSize,
-              color: Colors.white,
+              color: McColors.blue,
             ),
-            _ => const Icon(
+            _ => Icon(
               Icons.radio_button_unchecked,
               size: _markerSize,
-              color: Colors.white38,
+              color: mc.hairlineStrong,
             ),
           },
         ),
@@ -46,7 +49,7 @@ class VtcProgressLine extends StatelessWidget {
           child: Text(
             title,
             style: context.textTheme.bodySmall?.copyWith(
-              color: isNext ? Colors.white38 : Colors.white,
+              color: isNext ? mc.textTertiary : mc.textPrimary,
             ),
           ),
         ),
@@ -76,13 +79,15 @@ class VtcWaitingForParty extends StatelessWidget {
             dimension: _spinnerSize,
             child: CircularProgressIndicator(
               strokeWidth: 3,
-              color: Colors.white,
+              color: McColors.blue,
             ),
           ),
           Text(
             text,
             textAlign: TextAlign.center,
-            style: context.textTheme.titleLarge?.copyWith(color: Colors.white),
+            style: context.textTheme.titleLarge?.copyWith(
+              color: context.mcColors.textPrimary,
+            ),
           ),
         ],
       ),
@@ -91,7 +96,7 @@ class VtcWaitingForParty extends StatelessWidget {
 }
 
 /// What the phone does in the background, set apart from a page's main
-/// content: a darker, translucent panel under a small heading, [title] or
+/// content: a hairline panel under a small heading, [title] or
 /// "In the background", holding [children], the lines of its steps.
 class VtcBackgroundPanel extends StatelessWidget {
   const VtcBackgroundPanel({super.key, this.title, required this.children});
@@ -101,11 +106,12 @@ class VtcBackgroundPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final mc = context.mcColors;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: Colors.black.withAlpha(45),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withAlpha(40)),
+        color: context.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(McRadius.md),
+        border: Border.all(color: mc.hairline),
       ),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(14, 10, 14, 14),
@@ -116,12 +122,12 @@ class VtcBackgroundPanel extends StatelessWidget {
             Row(
               spacing: 6,
               children: [
-                const Icon(Icons.sync, size: 14, color: Colors.white60),
+                Icon(Icons.sync, size: 14, color: mc.textSecondary),
                 Flexible(
                   child: Text(
                     title ?? context.l10n.vtcBackgroundHeading,
                     style: context.textTheme.labelMedium?.copyWith(
-                      color: Colors.white60,
+                      color: mc.textSecondary,
                       letterSpacing: 0.4,
                     ),
                   ),

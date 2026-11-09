@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_colors.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import 'vtc_detail_line.dart';
 import 'vtc_flow_diagram.dart';
@@ -137,11 +138,15 @@ class VtcTrailStep extends HookWidget {
     final canExpand = details.isNotEmpty || flow != null;
     // Once opened, the summary moves under the step's picture, if any.
     final pictured = expanded.value && flow != null;
-    final summary = Text.rich(_summarySpan(), style: onboardingNote(context));
+    final mc = context.mcColors;
+    final summary = Text.rich(
+      _summarySpan(mc.textPrimary),
+      style: onboardingNote(context),
+    );
     final document = this.document;
     final foreground = stage == VtcTrailStage.next
-        ? Colors.white54
-        : Colors.white;
+        ? mc.textTertiary
+        : mc.textPrimary;
 
     return InkWell(
       onTap: canExpand ? () => expanded.value = !expanded.value : null,
@@ -165,8 +170,8 @@ class VtcTrailStep extends HookWidget {
                     child: Container(
                       width: _lineWidth,
                       color: stage == VtcTrailStage.done
-                          ? Colors.white70
-                          : Colors.white24,
+                          ? McColors.blue
+                          : mc.hairlineStrong,
                     ),
                   ),
               ],
@@ -192,7 +197,7 @@ class VtcTrailStep extends HookWidget {
                                 style: context.textTheme.bodyMedium?.copyWith(
                                   color: foreground,
                                   fontWeight: stage == VtcTrailStage.current
-                                      ? FontWeight.bold
+                                      ? FontWeight.w500
                                       : null,
                                 ),
                               ),
@@ -203,9 +208,9 @@ class VtcTrailStep extends HookWidget {
                         if (document != null)
                           IconButton(
                             key: documentKey,
-                            icon: const Icon(
+                            icon: Icon(
                               Icons.receipt_long_outlined,
-                              color: Colors.white,
+                              color: mc.textPrimary,
                             ),
                             tooltip: context.l10n.vtcJoinTrailShowDocument,
                             visualDensity: VisualDensity.compact,
@@ -227,7 +232,7 @@ class VtcTrailStep extends HookWidget {
                               expanded.value
                                   ? Icons.expand_less
                                   : Icons.expand_more,
-                              color: Colors.white,
+                              color: mc.textSecondary,
                             ),
                           ),
                       ],
@@ -271,12 +276,11 @@ class VtcTrailStep extends HookWidget {
 /// Splits a step's summary into its words and its [VtcTrailStep.highlights],
 /// the first and longest name found at each place.
 extension on VtcTrailStep {
-  static const _highlight = TextStyle(
-    color: Colors.white,
-    fontWeight: FontWeight.bold,
-  );
-
-  TextSpan _summarySpan() {
+  TextSpan _summarySpan(Color highlightColor) {
+    final highlight = TextStyle(
+      color: highlightColor,
+      fontWeight: FontWeight.w500,
+    );
     final names = highlights.where((name) => name.isNotEmpty).toList()
       ..sort((a, b) => b.length.compareTo(a.length));
     final spans = <TextSpan>[];
@@ -291,7 +295,7 @@ extension on VtcTrailStep {
           ), (first, found) => found.$1 < first.$1 ? found : first);
       if (start > at) spans.add(TextSpan(text: summary.substring(at, start)));
       if (name == null) break;
-      spans.add(TextSpan(text: name, style: _highlight));
+      spans.add(TextSpan(text: name, style: highlight));
       at = start + name.length;
     }
     return TextSpan(children: spans);
@@ -299,7 +303,8 @@ extension on VtcTrailStep {
 }
 
 /// A step's marker: filled when done, ringed when current, faint when
-/// still to come, and marked in the error colour when it failed. While
+/// still to come, and ringed in the danger colour, never filled, when it
+/// failed. While
 /// [busy], its icon turns, easing round once a cycle, and comes to rest
 /// upright.
 class VtcTrailMarker extends HookWidget {
@@ -335,7 +340,7 @@ class VtcTrailMarker extends HookWidget {
       [turning],
     );
 
-    final done = stage == VtcTrailStage.done;
+    final mc = context.mcColors;
     final failed = stage == VtcTrailStage.failed;
     return Container(
       key: failed ? const Key('vtc_trail_marker_failed') : null,
@@ -344,12 +349,17 @@ class VtcTrailMarker extends HookWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: switch (stage) {
-          VtcTrailStage.done => Colors.white,
-          VtcTrailStage.failed => context.colorScheme.error,
-          _ => Colors.white.withAlpha(25),
+          VtcTrailStage.done => McColors.blue,
+          VtcTrailStage.failed => mc.dangerText.withValues(alpha: 0.12),
+          VtcTrailStage.current => McColors.controlHoverWash,
+          VtcTrailStage.next => Colors.transparent,
         },
         border: Border.all(
-          color: stage == VtcTrailStage.next ? Colors.white38 : Colors.white,
+          color: switch (stage) {
+            VtcTrailStage.done || VtcTrailStage.current => McColors.blue,
+            VtcTrailStage.failed => mc.dangerText,
+            VtcTrailStage.next => mc.hairlineStrong,
+          },
           width: 2,
         ),
       ),
@@ -359,11 +369,12 @@ class VtcTrailMarker extends HookWidget {
         child: Icon(
           failed ? Icons.priority_high : icon,
           size: size / 2,
-          color: done
-              ? context.colorScheme.primary
-              : stage == VtcTrailStage.next
-              ? Colors.white54
-              : Colors.white,
+          color: switch (stage) {
+            VtcTrailStage.done => McColors.textOnPrimary,
+            VtcTrailStage.failed => mc.dangerText,
+            VtcTrailStage.current => mc.textPrimary,
+            VtcTrailStage.next => mc.textTertiary,
+          },
         ),
       ),
     );

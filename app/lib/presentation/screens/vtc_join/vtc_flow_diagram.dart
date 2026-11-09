@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_radius.dart';
+import '../../themes/tokens/mc_spacing.dart';
 
 /// One party in a [VtcFlowDiagram], such as this phone, the member's VTA or
 /// the community, drawn as its [picture] where it has one, else its [icon].
@@ -39,8 +41,9 @@ class VtcFlowDiagram extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Without the theme's letter spacing, which cut "Community" short.
+    final mc = context.mcColors;
     final labelStyle = context.textTheme.labelSmall?.copyWith(
-      color: Colors.white,
+      color: mc.textSecondary,
       letterSpacing: 0,
     );
 
@@ -50,21 +53,21 @@ class VtcFlowDiagram extends StatelessWidget {
         children: [
           for (final (index, node) in nodes.indexed) ...[
             if (index > 0)
-              const Expanded(
+              Expanded(
                 child: SizedBox(
                   height: _nodeSize,
                   child: Row(
                     children: [
                       Expanded(
                         child: Divider(
-                          color: Colors.white54,
+                          color: mc.hairlineStrong,
                           height: _nodeSize,
                         ),
                       ),
                       Icon(
                         Icons.arrow_forward_ios,
                         size: _arrowHead,
-                        color: Colors.white54,
+                        color: mc.textTertiary,
                       ),
                     ],
                   ),
@@ -81,8 +84,8 @@ class VtcFlowDiagram extends StatelessWidget {
                     height: _nodeSize,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.white.withAlpha(25),
-                      border: Border.all(color: Colors.white54),
+                      color: context.colorScheme.surfaceContainerHigh,
+                      border: Border.all(color: mc.hairlineStrong),
                       image: switch (node.picture) {
                         final picture? => DecorationImage(
                           image: picture,
@@ -92,7 +95,11 @@ class VtcFlowDiagram extends StatelessWidget {
                       },
                     ),
                     child: node.picture == null
-                        ? Icon(node.icon, size: _iconSize, color: Colors.white)
+                        ? Icon(
+                            node.icon,
+                            size: _iconSize,
+                            color: mc.textPrimary,
+                          )
                         : null,
                   ),
                   Text(
@@ -112,7 +119,7 @@ class VtcFlowDiagram extends StatelessWidget {
   }
 }
 
-/// A [flow] in a tinted box, with its [summary] in words under it.
+/// A [flow] in a hairline box, with its [summary] in words under it.
 class VtcFlowBox extends StatelessWidget {
   /// Creates a [VtcFlowBox].
   const VtcFlowBox({super.key, required this.flow, required this.summary});
@@ -121,16 +128,17 @@ class VtcFlowBox extends StatelessWidget {
   final Widget summary;
 
   static const _padding = 10.0;
-  static const _radius = 12.0;
-  static const _tint = 20;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(_padding),
+      // The hairline border takes its width from the padding, so the
+      // content keeps its size.
+      padding: const EdgeInsets.all(_padding - McSpacing.hairline),
       decoration: BoxDecoration(
-        color: Colors.white.withAlpha(_tint),
-        borderRadius: BorderRadius.circular(_radius),
+        color: context.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(McRadius.md),
+        border: Border.all(color: context.mcColors.hairline),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

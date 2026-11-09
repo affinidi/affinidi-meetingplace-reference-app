@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 
-/// One fact on the gradient, such as the key that signed: an [icon] for
+/// One fact on the page, such as the key that signed: an [icon] for
 /// what it is, then its [label] above its [value]. An identifier
 /// ([isId]: a DID, a DID URL, an id) is shown in monospace. A fact of
 /// several [items], such as a credential's types, lists them one bullet a
@@ -26,14 +26,15 @@ class VtcDetailLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final mc = context.mcColors;
     final valueStyle = context.textTheme.bodySmall?.copyWith(
-      color: Colors.white,
+      color: mc.textPrimary,
     );
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 8,
       children: [
-        Icon(icon, size: 16, color: Colors.white70),
+        Icon(icon, size: 16, color: mc.textSecondary),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

@@ -13,6 +13,8 @@ import '../../../infrastructure/services/camera_service/camera_service.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../dialogs/qr_code_picker/qr_code_picker.dart';
 import '../../effects/confetti/confetti_overlay.dart';
+import '../../themes/tokens/mc_radius.dart';
+import '../../themes/tokens/mc_typography.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import '../../widgets/swipeable_cards.dart';
 import '../../widgets/vta_identity_card.dart';
@@ -237,10 +239,7 @@ Future<bool> _confirm(
         ),
         ElevatedButton(
           onPressed: () => Navigator.of(context).pop(true),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: context.colorScheme.error,
-            foregroundColor: Colors.white,
-          ),
+          style: context.destructiveElevatedButtonStyle,
           child: Text(action),
         ),
       ],
@@ -361,7 +360,10 @@ class _Review extends StatelessWidget {
               ? null
               : IconButton(
                   key: const Key('vtc_join_manifest'),
-                  icon: const Icon(Icons.data_object, color: Colors.white),
+                  icon: Icon(
+                    Icons.data_object,
+                    color: context.mcColors.textPrimary,
+                  ),
                   tooltip: l10n.vtcJoinShowManifest,
                   onPressed: () => _showManifest(context, state.manifest),
                 ),
@@ -414,7 +416,7 @@ class _Review extends StatelessWidget {
   }
 }
 
-/// A rounded, frosted label, such as which identity joins.
+/// A rounded, outlined label, such as which identity joins.
 class _Pill extends StatelessWidget {
   const _Pill(this.text);
 
@@ -422,11 +424,11 @@ class _Pill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final mc = context.mcColors;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: Colors.white.withAlpha(25),
-        border: Border.all(color: Colors.white.withAlpha(76)),
-        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: mc.hairlineStrong),
+        borderRadius: BorderRadius.circular(McRadius.full),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -434,12 +436,12 @@ class _Pill extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           spacing: 6,
           children: [
-            const Icon(Icons.account_circle, size: 18, color: Colors.white),
+            Icon(Icons.account_circle, size: 18, color: mc.textSecondary),
             Flexible(
               child: Text(
                 text,
                 style: context.textTheme.bodySmall?.copyWith(
-                  color: Colors.white,
+                  color: mc.textPrimary,
                 ),
               ),
             ),
@@ -519,7 +521,7 @@ class _Consent extends StatelessWidget {
                     children: [
                       Text(
                         l10n.vtcJoinListMe,
-                        style: const TextStyle(color: Colors.white),
+                        style: TextStyle(color: context.mcColors.textPrimary),
                       ),
                       Text(
                         l10n.vtcJoinListMeNote,
@@ -537,8 +539,6 @@ class _Consent extends StatelessWidget {
                   key: const Key('vtc_join_list_me'),
                   value: state.listInDirectory,
                   onChanged: onListInDirectory,
-                  activeTrackColor: Colors.white,
-                  activeThumbColor: context.colorScheme.primary,
                 ),
               ],
             ),
@@ -573,7 +573,7 @@ class _Consent extends StatelessWidget {
             },
             // Anyone, not only members, sees these: worth a second look.
             iconColor: group == DirectoryAudience.public
-                ? context.customColors.warning
+                ? context.mcColors.warning
                 : null,
             title: l10n.vtcJoinShowsTo(
               _listOf(l10n, [
@@ -626,7 +626,7 @@ class _FieldDetail extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final labelStyle = context.textTheme.bodyMedium?.copyWith(
-      color: Colors.white,
+      color: context.mcColors.textPrimary,
       fontWeight: FontWeight.w500,
     );
     return Padding(
@@ -666,7 +666,7 @@ class _FieldDetail extends StatelessWidget {
   }
 }
 
-/// A small label on the gradient, as [_Pill] but without an icon.
+/// A small outlined label, as [_Pill] but without an icon.
 class _Tag extends StatelessWidget {
   const _Tag(this.text);
 
@@ -675,27 +675,28 @@ class _Tag extends StatelessWidget {
   @override
   Widget build(BuildContext context) => DecoratedBox(
     decoration: BoxDecoration(
-      color: Colors.white.withAlpha(25),
-      border: Border.all(color: Colors.white.withAlpha(76)),
-      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: context.mcColors.hairlineStrong),
+      borderRadius: BorderRadius.circular(McRadius.full),
     ),
     child: Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       child: Text(
         text,
-        style: context.textTheme.labelSmall?.copyWith(color: Colors.white),
+        style: context.textTheme.labelSmall?.copyWith(
+          color: context.mcColors.textSecondary,
+        ),
       ),
     ),
   );
 }
 
-/// A thin rule between the lines of a list on the gradient.
+/// A thin rule between the lines of a list.
 class _Divider extends StatelessWidget {
   const _Divider();
 
   @override
   Widget build(BuildContext context) => ColoredBox(
-    color: Colors.white.withAlpha(40),
+    color: context.mcColors.hairline,
     child: const SizedBox(height: 1),
   );
 }
@@ -714,7 +715,7 @@ class _ConsentItem extends HookWidget {
 
   final IconData icon;
 
-  /// Tints the icon, white when null.
+  /// Tints the icon, the secondary text colour when null.
   final Color? iconColor;
   final String title;
   final String? subtitle;
@@ -724,6 +725,7 @@ class _ConsentItem extends HookWidget {
   Widget build(BuildContext context) {
     final expanded = useState(false);
     final canExpand = details.isNotEmpty;
+    final mc = context.mcColors;
 
     // Tells screen readers the line opens, as the chevron tells the eye.
     return Semantics(
@@ -737,7 +739,7 @@ class _ConsentItem extends HookWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             spacing: 12,
             children: [
-              Icon(icon, size: 20, color: iconColor ?? Colors.white),
+              Icon(icon, size: 20, color: iconColor ?? mc.textSecondary),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -746,7 +748,7 @@ class _ConsentItem extends HookWidget {
                     Text(
                       title,
                       style: context.textTheme.bodyMedium?.copyWith(
-                        color: Colors.white,
+                        color: mc.textPrimary,
                       ),
                     ),
                     if (subtitle case final subtitle?)
@@ -758,7 +760,7 @@ class _ConsentItem extends HookWidget {
               if (canExpand)
                 Icon(
                   expanded.value ? Icons.expand_less : Icons.expand_more,
-                  color: Colors.white,
+                  color: mc.textSecondary,
                 ),
             ],
           ),
@@ -822,39 +824,36 @@ class _WayCard extends StatelessWidget {
 
   final VtcJoinWay way;
 
-  static const _radius = BorderRadius.all(Radius.circular(20));
+  static const _radius = BorderRadius.all(Radius.circular(McRadius.lg));
 
   /// Blurs the card stacked behind, as the identity deck does.
   static const _blurSigma = 20.0;
 
   @override
   Widget build(BuildContext context) {
+    final mc = context.mcColors;
     return ClipRRect(
       borderRadius: _radius,
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: _blurSigma, sigmaY: _blurSigma),
         child: DecoratedBox(
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Colors.white.withAlpha(60), Colors.white.withAlpha(25)],
-            ),
+            color: context.colorScheme.surfaceContainerHigh,
             borderRadius: _radius,
-            border: Border.all(color: Colors.white.withAlpha(90)),
+            border: Border.all(color: mc.hairlineStrong),
           ),
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
               spacing: 8,
               children: [
-                Icon(_iconOf(way), size: 28, color: Colors.white),
+                Icon(_iconOf(way), size: 28, color: mc.textPrimary),
                 Text(
                   _titleOf(context.l10n, way),
                   textAlign: TextAlign.center,
                   style: context.textTheme.titleSmall?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                    color: mc.textPrimary,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 if (way.credentialType case final type?)
@@ -862,7 +861,7 @@ class _WayCard extends StatelessWidget {
                     context.l10n.vtcJoinWayWithCredential(type),
                     textAlign: TextAlign.center,
                     style: context.textTheme.bodySmall?.copyWith(
-                      color: Colors.white,
+                      color: mc.textPrimary,
                     ),
                   ),
                 if (way.description case final description?)
@@ -1263,7 +1262,9 @@ class _VettingOutcome extends StatelessWidget {
               ? Icons.verified
               : Icons.do_not_disturb_on_outlined,
           size: 72,
-          color: Colors.white,
+          color: status == VtcVettingStatus.vouched
+              ? context.mcColors.success
+              : context.mcColors.textSecondary,
         ),
         Text(
           l10n.vtcApplicantOutcome(
@@ -1271,7 +1272,9 @@ class _VettingOutcome extends StatelessWidget {
             vetter,
           ),
           textAlign: TextAlign.center,
-          style: context.textTheme.titleMedium?.copyWith(color: Colors.white),
+          style: context.textTheme.titleMedium?.copyWith(
+            color: context.mcColors.textPrimary,
+          ),
         ),
         if (request?.declineMessage case final message?)
           OnboardingSubtitle(message),
@@ -1575,9 +1578,9 @@ class _ConfirmMatch extends StatelessWidget {
             code,
             key: const Key('vtc_join_match_code'),
             textAlign: TextAlign.center,
-            style: context.textTheme.displaySmall?.copyWith(
-              color: Colors.white,
-              fontFamily: 'monospace',
+            style: McTypography.code.copyWith(
+              fontSize: context.textTheme.displaySmall?.fontSize,
+              color: context.mcColors.textPrimary,
               letterSpacing: 4,
             ),
           ),
@@ -1745,12 +1748,14 @@ class _Outcome extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: 12,
       children: [
-        Icon(icon, size: 72, color: Colors.white),
+        Icon(icon, size: 72, color: context.mcColors.textPrimary),
         const SizedBox(height: 4),
         Text(
           message,
           textAlign: TextAlign.center,
-          style: context.textTheme.titleMedium?.copyWith(color: Colors.white),
+          style: context.textTheme.titleMedium?.copyWith(
+            color: context.mcColors.textPrimary,
+          ),
         ),
         ?trail,
         const SizedBox(height: 12),
@@ -1780,7 +1785,7 @@ class _Failed extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: 12,
       children: [
-        const Icon(Icons.error_outline, size: 72, color: Colors.white),
+        Icon(Icons.error_outline, size: 72, color: context.mcColors.dangerText),
         const SizedBox(height: 4),
         OnboardingMessage(message, isError: true),
         const SizedBox(height: 12),

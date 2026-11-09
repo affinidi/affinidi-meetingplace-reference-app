@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_trail_step.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_colors.dart';
 
 void main() {
   Future<void> pumpStep(WidgetTester tester, VtcTrailStage stage) =>
@@ -31,7 +32,10 @@ void main() {
         find.byKey(const Key('vtc_trail_marker_failed')),
       );
       final decoration = marker.decoration! as BoxDecoration;
-      expect(decoration.color, AppTheme.dark.colorScheme.error);
+      final danger = AppTheme.dark.extension<McColors>()!.dangerText;
+      // A danger ring, never a red fill.
+      expect((decoration.border! as Border).top.color, danger);
+      expect(decoration.color, danger.withValues(alpha: 0.12));
       expect(find.byIcon(Icons.priority_high), findsOneWidget);
       expect(find.byIcon(Icons.inbox_outlined), findsNothing);
     });
@@ -94,7 +98,7 @@ void main() {
       );
       final bold = <String>[];
       summary.textSpan!.visitChildren((span) {
-        if (span is TextSpan && span.style?.fontWeight == FontWeight.bold) {
+        if (span is TextSpan && span.style?.fontWeight == FontWeight.w500) {
           bold.add(span.text!);
         }
         return true;
