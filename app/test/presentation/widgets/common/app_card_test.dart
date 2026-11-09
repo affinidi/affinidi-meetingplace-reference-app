@@ -63,4 +63,33 @@ void main() {
       expect(border.top.color, mc.insetTop);
     });
   }
+
+  RadialGradient? washOf(WidgetTester tester) {
+    final boxes = tester.widgetList<DecoratedBox>(
+      find.descendant(
+        of: find.byType(AppCard),
+        matching: find.byType(DecoratedBox),
+      ),
+    );
+    return boxes
+        .map((box) => (box.decoration as BoxDecoration).gradient)
+        .whereType<RadialGradient>()
+        .firstOrNull;
+  }
+
+  testWidgets('carries an accent as a top-right corner wash', (tester) async {
+    const accent = Color(0xFF10B94E);
+    await pumpCard(tester, const AppCard(accent: accent, child: Text('Alice')));
+
+    final wash = washOf(tester)!;
+    expect(wash.center, Alignment.topRight);
+    expect(wash.colors.first, accent.withValues(alpha: 0.16));
+    expect(wash.colors.last.a, 0);
+  });
+
+  testWidgets('has no wash without an accent', (tester) async {
+    await pumpCard(tester, const AppCard(child: Text('Alice')));
+
+    expect(washOf(tester), isNull);
+  });
 }
