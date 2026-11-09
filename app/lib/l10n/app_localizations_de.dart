@@ -2042,6 +2042,10 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get membershipTrailCheckedNoTask =>
+      'None: the community\'s status list is read over HTTPS';
+
+  @override
   String get membershipTrailStatusList => 'Status list';
 
   @override

@@ -3026,6 +3026,12 @@ abstract class AppLocalizations {
   /// **'Its validity ended on {date}, so it no longer holds'**
   String membershipTrailExpired(String date);
 
+  /// Membership trail detail: checking the card against the community's status list takes no Trust Task
+  ///
+  /// In en, this message translates to:
+  /// **'None: the community\'s status list is read over HTTPS'**
+  String get membershipTrailCheckedNoTask;
+
   /// Trail detail: where the community publishes its status list
   ///
   /// In en, this message translates to:

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../domain/models/vtc/vtc_membership_entry.dart';
@@ -212,6 +213,7 @@ class _MembershipTrail extends StatelessWidget {
           },
           highlights: names,
           actor: community,
+          tasks: const [credentialIssueTask],
           details: [
             VtcTrailDetail(
               Icons.groups_outlined,
@@ -261,6 +263,13 @@ class _MembershipTrail extends StatelessWidget {
           },
           highlights: names,
           actor: l10n.membershipTrailYourVta,
+          // Kept when it came; archived, not deleted, once the member left.
+          tasks: [
+            if (left == null)
+              VtaTask.credentialsReceive
+            else
+              VtaTask.credentialsArchive,
+          ],
           details: [
             if (entry.stored case final stored?) ...[
               VtcTrailDetail(
@@ -310,7 +319,10 @@ class _MembershipTrail extends StatelessWidget {
             actor: leave == null
                 ? community
                 : l10n.membershipTrailLeftActor(community),
-            tasks: [if (receipt != null) receipt.type],
+            tasks: [
+              VtaTask.signTrustTask,
+              receipt?.type ?? MemberTask.selfRemove,
+            ],
             details: [
               if (receipt != null) ...[
                 if (receipt.signedAt case final at?)
@@ -362,6 +374,12 @@ class _MembershipTrail extends StatelessWidget {
           highlights: names,
           actor: l10n.membershipTrailThisPhone,
           details: [
+            // Said outright, so the step is not taken for a gap in the trail.
+            VtcTrailDetail(
+              Icons.assignment_outlined,
+              l10n.vtcJoinTrailTask,
+              l10n.membershipTrailCheckedNoTask,
+            ),
             if (status?.statusListUrl case final url?)
               VtcTrailDetail(
                 Icons.link,

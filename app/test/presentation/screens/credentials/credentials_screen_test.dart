@@ -430,9 +430,11 @@ void main() {
             .dy,
       ),
     );
+    expect(find.text(credentialIssueTask), findsOneWidget);
     await expand(tester, 'issued');
 
     await expand(tester, 'kept');
+    expect(find.text(VtaTask.credentialsReceive), findsOneWidget);
     expect(flow(tester, 'kept'), ['Your VTA', 'This phone']);
     expect(find.text('Done by'), findsOneWidget);
     expect(
@@ -471,6 +473,10 @@ void main() {
     );
     expect(find.text(FakeVtcNetwork.statusListUrl), findsOneWidget);
     expect(find.text('1'), findsOneWidget);
+    expect(
+      find.text("None: the community's status list is read over HTTPS"),
+      findsOneWidget,
+    );
     // Both steps of the VTA carry its marker.
     expect(
       find.descendant(
@@ -539,9 +545,11 @@ void main() {
 
     await expand(tester, 'kept');
     expect(flow(tester, 'kept'), ['This phone', 'Your VTA']);
+    expect(find.text(VtaTask.credentialsArchive), findsOneWidget);
     await expand(tester, 'left');
     expect(flow(tester, 'left'), ['Your VTA', 'This phone', 'Community']);
     expect(find.text('Your VTA, then Football club'), findsOneWidget);
+    expect(find.text(VtaTask.signTrustTask), findsOneWidget);
     expect(find.text(MemberTask.selfRemove), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('membership_trail_left_document')));

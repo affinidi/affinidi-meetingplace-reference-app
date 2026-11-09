@@ -1986,6 +1986,10 @@
 			}
 		}
 	},
+	"membershipTrailCheckedNoTask": "None: the community's status list is read over HTTPS",
+	"@membershipTrailCheckedNoTask": {
+		"description": "Membership trail detail: checking the card against the community's status list takes no Trust Task"
+	},
 	"membershipTrailStatusList": "Status list",
 	"@membershipTrailStatusList": {
 		"description": "Trail detail: where the community publishes its status list"
