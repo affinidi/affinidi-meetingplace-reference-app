@@ -10,6 +10,7 @@ import '../contacts/contacts_screen.dart';
 import '../contacts/contacts_screen_controller.dart';
 import 'communities_controller.dart';
 import 'community_info_view.dart';
+import 'community_members_controller.dart';
 import 'community_members_view.dart';
 
 /// A community the member belongs to, with its channels, its groups' chats,
@@ -25,11 +26,13 @@ class CommunityScreen extends HookConsumerWidget {
     final l10n = context.l10n;
     useEffect(() {
       // Not while building: showing the community changes the channels.
-      Future.microtask(
-        () => ref
+      Future.microtask(() {
+        ref
             .read(contactsScreenControllerProvider.notifier)
-            .showCommunity(communityDid),
-      );
+            .showCommunity(communityDid);
+        // Read the members now, for the Members tab to show at once.
+        ref.read(communityMembersControllerProvider(communityDid));
+      });
       return null;
     }, [communityDid]);
     final community = ref

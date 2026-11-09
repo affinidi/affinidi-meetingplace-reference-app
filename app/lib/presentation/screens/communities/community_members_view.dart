@@ -9,12 +9,14 @@ import '../../themes/tokens/mc_icons.dart';
 import '../vtc_trust/vtc_member_search_screen.dart';
 import '../vtc_trust/vtc_member_tile.dart';
 import '../vtc_trust/vtc_vouch.dart';
+import 'community_members_controller.dart';
 
 /// The other members of a community: those of the member's groups, or
 /// those the member searches the directory for, each with the vouches
 /// between them and the member, to vouch for them. The directory answers
 /// searches only, never lists every member, so the groups' members show
-/// until the member searches.
+/// until the member searches. Those are kept from opening the community
+/// and synced each time this tab opens; a search is read each time.
 class CommunityMembersView extends HookConsumerWidget {
   const CommunityMembersView({
     super.key,
@@ -29,21 +31,43 @@ class CommunityMembersView extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final service = ref.read(vtcTrustServiceProvider);
+    final cache = communityMembersControllerProvider(communityDid);
     final query = useState<String?>(null);
     final reload = useState(0);
-    final load = useMemoized(() async {
+    useEffect(() {
+      // Not while building: syncing changes what is shown.
+      Future.microtask(() => ref.read(cache.notifier).sync());
+      return null;
+    }, [communityDid]);
+    final listed = ref.watch(cache);
+    final search = useMemoized(() async {
       final text = query.value;
-      if (text != null && text.length < VtcMemberSearchScreen.minQueryLength) {
+      if (text == null) return null;
+      if (text.length < VtcMemberSearchScreen.minQueryLength) {
         throw const VtcTrustException(VtcTrustFailure.searchTooShort);
       }
       return (
-        text == null
-            ? await service.communityMembers(communityDid)
-            : await service.findMembers(communityDid, query: text),
+        await service.findMembers(communityDid, query: text),
         await service.edgesByMember(communityDid),
       );
     }, [query.value, reload.value]);
-    final loaded = useFuture(load);
+    final searched = useFuture(search);
+    final loaded = query.value == null
+        ? switch (listed) {
+            AsyncData(:final value) =>
+              AsyncSnapshot<CommunityMembers?>.withData(
+                ConnectionState.done,
+                value,
+              ),
+            AsyncError(:final error, :final stackTrace) =>
+              AsyncSnapshot<CommunityMembers?>.withError(
+                ConnectionState.done,
+                error,
+                stackTrace,
+              ),
+            _ => const AsyncSnapshot<CommunityMembers?>.waiting(),
+          }
+        : searched;
     final none = query.value == null
         ? l10n.vtcGroupMembersNone
         : l10n.vtcTrustSearchNone;
@@ -60,7 +84,12 @@ class CommunityMembersView extends HookConsumerWidget {
         name: name,
         entry: entry,
       );
-      if (edge != null) reload.value++;
+      if (edge == null) return;
+      if (query.value == null) {
+        await ref.read(cache.notifier).sync();
+      } else {
+        reload.value++;
+      }
     }
 
     return Column(

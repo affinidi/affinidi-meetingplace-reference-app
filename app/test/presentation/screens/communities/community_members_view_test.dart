@@ -40,8 +40,12 @@ class _FakeTrustService extends Fake implements VtcTrustService {
     DirectoryEntry(entryId: 'dir_bea', displayName: 'Bea', role: 'member'),
   ];
 
+  /// How often the members of the member's groups were read.
+  int listings = 0;
+
   @override
   Future<List<DirectoryEntry>> communityMembers(String communityDid) async {
+    listings++;
     if (refusal case final refusal?) throw VtcTrustException(refusal);
     return groupsMembers;
   }
@@ -109,6 +113,39 @@ void main() {
     )!;
   }
 
+  /// Opens the Members tab with [container], which keeps what the app
+  /// keeps between visits, or shows something else in its place.
+  Future<void> showTab(
+    WidgetTester tester,
+    ProviderContainer container, {
+    bool open = true,
+  }) => tester.pumpWidget(
+    UncontrolledProviderScope(
+      container: container,
+      child: MaterialApp(
+        theme: AppTheme.dark,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: open
+              ? const CommunityMembersView(
+                  communityDid: _club,
+                  communityName: 'Football club',
+                )
+              : const SizedBox.shrink(),
+        ),
+      ),
+    ),
+  );
+
+  ProviderContainer keptMembers() {
+    final container = ProviderContainer(
+      overrides: [vtcTrustServiceProvider.overrideWithValue(service)],
+    );
+    addTearDown(container.dispose);
+    return container;
+  }
+
   Future<void> search(WidgetTester tester, String text) async {
     await tester.enterText(
       find.byKey(const Key('community_members_search_field')),
@@ -137,9 +174,48 @@ void main() {
     expect(service.queries, isEmpty);
   });
 
+  testWidgets('reads the members once when first opened', (tester) async {
+    await pumpView(tester);
+
+    expect(service.listings, 1);
+  });
+
+  testWidgets('shows the kept members at once and syncs them on opening', (
+    tester,
+  ) async {
+    final container = keptMembers();
+    await showTab(tester, container);
+    await tester.pumpAndSettle();
+    await showTab(tester, container, open: false);
+    service.groupsMembers = [...service.groupsMembers, service.members.first];
+
+    await showTab(tester, container);
+
+    // Kept from before, while the community is asked again.
+    expect(inMember('dir_bea', find.text('Bea')), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    await tester.pumpAndSettle();
+    expect(inMember('dir_bob', find.text('Bob')), findsOneWidget);
+    expect(service.listings, 2);
+  });
+
+  testWidgets('keeps the members when syncing them fails', (tester) async {
+    final container = keptMembers();
+    await showTab(tester, container);
+    await tester.pumpAndSettle();
+    await showTab(tester, container, open: false);
+    service.refusal = VtcTrustFailure.network;
+
+    await showTab(tester, container);
+    await tester.pumpAndSettle();
+
+    expect(service.listings, 2);
+    expect(inMember('dir_bea', find.text('Bea')), findsOneWidget);
+  });
+
   testWidgets('says when the groups show nobody else', (tester) async {
-    final l10n = await pumpView(tester);
     service.groupsMembers = const [];
+    final l10n = await pumpView(tester);
     await search(tester, 'bob');
 
     await search(tester, ' ');
