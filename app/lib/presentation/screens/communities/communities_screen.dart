@@ -6,6 +6,8 @@ import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../navigation/routes/dashboard_routes.dart';
 import '../../../navigation/tabs/tabs.dart';
 import '../../themes/tokens/mc_icons.dart';
+import '../../themes/tokens/mc_spacing.dart';
+import '../../widgets/common/app_card.dart';
 import '../../widgets/section_header.dart';
 import '../credentials/membership_credentials_list.dart';
 import '../vtc_join/vtc_join_screen.dart';
@@ -119,34 +121,33 @@ class _CommunityRow extends StatelessWidget {
     final l10n = context.l10n;
     final colors = context.colorScheme;
 
-    return Material(
-      color: colors.surfaceContainerHigh,
-      borderRadius: BorderRadius.circular(16),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            spacing: 12,
-            children: [
-              Icon(McIcons.community, color: colors.onSurface),
-              Expanded(
-                child: Text(
-                  community.name ?? l10n.membershipCredentialUnnamed,
-                  style: context.textTheme.titleMedium?.copyWith(
-                    color: colors.onSurface,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+    return AppCard(
+      onTap: onTap,
+      padding: const EdgeInsets.symmetric(
+        horizontal: McSpacing.s4,
+        vertical: McSpacing.s3,
+      ),
+      child: Row(
+        spacing: 12,
+        children: [
+          Icon(McIcons.community, color: colors.onSurface),
+          Expanded(
+            child: Text(
+              community.name ?? l10n.membershipCredentialUnnamed,
+              style: context.textTheme.titleMedium?.copyWith(
+                color: colors.onSurface,
+                fontWeight: FontWeight.w500,
               ),
-              if (community.isApplying)
-                StatusChip(label: l10n.communityPending, color: Colors.amber)
-              else
-                Icon(McIcons.chevronRight, color: colors.onSurfaceVariant),
-            ],
+            ),
           ),
-        ),
+          if (community.isApplying)
+            StatusChip(
+              label: l10n.communityPending,
+              color: context.mcColors.warning,
+            )
+          else
+            Icon(McIcons.chevronRight, color: colors.onSurfaceVariant),
+        ],
       ),
     );
   }

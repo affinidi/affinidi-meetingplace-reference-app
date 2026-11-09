@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_community.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/extensions/build_context_extensions.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/credentials/membership_credentials_list.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
+import 'package:mpx_flutter_reference_app/presentation/widgets/common/app_card.dart';
 
 import '../../../fakes/fake_identities.dart';
 import '../../../utils/app.dart';
@@ -87,6 +90,38 @@ void main() {
         findsNothing,
       );
       expect(find.text(l10n.communitiesNone), findsNothing);
+    });
+
+    testWidgets('draws each community as a panel, pending in warning', (
+      tester,
+    ) async {
+      await openCommunitiesTab(tester);
+
+      await saveCommunities();
+      await pullToRefresh(tester);
+
+      for (final did in [footballDid, chessDid]) {
+        expect(
+          find.descendant(
+            of: find.byKey(Key('community_$did')),
+            matching: find.byType(AppCard),
+          ),
+          findsOneWidget,
+        );
+      }
+      final pending = tester.widget<StatusChip>(
+        find.descendant(
+          of: find.byKey(const Key('community_$footballDid')),
+          matching: find.byType(StatusChip),
+        ),
+      );
+      expect(
+        pending.color,
+        tester
+            .element(find.byKey(const Key('community_$footballDid')))
+            .mcColors
+            .warning,
+      );
     });
 
     testWidgets('opens a joined community with its channels and members', (
