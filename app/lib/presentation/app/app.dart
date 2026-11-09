@@ -37,7 +37,7 @@ class App extends ConsumerWidget {
       routerConfig: routerConfig,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.dark,
       localizationsDelegates: [...AppLocalizations.localizationsDelegates],
       supportedLocales: AppLocalizations.supportedLocales,
       locale: locale,
