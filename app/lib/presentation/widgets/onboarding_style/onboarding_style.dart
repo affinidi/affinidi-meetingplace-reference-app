@@ -31,11 +31,10 @@ Future<void> showOnboardingSheet(BuildContext context, Widget child) {
   );
 }
 
-/// The logo header and footer of onboarding on the black canvas, around a
-/// scrolling [child]. With [onClose], a close button leads the header, for
-/// a screen opened over another. Without [showBranding], neither the logo
-/// header nor the "powered by" footer, e.g. for a flow with steps of its
-/// own.
+/// The logo header of onboarding on the black canvas, over a scrolling
+/// [child]. With [onClose], a close button leads the header, for a screen
+/// opened over another. Without [showBranding], no logo header, e.g. for a
+/// flow with steps of its own.
 class OnboardingLayout extends StatelessWidget {
   const OnboardingLayout({
     super.key,
@@ -97,25 +96,7 @@ class OnboardingLayout extends StatelessWidget {
                       ],
                       child,
                       const Spacer(),
-                      if (showBranding)
-                        Padding(
-                          padding: EdgeInsets.only(
-                            top: 24,
-                            bottom: isSmallLandscape ? 16 : 32,
-                          ),
-                          child: Center(
-                            child: SizedBox(
-                              height: 40,
-                              child: Image.asset(
-                                'assets/images/powered_by_mpx.png',
-                                color: mc.textPrimary,
-                                colorBlendMode: BlendMode.modulate,
-                              ),
-                            ),
-                          ),
-                        )
-                      else
-                        SizedBox(height: isSmallLandscape ? 16 : 32),
+                      SizedBox(height: isSmallLandscape ? 16 : 32),
                     ],
                   ),
                 ),

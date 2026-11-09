@@ -220,7 +220,7 @@ void main() {
       expect(find.text('wants you to join'), findsOneWidget);
       expect(
         find.image(const AssetImage('assets/images/powered_by_mpx.png')),
-        findsOneWidget,
+        findsNothing,
       );
       expect(
         find.image(
@@ -1551,11 +1551,7 @@ void main() {
       await openVetting(tester);
 
       expect(find.text('Step 1 of 5 · Meet a vetter'), findsOneWidget);
-      // The flow's steps stand in for the logo and the footer.
-      expect(
-        find.image(const AssetImage('assets/images/powered_by_mpx.png')),
-        findsNothing,
-      );
+      // The flow's steps stand in for the logo.
       expect(
         find.image(
           const AssetImage('assets/images/meeting-place-splash-white-1024.png'),
@@ -1572,10 +1568,6 @@ void main() {
       await askBob(tester);
 
       expect(find.text('Step 2 of 5 · Ask the vetter'), findsOneWidget);
-      expect(
-        find.image(const AssetImage('assets/images/powered_by_mpx.png')),
-        findsNothing,
-      );
       expect(
         find.image(
           const AssetImage('assets/images/meeting-place-splash-white-1024.png'),

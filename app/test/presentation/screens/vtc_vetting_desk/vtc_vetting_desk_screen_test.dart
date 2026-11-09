@@ -183,11 +183,7 @@ void main() {
     expect(find.text('Step 1 of 4 · Show your ticket'), findsOneWidget);
     expect(find.byKey(const Key('vtc_vetter_ticket_qr')), findsOneWidget);
     expect(find.text(recorded.tickets.single.code), findsOneWidget);
-    // The flow's steps stand in for the logo and the footer.
-    expect(
-      find.image(const AssetImage('assets/images/powered_by_mpx.png')),
-      findsNothing,
-    );
+    // The flow's steps stand in for the logo.
     expect(
       find.image(
         const AssetImage('assets/images/meeting-place-splash-white-1024.png'),
