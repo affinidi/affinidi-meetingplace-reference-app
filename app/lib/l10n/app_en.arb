@@ -3871,6 +3871,15 @@
 	"@vtcTrustVouchesForYou": {
 		"description": "Badge: this member vouched for the member"
 	},
+	"vtcGroupMembersUnlistedNote": "Members who chose not to be listed in the directory of {community} aren't shown.",
+	"@vtcGroupMembersUnlistedNote": {
+		"description": "Why some members of a group may be missing from its list",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			}
+		}
+	},
 	"vtcJoinAlreadyMember": "You're already a member of {name}.",
 	"@vtcJoinAlreadyMember": {
 		"description": "The scanned community is one the member belongs to",

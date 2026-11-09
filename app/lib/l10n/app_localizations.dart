@@ -5724,6 +5724,12 @@ abstract class AppLocalizations {
   /// **'Vouches for you'**
   String get vtcTrustVouchesForYou;
 
+  /// Why some members of a group may be missing from its list
+  ///
+  /// In en, this message translates to:
+  /// **'Members who chose not to be listed in the directory of {community} aren\'t shown.'**
+  String vtcGroupMembersUnlistedNote(String community);
+
   /// The scanned community is one the member belongs to
   ///
   /// In en, this message translates to:

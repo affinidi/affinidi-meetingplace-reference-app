@@ -62,12 +62,28 @@ class VtcGroupMembersScreen extends HookConsumerWidget {
           ),
         ),
         AsyncSnapshot(data: (final members, _)) when members.isEmpty =>
-          _Message(l10n.vtcGroupMembersNone),
+          _Message(
+            '${l10n.vtcGroupMembersNone}\n\n'
+            '${l10n.vtcGroupMembersUnlistedNote(communityName)}',
+          ),
         AsyncSnapshot(data: (final members, final edges)) => ListView.separated(
-          itemCount: members.length,
+          // The note first: the community never says who is unlisted.
+          itemCount: members.length + 1,
           separatorBuilder: (_, _) => const Divider(height: 1),
           itemBuilder: (context, index) {
-            final entry = members[index];
+            if (index == 0) {
+              return Padding(
+                key: const Key('vtc_group_members_unlisted'),
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  l10n.vtcGroupMembersUnlistedNote(communityName),
+                  style: context.textTheme.bodySmall?.copyWith(
+                    color: context.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              );
+            }
+            final entry = members[index - 1];
             final name =
                 entry.displayName ?? entry.nickname ?? l10n.vtcTrustUnnamed;
             final memberEdges = edges[entry.did] ?? const VtcEdges();

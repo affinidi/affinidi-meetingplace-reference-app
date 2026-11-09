@@ -3817,6 +3817,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vtcTrustVouchesForYou => 'Vouches for you';
 
   @override
+  String vtcGroupMembersUnlistedNote(String community) {
+    return 'Members who chose not to be listed in the directory of $community aren\'t shown.';
+  }
+
+  @override
   String vtcJoinAlreadyMember(String name) {
     return 'You\'re already a member of $name.';
   }

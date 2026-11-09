@@ -148,7 +148,23 @@ void main() {
 
     await pumpScreen(tester);
 
-    expect(find.text('No other members to show.'), findsOneWidget);
+    expect(find.textContaining('No other members to show.'), findsOneWidget);
+    expect(
+      find.textContaining('chose not to be listed in the directory'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('says that unlisted members are not shown', (tester) async {
+    await pumpScreen(tester);
+
+    expect(
+      find.text(
+        'Members who chose not to be listed in the directory of Football '
+        "club aren't shown.",
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('says why the members cannot be shown', (tester) async {
