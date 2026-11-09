@@ -59,11 +59,19 @@ class VtcFindableView extends HookConsumerWidget {
                   .displayName
                   .trim() ??
               '';
-          if (mine.isDidVisibleToMembers &&
-              name.isNotEmpty &&
-              mine.displayName != name) {
-            await service.setDirectoryName(communityDid, name: name);
-            mine = await service.directoryCard(communityDid);
+          // A member who let others find them stays findable under their
+          // identity's name, also on a card hidden when they joined.
+          if (mine.isDidVisibleToMembers) {
+            var changed = false;
+            if (name.isNotEmpty && mine.displayName != name) {
+              await service.setDirectoryName(communityDid, name: name);
+              changed = true;
+            }
+            if (mine.isHidden) {
+              await service.setFindable(communityDid, findable: true);
+              changed = true;
+            }
+            if (changed) mine = await service.directoryCard(communityDid);
           }
           if (!context.mounted) return;
           identityName.value = name;
@@ -118,7 +126,7 @@ class VtcFindableView extends HookConsumerWidget {
               ),
               Switch.adaptive(
                 key: const Key('vtc_findable_switch'),
-                value: loaded?.isDidVisibleToMembers ?? false,
+                value: loaded?.isFindable ?? false,
                 onChanged: loaded == null || busy.value ? null : change,
                 activeTrackColor: Colors.white,
                 activeThumbColor: context.colorScheme.primary,

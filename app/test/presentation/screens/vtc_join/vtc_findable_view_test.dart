@@ -17,6 +17,7 @@ const _communityDid = 'did:webvh:community.example';
 /// The member's directory card, as the community answers it.
 class _FakeTrustService extends Fake implements VtcTrustService {
   bool findable = false;
+  bool hidden = false;
   String? name;
   VtcTrustFailure? refusal;
   final List<bool> changes = [];
@@ -27,6 +28,7 @@ class _FakeTrustService extends Fake implements VtcTrustService {
       MyDirectoryCard(
         entryId: 'dir_me',
         isDidVisibleToMembers: findable,
+        isHidden: hidden,
         displayName: name,
       );
 
@@ -42,6 +44,7 @@ class _FakeTrustService extends Fake implements VtcTrustService {
     if (refusal case final refusal?) throw VtcTrustException(refusal);
     changes.add(findable);
     this.findable = findable;
+    if (findable) hidden = false;
   }
 
   @override
@@ -146,6 +149,19 @@ void main() {
     await pumpView(tester);
 
     expect(service.names, ['John Doe']);
+  });
+
+  testWidgets('makes findable again a card hidden when joining', (
+    tester,
+  ) async {
+    service
+      ..findable = true
+      ..hidden = true;
+
+    await pumpView(tester);
+
+    expect(service.changes, [true]);
+    expect(findableSwitch(tester).value, isTrue);
   });
 
   testWidgets('leaves the name alone while members cannot find you', (
