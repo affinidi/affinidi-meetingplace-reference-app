@@ -198,8 +198,13 @@ class VtcGroupChatService {
     final offer = (await sdk.findOffer(
       mnemonic: link.mnemonic,
     )).connectionOffer;
-    // Only an offer for the group's own DID is the group's chat.
-    if (offer is! GroupConnectionOffer || offer.groupDid != group.groupDid) {
+    // The phrase comes from the group's own DID document, which only the
+    // community writes, so the offer it finds is the chat the community
+    // linked. The control plane names no group DID when an offer is found
+    // (it arrives once the member is let in); one that names another
+    // group's DID is not this group's chat.
+    if (offer is! GroupConnectionOffer ||
+        (offer.groupDid != null && offer.groupDid != group.groupDid)) {
       throw const VtcGroupChatException(VtcGroupChatFailure.notTheGroupsChat);
     }
 

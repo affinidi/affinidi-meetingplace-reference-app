@@ -15,6 +15,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/providers/app_logger_pr
 import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
 
+import '../../../fakes/fake_connection_offers.dart';
 import '../../../fakes/fake_contacts.dart';
 import '../../../fakes/fake_identities.dart';
 import '../../../fakes/fake_identities_service.dart';
@@ -634,6 +635,30 @@ void main() {
   });
 
   group('VtcGroupChatService.joinChat', () {
+    test("refuses an offer that names another group's DID", () async {
+      vtc.link = const GroupChatLink(
+        mnemonic: 'my-group-passphrase',
+        // This app's control plane, as the tests build it: none.
+        controlPlaneDid: '',
+      );
+      sdk.offerToFind = FakeConnectionOffers.groupOfferOwnedByMe;
+
+      await expectLater(
+        service.joinChat(
+          _communityDid,
+          vtc.group,
+          identity: FakeIdentities.primaryIdentity,
+        ),
+        throwsA(
+          isA<VtcGroupChatException>().having(
+            (e) => e.failure,
+            'failure',
+            VtcGroupChatFailure.notTheGroupsChat,
+          ),
+        ),
+      );
+    });
+
     test('refuses when the community linked no chat', () async {
       await expectLater(
         service.joinChat(
