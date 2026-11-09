@@ -159,6 +159,24 @@ void main() {
       expect(find.text(l10n.communitiesSubtitle), findsOneWidget);
     });
 
+    testWidgets('shows what a community is in its Info tab', (tester) async {
+      final l10n = await getL10n();
+      await openCommunitiesTab(tester);
+      await saveCommunities();
+      await pullToRefresh(tester);
+      await tester.tap(find.text('Chess club'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text(l10n.communityInfoTab));
+      await tester.pumpAndSettle();
+
+      expect(find.text(l10n.vtcJoinProfileHeading), findsOneWidget);
+      expect(find.text(l10n.communityDidLabel), findsOneWidget);
+      expect(find.textContaining('chess.example'), findsOneWidget);
+      // The test community publishes no profile; its DID shows regardless.
+      expect(find.text(l10n.communityInfoUnavailable), findsOneWidget);
+    });
+
     testWidgets('signs in to a community from its page', (tester) async {
       await openCommunitiesTab(tester);
       await saveCommunities();

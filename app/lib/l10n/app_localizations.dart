@@ -7002,6 +7002,12 @@ abstract class AppLocalizations {
   /// **'Info'**
   String get communityInfoTab;
 
+  /// Note on a community's Info tab when its public profile cannot be read
+  ///
+  /// In en, this message translates to:
+  /// **'The community\'s profile can\'t be read right now.'**
+  String get communityInfoUnavailable;
+
   /// Label above a community's DID in its profile
   ///
   /// In en, this message translates to:

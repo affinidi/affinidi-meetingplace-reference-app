@@ -5160,6 +5160,10 @@
 	"@communityInfoTab": {
 		"description": "Tab of a community's screen showing what the community publishes about itself"
 	},
+	"communityInfoUnavailable": "The community's profile can't be read right now.",
+	"@communityInfoUnavailable": {
+		"description": "Note on a community's Info tab when its public profile cannot be read"
+	},
 	"communityDidLabel": "Community DID",
 	"@communityDidLabel": {
 		"description": "Label above a community's DID in its profile"

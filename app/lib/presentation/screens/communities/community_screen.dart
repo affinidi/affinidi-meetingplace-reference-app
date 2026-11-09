@@ -9,10 +9,12 @@ import '../../widgets/section_header.dart';
 import '../contacts/contacts_screen.dart';
 import '../contacts/contacts_screen_controller.dart';
 import 'communities_controller.dart';
+import 'community_info_view.dart';
 import 'community_members_view.dart';
 
 /// A community the member belongs to, with its channels, its groups' chats,
-/// and its members. Opened from the Communities tab.
+/// its members, and what it publishes about itself. Opened from the
+/// Communities tab.
 class CommunityScreen extends HookConsumerWidget {
   const CommunityScreen({super.key, required this.communityDid});
 
@@ -37,7 +39,7 @@ class CommunityScreen extends HookConsumerWidget {
         .firstOrNull;
 
     final name = community?.name ?? l10n.membershipCredentialUnnamed;
-    final tabController = useTabController(initialLength: 2);
+    final tabController = useTabController(initialLength: 3);
 
     return SafeArea(
       child: Column(
@@ -51,7 +53,11 @@ class CommunityScreen extends HookConsumerWidget {
           ),
           FilterTabBar(
             controller: tabController,
-            labels: [l10n.communityChannelsTab, l10n.communityMembersTab],
+            labels: [
+              l10n.communityChannelsTab,
+              l10n.communityMembersTab,
+              l10n.communityInfoTab,
+            ],
           ),
           Expanded(
             child: TabBarView(
@@ -62,6 +68,7 @@ class CommunityScreen extends HookConsumerWidget {
                   communityDid: communityDid,
                   communityName: name,
                 ),
+                CommunityInfoView(communityDid: communityDid),
               ],
             ),
           ),
