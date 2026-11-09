@@ -220,8 +220,7 @@ class VtcVouchTrail extends HookConsumerWidget {
         Text(
           isOwn ? l10n.vtcTrustDoneTitle(name) : l10n.vtcTrustTheyVouched(name),
           style: context.textTheme.titleLarge?.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
+            color: context.mcColors.textPrimary,
           ),
         ),
         Column(
@@ -486,12 +485,7 @@ Future<bool> _confirm(
         ),
         ElevatedButton(
           onPressed: () => Navigator.of(context).pop(true),
-          style: isDestructive
-              ? ElevatedButton.styleFrom(
-                  backgroundColor: context.colorScheme.error,
-                  foregroundColor: Colors.white,
-                )
-              : null,
+          style: isDestructive ? context.destructiveElevatedButtonStyle : null,
           child: Text(action),
         ),
       ],

@@ -103,7 +103,7 @@ class VtcMemberCredentialsView extends HookConsumerWidget {
       title: title,
       subtitle: subtitle,
       trailing: IconButton(
-        icon: const Icon(McIcons.receipt, color: Colors.white),
+        icon: Icon(McIcons.receipt, color: context.mcColors.textPrimary),
         tooltip: l10n.vtcJoinTrailShowDocument,
         visualDensity: VisualDensity.compact,
         onPressed: () => showVtcJoinJson(context, title: title, json: document),
@@ -190,8 +190,7 @@ class VtcMemberCredentialsView extends HookConsumerWidget {
         Text(
           l10n.vtcMemberCredentialsTitle(name),
           style: context.textTheme.titleLarge?.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
+            color: context.mcColors.textPrimary,
           ),
         ),
         Text(

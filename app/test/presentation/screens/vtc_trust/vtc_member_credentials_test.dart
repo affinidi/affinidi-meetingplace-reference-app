@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_trust_service/vtc_trust_service.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/extensions/build_context_extensions.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_trust/vtc_member_credentials.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
@@ -55,14 +56,14 @@ void main() {
 
   setUp(() => service = _FakeTrustService());
 
-  Future<void> pumpButton(WidgetTester tester) async {
+  Future<void> pumpButton(WidgetTester tester, {ThemeData? theme}) async {
     await tester.binding.setSurfaceSize(const Size(400, 1000));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
       ProviderScope(
         overrides: [vtcTrustServiceProvider.overrideWithValue(service)],
         child: MaterialApp(
-          theme: AppTheme.dark,
+          theme: theme ?? AppTheme.dark,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: const Scaffold(
@@ -118,6 +119,23 @@ void main() {
     expect(find.text('another member vouched for Bob'), findsOneWidget);
     expect(find.textContaining('did:'), findsNothing);
   });
+
+  for (final (name, theme) in [
+    ('dark', AppTheme.dark),
+    ('light', AppTheme.light),
+  ]) {
+    testWidgets('titles the sheet in the $name theme\'s text colour', (
+      tester,
+    ) async {
+      await pumpButton(tester, theme: theme);
+
+      final title = find.text("Bob's credentials");
+      expect(
+        tester.widget<Text>(title).style?.color,
+        tester.element(title).mcColors.textPrimary,
+      );
+    });
+  }
 
   testWidgets('opens a credential as it was signed', (tester) async {
     service.shown = VtcMemberCredentials(
