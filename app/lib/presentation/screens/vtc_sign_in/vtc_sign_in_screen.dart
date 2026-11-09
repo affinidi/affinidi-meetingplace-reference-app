@@ -404,22 +404,27 @@ class _Review extends HookWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             spacing: 12,
             children: [
-              if (requester != null) ...[
+              // Only what the community could tell; nothing is guessed.
+              if ((requester?.browser, requester?.os) case (
+                final browser?,
+                final os?,
+              ))
                 OnboardingLine(
                   icon: McIcons.desktop,
-                  title: l10n.vtcSignInBrowser(requester.browser, requester.os),
+                  title: l10n.vtcSignInBrowser(browser, os),
                 ),
+              if (requester?.location case final location?)
                 OnboardingLine(
                   icon: McIcons.location,
-                  title: l10n.vtcSignInLocation(requester.location),
+                  title: l10n.vtcSignInLocation(location),
                 ),
+              if (requester?.sameNetwork case final sameNetwork?)
                 OnboardingLine(
-                  icon: requester.sameNetwork ? McIcons.wifi : McIcons.public,
-                  title: requester.sameNetwork
+                  icon: sameNetwork ? McIcons.wifi : McIcons.public,
+                  title: sameNetwork
                       ? l10n.vtcSignInSameNetwork
                       : l10n.vtcSignInOtherNetwork,
                 ),
-              ],
               Text(l10n.vtcSignInReportedNote, style: onboardingNote(context)),
             ],
           ),

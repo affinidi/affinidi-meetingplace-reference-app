@@ -133,6 +133,29 @@ void main() {
       expect(controller.calls, ['approve', 'decline']);
     });
 
+    testWidgets('shows only what the community could tell', (tester) async {
+      await pumpScreen(
+        tester,
+        VtcSignInState(
+          step: VtcSignInStep.review,
+          communityName: 'Rivendell',
+          website: 'https://rivendell.example',
+          decisionDeadline: deadline(),
+          requester: const SignInRequester(
+            browser: 'Firefox',
+            os: null,
+            location: null,
+            sameNetwork: null,
+            createdAt: '',
+          ),
+        ),
+      );
+
+      expect(find.byType(OnboardingLine), findsNothing);
+      expect(find.textContaining('network'), findsNothing);
+      expect(find.text('Approve'), findsOneWidget);
+    });
+
     testWidgets('asks to sign in as the identity card found on the VTA', (
       tester,
     ) async {
