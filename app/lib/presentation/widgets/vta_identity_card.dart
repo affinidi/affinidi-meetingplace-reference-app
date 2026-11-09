@@ -6,17 +6,21 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../domain/models/identity/identity.dart';
 import '../../infrastructure/extensions/build_context_extensions.dart';
 import '../../infrastructure/extensions/contact_card_extensions.dart';
+import '../../infrastructure/extensions/identities_extensions.dart';
 import '../../infrastructure/providers/cache_manager_provider.dart';
 import '../themes/tokens/mc_icons.dart';
 import '../themes/tokens/mc_radius.dart';
 import '../themes/tokens/mc_typography.dart';
+import 'common/app_card.dart';
+import 'identity_picker/identity_card.dart';
+import 'identity_picker/identity_contact_rows.dart';
 import 'onboarding_style/onboarding_style.dart';
 import 'vta_details.dart';
 
-/// A VTA identity as a card in the shape of an MPX identity card, a panel
-/// over the gradient: its picture centred over the card's upper edge,
-/// its name, with the VTA's shield beside it for where it lives on the VTA,
-/// the details its profile holds, and its full DID as metadata. A null
+/// A VTA identity as an MPX identity card: its picture centred over the
+/// card's upper edge, the kind of identity over its name, with the VTA's
+/// shield beside it for where it lives on the VTA, the details its profile
+/// holds as the identity card shows them, and its full DID as metadata. A null
 /// [did] is the new identity the VTA would create.
 class VtaIdentityCard extends ConsumerWidget {
   const VtaIdentityCard({
@@ -38,9 +42,9 @@ class VtaIdentityCard extends ConsumerWidget {
 
   static const _radius = Radius.circular(McRadius.xl);
 
-  /// The picture straddles the card's upper edge by half its height.
-  static const _avatarRadius = 40.0;
-  static const _avatarRing = 3.0;
+  /// The picture straddles the card's upper edge by half its height, as
+  /// on an identity card.
+  static const _pictureSize = IdentityCard.pictureSize;
 
   static const _blurSigma = 20.0;
 
@@ -53,53 +57,59 @@ class VtaIdentityCard extends ConsumerWidget {
     final identity = this.identity;
     final card = identity?.card;
     final displayName = card?.displayName.trim() ?? '';
-    final details = <(IconData, String)>[
-      if (card != null) ...[
-        if (card.fullName.isNotEmpty) (McIcons.badge, card.fullName),
-        if (card.emailAddress.trim().isNotEmpty)
-          (McIcons.email, card.emailAddress),
-        if (card.mobilePhone.trim().isNotEmpty)
-          (McIcons.phone, card.mobilePhone),
-      ],
-    ];
     final picture = card != null && card.hasProfilePic
         ? card.image(cacheManager: ref.read(cacheManagerProvider))
         : null;
 
     // The upper half of the picture hangs above the card, inside the margin.
     return Padding(
-      padding: const EdgeInsets.fromLTRB(8, _avatarRadius + 8, 8, 8),
+      padding: const EdgeInsets.fromLTRB(
+        IdentityCard.margin,
+        _pictureSize / 2 + IdentityCard.margin,
+        IdentityCard.margin,
+        IdentityCard.margin,
+      ),
       child: Stack(
         // The card takes the slot's full width, not its text's.
         fit: StackFit.passthrough,
         clipBehavior: Clip.none,
         children: [
-          // A panel, blurred behind as well so the card stacked behind it in
-          // a deck cannot be read.
+          // An identity card, blurred behind as well so the card stacked
+          // behind it in a deck cannot be read.
           ClipRRect(
             borderRadius: const BorderRadius.all(_radius),
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: _blurSigma, sigmaY: _blurSigma),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: context.colorScheme.surfaceContainerLow,
+              child: AppCard(
+                accent: identity?.getCardColor(context.colorScheme),
+                shape: RoundedRectangleBorder(
                   borderRadius: const BorderRadius.all(_radius),
-                  border: Border.all(color: mc.hairline),
+                  side: BorderSide(color: mc.hairline),
                 ),
                 // Sized to its content, or filling a slot such as a card in a
-                // deck, where the opened VTA details scroll.
+                // deck, where it scrolls.
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.fromLTRB(
-                    16,
-                    _avatarRadius + 10,
-                    16,
+                    20,
+                    _pictureSize / 2 + 8,
+                    20,
                     14,
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    spacing: 6,
+                    spacing: 4,
                     children: [
+                      // The kind of identity as an eyebrow, as on an
+                      // identity card.
+                      if (identity != null)
+                        Text(
+                          identity.getSubtitle(l10n: l10n).toUpperCase(),
+                          textAlign: TextAlign.center,
+                          style: McTypography.eyebrow.copyWith(
+                            color: mc.textSecondary,
+                          ),
+                        ),
                       // The VTA's shield beside the name, for an identity
                       // there.
                       Row(
@@ -115,7 +125,8 @@ class VtaIdentityCard extends ConsumerWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               textAlign: TextAlign.center,
-                              style: textTheme.titleMedium?.copyWith(
+                              // As a normal identity card's name.
+                              style: textTheme.titleLarge?.copyWith(
                                 color: mc.textPrimary,
                               ),
                             ),
@@ -159,11 +170,9 @@ class VtaIdentityCard extends ConsumerWidget {
                           style: onboardingNote(context),
                         ),
                       ] else ...[
-                        const SizedBox(height: 4),
-                        for (final (icon, value) in details)
-                          _Detail(icon: icon, value: value),
-                        if (details.isNotEmpty)
-                          Divider(height: 12, color: mc.hairline),
+                        const SizedBox(height: 8),
+                        if (card != null) IdentityContactRows(card: card),
+                        Divider(height: 12, color: mc.hairline),
                         _DidMetadata(did: did),
                       ],
                     ],
@@ -175,7 +184,7 @@ class VtaIdentityCard extends ConsumerWidget {
           Positioned(
             left: 0,
             right: 0,
-            top: -_avatarRadius,
+            top: -_pictureSize / 2,
             child: Center(
               child: _Avatar(
                 picture: picture,
@@ -189,61 +198,37 @@ class VtaIdentityCard extends ConsumerWidget {
   }
 }
 
-/// The identity's picture in a hairline ring, or [icon] when it has none.
+/// The identity's picture in the canvas-coloured ring an identity card's
+/// picture wears, or [icon] when it has none.
 class _Avatar extends StatelessWidget {
   const _Avatar({required this.picture, required this.icon});
 
   final ImageProvider<Object>? picture;
   final IconData icon;
 
+  /// As an identity card's picture's ring.
+  static const _ring = 6.0;
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
     final mc = context.mcColors;
     return Container(
-      padding: const EdgeInsets.all(VtaIdentityCard._avatarRing),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: colorScheme.surfaceContainerLow,
-        border: Border.all(color: mc.hairline),
+        border: Border.all(
+          color: context.theme.scaffoldBackgroundColor,
+          width: _ring,
+        ),
       ),
       child: CircleAvatar(
-        radius: VtaIdentityCard._avatarRadius - VtaIdentityCard._avatarRing,
+        radius: VtaIdentityCard._pictureSize / 2 - _ring,
         backgroundColor: colorScheme.surfaceContainerHigh,
         backgroundImage: picture,
         child: picture == null
             ? Icon(icon, size: 36, color: mc.textSecondary)
             : null,
       ),
-    );
-  }
-}
-
-/// One detail of the identity's profile, by its icon.
-class _Detail extends StatelessWidget {
-  const _Detail({required this.icon, required this.value});
-
-  final IconData icon;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final mc = context.mcColors;
-    return Row(
-      spacing: 8,
-      children: [
-        Icon(icon, size: 16, color: mc.textSecondary),
-        Expanded(
-          child: Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: context.textTheme.bodyMedium?.copyWith(
-              color: mc.textPrimary,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

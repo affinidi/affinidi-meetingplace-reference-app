@@ -14,6 +14,8 @@ import 'package:mpx_flutter_reference_app/infrastructure/providers/cache_manager
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_radius.dart';
+import 'package:mpx_flutter_reference_app/presentation/widgets/common/app_card.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/vta_identity_card.dart';
 
 import '../../fakes/fake_cache_manager.dart';
@@ -164,7 +166,24 @@ void main() {
       expect(glass.width, moreOrLessEquals(card.width - 16, epsilon: 1));
     });
 
-    testWidgets('leaves out the details the profile lacks', (tester) async {
+    testWidgets('looks as an identity card', (tester) async {
+      await _pump(
+        tester,
+        VtaIdentityCard(did: _did, identity: _identity(_card)),
+      );
+
+      final card = tester.widget<AppCard>(find.byType(AppCard));
+      expect(card.accent, AppTheme.dark.colorScheme.primary);
+      expect(
+        (card.shape! as RoundedRectangleBorder).borderRadius,
+        BorderRadius.circular(McRadius.xl),
+      );
+      expect(find.text('ALIAS IDENTITY'), findsOneWidget);
+    });
+
+    testWidgets('marks the details the profile lacks as not shared', (
+      tester,
+    ) async {
       await _pump(
         tester,
         VtaIdentityCard(
@@ -173,9 +192,9 @@ void main() {
         ),
       );
 
-      expect(find.byIcon(McIcons.badge), findsOneWidget);
-      expect(find.byIcon(McIcons.email), findsNothing);
-      expect(find.byIcon(McIcons.phone), findsNothing);
+      expect(find.text('Ada Lovelace'), findsOneWidget);
+      expect(find.text('Not shared'), findsNWidgets(2));
+      expect(find.text('ada@example.com'), findsNothing);
     });
 
     testWidgets('shows the picture in place of the icon', (tester) async {
