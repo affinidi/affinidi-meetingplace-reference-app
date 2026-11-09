@@ -23,6 +23,12 @@ RouteBase get $dashboardShellRouteData => StatefulShellRouteData.$route(
           factory: $ContactsRoute._fromState,
           routes: [
             GoRouteData.$route(
+              path: 'community/:communityDid',
+              name: 'community',
+              hasOverriddenOnExit: false,
+              factory: $CommunityRoute._fromState,
+            ),
+            GoRouteData.$route(
               path: ':contactId/connection-details',
               name: 'connectionDetails',
               hasOverriddenOnExit: false,
@@ -181,6 +187,31 @@ mixin $ContactsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/contacts');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $CommunityRoute on GoRouteData {
+  static CommunityRoute _fromState(GoRouterState state) =>
+      CommunityRoute(communityDid: state.pathParameters['communityDid']!);
+
+  CommunityRoute get _self => this as CommunityRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/contacts/community/${Uri.encodeComponent(_self.communityDid)}',
+  );
 
   @override
   void go(BuildContext context) => context.go(location);

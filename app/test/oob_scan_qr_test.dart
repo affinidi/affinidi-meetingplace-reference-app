@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/exceptions/app_exception_type.dart';
+import 'package:mpx_flutter_reference_app/navigation/routes/dashboard_routes.dart';
 import 'package:mpx_flutter_reference_app/presentation/dialogs/qr_code_picker/qr_code_picker.dart';
 
 import 'fakes/fake_contacts.dart';
@@ -377,7 +378,9 @@ void main() {
           (tester) async {
             await navigateToLocation(
               tester,
-              '/contacts',
+              const CommunityRoute(
+                communityDid: 'did:web:community.example',
+              ).location,
               isAuthenticated: true,
               alreadyOnboarded: true,
               identities: [testIdentity],

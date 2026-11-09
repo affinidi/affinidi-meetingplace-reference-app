@@ -87,7 +87,7 @@ void main() {
         });
 
         group('and a primary identity already exists', () {
-          testWidgets('it shows the channel screen', (tester) async {
+          testWidgets('it shows the communities screen', (tester) async {
             await navigateToLocation(
               tester,
               '/',
@@ -98,7 +98,7 @@ void main() {
             await tester.pumpAndSettle();
 
             final l10n = await getL10n();
-            expect(find.text(l10n.contactsPanelSubtitle), findsOneWidget);
+            expect(find.text(l10n.communitiesSubtitle), findsOneWidget);
           });
         });
       });
@@ -121,7 +121,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final l10n = await getL10n();
-      expect(find.text(l10n.contactsPanelSubtitle), findsOneWidget);
+      expect(find.text(l10n.communitiesSubtitle), findsOneWidget);
     });
   });
 
@@ -141,14 +141,14 @@ void main() {
       await tester.pumpAndSettle();
 
       final l10n = await getL10n();
-      expect(find.text(l10n.contactsPanelSubtitle), findsOneWidget);
+      expect(find.text(l10n.communitiesSubtitle), findsOneWidget);
     });
   });
 
-  group('When opening the app on channels tab', () {
+  group('When opening the app on communities tab', () {
     final location = RoutePaths.contacts;
 
-    testWidgets('it shows the channels screen', (tester) async {
+    testWidgets('it shows the communities screen', (tester) async {
       await navigateToLocation(
         tester,
         location,
@@ -159,7 +159,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final l10n = await getL10n();
-      expect(find.text(l10n.contactsPanelSubtitle), findsOneWidget);
+      expect(find.text(l10n.communitiesSubtitle), findsOneWidget);
     });
   });
 

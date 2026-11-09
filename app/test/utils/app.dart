@@ -5,6 +5,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meeting_place_credentials/meeting_place_credentials.dart';
@@ -98,6 +99,8 @@ Future<void> startApp(
     'alreadyOnboarded': alreadyOnboarded,
   });
   final sharedPreferences = await SharedPreferences.getInstance();
+  // The Communities tab reads the member's communities from it.
+  FlutterSecureStorage.setMockInitialValues({});
   final cacheManager = FakeCacheManager();
   final effectiveEnvironment = environment ?? FakeEnvironment();
   final effectiveSecureStorage = secureStorage ?? FakeSecureStorage();

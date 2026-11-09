@@ -91,16 +91,17 @@ class _FakeVtcService extends Fake implements VtcService {
   }
 
   /// The communities the member belongs to, and each one's groups.
-  List<VtcCommunity> communities = const [];
+  List<VtcCommunity> memberCommunities = const [];
   Map<String, List<VtcGroupListing>> groupsOf = const {};
 
   @override
-  Future<List<VtcCommunity>> memberships() async => communities;
+  Future<List<VtcCommunity>> memberships() async => memberCommunities;
 
   @override
-  Future<VtcCommunity?> community(String communityDid) async => communities
-      .where((community) => community.communityDid == communityDid)
-      .firstOrNull;
+  Future<VtcCommunity?> community(String communityDid) async =>
+      memberCommunities
+          .where((community) => community.communityDid == communityDid)
+          .firstOrNull;
 
   @override
   Future<List<VtcGroupListing>> memberGroups(String communityDid) async =>
@@ -478,7 +479,7 @@ void main() {
     final member = FakeIdentities.primaryIdentity;
 
     setUp(() {
-      vtc.communities = [
+      vtc.memberCommunities = [
         VtcCommunity(
           communityDid: _communityDid,
           personaDid: member.did,
@@ -545,7 +546,7 @@ void main() {
     });
 
     test('leaves a community whose member is not on this phone', () async {
-      vtc.communities = const [
+      vtc.memberCommunities = const [
         VtcCommunity(
           communityDid: _communityDid,
           personaDid: 'did:webvh:elsewhere',

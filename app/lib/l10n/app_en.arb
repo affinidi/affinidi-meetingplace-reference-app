@@ -4995,5 +4995,17 @@
 				"type": "String"
 			}
 		}
+	},
+	"communitiesSubtitle": "Tap a community to see its channels.",
+	"@communitiesSubtitle": {
+		"description": "Subtitle of the Communities tab"
+	},
+	"communitiesNone": "You have not joined a community yet.",
+	"@communitiesNone": {
+		"description": "Shown on the Communities tab when the member belongs to no community and applied to none"
+	},
+	"communityPending": "Pending",
+	"@communityPending": {
+		"description": "Chip on a community the member applied to, while it decides"
 	}
 }

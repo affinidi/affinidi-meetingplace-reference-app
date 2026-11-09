@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact_status.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_extensions.dart';
+import 'package:mpx_flutter_reference_app/navigation/routes/dashboard_routes.dart';
 
 import 'fakes/fake_channels.dart';
 import 'fakes/fake_contacts.dart';
@@ -10,10 +11,15 @@ import 'fakes/fake_identities.dart';
 import 'fakes/fake_meeting_place_sdk.dart';
 import 'utils/app.dart';
 
+/// The channels screen, shown inside a community.
+final communityLocation = const CommunityRoute(
+  communityDid: 'did:web:community.example',
+).location;
+
 Future<void> navigateToContactsScreen(WidgetTester tester) async {
   await navigateToLocation(
     tester,
-    '/contacts',
+    communityLocation,
     isAuthenticated: true,
     alreadyOnboarded: true,
     identities: [FakeIdentities.primaryIdentity],
@@ -226,7 +232,7 @@ void main() {
       final l10n = await getL10n();
       await navigateToLocation(
         tester,
-        '/contacts',
+        communityLocation,
         isAuthenticated: true,
         alreadyOnboarded: true,
         identities: [FakeIdentities.primaryIdentity],
@@ -363,7 +369,7 @@ void main() {
     ) async {
       await navigateToLocation(
         tester,
-        '/contacts',
+        communityLocation,
         isAuthenticated: true,
         alreadyOnboarded: true,
         identities: [FakeIdentities.primaryIdentity],
@@ -379,7 +385,7 @@ void main() {
         'messages', (tester) async {
       await navigateToLocation(
         tester,
-        '/contacts',
+        communityLocation,
         isAuthenticated: true,
         alreadyOnboarded: true,
         identities: [FakeIdentities.primaryIdentity],
@@ -409,7 +415,7 @@ void main() {
 
       await navigateToLocation(
         tester,
-        '/contacts',
+        communityLocation,
         isAuthenticated: true,
         alreadyOnboarded: true,
         identities: [FakeIdentities.primaryIdentity],

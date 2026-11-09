@@ -159,6 +159,19 @@ class MembershipStatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (label, color) = membershipStatusLabel(context.l10n, status);
+    return StatusChip(label: label, color: color);
+  }
+}
+
+/// A state's word in its colour, light on the dark screen.
+class StatusChip extends StatelessWidget {
+  const StatusChip({super.key, required this.label, required this.color});
+
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(

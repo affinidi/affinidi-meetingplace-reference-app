@@ -8,6 +8,7 @@ class RouteNames {
   static const settings = 'settings';
 
   // Contacts
+  static const community = 'community';
   static const chat = 'chat';
   static const audioVideoCall = 'audioVideoCall';
 

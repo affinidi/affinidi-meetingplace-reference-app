@@ -396,6 +396,13 @@ class VtcService {
       if (community.isMember) community,
   ];
 
+  /// The communities the member belongs to or is applying to, as this phone
+  /// records them.
+  Future<List<VtcCommunity>> communities() async => [
+    for (final community in await _repository.communities())
+      if (community.isMember || community.isApplying) community,
+  ];
+
   /// Reads what the community whose DID is [scanned], as its QR code shows
   /// it, asks of applicants.
   ///

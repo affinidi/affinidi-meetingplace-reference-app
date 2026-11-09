@@ -13,6 +13,7 @@ class RoutePaths {
   static const mockCredentials = '/mock-credentials';
 
   // Contacts
+  static const community = 'community/:communityDid';
   static const chat = ':contactId/chat';
   static const audioVideoCall = 'audio-video-call';
 

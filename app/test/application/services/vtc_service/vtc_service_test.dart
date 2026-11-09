@@ -6,6 +6,7 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/mock_credential_template.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_card_delivery.dart';
+import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_community.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_member_link.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_membership_entry.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_vetter_desk.dart';
@@ -133,6 +134,42 @@ void main() {
       expect(await service.linkedVta(), isNull);
       expect(await service.managerDid(), isNull);
       expect(keyStorage.did, isNull);
+    });
+  });
+
+  group('VtcService communities', () {
+    VtcCommunity community(
+      String did, {
+      bool isMember = true,
+      String? joinRequestId,
+    }) => VtcCommunity(
+      communityDid: did,
+      personaDid: 'did:key:z$did',
+      contextId: 'vta',
+      isMember: isMember,
+      joinRequestId: joinRequestId,
+    );
+
+    test('lists memberships and open applications only', () async {
+      final repository = SecureStorageVtcRepository();
+      await repository.saveCommunity(community('did:web:member'));
+      await repository.saveCommunity(
+        community(
+          'did:web:applying',
+          isMember: false,
+          joinRequestId: 'request-1',
+        ),
+      );
+      await repository.saveCommunity(
+        community('did:web:rejected', isMember: false),
+      );
+
+      final communities = await service.communities();
+
+      expect(communities.map((c) => c.communityDid), [
+        'did:web:member',
+        'did:web:applying',
+      ]);
     });
   });
 

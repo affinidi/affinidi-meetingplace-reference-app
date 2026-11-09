@@ -6827,6 +6827,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'DID: {did}'**
   String vtcVetterDetailsDid(String did);
+
+  /// Subtitle of the Communities tab
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a community to see its channels.'**
+  String get communitiesSubtitle;
+
+  /// Shown on the Communities tab when the member belongs to no community and applied to none
+  ///
+  /// In en, this message translates to:
+  /// **'You have not joined a community yet.'**
+  String get communitiesNone;
+
+  /// Chip on a community the member applied to, while it decides
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get communityPending;
 }
 
 class _AppLocalizationsDelegate

@@ -17,13 +17,11 @@ import '../../../infrastructure/extensions/contact_origin_extensions.dart';
 import '../../../infrastructure/extensions/widget_ref_extensions.dart';
 import '../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../../navigation/routes/dashboard_routes.dart';
-import '../../../navigation/tabs/tabs.dart';
 import '../../dialogs/new_connections_menu/new_connections_menu.dart';
 import '../../helpers/screensize_helper.dart';
 import '../../widgets/action_button.dart';
 import '../../widgets/async_loaders/modal_async_loading_status.dart';
 import '../../widgets/profile_circle_avatar.dart';
-import '../../widgets/section_banner.dart';
 import '../../widgets/tab_bar_tab.dart';
 import '../chat/chat_screen_controller.dart';
 import 'contacts_screen_controller.dart';
@@ -49,30 +47,24 @@ class ContactsScreen extends ConsumerWidget {
     final controller = ref.read(provider.notifier);
     ref.keepAround(contactsScreenControllerProvider);
 
-    return SafeArea(
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SectionBanner(
-              title: l10n.tabsTitle(Tabs.contacts.name),
-              subtitle: context.l10n.contactsPanelSubtitle,
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _FiltersBar(),
+          Padding(
+            padding: const EdgeInsets.all(2),
+            child: _ActionsBar(
+              onSelectNewConnectionsOption: () =>
+                  _showNewConnectionsMenu(context, ref),
             ),
-            _FiltersBar(),
-            Padding(
-              padding: const EdgeInsets.all(2),
-              child: _ActionsBar(
-                onSelectNewConnectionsOption: () =>
-                    _showNewConnectionsMenu(context, ref),
-              ),
-            ),
-            ModalAsyncLoadingStatus(
-              controller.deleteContactLoadingController,
-              successMessage: l10n.contactsDeleted(1),
-            ),
-            _ContactsLayout(),
-          ],
-        ),
+          ),
+          ModalAsyncLoadingStatus(
+            controller.deleteContactLoadingController,
+            successMessage: l10n.contactsDeleted(1),
+          ),
+          _ContactsLayout(),
+        ],
       ),
     );
   }

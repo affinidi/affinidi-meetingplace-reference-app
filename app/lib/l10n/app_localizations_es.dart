@@ -4666,4 +4666,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String vtcVetterDetailsDid(String did) {
     return 'DID: $did';
   }
+
+  @override
+  String get communitiesSubtitle => 'Tap a community to see its channels.';
+
+  @override
+  String get communitiesNone => 'You have not joined a community yet.';
+
+  @override
+  String get communityPending => 'Pending';
 }

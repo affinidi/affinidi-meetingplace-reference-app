@@ -5,9 +5,10 @@ import '../../presentation/page_transitions/slide_up_transition_page.dart';
 import '../../presentation/scaffolds/scaffold_with_nav_bar.dart';
 import '../../presentation/screens/chat/audio_video_call/audio_video_call_screen.dart';
 import '../../presentation/screens/chat/chat_screen.dart';
+import '../../presentation/screens/communities/communities_screen.dart';
+import '../../presentation/screens/communities/community_screen.dart';
 import '../../presentation/screens/connections/connection_details/connection_details_screen.dart';
 import '../../presentation/screens/connections/connections_screen.dart';
-import '../../presentation/screens/contacts/contacts_screen.dart';
 import '../../presentation/screens/credentials/credentials_screen.dart';
 import '../../presentation/screens/identities/form_screen/identity_form_screen.dart';
 import '../../presentation/screens/identities/identities_screen.dart';
@@ -27,6 +28,7 @@ import 'route_paths.dart';
 part 'connection/connection_details_route.dart';
 part 'contact/audio_video_call_route.dart';
 part 'contact/chat_route.dart';
+part 'contact/community_route.dart';
 part 'dashboard_routes.g.dart';
 part 'identity/identity_form_route.dart';
 part 'offer/accept_offer_route.dart';
@@ -47,6 +49,10 @@ part 'vrc/vrc_details_route.dart';
           path: RoutePaths.contacts,
           name: RouteNames.contacts,
           routes: [
+            TypedGoRoute<CommunityRoute>(
+              path: RoutePaths.community,
+              name: RouteNames.community,
+            ),
             TypedGoRoute<ConnectionDetailsRoute>(
               path: RoutePaths.connectionDetails,
               name: RouteNames.connectionDetails,
@@ -214,7 +220,7 @@ class ContactsRoute extends GoRouteData with $ContactsRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) =>
-      const ContactsScreen();
+      const CommunitiesScreen();
 }
 
 class ConnectionsRoute extends GoRouteData with $ConnectionsRoute {
