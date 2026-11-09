@@ -21,6 +21,7 @@ import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/chat_screen_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/chat_screen_state.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/call/video_call_peer_placeholder.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/call/video_call_pip_window.dart';
@@ -264,7 +265,7 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.text('Alice'), findsOneWidget);
-      expect(find.byIcon(Icons.person), findsOneWidget);
+      expect(find.byIcon(McIcons.person), findsOneWidget);
     });
 
     testWidgets('shows group icon in audio outgoing ringing state', (
@@ -283,7 +284,7 @@ void main() {
       await tester.pump();
 
       expect(tester.takeException(), isNull);
-      expect(find.byIcon(Icons.group), findsOneWidget);
+      expect(find.byIcon(McIcons.group), findsOneWidget);
       expect(find.text('Study Group'), findsOneWidget);
       expect(find.text('Waiting for others...'), findsNothing);
     });
@@ -311,7 +312,7 @@ void main() {
       await tester.pump();
 
       expect(tester.takeException(), isNull);
-      expect(find.byIcon(Icons.group), findsOneWidget);
+      expect(find.byIcon(McIcons.group), findsOneWidget);
       expect(find.text('You'), findsNothing);
     });
 
@@ -546,7 +547,7 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.byType(SmoothPageIndicator), findsOneWidget);
-      expect(find.byIcon(Icons.close_fullscreen), findsOneWidget);
+      expect(find.byIcon(McIcons.collapse), findsOneWidget);
       expect(find.byType(AudioVideoCallScreen), findsOneWidget);
     });
 
@@ -665,10 +666,10 @@ void main() {
       expect(find.text('Frank'), findsOneWidget);
       expect(find.byType(VideoCallPiPWindow), findsOneWidget);
       expect(find.byType(VideoCallPeerPlaceholder), findsOneWidget);
-      expect(find.byIcon(Icons.people_alt_outlined), findsNothing);
-      expect(find.byIcon(Icons.flip_camera_ios), findsNWidgets(2));
+      expect(find.byIcon(McIcons.participants), findsNothing);
+      expect(find.byIcon(McIcons.switchCamera), findsNWidgets(2));
 
-      await tester.tap(find.byIcon(Icons.flip_camera_ios).first);
+      await tester.tap(find.byIcon(McIcons.switchCamera).first);
       await tester.pump();
 
       expect(controller.switchCameraCalls, 1);
@@ -738,7 +739,7 @@ void main() {
         expect(tester.takeException(), isNull);
         expect(find.byType(AudioVideoCallScreen), findsOneWidget);
         expect(find.byType(VideoCallPiPWindow), findsNothing);
-        expect(find.byIcon(Icons.close_fullscreen), findsOneWidget);
+        expect(find.byIcon(McIcons.collapse), findsOneWidget);
         expect(find.byType(ProfileCircleAvatar), findsAtLeastNWidgets(1));
       },
     );
@@ -766,8 +767,8 @@ void main() {
       await tester.pump();
 
       expect(tester.takeException(), isNull);
-      expect(find.byIcon(Icons.close_fullscreen), findsOneWidget);
-      expect(find.byIcon(Icons.flip_camera_ios), findsOneWidget);
+      expect(find.byIcon(McIcons.collapse), findsOneWidget);
+      expect(find.byIcon(McIcons.switchCamera), findsOneWidget);
     });
 
     testWidgets('truncates long peer names and keeps muted pill in '
@@ -895,7 +896,7 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(find.text(errorMessage), findsOneWidget);
       expect(find.text(l10n.videoCallCallEnded), findsNothing);
-      expect(find.byIcon(Icons.error_outline), findsOneWidget);
+      expect(find.byIcon(McIcons.error), findsOneWidget);
     });
 
     testWidgets('dismisses ended overlay when closing error banner screen', (
@@ -911,13 +912,13 @@ void main() {
       await tester.pump();
       await tester.pump();
 
-      expect(find.byIcon(Icons.error_outline), findsOneWidget);
+      expect(find.byIcon(McIcons.error), findsOneWidget);
 
-      await tester.tap(find.byIcon(Icons.close));
+      await tester.tap(find.byIcon(McIcons.close));
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.error_outline), findsNothing);
-      expect(find.byIcon(Icons.close), findsNothing);
+      expect(find.byIcon(McIcons.error), findsNothing);
+      expect(find.byIcon(McIcons.close), findsNothing);
     });
 
     testWidgets('shows peer name in ringing state without peer history', (
@@ -1204,7 +1205,7 @@ void main() {
         tester.element(find.byType(AudioVideoCallScreen)),
       )!;
 
-      await tester.tap(find.byIcon(Icons.videocam_off));
+      await tester.tap(find.byIcon(McIcons.videoOff));
       await tester.pumpAndSettle();
 
       expect(find.text(l10n.videoCallSwitchToVideoTitle), findsOneWidget);
@@ -1261,7 +1262,7 @@ void main() {
         tester.element(find.byType(AudioVideoCallScreen)),
       )!;
 
-      await tester.tap(find.byIcon(Icons.videocam_off));
+      await tester.tap(find.byIcon(McIcons.videoOff));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text(l10n.videoCallSwitch));

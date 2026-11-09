@@ -4,6 +4,7 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../domain/models/vtc/vtc_card_delivery.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_icons.dart';
 import 'vtc_trail_step.dart';
 
 /// How a new member's card came from their identity's inbox to their VTA,
@@ -51,7 +52,7 @@ class VtcCardDeliveryTrail extends StatelessWidget {
       children: [
         VtcTrailStep(
           key: const Key('vtc_delivery_keys'),
-          icon: Icons.key_outlined,
+          icon: McIcons.key,
           stage: _stage(VtcDeliveryStep.keysLent),
           busy: _isBusy(VtcDeliveryStep.keysLent),
           title: l10n.vtcDeliveryKeysLent,
@@ -63,21 +64,21 @@ class VtcCardDeliveryTrail extends StatelessWidget {
           tasks: const [VtaTask.exportSecret],
           details: [
             VtcTrailDetail(
-              Icons.fingerprint,
+              McIcons.identities,
               l10n.vtcJoinTrailIdentity,
               delivery.personaDid,
               isId: true,
             ),
             if (delivery.signingKeyId case final id?)
               VtcTrailDetail(
-                Icons.draw_outlined,
+                McIcons.signature,
                 l10n.vtcJoinTrailKey,
                 id,
                 isId: true,
               ),
             if (delivery.keyAgreementKeyId case final id?)
               VtcTrailDetail(
-                Icons.lock_outline,
+                McIcons.lock,
                 l10n.vtcDeliveryKeyAgreementKey,
                 id,
                 isId: true,
@@ -86,7 +87,7 @@ class VtcCardDeliveryTrail extends StatelessWidget {
         ),
         VtcTrailStep(
           key: const Key('vtc_delivery_inbox'),
-          icon: Icons.inbox_outlined,
+          icon: McIcons.inbox,
           stage: _stage(VtcDeliveryStep.signedIn),
           busy: _isBusy(VtcDeliveryStep.signedIn),
           title: l10n.vtcDeliverySignedIn,
@@ -99,13 +100,13 @@ class VtcCardDeliveryTrail extends StatelessWidget {
             // Said outright, so a step without one is not mistaken for a
             // gap in the trail.
             VtcTrailDetail(
-              Icons.assignment_outlined,
+              McIcons.clipboard,
               l10n.vtcJoinTrailTask,
               l10n.vtcDeliveryInboxNoTask,
             ),
             if (delivery.mediatorDid case final did?)
               VtcTrailDetail(
-                Icons.hub_outlined,
+                McIcons.hub,
                 l10n.vtcDeliveryMediator,
                 did,
                 isId: true,
@@ -114,7 +115,7 @@ class VtcCardDeliveryTrail extends StatelessWidget {
         ),
         VtcTrailStep(
           key: const Key('vtc_delivery_pickup'),
-          icon: Icons.mark_email_read_outlined,
+          icon: McIcons.emailRead,
           stage: _stage(VtcDeliveryStep.pickedUp),
           busy: _isBusy(VtcDeliveryStep.pickedUp),
           title: l10n.vtcDeliveryPickedUp(communityName),
@@ -127,27 +128,27 @@ class VtcCardDeliveryTrail extends StatelessWidget {
           details: [
             if (issue != null) ...[
               VtcTrailDetail(
-                Icons.groups_outlined,
+                McIcons.community,
                 l10n.vtcDeliverySentBy,
                 issue.issuer,
                 isId: true,
               ),
               if (proof['cryptosuite'] case final String cryptosuite)
                 VtcTrailDetail(
-                  Icons.enhanced_encryption_outlined,
+                  McIcons.encrypted,
                   l10n.vtcJoinTrailCryptosuite,
                   cryptosuite,
                 ),
               if (proof['verificationMethod'] case final String key)
                 VtcTrailDetail(
-                  Icons.key_outlined,
+                  McIcons.key,
                   l10n.vtcJoinTrailKey,
                   key,
                   isId: true,
                 ),
               if (DateTime.tryParse('${proof['created']}') case final at?)
                 VtcTrailDetail(
-                  Icons.schedule,
+                  McIcons.clock,
                   l10n.vtcJoinTrailSignedAt,
                   time(at),
                 ),
@@ -159,7 +160,7 @@ class VtcCardDeliveryTrail extends StatelessWidget {
         ),
         VtcTrailStep(
           key: const Key('vtc_delivery_kept'),
-          icon: Icons.cloud_done_outlined,
+          icon: McIcons.cloudDone,
           stage: _stage(VtcDeliveryStep.kept),
           busy: _isBusy(VtcDeliveryStep.kept),
           title: l10n.vtcDeliveryKept,
@@ -174,7 +175,7 @@ class VtcCardDeliveryTrail extends StatelessWidget {
         ),
         VtcTrailStep(
           key: const Key('vtc_delivery_confirmed'),
-          icon: Icons.verified_outlined,
+          icon: McIcons.verified,
           stage: _stage(VtcDeliveryStep.confirmed),
           busy: _isBusy(VtcDeliveryStep.confirmed),
           title: l10n.vtcDeliveryConfirmed(communityName),

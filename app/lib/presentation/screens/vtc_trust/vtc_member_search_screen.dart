@@ -7,6 +7,7 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../application/services/vtc_trust_service/vtc_trust_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_icons.dart';
 import 'vtc_member_avatar.dart';
 import 'vtc_vouch.dart';
 
@@ -112,7 +113,7 @@ class VtcMemberSearchScreen extends HookConsumerWidget {
                 textInputAction: TextInputAction.search,
                 decoration: InputDecoration(
                   labelText: l10n.vtcTrustSearchHint,
-                  prefixIcon: const Icon(Icons.search),
+                  prefixIcon: const Icon(McIcons.search),
                 ),
                 onSubmitted: (text) => query.value = text.trim(),
               ),

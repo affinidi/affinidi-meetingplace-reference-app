@@ -236,7 +236,7 @@ class _ParticipantVideoOrAvatar extends ConsumerWidget {
               radius: avatarRadius,
               image: fallbackImage,
               child: Icon(
-                Icons.person,
+                McIcons.person,
                 size: avatarRadius,
                 color: context.colorScheme.onSurface,
               ),
@@ -264,7 +264,7 @@ class _ParticipantVideoOrAvatar extends ConsumerWidget {
             radius: avatarRadius,
             image: fallbackImage,
             child: Icon(
-              Icons.person,
+              McIcons.person,
               size: avatarRadius,
               color: context.colorScheme.onSurface,
             ),

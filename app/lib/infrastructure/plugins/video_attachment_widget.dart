@@ -9,6 +9,7 @@ import 'package:meeting_place_chat/meeting_place_chat.dart';
 
 import '../../application/services/voice_playback_service/voice_playback_service.dart';
 import '../../presentation/screens/media/video_player_screen/video_player_screen.dart';
+import '../../presentation/themes/tokens/mc_icons.dart';
 import '../extensions/build_context_extensions.dart';
 import 'attachment_plugin_cache.dart';
 
@@ -130,9 +131,9 @@ class _VideoAttachmentWidgetState extends ConsumerState<VideoAttachmentWidget> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.broken_image_outlined, size: 32),
+                const Icon(McIcons.imageBroken, size: 32),
                 const SizedBox(height: 8),
-                const Icon(Icons.refresh, size: 20),
+                const Icon(McIcons.refresh, size: 20),
                 const SizedBox(height: 4),
                 Text(
                   context.l10n.mediaTapToRetry,
@@ -163,12 +164,16 @@ class _VideoAttachmentWidgetState extends ConsumerState<VideoAttachmentWidget> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          Icons.video_file,
+                          McIcons.videoFile,
                           color: mc.textSecondary,
                           size: 48,
                         ),
                         const SizedBox(height: 8),
-                        Icon(Icons.download, color: mc.textSecondary, size: 24),
+                        Icon(
+                          McIcons.download,
+                          color: mc.textSecondary,
+                          size: 24,
+                        ),
                       ],
                     ),
             ),
@@ -186,11 +191,7 @@ class _VideoAttachmentWidgetState extends ConsumerState<VideoAttachmentWidget> {
           color: context.colorScheme.surfaceContainerHigh,
           clipBehavior: Clip.hardEdge,
           child: Center(
-            child: Icon(
-              Icons.play_circle_outline,
-              color: mc.textPrimary,
-              size: 56,
-            ),
+            child: Icon(McIcons.playCircle, color: mc.textPrimary, size: 56),
           ),
         ),
       ),

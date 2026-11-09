@@ -7,6 +7,7 @@ import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/participants/call_participant.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/participants/call_participant_list_sheet.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 
 Widget _wrap(Widget child) => MaterialApp(
   theme: AppTheme.dark,
@@ -79,8 +80,8 @@ void main() {
     await tester.pump();
 
     expect(find.text('Alice'), findsOneWidget);
-    expect(find.byIcon(Icons.notifications), findsNothing);
-    expect(find.byIcon(Icons.more_horiz), findsNothing);
+    expect(find.byIcon(McIcons.notifications), findsNothing);
+    expect(find.byIcon(McIcons.more), findsNothing);
   });
 
   // ---------------------------------------------------------------------------
@@ -102,10 +103,10 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.byIcon(Icons.notifications), findsOneWidget);
-    expect(find.byIcon(Icons.more_horiz), findsNothing);
+    expect(find.byIcon(McIcons.notifications), findsOneWidget);
+    expect(find.byIcon(McIcons.more), findsNothing);
 
-    await tester.tap(find.byIcon(Icons.notifications));
+    await tester.tap(find.byIcon(McIcons.notifications));
     expect(calledId, 'bob');
   });
 
@@ -128,10 +129,10 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byIcon(Icons.more_horiz), findsOneWidget);
-      expect(find.byIcon(Icons.notifications), findsNothing);
+      expect(find.byIcon(McIcons.more), findsOneWidget);
+      expect(find.byIcon(McIcons.notifications), findsNothing);
 
-      await tester.tap(find.byIcon(Icons.more_horiz));
+      await tester.tap(find.byIcon(McIcons.more));
       expect(ringingId, 'carol');
     },
   );
@@ -173,14 +174,14 @@ void main() {
 
       // Initial: 0 connected, bell visible
       expect(find.text('0 connected'), findsOneWidget);
-      expect(find.byIcon(Icons.notifications), findsOneWidget);
+      expect(find.byIcon(McIcons.notifications), findsOneWidget);
 
       await tester.tap(find.text('Move'));
       await tester.pump();
 
       // After: 1 connected, no bell
       expect(find.text('1 connected'), findsOneWidget);
-      expect(find.byIcon(Icons.notifications), findsNothing);
+      expect(find.byIcon(McIcons.notifications), findsNothing);
     },
   );
 
@@ -206,7 +207,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.byIcon(Icons.notifications), findsOneWidget);
-    expect(find.byIcon(Icons.more_horiz), findsNothing);
+    expect(find.byIcon(McIcons.notifications), findsOneWidget);
+    expect(find.byIcon(McIcons.more), findsNothing);
   });
 }

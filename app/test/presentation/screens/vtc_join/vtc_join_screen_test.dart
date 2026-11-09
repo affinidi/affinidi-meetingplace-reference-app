@@ -25,6 +25,7 @@ import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_progress_line.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_elevation.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/onboarding_style/onboarding_style.dart';
 
 import '../../../fakes/fake_identities.dart';
@@ -370,7 +371,7 @@ void main() {
         final roleIcon = tester.getRect(
           find.descendant(
             of: find.byKey(const Key('vtc_community_role')),
-            matching: find.byIcon(Icons.badge_outlined),
+            matching: find.byIcon(McIcons.badge),
           ),
         );
         final settings = tester.getRect(
@@ -912,7 +913,7 @@ void main() {
       await enterCode(tester, fakeVtcDid);
 
       expect(find.text('Show your Nickname to anyone'), findsOneWidget);
-      expect(find.byIcon(Icons.public), findsOneWidget);
+      expect(find.byIcon(McIcons.public), findsOneWidget);
     });
 
     testWidgets('lists the fields an audience sees as a sentence', (

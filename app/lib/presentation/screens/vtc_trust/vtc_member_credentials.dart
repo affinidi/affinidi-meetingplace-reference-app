@@ -6,6 +6,7 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../application/services/vtc_trust_service/vtc_trust_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import '../vtc_join/vtc_join_json_dialog.dart';
 import 'vtc_vouch.dart';
@@ -33,7 +34,7 @@ class VtcMemberCredentialsButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => IconButton(
     key: const Key('vtc_member_credentials'),
-    icon: const Icon(Icons.wallet_outlined, size: 20),
+    icon: const Icon(McIcons.credentials, size: 20),
     tooltip: context.l10n.vtcMemberCredentialsTitle(name),
     visualDensity: VisualDensity.compact,
     onPressed: () => showOnboardingSheet(
@@ -102,7 +103,7 @@ class VtcMemberCredentialsView extends HookConsumerWidget {
       title: title,
       subtitle: subtitle,
       trailing: IconButton(
-        icon: const Icon(Icons.receipt_long_outlined, color: Colors.white),
+        icon: const Icon(McIcons.receipt, color: Colors.white),
         tooltip: l10n.vtcJoinTrailShowDocument,
         visualDensity: VisualDensity.compact,
         onPressed: () => showVtcJoinJson(context, title: title, json: document),
@@ -132,7 +133,7 @@ class VtcMemberCredentialsView extends HookConsumerWidget {
           if (membership.membershipCredential case final card?)
             line(
               key: const Key('vtc_member_membership'),
-              icon: Icons.card_membership_outlined,
+              icon: McIcons.membership,
               title: l10n.vtcMemberCredentialsMembership,
               subtitle: l10n.vtcMemberCredentialsIssuedBy(communityName),
               document: card,
@@ -140,7 +141,7 @@ class VtcMemberCredentialsView extends HookConsumerWidget {
           if (membership.roleCredential case final card?)
             line(
               key: const Key('vtc_member_role'),
-              icon: Icons.badge_outlined,
+              icon: McIcons.badge,
               title: l10n.vtcMemberCredentialsRole,
               subtitle: l10n.vtcMemberCredentialsIssuedBy(communityName),
               document: card,
@@ -148,7 +149,7 @@ class VtcMemberCredentialsView extends HookConsumerWidget {
           if (membership.memberVmc case final card?)
             line(
               key: const Key('vtc_member_acknowledgement'),
-              icon: Icons.verified_outlined,
+              icon: McIcons.verified,
               title: l10n.vtcMemberCredentialsAcknowledgement,
               subtitle: membership.isMemberVmcBound
                   ? l10n.vtcMemberCredentialsAcknowledgementBound(name)
@@ -159,7 +160,7 @@ class VtcMemberCredentialsView extends HookConsumerWidget {
         if (shown.publicCard case final card?)
           line(
             key: const Key('vtc_member_public_card'),
-            icon: Icons.contact_page_outlined,
+            icon: McIcons.account,
             title: l10n.vtcMemberCredentialsPublicCard,
             subtitle: l10n.vtcMemberCredentialsSignedBy(name),
             document: card,
@@ -167,7 +168,7 @@ class VtcMemberCredentialsView extends HookConsumerWidget {
         for (final vouch in shown.vouches)
           line(
             key: Key('vtc_member_vouch_${vouch.id}'),
-            icon: Icons.handshake_outlined,
+            icon: McIcons.handshake,
             title: l10n.vtcMemberCredentialsVouch(
               nameOf(vouch.issuerDid, me),
               nameOf(vouch.subjectDid, me),

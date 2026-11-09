@@ -7,6 +7,7 @@ import '../../../../navigation/navigator.dart';
 import '../../../../navigation/routes/dashboard_routes.dart';
 import '../../../screens/chat/audio_video_call/rules/call_ui_rules.dart';
 import '../../../themes/tokens/mc_colors.dart';
+import '../../../themes/tokens/mc_icons.dart';
 import 'active_call_controller.dart';
 
 /// Banner shown between status bar and AppBar when a call is minimized.
@@ -42,7 +43,7 @@ class ActiveCallBanner extends ConsumerWidget {
     };
     final showDuration = phase == CallUiPhase.inCall;
 
-    final callIcon = callState.isAudioOnly ? Icons.phone : Icons.videocam;
+    final callIcon = callState.isAudioOnly ? McIcons.phone : McIcons.video;
 
     final bannerController = ref.read(activeCallControllerProvider.notifier);
 
@@ -62,7 +63,7 @@ class ActiveCallBanner extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.only(left: 12),
             child: _BannerIconButton(
-              icon: callState.isMicEnabled ? Icons.mic : Icons.mic_off,
+              icon: callState.isMicEnabled ? McIcons.mic : McIcons.micOff,
               semanticsLabel: callState.isMicEnabled
                   ? l10n.videoCallMute
                   : l10n.videoCallUnmute,
@@ -115,7 +116,7 @@ class ActiveCallBanner extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.only(right: 12),
             child: _BannerIconButton(
-              icon: Icons.call_end,
+              icon: McIcons.hangUp,
               semanticsLabel: l10n.videoCallEnd,
               backgroundColor: McColors.dark.dangerText.withValues(alpha: 0.12),
               foregroundColor: McColors.dark.dangerText,

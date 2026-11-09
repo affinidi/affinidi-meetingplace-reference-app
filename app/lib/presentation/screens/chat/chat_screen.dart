@@ -57,6 +57,7 @@ import '../../effects/balloon/ballon_effect.dart';
 import '../../effects/confetti/confetti_effect.dart';
 import '../../effects/screen_effect.dart';
 import '../../themes/tokens/mc_colors.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../../validators/max_length_validator_type.dart';
 import '../../validators/zalgo_text_validator.dart';
@@ -261,7 +262,7 @@ class _AudioVideoCallActions extends ConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton(
-          icon: const Icon(Icons.call),
+          icon: const Icon(McIcons.call),
           tooltip: context.l10n.callChatItemAudioCall,
           onPressed: canInitiateCall
               ? () => context.push(
@@ -273,7 +274,7 @@ class _AudioVideoCallActions extends ConsumerWidget {
               : null,
         ),
         IconButton(
-          icon: const Icon(Icons.videocam),
+          icon: const Icon(McIcons.video),
           tooltip: context.l10n.callChatItemVideoCall,
           onPressed: canInitiateCall
               ? () => context.push(
@@ -338,7 +339,7 @@ class _ChatEntry extends ConsumerWidget {
           spacing: 8,
           children: [
             Icon(
-              Icons.campaign_outlined,
+              McIcons.announce,
               size: 20,
               color: context.colorScheme.onSurfaceVariant,
             ),

@@ -39,7 +39,7 @@ class _MediatorSection extends ConsumerWidget {
       child: Column(
         children: [
           FormRowPicker(
-            icon: Icons.mediation_rounded,
+            icon: McIcons.mediator,
             iconColor: context.customColors.violet,
             label: selectedMediatorName ?? '',
             helperText: context.l10n.mediatorHelperText,

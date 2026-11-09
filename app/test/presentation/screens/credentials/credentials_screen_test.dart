@@ -19,6 +19,7 @@ import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/credentials/credentials_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 
 import '../../../fakes/fake_identities.dart';
 import '../../../fakes/fake_identities_service.dart';
@@ -208,7 +209,7 @@ void main() {
 
       expect(find.text('Chess club'), findsOneWidget);
       expect(syncing, findsOneWidget);
-      expect(find.byIcon(Icons.menu), findsOneWidget);
+      expect(find.byIcon(McIcons.menu), findsOneWidget);
 
       answering.complete();
       await settle(tester);
@@ -481,7 +482,7 @@ void main() {
     expect(
       find.descendant(
         of: find.byKey(const Key('membership_trail_kept')),
-        matching: find.byIcon(Icons.draw_outlined),
+        matching: find.byIcon(McIcons.signature),
       ),
       findsOneWidget,
     );
@@ -538,7 +539,7 @@ void main() {
     expect(
       find.descendant(
         of: find.byKey(const Key('membership_trail_left')),
-        matching: find.byIcon(Icons.draw_outlined),
+        matching: find.byIcon(McIcons.signature),
       ),
       findsOneWidget,
     );

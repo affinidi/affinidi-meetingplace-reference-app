@@ -7,6 +7,7 @@ import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/extensions/widget_ref_extensions.dart';
 import '../../../../infrastructure/providers/cache_manager_provider.dart';
+import '../../../themes/tokens/mc_icons.dart';
 import '../../../widgets/async_loaders/modal_async_loading_status.dart';
 import '../../../widgets/contact_card_view.dart';
 import '../../../widgets/form_rows/form_card.dart';
@@ -147,7 +148,7 @@ class _ProfilePictureWithScore extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  Icons.verified_user,
+                  McIcons.credentials,
                   size: 18,
                   color: colorScheme.onSurface,
                 ),

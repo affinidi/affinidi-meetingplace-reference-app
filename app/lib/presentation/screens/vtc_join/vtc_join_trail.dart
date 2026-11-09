@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_icons.dart';
 import 'vtc_trail_step.dart';
 
 /// Where an open application stands, drawn as the path it took: the
@@ -74,26 +75,21 @@ class VtcJoinTrail extends StatelessWidget {
     }) => [
       if (cryptosuite != null)
         VtcTrailDetail(
-          Icons.enhanced_encryption_outlined,
+          McIcons.encrypted,
           l10n.vtcJoinTrailCryptosuite,
           cryptosuite,
         ),
       if (key != null)
-        VtcTrailDetail(
-          Icons.key_outlined,
-          l10n.vtcJoinTrailKey,
-          key,
-          isId: true,
-        ),
+        VtcTrailDetail(McIcons.key, l10n.vtcJoinTrailKey, key, isId: true),
       if (purpose != null)
         VtcTrailDetail(
-          Icons.verified_outlined,
+          McIcons.verified,
           l10n.vtcJoinTrailProofPurpose,
           purpose,
         ),
       if (signedAt != null)
         VtcTrailDetail(
-          Icons.schedule,
+          McIcons.clock,
           l10n.vtcJoinTrailSignedAt,
           time(signedAt),
         ),
@@ -105,7 +101,7 @@ class VtcJoinTrail extends StatelessWidget {
         if (presentation != null && credentials.isNotEmpty)
           VtcTrailStep(
             key: const Key('vtc_join_trail_presentation'),
-            icon: Icons.workspace_premium_outlined,
+            icon: McIcons.award,
             stage: VtcTrailStage.done,
             title: l10n.vtcJoinTrailPresentation,
             summary: l10n.vtcJoinTrailPresentationSummary(
@@ -117,20 +113,20 @@ class VtcJoinTrail extends StatelessWidget {
             details: [
               if (presentation['holder'] case final String holder)
                 VtcTrailDetail(
-                  Icons.fingerprint,
+                  McIcons.identities,
                   l10n.vtcJoinTrailHolder,
                   holder,
                   isId: true,
                 ),
               for (final credential in credentials) ...[
                 VtcTrailDetail(
-                  Icons.workspace_premium_outlined,
+                  McIcons.award,
                   l10n.vtcJoinTrailCredential,
                   _typesOf(credential),
                 ),
                 if (_issuerOf(credential) case final issuer?)
                   VtcTrailDetail(
-                    Icons.account_balance_outlined,
+                    McIcons.institution,
                     l10n.vtcJoinTrailIssuer,
                     issuer,
                     isId: true,
@@ -138,7 +134,7 @@ class VtcJoinTrail extends StatelessWidget {
                 if (DateTime.tryParse('${credential['validUntil']}')
                     case final until?)
                   VtcTrailDetail(
-                    Icons.event_outlined,
+                    McIcons.calendar,
                     l10n.vtcJoinTrailValidUntil,
                     time(until),
                   ),
@@ -150,7 +146,7 @@ class VtcJoinTrail extends StatelessWidget {
           ),
         VtcTrailStep(
           key: const Key('vtc_join_trail_vta'),
-          icon: Icons.draw_outlined,
+          icon: McIcons.signature,
           stage: VtcTrailStage.done,
           title: l10n.vtcJoinTrailVta,
           summary: switch (receipt) {
@@ -167,7 +163,7 @@ class VtcJoinTrail extends StatelessWidget {
           details: [
             if (receipt != null) ...[
               VtcTrailDetail(
-                Icons.fingerprint,
+                McIcons.identities,
                 l10n.vtcJoinTrailIdentity,
                 receipt.signer,
                 isId: true,
@@ -186,7 +182,7 @@ class VtcJoinTrail extends StatelessWidget {
         ),
         VtcTrailStep(
           key: const Key('vtc_join_trail_community'),
-          icon: Icons.verified_user_outlined,
+          icon: McIcons.credentials,
           stage: VtcTrailStage.done,
           title: l10n.vtcJoinTrailCommunity(communityName),
           summary: receipt == null
@@ -196,14 +192,14 @@ class VtcJoinTrail extends StatelessWidget {
           details: [
             if (receipt != null) ...[
               VtcTrailDetail(
-                Icons.groups_outlined,
+                McIcons.community,
                 l10n.vtcJoinTrailAnsweredBy,
                 receipt.answeredBy,
                 isId: true,
               ),
               if (receipt.answeredAt case final at?)
                 VtcTrailDetail(
-                  Icons.schedule,
+                  McIcons.clock,
                   l10n.vtcJoinTrailAnsweredAt,
                   time(at),
                 ),
@@ -216,7 +212,7 @@ class VtcJoinTrail extends StatelessWidget {
             ],
             if (requestId case final id?)
               VtcTrailDetail(
-                Icons.tag,
+                McIcons.tag,
                 l10n.vtcJoinTrailRequestId,
                 id,
                 isId: true,
@@ -228,7 +224,7 @@ class VtcJoinTrail extends StatelessWidget {
         ),
         VtcTrailStep(
           key: const Key('vtc_join_trail_review'),
-          icon: deferred ? Icons.schedule : Icons.hourglass_top,
+          icon: deferred ? McIcons.clock : McIcons.pending,
           stage: VtcTrailStage.current,
           busy: checking,
           title: deferred ? l10n.vtcJoinTrailDeferred : l10n.vtcJoinTrailReview,
@@ -241,25 +237,25 @@ class VtcJoinTrail extends StatelessWidget {
           details: [
             if (lastCheck != null) ...[
               VtcTrailDetail(
-                Icons.assignment_outlined,
+                McIcons.clipboard,
                 l10n.vtcJoinTrailCheckTask,
                 lastCheck.type,
               ),
               if (lastCheck.signedAt case final at?)
                 VtcTrailDetail(
-                  Icons.schedule,
+                  McIcons.clock,
                   l10n.vtcJoinTrailCheckSignedAt,
                   time(at),
                 ),
               if (lastCheck.answeredAt case final at?)
                 VtcTrailDetail(
-                  Icons.schedule,
+                  McIcons.clock,
                   l10n.vtcJoinTrailCheckAnsweredAt,
                   time(at),
                 ),
               if (lastCheck.answerVerificationMethod case final key?)
                 VtcTrailDetail(
-                  Icons.key_outlined,
+                  McIcons.key,
                   l10n.vtcJoinTrailCheckAnswerKey,
                   key,
                   isId: true,
@@ -272,7 +268,7 @@ class VtcJoinTrail extends StatelessWidget {
         ),
         VtcTrailStep(
           key: const Key('vtc_join_trail_card'),
-          icon: Icons.badge_outlined,
+          icon: McIcons.badge,
           stage: VtcTrailStage.next,
           title: l10n.vtcJoinTrailCard,
           summary: l10n.vtcJoinTrailCardSummary,
@@ -312,7 +308,7 @@ class VtcWithdrawStep extends StatelessWidget {
         DateFormat.yMMMd(l10n.localeName).add_Hm().format(at.toLocal());
     return VtcTrailStep(
       key: const Key('vtc_join_trail_withdrawn'),
-      icon: Icons.undo,
+      icon: McIcons.undo,
       stage: VtcTrailStage.done,
       title: l10n.vtcJoinTrailWithdrawn,
       summary: receipt == null
@@ -323,16 +319,16 @@ class VtcWithdrawStep extends StatelessWidget {
       details: [
         if (receipt != null) ...[
           if (receipt.signedAt case final at?)
-            VtcTrailDetail(Icons.schedule, l10n.vtcJoinTrailSignedAt, time(at)),
+            VtcTrailDetail(McIcons.clock, l10n.vtcJoinTrailSignedAt, time(at)),
           VtcTrailDetail(
-            Icons.groups_outlined,
+            McIcons.community,
             l10n.vtcJoinTrailAnsweredBy,
             receipt.answeredBy,
             isId: true,
           ),
           if (receipt.answeredAt case final at?)
             VtcTrailDetail(
-              Icons.schedule,
+              McIcons.clock,
               l10n.vtcJoinTrailAnsweredAt,
               time(at),
             ),

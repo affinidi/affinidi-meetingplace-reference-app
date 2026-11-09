@@ -169,7 +169,7 @@ class _ChatContactImage extends ConsumerWidget {
               ),
               alignment: Alignment.center,
               child: Icon(
-                Icons.verified_user,
+                McIcons.credentials,
                 color: context.colorScheme.onPrimary,
                 size: 11,
               ),
@@ -191,7 +191,7 @@ class _ChatContactImage extends ConsumerWidget {
               ),
               alignment: Alignment.center,
               child: Icon(
-                Icons.notifications_off_outlined,
+                McIcons.notificationsOff,
                 color: context.mcColors.textPrimary,
                 size: 10,
               ),

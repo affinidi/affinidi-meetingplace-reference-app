@@ -220,9 +220,7 @@ class _CallDraggableMiniGrid extends HookWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          isExpanded
-                              ? Icons.keyboard_arrow_up
-                              : Icons.keyboard_arrow_down,
+                          isExpanded ? McIcons.chevronUp : McIcons.chevronDown,
                           color: colorScheme.onSurface,
                           size: 16,
                         ),

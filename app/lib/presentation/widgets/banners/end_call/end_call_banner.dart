@@ -5,6 +5,7 @@ import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../navigation/navigator.dart';
 import '../../../../navigation/routes/dashboard_routes.dart';
 import '../../../themes/tokens/mc_colors.dart';
+import '../../../themes/tokens/mc_icons.dart';
 import 'end_call_banner_controller.dart';
 
 /// Banner shown when the user dismisses a missed or declined call screen.
@@ -31,7 +32,7 @@ class EndCallBanner extends ConsumerWidget {
 
     final statusLabel = l10n.videoCallNoAnswer;
 
-    final callIcon = bannerState.isAudioOnly ? Icons.call : Icons.videocam;
+    final callIcon = bannerState.isAudioOnly ? McIcons.call : McIcons.video;
 
     final slideOffset = bannerState.slideOutOffset;
 

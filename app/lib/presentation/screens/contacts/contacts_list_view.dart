@@ -167,7 +167,7 @@ class _ContactListItem extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.delete, color: context.mcColors.dangerText),
+            Icon(McIcons.delete, color: context.mcColors.dangerText),
             Text(
               key: const Key('dismissible_delete_text'),
               context.l10n.generalDelete,

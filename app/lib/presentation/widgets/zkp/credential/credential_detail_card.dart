@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../themes/tokens/mc_icons.dart';
 import '../../../themes/tokens/mc_radius.dart';
 import 'credential_detail_row.dart';
 
@@ -53,7 +54,7 @@ class CredentialDetailCard extends StatelessWidget {
               child: Row(
                 children: [
                   Icon(
-                    Icons.verified_rounded,
+                    McIcons.verified,
                     color: mc.highlightSecondary,
                     size: 24,
                   ),

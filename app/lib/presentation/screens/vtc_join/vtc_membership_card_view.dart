@@ -7,6 +7,7 @@ import '../../../domain/models/vtc/vtc_membership_card.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../themes/tokens/mc_colors.dart';
 import '../../themes/tokens/mc_elevation.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import 'vtc_detail_line.dart';
@@ -38,10 +39,9 @@ class VtcMembershipCardView extends StatelessWidget {
       title: l10n.vtcMembershipCardTitle,
       credential: card.credential,
       credentialType: 'MembershipCredential',
-      documentIcon: Icons.card_membership_outlined,
+      documentIcon: McIcons.membership,
       chips: [
-        if (card.personhood)
-          (Icons.person_outline, l10n.vtcMembershipCardPersonhood),
+        if (card.personhood) (McIcons.person, l10n.vtcMembershipCardPersonhood),
       ],
       holderLabel: l10n.vtcMembershipCardMember,
       holderDid: card.memberDid,
@@ -164,10 +164,7 @@ class VtcCardView extends StatelessWidget {
                         ),
                         IconButton(
                           key: documentKey,
-                          icon: Icon(
-                            Icons.receipt_long_outlined,
-                            color: mc.textPrimary,
-                          ),
+                          icon: Icon(McIcons.receipt, color: mc.textPrimary),
                           tooltip: l10n.vtcMembershipCardShow,
                           onPressed: () => showVtcJoinJson(
                             context,
@@ -191,26 +188,26 @@ class VtcCardView extends StatelessWidget {
                         spacing: 12,
                         children: [
                           VtcDetailLine(
-                            icon: Icons.fingerprint,
+                            icon: McIcons.identities,
                             label: holderLabel,
                             value: holderDid,
                             isId: true,
                           ),
                           VtcDetailLine(
-                            icon: Icons.groups_outlined,
+                            icon: McIcons.community,
                             label: l10n.vtcMembershipCardIssuedBy,
                             value: issuer,
                             isId: true,
                           ),
                           if (validFrom case final from?)
                             VtcDetailLine(
-                              icon: Icons.event_available_outlined,
+                              icon: McIcons.calendarCheck,
                               label: l10n.vtcMembershipCardValidFrom,
                               value: date(from),
                             ),
                           if (validUntil case final until?)
                             VtcDetailLine(
-                              icon: Icons.event_busy_outlined,
+                              icon: McIcons.calendarX,
                               label: l10n.vtcMembershipCardValidUntil,
                               value: date(until),
                             ),
@@ -218,7 +215,7 @@ class VtcCardView extends StatelessWidget {
                             spacing: 8,
                             children: [
                               Icon(
-                                Icons.cloud_done_outlined,
+                                McIcons.cloudDone,
                                 size: 16,
                                 color: mc.textSecondary,
                               ),
@@ -254,7 +251,11 @@ class _Logo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fallback = Icon(Icons.groups, color: McColors.blue, size: size / 2);
+    final fallback = Icon(
+      McIcons.community,
+      color: McColors.blue,
+      size: size / 2,
+    );
     final url = this.url;
     return Container(
       width: size,

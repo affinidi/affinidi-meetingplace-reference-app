@@ -7,6 +7,7 @@ import '../../../application/services/vtc_trust_service/vtc_trust_service.dart';
 import '../../../domain/models/vtc/vtc_community.dart';
 import '../../../domain/models/vtc/vtc_member_link.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../widgets/form_rows/form_card.dart';
 import 'vtc_member_search_screen.dart';
 import 'vtc_vouch.dart';
@@ -123,7 +124,7 @@ class VtcContactTrustPanel extends HookConsumerWidget {
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: OutlinedButton.icon(
               key: const Key('vtc_vouch_in_community'),
-              icon: const Icon(Icons.handshake_outlined),
+              icon: const Icon(McIcons.handshake),
               label: Text(l10n.vtcTrustVouchInCommunity),
               onPressed: vouchInCommunity,
             ),

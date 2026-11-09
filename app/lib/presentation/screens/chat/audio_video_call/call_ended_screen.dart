@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../infrastructure/extensions/duration_extensions.dart';
+import '../../../themes/tokens/mc_icons.dart';
 import '../../../themes/tokens/mc_radius.dart';
 import '../../../widgets/call_ended/call_ended_controller.dart';
 import '../../../widgets/profile_circle_avatar.dart';
@@ -95,7 +96,7 @@ class CallEndedScreen extends ConsumerWidget {
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.error_outline, color: mc.dangerText),
+                              Icon(McIcons.error, color: mc.dangerText),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
@@ -119,7 +120,7 @@ class CallEndedScreen extends ConsumerWidget {
               right: 8,
               child: IconButton(
                 iconSize: 35,
-                icon: Icon(Icons.close, color: colorScheme.onSurface),
+                icon: Icon(McIcons.close, color: colorScheme.onSurface),
                 onPressed: callEndedController.dismiss,
               ),
             ),
@@ -142,7 +143,7 @@ class _CallEndedAvatar extends StatelessWidget {
         radius: 75,
         image: image,
         child: Icon(
-          Icons.person,
+          McIcons.person,
           size: 75,
           color: context.colorScheme.onSurface,
         ),

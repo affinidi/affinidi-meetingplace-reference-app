@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../themes/tokens/mc_icons.dart';
 import '../../../themes/tokens/mc_radius.dart';
 
 /// A reusable scaffold for displaying credential details.
@@ -56,7 +57,7 @@ class _DescriptionBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.verified_user, size: 24, color: mc.highlightSecondary),
+          Icon(McIcons.credentials, size: 24, color: mc.highlightSecondary),
           const SizedBox(width: 12),
           Expanded(
             child: Text(

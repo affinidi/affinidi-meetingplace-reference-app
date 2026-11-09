@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../infrastructure/extensions/color_extensions.dart';
 import '../../../helpers/screensize_helper.dart';
+import '../../../themes/tokens/mc_icons.dart';
 import 'authentication_screen_controller.dart';
 
 class AuthenticationScreen extends HookConsumerWidget {
@@ -145,7 +146,7 @@ class AuthenticationScreen extends HookConsumerWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
-                                  Icons.refresh,
+                                  McIcons.refresh,
                                   color: colorScheme.onPrimary,
                                   size: 18,
                                 ),

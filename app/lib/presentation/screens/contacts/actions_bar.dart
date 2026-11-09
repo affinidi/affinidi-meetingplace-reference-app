@@ -51,7 +51,7 @@ class _ActionsBar extends ConsumerWidget {
             IconButton(
               key: const Key('toggle_grid_view_button'),
               icon: Icon(
-                Icons.grid_view,
+                McIcons.grid,
                 color: shouldShowGrid
                     ? colorScheme.onSurface
                     : mc.textSecondary,
@@ -63,7 +63,7 @@ class _ActionsBar extends ConsumerWidget {
             IconButton(
               key: const Key('toggle_list_view_button'),
               icon: Icon(
-                Icons.list,
+                McIcons.list,
                 color: !shouldShowGrid
                     ? colorScheme.onSurface
                     : mc.textSecondary,
@@ -75,7 +75,7 @@ class _ActionsBar extends ConsumerWidget {
             IconButton(
               key: const Key('toggle_filter_button'),
               icon: Icon(
-                Icons.filter_list_alt,
+                McIcons.filter,
                 color: shouldShowFilter
                     ? colorScheme.primary
                     : mc.textSecondary,
@@ -89,7 +89,7 @@ class _ActionsBar extends ConsumerWidget {
           children: [
             if (isEditMode)
               IconButton(
-                icon: const Icon(Icons.cancel),
+                icon: const Icon(McIcons.cancel),
                 onPressed: () {
                   if (!context.mounted) return;
                   controller.cancelEdit();
@@ -97,7 +97,7 @@ class _ActionsBar extends ConsumerWidget {
               ),
             IconButton(
               icon: Icon(
-                Icons.delete,
+                McIcons.delete,
                 color: isEditMode ? colorScheme.primary : null,
               ),
               onPressed: hasContacts
@@ -119,7 +119,7 @@ class _ActionsBar extends ConsumerWidget {
             ),
             IconButton(
               key: const Key('new_connection_button'),
-              icon: const Icon(Icons.add),
+              icon: const Icon(McIcons.add),
               onPressed: hasIdentity ? onSelectNewConnectionsOption : null,
             ),
           ],

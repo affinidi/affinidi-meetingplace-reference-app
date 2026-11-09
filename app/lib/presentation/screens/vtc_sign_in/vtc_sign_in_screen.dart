@@ -10,6 +10,7 @@ import '../../../application/services/identities_service/identities_service.dart
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../dialogs/qr_code_picker/qr_code_picker.dart';
 import '../../themes/tokens/mc_colors.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../../themes/tokens/mc_typography.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
@@ -65,7 +66,7 @@ class VtcSignInScreen extends ConsumerWidget {
           onExpired: controller.expire,
         ),
         VtcSignInStep.approved => _Outcome(
-          icon: Icons.verified,
+          icon: McIcons.verified,
           message: Text(
             context.l10n.vtcSignInApproved,
             textAlign: TextAlign.center,
@@ -74,7 +75,7 @@ class VtcSignInScreen extends ConsumerWidget {
           onDone: close,
         ),
         VtcSignInStep.declined => _Outcome(
-          icon: Icons.block,
+          icon: McIcons.block,
           message: Text(
             context.l10n.vtcSignInDeclined,
             textAlign: TextAlign.center,
@@ -83,7 +84,7 @@ class VtcSignInScreen extends ConsumerWidget {
           onDone: close,
         ),
         VtcSignInStep.failed => _Outcome(
-          icon: Icons.error_outline,
+          icon: McIcons.error,
           message: OnboardingMessage(
             _failureMessage(context, state),
             isError: true,
@@ -405,15 +406,15 @@ class _Review extends HookWidget {
             children: [
               if (requester != null) ...[
                 OnboardingLine(
-                  icon: Icons.computer,
+                  icon: McIcons.desktop,
                   title: l10n.vtcSignInBrowser(requester.browser, requester.os),
                 ),
                 OnboardingLine(
-                  icon: Icons.location_on_outlined,
+                  icon: McIcons.location,
                   title: l10n.vtcSignInLocation(requester.location),
                 ),
                 OnboardingLine(
-                  icon: requester.sameNetwork ? Icons.wifi : Icons.public,
+                  icon: requester.sameNetwork ? McIcons.wifi : McIcons.public,
                   title: requester.sameNetwork
                       ? l10n.vtcSignInSameNetwork
                       : l10n.vtcSignInOtherNetwork,

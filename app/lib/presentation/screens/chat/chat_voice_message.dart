@@ -380,7 +380,7 @@ class _VoiceInputPreview extends HookConsumerWidget {
     }
 
     return _VoiceInputPill(
-      icon: Icons.pause,
+      icon: McIcons.pause,
       duration: _duration,
       levels: _levels,
       progress: null,
@@ -520,7 +520,7 @@ class _VoicePlaybackControlButton extends ConsumerWidget {
     final isPlaying = ref.watch(controller.voicePlaybackIsPlaying(clipId));
 
     return _VoiceControlButton(
-      icon: isPlaying ? Icons.pause : Icons.play_arrow,
+      icon: isPlaying ? McIcons.pause : McIcons.play,
       onPressed: () {
         unawaited(
           controller.toggleVoicePlayback(

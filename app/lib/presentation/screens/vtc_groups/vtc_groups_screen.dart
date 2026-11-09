@@ -9,6 +9,7 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import '../../../application/services/vtc_group_chat_service/vtc_group_chat_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../../themes/tokens/mc_spacing.dart';
 import '../../themes/tokens/mc_typography.dart';
@@ -63,7 +64,7 @@ class VtcGroupsScreen extends ConsumerWidget {
         actions: [
           IconButton(
             key: const Key('vtc_groups_refresh'),
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(McIcons.refresh),
             tooltip: l10n.vtcJoinCheckAgain,
             onPressed: state.isLoading ? null : controller.refresh,
           ),
@@ -220,20 +221,20 @@ class _GroupCard extends StatelessWidget {
             ),
           if (group.isManagedByCaller)
             _Line(
-              icon: Icons.badge_outlined,
+              icon: McIcons.badge,
               title: l10n.vtcCommunityRole,
               subtitle: l10n.vtcGroupManager,
             ),
           if (credentialUntil case final until?)
             _Line(
-              icon: Icons.verified_outlined,
+              icon: McIcons.verified,
               title: l10n.vtcGroupCredential,
               subtitle: l10n.vtcGroupCredentialUntil(
                 DateFormat.yMMMd(l10n.localeName).format(until.toLocal()),
               ),
             ),
           _Line(
-            icon: Icons.forum_outlined,
+            icon: McIcons.chats,
             title: l10n.vtcGroupChatHeading,
             subtitle: switch (status) {
               VtcGroupChatStatus.unknown => l10n.vtcGroupChatUnknown,
@@ -257,7 +258,7 @@ class _GroupCard extends StatelessWidget {
                       dimension: 16,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : Icon(canCreate ? Icons.add_comment_outlined : Icons.login),
+                  : Icon(canCreate ? McIcons.addComment : McIcons.login),
               label: Text(
                 canCreate ? l10n.vtcGroupChatCreate : l10n.vtcGroupChatJoin,
               ),
@@ -266,7 +267,7 @@ class _GroupCard extends StatelessWidget {
           if (group.showsMembersToMembers)
             OutlinedButton.icon(
               key: Key('vtc_group_members_${group.groupId}'),
-              icon: const Icon(Icons.people_outline),
+              icon: const Icon(McIcons.group),
               label: Text(l10n.vtcGroupMembersOpen),
               onPressed: onMembers,
             ),

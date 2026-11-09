@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
 
 class RCardNotesSheet extends StatefulWidget {
@@ -95,7 +96,7 @@ class _RCardNotesSheetState extends State<RCardNotesSheet> {
               ),
               IconButton(
                 onPressed: () => Navigator.of(context).pop(),
-                icon: Icon(Icons.close, color: titleColor),
+                icon: Icon(McIcons.close, color: titleColor),
               ),
             ],
           ),

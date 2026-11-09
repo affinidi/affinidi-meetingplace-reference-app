@@ -4,6 +4,7 @@ import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:mpx_flutter_reference_app/application/services/community_offer_service/community_offer_service.dart';
 import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_screen.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 
 import 'fakes/fake_community_offers.dart';
 import 'fakes/fake_connection_offers.dart';
@@ -61,14 +62,14 @@ void main() {
       await setupFindOfferTest(tester, location, testIdentity);
 
       expect(find.text(l10n.enterPassphrase), findsOneWidget);
-      expect(find.byIcon(Icons.cancel), findsOneWidget);
+      expect(find.byIcon(McIcons.cancel), findsOneWidget);
       expect(find.text(l10n.generalSearch), findsOneWidget);
     });
 
     testWidgets('it shows the QR code scanner button', (tester) async {
       await setupFindOfferTest(tester, location, testIdentity);
 
-      expect(find.byIcon(Icons.qr_code_scanner), findsOneWidget);
+      expect(find.byIcon(McIcons.scan), findsOneWidget);
     });
 
     group('and enter a passphrase', () {
@@ -85,7 +86,7 @@ void main() {
 
         expect(find.text('test-passphrase-123'), findsOneWidget);
 
-        final cancelButton = find.byIcon(Icons.cancel);
+        final cancelButton = find.byIcon(McIcons.cancel);
         await tester.tap(cancelButton);
         await tester.pumpAndSettle();
 

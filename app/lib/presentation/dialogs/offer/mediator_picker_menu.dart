@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../widgets/bottom_sheet_menu.dart';
 
 class MediatorPickerMenu extends HookConsumerWidget {
@@ -43,13 +44,10 @@ class MediatorPickerMenu extends HookConsumerWidget {
         return ListTile(
           leading: isSelected
               ? Icon(
-                  Icons.check_circle,
+                  McIcons.checkCircle,
                   color: context.listTileTheme.selectedColor,
                 )
-              : Icon(
-                  Icons.circle_outlined,
-                  color: context.listTileTheme.iconColor,
-                ),
+              : Icon(McIcons.circle, color: context.listTileTheme.iconColor),
           title: Text(friendlyName),
           onTap: () {
             if (!context.mounted) return;

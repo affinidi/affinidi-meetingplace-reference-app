@@ -7,6 +7,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 
 import '../../presentation/screens/media/image_view_screen/image_view_screen.dart';
+import '../../presentation/themes/tokens/mc_icons.dart';
 import '../../presentation/themes/tokens/mc_radius.dart';
 import '../extensions/build_context_extensions.dart';
 import 'attachment_plugin_cache.dart';
@@ -160,7 +161,7 @@ class _LoadingImage extends StatelessWidget {
         clipBehavior: Clip.hardEdge,
         child: Center(
           child: Icon(
-            Icons.image_outlined,
+            McIcons.image,
             size: 36,
             color: context.mcColors.textTertiary,
           ),
@@ -178,7 +179,7 @@ class _ErrorImage extends StatelessWidget {
     return const SizedBox(
       height: 200,
       width: 200,
-      child: Center(child: Icon(Icons.broken_image_outlined)),
+      child: Center(child: Icon(McIcons.imageBroken)),
     );
   }
 }

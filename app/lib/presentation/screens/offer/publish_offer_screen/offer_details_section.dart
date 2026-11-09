@@ -47,9 +47,9 @@ class _TransportPicker extends ConsumerWidget {
   IconData? _iconFor(ChannelTransport transport) {
     switch (transport) {
       case ChannelTransport.didcomm:
-        return Icons.shield_outlined;
+        return McIcons.shield;
       case ChannelTransport.matrix:
-        return Icons.forum_outlined;
+        return McIcons.chats;
     }
   }
 
@@ -74,7 +74,7 @@ class _TransportPicker extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.swap_horiz, color: context.colorScheme.secondary),
+              Icon(McIcons.swap, color: context.colorScheme.secondary),
               const SizedBox(width: 16),
               Text(
                 context.l10n.chatTransport,
@@ -128,7 +128,7 @@ class _HeadLine extends ConsumerWidget {
     return FormRowTextField(
       color: context.customColors.cyan,
       label: isGroupOffer ? context.l10n.chatGroupName : context.l10n.headline,
-      icon: Icons.group,
+      icon: McIcons.group,
       controller: controller.headlineController,
       textCapitalization: TextCapitalization.sentences,
       autocorrect: true,
@@ -158,7 +158,7 @@ class _GroupOffer extends ConsumerWidget {
 
     return FormRowToggle(
       switchKey: ValueKey('group_offer_switch_$_identityId'),
-      icon: isGroupOffer ? Icons.group : Icons.person,
+      icon: isGroupOffer ? McIcons.group : McIcons.person,
       iconColor: isGroupOffer
           ? context.colorScheme.primary
           : context.colorScheme.secondary,
@@ -199,7 +199,7 @@ class _OfferPhrase extends ConsumerWidget {
       children: [
         FormRowToggle(
           switchKey: ValueKey('random_phrase_switch_$_identityId'),
-          icon: Icons.key,
+          icon: McIcons.key,
           iconColor: context.customColors.success,
           label: context.l10n.generateRandomPhraseHelperEnabled,
           helperText: randomPhraseEnabled
@@ -243,7 +243,7 @@ class _Description extends ConsumerWidget {
     return FormRowTextField(
       color: context.customColors.purple,
       label: context.l10n.description,
-      icon: Icons.description,
+      icon: McIcons.document,
       controller: controller.descriptionController,
       textCapitalization: TextCapitalization.sentences,
       autocorrect: true,

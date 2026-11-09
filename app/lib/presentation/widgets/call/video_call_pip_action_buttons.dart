@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_icons.dart';
 
 /// Circular mute/unmute button for the PiP window.
 class VideoCallPiPMuteButton extends StatelessWidget {
@@ -36,7 +37,7 @@ class VideoCallPiPMuteButton extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: Icon(
-              isMicEnabled ? Icons.mic : Icons.mic_off,
+              isMicEnabled ? McIcons.mic : McIcons.micOff,
               color: isMicEnabled ? colors.pureWhite : colors.rose,
               size: 16,
             ),
@@ -69,7 +70,7 @@ class VideoCallPiPExpandButton extends StatelessWidget {
             color: colors.darkGrey.withValues(alpha: 0.75),
             shape: BoxShape.circle,
           ),
-          child: Icon(Icons.open_in_full, color: colors.pureWhite, size: 14),
+          child: Icon(McIcons.expand, color: colors.pureWhite, size: 14),
         ),
       ),
     );
@@ -106,7 +107,7 @@ class VideoCallPiPFlipCameraButton extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: Icon(
-              Icons.flip_camera_ios,
+              McIcons.switchCamera,
               color: colors.pureWhite,
               size: 16,
             ),

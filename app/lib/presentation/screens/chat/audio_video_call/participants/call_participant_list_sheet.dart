@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../../themes/tokens/mc_icons.dart';
 import '../../../../themes/tokens/mc_radius.dart';
 import '../../../../widgets/bottom_sheet_menu.dart';
 import '../../../../widgets/profile_circle_avatar.dart';
@@ -157,7 +158,7 @@ class _ParticipantRow extends StatelessWidget {
             radius: 20,
             image: p.avatar,
             child: p.avatar == null
-                ? Icon(Icons.person, color: onSurface)
+                ? Icon(McIcons.person, color: onSurface)
                 : null,
           ),
           const SizedBox(width: 12),
@@ -191,7 +192,7 @@ class _ParticipantRow extends StatelessWidget {
           : l10n.callParticipantCallAction(participant.firstName),
       child: IconButton(
         icon: Icon(
-          isRinging ? Icons.more_horiz : Icons.notifications,
+          isRinging ? McIcons.more : McIcons.notifications,
           color: color,
         ),
         onPressed: () =>

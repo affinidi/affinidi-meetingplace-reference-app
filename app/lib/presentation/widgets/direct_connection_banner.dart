@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../infrastructure/extensions/build_context_extensions.dart';
+import '../themes/tokens/mc_icons.dart';
 
 class DirectConnectionBanner extends StatelessWidget {
   const DirectConnectionBanner({super.key});
@@ -22,7 +23,7 @@ class DirectConnectionBanner extends StatelessWidget {
       child: Row(
         children: [
           Icon(
-            Icons.info_outline,
+            McIcons.info,
             color: context.colorScheme.onSurfaceVariant,
             size: 20,
           ),

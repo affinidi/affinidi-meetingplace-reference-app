@@ -106,26 +106,26 @@ class _ChatMessageActions extends ConsumerWidget {
     final items = <_ChatMessageActionItem>[
       if (_message.value.isNotEmpty && !_message.isDeleted)
         _ChatMessageActionItem(
-          icon: Icons.copy,
+          icon: McIcons.copy,
           label: context.l10n.chatMessageActionCopy,
           onTap: copy,
         ),
       if (_message.canEdit && supportsMessageEdit)
         _ChatMessageActionItem(
-          icon: Icons.edit_outlined,
+          icon: McIcons.edit,
           label: context.l10n.chatMessageActionEdit,
           onTap: edit,
         ),
       if (_message.canDelete && supportsMessageDelete) ...[
         _ChatMessageActionItem(
-          icon: Icons.delete_outline,
+          icon: McIcons.delete,
           label: context.l10n.chatMessageActionDelete,
           isDestructive: true,
           enabled: isWithinDeleteWindow,
           onTap: () => delete(localOnly: false),
         ),
         _ChatMessageActionItem(
-          icon: Icons.visibility_off_outlined,
+          icon: McIcons.hidden,
           label: context.l10n.chatMessageActionDeleteLocal,
           onTap: () => delete(localOnly: true),
         ),

@@ -6,6 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../themes/tokens/mc_colors.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../../themes/tokens/mc_typography.dart';
 
@@ -17,7 +18,7 @@ Future<void> showVtcJoinJson(
   BuildContext context, {
   required String title,
   required Map<String, dynamic> json,
-  IconData icon = Icons.data_object,
+  IconData icon = McIcons.code,
   String? subtitle,
   Key textKey = const Key('vtc_join_json'),
 }) {
@@ -138,7 +139,7 @@ class _JsonSheet extends HookWidget {
                   ),
                   IconButton(
                     key: const Key('vtc_join_json_copy'),
-                    icon: Icon(copied.value ? Icons.check : Icons.copy),
+                    icon: Icon(copied.value ? McIcons.check : McIcons.copy),
                     tooltip: copied.value
                         ? l10n.copiedToClipboard
                         : l10n.vtcJoinJsonCopy,
@@ -146,7 +147,7 @@ class _JsonSheet extends HookWidget {
                   ),
                   IconButton(
                     key: const Key('vtc_join_json_close'),
-                    icon: const Icon(Icons.close),
+                    icon: const Icon(McIcons.close),
                     tooltip: l10n.generalClose,
                     onPressed: () => Navigator.of(context).pop(),
                   ),

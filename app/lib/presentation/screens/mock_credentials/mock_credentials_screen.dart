@@ -197,7 +197,7 @@ class _TemplateCard extends StatelessWidget {
                 children: [
                   for (final name in holders)
                     Chip(
-                      avatar: const Icon(Icons.verified, size: 16),
+                      avatar: const Icon(McIcons.verified, size: 16),
                       label: Text(l10n.mockCredentialsHeldBy(name)),
                     ),
                 ],
@@ -211,7 +211,7 @@ class _TemplateCard extends StatelessWidget {
                     )
                   : FilledButton.icon(
                       onPressed: onImport,
-                      icon: const Icon(Icons.download),
+                      icon: const Icon(McIcons.download),
                       label: Text(l10n.mockCredentialsImport),
                     ),
             ),
@@ -240,7 +240,7 @@ Future<Identity?> _chooseIdentity(
         ),
         for (final identity in identities)
           ListTile(
-            leading: const Icon(Icons.person),
+            leading: const Icon(McIcons.person),
             title: Text(_nameOf(context, identity)),
             onTap: () => Navigator.of(context).pop(identity),
           ),

@@ -108,14 +108,14 @@ class _GroupVideoTopBar extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             CallTopBarActionButton(
-              icon: Icons.people_alt_outlined,
+              icon: McIcons.participants,
               onPressed: () =>
                   CallParticipantsSheet.show(context, contactId: contactId),
             ),
             if (showSwitchCamera) ...[
               const SizedBox(height: 8),
               CallTopBarActionButton(
-                icon: Icons.flip_camera_ios,
+                icon: McIcons.switchCamera,
                 onPressed: onSwitchCamera,
               ),
             ],
@@ -236,7 +236,7 @@ class _PeerParticipantStage extends StatelessWidget {
         child: ProfileCircleAvatar(
           radius: 96,
           child: Icon(
-            Icons.person,
+            McIcons.person,
             size: 96,
             color: context.colorScheme.onSurface,
           ),

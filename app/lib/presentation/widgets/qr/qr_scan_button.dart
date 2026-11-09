@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/services/camera_service/camera_service.dart';
 import '../../dialogs/qr_code_picker/qr_code_picker.dart';
+import '../../themes/tokens/mc_icons.dart';
 
 /// Opens the QR scanner and hands back what it read, or null when the
 /// member closed it. Disabled while the device has no camera.
@@ -23,11 +24,7 @@ class QrScanButton extends ConsumerWidget {
       height: 40,
       child: IconButton(
         padding: EdgeInsets.zero,
-        icon: Icon(
-          Icons.qr_code_scanner,
-          size: 24,
-          color: context.colorScheme.primary,
-        ),
+        icon: Icon(McIcons.scan, size: 24, color: context.colorScheme.primary),
         onPressed: !isCameraAvailable
             ? null
             : () async {

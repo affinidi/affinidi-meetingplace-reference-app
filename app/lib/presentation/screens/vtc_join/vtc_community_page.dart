@@ -8,6 +8,7 @@ import '../../../application/services/vtc_service/vtc_service.dart';
 import '../../../domain/models/vtc/vtc_card_delivery.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import '../vtc_vetter_profile/vtc_vetter_profile_screen.dart';
 import '../vtc_vetting_desk/vtc_vetting_desk_screen.dart';
@@ -119,7 +120,7 @@ class VtcCommunityPage extends HookConsumerWidget {
             ),
           ),
         ] else ...[
-          Icon(Icons.verified, size: 72, color: mc.success),
+          Icon(McIcons.verified, size: 72, color: mc.success),
           const SizedBox(height: 4),
           _WithAbout(
             state: state,
@@ -167,7 +168,7 @@ class VtcCommunityPage extends HookConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             spacing: 8,
             children: [
-              Icon(Icons.hourglass_top, size: 16, color: mc.textSecondary),
+              Icon(McIcons.pending, size: 16, color: mc.textSecondary),
               Flexible(
                 child: Text(
                   l10n.vtcMembershipCardOnItsWay,
@@ -212,7 +213,7 @@ class _RoleLine extends StatelessWidget {
       if (communityDid != null)
         IconButton(
           key: const Key('vtc_community_settings'),
-          icon: Icon(Icons.settings_outlined, color: iconColor),
+          icon: Icon(McIcons.settings, color: iconColor),
           tooltip: l10n.vtcCommunitySettings,
           onPressed: () => _showSettings(
             context,
@@ -224,7 +225,7 @@ class _RoleLine extends StatelessWidget {
       if (communityDid != null && canVet)
         IconButton(
           key: const Key('vtc_community_vetting_desk'),
-          icon: Icon(Icons.how_to_reg_outlined, color: iconColor),
+          icon: Icon(McIcons.userCheck, color: iconColor),
           tooltip: l10n.vtcVetterStart,
           onPressed: () => VtcVettingDeskScreen.show(
             context,
@@ -235,7 +236,7 @@ class _RoleLine extends StatelessWidget {
     ];
     return OnboardingLine(
       key: const Key('vtc_community_role'),
-      icon: Icons.badge_outlined,
+      icon: McIcons.badge,
       title: l10n.vtcCommunityRole,
       subtitle: vtcRoleName(l10n, role),
       trailing: actions.isEmpty
@@ -366,7 +367,7 @@ class _WithAbout extends StatelessWidget {
         Flexible(child: child),
         IconButton(
           key: const Key('vtc_community_about'),
-          icon: Icon(Icons.info_outline, color: context.mcColors.textSecondary),
+          icon: Icon(McIcons.info, color: context.mcColors.textSecondary),
           tooltip: context.l10n.vtcJoinProfileHeading,
           onPressed: () =>
               showOnboardingSheet(context, VtcCommunityProfile(state: state)),
@@ -429,9 +430,9 @@ class _CardRoute extends ConsumerWidget {
       key: const Key('vtc_join_card_route'),
       flow: VtcFlowDiagram(
         nodes: [
-          VtcFlowNode(Icons.groups_outlined, l10n.membershipFlowCommunity),
-          VtcFlowNode(Icons.person_outline, identity),
-          VtcFlowNode(Icons.shield_outlined, l10n.membershipTrailYourVta),
+          VtcFlowNode(McIcons.community, l10n.membershipFlowCommunity),
+          VtcFlowNode(McIcons.person, identity),
+          VtcFlowNode(McIcons.shield, l10n.membershipTrailYourVta),
         ],
       ),
       summary: Text(
@@ -465,7 +466,7 @@ class _CardArrival extends HookWidget {
             child: Row(
               spacing: 8,
               children: [
-                Icon(Icons.route_outlined, color: mc.textSecondary),
+                Icon(McIcons.route, color: mc.textSecondary),
                 Expanded(
                   child: Text(
                     context.l10n.vtcDeliveryHeading,
@@ -475,7 +476,7 @@ class _CardArrival extends HookWidget {
                   ),
                 ),
                 Icon(
-                  expanded.value ? Icons.expand_less : Icons.expand_more,
+                  expanded.value ? McIcons.chevronUp : McIcons.chevronDown,
                   color: mc.textSecondary,
                 ),
               ],

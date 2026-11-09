@@ -5,6 +5,7 @@ import '../../../application/services/credential_service/credential_service.dart
 import '../../../application/services/credential_service/credential_service_state.dart';
 import '../../../domain/models/credentials/liveness_credential_record.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../widgets/cards/credential_card.dart';
 import '../../widgets/credentials/liveness_credential_details_table.dart';
 import '../chat/liveness_credential_view_data.dart';
@@ -55,7 +56,7 @@ class CredentialDetailsScreen extends ConsumerWidget {
                     .deleteCredentialForIdentity(identityId);
                 if (context.mounted) Navigator.of(context).pop();
               },
-              icon: const Icon(Icons.delete_outline, size: 24),
+              icon: const Icon(McIcons.delete, size: 24),
             ),
         ],
       ),

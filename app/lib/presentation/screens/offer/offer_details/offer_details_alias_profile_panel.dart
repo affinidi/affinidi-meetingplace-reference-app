@@ -34,7 +34,7 @@ class _OfferDetailsAliasProfilePanel extends ConsumerWidget {
     return FormCard(
       title: context.l10n.myAliasProfile,
       child: FormRowIconText(
-        icon: Icons.person,
+        icon: McIcons.person,
         iconColor: context.colorScheme.secondary,
         label: label,
         labelStyle: context.textTheme.bodyMedium,

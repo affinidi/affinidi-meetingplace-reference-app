@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:mpx_flutter_reference_app/presentation/themes/app_custom_colors.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/call/call_participant_mute_badge.dart';
 
 Future<void> _pumpBadge(WidgetTester tester, Widget child) {
@@ -22,7 +22,7 @@ void main() {
     ) async {
       await _pumpBadge(tester, const CallParticipantMuteBadge());
 
-      expect(find.byIcon(Icons.mic_off), findsOneWidget);
+      expect(find.byIcon(McIcons.micOff), findsOneWidget);
 
       final badgeContainer = tester.widget<Container>(find.byType(Container));
       final decoration = badgeContainer.decoration as BoxDecoration?;

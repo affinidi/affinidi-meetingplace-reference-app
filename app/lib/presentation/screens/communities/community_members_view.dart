@@ -5,6 +5,7 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../application/services/vtc_trust_service/vtc_trust_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../vtc_trust/vtc_member_search_screen.dart';
 import '../vtc_trust/vtc_member_tile.dart';
 import '../vtc_trust/vtc_vouch.dart';
@@ -74,7 +75,7 @@ class CommunityMembersView extends HookConsumerWidget {
               labelText: l10n.vtcTrustSearchHint,
               helperText: l10n.communityMembersPrompt(communityName),
               helperMaxLines: 2,
-              prefixIcon: const Icon(Icons.search),
+              prefixIcon: const Icon(McIcons.search),
             ),
             // Nothing to search for shows the groups' members again.
             onSubmitted: (text) =>

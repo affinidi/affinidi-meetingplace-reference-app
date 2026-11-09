@@ -10,6 +10,7 @@ import '../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../../navigation/routes/dashboard_routes.dart';
 import '../../../navigation/tabs/tabs.dart';
 import '../../painting/cached_base64_image.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../../widgets/cards/animated_stacked_card_deck.dart';
 import '../../widgets/cards/r_card_header_card.dart';
@@ -126,12 +127,12 @@ class RCardsScreen extends HookConsumerWidget {
               ],
               IconButton(
                 onPressed: controller.toggleSearch,
-                icon: Icon(Icons.search, color: colorScheme.onSurface),
+                icon: Icon(McIcons.search, color: colorScheme.onSurface),
               ),
               IconButton(
                 onPressed: hasAnyCards ? exportAll : null,
                 icon: Icon(
-                  Icons.download_outlined,
+                  McIcons.download,
                   color: hasAnyCards
                       ? colorScheme.onSurface
                       : context.mcColors.textTertiary,

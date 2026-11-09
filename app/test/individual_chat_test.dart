@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'fakes/fake_channels.dart';
@@ -469,7 +470,7 @@ void main() {
             find.byKey(const Key('media_review_submit_button')),
             findsOneWidget,
           );
-          expect(find.byIcon(Icons.close), findsOneWidget);
+          expect(find.byIcon(McIcons.close), findsOneWidget);
 
           await submitMediaWithMessage(tester, message);
           await tester.pumpAndSettle();
@@ -648,7 +649,7 @@ void main() {
           findsOneWidget,
         );
 
-        expect(find.byIcon(Icons.notifications_off_outlined), findsWidgets);
+        expect(find.byIcon(McIcons.notificationsOff), findsWidgets);
 
         expect(find.byKey(const Key('notifications_why_link')), findsOneWidget);
 
@@ -686,7 +687,7 @@ void main() {
 
           final closeButton = find.descendant(
             of: find.byKey(const Key('notifications_unavailable_banner')),
-            matching: find.byIcon(Icons.close),
+            matching: find.byIcon(McIcons.close),
           );
           expect(closeButton, findsOneWidget);
 
@@ -720,7 +721,7 @@ void main() {
             findsNothing,
           );
 
-          expect(find.byIcon(Icons.notifications_off_outlined), findsOneWidget);
+          expect(find.byIcon(McIcons.notificationsOff), findsOneWidget);
         },
       );
     });

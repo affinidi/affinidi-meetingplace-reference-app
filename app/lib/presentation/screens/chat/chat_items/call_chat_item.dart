@@ -110,8 +110,8 @@ class _CallChatItem extends ConsumerWidget {
                 ),
                 child: Icon(
                   call.mediaType == CallMediaType.audio
-                      ? Icons.call
-                      : Icons.videocam,
+                      ? McIcons.call
+                      : McIcons.video,
                   size: 24,
                   color: colors.icon,
                 ),

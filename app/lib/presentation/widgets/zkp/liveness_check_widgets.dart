@@ -4,6 +4,7 @@ import '../../../infrastructure/extensions/box_constraints_extensions.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../screens/chat/liveness_credential_view_data.dart';
 import '../../screens/credentials/credential_details_screen.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../cards/credential_card.dart';
 import '../credentials/liveness_credential_details_table.dart';
@@ -48,7 +49,7 @@ class ZkpInfoBanner extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.info, color: mc.textSecondary, size: 20),
+          Icon(McIcons.info, color: mc.textSecondary, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -140,7 +141,7 @@ class VcNotFoundStepView extends StatelessWidget {
                             Align(
                               alignment: Alignment.topCenter,
                               child: Icon(
-                                Icons.search_off,
+                                McIcons.searchOff,
                                 size: 80,
                                 color: context.mcColors.textTertiary,
                               ),
@@ -285,7 +286,7 @@ class VcGeneratedStepView extends StatelessWidget {
                             Align(
                               alignment: Alignment.topCenter,
                               child: Icon(
-                                Icons.check_circle,
+                                McIcons.checkCircle,
                                 size: 80,
                                 color: context.mcColors.success,
                               ),

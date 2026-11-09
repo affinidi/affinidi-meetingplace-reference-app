@@ -15,6 +15,7 @@ import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/extensions/vrc_extensions.dart';
 import '../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../../presentation/screens/verifiable_credential/verifiable_credential_screen.dart';
+import '../../../presentation/themes/tokens/mc_icons.dart';
 import '../../../presentation/themes/tokens/mc_radius.dart';
 import '../../../presentation/widgets/buttons/elevated_loading_button.dart';
 import '../../../presentation/widgets/identity_picker/identity_picker.dart';
@@ -35,7 +36,7 @@ class VrcAttachmentsPlugin implements AttachmentPicker, AttachmentRenderer {
 
   @override
   AttachmentPluginIcon get icon =>
-      const MaterialIcon(Icons.verified_user, color: Colors.white);
+      const MaterialIcon(McIcons.credentials, color: Colors.white);
 
   @override
   bool get isPlatformSupported => true;

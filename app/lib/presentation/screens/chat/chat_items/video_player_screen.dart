@@ -105,7 +105,7 @@ class _VideoPlayerScreenState extends State<_VideoPlayerScreen> {
             builder: (context, value, child) {
               if (!value.isPlaying) {
                 return const Icon(
-                  Icons.play_circle_fill,
+                  McIcons.playCircle,
                   color: Colors.white70,
                   size: 72,
                 );

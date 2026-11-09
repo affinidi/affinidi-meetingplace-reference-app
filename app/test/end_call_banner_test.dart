@@ -8,6 +8,7 @@ import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/navigation/navigator.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/rules/call_ui_rules.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/end_call/end_call_banner.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/end_call/end_call_banner_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/end_call/end_call_banner_state.dart';
@@ -122,8 +123,8 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byIcon(Icons.call), findsOneWidget);
-      expect(find.byIcon(Icons.videocam), findsNothing);
+      expect(find.byIcon(McIcons.call), findsOneWidget);
+      expect(find.byIcon(McIcons.video), findsNothing);
     });
 
     testWidgets('shows videocam icon for video call', (tester) async {
@@ -132,8 +133,8 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byIcon(Icons.videocam), findsOneWidget);
-      expect(find.byIcon(Icons.call), findsNothing);
+      expect(find.byIcon(McIcons.video), findsOneWidget);
+      expect(find.byIcon(McIcons.call), findsNothing);
     });
   });
 

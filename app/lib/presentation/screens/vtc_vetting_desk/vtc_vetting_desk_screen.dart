@@ -9,6 +9,7 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import '../../../domain/models/vtc/vtc_vetter_desk.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../effects/confetti/confetti_overlay.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_spacing.dart';
 import '../../themes/tokens/mc_typography.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
@@ -106,7 +107,7 @@ class VtcVettingDeskScreen extends HookConsumerWidget {
                   title: l10n.vtcVetterCardTitle,
                   credential: card.credential,
                   credentialType: 'AuthorityCredential',
-                  documentIcon: Icons.how_to_reg_outlined,
+                  documentIcon: McIcons.userCheck,
                   holderLabel: l10n.vtcVetterCardHolder,
                   holderDid: card.vetterDid,
                   issuer: card.issuer,
@@ -276,7 +277,7 @@ class _Outcome extends StatelessWidget {
       spacing: 12,
       children: [
         Icon(
-          vouched ? Icons.verified : Icons.do_not_disturb_on_outlined,
+          vouched ? McIcons.verified : McIcons.remove,
           size: 72,
           color: vouched
               ? context.mcColors.success
@@ -365,12 +366,12 @@ class _Requirements extends StatelessWidget {
         children: [
           for (final type in details)
             OnboardingLine(
-              icon: Icons.badge_outlined,
+              icon: McIcons.badge,
               title: vtcClaimTypeLabel(l10n, type),
             ),
           if (documents != null && documents.isNotEmpty)
             OnboardingLine(
-              icon: Icons.description_outlined,
+              icon: McIcons.document,
               title: l10n.vtcVetterRequirementsDocuments(
                 [
                   for (final document in documents)
@@ -625,7 +626,7 @@ class _SessionView extends HookWidget {
               Text(l10n.vtcVetterCardIntro, style: onboardingNote(context)),
               for (final claim in details)
                 OnboardingLine(
-                  icon: Icons.badge_outlined,
+                  icon: McIcons.badge,
                   title: vtcClaimTypeLabel(l10n, claim.type),
                   subtitle: '${claim.value}',
                 ),
@@ -706,7 +707,7 @@ class _IssuedList extends StatelessWidget {
             Text(l10n.vtcVetterIssuedNone, style: onboardingNote(context)),
           for (final statement in issued)
             OnboardingLine(
-              icon: Icons.verified_outlined,
+              icon: McIcons.verified,
               title: l10n.vtcVetterIssuedLine(
                 dates.formatMediumDate(statement.issuedAt.toLocal()),
                 dates.formatMediumDate(statement.validUntil.toLocal()),

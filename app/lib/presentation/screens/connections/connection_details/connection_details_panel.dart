@@ -25,21 +25,21 @@ class _ConnectionDetailsPanel extends ConsumerWidget {
     final items = [
       if (dateAdded != null)
         FormRowIconTitle(
-          icon: Icons.calendar_today,
+          icon: McIcons.calendar,
           label: context.l10n.connectionEstablished,
           iconColor: context.colorScheme.primary,
           value: dateAdded.timeAgo(context.l10n),
         ),
       if (isDebugMode && mediatorName.isNotEmpty)
         FormRowIconTitle(
-          icon: Icons.mediation,
+          icon: McIcons.mediator,
           label: context.l10n.generalMediator,
           iconColor: context.customColors.purple,
           value: mediatorName,
         ),
       if (contactOrigin != null)
         FormRowIconTitle(
-          icon: Icons.route,
+          icon: McIcons.route,
           label: context.l10n.connectionApproach,
           iconColor: context.customColors.success,
           value: context.l10n.contactOrigin(contactOrigin.name),

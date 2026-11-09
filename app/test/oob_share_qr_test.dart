@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 
 import 'fakes/fake_identities.dart';
 import 'fakes/fake_meeting_place_sdk.dart';
@@ -28,7 +29,7 @@ void main() {
         await navigateToLocation(tester, location, identities: [testIdentity]);
         await tester.pumpAndSettle();
 
-        expect(find.byIcon(Icons.cancel_outlined), findsOneWidget);
+        expect(find.byIcon(McIcons.cancel), findsOneWidget);
       });
 
       testWidgets('should display share CTA when QR is generated', (
@@ -149,7 +150,7 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        final cancelButton = find.byIcon(Icons.cancel_outlined);
+        final cancelButton = find.byIcon(McIcons.cancel);
         await tester.tap(cancelButton);
         await tester.pumpAndSettle();
       });
@@ -255,7 +256,7 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        final cancelButton = find.byIcon(Icons.cancel_outlined);
+        final cancelButton = find.byIcon(McIcons.cancel);
         await tester.tap(cancelButton);
         await tester.pump();
 

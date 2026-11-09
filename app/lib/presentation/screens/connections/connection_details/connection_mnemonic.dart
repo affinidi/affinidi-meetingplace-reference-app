@@ -47,7 +47,7 @@ class _ConnectionMnenomicPanel extends ConsumerWidget {
                               context.colorScheme.surfaceContainerHigh,
                           radius: 18,
                           child: Icon(
-                            Icons.qr_code,
+                            McIcons.qrCode,
                             color: context.colorScheme.onSurfaceVariant,
                             size: 22,
                           ),

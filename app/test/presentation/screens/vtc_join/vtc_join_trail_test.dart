@@ -7,6 +7,7 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_trail.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 
 void main() {
   Map<String, dynamic> proof(String key, String created) => {
@@ -179,9 +180,9 @@ void main() {
       expect(find.text(VtaTask.signTrustTask), findsOneWidget);
       expect(find.text(JoinTask.submit), findsOneWidget);
       // Each detail with an icon for what it is.
-      expect(find.byIcon(Icons.fingerprint), findsOneWidget);
-      expect(find.byIcon(Icons.assignment_outlined), findsOneWidget);
-      expect(find.byIcon(Icons.key_outlined), findsOneWidget);
+      expect(find.byIcon(McIcons.identities), findsOneWidget);
+      expect(find.byIcon(McIcons.clipboard), findsOneWidget);
+      expect(find.byIcon(McIcons.key), findsOneWidget);
       expect(find.text('Document id'), findsNothing);
       expect(find.text('Cryptosuite'), findsOneWidget);
       expect(find.text('did:webvh:persona#key-0'), findsOneWidget);
@@ -400,7 +401,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text(JoinTask.submit), findsOneWidget);
       // No documents to show.
-      expect(find.byIcon(Icons.receipt_long_outlined), findsNothing);
+      expect(find.byIcon(McIcons.receipt), findsNothing);
     });
 
     testWidgets('turns the review marker while it checks', (tester) async {
@@ -408,7 +409,7 @@ void main() {
       final busy = find.byKey(const Key('vtc_join_trail_marker_busy'));
       expect(busy, findsOneWidget);
       expect(
-        find.descendant(of: busy, matching: find.byIcon(Icons.hourglass_top)),
+        find.descendant(of: busy, matching: find.byIcon(McIcons.pending)),
         findsOneWidget,
       );
       final turns = tester.widget<RotationTransition>(busy).turns;
@@ -421,7 +422,7 @@ void main() {
       expect(busy, findsNothing);
       final rest = tester.widget<RotationTransition>(
         find.ancestor(
-          of: find.byIcon(Icons.hourglass_top),
+          of: find.byIcon(McIcons.pending),
           matching: find.byType(RotationTransition),
         ),
       );
@@ -453,8 +454,8 @@ void main() {
       );
       // No document to show; only the VTA's signing and the card still to
       // come open, to the tasks they take.
-      expect(find.byIcon(Icons.receipt_long_outlined), findsNothing);
-      expect(find.byIcon(Icons.expand_more), findsNWidgets(2));
+      expect(find.byIcon(McIcons.receipt), findsNothing);
+      expect(find.byIcon(McIcons.chevronDown), findsNWidgets(2));
       await tester.tap(find.byKey(const Key('vtc_join_trail_vta')));
       await tester.pumpAndSettle();
       expect(find.text(VtaTask.signTrustTask), findsOneWidget);
@@ -520,7 +521,7 @@ void main() {
       await pumpStep(tester, null);
 
       expect(find.text('Football club no longer held it open'), findsOneWidget);
-      expect(find.byIcon(Icons.receipt_long_outlined), findsNothing);
+      expect(find.byIcon(McIcons.receipt), findsNothing);
     });
   });
 }

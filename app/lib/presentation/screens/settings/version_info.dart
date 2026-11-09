@@ -83,7 +83,7 @@ class _VersionInfoSectionState extends ConsumerState<_VersionInfoSection> {
                       width: 24.0,
                       color: colorScheme.primary,
                       child: Icon(
-                        Icons.qr_code,
+                        McIcons.qrCode,
                         color: colorScheme.onPrimary,
                         size: 18,
                       ),

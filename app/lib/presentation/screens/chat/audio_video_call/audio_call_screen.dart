@@ -373,7 +373,7 @@ class _IndividualAudioCallAvatar extends StatelessWidget {
       radius: _diameter / 2,
       image: peerAvatarImage,
       child: Icon(
-        Icons.person,
+        McIcons.person,
         size: _diameter / 2,
         color: context.colorScheme.onSurface,
       ),

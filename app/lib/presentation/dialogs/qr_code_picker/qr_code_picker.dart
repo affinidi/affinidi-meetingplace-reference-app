@@ -10,6 +10,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/services/permission_service/permission_service.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../widgets/camera_permission_instruction.dart';
 import 'qr_code_picker_controller.dart';
 
@@ -64,7 +65,7 @@ class QrCodePicker extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.camera_alt, color: mc.textPrimary, size: 64),
+              Icon(McIcons.camera, color: mc.textPrimary, size: 64),
               const SizedBox(height: 16),
               Text(
                 l10n.cameraNotAvailable,
@@ -241,7 +242,7 @@ class _QRScannerScreen extends HookConsumerWidget {
                       backgroundColor: context.colorScheme.surface,
                     ),
                     icon: Icon(
-                      Icons.cancel_outlined,
+                      McIcons.cancel,
                       color: context.colorScheme.primary,
                       size: 70,
                     ),

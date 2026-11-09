@@ -8,6 +8,7 @@ import '../../../../infrastructure/configuration/environment.dart';
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../navigation/navigator.dart';
 import '../../../themes/tokens/mc_colors.dart';
+import '../../../themes/tokens/mc_icons.dart';
 import '../../../themes/tokens/mc_radius.dart';
 import '../image_preview.dart';
 import '../media_screen/media_screen.dart';
@@ -95,7 +96,7 @@ class _MediaReviewScreenState extends ConsumerState<MediaReviewScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     _ReviewActionButton(
-                      icon: Icons.close,
+                      icon: McIcons.close,
                       backgroundColor: customColors.mediaSurfaceOverlay,
                       onPressed: _isSending
                           ? null
@@ -183,7 +184,7 @@ class _MediaReviewScreenState extends ConsumerState<MediaReviewScreen> {
                                     key: const Key(
                                       'media_review_submit_button',
                                     ),
-                                    icon: Icons.send_rounded,
+                                    icon: McIcons.send,
                                     backgroundColor: Theme.of(
                                       context,
                                     ).colorScheme.primary,
@@ -201,7 +202,7 @@ class _MediaReviewScreenState extends ConsumerState<MediaReviewScreen> {
                     ? const SizedBox.shrink()
                     : _ReviewActionButton(
                         key: const Key('media_review_submit_button'),
-                        icon: Icons.check_rounded,
+                        icon: McIcons.check,
                         backgroundColor: Theme.of(context).colorScheme.primary,
                         foregroundColor: McColors.textOnPrimary,
                         onPressed: _isSending

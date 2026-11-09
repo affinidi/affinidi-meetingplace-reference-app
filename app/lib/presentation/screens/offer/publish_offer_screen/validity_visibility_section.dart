@@ -29,7 +29,7 @@ class _ValidityVisibilitySection extends ConsumerWidget {
       child: Column(
         children: [
           // FormRowToggle(
-          //   icon: Icons.public,
+          //   icon: McIcons.public,
           //   iconColor: context.customColors.warning,
           //   label: context.l10n.searchableAtMeetingPlace,
           //   helperText: context.l10n.searchableHelperText,
@@ -42,7 +42,7 @@ class _ValidityVisibilitySection extends ConsumerWidget {
           // ),
           // const Divider(),
           FormRowToggle(
-            icon: Icons.timer_outlined,
+            icon: McIcons.timer,
             iconColor: context.colorScheme.error,
             label: context.l10n.setExpiry,
             helperText: hasExpiry && expiryDate != null
@@ -93,7 +93,7 @@ class _ValidityVisibilitySection extends ConsumerWidget {
             const Divider(),
           ],
           FormRowToggle(
-            icon: Icons.replay_5_sharp,
+            icon: McIcons.replay,
             iconColor: context.customColors.rose,
             label: context.l10n.limitNumberOfUses,
             helperText: hasMaxUsages

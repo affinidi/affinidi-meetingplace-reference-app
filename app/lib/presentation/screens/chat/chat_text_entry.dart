@@ -83,7 +83,7 @@ class _ChatTextEntry extends HookConsumerWidget {
                     child: SizedBox.square(
                       dimension: 50,
                       child: Icon(
-                        Icons.add,
+                        McIcons.add,
                         size: 30,
                         color: context.colorScheme.onPrimary,
                       ),
@@ -104,7 +104,7 @@ class _ChatTextEntry extends HookConsumerWidget {
                     radius: 60,
                     onTap: shouldDisable || voice.isBusy ? null : voice.discard,
                     child: Icon(
-                      Icons.delete,
+                      McIcons.delete,
                       size: 25,
                       color: context.colorScheme.onPrimary,
                     ),
@@ -245,10 +245,10 @@ class _ChatTextEntry extends HookConsumerWidget {
                           : 'chat_send_icon',
                     ),
                     hasMessageText || voice.hasDraftOrRecording
-                        ? Icons.send
+                        ? McIcons.send
                         : supportsVoiceMessages
-                        ? Icons.mic
-                        : Icons.send,
+                        ? McIcons.mic
+                        : McIcons.send,
                     size: 40,
                     color: shouldDisable || voice.isBusy
                         ? context.theme.disabledColor

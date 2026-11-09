@@ -19,6 +19,7 @@ import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/audio_video_call_screen_state.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/participants/call_participant_list_sheet.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_controller.dart';
 
 import 'fakes/fake_cache_manager.dart';
@@ -111,7 +112,7 @@ void main() {
     await tester.pump();
 
     expect(tester.takeException(), isNull);
-    expect(find.byIcon(Icons.people_alt_outlined), findsOneWidget);
+    expect(find.byIcon(McIcons.participants), findsOneWidget);
   });
 
   testWidgets(
@@ -120,7 +121,7 @@ void main() {
       await tester.pumpWidget(_wrap(groupState()));
       await tester.pump();
 
-      await tester.tap(find.byIcon(Icons.people_alt_outlined));
+      await tester.tap(find.byIcon(McIcons.participants));
       await tester.pumpAndSettle();
 
       final sheet = find.byType(CallParticipantListSheet);
@@ -141,7 +142,10 @@ void main() {
         findsOneWidget,
       );
       expect(
-        find.descendant(of: sheet, matching: find.byIcon(Icons.notifications)),
+        find.descendant(
+          of: sheet,
+          matching: find.byIcon(McIcons.notifications),
+        ),
         findsOneWidget,
       );
     },
@@ -153,7 +157,7 @@ void main() {
     await tester.pumpWidget(_wrap(groupState(isAudioOnly: false)));
     await tester.pump();
 
-    await tester.tap(find.byIcon(Icons.people_alt_outlined));
+    await tester.tap(find.byIcon(McIcons.participants));
     await tester.pumpAndSettle();
 
     expect(find.byType(CallParticipantListSheet), findsOneWidget);

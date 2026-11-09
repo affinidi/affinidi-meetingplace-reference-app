@@ -5,6 +5,7 @@ import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:meeting_place_core/meeting_place_core.dart' as sdk;
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_card_extensions.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/plugins/audio_attachments_plugin/audio_attachments_plugin.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'fakes/fake_channels.dart';
@@ -176,13 +177,13 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.play_arrow), findsOneWidget);
+      expect(find.byIcon(McIcons.play), findsOneWidget);
       expect(find.text('0:11'), findsOneWidget);
       final waveform = find.byKey(const Key('voice_waveform_paint'));
       expect(waveform, findsOneWidget);
       expect(tester.getSize(waveform).width, greaterThan(0));
       expect(tester.getSize(waveform).height, 28);
-      expect(find.byIcon(Icons.insert_drive_file), findsNothing);
+      expect(find.byIcon(McIcons.document), findsNothing);
     });
 
     testWidgets('it allows typing in the message input', (tester) async {
@@ -430,7 +431,7 @@ void main() {
             find.byKey(const Key('media_review_submit_button')),
             findsOneWidget,
           );
-          expect(find.byIcon(Icons.close), findsOneWidget);
+          expect(find.byIcon(McIcons.close), findsOneWidget);
 
           await submitMediaWithMessage(tester, message);
           await tester.pumpAndSettle();

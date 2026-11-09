@@ -6,6 +6,7 @@ import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_community_page.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_state.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 
 void main() {
   Future<void> pumpPage(WidgetTester tester, VtcJoinState state) {
@@ -57,7 +58,7 @@ void main() {
       );
       expect(find.text('Opening your card'), findsOne);
       expect(
-        marker('vtc_card_step_finding', find.byIcon(Icons.check_circle)),
+        marker('vtc_card_step_finding', find.byIcon(McIcons.checkCircle)),
         findsOne,
       );
       expect(
@@ -78,10 +79,7 @@ void main() {
         findsOne,
       );
       expect(
-        marker(
-          'vtc_card_step_reading',
-          find.byIcon(Icons.radio_button_unchecked),
-        ),
+        marker('vtc_card_step_reading', find.byIcon(McIcons.circle)),
         findsOne,
       );
     });

@@ -17,7 +17,7 @@ class _DisplayNamePanel extends ConsumerWidget {
         FormCard(
           title: context.l10n.displayName,
           child: FormRowTextField(
-            icon: Icons.edit,
+            icon: McIcons.edit,
             label: context.l10n.generalName,
             color: context.customColors.success,
             controller: controller.displayNameController,

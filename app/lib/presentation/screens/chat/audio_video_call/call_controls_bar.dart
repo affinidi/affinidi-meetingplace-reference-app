@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../themes/tokens/mc_icons.dart';
 
 class CallButtonConfig {
   const CallButtonConfig({
@@ -47,25 +48,25 @@ class CallControlsBar extends StatelessWidget {
             children: [
               if (camera != null)
                 _ControlButton(
-                  icon: camera!.isEnabled ? Icons.videocam : Icons.videocam_off,
+                  icon: camera!.isEnabled ? McIcons.video : McIcons.videoOff,
                   isActive: camera!.isEnabled && !camera!.isDisabled,
                   isDisabled: camera!.isDisabled,
                   onTap: camera!.onTap,
                 ),
               _ControlButton(
-                icon: Icons.volume_up,
+                icon: McIcons.speaker,
                 isActive: speaker.isEnabled,
                 onTap: speaker.onTap,
               ),
               _ControlButton(
-                icon: mic.isEnabled ? Icons.mic : Icons.mic_off,
+                icon: mic.isEnabled ? McIcons.mic : McIcons.micOff,
                 isActive: !mic.isEnabled && !mic.isDisabled,
                 isDisabled: mic.isDisabled,
                 onTap: mic.onTap,
                 isMic: true,
               ),
               _ControlButton(
-                icon: Icons.call_end,
+                icon: McIcons.hangUp,
                 isActive: false,
                 isEndCall: true,
                 onTap: onEndCall,

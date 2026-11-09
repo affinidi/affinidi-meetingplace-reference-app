@@ -14,6 +14,7 @@ import '../../../navigation/routes/dashboard_routes.dart';
 import '../../../navigation/tabs/tabs.dart';
 import '../../dialogs/new_connections_menu/new_connections_menu.dart';
 import '../../dialogs/offer/delete_connection_dialog.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../../themes/tokens/mc_spacing.dart';
 import '../../widgets/common/app_card.dart';

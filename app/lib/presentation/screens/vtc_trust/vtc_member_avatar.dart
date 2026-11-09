@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../application/services/vtc_trust_service/vtc_trust_service.dart';
+import '../../themes/tokens/mc_icons.dart';
 
 /// The picture the member of [entry] shows in the community's directory,
 /// or a person until it arrives, or when they show none or it cannot be
@@ -31,7 +32,7 @@ class VtcMemberAvatar extends HookConsumerWidget {
     if (picture == null) {
       return const SizedBox.square(
         dimension: _radius * 2,
-        child: Icon(Icons.person_outline),
+        child: Icon(McIcons.person),
       );
     }
     return CircleAvatar(

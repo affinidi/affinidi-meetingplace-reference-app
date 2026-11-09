@@ -13,6 +13,7 @@ import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/cache_manager_provider.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/vta_identity_card.dart';
 
 import '../../fakes/fake_cache_manager.dart';
@@ -75,7 +76,7 @@ void main() {
       expect(find.text('Ada Lovelace'), findsOneWidget);
       expect(find.text('ada@example.com'), findsOneWidget);
       expect(find.text('+44 20'), findsOneWidget);
-      expect(find.byIcon(Icons.person), findsOneWidget);
+      expect(find.byIcon(McIcons.person), findsOneWidget);
     });
 
     testWidgets('shows the full DID as metadata at the foot', (tester) async {
@@ -103,7 +104,7 @@ void main() {
         Theme.of(context).textTheme.labelSmall?.fontSize,
       );
       expect(did.style?.fontFamily, 'monospace');
-      expect(find.byIcon(Icons.fingerprint), findsOneWidget);
+      expect(find.byIcon(McIcons.identities), findsOneWidget);
       expect(
         tester.getTopLeft(find.text(longDid)).dy,
         greaterThan(tester.getTopLeft(find.text('+44 20')).dy),
@@ -172,9 +173,9 @@ void main() {
         ),
       );
 
-      expect(find.byIcon(Icons.badge_outlined), findsOneWidget);
-      expect(find.byIcon(Icons.email_outlined), findsNothing);
-      expect(find.byIcon(Icons.phone_outlined), findsNothing);
+      expect(find.byIcon(McIcons.badge), findsOneWidget);
+      expect(find.byIcon(McIcons.email), findsNothing);
+      expect(find.byIcon(McIcons.phone), findsNothing);
     });
 
     testWidgets('shows the picture in place of the icon', (tester) async {
@@ -192,7 +193,7 @@ void main() {
 
       final avatar = tester.widget<CircleAvatar>(find.byType(CircleAvatar));
       expect(avatar.backgroundImage, isNotNull);
-      expect(find.byIcon(Icons.person), findsNothing);
+      expect(find.byIcon(McIcons.person), findsNothing);
     });
 
     testWidgets('shows an identity this phone does not hold by its DID', (
@@ -201,7 +202,7 @@ void main() {
       await _pump(tester, const VtaIdentityCard(did: _did));
 
       expect(find.text(_did), findsOneWidget);
-      expect(find.byIcon(Icons.email_outlined), findsNothing);
+      expect(find.byIcon(McIcons.email), findsNothing);
     });
 
     testWidgets('shows where an identity on the VTA lives, collapsed', (

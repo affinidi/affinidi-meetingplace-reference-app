@@ -28,14 +28,14 @@ class _OfferDetailsDidInfoPanel extends ConsumerWidget {
       child: Column(
         children: [
           FormRowIconText(
-            icon: Icons.open_in_new_off,
+            icon: McIcons.linkBreak,
             iconColor: context.customColors.warning,
             label: did.topAndTail(),
             isCopiable: true,
           ),
           const Divider(),
           FormRowIconText(
-            icon: Icons.drag_indicator_sharp,
+            icon: McIcons.dragHandle,
             iconColor: context.customColors.success,
             label: context.l10n.didSha256(didSha256.topAndTail()),
             isCopiable: true,

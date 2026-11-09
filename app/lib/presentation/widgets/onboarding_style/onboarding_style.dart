@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../helpers/screensize_helper.dart';
 import '../../themes/tokens/mc_colors.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../../themes/tokens/mc_typography.dart';
 import '../common/app_card.dart';
@@ -125,7 +126,7 @@ class OnboardingLayout extends StatelessWidget {
                 top: 4,
                 left: 4,
                 child: IconButton(
-                  icon: Icon(Icons.close, color: mc.textPrimary),
+                  icon: Icon(McIcons.close, color: mc.textPrimary),
                   tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
                   onPressed: onClose,
                 ),
@@ -338,7 +339,7 @@ class GlassCard extends StatelessWidget {
               children: [
                 Expanded(child: titleText),
                 IconButton(
-                  icon: Icon(Icons.copy, size: 18, color: mc.textSecondary),
+                  icon: Icon(McIcons.copy, size: 18, color: mc.textSecondary),
                   tooltip: copyLabel,
                   onPressed: onCopy,
                 ),

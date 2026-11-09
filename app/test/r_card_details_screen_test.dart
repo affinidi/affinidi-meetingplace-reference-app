@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 import 'package:mpx_app_core/mpx_app_core.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/plugins/r_card_attachments_plugin/r_card_attachment.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 import 'package:ssi/ssi.dart';
 
 import 'fakes/fake_channels.dart';
@@ -102,8 +103,8 @@ void main() {
       // Card content includes the firstName from vcBlob
       expect(find.textContaining('Alice'), findsWidgets);
       // Delete and export icons are visible (not isOwnCard)
-      expect(find.byIcon(Icons.delete), findsOneWidget);
-      expect(find.byIcon(Icons.download_outlined), findsOneWidget);
+      expect(find.byIcon(McIcons.delete), findsOneWidget);
+      expect(find.byIcon(McIcons.download), findsOneWidget);
     });
 
     testWidgets('hides delete and export icons when isFromMe (virtual card)', (
@@ -123,8 +124,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.delete), findsNothing);
-      expect(find.byIcon(Icons.download_outlined), findsNothing);
+      expect(find.byIcon(McIcons.delete), findsNothing);
+      expect(find.byIcon(McIcons.download), findsNothing);
     });
 
     testWidgets('shows delete confirmation dialog when delete icon tapped', (
@@ -150,7 +151,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(Icons.delete));
+      await tester.tap(find.byIcon(McIcons.delete));
       await tester.pumpAndSettle();
 
       expect(
@@ -305,8 +306,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.download_outlined), findsOneWidget);
-      await tester.tap(find.byIcon(Icons.download_outlined));
+      expect(find.byIcon(McIcons.download), findsOneWidget);
+      await tester.tap(find.byIcon(McIcons.download));
       await tester.pumpAndSettle();
 
       // Verify export was called; the factory instance tracked it

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../themes/tokens/mc_icons.dart';
 import '../../../themes/tokens/mc_radius.dart';
 import 'credential_card_components.dart';
 
@@ -56,11 +57,7 @@ class _SectionHeader extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            Icons.info_outline,
-            color: context.mcColors.textSecondary,
-            size: 12,
-          ),
+          Icon(McIcons.info, color: context.mcColors.textSecondary, size: 12),
           const SizedBox(width: 4),
           Text(
             title,

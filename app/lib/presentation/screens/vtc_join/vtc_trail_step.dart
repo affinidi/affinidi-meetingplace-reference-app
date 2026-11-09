@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../themes/tokens/mc_colors.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import 'vtc_detail_line.dart';
 import 'vtc_flow_diagram.dart';
@@ -116,20 +117,12 @@ class VtcTrailStep extends HookWidget {
     final expanded = useState(false);
     final details = [
       if (actor case final actor?)
-        VtcTrailDetail(
-          Icons.how_to_reg_outlined,
-          context.l10n.vtcTrailDoneBy,
-          actor,
-        ),
+        VtcTrailDetail(McIcons.userCheck, context.l10n.vtcTrailDoneBy, actor),
       if (tasks case [final task])
-        VtcTrailDetail(
-          Icons.assignment_outlined,
-          context.l10n.vtcJoinTrailTask,
-          task,
-        )
+        VtcTrailDetail(McIcons.clipboard, context.l10n.vtcJoinTrailTask, task)
       else if (tasks.isNotEmpty)
         VtcTrailDetail.list(
-          Icons.assignment_outlined,
+          McIcons.clipboard,
           context.l10n.vtcTrailTasks,
           tasks,
         ),
@@ -208,17 +201,14 @@ class VtcTrailStep extends HookWidget {
                         if (document != null)
                           IconButton(
                             key: documentKey,
-                            icon: Icon(
-                              Icons.receipt_long_outlined,
-                              color: mc.textPrimary,
-                            ),
+                            icon: Icon(McIcons.receipt, color: mc.textPrimary),
                             tooltip: context.l10n.vtcJoinTrailShowDocument,
                             visualDensity: VisualDensity.compact,
                             onPressed: () => showVtcJoinJson(
                               context,
                               title: documentTitle,
                               json: document,
-                              icon: Icons.receipt_long_outlined,
+                              icon: McIcons.receipt,
                               subtitle: switch (document['type']) {
                                 final String type => type,
                                 _ => null,
@@ -230,8 +220,8 @@ class VtcTrailStep extends HookWidget {
                             padding: const EdgeInsets.only(top: 4),
                             child: Icon(
                               expanded.value
-                                  ? Icons.expand_less
-                                  : Icons.expand_more,
+                                  ? McIcons.chevronUp
+                                  : McIcons.chevronDown,
                               color: mc.textSecondary,
                             ),
                           ),
@@ -367,7 +357,7 @@ class VtcTrailMarker extends HookWidget {
         key: busy ? const Key('vtc_join_trail_marker_busy') : null,
         turns: turns,
         child: Icon(
-          failed ? Icons.priority_high : icon,
+          failed ? McIcons.error : icon,
           size: size / 2,
           color: switch (stage) {
             VtcTrailStage.done => McColors.textOnPrimary,

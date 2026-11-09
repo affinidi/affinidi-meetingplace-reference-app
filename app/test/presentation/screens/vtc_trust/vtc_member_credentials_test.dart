@@ -6,6 +6,7 @@ import 'package:mpx_flutter_reference_app/application/services/vtc_trust_service
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_trust/vtc_member_credentials.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 
 const _club = 'did:webvh:QmClub:vtc.example';
 const _me = 'did:webvh:QmMe:vta.example:me';
@@ -127,7 +128,7 @@ void main() {
     await tester.tap(
       find.descendant(
         of: find.byKey(const Key('vtc_member_vouch_edge-2')),
-        matching: find.byIcon(Icons.receipt_long_outlined),
+        matching: find.byIcon(McIcons.receipt),
       ),
     );
     await tester.pumpAndSettle();

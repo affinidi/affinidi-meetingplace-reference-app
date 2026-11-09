@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../presentation/themes/tokens/mc_colors.dart';
+import '../../../presentation/themes/tokens/mc_icons.dart';
 import '../../../presentation/themes/tokens/mc_radius.dart';
 import '../../extensions/build_context_extensions.dart';
 
@@ -38,7 +39,7 @@ class VrcAttachmentWidget extends StatelessWidget {
                   color: McColors.controlHoverWash,
                 ),
                 child: Icon(
-                  Icons.verified_user,
+                  McIcons.credentials,
                   size: 24,
                   color: mc.highlightSecondary,
                 ),

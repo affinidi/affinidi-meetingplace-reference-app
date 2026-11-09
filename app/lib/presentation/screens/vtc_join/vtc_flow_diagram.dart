@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../../themes/tokens/mc_spacing.dart';
 
@@ -65,7 +66,7 @@ class VtcFlowDiagram extends StatelessWidget {
                         ),
                       ),
                       Icon(
-                        Icons.arrow_forward_ios,
+                        McIcons.chevronRight,
                         size: _arrowHead,
                         color: mc.textTertiary,
                       ),

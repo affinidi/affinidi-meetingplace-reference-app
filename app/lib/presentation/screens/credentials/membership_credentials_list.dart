@@ -7,6 +7,7 @@ import '../../../domain/models/vtc/vtc_membership_entry.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../themes/tokens/mc_colors.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../../themes/tokens/mc_spacing.dart';
 import '../../widgets/common/app_card.dart';
@@ -128,7 +129,7 @@ class MembershipCredentialRow extends ConsumerWidget {
       child: Row(
         spacing: 12,
         children: [
-          Icon(Icons.card_membership_outlined, color: colors.onSurface),
+          Icon(McIcons.membership, color: colors.onSurface),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

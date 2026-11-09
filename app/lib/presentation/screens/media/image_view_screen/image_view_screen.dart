@@ -1,8 +1,10 @@
 import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../navigation/navigator.dart';
+import '../../../themes/tokens/mc_icons.dart';
 import '../frosted_media_icon_button.dart';
 import '../image_preview.dart';
 
@@ -32,7 +34,7 @@ class _ImageViewScreenState extends ConsumerState<ImageViewScreen> {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
                 child: FrostedMediaIconButton(
-                  icon: Icons.close_rounded,
+                  icon: McIcons.close,
                   tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
                   dimension: 46,
                   backgroundColor: Colors.black.withValues(alpha: 0.48),

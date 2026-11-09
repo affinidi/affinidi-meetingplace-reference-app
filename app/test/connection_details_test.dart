@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 
 import 'fakes/fake_channels.dart';
 import 'fakes/fake_chat_sdk.dart';
@@ -39,7 +40,7 @@ void main() {
             of: find.textContaining(FakeGroups.removableMemberFirstName),
             matching: find.byType(ListTile),
           ),
-          matching: find.byIcon(Icons.person_remove_outlined),
+          matching: find.byIcon(McIcons.personRemove),
         );
         expect(removeButton, findsOneWidget);
 
@@ -77,7 +78,7 @@ void main() {
           of: find.textContaining(FakeGroups.removableMemberFirstName),
           matching: find.byType(ListTile),
         ),
-        matching: find.byIcon(Icons.person_remove_outlined),
+        matching: find.byIcon(McIcons.personRemove),
       );
       await tester.ensureVisible(removeButton);
       await tester.pumpAndSettle();
@@ -109,7 +110,7 @@ void main() {
           of: find.textContaining(FakeGroups.adminMemberFirstName),
           matching: find.byType(ListTile),
         ),
-        matching: find.byIcon(Icons.person_remove_outlined),
+        matching: find.byIcon(McIcons.personRemove),
       );
       expect(adminRemoveButton, findsNothing);
     });
@@ -134,7 +135,7 @@ void main() {
           of: find.textContaining(FakeGroups.removableMemberFirstName),
           matching: find.byType(ListTile),
         ),
-        matching: find.byIcon(Icons.person_remove_outlined),
+        matching: find.byIcon(McIcons.personRemove),
       );
       await tester.ensureVisible(removeButton);
       await tester.pumpAndSettle();

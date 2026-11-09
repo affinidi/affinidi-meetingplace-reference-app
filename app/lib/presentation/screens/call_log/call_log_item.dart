@@ -67,8 +67,8 @@ class _CallLogItem extends StatelessWidget {
         children: [
           Icon(
             entry.mediaType == CallMediaType.audio
-                ? Icons.call
-                : Icons.videocam,
+                ? McIcons.call
+                : McIcons.video,
             color: colorScheme.onSurface,
           ),
           const SizedBox(width: 12),

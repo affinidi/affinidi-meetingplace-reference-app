@@ -8,6 +8,7 @@ import '../../screens/chat/audio_video_call/audio_video_call_screen.dart';
 import '../../screens/chat/audio_video_call/rules/call_ui_rules.dart';
 import '../../screens/chat/chat_screen_controller.dart';
 import '../../themes/tokens/mc_colors.dart';
+import '../../themes/tokens/mc_icons.dart';
 import 'active_call/active_call_controller.dart';
 
 class GroupCallJoinBanner extends ConsumerWidget {
@@ -38,7 +39,7 @@ class GroupCallJoinBanner extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
         children: [
-          Icon(Icons.videocam, color: context.customColors.pureWhite, size: 20),
+          Icon(McIcons.video, color: context.customColors.pureWhite, size: 20),
           const SizedBox(width: 10),
           Expanded(
             child: Text(

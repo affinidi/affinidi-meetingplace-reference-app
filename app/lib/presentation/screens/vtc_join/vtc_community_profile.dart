@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import 'vtc_join_state.dart';
@@ -65,13 +66,13 @@ class VtcCommunityProfile extends HookWidget {
               ),
             if (state.website case final website?)
               OnboardingLine(
-                icon: Icons.language,
+                icon: McIcons.website,
                 title: l10n.vtcJoinWebsite,
                 subtitle: website.toString(),
               ),
             if (state.contactEmail case final email?)
               OnboardingLine(
-                icon: Icons.mail_outline,
+                icon: McIcons.email,
                 title: l10n.vtcJoinContact,
                 subtitle: email,
               ),
@@ -79,7 +80,7 @@ class VtcCommunityProfile extends HookWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: 12,
               children: [
-                Icon(Icons.fingerprint, size: 20, color: mc.textSecondary),
+                Icon(McIcons.identities, size: 20, color: mc.textSecondary),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -104,7 +105,7 @@ class VtcCommunityProfile extends HookWidget {
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.copy, size: 18, color: mc.textSecondary),
+                  icon: Icon(McIcons.copy, size: 18, color: mc.textSecondary),
                   tooltip: l10n.linkedVtaCopyDid,
                   visualDensity: VisualDensity.compact,
                   onPressed: copyDid,

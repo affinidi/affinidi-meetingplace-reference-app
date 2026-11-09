@@ -9,6 +9,7 @@ import '../../../../infrastructure/extensions/string_list_extensions.dart';
 import '../../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../../../navigation/navigator.dart';
 import '../../../../navigation/routes/dashboard_routes.dart';
+import '../../../themes/tokens/mc_icons.dart';
 import '../../../widgets/async_loaders/modal_async_loading_status.dart';
 import '../../../widgets/identity_picker/identity_picker.dart';
 import '../../../widgets/offer_banner.dart';
@@ -179,7 +180,7 @@ class FindOfferScreen extends HookConsumerWidget {
                       child: IconButton(
                         padding: EdgeInsets.zero,
                         icon: Icon(
-                          Icons.cancel,
+                          McIcons.cancel,
                           size: 40,
                           color: context.colorScheme.primary,
                         ),

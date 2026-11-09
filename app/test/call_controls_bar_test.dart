@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/call_controls_bar.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 
 Widget _wrap(Widget child) => MaterialApp(
   theme: AppTheme.dark,
@@ -47,8 +48,8 @@ void main() {
       );
       await tester.pump();
 
-      expect(_containerColor(tester, Icons.mic), _gray);
-      expect(_containerColor(tester, Icons.videocam), isNot(_gray));
+      expect(_containerColor(tester, McIcons.mic), _gray);
+      expect(_containerColor(tester, McIcons.video), isNot(_gray));
     });
 
     testWidgets('muted mic is white with a red icon', (tester) async {
@@ -64,8 +65,11 @@ void main() {
       );
       await tester.pump();
 
-      expect(_containerColor(tester, Icons.mic_off), isNot(_gray));
-      expect(tester.widget<Icon>(find.byIcon(Icons.mic_off)).color, Colors.red);
+      expect(_containerColor(tester, McIcons.micOff), isNot(_gray));
+      expect(
+        tester.widget<Icon>(find.byIcon(McIcons.micOff)).color,
+        Colors.red,
+      );
     });
 
     testWidgets('speaker off is grey and speaker on is white', (tester) async {
@@ -80,7 +84,7 @@ void main() {
         ),
       );
       await tester.pump();
-      expect(_containerColor(tester, Icons.volume_up), _gray);
+      expect(_containerColor(tester, McIcons.speaker), _gray);
 
       await tester.pumpWidget(
         _wrap(
@@ -93,7 +97,7 @@ void main() {
         ),
       );
       await tester.pump();
-      expect(_containerColor(tester, Icons.volume_up), isNot(_gray));
+      expect(_containerColor(tester, McIcons.speaker), isNot(_gray));
     });
   });
 
@@ -111,7 +115,7 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byIcon(Icons.mic), findsOneWidget);
+      expect(find.byIcon(McIcons.mic), findsOneWidget);
     });
 
     testWidgets('shows mic_off icon when mic is disabled', (tester) async {
@@ -127,7 +131,7 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byIcon(Icons.mic_off), findsOneWidget);
+      expect(find.byIcon(McIcons.micOff), findsOneWidget);
     });
 
     testWidgets('shows camera button when camera is provided', (tester) async {
@@ -143,7 +147,7 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byIcon(Icons.videocam), findsOneWidget);
+      expect(find.byIcon(McIcons.video), findsOneWidget);
     });
 
     testWidgets('hides camera button when camera is null (audio-only)', (
@@ -154,8 +158,8 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byIcon(Icons.videocam), findsNothing);
-      expect(find.byIcon(Icons.videocam_off), findsNothing);
+      expect(find.byIcon(McIcons.video), findsNothing);
+      expect(find.byIcon(McIcons.videoOff), findsNothing);
     });
 
     testWidgets('calls onMicToggle when mic button is tapped', (tester) async {
@@ -173,7 +177,7 @@ void main() {
       );
       await tester.pump();
 
-      await tester.tap(find.byIcon(Icons.mic));
+      await tester.tap(find.byIcon(McIcons.mic));
       expect(tapped, isTrue);
     });
 
@@ -194,7 +198,7 @@ void main() {
       );
       await tester.pump();
 
-      await tester.tap(find.byIcon(Icons.videocam));
+      await tester.tap(find.byIcon(McIcons.video));
       expect(tapped, isTrue);
     });
 
@@ -215,7 +219,7 @@ void main() {
       );
       await tester.pump();
 
-      await tester.tap(find.byIcon(Icons.call_end));
+      await tester.tap(find.byIcon(McIcons.hangUp));
       expect(tapped, isTrue);
     });
 
@@ -232,7 +236,7 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byIcon(Icons.volume_up), findsOneWidget);
+      expect(find.byIcon(McIcons.speaker), findsOneWidget);
     });
 
     testWidgets('shows volume_up icon when speaker is off', (tester) async {
@@ -248,7 +252,7 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byIcon(Icons.volume_up), findsOneWidget);
+      expect(find.byIcon(McIcons.speaker), findsOneWidget);
     });
 
     testWidgets('shows speaker button in audio-only mode', (tester) async {
@@ -263,7 +267,7 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byIcon(Icons.volume_up), findsOneWidget);
+      expect(find.byIcon(McIcons.speaker), findsOneWidget);
     });
 
     testWidgets('calls onSpeakerToggle when speaker button is tapped', (
@@ -283,7 +287,7 @@ void main() {
       );
       await tester.pump();
 
-      await tester.tap(find.byIcon(Icons.volume_up));
+      await tester.tap(find.byIcon(McIcons.speaker));
       expect(tapped, isTrue);
     });
   });

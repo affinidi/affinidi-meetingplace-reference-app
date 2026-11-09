@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_flow_diagram.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 
 void main() {
   testWidgets('fits three parties with long names on a narrow phone', (
@@ -19,10 +20,10 @@ void main() {
             alignment: Alignment.topLeft,
             child: VtcFlowDiagram(
               nodes: [
-                VtcFlowNode(Icons.shield_outlined, 'Your VTA'),
-                VtcFlowNode(Icons.smartphone, 'This phone'),
+                VtcFlowNode(McIcons.shield, 'Your VTA'),
+                VtcFlowNode(McIcons.device, 'This phone'),
                 VtcFlowNode(
-                  Icons.groups_outlined,
+                  McIcons.community,
                   'The Sunday Morning Five-a-side Football Club',
                 ),
               ],

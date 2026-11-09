@@ -16,7 +16,7 @@ class _CallTopBar extends ConsumerWidget {
        centerPadding = EdgeInsets.zero;
 
   const _CallTopBar.group({required this.contactId, required this.onMinimize})
-    : trailingIcon = Icons.people_alt_outlined,
+    : trailingIcon = McIcons.participants,
       onTrailingPressed = null,
       trailing = null,
       statusPill = null,
@@ -28,7 +28,7 @@ class _CallTopBar extends ConsumerWidget {
     required this.contactId,
     required this.onMinimize,
     required VoidCallback onSwitchCamera,
-  }) : trailingIcon = Icons.flip_camera_ios,
+  }) : trailingIcon = McIcons.switchCamera,
        onTrailingPressed = onSwitchCamera,
        trailing = null,
        statusPill = null,
@@ -115,7 +115,7 @@ class _CallPersonAvatar extends StatelessWidget {
         ),
       ),
       child: Icon(
-        isGroup ? Icons.group : Icons.person,
+        isGroup ? McIcons.group : McIcons.person,
         size: _diameter / 2,
         color: colors.pureWhite,
       ),

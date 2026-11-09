@@ -116,7 +116,7 @@ class _ProfilePictures extends ConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      Icons.verified_user,
+                      McIcons.credentials,
                       size: 18,
                       color: colorScheme.onSurface,
                     ),

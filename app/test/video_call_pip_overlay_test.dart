@@ -11,6 +11,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/audio_video_call_screen_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/audio_video_call_screen_state.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_state.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/call/video_call_peer_placeholder.dart';
@@ -78,8 +79,8 @@ void main() {
 
       expect(find.byType(VideoCallPiPOverlay), findsOneWidget);
       expect(find.byType(SizedBox), findsWidgets);
-      expect(find.byIcon(Icons.flip_camera_ios), findsNothing);
-      expect(find.byIcon(Icons.mic), findsNothing);
+      expect(find.byIcon(McIcons.switchCamera), findsNothing);
+      expect(find.byIcon(McIcons.mic), findsNothing);
     });
 
     testWidgets('renders nothing when call is not minimized', (tester) async {
@@ -88,7 +89,7 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byIcon(Icons.flip_camera_ios), findsNothing);
+      expect(find.byIcon(McIcons.switchCamera), findsNothing);
     });
 
     testWidgets('renders nothing when call is audio-only', (tester) async {
@@ -97,7 +98,7 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byIcon(Icons.flip_camera_ios), findsNothing);
+      expect(find.byIcon(McIcons.switchCamera), findsNothing);
     });
 
     testWidgets('renders the PiP with self avatar when camera is disabled', (
@@ -113,7 +114,7 @@ void main() {
       await tester.tap(find.byType(VideoCallPiPOverlay));
       await tester.pump();
 
-      expect(find.byIcon(Icons.mic), findsOneWidget);
+      expect(find.byIcon(McIcons.mic), findsOneWidget);
     });
 
     testWidgets('shows remote primary placeholder with local inset', (
@@ -175,8 +176,8 @@ void main() {
       await tester.pumpWidget(_wrap(_kMinimizedVideoState));
       await tester.pump();
 
-      expect(find.byIcon(Icons.flip_camera_ios), findsNothing);
-      expect(find.byIcon(Icons.open_in_full), findsNothing);
+      expect(find.byIcon(McIcons.switchCamera), findsNothing);
+      expect(find.byIcon(McIcons.expand), findsNothing);
     });
 
     testWidgets('controls appear after tapping the PiP window', (tester) async {
@@ -186,9 +187,9 @@ void main() {
       await tester.tap(find.byType(VideoCallPiPOverlay));
       await tester.pump();
 
-      expect(find.byIcon(Icons.flip_camera_ios), findsOneWidget);
-      expect(find.byIcon(Icons.open_in_full), findsOneWidget);
-      expect(find.byIcon(Icons.mic), findsOneWidget);
+      expect(find.byIcon(McIcons.switchCamera), findsOneWidget);
+      expect(find.byIcon(McIcons.expand), findsOneWidget);
+      expect(find.byIcon(McIcons.mic), findsOneWidget);
     });
 
     testWidgets('controls auto-collapse after 2 seconds', (tester) async {
@@ -198,11 +199,11 @@ void main() {
       await tester.tap(find.byType(VideoCallPiPOverlay));
       await tester.pump();
 
-      expect(find.byIcon(Icons.flip_camera_ios), findsOneWidget);
+      expect(find.byIcon(McIcons.switchCamera), findsOneWidget);
 
       await tester.pump(const Duration(seconds: 2));
 
-      expect(find.byIcon(Icons.flip_camera_ios), findsNothing);
+      expect(find.byIcon(McIcons.switchCamera), findsNothing);
     });
 
     testWidgets('second tap collapses controls immediately', (tester) async {
@@ -212,12 +213,12 @@ void main() {
       await tester.tap(find.byType(VideoCallPiPOverlay));
       await tester.pump();
 
-      expect(find.byIcon(Icons.flip_camera_ios), findsOneWidget);
+      expect(find.byIcon(McIcons.switchCamera), findsOneWidget);
 
       await tester.tap(find.byType(VideoCallPiPOverlay));
       await tester.pump();
 
-      expect(find.byIcon(Icons.flip_camera_ios), findsNothing);
+      expect(find.byIcon(McIcons.switchCamera), findsNothing);
     });
   });
 }

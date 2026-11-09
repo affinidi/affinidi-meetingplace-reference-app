@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/models/contacts/contact.dart';
 import '../../navigation/navigator.dart' as app_navigator;
 import '../../navigation/routes/dashboard_routes.dart';
+import '../themes/tokens/mc_icons.dart';
 import '../widgets/bottom_sheet_menu.dart';
 
 class ConnectionSuccessDialog extends ConsumerWidget {
@@ -34,7 +35,7 @@ class ConnectionSuccessDialog extends ConsumerWidget {
         switch (index) {
           case 0:
             return ListTile(
-              leading: const Icon(Icons.chat_bubble_outline),
+              leading: const Icon(McIcons.chat),
               title: Text('Chat with ${contact.displayName}'),
               onTap: () {
                 Navigator.of(context, rootNavigator: true).pop();
@@ -45,7 +46,7 @@ class ConnectionSuccessDialog extends ConsumerWidget {
             );
           case 1:
             return ListTile(
-              leading: const Icon(Icons.close),
+              leading: const Icon(McIcons.close),
               title: const Text('Close'),
               onTap: () {
                 Navigator.of(context, rootNavigator: true).pop();

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../themes/tokens/mc_icons.dart';
 import '../../../widgets/info_banner.dart';
 import '../chat_screen_controller.dart';
 import '../proof_flow_controller.dart';
@@ -59,7 +60,7 @@ class ChatZkpOverlay extends ConsumerWidget {
       },
       child: Row(
         children: [
-          Icon(Icons.error, color: mc.dangerText, size: 20),
+          Icon(McIcons.error, color: mc.dangerText, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Text(

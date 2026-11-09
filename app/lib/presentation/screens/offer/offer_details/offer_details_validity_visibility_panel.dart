@@ -31,7 +31,7 @@ class _OfferDetailsValidityVisibilityPanel extends ConsumerWidget {
       child: Column(
         children: [
           FormRowIconText(
-            icon: Icons.timer_outlined,
+            icon: McIcons.timer,
             iconColor: context.colorScheme.error,
             label: label,
             helperText: helperText,
@@ -39,7 +39,7 @@ class _OfferDetailsValidityVisibilityPanel extends ConsumerWidget {
           ),
           Divider(color: context.mcColors.hairline, height: 10),
           FormRowIconText(
-            icon: Icons.replay_5_sharp,
+            icon: McIcons.replay,
             iconColor: context.customColors.rose,
             labelStyle: context.textTheme.bodyMedium,
             label: maxUsages == null

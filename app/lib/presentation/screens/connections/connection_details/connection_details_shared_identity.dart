@@ -27,7 +27,7 @@ class _SharedIdentityPanel extends ConsumerWidget {
               if (isDebugMode && myDid != null && myDid.isNotEmpty) ...[
                 const Divider(),
                 FormRowIconTitle(
-                  icon: Icons.fingerprint,
+                  icon: McIcons.identities,
                   iconColor: context.customColors.orange,
                   label: context.l10n.generalDid,
                   value: myDid.topAndTail(),
@@ -39,7 +39,7 @@ class _SharedIdentityPanel extends ConsumerWidget {
                   myDidSha256.isNotEmpty) ...[
                 const Divider(),
                 FormRowIconTitle(
-                  icon: Icons.drag_indicator_sharp,
+                  icon: McIcons.dragHandle,
                   iconColor: context.customColors.success,
                   label: context.l10n.generalDidSha256,
                   value: myDidSha256.topAndTail(),

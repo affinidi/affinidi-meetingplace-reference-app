@@ -1,9 +1,9 @@
 part of 'chat_screen.dart';
 
 const _kAttachmentPluginIcons = <String, IconData>{
-  '📷': Icons.camera_alt,
-  '🖼': Icons.image_outlined,
-  '📄': Icons.assignment_outlined,
+  '📷': McIcons.camera,
+  '🖼': McIcons.image,
+  '📄': McIcons.clipboard,
 };
 
 IconData _resolveAttachmentIcon(AttachmentPluginIcon icon) => switch (icon) {
@@ -11,18 +11,18 @@ IconData _resolveAttachmentIcon(AttachmentPluginIcon icon) => switch (icon) {
   EmojiIcon(:final emoji) =>
     _kAttachmentPluginIcons[emoji] ??
         (emoji.startsWith('📷')
-            ? Icons.camera_alt
+            ? McIcons.camera
             : emoji.startsWith('🖼')
-            ? Icons.image_outlined
+            ? McIcons.image
             : emoji.startsWith('📄')
-            ? Icons.assignment_outlined
-            : Icons.attachment),
-  AssetIcon() => Icons.attachment,
+            ? McIcons.clipboard
+            : McIcons.attachment),
+  AssetIcon() => McIcons.attachment,
 };
 
 IconData _resolveMediaOptionIcon(AttachmentPicker plugin) => switch (plugin) {
-  VrcAttachmentsPlugin() => Icons.handshake,
-  RCardAttachmentsPlugin() => Icons.credit_card,
+  VrcAttachmentsPlugin() => McIcons.handshake,
+  RCardAttachmentsPlugin() => McIcons.rCards,
   _ => _resolveAttachmentIcon(plugin.icon),
 };
 
@@ -235,7 +235,7 @@ class _ChatMediaOptions extends ConsumerWidget {
           }),
       if (isZkpEnabled && supportsHumanZkp)
         _ChatMediaOptionItem(
-          icon: Icons.how_to_reg,
+          icon: McIcons.userCheck,
           label: context.l10n.humanZkpAbbreviated,
           subtitle: hasVerifiedProof
               ? context.l10n.zkpProofAlreadyShared
@@ -294,7 +294,7 @@ class _ChatEffectOptions extends ConsumerWidget {
 
     final items = <_ChatMediaOptionItem>[
       _ChatMediaOptionItem(
-        icon: Icons.celebration_outlined,
+        icon: McIcons.celebrate,
         isBalloon: true,
         label: context.l10n.generalBalloons,
         onTap: () {
@@ -303,7 +303,7 @@ class _ChatEffectOptions extends ConsumerWidget {
       ),
       _ChatMediaOptionItem(
         // https://www.amp-what.com/unicode/search/confetti
-        icon: Icons.celebration,
+        icon: McIcons.celebrate,
         label: context.l10n.generalConfetti,
         onTap: () {
           sendEffect(ScreenEffect.confetti());

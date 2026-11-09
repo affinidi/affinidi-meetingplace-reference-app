@@ -14,6 +14,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../../infrastructure/configuration/environment.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
+import '../../../presentation/themes/tokens/mc_icons.dart';
 import '../attachment_plugin_cache.dart';
 import 'document_attachment.dart';
 
@@ -376,13 +377,13 @@ class _DocumentAttachmentWidgetState extends State<_DocumentAttachmentWidget> {
                     child: _isDownloading
                         ? const CircularProgressIndicator(strokeWidth: 2)
                         : Icon(
-                            Icons.download,
+                            McIcons.download,
                             color: mc.textTertiary,
                             size: 16,
                           ),
                   ),
                 if (_hasFailed)
-                  Icon(Icons.error_outline, color: mc.dangerText, size: 16),
+                  Icon(McIcons.error, color: mc.dangerText, size: 16),
               ],
             ),
           ),
@@ -392,26 +393,26 @@ class _DocumentAttachmentWidgetState extends State<_DocumentAttachmentWidget> {
   }
 
   IconData _iconForMimeType(String? mimeType) {
-    if (mimeType == null) return Icons.insert_drive_file;
-    if (mimeType.contains('pdf')) return Icons.picture_as_pdf;
+    if (mimeType == null) return McIcons.document;
+    if (mimeType.contains('pdf')) return McIcons.pdf;
     if (mimeType.contains('word') || mimeType.contains('doc')) {
-      return Icons.description;
+      return McIcons.document;
     }
     if (mimeType.contains('sheet') ||
         mimeType.contains('excel') ||
         mimeType.contains('csv')) {
-      return Icons.table_chart;
+      return McIcons.table;
     }
     if (mimeType.contains('presentation') || mimeType.contains('powerpoint')) {
-      return Icons.slideshow;
+      return McIcons.presentation;
     }
     if (mimeType.contains('zip') ||
         mimeType.contains('tar') ||
         mimeType.contains('gz')) {
-      return Icons.folder_zip;
+      return McIcons.archive;
     }
-    if (mimeType.contains('text/')) return Icons.article;
-    return Icons.insert_drive_file;
+    if (mimeType.contains('text/')) return McIcons.document;
+    return McIcons.document;
   }
 
   String _formatBytes(int bytes) {

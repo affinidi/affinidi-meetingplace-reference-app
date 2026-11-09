@@ -9,6 +9,7 @@ import '../../../application/services/identities_service/identities_service.dart
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/providers/cache_manager_provider.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../profile_circle_avatar.dart';
 import 'video_call_pip_overlay.dart' show VideoCallPiPOverlay;
@@ -280,7 +281,7 @@ class _SelfAvatarPlaceholder extends ConsumerWidget {
       radius: _diameter / 2,
       image: image,
       child: Icon(
-        Icons.person,
+        McIcons.person,
         size: _diameter / 2,
         color: context.colorScheme.onSurface,
       ),

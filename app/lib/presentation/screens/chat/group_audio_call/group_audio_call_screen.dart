@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../themes/tokens/mc_icons.dart';
 import 'group_audio_call_controller.dart';
 import 'group_audio_call_participant_tile.dart';
 import 'group_audio_call_state.dart';
@@ -75,7 +76,7 @@ class _RingingStateView extends StatelessWidget {
           const SizedBox(height: 48),
           ElevatedButton.icon(
             onPressed: controller.leaveCall,
-            icon: const Icon(Icons.close),
+            icon: const Icon(McIcons.close),
             label: Text(context.l10n.groupCallEndCall),
             style: ElevatedButton.styleFrom(
               backgroundColor: colors.rose,
@@ -99,7 +100,7 @@ class _GroupCallAvatar extends StatelessWidget {
       width: 120,
       height: 120,
       decoration: BoxDecoration(shape: BoxShape.circle, color: colors.grey700),
-      child: Icon(Icons.group, size: 60, color: colors.cyan),
+      child: Icon(McIcons.group, size: 60, color: colors.cyan),
     );
   }
 }
@@ -213,7 +214,7 @@ class _ControlsBar extends StatelessWidget {
             FloatingActionButton.extended(
               onPressed: controller.toggleMic,
               backgroundColor: colors.cyan,
-              icon: Icon(Icons.mic, color: colors.pureWhite),
+              icon: Icon(McIcons.mic, color: colors.pureWhite),
               label: Text(
                 context.l10n.groupCallMute,
                 style: TextStyle(color: colors.pureWhite),
@@ -222,7 +223,7 @@ class _ControlsBar extends StatelessWidget {
             FloatingActionButton.extended(
               onPressed: controller.leaveCall,
               backgroundColor: colors.rose,
-              icon: Icon(Icons.call_end, color: colors.pureWhite),
+              icon: Icon(McIcons.hangUp, color: colors.pureWhite),
               label: Text(
                 context.l10n.groupCallLeave,
                 style: TextStyle(color: colors.pureWhite),

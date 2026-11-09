@@ -9,6 +9,7 @@ import 'package:mpx_flutter_reference_app/application/services/identities_servic
 import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/plugins/r_card_attachments_plugin/r_card_attachment.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/plugins/r_card_attachments_plugin/r_card_attachments_plugin.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/identity_picker/identity_picker.dart';
 
 import 'fakes/fake_cache_manager.dart';
@@ -64,7 +65,7 @@ void main() {
 
       final l10n = await getL10n();
       expect(find.text(l10n.genRCard), findsOneWidget);
-      expect(find.byIcon(Icons.credit_card), findsOneWidget);
+      expect(find.byIcon(McIcons.rCards), findsOneWidget);
     });
 
     testWidgets('R-Card option is enabled (onTap is non-null) '

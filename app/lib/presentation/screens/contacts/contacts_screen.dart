@@ -19,6 +19,7 @@ import '../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../../navigation/routes/dashboard_routes.dart';
 import '../../dialogs/new_connections_menu/new_connections_menu.dart';
 import '../../helpers/screensize_helper.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../../themes/tokens/mc_spacing.dart';
 import '../../widgets/action_button.dart';

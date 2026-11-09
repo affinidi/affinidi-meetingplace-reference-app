@@ -32,7 +32,7 @@ class _ActionsBar extends ConsumerWidget {
       children: [
         if (isEditMode)
           IconButton(
-            icon: const Icon(Icons.cancel),
+            icon: const Icon(McIcons.cancel),
             onPressed: () {
               if (!context.mounted) return;
               controller.cancelEdit();
@@ -40,7 +40,7 @@ class _ActionsBar extends ConsumerWidget {
           ),
         IconButton(
           icon: Icon(
-            Icons.delete,
+            McIcons.delete,
             color: isEditMode ? context.colorScheme.primary : null,
           ),
           onPressed: hasConnections
@@ -61,7 +61,7 @@ class _ActionsBar extends ConsumerWidget {
               : null,
         ),
         IconButton(
-          icon: const Icon(Icons.add),
+          icon: const Icon(McIcons.add),
           onPressed: hasIdentity ? onSelectNewConnectionsOption : null,
         ),
       ],

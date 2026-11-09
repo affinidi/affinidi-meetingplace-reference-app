@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_icons.dart';
 
 class ImagePreview extends StatelessWidget {
   const ImagePreview({required this.imageBytes});
@@ -27,7 +28,7 @@ class ImagePreview extends StatelessWidget {
                   border: Border.all(color: Colors.white24),
                 ),
                 child: const Icon(
-                  Icons.broken_image_outlined,
+                  McIcons.imageBroken,
                   color: Colors.white70,
                   size: 34,
                 ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../domain/models/contact_card/contact_card.dart';
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../themes/tokens/mc_icons.dart';
 import '../../../themes/tokens/mc_radius.dart';
 
 /// Reusable participant tile for group audio calls.
@@ -101,7 +102,7 @@ class _MutedIndicator extends StatelessWidget {
         color: context.customColors.rose,
       ),
       child: Icon(
-        Icons.mic_off,
+        McIcons.micOff,
         color: context.customColors.pureWhite,
         size: size * 0.12,
       ),
@@ -158,7 +159,7 @@ class _DefaultProfileIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Icon(
-        Icons.person,
+        McIcons.person,
         size: size * 0.5,
         color: context.customColors.whiteOverlay30,
       ),

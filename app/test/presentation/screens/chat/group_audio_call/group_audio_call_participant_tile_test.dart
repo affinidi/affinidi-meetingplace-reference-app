@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/group_audio_call/group_audio_call_participant_tile.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_custom_colors.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 
 Future<void> _pumpTile(WidgetTester tester, Widget child) {
   return tester.pumpWidget(
@@ -53,11 +54,11 @@ void main() {
         ),
       );
 
-      expect(find.byIcon(Icons.mic_off), findsOneWidget);
+      expect(find.byIcon(McIcons.micOff), findsOneWidget);
       final badgeContainer = tester.widget<Container>(
         find
             .ancestor(
-              of: find.byIcon(Icons.mic_off),
+              of: find.byIcon(McIcons.micOff),
               matching: find.byType(Container),
             )
             .first,
@@ -81,7 +82,7 @@ void main() {
         ),
       );
 
-      expect(find.byIcon(Icons.mic_off), findsNothing);
+      expect(find.byIcon(McIcons.micOff), findsNothing);
     });
 
     testWidgets('shows self indicator when isSelf is true', (

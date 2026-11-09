@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../themes/tokens/mc_icons.dart';
 
 class ChatEncryptionNotice extends StatelessWidget {
   const ChatEncryptionNotice({super.key});
@@ -26,7 +27,7 @@ class _ChatEncryptionNoticeContent extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(Icons.lock, size: 16, color: colorScheme.onSurface),
+        Icon(McIcons.lock, size: 16, color: colorScheme.onSurface),
         const SizedBox(width: 8),
         Expanded(
           child: Text(

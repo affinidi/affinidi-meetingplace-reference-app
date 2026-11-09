@@ -117,7 +117,7 @@ class _CallEndAvatar extends StatelessWidget {
         radius: 75,
         image: image,
         child: Icon(
-          Icons.person,
+          McIcons.person,
           size: 75,
           color: context.colorScheme.onSurface,
         ),
@@ -155,7 +155,7 @@ class _CallNoAnswerActionBar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _CallNoAnswerActionButton(
-              icon: Icons.close,
+              icon: McIcons.close,
               label: l10n.videoCallCancel,
               iconColor: isAudioOnly ? colors.pureWhite : colorScheme.onSurface,
               containerColor: cancelContainerColor,
@@ -164,7 +164,7 @@ class _CallNoAnswerActionBar extends StatelessWidget {
             ),
             const SizedBox(width: 80),
             _CallNoAnswerActionButton(
-              icon: isAudioOnly ? Icons.call : Icons.videocam,
+              icon: isAudioOnly ? McIcons.call : McIcons.video,
               label: l10n.videoCallAgain,
               iconColor: colors.pureWhite,
               containerColor: colors.success,

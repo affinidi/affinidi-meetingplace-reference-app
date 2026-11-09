@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:camera/camera.dart';
-import 'package:flutter/cupertino.dart' hide Navigator;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -11,6 +10,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../navigation/navigator.dart' hide Navigator;
+import '../../../themes/tokens/mc_icons.dart';
 import '../../../widgets/camera_permission_instruction.dart';
 import '../../../widgets/images/compressed_image.dart';
 import '../frosted_media_icon_button.dart';
@@ -256,7 +256,7 @@ class MediaScreen extends HookConsumerWidget {
                     padding: const EdgeInsets.all(16),
                     child: FrostedMediaIconButton(
                       tooltip: closeTooltip,
-                      icon: Icons.close_rounded,
+                      icon: McIcons.close,
                       onPressed: () {
                         navigator.pop(MediaReviewResult.empty());
                         Future(controller.closeCamera);
@@ -278,7 +278,7 @@ class MediaScreen extends HookConsumerWidget {
                       children: [
                         FrostedMediaIconButton(
                           tooltip: galleryTooltip,
-                          icon: Icons.photo_library_rounded,
+                          icon: McIcons.images,
                           onPressed: () => _pickImage(ref, context),
                         ),
                         _CameraCaptureButton(
@@ -288,7 +288,7 @@ class MediaScreen extends HookConsumerWidget {
                         ),
                         FrostedMediaIconButton(
                           tooltip: switchCameraTooltip,
-                          icon: CupertinoIcons.switch_camera,
+                          icon: McIcons.switchCamera,
                           onPressed: () async => controller.toggleCamera(),
                         ),
                       ],

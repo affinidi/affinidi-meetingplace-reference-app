@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../themes/tokens/mc_icons.dart';
 import '../../../themes/tokens/mc_radius.dart';
 
 /// Data model for a single detail row in a credential card.
@@ -54,11 +55,7 @@ class CredentialCardContainer extends StatelessWidget {
             padding: const EdgeInsets.all(16.0),
             child: Row(
               children: [
-                Icon(
-                  Icons.verified_rounded,
-                  color: mc.highlightSecondary,
-                  size: 24,
-                ),
+                Icon(McIcons.verified, color: mc.highlightSecondary, size: 24),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(

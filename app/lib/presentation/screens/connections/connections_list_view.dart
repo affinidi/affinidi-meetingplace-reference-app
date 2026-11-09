@@ -91,7 +91,7 @@ class _ConnectionListItem extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           spacing: 5,
           children: [
-            Icon(Icons.delete, color: context.mcColors.dangerText),
+            Icon(McIcons.delete, color: context.mcColors.dangerText),
             Text(
               context.l10n.generalDelete,
               style: context.textTheme.bodySmall?.copyWith(
@@ -324,7 +324,7 @@ class _ConnectionTrailingWidget extends ConsumerWidget {
                 isSelected: isSelected,
               ),
               icon: Icon(
-                Icons.chevron_right,
+                McIcons.chevronRight,
                 size: 24,
                 color: context.mcColors.textSecondary,
               ),

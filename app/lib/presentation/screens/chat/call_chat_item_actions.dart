@@ -85,7 +85,7 @@ class _CallChatItemActions extends ConsumerWidget {
                       child: Row(
                         children: [
                           Icon(
-                            isAudioOnly ? Icons.call : Icons.videocam,
+                            isAudioOnly ? McIcons.call : McIcons.video,
                             color: context.mcColors.textPrimary,
                             size: 24,
                           ),

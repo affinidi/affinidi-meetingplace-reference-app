@@ -1,6 +1,7 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 
 import 'fakes/fake_chat_sdk.dart';
 import 'fakes/fake_connectivity.dart';
@@ -10,7 +11,7 @@ import 'utils/app.dart';
 
 /// Opens the + attachment sheet from the chat input bar.
 Future<void> _openAttachmentSheet(WidgetTester tester) async {
-  await tester.tap(find.byIcon(Icons.add));
+  await tester.tap(find.byIcon(McIcons.add));
   await tester.pumpAndSettle();
 }
 

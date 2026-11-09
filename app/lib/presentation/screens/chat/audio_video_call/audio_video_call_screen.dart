@@ -25,6 +25,7 @@ import '../../../../presentation/widgets/call/video_call_pip_action_buttons.dart
 import '../../../../presentation/widgets/call/video_call_pip_window.dart';
 import '../../../../presentation/widgets/images/default_profile_image.dart';
 import '../../../../presentation/widgets/profile_circle_avatar.dart';
+import '../../../themes/tokens/mc_icons.dart';
 import '../../../widgets/call_ended/call_ended_controller.dart';
 import '../chat_screen_controller.dart';
 import 'audio_video_call_screen_controller.dart';

@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../screens/chat/chat_items/concierge_message.dart';
 import '../../themes/tokens/mc_colors.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
 
 /// Types of ZKP notices that can be displayed
@@ -177,7 +178,7 @@ class _ZkpBadge extends StatelessWidget {
                 color: McColors.controlHoverWash,
               ),
               child: Icon(
-                Icons.how_to_reg,
+                McIcons.userCheck,
                 size: 22,
                 color: mc.highlightSecondary,
               ),

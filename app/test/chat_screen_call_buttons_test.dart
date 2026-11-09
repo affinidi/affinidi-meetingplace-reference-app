@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_chat/meeting_place_chat.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 
 import 'fakes/fake_channels.dart';
 import 'fakes/fake_chat_sdk.dart';
@@ -55,8 +55,8 @@ void main() {
           contact: contact,
         );
 
-        expect(find.byIcon(Icons.call), findsNothing);
-        expect(find.byIcon(Icons.videocam), findsNothing);
+        expect(find.byIcon(McIcons.call), findsNothing);
+        expect(find.byIcon(McIcons.video), findsNothing);
       });
     });
 
@@ -69,8 +69,8 @@ void main() {
           contact: contact,
         );
 
-        expect(find.byIcon(Icons.call), findsNothing);
-        expect(find.byIcon(Icons.videocam), findsNothing);
+        expect(find.byIcon(McIcons.call), findsNothing);
+        expect(find.byIcon(McIcons.video), findsNothing);
       });
     });
   });
@@ -88,8 +88,8 @@ void main() {
           contact: contact,
         );
 
-        expect(find.byIcon(Icons.call), findsOneWidget);
-        expect(find.byIcon(Icons.videocam), findsOneWidget);
+        expect(find.byIcon(McIcons.call), findsOneWidget);
+        expect(find.byIcon(McIcons.video), findsOneWidget);
       });
     });
 
@@ -104,8 +104,8 @@ void main() {
           contact: contact,
         );
 
-        expect(find.byIcon(Icons.call), findsNothing);
-        expect(find.byIcon(Icons.videocam), findsNothing);
+        expect(find.byIcon(McIcons.call), findsNothing);
+        expect(find.byIcon(McIcons.video), findsNothing);
       });
     });
 
@@ -120,8 +120,8 @@ void main() {
           contact: contact,
         );
 
-        expect(find.byIcon(Icons.call), findsNothing);
-        expect(find.byIcon(Icons.videocam), findsNothing);
+        expect(find.byIcon(McIcons.call), findsNothing);
+        expect(find.byIcon(McIcons.video), findsNothing);
       });
     });
 
@@ -135,8 +135,8 @@ void main() {
           contact: contact,
         );
 
-        expect(find.byIcon(Icons.call), findsOneWidget);
-        expect(find.byIcon(Icons.videocam), findsOneWidget);
+        expect(find.byIcon(McIcons.call), findsOneWidget);
+        expect(find.byIcon(McIcons.video), findsOneWidget);
       });
     });
   });

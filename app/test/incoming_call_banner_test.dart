@@ -14,6 +14,7 @@ import 'package:mpx_flutter_reference_app/navigation/navigator.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/audio_video_call_screen_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/chat/audio_video_call/audio_video_call_screen_state.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/incoming_call_banner.dart';
 
 import 'fakes/fake_contacts_service.dart';
@@ -115,16 +116,16 @@ void main() {
       await tester.pumpWidget(wrap(_event(isAudioOnly: true)));
       await tester.pump();
 
-      expect(find.byIcon(Icons.phone), findsOneWidget);
-      expect(find.byIcon(Icons.videocam), findsNothing);
+      expect(find.byIcon(McIcons.phone), findsOneWidget);
+      expect(find.byIcon(McIcons.video), findsNothing);
     });
 
     testWidgets('shows the video icon for a video call', (tester) async {
       await tester.pumpWidget(wrap(_event(isAudioOnly: false)));
       await tester.pump();
 
-      expect(find.byIcon(Icons.videocam), findsOneWidget);
-      expect(find.byIcon(Icons.phone), findsNothing);
+      expect(find.byIcon(McIcons.video), findsOneWidget);
+      expect(find.byIcon(McIcons.phone), findsNothing);
     });
   });
 
@@ -133,7 +134,7 @@ void main() {
       await tester.pumpWidget(wrap(_event()));
       await tester.pump();
 
-      await tester.tap(find.byIcon(Icons.call));
+      await tester.tap(find.byIcon(McIcons.call));
       await tester.pump();
 
       expect(callService.acceptedCallIds, ['call-1']);
@@ -146,7 +147,7 @@ void main() {
       );
       await tester.pump();
 
-      await tester.tap(find.byIcon(Icons.call));
+      await tester.tap(find.byIcon(McIcons.call));
       await tester.pump();
 
       expect(callService.acceptedCallIds, ['call-1']);
@@ -157,11 +158,11 @@ void main() {
       await tester.pumpWidget(wrap(_event()));
       await tester.pump();
 
-      expect(find.byIcon(Icons.call), findsOneWidget);
-      await tester.tap(find.byIcon(Icons.call));
+      expect(find.byIcon(McIcons.call), findsOneWidget);
+      await tester.tap(find.byIcon(McIcons.call));
       await tester.pump();
 
-      expect(find.byIcon(Icons.call), findsNothing);
+      expect(find.byIcon(McIcons.call), findsNothing);
       expect(find.byType(SizedBox), findsWidgets);
     });
 
@@ -169,7 +170,7 @@ void main() {
       await tester.pumpWidget(wrap(_event(), withPeerRecall: true));
       await tester.pump();
 
-      await tester.tap(find.byIcon(Icons.call));
+      await tester.tap(find.byIcon(McIcons.call));
       await tester.pump();
 
       expect(callService.acceptedCallIds, ['call-1']);
@@ -181,7 +182,7 @@ void main() {
       await tester.pumpWidget(wrap(_event()));
       await tester.pump();
 
-      await tester.tap(find.byIcon(Icons.call_end));
+      await tester.tap(find.byIcon(McIcons.hangUp));
       await tester.pump();
 
       expect(callService.declinedCallIds, ['call-1']);
@@ -204,7 +205,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(callService.declinedCallIds, isEmpty);
-        expect(find.byIcon(Icons.call), findsNothing);
+        expect(find.byIcon(McIcons.call), findsNothing);
       },
     );
 

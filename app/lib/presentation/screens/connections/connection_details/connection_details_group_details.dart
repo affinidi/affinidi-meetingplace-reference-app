@@ -39,7 +39,7 @@ class _GroupDetailsPanel extends ConsumerWidget {
     if (groupName != null) {
       items.add(
         FormRowIconTitle(
-          icon: Icons.person,
+          icon: McIcons.person,
           iconColor: context.colorScheme.primary,
           label: context.l10n.generalName,
           value: groupName,
@@ -65,7 +65,7 @@ class _GroupDetailsPanel extends ConsumerWidget {
     if (isDebugMode && adminDid != null && adminDid.isNotEmpty) {
       items.add(
         FormRowIconTitle(
-          icon: Icons.fingerprint,
+          icon: McIcons.identities,
           iconColor: context.customColors.orange,
           label: context.l10n.generalDid,
           value: adminDid.topAndTail(),
@@ -77,7 +77,7 @@ class _GroupDetailsPanel extends ConsumerWidget {
     if (isDebugMode && adminDidSha256 != null && adminDidSha256.isNotEmpty) {
       items.add(
         FormRowIconTitle(
-          icon: Icons.drag_indicator_sharp,
+          icon: McIcons.dragHandle,
           iconColor: context.customColors.success,
           label: context.l10n.generalDidSha256,
           value: adminDidSha256.topAndTail(),
@@ -89,7 +89,7 @@ class _GroupDetailsPanel extends ConsumerWidget {
     if (isDebugMode && offerLink.isNotEmpty) {
       items.add(
         FormRowIconTitle(
-          icon: Icons.link,
+          icon: McIcons.link,
           iconColor: context.colorScheme.secondary,
           label: context.l10n.generalOfferLink,
           value: offerLink,
@@ -101,7 +101,7 @@ class _GroupDetailsPanel extends ConsumerWidget {
     if (isDebugMode && groupId.isNotEmpty) {
       items.add(
         FormRowIconTitle(
-          icon: Icons.group,
+          icon: McIcons.group,
           iconColor: context.customColors.purple,
           label: context.l10n.generalGroupId,
           value: groupId.topAndTail(),

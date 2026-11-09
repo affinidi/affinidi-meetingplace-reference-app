@@ -8,6 +8,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../application/services/vtc_service/vtc_service.dart';
 import '../../infrastructure/extensions/build_context_extensions.dart';
 import '../../l10n/app_localizations.dart';
+import '../themes/tokens/mc_icons.dart';
 import '../themes/tokens/mc_radius.dart';
 
 /// Where an identity lives on the member's VTA: its context, its profile,
@@ -57,7 +58,7 @@ class VtaDetails extends HookConsumerWidget {
             child: Row(
               spacing: 6,
               children: [
-                Icon(Icons.dns_outlined, size: 16, color: foreground),
+                Icon(McIcons.server, size: 16, color: foreground),
                 Expanded(
                   child: Text(
                     l10n.vtaDetailsTitle,
@@ -68,7 +69,7 @@ class VtaDetails extends HookConsumerWidget {
                   ),
                 ),
                 Icon(
-                  expanded.value ? Icons.expand_less : Icons.expand_more,
+                  expanded.value ? McIcons.chevronUp : McIcons.chevronDown,
                   color: foreground,
                 ),
               ],
@@ -227,7 +228,7 @@ class _Profile extends StatelessWidget {
                 visualDensity: VisualDensity.compact,
                 iconSize: 16,
                 color: color,
-                icon: const Icon(Icons.copy),
+                icon: const Icon(McIcons.copy),
                 onPressed: () => _copy(context, document),
               ),
           ],

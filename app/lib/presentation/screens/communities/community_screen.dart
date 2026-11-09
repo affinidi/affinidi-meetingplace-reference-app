@@ -4,8 +4,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../navigation/tabs/tabs.dart';
-import '../../widgets/section_header.dart';
 import '../../widgets/filter_tab_bar.dart';
+import '../../widgets/section_header.dart';
 import '../contacts/contacts_screen.dart';
 import '../contacts/contacts_screen_controller.dart';
 import 'communities_controller.dart';

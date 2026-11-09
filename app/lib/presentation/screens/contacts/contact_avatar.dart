@@ -21,7 +21,11 @@ class _ContactAvatar extends ConsumerWidget {
           Positioned(
             top: isList ? -5 : -5,
             right: isList ? -10 : -15,
-            child: Icon(Icons.star, color: statusColor, size: isList ? 20 : 24),
+            child: Icon(
+              McIcons.star,
+              color: statusColor,
+              size: isList ? 20 : 24,
+            ),
           ),
         ProfileCircleAvatar(radius: iconSize / 2, image: displayImage),
       ],

@@ -58,7 +58,11 @@ class _ContactsSearchField extends HookConsumerWidget {
             ),
             if (text.isNotEmpty)
               IconButton(
-                icon: Icon(Icons.clear, color: colorScheme.onSurface, size: 20),
+                icon: Icon(
+                  McIcons.close,
+                  color: colorScheme.onSurface,
+                  size: 20,
+                ),
                 onPressed: () {
                   searchTextController.clear();
                   controller.clearSearch();

@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 
 import '../../../domain/models/vtc/vtc_identity_check.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import 'vtc_claim_type_label.dart';
 import 'vtc_detail_line.dart';
@@ -40,13 +41,13 @@ class VtcIdentityCheckView extends StatelessWidget {
         spacing: 12,
         children: [
           VtcDetailLine(
-            icon: Icons.how_to_reg_outlined,
+            icon: McIcons.userCheck,
             label: l10n.vtcIdentityCheckHow,
             value: l10n.vtcIdentityCheckMethod(check.method),
           ),
           if (check.documentClasses.isNotEmpty)
             VtcDetailLine(
-              icon: Icons.badge_outlined,
+              icon: McIcons.badge,
               label: l10n.vtcIdentityCheckDocuments,
               value: '',
               items: [
@@ -56,7 +57,7 @@ class VtcIdentityCheckView extends StatelessWidget {
             ),
           if (check.claimsVerified.isNotEmpty)
             VtcDetailLine(
-              icon: Icons.task_alt,
+              icon: McIcons.checkCircle,
               label: l10n.vtcIdentityCheckConfirmed,
               value: '',
               items: [
@@ -67,19 +68,19 @@ class VtcIdentityCheckView extends StatelessWidget {
             )
           else if (check.livenessConfirmed)
             VtcDetailLine(
-              icon: Icons.task_alt,
+              icon: McIcons.checkCircle,
               label: l10n.vtcIdentityCheckConfirmed,
               value: l10n.vtcIdentityCheckLiveness,
             ),
           if (check.validFrom case final validFrom?)
             VtcDetailLine(
-              icon: Icons.event_available_outlined,
+              icon: McIcons.calendarCheck,
               label: l10n.vtcIdentityCheckCheckedOn,
               value: date(validFrom),
             ),
           if (check.validUntil case final validUntil?)
             VtcDetailLine(
-              icon: Icons.event_outlined,
+              icon: McIcons.calendar,
               label: l10n.vtcIdentityCheckValidUntil,
               value: date(validUntil),
             ),
@@ -87,13 +88,13 @@ class VtcIdentityCheckView extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: TextButton.icon(
               key: const Key('vtc_identity_check_document'),
-              icon: const Icon(Icons.receipt_long_outlined),
+              icon: const Icon(McIcons.receipt),
               label: Text(l10n.vtcIdentityCheckShow),
               onPressed: () => showVtcJoinJson(
                 context,
                 title: heading,
                 json: check.credential,
-                icon: Icons.verified_user_outlined,
+                icon: McIcons.credentials,
                 subtitle: _statementKind,
               ),
             ),

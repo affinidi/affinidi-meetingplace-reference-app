@@ -41,14 +41,14 @@ class _PhraseValidationIcon extends ConsumerWidget {
 
     if (isPhraseAvailable == true) {
       return Icon(
-        Icons.check_circle,
+        McIcons.checkCircle,
         color: context.customColors.success,
         size: 20,
       );
     }
 
     if (isPhraseAvailable == false) {
-      return Icon(Icons.cancel, color: context.colorScheme.error, size: 20);
+      return Icon(McIcons.cancel, color: context.colorScheme.error, size: 20);
     }
 
     return const SizedBox.shrink();

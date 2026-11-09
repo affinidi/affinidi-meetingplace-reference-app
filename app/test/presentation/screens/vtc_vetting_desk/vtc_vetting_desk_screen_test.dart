@@ -16,6 +16,7 @@ import 'package:mpx_flutter_reference_app/presentation/screens/vtc_vetting_desk/
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_vetting_desk/vtc_vetting_desk_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_vetting_desk/vtc_vetting_desk_state.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 
 import '../../../fakes/fake_vetter_desk.dart';
 import '../../../fakes/fake_vtc_network.dart';
@@ -222,7 +223,7 @@ void main() {
       tester,
       find.descendant(
         of: find.byType(VtcVettingFlowScreen),
-        matching: find.byIcon(Icons.close),
+        matching: find.byIcon(McIcons.close),
       ),
     );
     await tester.pump(const Duration(seconds: 1));

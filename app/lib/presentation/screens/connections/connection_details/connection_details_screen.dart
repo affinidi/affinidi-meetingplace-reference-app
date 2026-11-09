@@ -14,6 +14,7 @@ import '../../../../infrastructure/extensions/contact_extensions.dart';
 import '../../../../infrastructure/extensions/date_time_extensions.dart';
 import '../../../../infrastructure/extensions/did_extensions.dart';
 import '../../../../infrastructure/providers/cache_manager_provider.dart';
+import '../../../themes/tokens/mc_icons.dart';
 import '../../../themes/tokens/mc_typography.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/async_loaders/modal_async_loading_status.dart';

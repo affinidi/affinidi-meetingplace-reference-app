@@ -33,7 +33,7 @@ class _OfferDetailsInfoPanel extends ConsumerWidget {
       child: Column(
         children: [
           FormRowIconTitle(
-            icon: Icons.connect_without_contact,
+            icon: McIcons.connect,
             iconColor: context.customColors.violet,
             label: context.l10n.generalOfferLink,
             value: offerLink,
@@ -41,7 +41,7 @@ class _OfferDetailsInfoPanel extends ConsumerWidget {
           ),
           const Divider(),
           FormRowIconTitle(
-            icon: Icons.format_list_bulleted_rounded,
+            icon: McIcons.list,
             iconColor: context.customColors.orange,
             label: context.l10n.generalMnemonic,
             value: mnemonic ?? '',
@@ -49,7 +49,7 @@ class _OfferDetailsInfoPanel extends ConsumerWidget {
           ),
           const Divider(),
           FormRowIconTitle(
-            icon: Icons.merge_type,
+            icon: McIcons.merge,
             iconColor: context.customColors.purple,
             label: context.l10n.generalConnectionType,
             value: type?.name ?? '',
@@ -57,7 +57,7 @@ class _OfferDetailsInfoPanel extends ConsumerWidget {
           ),
           const Divider(),
           FormRowIconTitle(
-            icon: Icons.extension_rounded,
+            icon: McIcons.extension,
             iconColor: context.customColors.cyan,
             label: context.l10n.generalExternalRef,
             value: externalRef ?? '',
@@ -66,7 +66,7 @@ class _OfferDetailsInfoPanel extends ConsumerWidget {
           if (groupDid != null && groupDid.isNotEmpty) ...[
             const Divider(),
             FormRowIconTitle(
-              icon: Icons.group,
+              icon: McIcons.group,
               iconColor: context.customColors.rose,
               label: context.l10n.generalGroupDid,
               value: groupDid.topAndTail(),

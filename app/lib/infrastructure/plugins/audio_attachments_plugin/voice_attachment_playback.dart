@@ -10,6 +10,7 @@ import 'package:meeting_place_chat/meeting_place_chat.dart' as chat;
 
 import '../../../application/services/voice_playback_service/voice_playback_service.dart';
 import '../../../presentation/themes/tokens/mc_colors.dart';
+import '../../../presentation/themes/tokens/mc_icons.dart';
 import '../../../presentation/themes/tokens/mc_radius.dart';
 import '../../../presentation/widgets/profile_circle_avatar.dart';
 import '../../extensions/build_context_extensions.dart';
@@ -51,7 +52,7 @@ class VoiceAttachmentBubble extends StatelessWidget {
         image: avatarImage,
         child: avatarImage == null
             ? Icon(
-                isFromMe ? Icons.person : Icons.person_outline,
+                isFromMe ? McIcons.person : McIcons.person,
                 color: context.mcColors.textSecondary,
                 size: 30,
               )
@@ -72,7 +73,7 @@ class VoiceAttachmentBubble extends StatelessWidget {
                 ),
               )
             : Icon(
-                isPlaying ? Icons.pause : Icons.play_arrow,
+                isPlaying ? McIcons.pause : McIcons.play,
                 color: foreground,
                 size: 30,
               ),
@@ -154,7 +155,7 @@ class VoiceAttachmentPlaybackBubble extends HookConsumerWidget {
           image: avatarImage,
           child: avatarImage == null
               ? Icon(
-                  isFromMe ? Icons.person : Icons.person_outline,
+                  isFromMe ? McIcons.person : McIcons.person,
                   color: context.mcColors.textSecondary,
                   size: 30,
                 )
@@ -379,7 +380,7 @@ class _ScopedVoiceAttachmentPlaybackButton extends ConsumerWidget {
         );
       },
       icon: Icon(
-        isPlaying ? Icons.pause : Icons.play_arrow,
+        isPlaying ? McIcons.pause : McIcons.play,
         // Inside the bubble frame, which sets the foreground.
         color: IconTheme.of(context).color,
         size: 30,

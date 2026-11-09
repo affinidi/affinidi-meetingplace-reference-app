@@ -10,6 +10,7 @@ import 'package:mpx_flutter_reference_app/presentation/screens/vtc_sign_in/vtc_s
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_sign_in/vtc_sign_in_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_sign_in/vtc_sign_in_state.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/onboarding_style/onboarding_style.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/vta_identity_card.dart';
 
@@ -257,7 +258,7 @@ void main() {
         ),
       );
 
-      expect(find.byIcon(Icons.error_outline), findsOneWidget);
+      expect(find.byIcon(McIcons.error), findsOneWidget);
       expect(
         find.widgetWithText(
           OnboardingMessage,

@@ -9,6 +9,7 @@ import '../../../domain/models/contacts/contact_type.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../screens/chat/audio_video_call/audio_video_call_screen_controller.dart';
 import '../../themes/tokens/mc_colors.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../banners/active_call/active_call_controller.dart';
 import '../banners/incoming_call/incoming_call_banner_controller.dart';
@@ -130,8 +131,8 @@ class _IncomingCallBannerState extends ConsumerState<IncomingCallBanner>
                 children: [
                   Icon(
                     event.mediaType == CallMediaType.audio
-                        ? Icons.phone
-                        : Icons.videocam,
+                        ? McIcons.phone
+                        : McIcons.video,
                     color: context.customColors.incomingCallBannerCallTypeLabel,
                   ),
                   const SizedBox(width: 12),
@@ -164,7 +165,7 @@ class _IncomingCallBannerState extends ConsumerState<IncomingCallBanner>
                   const SizedBox(width: 8),
                   if (!isGroup)
                     _ActionButton(
-                      icon: Icons.call_end,
+                      icon: McIcons.hangUp,
                       // Call UI stays dark, so decline is the dark mode's
                       // danger outline, never a red fill.
                       color: McColors.dark.dangerText,
@@ -194,7 +195,7 @@ class _IncomingCallBannerState extends ConsumerState<IncomingCallBanner>
                     )
                   else
                     _ActionButton(
-                      icon: Icons.call,
+                      icon: McIcons.call,
                       color: McColors.blue,
                       semanticsLabel: context.l10n.incomingCallBannerAccept,
                       onTap: onJoinOrAccept,

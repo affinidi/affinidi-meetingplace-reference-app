@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../infrastructure/loggers/app_logger/app_log_entry.dart';
 import '../../../../infrastructure/loggers/app_logger/log_constants.dart';
+import '../../../themes/tokens/mc_icons.dart';
 import '../../../themes/tokens/mc_typography.dart';
 import 'debug_panel_controller.dart';
 
@@ -234,7 +235,7 @@ class _EmptyState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.terminal, size: 64, color: mc.textTertiary),
+          Icon(McIcons.terminal, size: 64, color: mc.textTertiary),
           const SizedBox(height: 16),
           Text(
             l10n.debugPanelNoLogs,
@@ -277,9 +278,7 @@ class _DebugFAB extends StatelessWidget {
       child: AnimatedSwitcher(
         duration: const Duration(milliseconds: 200),
         child: Icon(
-          isAtBottom
-              ? Icons.keyboard_arrow_up_rounded
-              : Icons.keyboard_arrow_down_rounded,
+          isAtBottom ? McIcons.chevronUp : McIcons.chevronDown,
           key: ValueKey(isAtBottom),
           color: mc.textPrimary,
         ),

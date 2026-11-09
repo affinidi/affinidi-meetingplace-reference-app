@@ -24,13 +24,13 @@ class _DebugSettingsSection extends ConsumerWidget {
           title: context.l10n.debugSettingsTitle,
           child: ListTile(
             leading: Icon(
-              Icons.terminal,
+              McIcons.terminal,
               color: context.mcColors.textPrimary,
               size: 20,
             ),
             title: Text(context.l10n.debugPanelTitle),
             subtitle: Text(context.l10n.debugPanelSubtitle),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            trailing: const Icon(McIcons.chevronRight, size: 16),
             onTap: () {
               showDialog<void>(
                 context: context,

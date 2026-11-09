@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
 
 class RCardHeaderCard extends StatelessWidget {
@@ -65,7 +66,7 @@ class RCardHeaderCard extends StatelessWidget {
                         backgroundColor: colorScheme.surfaceContainerHigh,
                         foregroundImage: avatarImage,
                         child: avatarImage == null
-                            ? Icon(Icons.person, color: mc.textSecondary)
+                            ? Icon(McIcons.person, color: mc.textSecondary)
                             : null,
                       ),
                     ],

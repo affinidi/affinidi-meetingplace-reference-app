@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../domain/models/vtc/vtc_membership_entry.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../vtc_groups/vtc_groups_screen.dart';
 import '../vtc_join/vtc_flow_diagram.dart';
 import '../vtc_join/vtc_join_screen.dart';
@@ -46,7 +47,7 @@ class MembershipCredentialDetailsScreen extends ConsumerWidget {
           if (entry != null)
             IconButton(
               key: const Key('membership_check_again'),
-              icon: const Icon(Icons.refresh),
+              icon: const Icon(McIcons.refresh),
               tooltip: l10n.vtcJoinCheckAgain,
               onPressed: checking
                   ? null
@@ -84,7 +85,7 @@ class MembershipCredentialDetailsScreen extends ConsumerWidget {
                   if (entry.left == null)
                     OutlinedButton.icon(
                       key: const Key('membership_groups'),
-                      icon: const Icon(Icons.groups_outlined),
+                      icon: const Icon(McIcons.community),
                       label: Text(l10n.vtcGroupsOpen),
                       onPressed: () => Navigator.of(context).push(
                         MaterialPageRoute<void>(
@@ -126,14 +127,14 @@ class _CommunityLinks extends ConsumerWidget {
       children: [
         FilledButton.icon(
           key: const Key('membership_open_community'),
-          icon: const Icon(Icons.groups_outlined),
+          icon: const Icon(McIcons.community),
           label: Text(l10n.membershipOpenCommunity),
           onPressed: () => VtcJoinScreen.show(context, code: communityDid),
         ),
         if (website != null)
           OutlinedButton.icon(
             key: const Key('membership_open_website'),
-            icon: const Icon(Icons.open_in_new),
+            icon: const Icon(McIcons.openExternal),
             label: Text(l10n.membershipOpenWebsite),
             onPressed: () =>
                 launchUrl(website, mode: LaunchMode.externalApplication),
@@ -175,25 +176,22 @@ class _MembershipTrail extends StatelessWidget {
     final statusList = status?.statusList ?? lastKnown?.statusList;
     final names = [identity, community];
     final phoneNode = VtcFlowNode(
-      Icons.smartphone,
+      McIcons.device,
       l10n.membershipTrailThisPhone,
     );
-    final vtaNode = VtcFlowNode(
-      Icons.shield_outlined,
-      l10n.membershipTrailYourVta,
-    );
+    final vtaNode = VtcFlowNode(McIcons.shield, l10n.membershipTrailYourVta);
     final communityNode = VtcFlowNode(
-      Icons.groups_outlined,
+      McIcons.community,
       l10n.membershipFlowCommunity,
     );
-    final identityNode = VtcFlowNode(Icons.person_outline, identity);
+    final identityNode = VtcFlowNode(McIcons.person, identity);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         VtcTrailStep(
           key: const Key('membership_trail_issued'),
-          icon: Icons.card_membership_outlined,
+          icon: McIcons.membership,
           stage: VtcTrailStage.done,
           title: l10n.membershipTrailIssued(community),
           flow: VtcFlowDiagram(
@@ -216,26 +214,26 @@ class _MembershipTrail extends StatelessWidget {
           tasks: const [credentialIssueTask],
           details: [
             VtcTrailDetail(
-              Icons.groups_outlined,
+              McIcons.community,
               l10n.vtcJoinTrailIssuer,
               card.issuer,
               isId: true,
             ),
             VtcTrailDetail(
-              Icons.fingerprint,
+              McIcons.identities,
               l10n.membershipTrailMember,
               card.memberDid,
               isId: true,
             ),
             if (card.validFrom case final from?)
               VtcTrailDetail(
-                Icons.event_outlined,
+                McIcons.calendar,
                 l10n.membershipTrailValidFrom,
                 time(from),
               ),
             if (card.validUntil case final until?)
               VtcTrailDetail(
-                Icons.event_outlined,
+                McIcons.calendar,
                 l10n.vtcJoinTrailValidUntil,
                 time(until),
               ),
@@ -246,7 +244,7 @@ class _MembershipTrail extends StatelessWidget {
         ),
         VtcTrailStep(
           key: const Key('membership_trail_kept'),
-          icon: Icons.draw_outlined,
+          icon: McIcons.signature,
           stage: VtcTrailStage.done,
           title: l10n.membershipTrailKept,
           flow: VtcFlowDiagram(
@@ -273,26 +271,26 @@ class _MembershipTrail extends StatelessWidget {
           details: [
             if (entry.stored case final stored?) ...[
               VtcTrailDetail(
-                Icons.inventory_2_outlined,
+                McIcons.archiveBox,
                 l10n.membershipTrailStoredId,
                 stored.id,
                 isId: true,
               ),
               if (stored.purpose case final purpose?)
                 VtcTrailDetail(
-                  Icons.folder_outlined,
+                  McIcons.folder,
                   l10n.membershipTrailStoredPurpose,
                   purpose,
                 ),
               if (stored.status case final status?)
                 VtcTrailDetail(
-                  Icons.verified_outlined,
+                  McIcons.verified,
                   l10n.membershipTrailStoredStatus,
                   status,
                 ),
               if (stored.types.isNotEmpty)
                 VtcTrailDetail.list(
-                  Icons.category_outlined,
+                  McIcons.category,
                   l10n.membershipTrailStoredTypes,
                   stored.types,
                 ),
@@ -302,7 +300,7 @@ class _MembershipTrail extends StatelessWidget {
         if (left != null)
           VtcTrailStep(
             key: const Key('membership_trail_left'),
-            icon: Icons.draw_outlined,
+            icon: McIcons.signature,
             stage: VtcTrailStage.done,
             title: l10n.membershipTrailLeft(community),
             flow: VtcFlowDiagram(
@@ -327,19 +325,19 @@ class _MembershipTrail extends StatelessWidget {
               if (receipt != null) ...[
                 if (receipt.signedAt case final at?)
                   VtcTrailDetail(
-                    Icons.schedule,
+                    McIcons.clock,
                     l10n.vtcJoinTrailSignedAt,
                     time(at),
                   ),
                 VtcTrailDetail(
-                  Icons.groups_outlined,
+                  McIcons.community,
                   l10n.vtcJoinTrailAnsweredBy,
                   receipt.answeredBy,
                   isId: true,
                 ),
                 if (receipt.answeredAt case final at?)
                   VtcTrailDetail(
-                    Icons.schedule,
+                    McIcons.clock,
                     l10n.vtcJoinTrailAnsweredAt,
                     time(at),
                   ),
@@ -351,7 +349,7 @@ class _MembershipTrail extends StatelessWidget {
           ),
         VtcTrailStep(
           key: const Key('membership_trail_checked'),
-          icon: Icons.fact_check_outlined,
+          icon: McIcons.checklist,
           stage: switch (status?.state) {
             null => VtcTrailStage.current,
             VtcCardState.unknown => VtcTrailStage.failed,
@@ -376,26 +374,26 @@ class _MembershipTrail extends StatelessWidget {
           details: [
             // Said outright, so the step is not taken for a gap in the trail.
             VtcTrailDetail(
-              Icons.assignment_outlined,
+              McIcons.clipboard,
               l10n.vtcJoinTrailTask,
               l10n.membershipTrailCheckedNoTask,
             ),
             if (status?.statusListUrl case final url?)
               VtcTrailDetail(
-                Icons.link,
+                McIcons.link,
                 l10n.membershipTrailStatusList,
                 url.toString(),
                 isId: true,
               ),
             if (status?.index case final index?)
               VtcTrailDetail(
-                Icons.tag,
+                McIcons.tag,
                 l10n.membershipTrailStatusIndex,
                 '$index',
               ),
             if (status?.checkedAt ?? lastKnown?.checkedAt case final at?)
               VtcTrailDetail(
-                Icons.schedule,
+                McIcons.clock,
                 l10n.membershipTrailCheckedAt,
                 time(at),
               ),

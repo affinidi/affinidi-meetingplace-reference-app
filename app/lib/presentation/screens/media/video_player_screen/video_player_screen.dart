@@ -9,6 +9,7 @@ import 'package:video_player/video_player.dart';
 
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../infrastructure/loggers/app_logger/app_logger.dart';
+import '../../../themes/tokens/mc_icons.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
   const VideoPlayerScreen({super.key, required this.videoBytes, this.filename});
@@ -115,7 +116,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
             builder: (context, value, child) {
               if (!value.isPlaying) {
                 return const Icon(
-                  Icons.play_circle_fill,
+                  McIcons.playCircle,
                   color: Colors.white70,
                   size: 72,
                 );

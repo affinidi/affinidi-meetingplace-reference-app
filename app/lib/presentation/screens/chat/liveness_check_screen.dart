@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../application/services/credential_service/liveness_errors.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../widgets/zkp/liveness_check_widgets.dart';
 import '../credentials/credential_details_screen.dart';
 import 'liveness_check_screen_controller.dart';
@@ -162,7 +163,7 @@ class _LivenessCheckScreenState extends ConsumerState<LivenessCheckScreen> {
         ),
         centerTitle: true,
         leading: onBack != null
-            ? IconButton(icon: const Icon(Icons.arrow_back), onPressed: onBack)
+            ? IconButton(icon: const Icon(McIcons.back), onPressed: onBack)
             : null,
         automaticallyImplyLeading: onBack != null,
       ),

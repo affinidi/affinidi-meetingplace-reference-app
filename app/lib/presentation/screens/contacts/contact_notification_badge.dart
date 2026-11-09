@@ -44,7 +44,7 @@ class _ContactNotificationBadge extends StatelessWidget {
       padding: isOobContact ? null : padding,
       child: isOobContact
           ? Icon(
-              Icons.notifications_off_outlined,
+              McIcons.notificationsOff,
               color: context.mcColors.textPrimary,
               size: 14,
             )

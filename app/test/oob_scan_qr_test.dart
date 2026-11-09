@@ -6,6 +6,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/exceptions/app_exceptio
 import 'package:mpx_flutter_reference_app/navigation/routes/dashboard_routes.dart';
 import 'package:mpx_flutter_reference_app/presentation/dialogs/qr_code_picker/qr_code_picker.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/contacts/contacts_screen_controller.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 
 import 'fakes/fake_contacts.dart';
 import 'fakes/fake_identities.dart';
@@ -396,10 +397,7 @@ void main() {
             );
             await tester.pumpAndSettle();
 
-            expect(
-              find.byIcon(Icons.notifications_off_outlined),
-              findsOneWidget,
-            );
+            expect(find.byIcon(McIcons.notificationsOff), findsOneWidget);
 
             expect(find.text('0'), findsNothing);
           },

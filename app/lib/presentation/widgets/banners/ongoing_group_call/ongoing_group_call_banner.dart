@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../navigation/routes/dashboard_routes.dart';
+import '../../../themes/tokens/mc_icons.dart';
 import '../../profile_circle_avatar.dart';
 import 'ongoing_group_call_banner_state.dart';
 import 'ongoing_group_call_controller.dart';
@@ -124,7 +125,7 @@ class _JoinButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return FilledButton.icon(
       onPressed: onPressed,
-      icon: const Icon(Icons.call, size: 18),
+      icon: const Icon(McIcons.call, size: 18),
       label: Text(context.l10n.videoCallGroupCallJoin),
       style: FilledButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -201,7 +202,7 @@ class _RingedAvatar extends StatelessWidget {
         image: avatar.image,
         radius: kOngoingCallAvatarSize / 2,
         child: initial.isEmpty
-            ? const Icon(Icons.person, size: 18)
+            ? const Icon(McIcons.person, size: 18)
             : Text(
                 initial.substring(0, 1).toUpperCase(),
                 style: context.textTheme.labelMedium,

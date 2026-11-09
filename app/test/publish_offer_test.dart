@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:meeting_place_credentials/meeting_place_credentials.dart';
 import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 
 import 'fakes/fake_channels.dart';
 import 'fakes/fake_identities.dart';
@@ -481,7 +482,7 @@ void main() {
             await tester.pumpAndSettle();
             await tester.pump(Durations.extralong1);
 
-            expect(find.byIcon(Icons.cancel), findsOneWidget);
+            expect(find.byIcon(McIcons.cancel), findsOneWidget);
 
             verifyPublishButtonState(
               tester,

@@ -8,6 +8,7 @@ import 'package:mpx_flutter_reference_app/application/services/identities_servic
 import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service_state.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/call/video_call_pip_window.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/profile_circle_avatar.dart';
 
@@ -127,7 +128,7 @@ void main() {
         // Fallback renders the ProfileCircleAvatar (which shows the person icon
         // child when no image is set).
         expect(find.byType(ProfileCircleAvatar), findsOneWidget);
-        expect(find.byIcon(Icons.person), findsOneWidget);
+        expect(find.byIcon(McIcons.person), findsOneWidget);
 
         final avatar = tester.widget<ProfileCircleAvatar>(
           find.byType(ProfileCircleAvatar),

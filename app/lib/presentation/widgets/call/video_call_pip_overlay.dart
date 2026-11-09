@@ -19,6 +19,7 @@ import '../../screens/chat/audio_video_call/audio_video_call_screen.dart'
     show AudioVideoCallScreen;
 import '../../screens/chat/audio_video_call/audio_video_call_screen_controller.dart';
 import '../../screens/chat/audio_video_call/rules/call_ui_rules.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../banners/active_call/active_call_controller.dart';
 import '../profile_circle_avatar.dart';
@@ -280,7 +281,7 @@ class _MinimizedLocalInset extends ConsumerWidget {
                     radius: _avatarRadius,
                     image: image,
                     child: Icon(
-                      Icons.person,
+                      McIcons.person,
                       size: _avatarIconSize,
                       color: context.colorScheme.onSurface,
                     ),

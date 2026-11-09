@@ -13,6 +13,7 @@ import '../../../infrastructure/services/camera_service/camera_service.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../dialogs/qr_code_picker/qr_code_picker.dart';
 import '../../effects/confetti/confetti_overlay.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../../themes/tokens/mc_typography.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
@@ -147,7 +148,7 @@ class VtcJoinScreen extends HookConsumerWidget {
           ),
         ),
         VtcJoinStep.left => _Outcome(
-          icon: Icons.logout,
+          icon: McIcons.logout,
           message: l10n.vtcJoinLeft(name),
           onDone: close,
         ),
@@ -167,7 +168,7 @@ class VtcJoinScreen extends HookConsumerWidget {
           onDone: close,
         ),
         VtcJoinStep.withdrawn => _Outcome(
-          icon: Icons.undo,
+          icon: McIcons.undo,
           message: l10n.vtcJoinWithdrawn(name),
           trail: VtcWithdrawStep(
             communityName: name,
@@ -181,7 +182,7 @@ class VtcJoinScreen extends HookConsumerWidget {
           ),
         ),
         VtcJoinStep.denied => _Outcome(
-          icon: Icons.block,
+          icon: McIcons.block,
           message: switch (state.denialReason) {
             final reason? => l10n.vtcJoinDeniedWithReason(name, reason),
             null => l10n.vtcJoinDenied(name),
@@ -189,7 +190,7 @@ class VtcJoinScreen extends HookConsumerWidget {
           onDone: close,
         ),
         VtcJoinStep.needsMore => _Outcome(
-          icon: Icons.info_outline,
+          icon: McIcons.info,
           message: l10n.vtcJoinNeedsMore,
           onDone: close,
         ),
@@ -301,7 +302,7 @@ class _EnterCode extends HookConsumerWidget {
           onSubmitted: submit,
           suffixIcon: IconButton(
             tooltip: l10n.vtcJoinPasteAction,
-            icon: const Icon(Icons.content_paste),
+            icon: const Icon(McIcons.paste),
             onPressed: () async {
               final data = await Clipboard.getData(Clipboard.kTextPlain);
               if (data?.text case final text?) field.text = text.trim();
@@ -360,10 +361,7 @@ class _Review extends StatelessWidget {
               ? null
               : IconButton(
                   key: const Key('vtc_join_manifest'),
-                  icon: Icon(
-                    Icons.data_object,
-                    color: context.mcColors.textPrimary,
-                  ),
+                  icon: Icon(McIcons.code, color: context.mcColors.textPrimary),
                   tooltip: l10n.vtcJoinShowManifest,
                   onPressed: () => _showManifest(context, state.manifest),
                 ),
@@ -436,7 +434,7 @@ class _Pill extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           spacing: 6,
           children: [
-            Icon(Icons.account_circle, size: 18, color: mc.textSecondary),
+            Icon(McIcons.account, size: 18, color: mc.textSecondary),
             Flexible(
               child: Text(
                 text,
@@ -472,7 +470,7 @@ class _Consent extends StatelessWidget {
     final items = [
       for (final detail in state.requestedDetails)
         _ConsentItem(
-          icon: Icons.badge_outlined,
+          icon: McIcons.badge,
           title: l10n.vtcJoinReceivesDetail(
             vtcClaimTypeLabel(l10n, detail.type),
           ),
@@ -487,7 +485,7 @@ class _Consent extends StatelessWidget {
       if (disclosure != null) ..._audienceItems(context, disclosure),
       if (disclosure?.adminNotes ?? false)
         _ConsentItem(
-          icon: Icons.sticky_note_2_outlined,
+          icon: McIcons.note,
           title: l10n.vtcJoinKeepsNotes,
           details: [_Note(l10n.vtcJoinAdminNotesDetail)],
         ),
@@ -567,9 +565,9 @@ class _Consent extends StatelessWidget {
             when fields.isNotEmpty || disclosure.membershipIdentifiers == group)
           _ConsentItem(
             icon: switch (group) {
-              DirectoryAudience.admins => Icons.admin_panel_settings_outlined,
-              DirectoryAudience.public => Icons.public,
-              _ => Icons.visibility_outlined,
+              DirectoryAudience.admins => McIcons.admin,
+              DirectoryAudience.public => McIcons.public,
+              _ => McIcons.visible,
             },
             // Anyone, not only members, sees these: worth a second look.
             iconColor: group == DirectoryAudience.public
@@ -759,7 +757,7 @@ class _ConsentItem extends HookWidget {
               ),
               if (canExpand)
                 Icon(
-                  expanded.value ? Icons.expand_less : Icons.expand_more,
+                  expanded.value ? McIcons.chevronUp : McIcons.chevronDown,
                   color: mc.textSecondary,
                 ),
             ],
@@ -880,10 +878,10 @@ class _WayCard extends StatelessWidget {
 }
 
 IconData _iconOf(VtcJoinWay way) => way.unsupported != null
-    ? Icons.block
+    ? McIcons.block
     : way.automatic
-    ? Icons.how_to_reg
-    : Icons.rate_review;
+    ? McIcons.userCheck
+    : McIcons.review;
 
 String _titleOf(AppLocalizations l10n, VtcJoinWay way) => switch (way) {
   VtcJoinWay(unsupported: VtcJoinUnsupported.credentialMissing) =>
@@ -992,7 +990,7 @@ class _ApproveDetails extends StatelessWidget {
             children: [
               for (final detail in state.details)
                 OnboardingLine(
-                  icon: Icons.badge,
+                  icon: McIcons.badge,
                   title: detail.value,
                   subtitle: vtcClaimTypeLabel(l10n, detail.type),
                 ),
@@ -1059,7 +1057,7 @@ class _ApproveCredential extends StatelessWidget {
             children: [
               for (final claim in credential.claims)
                 OnboardingLine(
-                  icon: Icons.badge,
+                  icon: McIcons.badge,
                   title: claim.value,
                   subtitle: claim.type,
                 ),
@@ -1259,8 +1257,8 @@ class _VettingOutcome extends StatelessWidget {
       children: [
         Icon(
           status == VtcVettingStatus.vouched
-              ? Icons.verified
-              : Icons.do_not_disturb_on_outlined,
+              ? McIcons.verified
+              : McIcons.remove,
           size: 72,
           color: status == VtcVettingStatus.vouched
               ? context.mcColors.success
@@ -1437,12 +1435,12 @@ class _Vetting extends HookConsumerWidget {
 }
 
 IconData _vettingIcon(VtcVettingStatus status) => switch (status) {
-  VtcVettingStatus.vouched => Icons.verified,
+  VtcVettingStatus.vouched => McIcons.verified,
   VtcVettingStatus.declined ||
   VtcVettingStatus.refused ||
-  VtcVettingStatus.abandoned => Icons.block,
-  VtcVettingStatus.inSession => Icons.compare_arrows,
-  _ => Icons.hourglass_top,
+  VtcVettingStatus.abandoned => McIcons.block,
+  VtcVettingStatus.inSession => McIcons.swap,
+  _ => McIcons.pending,
 };
 
 /// The vetters the community lists, to pick the one in front of the member.
@@ -1475,7 +1473,7 @@ class _ChooseVetter extends StatelessWidget {
               key: Key('vtc_join_vetter_${vetter.did}'),
               onTap: () => onChoose(vetter.did),
               child: OnboardingLine(
-                icon: Icons.person_search,
+                icon: McIcons.personSearch,
                 title: vetter.displayName ?? l10n.vtcVetterUnnamed,
                 titleTooltip: vtcVetterDetails(l10n, vetter.did, vetter),
                 subtitle: [
@@ -1587,7 +1585,7 @@ class _ConfirmMatch extends StatelessWidget {
         ),
         if (request?.roleValidUntil case final until?)
           OnboardingLine(
-            icon: Icons.verified_user,
+            icon: McIcons.credentials,
             title: vetter,
             subtitle: l10n.vtcJoinVettingVerified(
               vetter,
@@ -1641,7 +1639,7 @@ class _ApproveVettingCard extends StatelessWidget {
             children: [
               for (final detail in state.details)
                 OnboardingLine(
-                  icon: Icons.badge,
+                  icon: McIcons.badge,
                   title: detail.value,
                   subtitle: vtcClaimTypeLabel(l10n, detail.type),
                 ),
@@ -1785,7 +1783,7 @@ class _Failed extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: 12,
       children: [
-        Icon(Icons.error_outline, size: 72, color: context.mcColors.dangerText),
+        Icon(McIcons.error, size: 72, color: context.mcColors.dangerText),
         const SizedBox(height: 4),
         OnboardingMessage(message, isError: true),
         const SizedBox(height: 12),

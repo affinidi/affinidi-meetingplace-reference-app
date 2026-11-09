@@ -165,7 +165,7 @@ class _GroupMembersList extends ConsumerWidget {
           ),
           trailing: canRemove
               ? IconButton(
-                  icon: const Icon(Icons.person_remove_outlined),
+                  icon: const Icon(McIcons.personRemove),
                   onPressed: () => _RemoveMemberDialog.show(
                     context,
                     contactId: _contactId,

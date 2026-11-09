@@ -4,6 +4,7 @@ import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_trail_step.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_colors.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 
 void main() {
   Future<void> pumpStep(WidgetTester tester, VtcTrailStage stage) =>
@@ -14,7 +15,7 @@ void main() {
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: VtcTrailStep(
-              icon: Icons.inbox_outlined,
+              icon: McIcons.inbox,
               stage: stage,
               title: 'Signed in',
               summary: 'Trying again',
@@ -36,8 +37,8 @@ void main() {
       // A danger ring, never a red fill.
       expect((decoration.border! as Border).top.color, danger);
       expect(decoration.color, danger.withValues(alpha: 0.12));
-      expect(find.byIcon(Icons.priority_high), findsOneWidget);
-      expect(find.byIcon(Icons.inbox_outlined), findsNothing);
+      expect(find.byIcon(McIcons.error), findsOneWidget);
+      expect(find.byIcon(McIcons.inbox), findsNothing);
     });
 
     testWidgets('names who did it first among its details', (tester) async {
@@ -49,14 +50,12 @@ void main() {
           home: const Scaffold(
             body: VtcTrailStep(
               key: Key('step'),
-              icon: Icons.draw_outlined,
+              icon: McIcons.signature,
               stage: VtcTrailStage.done,
               title: 'Signed',
               summary: 'As your identity',
               actor: 'Your VTA',
-              details: [
-                VtcTrailDetail(Icons.key_outlined, 'Signing key', 'key-1'),
-              ],
+              details: [VtcTrailDetail(McIcons.key, 'Signing key', 'key-1')],
               isLast: true,
             ),
           ),
@@ -82,7 +81,7 @@ void main() {
           supportedLocales: AppLocalizations.supportedLocales,
           home: const Scaffold(
             body: VtcTrailStep(
-              icon: Icons.card_membership_outlined,
+              icon: McIcons.membership,
               stage: VtcTrailStage.done,
               title: 'Issued by Chess club',
               summary: 'Your card for Ada, signed by Chess club on Nov 4',
@@ -110,7 +109,7 @@ void main() {
       await pumpStep(tester, VtcTrailStage.current);
 
       expect(find.byKey(const Key('vtc_trail_marker_failed')), findsNothing);
-      expect(find.byIcon(Icons.inbox_outlined), findsOneWidget);
+      expect(find.byIcon(McIcons.inbox), findsOneWidget);
     });
 
     Future<void> pumpTasks(WidgetTester tester, List<String> tasks) async {
@@ -122,14 +121,14 @@ void main() {
           home: Scaffold(
             body: VtcTrailStep(
               key: const Key('step'),
-              icon: Icons.draw_outlined,
+              icon: McIcons.signature,
               stage: VtcTrailStage.done,
               title: 'Signed',
               summary: 'As your identity',
               actor: 'Your VTA',
               tasks: tasks,
               details: const [
-                VtcTrailDetail(Icons.key_outlined, 'Signing key', 'key-1'),
+                VtcTrailDetail(McIcons.key, 'Signing key', 'key-1'),
               ],
               isLast: true,
             ),

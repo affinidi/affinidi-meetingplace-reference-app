@@ -8,6 +8,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/navigation/navigator.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_banner.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/banners/active_call/active_call_state.dart';
@@ -58,16 +59,16 @@ void main() {
       await tester.pumpWidget(wrap(_state(isAudioOnly: true)));
       await tester.pump();
 
-      expect(find.byIcon(Icons.phone), findsOneWidget);
-      expect(find.byIcon(Icons.videocam), findsNothing);
+      expect(find.byIcon(McIcons.phone), findsOneWidget);
+      expect(find.byIcon(McIcons.video), findsNothing);
     });
 
     testWidgets('shows the video icon for a video call', (tester) async {
       await tester.pumpWidget(wrap(_state(isAudioOnly: false)));
       await tester.pump();
 
-      expect(find.byIcon(Icons.videocam), findsOneWidget);
-      expect(find.byIcon(Icons.phone), findsNothing);
+      expect(find.byIcon(McIcons.video), findsOneWidget);
+      expect(find.byIcon(McIcons.phone), findsNothing);
     });
   });
 

@@ -238,7 +238,7 @@ class _OtherPartyIdentityCard extends ConsumerWidget {
                         Padding(
                           padding: const EdgeInsets.only(top: 2.0),
                           child: Icon(
-                            Icons.email,
+                            McIcons.email,
                             color: colorScheme.onSurfaceVariant,
                             size: 16,
                           ),
@@ -261,7 +261,7 @@ class _OtherPartyIdentityCard extends ConsumerWidget {
                         Padding(
                           padding: const EdgeInsets.only(top: 2.0),
                           child: Icon(
-                            Icons.phone,
+                            McIcons.phone,
                             color: colorScheme.onSurfaceVariant,
                             size: 16,
                           ),

@@ -26,7 +26,7 @@ class _MeetingPlaceControlPlaneSection extends ConsumerWidget {
         child: Column(
           children: [
             FormRowToggle(
-              icon: Icons.qr_code,
+              icon: McIcons.qrCode,
               iconColor: context.colorScheme.primary,
               label: context.l10n.showQrScannerForOffers,
               value: shouldShowMeetingPlaceQR,

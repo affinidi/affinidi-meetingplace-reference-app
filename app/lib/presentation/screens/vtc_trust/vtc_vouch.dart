@@ -10,6 +10,7 @@ import '../../../application/services/identities_service/identities_service.dart
 import '../../../application/services/vtc_trust_service/vtc_trust_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import '../vtc_join/vtc_flow_diagram.dart';
 import '../vtc_join/vtc_trail_step.dart';
@@ -197,20 +198,20 @@ class VtcVouchTrail extends HookConsumerWidget {
     final voucher = isOwn ? you : name;
     final vouchedFor = isOwn ? name : you;
     final voucherNode = VtcFlowNode(
-      Icons.person_outline,
+      McIcons.person,
       voucher,
       picture: isOwn ? yours : theirs,
     );
     final vouchedForNode = VtcFlowNode(
-      Icons.person_outline,
+      McIcons.person,
       vouchedFor,
       picture: isOwn ? theirs : yours,
     );
     final vtaNode = VtcFlowNode(
-      Icons.shield_outlined,
+      McIcons.shield,
       isOwn ? l10n.membershipTrailYourVta : l10n.vtcVouchTrailTheirVta(name),
     );
-    final communityNode = VtcFlowNode(Icons.groups_outlined, communityName);
+    final communityNode = VtcFlowNode(McIcons.community, communityName);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -228,7 +229,7 @@ class VtcVouchTrail extends HookConsumerWidget {
           children: [
             VtcTrailStep(
               key: const Key('vtc_vouch_vouched'),
-              icon: Icons.handshake_outlined,
+              icon: McIcons.handshake,
               stage: VtcTrailStage.done,
               title: l10n.vtcVouchTrailTheVouch,
               flow: VtcFlowDiagram(
@@ -241,13 +242,13 @@ class VtcVouchTrail extends HookConsumerWidget {
               highlights: [communityName],
               details: [
                 VtcTrailDetail(
-                  Icons.person_outline,
+                  McIcons.person,
                   l10n.vtcJoinTrailIdentity,
                   edge.issuerDid,
                   isId: true,
                 ),
                 VtcTrailDetail(
-                  Icons.person_pin_outlined,
+                  McIcons.person,
                   l10n.vtcVouchTrailVouchedFor,
                   edge.subjectDid,
                   isId: true,
@@ -256,7 +257,7 @@ class VtcVouchTrail extends HookConsumerWidget {
             ),
             VtcTrailStep(
               key: const Key('vtc_vouch_signed'),
-              icon: Icons.draw_outlined,
+              icon: McIcons.signature,
               stage: VtcTrailStage.done,
               title: isOwn
                   ? l10n.vtcTrustSigned
@@ -273,20 +274,20 @@ class VtcVouchTrail extends HookConsumerWidget {
               details: [
                 if (proof['cryptosuite'] case final String cryptosuite)
                   VtcTrailDetail(
-                    Icons.enhanced_encryption_outlined,
+                    McIcons.encrypted,
                     l10n.vtcJoinTrailCryptosuite,
                     cryptosuite,
                   ),
                 if (proof['verificationMethod'] case final String key)
                   VtcTrailDetail(
-                    Icons.key_outlined,
+                    McIcons.key,
                     l10n.vtcJoinTrailKey,
                     key,
                     isId: true,
                   ),
                 if (DateTime.tryParse('${proof['created']}') case final at?)
                   VtcTrailDetail(
-                    Icons.schedule,
+                    McIcons.clock,
                     l10n.vtcJoinTrailSignedAt,
                     time(at),
                   ),
@@ -297,7 +298,7 @@ class VtcVouchTrail extends HookConsumerWidget {
             ),
             VtcTrailStep(
               key: const Key('vtc_vouch_stored'),
-              icon: Icons.groups_outlined,
+              icon: McIcons.community,
               stage: VtcTrailStage.done,
               title: l10n.vtcTrustStored(communityName),
               flow: VtcFlowDiagram(
@@ -309,14 +310,14 @@ class VtcVouchTrail extends HookConsumerWidget {
               tasks: const [RelationshipTask.publish],
               details: [
                 VtcTrailDetail(
-                  Icons.tag,
+                  McIcons.tag,
                   l10n.vtcVouchTrailRecord,
                   edge.id,
                   isId: true,
                 ),
                 if (edge.createdAt case final at?)
                   VtcTrailDetail(
-                    Icons.schedule,
+                    McIcons.clock,
                     l10n.vtcVouchTrailStoredAt,
                     time(at),
                   ),
@@ -405,7 +406,7 @@ class VtcVouchButton extends StatelessWidget {
     if (tooltip == null) return const SizedBox.shrink();
     return IconButton(
       key: const Key('vtc_vouches'),
-      icon: const Icon(Icons.handshake_outlined, size: 20),
+      icon: const Icon(McIcons.handshake, size: 20),
       tooltip: tooltip,
       visualDensity: VisualDensity.compact,
       onPressed: () => showVouches(

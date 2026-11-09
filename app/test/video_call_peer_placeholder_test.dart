@@ -7,6 +7,7 @@ import 'package:mpx_flutter_reference_app/application/services/identities_servic
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/cache_manager_provider.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/call/video_call_peer_placeholder.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/profile_circle_avatar.dart';
 
@@ -85,7 +86,7 @@ void main() {
         find.byType(ProfileCircleAvatar),
       );
       expect(avatar.image, isNull);
-      expect(find.byIcon(Icons.person), findsOneWidget);
+      expect(find.byIcon(McIcons.person), findsOneWidget);
     });
 
     testWidgets(
@@ -126,7 +127,7 @@ void main() {
         find.byType(ProfileCircleAvatar),
       );
       expect(avatar.image, isNull);
-      expect(find.byIcon(Icons.person), findsOneWidget);
+      expect(find.byIcon(McIcons.person), findsOneWidget);
     });
   });
 }

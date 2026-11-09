@@ -7,6 +7,7 @@ import '../../domain/models/identity/identity.dart';
 import '../../infrastructure/extensions/build_context_extensions.dart';
 import '../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../infrastructure/providers/cache_manager_provider.dart';
+import '../themes/tokens/mc_icons.dart';
 import '../themes/tokens/mc_radius.dart';
 import '../themes/tokens/mc_typography.dart';
 import 'onboarding_style/onboarding_style.dart';
@@ -54,11 +55,11 @@ class VtaIdentityCard extends ConsumerWidget {
     final displayName = card?.displayName.trim() ?? '';
     final details = <(IconData, String)>[
       if (card != null) ...[
-        if (card.fullName.isNotEmpty) (Icons.badge_outlined, card.fullName),
+        if (card.fullName.isNotEmpty) (McIcons.badge, card.fullName),
         if (card.emailAddress.trim().isNotEmpty)
-          (Icons.email_outlined, card.emailAddress),
+          (McIcons.email, card.emailAddress),
         if (card.mobilePhone.trim().isNotEmpty)
-          (Icons.phone_outlined, card.mobilePhone),
+          (McIcons.phone, card.mobilePhone),
       ],
     ];
     final picture = card != null && card.hasProfilePic
@@ -118,11 +119,7 @@ class VtaIdentityCard extends ConsumerWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           spacing: 4,
                           children: [
-                            Icon(
-                              Icons.error_outline,
-                              size: 16,
-                              color: mc.dangerText,
-                            ),
+                            Icon(McIcons.error, size: 16, color: mc.dangerText),
                             Text(
                               l10n.vtcJoinCredentialMissing,
                               style: textTheme.labelMedium?.copyWith(
@@ -175,7 +172,7 @@ class VtaIdentityCard extends ConsumerWidget {
             child: Center(
               child: _Avatar(
                 picture: picture,
-                icon: did == null ? Icons.person_add : Icons.person,
+                icon: did == null ? McIcons.personAdd : McIcons.person,
               ),
             ),
           ),
@@ -260,7 +257,7 @@ class _DidMetadata extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.only(top: 1),
-          child: Icon(Icons.fingerprint, size: 14, color: mc.textTertiary),
+          child: Icon(McIcons.identities, size: 14, color: mc.textTertiary),
         ),
         Expanded(
           child: Text(

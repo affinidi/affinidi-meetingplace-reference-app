@@ -10,6 +10,7 @@ import '../../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../../infrastructure/extensions/did_extensions.dart';
 import '../../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../../dialogs/offer/delete_connection_dialog.dart';
+import '../../../themes/tokens/mc_icons.dart';
 import '../../../widgets/async_loaders/modal_async_loading_status.dart';
 import '../../../widgets/buttons/elevated_loading_button.dart';
 import '../../../widgets/contact_card_view.dart';

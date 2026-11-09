@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../../infrastructure/providers/qr_code_view_factory_provider.dart';
+import '../../../themes/tokens/mc_icons.dart';
 import '../../../widgets/async_loaders/inline_async_loading_status.dart';
 import 'oob_share_qr_controller.dart';
 
@@ -113,7 +114,7 @@ class OOBShareQrScreen extends HookConsumerWidget {
                 IconButton.filled(
                   style: IconButton.styleFrom(backgroundColor: mc.canvas),
                   icon: Icon(
-                    Icons.cancel_outlined,
+                    McIcons.cancel,
                     color: mc.textSecondary,
                     size: qrScannerTheme.iconSize * 0.7,
                   ),

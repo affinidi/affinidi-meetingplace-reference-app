@@ -9,6 +9,7 @@ import 'package:mpx_flutter_reference_app/application/services/vtc_trust_service
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_groups/vtc_group_members_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 
 const _club = 'did:webvh:QmClub:vtc.example';
 const _me = 'did:webvh:QmMe:vta.example:me';
@@ -238,10 +239,7 @@ void main() {
       findsOneWidget,
     );
     expect(inMember('dir_carol', find.byType(CircleAvatar)), findsNothing);
-    expect(
-      inMember('dir_carol', find.byIcon(Icons.person_outline)),
-      findsOneWidget,
-    );
+    expect(inMember('dir_carol', find.byIcon(McIcons.person)), findsOneWidget);
   });
 
   testWidgets('vouches back once you consent', (tester) async {
@@ -312,7 +310,7 @@ void main() {
     final flow = find.byKey(const Key('vtc_vouch_flow_vouched'));
     expect(pictured(flow), findsOneWidget, reason: 'Bob, by his picture');
     expect(
-      find.descendant(of: flow, matching: find.byIcon(Icons.person_outline)),
+      find.descendant(of: flow, matching: find.byIcon(McIcons.person)),
       findsOneWidget,
       reason: 'you, without one, as a person',
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../infrastructure/extensions/build_context_extensions.dart';
+import '../themes/tokens/mc_icons.dart';
 
 class CameraPermissionInstruction extends StatelessWidget {
   const CameraPermissionInstruction({
@@ -65,7 +66,7 @@ class CameraPermissionInstruction extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
-                  icon: const Icon(Icons.settings),
+                  icon: const Icon(McIcons.settings),
                   label: Text(l10n.cameraOpenSettings),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
@@ -77,7 +78,7 @@ class CameraPermissionInstruction extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  icon: const Icon(Icons.refresh),
+                  icon: const Icon(McIcons.refresh),
                   label: Text(l10n.generalRetry),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),

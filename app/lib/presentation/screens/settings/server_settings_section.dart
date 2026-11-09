@@ -48,12 +48,12 @@ class _ServerSettingsSection extends ConsumerWidget {
                             IconButton(
                               onPressed: () =>
                                   _renameMediator(context, ref, did, name),
-                              icon: const Icon(Icons.edit, size: 20),
+                              icon: const Icon(McIcons.edit, size: 20),
                             ),
                             IconButton(
                               onPressed: () =>
                                   _confirmDelete(context, ref, did, name),
-                              icon: const Icon(Icons.delete, size: 20),
+                              icon: const Icon(McIcons.delete, size: 20),
                             ),
                           ],
                         ],

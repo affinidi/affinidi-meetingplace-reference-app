@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../themes/tokens/mc_colors.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
 import 'vtc_trail_step.dart';
 
@@ -34,12 +35,12 @@ class VtcProgressLine extends StatelessWidget {
               ),
             ),
             VtcTrailStage.done => const Icon(
-              Icons.check_circle,
+              McIcons.checkCircle,
               size: _markerSize,
               color: McColors.blue,
             ),
             _ => Icon(
-              Icons.radio_button_unchecked,
+              McIcons.circle,
               size: _markerSize,
               color: mc.hairlineStrong,
             ),
@@ -122,7 +123,7 @@ class VtcBackgroundPanel extends StatelessWidget {
             Row(
               spacing: 6,
               children: [
-                Icon(Icons.sync, size: 14, color: mc.textSecondary),
+                Icon(McIcons.sync, size: 14, color: mc.textSecondary),
                 Flexible(
                   child: Text(
                     title ?? context.l10n.vtcBackgroundHeading,

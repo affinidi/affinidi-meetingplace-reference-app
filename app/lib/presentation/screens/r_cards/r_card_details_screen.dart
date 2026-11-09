@@ -14,6 +14,7 @@ import '../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../../navigation/routes/dashboard_routes.dart';
 import '../../../navigation/tabs/tabs.dart';
 import '../../painting/cached_base64_image.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../widgets/cards/r_card_header_card.dart';
 import '../../widgets/images/default_profile_image.dart';
 import 'r_card_notes_sheet.dart';
@@ -161,11 +162,11 @@ class _RCardDetailsScreenState extends ConsumerState<RCardDetailsScreen> {
               : [
                   IconButton(
                     onPressed: () => _deleteCard(context, ref, currentCard),
-                    icon: const Icon(Icons.delete),
+                    icon: const Icon(McIcons.delete),
                   ),
                   IconButton(
                     onPressed: () => _exportCard(context, ref, currentCard),
-                    icon: const Icon(Icons.download_outlined),
+                    icon: const Icon(McIcons.download),
                   ),
                 ],
         ),
@@ -390,39 +391,39 @@ class _RCardDetailsContent extends ConsumerWidget {
                       dividerColor: context.mcColors.hairline,
                       rows: [
                         _DetailRowData(
-                          icon: Icons.email_outlined,
+                          icon: McIcons.email,
                           label: '${l10n.rCardFieldEmail}:',
                           value: notSharedIfEmpty(email),
                         ),
                         _DetailRowData(
-                          icon: Icons.phone_outlined,
+                          icon: McIcons.phone,
                           label: '${l10n.rCardFieldPhone}:',
                           value: notSharedIfEmpty(phone),
                         ),
                         _DetailRowData(
-                          icon: Icons.apartment_outlined,
+                          icon: McIcons.organisation,
                           label: '${l10n.rCardFieldCompany}:',
                           value: notSharedIfEmpty(company),
                         ),
                         _DetailRowData(
-                          icon: Icons.badge_outlined,
+                          icon: McIcons.badge,
                           label: '${l10n.rCardFieldPosition}:',
                           value: notSharedIfEmpty(position),
                         ),
                         _DetailRowData(
-                          icon: Icons.share_outlined,
+                          icon: McIcons.share,
                           label: '${l10n.rCardFieldSocial}:',
                           value: notSharedIfEmpty(social),
-                          trailing: const Icon(Icons.open_in_new, size: 18),
+                          trailing: const Icon(McIcons.openExternal, size: 18),
                           onTap: (social == null || social.trim().isEmpty)
                               ? null
                               : () => openUrl(social),
                         ),
                         _DetailRowData(
-                          icon: Icons.public,
+                          icon: McIcons.public,
                           label: '${l10n.rCardFieldWebsite}:',
                           value: notSharedIfEmpty(website),
-                          trailing: const Icon(Icons.open_in_new, size: 18),
+                          trailing: const Icon(McIcons.openExternal, size: 18),
                           onTap: (website == null || website.trim().isEmpty)
                               ? null
                               : () => openUrl(website),
@@ -461,7 +462,7 @@ class _RCardDetailsContent extends ConsumerWidget {
                       Center(
                         child: TextButton.icon(
                           onPressed: contact == null ? null : goToChat,
-                          icon: const Icon(Icons.chat_bubble_outline),
+                          icon: const Icon(McIcons.chat),
                           label: Text(
                             l10n.rCardChatWith(
                               name.isEmpty ? l10n.anonymous : displayName,

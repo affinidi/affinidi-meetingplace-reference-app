@@ -34,7 +34,7 @@ class _Names extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
             child: Icon(
-              Icons.arrow_forward,
+              McIcons.arrowForward,
               color: context.colorScheme.onSurface,
               size: 24,
             ),

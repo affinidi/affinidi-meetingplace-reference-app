@@ -5,6 +5,7 @@ import '../../../domain/models/vtc/vtc_community.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../navigation/routes/dashboard_routes.dart';
 import '../../../navigation/tabs/tabs.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../widgets/section_header.dart';
 import '../credentials/membership_credentials_list.dart';
 import '../vtc_join/vtc_join_screen.dart';
@@ -55,7 +56,7 @@ class CommunitiesScreen extends ConsumerWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: TextButton.icon(
                     key: const Key('join_community_button'),
-                    icon: const Icon(Icons.group_add),
+                    icon: const Icon(McIcons.personAdd),
                     label: Text(l10n.vtcJoinMenuTitle),
                     onPressed: join,
                   ),
@@ -129,7 +130,7 @@ class _CommunityRow extends StatelessWidget {
           child: Row(
             spacing: 12,
             children: [
-              Icon(Icons.groups_outlined, color: colors.onSurface),
+              Icon(McIcons.community, color: colors.onSurface),
               Expanded(
                 child: Text(
                   community.name ?? l10n.membershipCredentialUnnamed,
@@ -142,7 +143,7 @@ class _CommunityRow extends StatelessWidget {
               if (community.isApplying)
                 StatusChip(label: l10n.communityPending, color: Colors.amber)
               else
-                Icon(Icons.chevron_right, color: colors.onSurfaceVariant),
+                Icon(McIcons.chevronRight, color: colors.onSurfaceVariant),
             ],
           ),
         ),

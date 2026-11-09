@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_credentials/meeting_place_credentials.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 import 'package:ssi/ssi.dart';
 
 import 'fakes/fake_contacts.dart';
@@ -121,7 +122,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(Icons.search));
+      await tester.tap(find.byIcon(McIcons.search));
       await tester.pumpAndSettle();
 
       expect(find.byType(TextField), findsOneWidget);
@@ -180,7 +181,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final exportButton = tester.widget<IconButton>(
-        find.widgetWithIcon(IconButton, Icons.download_outlined),
+        find.widgetWithIcon(IconButton, McIcons.download),
       );
       expect(exportButton.onPressed, isNull);
     });
@@ -209,7 +210,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final exportButton = tester.widget<IconButton>(
-        find.widgetWithIcon(IconButton, Icons.download_outlined),
+        find.widgetWithIcon(IconButton, McIcons.download),
       );
       expect(exportButton.onPressed, isNotNull);
     });
@@ -249,13 +250,11 @@ void main() {
 
         // Export button should be enabled (card exists in service)
         final exportButton = tester.widget<IconButton>(
-          find.widgetWithIcon(IconButton, Icons.download_outlined),
+          find.widgetWithIcon(IconButton, McIcons.download),
         );
         expect(exportButton.onPressed, isNotNull);
 
-        await tester.tap(
-          find.widgetWithIcon(IconButton, Icons.download_outlined),
-        );
+        await tester.tap(find.widgetWithIcon(IconButton, McIcons.download));
         await tester.pumpAndSettle();
 
         expect(capturedService.exportAllCalled, isTrue);

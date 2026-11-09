@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_icons.dart';
 
 /// Compact mute badge shown on call participant surfaces.
 class CallParticipantMuteBadge extends StatelessWidget {
@@ -20,7 +21,7 @@ class CallParticipantMuteBadge extends StatelessWidget {
         color: Colors.black,
       ),
       child: Icon(
-        Icons.mic_off,
+        McIcons.micOff,
         color: context.customColors.pureWhite,
         size: size * 0.55,
       ),

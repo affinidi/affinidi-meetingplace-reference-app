@@ -5,6 +5,7 @@ import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/extensions/duration_extensions.dart';
 import '../../screens/chat/audio_video_call/audio_video_call_screen_controller.dart';
 import '../../screens/chat/audio_video_call/rules/call_ui_rules.dart';
+import '../../themes/tokens/mc_icons.dart';
 import 'call_overlay_widgets.dart';
 
 /// Call header bar showing peer name, call status, duration, and optional
@@ -54,10 +55,7 @@ class CallTopBarWidget extends ConsumerWidget {
       child: Row(
         crossAxisAlignment: crossAxisAlignment,
         children: [
-          CallTopBarActionButton(
-            icon: Icons.close_fullscreen,
-            onPressed: onMinimize,
-          ),
+          CallTopBarActionButton(icon: McIcons.collapse, onPressed: onMinimize),
           Expanded(
             child: Padding(
               padding: centerPadding,

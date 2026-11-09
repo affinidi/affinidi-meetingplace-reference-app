@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../infrastructure/extensions/build_context_extensions.dart';
 import '../themes/tokens/mc_colors.dart';
+import '../themes/tokens/mc_icons.dart';
 import '../themes/tokens/mc_radius.dart';
 
 class InfoBanner extends StatelessWidget {
@@ -9,7 +10,7 @@ class InfoBanner extends StatelessWidget {
     super.key,
     required this.child,
     required this.onDismiss,
-    this.icon = Icons.description_outlined,
+    this.icon = McIcons.document,
     this.backgroundColor,
     this.padding = const EdgeInsets.all(16),
     this.margin = const EdgeInsets.all(8),
@@ -54,7 +55,7 @@ class InfoBanner extends StatelessWidget {
             top: -10,
             right: -8,
             child: IconButton(
-              icon: Icon(Icons.close, color: mc.textTertiary, size: 28),
+              icon: Icon(McIcons.close, color: mc.textTertiary, size: 28),
               onPressed: onDismiss,
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),

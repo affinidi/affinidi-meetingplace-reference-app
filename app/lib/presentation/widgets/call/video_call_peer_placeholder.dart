@@ -6,6 +6,7 @@ import '../../../application/services/identities_service/identities_service.dart
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/providers/cache_manager_provider.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../profile_circle_avatar.dart';
 
 /// Avatar placeholder shown full-screen behind a 1:1 video call when the
@@ -54,7 +55,7 @@ class VideoCallPeerPlaceholder extends ConsumerWidget {
         radius: diameter / 2,
         image: image,
         child: Icon(
-          Icons.person,
+          McIcons.person,
           size: diameter / 2,
           color: context.colorScheme.onSurface,
         ),

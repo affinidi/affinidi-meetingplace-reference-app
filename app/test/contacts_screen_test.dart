@@ -8,6 +8,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/extensions/build_contex
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_extensions.dart';
 import 'package:mpx_flutter_reference_app/navigation/routes/dashboard_routes.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/contacts/contacts_screen_controller.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 
 import 'fakes/fake_channels.dart';
 import 'fakes/fake_contacts.dart';
@@ -67,7 +68,13 @@ void main() {
       await navigateToContactsScreen(tester);
 
       expect(find.text('Communities'), findsWidgets);
-      expect(find.byIcon(Icons.groups), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(NavigationBar),
+          matching: find.byIcon(McIcons.communities),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('should show the contacts panel subtitle', (tester) async {
@@ -365,7 +372,7 @@ void main() {
       await tester.enterText(searchField, 'Alice');
       await tester.pumpAndSettle();
 
-      final clearButton = find.byIcon(Icons.clear);
+      final clearButton = find.byIcon(McIcons.close);
       await tester.tap(clearButton);
       await tester.pumpAndSettle();
 
@@ -497,7 +504,7 @@ void main() {
       'should show OOB notification off icon for direct interactive contacts',
       (tester) async {
         await navigateToContactsScreen(tester);
-        expect(find.byIcon(Icons.notifications_off_outlined), findsOneWidget);
+        expect(find.byIcon(McIcons.notificationsOff), findsOneWidget);
       },
     );
 
