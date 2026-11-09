@@ -13,7 +13,7 @@ import '../../painting/cached_base64_image.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../../widgets/cards/animated_stacked_card_deck.dart';
 import '../../widgets/cards/r_card_header_card.dart';
-import '../../widgets/section_banner.dart';
+import '../../widgets/section_header.dart';
 import '../../widgets/tab_bar_tab.dart';
 import 'r_cards_screen_controller.dart';
 import 'r_cards_screen_filter.dart';
@@ -83,7 +83,7 @@ class RCardsScreen extends HookConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SectionBanner(
+            SectionHeader(
               title: l10n.tabsTitle(Tabs.rCards.name),
               subtitle: l10n.rCardsPanelSubtitle,
             ),

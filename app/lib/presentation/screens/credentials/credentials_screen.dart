@@ -9,7 +9,7 @@ import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../navigation/tabs/tabs.dart';
 import '../../widgets/cards/animated_stacked_card_deck.dart';
 import '../../widgets/cards/credential_card.dart';
-import '../../widgets/section_banner.dart';
+import '../../widgets/section_header.dart';
 import '../../widgets/tab_bar_tab.dart';
 import 'credential_details_screen.dart';
 import 'membership_credential_details_screen.dart';
@@ -47,7 +47,7 @@ class CredentialsScreen extends HookConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              SectionBanner(
+              SectionHeader(
                 title: l10n.tabsTitle(Tabs.credentials.name),
                 subtitle: l10n.verifiableCredentialWallet,
                 showProgress: memberships.isSyncing,

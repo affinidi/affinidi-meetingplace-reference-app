@@ -17,7 +17,7 @@ import '../../themes/tokens/mc_radius.dart';
 import '../../widgets/action_button.dart';
 import '../../widgets/buttons/elevated_loading_button.dart';
 import '../../widgets/identity_picker/identity_picker.dart';
-import '../../widgets/section_banner.dart';
+import '../../widgets/section_header.dart';
 import '../../widgets/tab_bar_tab.dart';
 import 'form_screen/identity_form_fields.dart';
 import 'form_screen/identity_form_mode.dart';
@@ -54,7 +54,7 @@ class IdentitiesScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              SectionBanner(
+              SectionHeader(
                 title: l10n.tabsTitle(Tabs.identities.name),
                 subtitle: context.l10n.identitiesPanelSubtitle,
               ),

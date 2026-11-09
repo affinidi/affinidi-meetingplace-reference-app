@@ -112,7 +112,7 @@ void main() {
         findsOneWidget,
       );
 
-      await tester.tap(find.byKey(const Key('section_banner_back')));
+      await tester.tap(find.byKey(const Key('section_header_back')));
       await tester.pumpAndSettle();
 
       expect(find.text(l10n.communitiesSubtitle), findsOneWidget);
@@ -128,7 +128,7 @@ void main() {
       await tester.tap(find.text('Chess club'));
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('section_banner_back')), findsOneWidget);
+      expect(find.byKey(const Key('section_header_back')), findsOneWidget);
       expect(find.byIcon(Icons.menu), findsOneWidget);
 
       // As the system's back button does.
@@ -137,7 +137,7 @@ void main() {
 
       expect(find.text(l10n.communitiesSubtitle), findsOneWidget);
       expect(find.text('Chess club'), findsOneWidget);
-      expect(find.byKey(const Key('section_banner_back')), findsNothing);
+      expect(find.byKey(const Key('section_header_back')), findsNothing);
     });
   });
 }

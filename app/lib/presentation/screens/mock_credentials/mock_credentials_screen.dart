@@ -7,7 +7,7 @@ import '../../../domain/models/vtc/mock_credential_template.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../navigation/routes/route_paths.dart';
 import '../../themes/tokens/mc_typography.dart';
-import '../../widgets/section_banner.dart';
+import '../../widgets/section_header.dart';
 import 'mock_credentials_controller.dart';
 import 'mock_credentials_state.dart';
 
@@ -55,7 +55,7 @@ class MockCredentialsScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SectionBanner(
+          SectionHeader(
             title: l10n.mockCredentialsTitle,
             subtitle: l10n.mockCredentialsSubtitle,
             onClose: () {

@@ -17,7 +17,7 @@ import '../../themes/tokens/mc_radius.dart';
 import '../../widgets/async_loaders/modal_async_loading_status.dart';
 import '../../widgets/form_rows/form_card.dart';
 import '../../widgets/form_rows/form_row_toggle.dart';
-import '../../widgets/section_banner.dart';
+import '../../widgets/section_header.dart';
 import 'debug/debug_panel.dart';
 import 'linked_vta_section.dart';
 import 'settings_screen_controller.dart';
@@ -76,7 +76,7 @@ class SettingsScreen extends HookConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SectionBanner(
+            SectionHeader(
               title: l10n.tabsTitle(TabTitleKey.settings.name),
               subtitle: l10n.settingsScreenSubtitle,
               onClose: () {

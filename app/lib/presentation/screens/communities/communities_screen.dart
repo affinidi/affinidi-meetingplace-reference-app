@@ -5,7 +5,7 @@ import '../../../domain/models/vtc/vtc_community.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../navigation/routes/dashboard_routes.dart';
 import '../../../navigation/tabs/tabs.dart';
-import '../../widgets/section_banner.dart';
+import '../../widgets/section_header.dart';
 import '../credentials/membership_credentials_list.dart';
 import '../vtc_join/vtc_join_screen.dart';
 import 'communities_controller.dart';
@@ -44,7 +44,7 @@ class CommunitiesScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              SectionBanner(
+              SectionHeader(
                 title: l10n.tabsTitle(Tabs.contacts.name),
                 subtitle: l10n.communitiesSubtitle,
               ),

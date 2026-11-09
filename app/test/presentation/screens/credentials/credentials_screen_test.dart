@@ -167,7 +167,7 @@ void main() {
   }
 
   Finder chip(String key) => find.byKey(Key('membership_status_$key'));
-  final syncing = find.byKey(const Key('section_banner_progress'));
+  final syncing = find.byKey(const Key('section_header_progress'));
 
   /// Keeps the chess card on this phone, as the VTA last described it.
   Future<void> keepChessCard() =>

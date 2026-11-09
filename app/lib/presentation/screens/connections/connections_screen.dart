@@ -16,7 +16,7 @@ import '../../dialogs/new_connections_menu/new_connections_menu.dart';
 import '../../dialogs/offer/delete_connection_dialog.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../../widgets/profile_circle_avatar.dart';
-import '../../widgets/section_banner.dart';
+import '../../widgets/section_header.dart';
 import '../../widgets/tab_bar_tab.dart';
 import 'connections_screen_controller.dart';
 import 'connections_screen_filter.dart';
@@ -39,7 +39,7 @@ class ConnectionsScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SectionBanner(
+            SectionHeader(
               title: context.l10n.tabsTitle(Tabs.connections.name),
               subtitle: l10n.connectionsPanelSubtitle,
             ),
