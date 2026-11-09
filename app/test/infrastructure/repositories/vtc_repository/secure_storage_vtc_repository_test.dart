@@ -2,6 +2,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_left_membership.dart';
+import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_member_link.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_vetter_desk.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_vetting.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
@@ -229,6 +230,73 @@ void main() {
 
       await repository.clear();
       expect(await repository.findVetterDesk('did:webvh:other'), isNull);
+    });
+  });
+
+  group('SecureStorageVtcRepository member links', () {
+    final linkedAt = DateTime.utc(2026, 11, 9, 9);
+    VtcMemberLink link({
+      String community = 'did:webvh:club',
+      String channel = 'did:web:channel-bob',
+      String entryId = 'dir_bob',
+    }) => VtcMemberLink(
+      communityDid: community,
+      channelDid: channel,
+      entryId: entryId,
+      personaDid: 'did:webvh:bob',
+      name: 'Bob',
+      linkedAt: linkedAt,
+    );
+
+    test('keeps a contact\'s link, as stored', () async {
+      await SecureStorageVtcRepository().saveMemberLink(link());
+
+      final stored = (await SecureStorageVtcRepository().memberLinks()).single;
+      expect(stored.communityDid, 'did:webvh:club');
+      expect(stored.channelDid, 'did:web:channel-bob');
+      expect(stored.entryId, 'dir_bob');
+      expect(stored.personaDid, 'did:webvh:bob');
+      expect(stored.name, 'Bob');
+      expect(stored.linkedAt, linkedAt);
+    });
+
+    test('replaces a contact\'s link in the same community only', () async {
+      final repository = SecureStorageVtcRepository();
+      await repository.saveMemberLink(link());
+      await repository.saveMemberLink(link(community: 'did:webvh:chess'));
+      await repository.saveMemberLink(link(entryId: 'dir_bob_2'));
+
+      final links = await repository.memberLinks();
+      expect(links, hasLength(2));
+      expect(
+        links.firstWhere((l) => l.communityDid == 'did:webvh:club').entryId,
+        'dir_bob_2',
+      );
+    });
+
+    test('lists the links of one contact', () async {
+      final repository = SecureStorageVtcRepository();
+      await repository.saveMemberLink(link());
+      await repository.saveMemberLink(link(channel: 'did:web:channel-carol'));
+
+      final bobs = await repository.memberLinks(
+        channelDid: 'did:web:channel-bob',
+      );
+      expect(bobs.single.channelDid, 'did:web:channel-bob');
+    });
+
+    test('forgets a community\'s links, and every link on clear', () async {
+      final repository = SecureStorageVtcRepository();
+      await repository.saveMemberLink(link());
+      await repository.saveMemberLink(link(community: 'did:webvh:chess'));
+
+      await repository.removeMemberLinks('did:webvh:club');
+      expect((await repository.memberLinks()).map((l) => l.communityDid), [
+        'did:webvh:chess',
+      ]);
+
+      await repository.clear();
+      expect(await repository.memberLinks(), isEmpty);
     });
   });
 }

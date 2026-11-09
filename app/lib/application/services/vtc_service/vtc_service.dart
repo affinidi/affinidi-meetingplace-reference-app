@@ -2135,6 +2135,8 @@ class VtcService {
       communityDid,
       personaDid: community.personaDid,
     );
+    // A vouch there now names nobody the member can act as.
+    await _repository.removeMemberLinks(communityDid);
     await _repository.removeCommunity(communityDid);
     _membershipsChanged.add(null);
   }

@@ -4,6 +4,7 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/mock_credential_template.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_card_delivery.dart';
+import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_member_link.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_membership_entry.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_vetter_desk.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_vetting.dart';
@@ -762,6 +763,24 @@ void main() {
           {'id': 'card-1'},
         ]);
         expect(await service.community(fakeVtcDid), isNull);
+      });
+
+      test('forgets the contacts linked to its members', () async {
+        final repository = SecureStorageVtcRepository();
+        await repository.saveMemberLink(
+          VtcMemberLink(
+            communityDid: fakeVtcDid,
+            channelDid: 'did:web:channel-bob',
+            entryId: 'dir_bob',
+            personaDid: 'did:webvh:bob',
+            name: 'Bob',
+            linkedAt: DateTime.utc(2026, 11, 9),
+          ),
+        );
+
+        await service.leave(fakeVtcDid);
+
+        expect(await repository.memberLinks(), isEmpty);
       });
 
       test('keeps the card and the signed answer once left', () async {
