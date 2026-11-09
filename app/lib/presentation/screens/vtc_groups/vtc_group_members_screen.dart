@@ -5,6 +5,7 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../application/services/vtc_trust_service/vtc_trust_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../vtc_trust/vtc_member_credentials.dart';
 import '../vtc_trust/vtc_vouch.dart';
 
 /// The other members of a community group, as the community's directory
@@ -90,22 +91,17 @@ class VtcGroupMembersScreen extends HookConsumerWidget {
             return ListTile(
               key: Key('vtc_group_member_${entry.entryId}'),
               leading: const Icon(Icons.person_outline),
-              title: Row(
-                children: [
-                  Flexible(child: Text(name)),
-                  VtcVouchButton(
-                    edges: memberEdges,
-                    name: name,
-                    communityName: communityName,
-                  ),
-                ],
-              ),
+              title: Text(name),
               subtitle: entry.did == null
                   ? Text(l10n.vtcTrustNotFindable(name, communityName))
                   : null,
-              trailing: entry.did == null || memberEdges.outgoing != null
-                  ? null
-                  : FilledButton(
+              // The icons last, in a slot each, so they line up on the
+              // right in every row whether or not it offers to vouch.
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (entry.did != null && memberEdges.outgoing == null)
+                    FilledButton(
                       onPressed: () => vouch(entry, name),
                       child: Text(
                         memberEdges.canVouchBack
@@ -113,6 +109,34 @@ class VtcGroupMembersScreen extends HookConsumerWidget {
                             : l10n.vtcTrustVouch,
                       ),
                     ),
+                  SizedBox.square(
+                    dimension: _iconSlot,
+                    child: VtcVouchButton(
+                      edges: memberEdges,
+                      name: name,
+                      communityName: communityName,
+                    ),
+                  ),
+                  SizedBox.square(
+                    dimension: _iconSlot,
+                    child: VtcMemberCredentialsButton(
+                      communityDid: communityDid,
+                      communityName: communityName,
+                      entry: entry,
+                      name: name,
+                      names: {
+                        for (final member in members)
+                          if ((
+                                member.did,
+                                member.displayName ?? member.nickname,
+                              )
+                              case (final did?, final shown?))
+                            did: shown,
+                      },
+                    ),
+                  ),
+                ],
+              ),
             );
           },
         ),
@@ -121,6 +145,9 @@ class VtcGroupMembersScreen extends HookConsumerWidget {
     );
   }
 }
+
+/// The room each icon of a member's row takes, kept when it shows none.
+const _iconSlot = 40.0;
 
 class _Message extends StatelessWidget {
   const _Message(this.text);

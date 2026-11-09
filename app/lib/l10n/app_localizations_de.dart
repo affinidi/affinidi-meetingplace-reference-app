@@ -3920,6 +3920,66 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String vtcMemberCredentialsTitle(String name) {
+    return '$name\'s credentials';
+  }
+
+  @override
+  String vtcMemberCredentialsNote(String community) {
+    return 'As $community shows them to you.';
+  }
+
+  @override
+  String vtcMemberCredentialsNone(String community, String name) {
+    return '$community shows you none of $name\'s credentials.';
+  }
+
+  @override
+  String get vtcMemberCredentialsMembership => 'Membership card';
+
+  @override
+  String get vtcMemberCredentialsRole => 'Role card';
+
+  @override
+  String vtcMemberCredentialsIssuedBy(String community) {
+    return 'Issued by $community';
+  }
+
+  @override
+  String get vtcMemberCredentialsAcknowledgement => 'Acknowledgement';
+
+  @override
+  String vtcMemberCredentialsAcknowledgementBound(String name) {
+    return 'Signed by $name, for this membership card';
+  }
+
+  @override
+  String vtcMemberCredentialsAcknowledgementStale(String name) {
+    return 'Signed by $name, for an earlier membership card';
+  }
+
+  @override
+  String get vtcMemberCredentialsPublicCard => 'Public card';
+
+  @override
+  String vtcMemberCredentialsSignedBy(String name) {
+    return 'Signed by $name';
+  }
+
+  @override
+  String vtcMemberCredentialsVouch(String issuer, String subject) {
+    return '$issuer vouched for $subject';
+  }
+
+  @override
+  String vtcMemberCredentialsStoredAt(String date) {
+    return 'Stored $date';
+  }
+
+  @override
+  String get vtcMemberCredentialsAnotherMember => 'another member';
+
+  @override
   String vtcJoinAlreadyMember(String name) {
     return 'You\'re already a member of $name.';
   }

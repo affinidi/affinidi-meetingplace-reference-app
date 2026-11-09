@@ -5796,6 +5796,90 @@ abstract class AppLocalizations {
   /// **'You and {name} vouched for each other'**
   String vtcTrustVouchedForEachOther(String name);
 
+  /// Title of another member's credentials
+  ///
+  /// In en, this message translates to:
+  /// **'{name}\'s credentials'**
+  String vtcMemberCredentialsTitle(String name);
+
+  /// Whose view of another member's credentials this is
+  ///
+  /// In en, this message translates to:
+  /// **'As {community} shows them to you.'**
+  String vtcMemberCredentialsNote(String community);
+
+  /// The community shows no credential of another member
+  ///
+  /// In en, this message translates to:
+  /// **'{community} shows you none of {name}\'s credentials.'**
+  String vtcMemberCredentialsNone(String community, String name);
+
+  /// The membership card a community issued a member
+  ///
+  /// In en, this message translates to:
+  /// **'Membership card'**
+  String get vtcMemberCredentialsMembership;
+
+  /// The role card a community issued a member
+  ///
+  /// In en, this message translates to:
+  /// **'Role card'**
+  String get vtcMemberCredentialsRole;
+
+  /// Who issued a card
+  ///
+  /// In en, this message translates to:
+  /// **'Issued by {community}'**
+  String vtcMemberCredentialsIssuedBy(String community);
+
+  /// A member's acknowledgement of their membership card
+  ///
+  /// In en, this message translates to:
+  /// **'Acknowledgement'**
+  String get vtcMemberCredentialsAcknowledgement;
+
+  /// A member's acknowledgement names the card the community holds
+  ///
+  /// In en, this message translates to:
+  /// **'Signed by {name}, for this membership card'**
+  String vtcMemberCredentialsAcknowledgementBound(String name);
+
+  /// A member's acknowledgement names an earlier card
+  ///
+  /// In en, this message translates to:
+  /// **'Signed by {name}, for an earlier membership card'**
+  String vtcMemberCredentialsAcknowledgementStale(String name);
+
+  /// The external card a member published
+  ///
+  /// In en, this message translates to:
+  /// **'Public card'**
+  String get vtcMemberCredentialsPublicCard;
+
+  /// Who signed a card
+  ///
+  /// In en, this message translates to:
+  /// **'Signed by {name}'**
+  String vtcMemberCredentialsSignedBy(String name);
+
+  /// A vouch between two members
+  ///
+  /// In en, this message translates to:
+  /// **'{issuer} vouched for {subject}'**
+  String vtcMemberCredentialsVouch(String issuer, String subject);
+
+  /// When the community stored a vouch
+  ///
+  /// In en, this message translates to:
+  /// **'Stored {date}'**
+  String vtcMemberCredentialsStoredAt(String date);
+
+  /// A member the app knows no name of
+  ///
+  /// In en, this message translates to:
+  /// **'another member'**
+  String get vtcMemberCredentialsAnotherMember;
+
   /// The scanned community is one the member belongs to
   ///
   /// In en, this message translates to:

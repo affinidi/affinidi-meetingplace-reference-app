@@ -134,6 +134,38 @@ void main() {
     expect(find.textContaining('did:'), findsNothing);
   });
 
+  testWidgets('aligns the icons right of every member\'s name', (tester) async {
+    await pumpScreen(tester);
+
+    for (final entryId in ['dir_bob', 'dir_carol', 'dir_dan', 'dir_anon']) {
+      expect(
+        inMember(entryId, find.byKey(const Key('vtc_member_credentials'))),
+        findsOneWidget,
+      );
+    }
+    final name = tester.getTopRight(inMember('dir_bob', find.text('Bob')));
+    final vouches = tester.getCenter(
+      inMember('dir_bob', find.byKey(const Key('vtc_vouches'))),
+    );
+    final credentials = tester.getCenter(
+      inMember('dir_bob', find.byKey(const Key('vtc_member_credentials'))),
+    );
+    expect(vouches.dx, greaterThan(name.dx));
+    expect(credentials.dx, greaterThan(vouches.dx));
+    // Right-aligned: Carol's icons line up with Bob's, whatever the names.
+    expect(
+      tester
+          .getCenter(
+            inMember(
+              'dir_carol',
+              find.byKey(const Key('vtc_member_credentials')),
+            ),
+          )
+          .dx,
+      moreOrLessEquals(credentials.dx),
+    );
+  });
+
   testWidgets('vouches back once you consent', (tester) async {
     await pumpScreen(tester);
 
