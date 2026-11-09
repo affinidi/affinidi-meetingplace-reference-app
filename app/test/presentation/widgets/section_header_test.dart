@@ -16,6 +16,7 @@ void main() {
         theme: theme ?? AppTheme.dark,
         home: Scaffold(
           body: SectionHeader(
+            icon: Icons.compare_arrows,
             title: 'Connections',
             subtitle: subtitle,
             showProgress: showProgress,
@@ -33,6 +34,7 @@ void main() {
     testWidgets('shows the title and lead in the $name theme', (tester) async {
       await pumpHeader(tester, theme: theme);
 
+      expect(find.byIcon(Icons.compare_arrows), findsOneWidget);
       expect(find.text('Connections'), findsOneWidget);
       expect(find.text('Who you are connected with'), findsOneWidget);
       expect(find.byIcon(Icons.menu), findsOneWidget);
@@ -80,5 +82,18 @@ void main() {
 
     expect(find.byType(CircularProgressIndicator), findsNothing);
     expect(find.byIcon(Icons.menu), findsOneWidget);
+  });
+
+  testWidgets('centres the icon on the title line', (tester) async {
+    await pumpHeader(tester);
+
+    final icon = tester.getCenter(find.byIcon(Icons.compare_arrows));
+    final title = tester.getRect(find.text('Connections'));
+    final lineHeight =
+        AppTheme.dark.textTheme.headlineSmall!.fontSize! *
+        AppTheme.dark.textTheme.headlineSmall!.height!;
+
+    expect(icon.dy, closeTo(title.top + lineHeight / 2, 1));
+    expect(icon.dx, lessThan(title.left));
   });
 }

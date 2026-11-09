@@ -48,6 +48,7 @@ class CredentialsScreen extends HookConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SectionHeader(
+                icon: Tabs.credentials.iconData,
                 title: l10n.tabsTitle(Tabs.credentials.name),
                 subtitle: l10n.verifiableCredentialWallet,
                 showProgress: memberships.isSyncing,

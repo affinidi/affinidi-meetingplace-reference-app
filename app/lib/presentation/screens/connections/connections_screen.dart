@@ -42,6 +42,7 @@ class ConnectionsScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             SectionHeader(
+              icon: Tabs.connections.iconData,
               title: context.l10n.tabsTitle(Tabs.connections.name),
               subtitle: l10n.connectionsPanelSubtitle,
             ),

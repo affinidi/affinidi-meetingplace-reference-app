@@ -82,6 +82,7 @@ class RCardsScreen extends HookConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SectionHeader(
+            icon: Tabs.rCards.iconData,
             title: l10n.tabsTitle(Tabs.rCards.name),
             subtitle: l10n.rCardsPanelSubtitle,
           ),

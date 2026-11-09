@@ -58,6 +58,7 @@ class MockCredentialsScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SectionHeader(
+            icon: Icons.science,
             title: l10n.mockCredentialsTitle,
             subtitle: l10n.mockCredentialsSubtitle,
             onClose: () {

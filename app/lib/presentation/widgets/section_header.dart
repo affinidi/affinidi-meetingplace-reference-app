@@ -4,11 +4,13 @@ import '../../infrastructure/extensions/build_context_extensions.dart';
 import '../scaffolds/dashboard_shell_scaffold_key.dart';
 import '../themes/tokens/mc_spacing.dart';
 
-/// Opens a main section: its title, a muted lead and the section's action,
-/// closed by a hairline, as a Mission Control section head.
+/// Opens a main section: its icon and title, a muted lead and the
+/// section's action, closed by a hairline, as a Mission Control section
+/// head.
 class SectionHeader extends StatelessWidget {
   const SectionHeader({
     super.key,
+    required this.icon,
     required this.title,
     required this.subtitle,
     this.showProgress,
@@ -16,6 +18,8 @@ class SectionHeader extends StatelessWidget {
     this.onBack,
   });
 
+  /// The section's symbol, as on its navigation item.
+  final IconData icon;
   final String title;
   final String subtitle;
   final bool? showProgress;
@@ -26,6 +30,7 @@ class SectionHeader extends StatelessWidget {
   /// title; none when null.
   final VoidCallback? onBack;
 
+  static const _iconSize = 24.0;
   static const _actionSize = 40.0;
   static const _progressSize = 20.0;
 
@@ -37,6 +42,10 @@ class SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final mc = context.mcColors;
     final textTheme = context.textTheme;
+    final titleStyle = textTheme.headlineSmall;
+    // The icon centres on the title's first line, whatever its size.
+    final titleLineHeight =
+        (titleStyle?.fontSize ?? _iconSize) * (titleStyle?.height ?? 1);
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -65,12 +74,16 @@ class SectionHeader extends StatelessWidget {
                   onPressed: onBack,
                 ),
               ),
+            SizedBox(
+              height: titleLineHeight,
+              child: Icon(icon, size: _iconSize, color: mc.textSecondary),
+            ),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: McSpacing.s1,
                 children: [
-                  Text(title, style: textTheme.headlineSmall),
+                  Text(title, style: titleStyle),
                   Text(
                     subtitle,
                     maxLines: 3,

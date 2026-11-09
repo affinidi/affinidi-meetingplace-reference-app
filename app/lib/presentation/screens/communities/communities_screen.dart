@@ -45,6 +45,7 @@ class CommunitiesScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SectionHeader(
+                icon: Tabs.contacts.iconData,
                 title: l10n.tabsTitle(Tabs.contacts.name),
                 subtitle: l10n.communitiesSubtitle,
               ),

@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../navigation/tabs/tabs.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/tab_bar_tab.dart';
 import '../contacts/contacts_screen.dart';
@@ -43,6 +44,7 @@ class CommunityScreen extends HookConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SectionHeader(
+            icon: Tabs.contacts.iconData,
             title: name,
             subtitle: l10n.contactsPanelSubtitle,
             onBack: () => Navigator.of(context).pop(),

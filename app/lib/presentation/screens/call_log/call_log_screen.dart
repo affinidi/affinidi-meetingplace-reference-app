@@ -35,6 +35,7 @@ class CallLogScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SectionHeader(
+            icon: Icons.history,
             title: l10n.callLogScreenTitle,
             subtitle: l10n.callLogScreenSubtitle,
             onClose: () {

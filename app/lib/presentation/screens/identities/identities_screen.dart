@@ -55,6 +55,7 @@ class IdentitiesScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SectionHeader(
+                icon: Tabs.identities.iconData,
                 title: l10n.tabsTitle(Tabs.identities.name),
                 subtitle: context.l10n.identitiesPanelSubtitle,
               ),

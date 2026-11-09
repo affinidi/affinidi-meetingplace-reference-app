@@ -77,6 +77,7 @@ class SettingsScreen extends HookConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             SectionHeader(
+              icon: Icons.settings,
               title: l10n.tabsTitle(TabTitleKey.settings.name),
               subtitle: l10n.settingsScreenSubtitle,
               onClose: () {

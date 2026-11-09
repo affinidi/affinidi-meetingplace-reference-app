@@ -13,20 +13,20 @@ enum Tabs {
 
   final NotificationCounterType serviceKey;
 
-  Widget get icon {
-    switch (this) {
-      case Tabs.connections:
-        return const Icon(Icons.compare_arrows, size: 32);
-      case Tabs.contacts:
-        return const Icon(Icons.groups);
-      case Tabs.identities:
-        return const Icon(Icons.fingerprint);
-      case Tabs.rCards:
-        return const Icon(Icons.credit_card);
-      case Tabs.credentials:
-        return const Icon(Icons.verified_user);
-    }
-  }
+  /// The tab's symbol, shared by its navigation item and its section
+  /// header.
+  IconData get iconData => switch (this) {
+    Tabs.connections => Icons.compare_arrows,
+    Tabs.contacts => Icons.groups,
+    Tabs.identities => Icons.fingerprint,
+    Tabs.rCards => Icons.credit_card,
+    Tabs.credentials => Icons.verified_user,
+  };
+
+  Widget get icon => this == Tabs.connections
+      // The arrows read small at the default size.
+      ? Icon(iconData, size: 32)
+      : Icon(iconData);
 }
 
 enum TabTitleKey {
