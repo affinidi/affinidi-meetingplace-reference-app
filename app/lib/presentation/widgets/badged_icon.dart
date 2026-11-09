@@ -18,7 +18,6 @@ class BadgedIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return count > 0
         ? Badge(
-            offset: const Offset(15, 0),
             label: Text(
               '$count',
               textScaler:

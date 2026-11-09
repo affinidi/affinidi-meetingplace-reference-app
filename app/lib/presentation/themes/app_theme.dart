@@ -164,6 +164,13 @@ class AppTheme {
           ),
         ),
       ),
+      // A count is news, not an error: the blue signal, never a red fill.
+      badgeTheme: BadgeThemeData(
+        backgroundColor: McColors.blue,
+        textColor: McColors.textOnPrimary,
+        textStyle: textTheme.labelSmall,
+        offset: const Offset(McSpacing.s4, 0),
+      ),
       iconTheme: IconThemeData(color: mc.textSecondary),
       inputDecorationTheme: InputDecorationTheme(
         // Most fields sit in form rows that draw their own hairlines.
