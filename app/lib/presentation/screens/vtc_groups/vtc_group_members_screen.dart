@@ -6,6 +6,7 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import '../../../application/services/vtc_trust_service/vtc_trust_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../vtc_join/vtc_role_name.dart';
+import '../vtc_trust/vtc_member_avatar.dart';
 import '../vtc_trust/vtc_member_credentials.dart';
 import '../vtc_trust/vtc_vouch.dart';
 
@@ -91,7 +92,10 @@ class VtcGroupMembersScreen extends HookConsumerWidget {
             final memberEdges = edges[entry.did] ?? const VtcEdges();
             return ListTile(
               key: Key('vtc_group_member_${entry.entryId}'),
-              leading: const Icon(Icons.person_outline),
+              leading: VtcMemberAvatar(
+                communityDid: communityDid,
+                entry: entry,
+              ),
               title: Text(name),
               subtitle: switch ((entry.role, entry.did)) {
                 (null, null) => Text(

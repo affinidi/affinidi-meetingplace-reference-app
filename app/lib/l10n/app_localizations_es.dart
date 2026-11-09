@@ -3851,7 +3851,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String vtcDirectoryNameShown(String community, String name) {
-    return 'Members of $community see you as $name, the name of the identity you joined with.';
+    return 'Members of $community see you as $name, with the name and picture of the identity you joined with.';
   }
 
   @override

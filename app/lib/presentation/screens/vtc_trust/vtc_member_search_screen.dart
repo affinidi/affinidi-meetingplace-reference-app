@@ -7,6 +7,7 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../application/services/vtc_trust_service/vtc_trust_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import 'vtc_member_avatar.dart';
 import 'vtc_vouch.dart';
 
 /// Finds which member of a community a contact is: searches the community's
@@ -143,7 +144,10 @@ class VtcMemberSearchScreen extends HookConsumerWidget {
                     return ListTile(
                       key: Key('vtc_member_${entry.entryId}'),
                       enabled: isFindable,
-                      leading: const Icon(Icons.person_outline),
+                      leading: VtcMemberAvatar(
+                        communityDid: communityDid,
+                        entry: entry,
+                      ),
                       title: Text(name),
                       subtitle: isFindable
                           ? null

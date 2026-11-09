@@ -3865,7 +3865,7 @@
 			}
 		}
 	},
-	"vtcDirectoryNameShown": "Members of {community} see you as {name}, the name of the identity you joined with.",
+	"vtcDirectoryNameShown": "Members of {community} see you as {name}, with the name and picture of the identity you joined with.",
 	"@vtcDirectoryNameShown": {
 		"description": "The name other members of a community see, taken from the identity the member joined with",
 		"placeholders": {

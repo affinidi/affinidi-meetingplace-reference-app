@@ -1,6 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:image/image.dart' as img;
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_trust_service/vtc_trust_service.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
@@ -31,6 +34,14 @@ PublishedRelationship _edge(String id, String issuer, String subject) =>
 
 /// A group's members and the vouches with them.
 class _FakeTrustService extends Fake implements VtcTrustService {
+  /// Pictures by the digest a member's entry names.
+  Map<String, Uint8List> memberPictures = {};
+
+  @override
+  Future<Uint8List?> memberPicture(
+    String communityDid, {
+    required DirectoryEntry entry,
+  }) async => memberPictures[entry.avatarSha256];
   List<DirectoryEntry> members = const [
     DirectoryEntry(
       entryId: 'dir_bob',
@@ -203,6 +214,36 @@ void main() {
       ),
       findsNothing,
       reason: 'no role shown, none drawn',
+    );
+  });
+
+  testWidgets('shows the picture a member shows, else a person', (
+    tester,
+  ) async {
+    service
+      ..members = const [
+        DirectoryEntry(
+          entryId: 'dir_bob',
+          displayName: 'Bob',
+          did: _bob,
+          avatarSha256: 'sha-bob',
+        ),
+        DirectoryEntry(entryId: 'dir_carol', displayName: 'Carol', did: _carol),
+      ]
+      ..memberPictures = {
+        'sha-bob': img.encodePng(img.Image(width: 4, height: 4)),
+      };
+
+    await pumpScreen(tester);
+
+    expect(
+      inMember('dir_bob', find.byKey(const Key('vtc_member_avatar_dir_bob'))),
+      findsOneWidget,
+    );
+    expect(inMember('dir_carol', find.byType(CircleAvatar)), findsNothing);
+    expect(
+      inMember('dir_carol', find.byIcon(Icons.person_outline)),
+      findsOneWidget,
     );
   });
 

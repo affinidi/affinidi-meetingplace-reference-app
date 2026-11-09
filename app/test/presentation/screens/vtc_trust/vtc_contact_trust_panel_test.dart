@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -18,6 +20,14 @@ const _channel = 'did:web:mpx.example:channel-bob';
 /// The member's communities and vouches, as vouching for a contact asks
 /// them.
 class _FakeTrustService extends Fake implements VtcTrustService {
+  /// Pictures by the digest a member's entry names.
+  Map<String, Uint8List> memberPictures = {};
+
+  @override
+  Future<Uint8List?> memberPicture(
+    String communityDid, {
+    required DirectoryEntry entry,
+  }) async => memberPictures[entry.avatarSha256];
   List<VtcCommunity> memberOf = const [
     VtcCommunity(
       communityDid: _club,

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -9,6 +11,14 @@ import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 
 /// A directory that answers every search with [found].
 class _FakeTrustService extends Fake implements VtcTrustService {
+  /// Pictures by the digest a member's entry names.
+  Map<String, Uint8List> memberPictures = {};
+
+  @override
+  Future<Uint8List?> memberPicture(
+    String communityDid, {
+    required DirectoryEntry entry,
+  }) async => memberPictures[entry.avatarSha256];
   List<DirectoryEntry> found = const [];
   final List<String> queries = [];
 

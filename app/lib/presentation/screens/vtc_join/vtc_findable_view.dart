@@ -13,9 +13,10 @@ import '../../widgets/onboarding_style/onboarding_style.dart';
 /// instead of its administrators only, under that identity's name. Read
 /// from the community each time, never kept on the phone.
 ///
-/// The name is always the identity's own, never one typed here. It is sent
-/// when the member lets others find them, and brought in step with the
-/// identity each time this opens while they can be found.
+/// The name and picture are always the identity's own, never ones chosen
+/// here. They are sent when the member lets others find them; while they
+/// can be found, the name is brought in step with the identity each time
+/// this opens, and a picture added to a card without one.
 class VtcFindableView extends HookConsumerWidget {
   const VtcFindableView({
     super.key,
@@ -35,6 +36,7 @@ class VtcFindableView extends HookConsumerWidget {
     );
     final card = useState<MyDirectoryCard?>(null);
     final identityName = useState('');
+    final identityPicture = useState<String?>(null);
     final busy = useState(false);
     final failure = useState<String?>(null);
 
@@ -51,20 +53,22 @@ class VtcFindableView extends HookConsumerWidget {
         try {
           var mine = await service.directoryCard(communityDid);
           final identityDid = await service.identityDid(communityDid);
-          final name =
-              identities
-                  .where((identity) => identity.did == identityDid)
-                  .firstOrNull
-                  ?.card
-                  .displayName
-                  .trim() ??
-              '';
+          final joinedAs = identities
+              .where((identity) => identity.did == identityDid)
+              .firstOrNull;
+          final name = joinedAs?.card.displayName.trim() ?? '';
+          final picture = joinedAs?.card.profilePic;
           // A member who let others find them stays findable under their
-          // identity's name, also on a card hidden when they joined.
+          // identity's name and picture, also on a card hidden when they
+          // joined.
           if (mine.isDidVisibleToMembers) {
             var changed = false;
             if (name.isNotEmpty && mine.displayName != name) {
               await service.setDirectoryName(communityDid, name: name);
+              changed = true;
+            }
+            if (picture != null && mine.avatarSha256 == null) {
+              await service.setDirectoryPicture(communityDid, base64: picture);
               changed = true;
             }
             if (mine.isHidden) {
@@ -75,6 +79,7 @@ class VtcFindableView extends HookConsumerWidget {
           }
           if (!context.mounted) return;
           identityName.value = name;
+          identityPicture.value = picture;
           card.value = mine;
         } on VtcTrustException catch (error) {
           if (context.mounted) failure.value = messageOf(error.failure);
@@ -102,6 +107,10 @@ class VtcFindableView extends HookConsumerWidget {
       final name = identityName.value;
       if (findable && name.isNotEmpty) {
         await service.setDirectoryName(communityDid, name: name);
+      }
+      final picture = identityPicture.value;
+      if (findable && picture != null) {
+        await service.setDirectoryPicture(communityDid, base64: picture);
       }
       await service.setFindable(communityDid, findable: findable);
     });

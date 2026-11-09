@@ -1,10 +1,14 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:image/image.dart' as img;
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service_state.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_trust_service/vtc_trust_service.dart';
+import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_findable_view.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
@@ -16,6 +20,19 @@ const _communityDid = 'did:webvh:community.example';
 
 /// The member's directory card, as the community answers it.
 class _FakeTrustService extends Fake implements VtcTrustService {
+  String? avatarSha256;
+  final List<String?> pictures = [];
+
+  @override
+  Future<void> setDirectoryPicture(
+    String communityDid, {
+    required String? base64,
+  }) async {
+    if (refusal case final refusal?) throw VtcTrustException(refusal);
+    pictures.add(base64);
+    avatarSha256 = base64 == null ? null : 'sha-of-picture';
+  }
+
   bool findable = false;
   bool hidden = false;
   String? name;
@@ -60,8 +77,21 @@ class _FakeTrustService extends Fake implements VtcTrustService {
 
 void main() {
   late _FakeTrustService service;
+  late Identity joinedAs;
 
-  setUp(() => service = _FakeTrustService());
+  setUp(() {
+    service = _FakeTrustService();
+    joinedAs = FakeIdentities.primaryIdentity;
+  });
+
+  /// The primary identity with a picture.
+  Identity withPicture() => joinedAs.copyWith(
+    card: joinedAs.card.copyWith(
+      profilePic: base64Encode(
+        img.encodePng(img.Image(width: 300, height: 300)),
+      ),
+    ),
+  );
 
   Future<void> pumpView(WidgetTester tester) async {
     await tester.binding.setSurfaceSize(const Size(400, 1000));
@@ -73,11 +103,8 @@ void main() {
           identitiesServiceProvider.overrideWith(
             () => FakeIdentitiesService(
               IdentitiesServiceState(
-                currentIdentity: FakeIdentities.primaryIdentity,
-                identities: [
-                  FakeIdentities.primaryIdentity,
-                  FakeIdentities.secondaryIdentity,
-                ],
+                currentIdentity: joinedAs,
+                identities: [joinedAs, FakeIdentities.secondaryIdentity],
               ),
             ),
           ),
@@ -119,8 +146,8 @@ void main() {
     );
     expect(
       find.text(
-        'Members of Club see you as John Doe, the name of the identity you '
-        'joined with.',
+        'Members of Club see you as John Doe, with the name and picture of '
+        'the identity you joined with.',
       ),
       findsOneWidget,
     );
@@ -162,6 +189,40 @@ void main() {
 
     expect(service.changes, [true]);
     expect(findableSwitch(tester).value, isTrue);
+  });
+
+  testWidgets('sends the identity\'s picture when letting members find you', (
+    tester,
+  ) async {
+    joinedAs = withPicture();
+    await pumpView(tester);
+    expect(service.pictures, isEmpty, reason: 'nothing leaves before that');
+
+    await tapKey(tester, 'vtc_findable_switch');
+
+    expect(service.pictures, [joinedAs.card.profilePic]);
+    expect(service.changes, [true]);
+  });
+
+  testWidgets('adds the picture to a findable card without one', (
+    tester,
+  ) async {
+    joinedAs = withPicture();
+    service
+      ..findable = true
+      ..name = 'John Doe';
+
+    await pumpView(tester);
+
+    expect(service.pictures, [joinedAs.card.profilePic]);
+  });
+
+  testWidgets('sends no picture an identity does not have', (tester) async {
+    await pumpView(tester);
+
+    await tapKey(tester, 'vtc_findable_switch');
+
+    expect(service.pictures, isEmpty);
   });
 
   testWidgets('leaves the name alone while members cannot find you', (
