@@ -5760,6 +5760,12 @@ abstract class AppLocalizations {
   /// **'As the community keeps it: its record of the vouch, with the signed credential in vrcJsonld.'**
   String get vtcTrustRecordNote;
 
+  /// Title of the community's record of a vouch
+  ///
+  /// In en, this message translates to:
+  /// **'What {community} keeps'**
+  String vtcTrustRecordDocument(String community);
+
   /// The scanned community is one the member belongs to
   ///
   /// In en, this message translates to:

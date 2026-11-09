@@ -177,6 +177,13 @@ void main() {
     expect(find.text('Signed by your VTA'), findsOneWidget);
     expect(find.text('Stored by Football club'), findsOneWidget);
     expect(service.stored.single.personaDid, _bob);
+
+    await tester.tap(find.byKey(const Key('vtc_vouch_record')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('What Football club keeps'), findsOneWidget);
+    expect(find.textContaining('vrcJsonld'), findsWidgets);
+    expect(find.textContaining('edge-1'), findsWidgets);
   });
 
   testWidgets('publishes nothing without consent', (tester) async {

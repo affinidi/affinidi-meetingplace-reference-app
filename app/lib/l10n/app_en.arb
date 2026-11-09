@@ -3923,6 +3923,15 @@
 	"@vtcTrustRecordNote": {
 		"description": "Explains the community's record of a vouch shown in full"
 	},
+	"vtcTrustRecordDocument": "What {community} keeps",
+	"@vtcTrustRecordDocument": {
+		"description": "Title of the community's record of a vouch",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			}
+		}
+	},
 	"vtcJoinAlreadyMember": "You're already a member of {name}.",
 	"@vtcJoinAlreadyMember": {
 		"description": "The scanned community is one the member belongs to",
