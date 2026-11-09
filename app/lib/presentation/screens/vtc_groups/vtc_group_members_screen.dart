@@ -96,7 +96,7 @@ class VtcGroupMembersScreen extends HookConsumerWidget {
               subtitle: entry.did == null
                   ? Text(l10n.vtcTrustNotFindable(name, communityName))
                   : hasVouches
-                  ? VtcVouchChips(
+                  ? VtcVouchIcons(
                       edges: memberEdges,
                       name: name,
                       outgoingLabel: l10n.vtcTrustVouched,

@@ -175,11 +175,13 @@ class VtcVouchTrail extends StatelessWidget {
   }
 }
 
-/// The vouches between the member and [name], one chip each way round,
-/// labelled [outgoingLabel] and [incomingLabel]. A chip opens the signed
+/// The vouches between the member and [name], one icon each way round: an
+/// outgoing arrow for the member's vouch, labelled [outgoingLabel], and an
+/// incoming one for [name]'s, labelled [incomingLabel]. The label is the
+/// icon's tooltip and what a screen reader says. An icon opens the signed
 /// credential the community keeps for that vouch.
-class VtcVouchChips extends StatelessWidget {
-  const VtcVouchChips({
+class VtcVouchIcons extends StatelessWidget {
+  const VtcVouchIcons({
     super.key,
     required this.edges,
     required this.name,
@@ -195,22 +197,23 @@ class VtcVouchChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Wrap(
-      spacing: 8,
-      runSpacing: 4,
+    return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         if (edges.outgoing case final edge?)
-          _chip(
+          _icon(
             context,
             key: const Key('vtc_vouch_outgoing'),
+            icon: Icons.call_made,
             label: outgoingLabel,
             title: l10n.vtcTrustYourVouchDocument(name),
             edge: edge,
           ),
         if (edges.incoming case final edge?)
-          _chip(
+          _icon(
             context,
             key: const Key('vtc_vouch_incoming'),
+            icon: Icons.call_received,
             label: incomingLabel,
             title: l10n.vtcTrustTheirVouchDocument(name),
             edge: edge,
@@ -219,18 +222,19 @@ class VtcVouchChips extends StatelessWidget {
     );
   }
 
-  static Widget _chip(
+  static Widget _icon(
     BuildContext context, {
     required Key key,
+    required IconData icon,
     required String label,
     required String title,
     required PublishedRelationship edge,
   }) {
     final vrc = edge.vrc;
-    return ActionChip(
+    return IconButton(
       key: key,
-      avatar: const Icon(Icons.handshake_outlined, size: 16),
-      label: Text(label),
+      icon: Icon(icon, size: 20),
+      tooltip: label,
       visualDensity: VisualDensity.compact,
       onPressed: vrc == null
           ? null

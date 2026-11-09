@@ -198,7 +198,7 @@ class _TrustRowView extends StatelessWidget {
                 for (final line in lines)
                   Text(line, style: context.textTheme.bodySmall),
                 if (edges != null)
-                  VtcVouchChips(
+                  VtcVouchIcons(
                     edges: edges,
                     name: name,
                     outgoingLabel: l10n.vtcTrustYouVouched,

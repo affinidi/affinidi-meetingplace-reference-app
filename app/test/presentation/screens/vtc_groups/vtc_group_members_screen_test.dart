@@ -108,9 +108,12 @@ void main() {
     await pumpScreen(tester);
 
     expect(find.text('Members of Identity WG'), findsOneWidget);
-    expect(inMember('dir_bob', find.text('Vouches for you')), findsOneWidget);
+    expect(
+      inMember('dir_bob', find.byTooltip('Vouches for you')),
+      findsOneWidget,
+    );
     expect(inMember('dir_bob', find.text('Vouch back')), findsOneWidget);
-    expect(inMember('dir_carol', find.text('Vouched')), findsOneWidget);
+    expect(inMember('dir_carol', find.byTooltip('Vouched')), findsOneWidget);
     expect(inMember('dir_carol', find.byType(FilledButton)), findsNothing);
     expect(
       inMember(
@@ -137,8 +140,11 @@ void main() {
     expect(find.text('You vouched for Bob'), findsOneWidget);
     await tester.tapAt(const Offset(10, 10));
     await tester.pumpAndSettle();
-    expect(inMember('dir_bob', find.text('Vouched')), findsOneWidget);
-    expect(inMember('dir_bob', find.text('Vouches for you')), findsOneWidget);
+    expect(inMember('dir_bob', find.byTooltip('Vouched')), findsOneWidget);
+    expect(
+      inMember('dir_bob', find.byTooltip('Vouches for you')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('opens the signed vouch a member gave you', (tester) async {
@@ -158,7 +164,7 @@ void main() {
     };
     await pumpScreen(tester);
 
-    await tester.tap(inMember('dir_bob', find.text('Vouches for you')));
+    await tester.tap(inMember('dir_bob', find.byTooltip('Vouches for you')));
     await tester.pumpAndSettle();
 
     expect(find.text("Bob's vouch for you"), findsOneWidget);
