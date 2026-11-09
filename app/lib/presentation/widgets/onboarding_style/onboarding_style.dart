@@ -48,6 +48,31 @@ Future<void> showOnboardingSheet(BuildContext context, Widget child) {
   );
 }
 
+/// The canvas with the accent glow rising from its bottom, behind
+/// onboarding, the community page and the main tabs. The glow reaches
+/// further on wide screens so it still lifts the middle of the page.
+class GlowBackdrop extends StatelessWidget {
+  const GlowBackdrop({super.key, required this.child});
+
+  static const _wideScreenWidth = 1024.0;
+  static const _wideGlowRadius = 6.0;
+  static const _glowRadius = 2.0;
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final isWide = MediaQuery.sizeOf(context).width > _wideScreenWidth;
+    return DecoratedBox(
+      decoration: onboardingGradient(
+        context,
+        radius: isWide ? _wideGlowRadius : _glowRadius,
+      ),
+      child: child,
+    );
+  }
+}
+
 /// The blue gradient, logo header and footer of onboarding, around a
 /// scrolling [child]. With [onClose], a close button leads the header, for
 /// a screen opened over another. Without [showBranding], neither the logo
@@ -72,12 +97,10 @@ class OnboardingLayout extends StatelessWidget {
     final isSmallLandscape =
         ScreensizeHelper().isSmallScreen(context) &&
         ScreensizeHelper().isLandscape(context);
-    final radius = media.size.width > 1024 ? 6.0 : 2.0;
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      body: DecoratedBox(
-        decoration: onboardingGradient(context, radius: radius),
+      body: GlowBackdrop(
         child: SafeArea(
           child: Stack(
             children: [
