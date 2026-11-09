@@ -5528,6 +5528,12 @@ abstract class AppLocalizations {
   /// **'Link your VTA to see your groups.'**
   String get vtcGroupsVtaMissing;
 
+  /// Shown instead of a community's groups when the phone holds no confirmed membership of it
+  ///
+  /// In en, this message translates to:
+  /// **'This phone hasn\'t confirmed your membership yet. Open the community to check, then try again.'**
+  String get vtcGroupsNotAMember;
+
   /// Shown when the community or the VTA cannot be reached
   ///
   /// In en, this message translates to:
@@ -5545,6 +5551,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Group chat'**
   String get vtcGroupChatHeading;
+
+  /// Question a group's manager answers when creating its chat
+  ///
+  /// In en, this message translates to:
+  /// **'Who can post in this chat?'**
+  String get vtcGroupChatPostingTitle;
+
+  /// Choice letting every member of a group post in its chat
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone in the group'**
+  String get vtcGroupChatPostingEveryone;
+
+  /// What choosing that every member posts means
+  ///
+  /// In en, this message translates to:
+  /// **'Every member reads and posts.'**
+  String get vtcGroupChatPostingEveryoneHint;
+
+  /// Choice letting only a group's managers post in its chat
+  ///
+  /// In en, this message translates to:
+  /// **'Only the group\'s managers'**
+  String get vtcGroupChatPostingManagers;
+
+  /// What choosing that only managers post means
+  ///
+  /// In en, this message translates to:
+  /// **'Members only read, as in announcements.'**
+  String get vtcGroupChatPostingManagersHint;
+
+  /// Shown instead of the message box in a group chat where only managers post
+  ///
+  /// In en, this message translates to:
+  /// **'Only the group\'s managers post in this chat.'**
+  String get vtcGroupChatReadOnly;
+
+  /// Heading of the member's credential of a community group
+  ///
+  /// In en, this message translates to:
+  /// **'Group credential'**
+  String get vtcGroupCredential;
+
+  /// Until when the member's credential of a community group holds
+  ///
+  /// In en, this message translates to:
+  /// **'Valid until {date}'**
+  String vtcGroupCredentialUntil(String date);
 
   /// A group's chat status when its link cannot be read
   ///
@@ -5623,6 +5677,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The linked chat isn\'t this group\'s. Ask one of its managers.'**
   String get vtcGroupChatNotTheGroups;
+
+  /// Why a group chat could not be created or joined: the member identity is on another phone
+  ///
+  /// In en, this message translates to:
+  /// **'The identity that is your membership of this community isn\'t on this phone.'**
+  String get vtcGroupChatMemberNotHere;
 
   /// Shown when the member's VTA keeps no credential of the group
   ///

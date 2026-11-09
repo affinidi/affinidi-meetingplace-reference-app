@@ -3674,6 +3674,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vtcGroupsVtaMissing => 'Link your VTA to see your groups.';
 
   @override
+  String get vtcGroupsNotAMember =>
+      'This phone hasn\'t confirmed your membership yet. Open the community to check, then try again.';
+
+  @override
   String get vtcGroupsUnreachable =>
       'Your groups couldn\'t be loaded. Check your connection and try again.';
 
@@ -3682,6 +3686,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vtcGroupChatHeading => 'Group chat';
+
+  @override
+  String get vtcGroupChatPostingTitle => 'Who can post in this chat?';
+
+  @override
+  String get vtcGroupChatPostingEveryone => 'Everyone in the group';
+
+  @override
+  String get vtcGroupChatPostingEveryoneHint => 'Every member reads and posts.';
+
+  @override
+  String get vtcGroupChatPostingManagers => 'Only the group\'s managers';
+
+  @override
+  String get vtcGroupChatPostingManagersHint =>
+      'Members only read, as in announcements.';
+
+  @override
+  String get vtcGroupChatReadOnly =>
+      'Only the group\'s managers post in this chat.';
+
+  @override
+  String get vtcGroupCredential => 'Group credential';
+
+  @override
+  String vtcGroupCredentialUntil(String date) {
+    return 'Valid until $date';
+  }
 
   @override
   String get vtcGroupChatUnknown => 'This group\'s chat couldn\'t be checked.';
@@ -3728,6 +3760,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get vtcGroupChatNotTheGroups =>
       'The linked chat isn\'t this group\'s. Ask one of its managers.';
+
+  @override
+  String get vtcGroupChatMemberNotHere =>
+      'The identity that is your membership of this community isn\'t on this phone.';
 
   @override
   String get vtcGroupChatNoCredential =>

@@ -43,10 +43,12 @@ const _linked = VtcGroup(
 
 class _FakeVtcService extends Fake implements VtcService {
   bool isVtaMissing = false;
+  bool isNotYetMember = false;
 
   @override
   Future<List<VtcGroupListing>> memberGroups(String communityDid) async {
     if (isVtaMissing) throw const VtaNotLinkedException();
+    if (isNotYetMember) throw const NotACommunityMemberException();
     return const [
       VtcGroupListing(group: _managed, standing: GroupStanding.member),
       VtcGroupListing(group: _linked, standing: GroupStanding.member),
@@ -60,6 +62,12 @@ class _FakeVtcService extends Fake implements VtcService {
   }) async => 0;
 
   @override
+  Future<DateTime?> groupCredentialValidUntil(
+    String communityDid, {
+    required String groupDid,
+  }) async => groupDid == _managedDid ? DateTime.utc(2026, 12, 9) : null;
+
+  @override
   Future<GroupChatLink?> groupChatLink(String groupDid) async =>
       groupDid == _linkedDid
       ? const GroupChatLink(
@@ -71,22 +79,36 @@ class _FakeVtcService extends Fake implements VtcService {
 
 class _FakeChats extends Fake implements VtcGroupChatService {
   final created = <String>[];
+  final postings = <GroupChatPosting>[];
   final joined = <String>[];
   VtcGroupChatFailure? joinFailure;
 
+  /// The identity that is the member here: not the current one.
+  Identity? member = FakeIdentities.secondaryIdentity;
+
+  /// The identities the chats were created and joined as, by their id.
+  final actedAs = <String>[];
+
   @override
   Future<List<VtcGroupChat>> chats() async => const [];
+
+  @override
+  Future<Identity?> memberIdentity(String communityDid) async => member;
 
   @override
   Future<GroupChatLink> createChat(
     String communityDid,
     VtcGroup group, {
     required Identity identity,
+    GroupChatPosting posting = GroupChatPosting.everyone,
   }) async {
     created.add(group.groupId);
-    return const GroupChatLink(
+    postings.add(posting);
+    actedAs.add(identity.id);
+    return GroupChatLink(
       mnemonic: 'identity-wg',
       controlPlaneDid: 'did:web:control-plane.example',
+      posting: posting,
     );
   }
 
@@ -100,6 +122,7 @@ class _FakeChats extends Fake implements VtcGroupChatService {
       throw VtcGroupChatException(failure);
     }
     joined.add(group.groupId);
+    actedAs.add(identity.id);
   }
 }
 
@@ -158,6 +181,7 @@ void main() {
     expect(find.text('Manager'), findsOneWidget);
     expect(find.byKey(const Key('vtc_group_create_g1')), findsOneWidget);
     expect(find.byKey(const Key('vtc_group_join_g2')), findsOneWidget);
+    expect(find.text('Valid until Dec 9, 2026'), findsOneWidget);
   });
 
   testWidgets('shows the link to publish once the chat is created', (
@@ -166,6 +190,8 @@ void main() {
     await pumpScreen(tester);
 
     await tapVisible(tester, const Key('vtc_group_create_g1'));
+    await tester.tap(find.byKey(const Key('vtc_group_posting_everyone')));
+    await tester.pumpAndSettle();
 
     expect(chats.created, ['g1']);
     expect(find.text("Publish the chat's link"), findsOneWidget);
@@ -175,6 +201,68 @@ void main() {
     expect(service.data, contains('MeetingPlaceGroup'));
     expect(service.data, contains('identity-wg'));
     expect(service.data, contains('$_managedDid#meeting-place'));
+  });
+
+  testWidgets('asks who may post, and links only managers posting', (
+    tester,
+  ) async {
+    await pumpScreen(tester);
+
+    await tapVisible(tester, const Key('vtc_group_create_g1'));
+    expect(find.text('Who can post in this chat?'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('vtc_group_posting_managers')));
+    await tester.pumpAndSettle();
+
+    expect(chats.postings, [GroupChatPosting.managers]);
+    final service = tester.widget<SelectableText>(
+      find.byKey(const Key('vtc_group_chat_link_service')),
+    );
+    expect(service.data, contains('"post": "managers"'));
+  });
+
+  testWidgets('creates no chat when the question is dismissed', (tester) async {
+    await pumpScreen(tester);
+
+    await tapVisible(tester, const Key('vtc_group_create_g1'));
+    await tester.tapAt(const Offset(4, 4));
+    await tester.pumpAndSettle();
+
+    expect(chats.created, isEmpty);
+  });
+
+  testWidgets('creates and joins as the identity that is the member, not '
+      'the current one', (tester) async {
+    await pumpScreen(tester);
+
+    await tapVisible(tester, const Key('vtc_group_create_g1'));
+    await tester.tap(find.byKey(const Key('vtc_group_posting_everyone')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Done'));
+    await tester.pumpAndSettle();
+    await tapVisible(tester, const Key('vtc_group_join_g2'));
+
+    expect(chats.actedAs, [
+      FakeIdentities.secondaryIdentity.id,
+      FakeIdentities.secondaryIdentity.id,
+    ]);
+  });
+
+  testWidgets('joins as nobody when the member is not on this phone', (
+    tester,
+  ) async {
+    chats.member = null;
+    await pumpScreen(tester);
+
+    await tapVisible(tester, const Key('vtc_group_join_g2'));
+
+    expect(chats.joined, isEmpty);
+    expect(
+      find.text(
+        "The identity that is your membership of this community isn't on "
+        'this phone.',
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('joins a linked chat', (tester) async {
@@ -196,6 +284,21 @@ void main() {
       find.text(
         "Your VTA doesn't have this group's membership credential yet. "
         'Try again later.',
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('says the membership is not confirmed yet instead of '
+      'failing', (tester) async {
+    vtc.isNotYetMember = true;
+
+    await pumpScreen(tester);
+
+    expect(
+      find.text(
+        "This phone hasn't confirmed your membership yet. Open the community "
+        'to check, then try again.',
       ),
       findsOneWidget,
     );

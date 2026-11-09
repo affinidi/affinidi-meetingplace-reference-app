@@ -1,7 +1,6 @@
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../application/services/identities_service/identities_service.dart';
 import '../../../application/services/vtc_group_chat_service/vtc_group_chat_service.dart';
 import '../../../application/services/vtc_service/vtc_service.dart';
 import '../../../domain/models/identity/identity.dart';
@@ -42,6 +41,13 @@ class VtcGroupsController extends _$VtcGroupsController {
         failure: VtcGroupsFailure.vtaMissing,
       );
       return;
+    } on NotACommunityMemberException {
+      if (!ref.mounted) return;
+      state = state.copyWith(
+        isLoading: false,
+        failure: VtcGroupsFailure.notAMember,
+      );
+      return;
     } on MeetingPlaceVtcSDKException catch (error) {
       _log('reading groups', error.code.name);
       if (!ref.mounted) return;
@@ -62,6 +68,20 @@ class VtcGroupsController extends _$VtcGroupsController {
     } on MeetingPlaceVtcSDKException catch (error) {
       _log('collecting group credentials', error.code.name);
     }
+    final credentialsUntil = <String, DateTime>{};
+    for (final listing in groups) {
+      try {
+        if (await _vtc.groupCredentialValidUntil(
+              communityDid,
+              groupDid: listing.group.groupDid,
+            )
+            case final until?) {
+          credentialsUntil[listing.group.groupId] = until;
+        }
+      } on MeetingPlaceVtcSDKException catch (error) {
+        _log('reading a group credential', error.code.name);
+      }
+    }
     final chats = await _chats.chats();
     final statuses = <String, VtcGroupChatStatus>{};
     for (final listing in groups) {
@@ -76,15 +96,20 @@ class VtcGroupsController extends _$VtcGroupsController {
       };
     }
     if (!ref.mounted) return;
-    state = state.copyWith(chats: statuses);
+    state = state.copyWith(chats: statuses, credentialsUntil: credentialsUntil);
   }
 
-  /// Creates the chat of [group] as the member's current identity.
-  Future<void> createChat(VtcGroup group) => _act(group, (identity) async {
+  /// Creates the chat of [group] as the member's current identity, where
+  /// [posting] may post.
+  Future<void> createChat(
+    VtcGroup group, {
+    GroupChatPosting posting = GroupChatPosting.everyone,
+  }) => _act(group, (identity) async {
     final link = await _chats.createChat(
       communityDid,
       group,
       identity: identity,
+      posting: posting,
     );
     if (!ref.mounted) return;
     state = state.copyWith(
@@ -112,10 +137,15 @@ class VtcGroupsController extends _$VtcGroupsController {
     VtcGroup group,
     Future<void> Function(Identity identity) action,
   ) async {
-    final identity = ref.read(
-      identitiesServiceProvider.currentIdentityOrPrimary,
-    );
-    if (identity == null || state.busy.contains(group.groupId)) return;
+    if (state.busy.contains(group.groupId)) return;
+    // The identity that is the member acts in the group's chat, not
+    // whichever identity is current.
+    final identity = await _chats.memberIdentity(communityDid);
+    if (!ref.mounted) return;
+    if (identity == null) {
+      state = state.copyWith(chatFailure: VtcGroupChatFailure.memberNotHere);
+      return;
+    }
     state = state.copyWith(
       busy: {...state.busy, group.groupId},
       chatFailure: null,

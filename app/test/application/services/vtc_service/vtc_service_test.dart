@@ -873,6 +873,20 @@ void main() {
         expect(entries.single.left, isNull);
       });
 
+      test("leaves out a community group's credential", () async {
+        hold([
+          card(status: FakeVtcNetwork.statusEntry(7)),
+          card(
+            id: 'urn:uuid:group',
+            issuer: 'did:webvh:QmGroup:vtc.example:group-dids:g1',
+          ),
+        ]);
+
+        final entries = await service.membershipCredentials();
+
+        expect(entries.single.key, 'urn:uuid:vmc');
+      });
+
       test('reads a card valid, then revoked once left', () async {
         hold([card(status: FakeVtcNetwork.statusEntry(7))]);
         final active = (await service.membershipCredentials()).single;

@@ -5,6 +5,8 @@ import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../domain/models/identity/identity.dart';
+import '../../../domain/models/vtc/vtc_chat_posting.dart';
+import '../../../domain/models/vtc/vtc_community.dart';
 import '../../../domain/models/vtc/vtc_group_chat.dart';
 import '../../../domain/repositories/vtc_repository.dart';
 import '../../../infrastructure/configuration/environment.dart';
@@ -14,6 +16,7 @@ import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
 import '../connections_service/connections_service.dart';
 import '../connections_service/publish_offer_params.dart';
+import '../identities_service/identities_service.dart';
 import '../vtc_service/vtc_service.dart';
 
 /// Why a community group chat could not be created or joined.
@@ -38,6 +41,10 @@ enum VtcGroupChatFailure {
 
   /// The member's VTA keeps no credential of the group yet.
   noGroupCredential,
+
+  /// The identity that is the member of the community is not on this
+  /// phone, so no other identity may act for it in the group's chat.
+  memberNotHere,
 }
 
 /// A community group chat that could not be created or joined.
@@ -61,7 +68,8 @@ class VtcGroupChatException implements Exception {
 /// removes them when the community no longer does, and makes the group's
 /// managers the chat's moderators. A chat is found through the link the
 /// community publishes in the group's DID document, never through a link a
-/// chat makes for itself.
+/// chat makes for itself; the link also says who may post. A member joins
+/// the chat of each group they are in on their own, once.
 ///
 /// Never logs a DID, a credential or a member.
 class VtcGroupChatService {
@@ -74,6 +82,7 @@ class VtcGroupChatService {
   final Ref _ref;
   final VtcRepository _repository;
   StreamSubscription<ChannelAttachmentEvent>? _joinRequests;
+  Future<void>? _joining;
 
   VtcService get _vtc => _ref.read(vtcServiceProvider);
 
@@ -82,9 +91,26 @@ class VtcGroupChatService {
   /// Every chat this phone owns or joined that follows a community group.
   Future<List<VtcGroupChat>> chats() => _repository.groupChats();
 
+  /// The identity on this phone that is the member of [communityDid], which
+  /// creates and joins the chats of its groups whichever identity is
+  /// current: null when the phone holds no membership of it, or the
+  /// identity is not on this phone.
+  Future<Identity?> memberIdentity(String communityDid) async {
+    final community = await _vtc.community(communityDid);
+    if (community == null || !community.isMember) return null;
+    return _identityOf(community);
+  }
+
+  Identity? _identityOf(VtcCommunity community) => _ref
+      .read(identitiesServiceProvider)
+      .identities
+      .where((identity) => identity.did == community.personaDid)
+      .firstOrNull;
+
   /// Creates the chat of the group [group] of [communityDid] as [identity],
-  /// known by the group's DID, and returns the link the community must
-  /// publish for members to find it.
+  /// known by the group's DID, where [posting] may post, and returns the link
+  /// the community must publish for members to find it and to set who may
+  /// post.
   ///
   /// Throws [VtcGroupChatException] when the member does not manage the
   /// group, the group hides its members, or the community already linked a
@@ -95,6 +121,7 @@ class VtcGroupChatService {
     String communityDid,
     VtcGroup group, {
     required Identity identity,
+    GroupChatPosting posting = GroupChatPosting.everyone,
   }) async {
     final current = (await _vtc.communityGroup(
       communityDid,
@@ -141,11 +168,13 @@ class VtcGroupChatService {
         groupDid: current.groupDid,
         name: current.name,
         isOwner: true,
+        posting: posting,
       ),
     );
     return GroupChatLink(
       mnemonic: offer.mnemonic,
       controlPlaneDid: environment.controlPlaneDid,
+      posting: posting,
     );
   }
 
@@ -190,8 +219,13 @@ class VtcGroupChatService {
     final offer = (await sdk.findOffer(
       mnemonic: link.mnemonic,
     )).connectionOffer;
-    // Only an offer for the group's own DID is the group's chat.
-    if (offer is! GroupConnectionOffer || offer.groupDid != group.groupDid) {
+    // The phrase comes from the group's own DID document, which only the
+    // community writes, so the offer it finds is the chat the community
+    // linked. The control plane names no group DID when an offer is found
+    // (it arrives once the member is let in); one that names another
+    // group's DID is not this group's chat.
+    if (offer is! GroupConnectionOffer ||
+        (offer.groupDid != null && offer.groupDid != group.groupDid)) {
       throw const VtcGroupChatException(VtcGroupChatFailure.notTheGroupsChat);
     }
 
@@ -222,7 +256,75 @@ class VtcGroupChatService {
         groupDid: group.groupDid,
         name: group.name,
         isOwner: false,
+        posting: link.posting,
       ),
+    );
+  }
+
+  /// Joins, as the identity that is the member, the linked chat of every
+  /// group the member is in, in each community they belong to: a group the
+  /// community puts every member in, such as announcements, is in their
+  /// chats without asking. A group's chat is joined once, so one the member
+  /// left stays left. Idempotent while running.
+  ///
+  /// A chat that cannot be joined now, such as one not linked yet or whose
+  /// credential is not delivered yet, is tried again on the next call.
+  Future<void> joinGroupChats() {
+    return _joining ??= _joinGroupChats().whenComplete(() => _joining = null);
+  }
+
+  Future<void> _joinGroupChats() async {
+    final joined = {
+      for (final chat in await _repository.groupChats()) chat.groupDid,
+    };
+    for (final community in await _vtc.memberships()) {
+      final identity = _identityOf(community);
+      if (identity == null) continue;
+      final List<VtcGroupListing> listings;
+      try {
+        listings = await _vtc.memberGroups(community.communityDid);
+      } on VtaNotLinkedException {
+        return;
+      } on MeetingPlaceVtcSDKException catch (error) {
+        _logFailure('reading groups', error.code.name);
+        continue;
+      }
+      for (final VtcGroupListing(:group, :standing) in listings) {
+        if (standing != GroupStanding.member ||
+            joined.contains(group.groupDid)) {
+          continue;
+        }
+        try {
+          await joinChat(community.communityDid, group, identity: identity);
+          joined.add(group.groupDid);
+        } on VtcGroupChatException {
+          // Not linked or not deliverable yet: tried again next time.
+        } on Exception catch (error) {
+          _logFailure('joining a group chat', error.runtimeType);
+        }
+      }
+    }
+  }
+
+  /// Who may post in the community group chat [chatGroupId], which the
+  /// member on this phone talks in as [channel]: null when everyone may, or
+  /// the chat follows no community group.
+  ///
+  /// Throws the Meeting Place error when the chat cannot be read.
+  Future<VtcChatPosting?> postingIn(
+    Channel channel, {
+    required String chatGroupId,
+  }) async {
+    final chat = (await _repository.groupChats())
+        .where((chat) => chat.chatGroupId == chatGroupId)
+        .firstOrNull;
+    if (chat == null || chat.posting == GroupChatPosting.everyone) {
+      return null;
+    }
+    final sdk = await _ref.read(meetingPlaceSdkProvider.future);
+    return VtcChatPosting(
+      posters: await sdk.groupModerators(channel),
+      memberDid: channel.permanentChannelDid!,
     );
   }
 
@@ -336,21 +438,36 @@ class VtcGroupChatService {
     );
   }
 
-  /// Brings every chat this phone owns in step with its group: removes
-  /// those the community no longer lists as active members, and makes the
-  /// group's managers, and only them, moderators.
+  /// Brings every chat this phone owns or joined in step with its group:
+  /// reads who may post from the community's link again, and, in a chat
+  /// this phone owns, removes those the community no longer lists as active
+  /// members, and makes the group's managers, and only them, moderators.
   ///
   /// A chat whose group cannot be read now is left as it is.
   Future<void> syncChats() async {
     final sdk = await _ref.read(meetingPlaceSdkProvider.future);
     for (final chat in await _repository.groupChats()) {
-      if (!chat.isOwner || chat.members.isEmpty) continue;
       try {
-        await _sync(sdk, chat);
+        final current = await _readPosting(chat);
+        if (current.isOwner && current.members.isNotEmpty) {
+          await _sync(sdk, current);
+        }
       } on MeetingPlaceVtcSDKException catch (error) {
         _logFailure('reading a group', error.code.name);
+      } on Exception catch (error) {
+        _logFailure('resolving a group', error.runtimeType);
       }
     }
+  }
+
+  /// [chat] with who may post as the community's link says now, kept when
+  /// it changed. A link the community withdrew changes nothing.
+  Future<VtcGroupChat> _readPosting(VtcGroupChat chat) async {
+    final link = await _vtc.groupChatLink(chat.groupDid);
+    if (link == null || link.posting == chat.posting) return chat;
+    final updated = chat.copyWith(posting: link.posting);
+    await _repository.saveGroupChat(updated);
+    return updated;
   }
 
   Future<void> _sync(MeetingPlaceCoreSDK sdk, VtcGroupChat chat) async {

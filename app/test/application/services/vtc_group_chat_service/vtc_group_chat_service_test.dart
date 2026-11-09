@@ -4,15 +4,21 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
+import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service.dart';
+import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service_state.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_group_chat_service/vtc_group_chat_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
+import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
+import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_community.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_group_chat.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_logger_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/meeting_place_sdk_provider.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
 
+import '../../../fakes/fake_connection_offers.dart';
 import '../../../fakes/fake_contacts.dart';
 import '../../../fakes/fake_identities.dart';
+import '../../../fakes/fake_identities_service.dart';
 import '../../../mocks/fake_app_logger.dart';
 
 const _communityDid = 'did:webvh:QmVtc:vtc.example';
@@ -84,6 +90,22 @@ class _FakeVtcService extends Fake implements VtcService {
     return VtcGroupListing(group: group, standing: GroupStanding.member);
   }
 
+  /// The communities the member belongs to, and each one's groups.
+  List<VtcCommunity> communities = const [];
+  Map<String, List<VtcGroupListing>> groupsOf = const {};
+
+  @override
+  Future<List<VtcCommunity>> memberships() async => communities;
+
+  @override
+  Future<VtcCommunity?> community(String communityDid) async => communities
+      .where((community) => community.communityDid == communityDid)
+      .firstOrNull;
+
+  @override
+  Future<List<VtcGroupListing>> memberGroups(String communityDid) async =>
+      groupsOf[communityDid] ?? const [];
+
   @override
   Future<GroupChatLink?> groupChatLink(String groupDid) async => link;
 
@@ -140,7 +162,62 @@ class _FakeSdk extends Fake implements MeetingPlaceMatrixSDK {
   @override
   Future<FindOfferResult> findOffer({required String mnemonic}) async =>
       FindOfferResult(connectionOffer: offerToFind);
+
+  Set<String> chatModerators = const {};
+
+  @override
+  Future<Set<String>> groupModerators(Channel channel) async => chatModerators;
 }
+
+/// Records the chats it is asked to join instead of joining them.
+class _JoinRecordingService extends VtcGroupChatService {
+  _JoinRecordingService(super.ref, {super.repository});
+
+  final joined = <(String, String, String)>[];
+
+  /// Groups whose chat cannot be joined yet.
+  Set<String> notYetJoinable = const {};
+
+  @override
+  Future<void> joinChat(
+    String communityDid,
+    VtcGroup group, {
+    required Identity identity,
+  }) async {
+    if (notYetJoinable.contains(group.groupId)) {
+      throw const VtcGroupChatException(VtcGroupChatFailure.notLinked);
+    }
+    joined.add((communityDid, group.groupId, identity.id));
+  }
+}
+
+VtcGroupListing _listing(
+  String groupId, {
+  GroupStanding standing = GroupStanding.member,
+}) => VtcGroupListing(
+  group: VtcGroup(
+    groupId: groupId,
+    groupDid: groupId == 'g1' ? _groupDid : '$_groupDid-$groupId',
+    name: groupId,
+    isDynamic: true,
+    visibility: GroupAudience.members,
+    showMembers: GroupAudience.groupMembers,
+  ),
+  standing: standing,
+);
+
+Channel _chatChannel() => Channel(
+  offerLink: 'offer://chat',
+  publishOfferDid: 'did:key:oob',
+  mediatorDid: 'did:web:mediator.example',
+  status: ChannelStatus.inaugurated,
+  type: ChannelType.group,
+  transport: ChannelTransport.matrix,
+  isConnectionInitiator: false,
+  contactCard: FakeContacts.sdkContactCard,
+  permanentChannelDid: _memberDid,
+  otherPartyPermanentChannelDid: _groupDid,
+);
 
 Channel _joinRequest({String memberDid = _memberDid}) => Channel(
   offerLink: 'offer://chat',
@@ -175,8 +252,7 @@ void main() {
     isOwner: true,
   );
 
-  Future<VtcGroupChat> stored() async =>
-      (await repository.groupChats()).single;
+  Future<VtcGroupChat> stored() async => (await repository.groupChats()).single;
 
   setUp(() async {
     FlutterSecureStorage.setMockInitialValues({});
@@ -340,6 +416,152 @@ void main() {
     });
   });
 
+  group('VtcGroupChatService.syncChats posting', () {
+    test("reads who may post from the community's link again", () async {
+      vtc.link = const GroupChatLink(
+        mnemonic: 'identity-wg',
+        controlPlaneDid: 'did:web:control-plane.example',
+        posting: GroupChatPosting.managers,
+      );
+
+      await service.syncChats();
+
+      expect((await stored()).posting, GroupChatPosting.managers);
+    });
+
+    test('keeps who may post when the link is gone', () async {
+      await repository.saveGroupChat(
+        ownedChat.copyWith(posting: GroupChatPosting.managers),
+      );
+
+      await service.syncChats();
+
+      expect((await stored()).posting, GroupChatPosting.managers);
+    });
+  });
+
+  group('VtcGroupChatService.postingIn', () {
+    test('lets everyone post where the link lets everyone', () async {
+      expect(
+        await service.postingIn(_chatChannel(), chatGroupId: 'chat-1'),
+        isNull,
+      );
+    });
+
+    test("lets only the chat's moderators post where only managers "
+        'do', () async {
+      await repository.saveGroupChat(
+        ownedChat.copyWith(posting: GroupChatPosting.managers),
+      );
+      sdk.chatModerators = {_ownerDid};
+
+      final posting = await service.postingIn(
+        _chatChannel(),
+        chatGroupId: 'chat-1',
+      );
+
+      expect(posting!.canPost, isFalse);
+      expect(posting.allows(_ownerDid), isTrue);
+      expect(posting.allows(_memberDid), isFalse);
+    });
+
+    test('knows nothing of a chat that follows no group', () async {
+      expect(
+        await service.postingIn(_chatChannel(), chatGroupId: 'other'),
+        isNull,
+      );
+    });
+  });
+
+  group('VtcGroupChatService.joinGroupChats', () {
+    late _JoinRecordingService joining;
+    final member = FakeIdentities.primaryIdentity;
+
+    setUp(() {
+      vtc.communities = [
+        VtcCommunity(
+          communityDid: _communityDid,
+          personaDid: member.did,
+          contextId: 'mpx-1',
+        ),
+      ];
+      final container = ProviderContainer(
+        overrides: [
+          vtcServiceProvider.overrideWithValue(vtc),
+          meetingPlaceSdkProvider.overrideWith((ref) async => sdk),
+          appLoggerProvider.overrideWithValue(FakeAppLogger()),
+          identitiesServiceProvider.overrideWith(
+            () => FakeIdentitiesService(
+              IdentitiesServiceState(identities: [member]),
+            ),
+          ),
+          vtcGroupChatServiceProvider.overrideWith(
+            (ref) => _JoinRecordingService(ref, repository: repository),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      joining =
+          container.read(vtcGroupChatServiceProvider) as _JoinRecordingService;
+    });
+
+    test("joins the chats of the member's groups as the identity that is "
+        'the member, but not one it has', () async {
+      vtc.groupsOf = {
+        _communityDid: [_listing('g1'), _listing('announcements')],
+      };
+
+      await joining.joinGroupChats();
+
+      expect(joining.joined, [(_communityDid, 'announcements', member.id)]);
+    });
+
+    test('joins only groups the member is in', () async {
+      vtc.groupsOf = {
+        _communityDid: [_listing('requested', standing: GroupStanding.pending)],
+      };
+
+      await joining.joinGroupChats();
+
+      expect(joining.joined, isEmpty);
+    });
+
+    test('tries a chat it could not join again next time', () async {
+      vtc.groupsOf = {
+        _communityDid: [_listing('announcements')],
+      };
+      joining.notYetJoinable = {'announcements'};
+
+      await joining.joinGroupChats();
+      joining.notYetJoinable = const {};
+      await joining.joinGroupChats();
+
+      expect(joining.joined, [(_communityDid, 'announcements', member.id)]);
+    });
+
+    test('names the identity that is the member as the one to act', () async {
+      expect((await joining.memberIdentity(_communityDid))?.id, member.id);
+      expect(await joining.memberIdentity('did:webvh:QmOther:x'), isNull);
+    });
+
+    test('leaves a community whose member is not on this phone', () async {
+      vtc.communities = const [
+        VtcCommunity(
+          communityDid: _communityDid,
+          personaDid: 'did:webvh:elsewhere',
+          contextId: 'mpx-2',
+        ),
+      ];
+      vtc.groupsOf = {
+        _communityDid: [_listing('announcements')],
+      };
+
+      await joining.joinGroupChats();
+
+      expect(joining.joined, isEmpty);
+    });
+  });
+
   group('VtcGroupChatService.createChat', () {
     test('refuses a member who does not manage the group', () async {
       vtc.managers = const [];
@@ -423,6 +645,30 @@ void main() {
   });
 
   group('VtcGroupChatService.joinChat', () {
+    test("refuses an offer that names another group's DID", () async {
+      vtc.link = const GroupChatLink(
+        mnemonic: 'my-group-passphrase',
+        // This app's control plane, as the tests build it: none.
+        controlPlaneDid: '',
+      );
+      sdk.offerToFind = FakeConnectionOffers.groupOfferOwnedByMe;
+
+      await expectLater(
+        service.joinChat(
+          _communityDid,
+          vtc.group,
+          identity: FakeIdentities.primaryIdentity,
+        ),
+        throwsA(
+          isA<VtcGroupChatException>().having(
+            (e) => e.failure,
+            'failure',
+            VtcGroupChatFailure.notTheGroupsChat,
+          ),
+        ),
+      );
+    });
+
     test('refuses when the community linked no chat', () async {
       await expectLater(
         service.joinChat(

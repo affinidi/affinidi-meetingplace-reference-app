@@ -30,6 +30,10 @@ enum VtcGroupsFailure {
 
   /// The community or the VTA could not be reached.
   unreachable,
+
+  /// This phone holds no confirmed membership of the community yet, such as
+  /// right after a request is approved, before the app has heard of it.
+  notAMember,
 }
 
 /// The member's groups in one community, and their chats.
@@ -42,6 +46,10 @@ abstract class VtcGroupsState with _$VtcGroupsState {
     /// Each group's chat, by group id.
     @Default(<String, VtcGroupChatStatus>{})
     Map<String, VtcGroupChatStatus> chats,
+
+    /// Until when the member's credential of each group holds, by group id;
+    /// a group missing has none on the member's VTA yet.
+    @Default(<String, DateTime>{}) Map<String, DateTime> credentialsUntil,
 
     /// Groups with an action under way, by id.
     @Default(<String>{}) Set<String> busy,

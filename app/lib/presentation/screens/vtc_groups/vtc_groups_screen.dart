@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../application/services/vtc_group_chat_service/vtc_group_chat_service.dart';
@@ -74,6 +75,7 @@ class VtcGroupsScreen extends ConsumerWidget {
         VtcGroupsState(failure: final failure?) => _Message(switch (failure) {
           VtcGroupsFailure.vtaMissing => l10n.vtcGroupsVtaMissing,
           VtcGroupsFailure.unreachable => l10n.vtcGroupsUnreachable,
+          VtcGroupsFailure.notAMember => l10n.vtcGroupsNotAMember,
         }),
         VtcGroupsState(groups: []) => _Message(l10n.vtcGroupsNone),
         _ => SingleChildScrollView(
@@ -96,7 +98,16 @@ class VtcGroupsScreen extends ConsumerWidget {
                       state.chats[listing.group.groupId] ??
                       VtcGroupChatStatus.unknown,
                   isBusy: state.busy.contains(listing.group.groupId),
-                  onCreate: () => controller.createChat(listing.group),
+                  credentialUntil:
+                      state.credentialsUntil[listing.group.groupId],
+                  onCreate: () async {
+                    final posting = await _askPosting(context);
+                    if (posting == null) return;
+                    await controller.createChat(
+                      listing.group,
+                      posting: posting,
+                    );
+                  },
                   onJoin: () => controller.joinChat(listing.group),
                 ),
             ],
@@ -118,6 +129,7 @@ class VtcGroupsScreen extends ConsumerWidget {
       VtcGroupChatFailure.otherMeetingPlace => l10n.vtcGroupChatElsewhere,
       VtcGroupChatFailure.notTheGroupsChat => l10n.vtcGroupChatNotTheGroups,
       VtcGroupChatFailure.noGroupCredential => l10n.vtcGroupChatNoCredential,
+      VtcGroupChatFailure.memberNotHere => l10n.vtcGroupChatMemberNotHere,
     };
   }
 }
@@ -149,11 +161,16 @@ class _GroupCard extends StatelessWidget {
     required this.isBusy,
     required this.onCreate,
     required this.onJoin,
+    this.credentialUntil,
   });
 
   final VtcGroup group;
   final VtcGroupChatStatus status;
   final bool isBusy;
+
+  /// Until when the member's credential of the group holds, when their VTA
+  /// keeps one.
+  final DateTime? credentialUntil;
   final VoidCallback onCreate;
   final VoidCallback onJoin;
 
@@ -197,6 +214,14 @@ class _GroupCard extends StatelessWidget {
               icon: Icons.badge_outlined,
               title: l10n.vtcCommunityRole,
               subtitle: l10n.vtcGroupManager,
+            ),
+          if (credentialUntil case final until?)
+            _Line(
+              icon: Icons.verified_outlined,
+              title: l10n.vtcGroupCredential,
+              subtitle: l10n.vtcGroupCredentialUntil(
+                DateFormat.yMMMd(l10n.localeName).format(until.toLocal()),
+              ),
             ),
           _Line(
             icon: Icons.forum_outlined,
@@ -272,6 +297,41 @@ class _Line extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Asks the manager who may post in the chat about to be created; null when
+/// they dismiss the question.
+Future<GroupChatPosting?> _askPosting(BuildContext context) {
+  final l10n = context.l10n;
+  return showDialog<GroupChatPosting>(
+    context: context,
+    builder: (context) => SimpleDialog(
+      title: Text(l10n.vtcGroupChatPostingTitle),
+      children: [
+        for (final (posting, title, subtitle) in [
+          (
+            GroupChatPosting.everyone,
+            l10n.vtcGroupChatPostingEveryone,
+            l10n.vtcGroupChatPostingEveryoneHint,
+          ),
+          (
+            GroupChatPosting.managers,
+            l10n.vtcGroupChatPostingManagers,
+            l10n.vtcGroupChatPostingManagersHint,
+          ),
+        ])
+          SimpleDialogOption(
+            key: Key('vtc_group_posting_${posting.name}'),
+            onPressed: () => Navigator.of(context).pop(posting),
+            child: ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(title),
+              subtitle: Text(subtitle),
+            ),
+          ),
+      ],
+    ),
+  );
 }
 
 /// The service entry the community's operator adds to the group's DID

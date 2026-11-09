@@ -3638,6 +3638,10 @@
 	"@vtcGroupsVtaMissing": {
 		"description": "Shown when no VTA is linked, so groups cannot be read"
 	},
+	"vtcGroupsNotAMember": "This phone hasn't confirmed your membership yet. Open the community to check, then try again.",
+	"@vtcGroupsNotAMember": {
+		"description": "Shown instead of a community's groups when the phone holds no confirmed membership of it"
+	},
 	"vtcGroupsUnreachable": "Your groups couldn't be loaded. Check your connection and try again.",
 	"@vtcGroupsUnreachable": {
 		"description": "Shown when the community or the VTA cannot be reached"
@@ -3649,6 +3653,43 @@
 	"vtcGroupChatHeading": "Group chat",
 	"@vtcGroupChatHeading": {
 		"description": "Heading of where a group's chat stands, and of its link"
+	},
+	"vtcGroupChatPostingTitle": "Who can post in this chat?",
+	"@vtcGroupChatPostingTitle": {
+		"description": "Question a group's manager answers when creating its chat"
+	},
+	"vtcGroupChatPostingEveryone": "Everyone in the group",
+	"@vtcGroupChatPostingEveryone": {
+		"description": "Choice letting every member of a group post in its chat"
+	},
+	"vtcGroupChatPostingEveryoneHint": "Every member reads and posts.",
+	"@vtcGroupChatPostingEveryoneHint": {
+		"description": "What choosing that every member posts means"
+	},
+	"vtcGroupChatPostingManagers": "Only the group's managers",
+	"@vtcGroupChatPostingManagers": {
+		"description": "Choice letting only a group's managers post in its chat"
+	},
+	"vtcGroupChatPostingManagersHint": "Members only read, as in announcements.",
+	"@vtcGroupChatPostingManagersHint": {
+		"description": "What choosing that only managers post means"
+	},
+	"vtcGroupChatReadOnly": "Only the group's managers post in this chat.",
+	"@vtcGroupChatReadOnly": {
+		"description": "Shown instead of the message box in a group chat where only managers post"
+	},
+	"vtcGroupCredential": "Group credential",
+	"@vtcGroupCredential": {
+		"description": "Heading of the member's credential of a community group"
+	},
+	"vtcGroupCredentialUntil": "Valid until {date}",
+	"@vtcGroupCredentialUntil": {
+		"description": "Until when the member's credential of a community group holds",
+		"placeholders": {
+			"date": {
+				"type": "String"
+			}
+		}
 	},
 	"vtcGroupChatUnknown": "This group's chat couldn't be checked.",
 	"@vtcGroupChatUnknown": {
@@ -3701,6 +3742,10 @@
 	"vtcGroupChatNotTheGroups": "The linked chat isn't this group's. Ask one of its managers.",
 	"@vtcGroupChatNotTheGroups": {
 		"description": "Shown when the linked offer is not for the group's DID"
+	},
+	"vtcGroupChatMemberNotHere": "The identity that is your membership of this community isn't on this phone.",
+	"@vtcGroupChatMemberNotHere": {
+		"description": "Why a group chat could not be created or joined: the member identity is on another phone"
 	},
 	"vtcGroupChatNoCredential": "Your VTA doesn't have this group's membership credential yet. Try again later.",
 	"@vtcGroupChatNoCredential": {
