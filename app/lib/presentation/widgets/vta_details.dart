@@ -8,15 +8,13 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../application/services/vtc_service/vtc_service.dart';
 import '../../infrastructure/extensions/build_context_extensions.dart';
 import '../../l10n/app_localizations.dart';
-import '../themes/tokens/mc_colors.dart';
 import '../themes/tokens/mc_icons.dart';
+import '../themes/tokens/mc_radius.dart';
 
-/// Where an identity lives on the member's VTA: its context, its profile,
-/// and the profile as the VTA keeps it. Collapsed to the VTA's shield until
-/// the member taps it; the profile is read from the VTA the first time it
-/// is opened.
-class VtaDetails extends HookConsumerWidget {
-  const VtaDetails({
+/// The VTA's shield, as in the trail diagrams, beside an identity's name:
+/// opens [showVtaDetails] for where the identity lives on the VTA.
+class VtaDetailsButton extends StatelessWidget {
+  const VtaDetailsButton({
     super.key,
     required this.contextId,
     required this.profileId,
@@ -26,103 +24,142 @@ class VtaDetails extends HookConsumerWidget {
   final String contextId;
   final String profileId;
 
-  /// Text and icon colour, for a section on a dark card; else the theme's.
+  /// The icon's colour, for a dark card; else the theme's.
   final Color? color;
 
-  static const _animation = Duration(milliseconds: 200);
-  static const _iconSize = 16.0;
-  static const _tapRadius = 20.0;
+  static const _iconSize = 20.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      key: const Key('vta_details_toggle'),
+      tooltip: context.l10n.vtaDetailsTitle,
+      visualDensity: VisualDensity.compact,
+      icon: Icon(McIcons.shield, size: _iconSize, color: color),
+      onPressed: () =>
+          showVtaDetails(context, contextId: contextId, profileId: profileId),
+    );
+  }
+}
+
+/// Shows where an identity lives on the member's VTA in a sheet: its
+/// context, its profile, and the profile as the VTA keeps it, read from the
+/// VTA as the sheet opens.
+Future<void> showVtaDetails(
+  BuildContext context, {
+  required String contextId,
+  required String profileId,
+}) => showModalBottomSheet<void>(
+  context: context,
+  useRootNavigator: true,
+  isScrollControlled: true,
+  useSafeArea: true,
+  backgroundColor: Colors.transparent,
+  builder: (_) => _VtaDetailsSheet(contextId: contextId, profileId: profileId),
+);
+
+class _VtaDetailsSheet extends HookConsumerWidget {
+  const _VtaDetailsSheet({required this.contextId, required this.profileId});
+
+  final String contextId;
+  final String profileId;
+
+  static const _radius = Radius.circular(McRadius.xl);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final foreground = color ?? context.colorScheme.onSurface;
-    final expanded = useState(false);
-    final document = useState<Future<Map<String, dynamic>>?>(null);
-
-    void load() => document.value = ref
+    final mc = context.mcColors;
+    final colors = context.colorScheme;
+    Future<Map<String, dynamic>> read() => ref
         .read(vtcServiceProvider)
         .identityProfileDocument(contextId: contextId, profileId: profileId);
+    final document = useState(useMemoized(read));
 
-    void toggle() {
-      expanded.value = !expanded.value;
-      if (expanded.value && document.value == null) load();
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // The VTA's shield, as in the trail diagrams, opens and closes the
-        // details; open, it turns blue and names what it shows.
-        // The title starts where a detail row's text does: the tap area's
-        // padding is the rows' gap.
-        Row(
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.6,
+      minChildSize: 0.4,
+      maxChildSize: 0.95,
+      builder: (context, scrollController) => DecoratedBox(
+        decoration: BoxDecoration(
+          color: mc.raised,
+          borderRadius: const BorderRadius.vertical(top: _radius),
+          border: Border(top: BorderSide(color: mc.hairline)),
+        ),
+        child: ListView(
+          key: const Key('vta_details_sheet'),
+          controller: scrollController,
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
           children: [
-            // Drawn at a detail row's icon size, so it lines up with the
-            // icons above it; the tap area reaches past it to the end.
-            Semantics(
-              button: true,
-              toggled: expanded.value,
-              child: Tooltip(
-                message: l10n.vtaDetailsTitle,
-                child: InkResponse(
-                  key: const Key('vta_details_toggle'),
-                  onTap: toggle,
-                  radius: _tapRadius,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 8, 8, 8),
-                    child: Icon(
-                      McIcons.shield,
-                      size: _iconSize,
-                      color: expanded.value ? McColors.blue : foreground,
-                    ),
-                  ),
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(top: 10, bottom: 6),
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: mc.hairlineStrong,
+                  borderRadius: BorderRadius.circular(McRadius.xs),
                 ),
               ),
             ),
-            if (expanded.value)
-              Expanded(
-                child: Text(
-                  l10n.vtaDetailsTitle,
-                  style: context.textTheme.labelLarge?.copyWith(
-                    color: foreground,
-                    fontWeight: FontWeight.bold,
+            Padding(
+              padding: const EdgeInsets.only(top: 8, bottom: 16),
+              child: Row(
+                spacing: 12,
+                children: [
+                  CircleAvatar(
+                    radius: 20,
+                    backgroundColor: colors.primaryContainer,
+                    child: Icon(
+                      McIcons.shield,
+                      color: colors.onPrimaryContainer,
+                    ),
                   ),
-                ),
-              ),
-          ],
-        ),
-        AnimatedSize(
-          duration: _animation,
-          alignment: Alignment.topCenter,
-          child: expanded.value
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  spacing: 8,
-                  children: [
-                    _Field(
-                      label: l10n.vtaDetailsContextId,
-                      value: contextId,
-                      color: foreground,
-                    ),
-                    _Field(
-                      label: l10n.vtaDetailsProfileId,
-                      value: profileId,
-                      color: foreground,
-                    ),
-                    FutureBuilder(
-                      future: document.value,
-                      builder: (context, snapshot) => _Profile(
-                        snapshot: snapshot,
-                        onRetry: load,
-                        color: foreground,
+                  Expanded(
+                    child: Text(
+                      l10n.vtaDetailsTitle,
+                      style: context.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                  ],
-                )
-              : const SizedBox(width: double.infinity),
+                  ),
+                  IconButton(
+                    key: const Key('vta_details_close'),
+                    icon: const Icon(McIcons.close),
+                    tooltip: l10n.generalClose,
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: 12,
+              children: [
+                _Field(
+                  label: l10n.vtaDetailsContextId,
+                  value: contextId,
+                  color: mc.textPrimary,
+                ),
+                _Field(
+                  label: l10n.vtaDetailsProfileId,
+                  value: profileId,
+                  color: mc.textPrimary,
+                ),
+                FutureBuilder(
+                  future: document.value,
+                  builder: (context, snapshot) => _Profile(
+                    snapshot: snapshot,
+                    onRetry: () => document.value = read(),
+                    color: mc.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

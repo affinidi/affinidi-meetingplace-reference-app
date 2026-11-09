@@ -5,7 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
-import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_colors.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/vta_details.dart';
 
@@ -43,12 +43,13 @@ void main() {
   Future<void> pump(WidgetTester tester) => tester.pumpWidget(
     ProviderScope(
       overrides: [vtcServiceProvider.overrideWithValue(vtc)],
-      child: const MaterialApp(
+      child: MaterialApp(
+        theme: AppTheme.dark,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(
-          body: SingleChildScrollView(
-            child: VtaDetails(contextId: 'mpx-1', profileId: '01PROFILE'),
+        home: const Scaffold(
+          body: Center(
+            child: VtaDetailsButton(contextId: 'mpx-1', profileId: '01PROFILE'),
           ),
         ),
       ),
@@ -56,7 +57,7 @@ void main() {
   );
 
   // The fake VTA answers over a real HTTP stack, outside the fake clock.
-  // A frame first, so the section listens before the VTA answers.
+  // A frame first, so the sheet listens before the VTA answers.
   Future<void> answered(WidgetTester tester) async {
     await tester.pump();
     await tester.runAsync(
@@ -70,30 +71,26 @@ void main() {
     await answered(tester);
   }
 
-  group('VtaDetails', () {
-    testWidgets('is collapsed, and reads nothing, until opened', (
+  group('VtaDetailsButton', () {
+    testWidgets('shows the shield, and reads nothing, until tapped', (
       tester,
     ) async {
       await pump(tester);
 
       expect(find.byIcon(McIcons.shield), findsOneWidget);
       expect(find.byTooltip('VTA details'), findsOneWidget);
-      expect(find.text('VTA details'), findsNothing);
-      expect(find.text('Context ID'), findsNothing);
       expect(find.text('mpx-1'), findsNothing);
       expect(profileReads(), isEmpty);
     });
 
-    testWidgets('shows the context, the profile and its JSON', (tester) async {
+    testWidgets('opens a sheet of the context, the profile and its JSON', (
+      tester,
+    ) async {
       await pump(tester);
       await open(tester);
 
+      expect(find.byKey(const Key('vta_details_sheet')), findsOneWidget);
       expect(find.text('VTA details'), findsOneWidget);
-      expect(
-        tester.widget<Icon>(find.byIcon(McIcons.shield)).color,
-        McColors.blue,
-      );
-
       expect(find.text('mpx-1'), findsOneWidget);
       expect(find.text('01PROFILE'), findsOneWidget);
       final json = tester
@@ -106,17 +103,14 @@ void main() {
       expect(profileReads(), hasLength(1));
     });
 
-    testWidgets('reads the profile once, however often opened', (tester) async {
+    testWidgets('closes the sheet', (tester) async {
       await pump(tester);
       await open(tester);
-      await tester.tap(find.byKey(const Key('vta_details_toggle')));
+
+      await tester.tap(find.byKey(const Key('vta_details_close')));
       await tester.pumpAndSettle();
-      expect(find.text('mpx-1'), findsNothing);
 
-      await open(tester);
-
-      expect(find.text('mpx-1'), findsOneWidget);
-      expect(profileReads(), hasLength(1));
+      expect(find.byKey(const Key('vta_details_sheet')), findsNothing);
     });
 
     testWidgets('copies the whole profile', (tester) async {

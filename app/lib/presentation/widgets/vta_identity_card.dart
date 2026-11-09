@@ -15,9 +15,9 @@ import 'vta_details.dart';
 
 /// A VTA identity as a card in the shape of an MPX identity card, a panel
 /// over the gradient: its picture centred over the card's upper edge,
-/// its name, the details its profile holds, its full DID as metadata, and
-/// where it lives on the VTA, collapsed. A null [did] is the new identity
-/// the VTA would create.
+/// its name, with the VTA's shield beside it for where it lives on the VTA,
+/// the details its profile holds, and its full DID as metadata. A null
+/// [did] is the new identity the VTA would create.
 class VtaIdentityCard extends ConsumerWidget {
   const VtaIdentityCard({
     super.key,
@@ -100,18 +100,34 @@ class VtaIdentityCard extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     spacing: 6,
                     children: [
-                      Text(
-                        did == null
-                            ? l10n.vtcJoinNewIdentity
-                            : displayName.isNotEmpty
-                            ? displayName
-                            : l10n.vtcJoinExistingIdentity,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                        style: textTheme.titleMedium?.copyWith(
-                          color: mc.textPrimary,
-                        ),
+                      // The VTA's shield beside the name, for an identity
+                      // there.
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              did == null
+                                  ? l10n.vtcJoinNewIdentity
+                                  : displayName.isNotEmpty
+                                  ? displayName
+                                  : l10n.vtcJoinExistingIdentity,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                              style: textTheme.titleMedium?.copyWith(
+                                color: mc.textPrimary,
+                              ),
+                            ),
+                          ),
+                          if (identity != null && identity.isVtaPersona)
+                            VtaDetailsButton(
+                              key: ValueKey(identity.id),
+                              contextId: identity.vtaContextId!,
+                              profileId: identity.vtaProfileId!,
+                              color: mc.textSecondary,
+                            ),
+                        ],
                       ),
                       if (missingCredential)
                         Row(
@@ -149,15 +165,6 @@ class VtaIdentityCard extends ConsumerWidget {
                         if (details.isNotEmpty)
                           Divider(height: 12, color: mc.hairline),
                         _DidMetadata(did: did),
-                        if (identity != null && identity.isVtaPersona) ...[
-                          Divider(height: 12, color: mc.hairline),
-                          VtaDetails(
-                            key: ValueKey(identity.id),
-                            contextId: identity.vtaContextId!,
-                            profileId: identity.vtaProfileId!,
-                            color: mc.textSecondary,
-                          ),
-                        ],
                       ],
                     ],
                   ),

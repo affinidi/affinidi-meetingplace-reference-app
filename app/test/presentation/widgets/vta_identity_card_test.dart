@@ -205,15 +205,22 @@ void main() {
       expect(find.byIcon(McIcons.email), findsNothing);
     });
 
-    testWidgets('shows where an identity on the VTA lives, collapsed', (
-      tester,
-    ) async {
+    testWidgets('puts the VTA details beside the name', (tester) async {
       await _pump(
         tester,
         VtaIdentityCard(did: _did, identity: _identity(_card, onVta: true)),
       );
 
-      expect(find.byKey(const Key('vta_details_toggle')), findsOneWidget);
+      final shield = tester.getRect(
+        find.byKey(const Key('vta_details_toggle')),
+      );
+      final name = tester.getRect(find.text('Ada L'));
+      expect(shield.center.dy, moreOrLessEquals(name.center.dy, epsilon: 1));
+      expect(
+        shield.left,
+        greaterThanOrEqualTo(name.right),
+        reason: 'beside the name',
+      );
       expect(find.text('mpx-1'), findsNothing);
     });
 
@@ -228,9 +235,7 @@ void main() {
       expect(find.byKey(const Key('vta_details_toggle')), findsNothing);
     });
 
-    testWidgets('scrolls the opened VTA details in a slot of fixed height', (
-      tester,
-    ) async {
+    testWidgets('opens the VTA details in a sheet', (tester) async {
       final vta = FakeVta()
         ..answers[VtaTask.localProfileGet] = {
           'profile': {'profileId': '01PROFILE', 'entries': <Object>[]},
@@ -260,7 +265,7 @@ void main() {
       );
 
       await tester.tap(find.byKey(const Key('vta_details_toggle')));
-      // A frame first, so the section listens before the VTA answers.
+      // A frame first, so the sheet listens before the VTA answers.
       await tester.pump();
       await tester.runAsync(
         () => Future<void>.delayed(const Duration(milliseconds: 200)),
@@ -268,18 +273,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
+      expect(find.byKey(const Key('vta_details_sheet')), findsOneWidget);
       expect(find.byKey(const Key('vta_details_profile')), findsOneWidget);
-      await tester.scrollUntilVisible(
-        find.text('01PROFILE'),
-        50,
-        // The card's own; selectable text brings scrollables of its own.
-        scrollable: find
-            .descendant(
-              of: find.byType(VtaIdentityCard),
-              matching: find.byType(Scrollable),
-            )
-            .first,
-      );
       expect(find.text('01PROFILE'), findsOneWidget);
     });
   });

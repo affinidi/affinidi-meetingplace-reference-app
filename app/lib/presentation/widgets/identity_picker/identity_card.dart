@@ -63,21 +63,18 @@ class IdentityCard extends StatelessWidget {
           ),
           child: Stack(
             children: [
-              // Scrolls once opened VTA details outgrow the card's slot.
-              SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _IdentityHeader(
-                      identity: identity,
-                      identityCardSize: identityCardSize,
-                    ),
-                    _IdentityContentSection(
-                      identity: identity,
-                      identityCardSize: identityCardSize,
-                    ),
-                  ],
-                ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _IdentityHeader(
+                    identity: identity,
+                    identityCardSize: identityCardSize,
+                  ),
+                  _IdentityContentSection(
+                    identity: identity,
+                    identityCardSize: identityCardSize,
+                  ),
+                ],
               ),
               _IdentityProfilePicture(
                 identity: identity,
@@ -139,15 +136,28 @@ class _IdentityHeader extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   softWrap: true,
                 ),
-                Text(
-                  identity.getDisplayName(l10n: l10n),
-                  style:
-                      (identityCardSize.isSmall
-                              ? textTheme.titleMedium
-                              : textTheme.titleLarge)
-                          ?.copyWith(color: mc.textPrimary),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                // The VTA's shield beside the name, for an identity there.
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        identity.getDisplayName(l10n: l10n),
+                        style:
+                            (identityCardSize.isSmall
+                                    ? textTheme.titleMedium
+                                    : textTheme.titleLarge)
+                                ?.copyWith(color: mc.textPrimary),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (identity.isVtaPersona)
+                      VtaDetailsButton(
+                        contextId: identity.vtaContextId!,
+                        profileId: identity.vtaProfileId!,
+                        color: mc.textSecondary,
+                      ),
+                  ],
                 ),
               ],
             ),
@@ -191,22 +201,12 @@ class _IdentityContentSection extends StatelessWidget {
   final Identity identity;
   final IdentityCardSize identityCardSize;
 
-  /// Room under the content for the action button: its offset from the
-  /// card's foot, its padding and its height. Opened VTA details scroll
-  /// clear of it.
-  static const _actionReserve = 50.0 + 24.0 + 70.0;
-
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: identityCardSize.isSmall
           ? const EdgeInsets.only(top: 4, left: 20, right: 20)
-          : EdgeInsets.only(
-              top: 48,
-              left: 24,
-              right: 24,
-              bottom: identity.isVtaPersona ? _actionReserve : 0,
-            ),
+          : const EdgeInsets.only(top: 48, left: 24, right: 24),
       child: _IdentityContent(
         identity: identity,
         identityCardSize: identityCardSize,
@@ -267,13 +267,6 @@ class _IdentityContent extends StatelessWidget {
           ),
           SizedBox(height: identityCardSize.isSmall ? 6 : 8),
         ],
-        if (identity.isVtaPersona)
-          VtaDetails(
-            key: ValueKey(identity.id),
-            contextId: identity.vtaContextId!,
-            profileId: identity.vtaProfileId!,
-            color: context.mcColors.textSecondary,
-          ),
       ],
     );
   }
