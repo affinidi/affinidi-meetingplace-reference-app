@@ -6,6 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../domain/models/identity/identity.dart';
 import '../../infrastructure/extensions/build_context_extensions.dart';
 import '../../infrastructure/extensions/contact_card_extensions.dart';
+import '../../infrastructure/extensions/did_extensions.dart';
 import '../../infrastructure/extensions/identities_extensions.dart';
 import '../../infrastructure/providers/cache_manager_provider.dart';
 import '../themes/tokens/mc_icons.dart';
@@ -20,7 +21,7 @@ import 'vta_details.dart';
 /// A VTA identity as an MPX identity card: its picture centred over the
 /// card's upper edge, the kind of identity over its name, with the VTA's
 /// shield beside it for where it lives on the VTA, the details its profile
-/// holds as the identity card shows them, and its full DID as metadata. A null
+/// holds as the identity card shows them, and its DID as metadata. A null
 /// [did] is the new identity the VTA would create.
 class VtaIdentityCard extends ConsumerWidget {
   const VtaIdentityCard({
@@ -233,8 +234,8 @@ class _Avatar extends StatelessWidget {
   }
 }
 
-/// The identity's DID in full, set small and muted as metadata rather than
-/// as a detail of the profile.
+/// The identity's DID, its start and end only, set small and muted as
+/// metadata rather than as a detail of the profile.
 class _DidMetadata extends StatelessWidget {
   const _DidMetadata({required this.did});
 
@@ -251,9 +252,13 @@ class _DidMetadata extends StatelessWidget {
           padding: const EdgeInsets.only(top: 1),
           child: Icon(McIcons.identities, size: 14, color: mc.textTertiary),
         ),
+        // Its start and end, as DIDs are shown elsewhere; the middle tells
+        // identities apart no better.
         Expanded(
           child: Text(
-            did,
+            did.topAndTail(),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: McTypography.code.copyWith(
               color: mc.textTertiary,
               fontSize: context.textTheme.labelSmall?.fontSize,
