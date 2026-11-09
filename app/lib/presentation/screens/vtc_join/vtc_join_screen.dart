@@ -7,6 +7,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
+import '../../../domain/models/vtc/vtc_left_membership.dart';
 import '../../../domain/models/vtc/vtc_vetting.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/services/camera_service/camera_service.dart';
@@ -84,9 +85,12 @@ class VtcJoinScreen extends HookConsumerWidget {
       showBranding: state.step != VtcJoinStep.vetting,
       child: switch (state.step) {
         VtcJoinStep.scanning => _EnterCode(onSubmit: controller.onScanned),
-        VtcJoinStep.working => switch (state.openStep) {
-          final step? => Center(child: _Opening(step: step)),
-          null => const Center(child: OnboardingSpinner()),
+        VtcJoinStep.working => switch ((state.openStep, state.leaveStep)) {
+          (final step?, _) => Center(child: _Opening(step: step)),
+          (_, final step?) => Center(
+            child: _Leaving(step: step, communityName: name),
+          ),
+          _ => const Center(child: OnboardingSpinner()),
         },
         VtcJoinStep.review => _Review(
           state: state,
@@ -1822,13 +1826,49 @@ class _Opening extends StatelessWidget {
               VtcOpenStep.checkingMembership => l10n.vtcOpenStepMembership,
               VtcOpenStep.checkingCredentials => l10n.vtcOpenStepCredentials,
             },
-            stage: switch (each.index.compareTo(step.index)) {
-              < 0 => VtcTrailStage.done,
-              0 => VtcTrailStage.current,
-              _ => VtcTrailStage.next,
-            },
+            stage: _stageOf(each, step),
           ),
       ],
     );
   }
 }
+
+/// Leaving a community, step by step, as [_Opening] shows opening it.
+class _Leaving extends StatelessWidget {
+  const _Leaving({required this.step, required this.communityName});
+
+  /// The step under way.
+  final VtcLeaveStep step;
+  final String communityName;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return VtcBackgroundPanel(
+      key: const Key('vtc_join_leaving'),
+      title: l10n.vtcLeaveLoading(communityName),
+      children: [
+        for (final each in VtcLeaveStep.values)
+          VtcProgressLine(
+            key: Key('vtc_leave_step_${each.name}'),
+            title: switch (each) {
+              VtcLeaveStep.readingCard => l10n.vtcLeaveStepCard,
+              VtcLeaveStep.tellingCommunity => l10n.vtcLeaveStepTelling(
+                communityName,
+              ),
+              VtcLeaveStep.archivingCard => l10n.vtcLeaveStepArchiving,
+            },
+            stage: _stageOf(each, step),
+          ),
+      ],
+    );
+  }
+}
+
+/// How far [current] got with [step], both of the same ordered steps.
+VtcTrailStage _stageOf(Enum step, Enum current) =>
+    switch (step.index.compareTo(current.index)) {
+      < 0 => VtcTrailStage.done,
+      0 => VtcTrailStage.current,
+      _ => VtcTrailStage.next,
+    };

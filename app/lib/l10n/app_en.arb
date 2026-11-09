@@ -4319,6 +4319,32 @@
 	"@vtcOpenStepCredentials": {
 		"description": "Step of opening a community: asking the member's VTA which identities hold the credentials the community asks for"
 	},
+	"vtcLeaveLoading": "Leaving {name}…",
+	"@vtcLeaveLoading": {
+		"description": "Heading over the steps of leaving a community",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcLeaveStepCard": "Reading your membership card from your VTA, to keep a record",
+	"@vtcLeaveStepCard": {
+		"description": "Step of leaving a community: reading the card from the member's VTA, kept on the phone as a record"
+	},
+	"vtcLeaveStepTelling": "Telling {name} you're leaving",
+	"@vtcLeaveStepTelling": {
+		"description": "Step of leaving a community: sending the signed leave to the community",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcLeaveStepArchiving": "Archiving your card on your VTA",
+	"@vtcLeaveStepArchiving": {
+		"description": "Step of leaving a community: archiving the membership card on the member's VTA"
+	},
 	"vtcCardStepFinding": "Looking on your VTA for the card {name} issued you",
 	"@vtcCardStepFinding": {
 		"description": "Step of getting the membership card: asking the member's VTA for the card the community issued",

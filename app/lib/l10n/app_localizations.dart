@@ -6198,6 +6198,30 @@ abstract class AppLocalizations {
   /// **'Asking your VTA which of your identities hold what it asks for'**
   String get vtcOpenStepCredentials;
 
+  /// Heading over the steps of leaving a community
+  ///
+  /// In en, this message translates to:
+  /// **'Leaving {name}…'**
+  String vtcLeaveLoading(String name);
+
+  /// Step of leaving a community: reading the card from the member's VTA, kept on the phone as a record
+  ///
+  /// In en, this message translates to:
+  /// **'Reading your membership card from your VTA, to keep a record'**
+  String get vtcLeaveStepCard;
+
+  /// Step of leaving a community: sending the signed leave to the community
+  ///
+  /// In en, this message translates to:
+  /// **'Telling {name} you\'re leaving'**
+  String vtcLeaveStepTelling(String name);
+
+  /// Step of leaving a community: archiving the membership card on the member's VTA
+  ///
+  /// In en, this message translates to:
+  /// **'Archiving your card on your VTA'**
+  String get vtcLeaveStepArchiving;
+
   /// Step of getting the membership card: asking the member's VTA for the card the community issued
   ///
   /// In en, this message translates to:

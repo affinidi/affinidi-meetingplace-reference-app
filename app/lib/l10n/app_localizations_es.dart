@@ -4164,6 +4164,23 @@ class AppLocalizationsEs extends AppLocalizations {
       'Asking your VTA which of your identities hold what it asks for';
 
   @override
+  String vtcLeaveLoading(String name) {
+    return 'Leaving $name…';
+  }
+
+  @override
+  String get vtcLeaveStepCard =>
+      'Reading your membership card from your VTA, to keep a record';
+
+  @override
+  String vtcLeaveStepTelling(String name) {
+    return 'Telling $name you\'re leaving';
+  }
+
+  @override
+  String get vtcLeaveStepArchiving => 'Archiving your card on your VTA';
+
+  @override
   String vtcCardStepFinding(String name) {
     return 'Looking on your VTA for the card $name issued you';
   }

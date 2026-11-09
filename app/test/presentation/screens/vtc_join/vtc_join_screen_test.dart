@@ -283,7 +283,23 @@ void main() {
           matching: find.text('Leave community'),
         ),
       );
+      // The steps show once the first call to the VTA starts.
+      final leaving = find.byKey(const Key('vtc_join_leaving'));
+      for (var i = 0; i < 50 && leaving.evaluate().isEmpty; i++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 1)),
+        );
+        await tester.pump();
+      }
+      expect(leaving, findsOneWidget);
+      expect(find.text('Leaving Football club…'), findsOneWidget);
+      expect(
+        find.byKey(const Key('vtc_leave_step_archivingCard')),
+        findsOneWidget,
+      );
+
       await settle(tester);
+      expect(leaving, findsNothing);
       expect(find.text('You left Football club.'), findsOneWidget);
       expect(await service.community(fakeVtcDid), isNull);
     });
