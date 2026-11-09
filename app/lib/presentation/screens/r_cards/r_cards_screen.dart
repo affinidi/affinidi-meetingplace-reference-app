@@ -13,8 +13,8 @@ import '../../painting/cached_base64_image.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../../widgets/cards/animated_stacked_card_deck.dart';
 import '../../widgets/cards/r_card_header_card.dart';
+import '../../widgets/filter_tab_bar.dart';
 import '../../widgets/section_header.dart';
-import '../../widgets/tab_bar_tab.dart';
 import 'r_cards_screen_controller.dart';
 import 'r_cards_screen_filter.dart';
 import 'returning_card_provider.dart';
@@ -180,22 +180,16 @@ class _FiltersBar extends HookConsumerWidget {
     );
     final l10n = context.l10n;
 
-    return TabBar(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      isScrollable: true,
-      enableFeedback: true,
-      labelPadding: const EdgeInsets.symmetric(horizontal: 10),
-      tabAlignment: TabAlignment.start,
+    return FilterTabBar(
       controller: tabController,
-      onTap: (index) {
+      labels: [
+        for (final filter in RCardsScreenFilter.values)
+          l10n.rCardsFilterLabel(filter.name),
+      ],
+      onSelected: (index) {
         if (!context.mounted) return;
         controller.applyFilter(RCardsScreenFilter.values[index]);
       },
-      tabs: RCardsScreenFilter.values
-          .map(
-            (filter) => TabBarTab(label: l10n.rCardsFilterLabel(filter.name)),
-          )
-          .toList(),
     );
   }
 }

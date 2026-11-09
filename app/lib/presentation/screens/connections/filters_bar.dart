@@ -10,23 +10,16 @@ class _FiltersBar extends HookConsumerWidget {
     );
     final l10n = context.l10n;
 
-    return TabBar(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      isScrollable: true,
-      enableFeedback: true,
-      labelPadding: const EdgeInsets.symmetric(horizontal: 10),
-      tabAlignment: TabAlignment.start,
+    return FilterTabBar(
       controller: tabController,
-      onTap: (index) {
+      labels: [
+        for (final filter in ConnectionsScreenFilter.values)
+          l10n.connectionsFilterLabel(filter.name),
+      ],
+      onSelected: (index) {
         if (!context.mounted) return;
         controller.applyFilter(ConnectionsScreenFilter.values[index]);
       },
-      tabs: ConnectionsScreenFilter.values
-          .map(
-            (filter) =>
-                TabBarTab(label: l10n.connectionsFilterLabel(filter.name)),
-          )
-          .toList(),
     );
   }
 }

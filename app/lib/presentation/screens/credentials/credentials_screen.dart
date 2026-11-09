@@ -9,8 +9,8 @@ import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../navigation/tabs/tabs.dart';
 import '../../widgets/cards/animated_stacked_card_deck.dart';
 import '../../widgets/cards/credential_card.dart';
+import '../../widgets/filter_tab_bar.dart';
 import '../../widgets/section_header.dart';
-import '../../widgets/tab_bar_tab.dart';
 import 'credential_details_screen.dart';
 import 'membership_credential_details_screen.dart';
 import 'membership_credentials_controller.dart';
@@ -53,17 +53,9 @@ class CredentialsScreen extends HookConsumerWidget {
                 subtitle: l10n.verifiableCredentialWallet,
                 showProgress: memberships.isSyncing,
               ),
-              TabBar(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                isScrollable: true,
-                enableFeedback: true,
-                labelPadding: const EdgeInsets.symmetric(horizontal: 10),
-                tabAlignment: TabAlignment.start,
+              FilterTabBar(
                 controller: tabController,
-                tabs: [
-                  TabBarTab(label: l10n.all),
-                  TabBarTab(label: l10n.membershipsTab),
-                ],
+                labels: [l10n.all, l10n.membershipsTab],
               ),
               if (tab == 0 && hasNone)
                 const _EmptyStateWidget()

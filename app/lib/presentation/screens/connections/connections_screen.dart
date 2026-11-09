@@ -17,9 +17,9 @@ import '../../dialogs/offer/delete_connection_dialog.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../../themes/tokens/mc_spacing.dart';
 import '../../widgets/common/app_card.dart';
+import '../../widgets/filter_tab_bar.dart';
 import '../../widgets/profile_circle_avatar.dart';
 import '../../widgets/section_header.dart';
-import '../../widgets/tab_bar_tab.dart';
 import 'connections_screen_controller.dart';
 import 'connections_screen_filter.dart';
 

@@ -400,11 +400,16 @@ class AppTheme {
         highlightElevation: 0,
         shape: StadiumBorder(),
       ),
+      // A row of siblings: body labels in the same weight either way so
+      // nothing moves, no ink, and the selected one carries the square 2px
+      // signal line.
       tabBarTheme: TabBarThemeData(
         labelColor: mc.textPrimary,
         unselectedLabelColor: mc.textSecondary,
-        labelStyle: textTheme.labelLarge,
-        unselectedLabelStyle: textTheme.labelLarge,
+        labelStyle: textTheme.bodyMedium,
+        unselectedLabelStyle: textTheme.bodyMedium,
+        overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+        splashFactory: NoSplash.splashFactory,
         indicatorSize: TabBarIndicatorSize.label,
         indicator: const UnderlineTabIndicator(
           borderSide: BorderSide(

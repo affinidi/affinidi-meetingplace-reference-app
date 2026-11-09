@@ -47,6 +47,15 @@ void main() {
         expect(shape.side.color, mc.hairline);
       });
 
+      test('marks the selected filter with a line, not ink', () {
+        expect(theme.tabBarTheme.splashFactory, NoSplash.splashFactory);
+        expect(theme.tabBarTheme.indicatorSize, TabBarIndicatorSize.label);
+        expect(
+          theme.tabBarTheme.labelStyle,
+          theme.tabBarTheme.unselectedLabelStyle,
+        );
+      });
+
       test('outlines chips with a hairline and no fill', () {
         expect(theme.chipTheme.backgroundColor, Colors.transparent);
         expect(theme.chipTheme.side?.color, mc.hairlineStrong);

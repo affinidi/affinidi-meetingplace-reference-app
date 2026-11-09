@@ -5,7 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../navigation/tabs/tabs.dart';
 import '../../widgets/section_header.dart';
-import '../../widgets/tab_bar_tab.dart';
+import '../../widgets/filter_tab_bar.dart';
 import '../contacts/contacts_screen.dart';
 import '../contacts/contacts_screen_controller.dart';
 import 'communities_controller.dart';
@@ -49,12 +49,9 @@ class CommunityScreen extends HookConsumerWidget {
             subtitle: l10n.contactsPanelSubtitle,
             onBack: () => Navigator.of(context).pop(),
           ),
-          TabBar(
+          FilterTabBar(
             controller: tabController,
-            tabs: [
-              TabBarTab(label: l10n.communityChannelsTab),
-              TabBarTab(label: l10n.communityMembersTab),
-            ],
+            labels: [l10n.communityChannelsTab, l10n.communityMembersTab],
           ),
           Expanded(
             child: TabBarView(
