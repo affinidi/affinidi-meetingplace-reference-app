@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_radius.dart';
 
 class RCardNotesSheet extends StatefulWidget {
   const RCardNotesSheet({
@@ -21,10 +22,9 @@ class RCardNotesSheet extends StatefulWidget {
       context: context,
       isScrollControlled: true,
       useRootNavigator: true,
-      backgroundColor: Colors.black,
       clipBehavior: Clip.antiAlias,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(McRadius.xl)),
       ),
       builder: (context) => Padding(
         padding: EdgeInsets.only(
@@ -68,11 +68,9 @@ class _RCardNotesSheetState extends State<RCardNotesSheet> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    const titleColor = Colors.white;
-    final dividerColor = context.colorScheme.primary;
-    final fieldBorderColor = context.colorScheme.primary;
-    const hintColor = Color(0xFF9CA3AF);
-    final saveButtonColor = context.colorScheme.primary;
+    final mc = context.mcColors;
+    final textTheme = context.textTheme;
+    final titleColor = mc.textPrimary;
 
     Future<void> save() async {
       if (!_canSave) return;
@@ -92,21 +90,17 @@ class _RCardNotesSheetState extends State<RCardNotesSheet> {
               Expanded(
                 child: Text(
                   l10n.rCardNotesTitle,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: titleColor,
-                  ),
+                  style: textTheme.titleLarge?.copyWith(color: titleColor),
                 ),
               ),
               IconButton(
                 onPressed: () => Navigator.of(context).pop(),
-                icon: const Icon(Icons.close, color: titleColor),
+                icon: Icon(Icons.close, color: titleColor),
               ),
             ],
           ),
         ),
-        Divider(height: 1, thickness: 1, color: dividerColor),
+        Divider(height: 1, thickness: 1, color: mc.hairline),
         Padding(
           padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
           child: Column(
@@ -114,38 +108,34 @@ class _RCardNotesSheetState extends State<RCardNotesSheet> {
             children: [
               Text(
                 l10n.rCardAddNotes,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: titleColor,
-                ),
+                style: textTheme.labelLarge?.copyWith(color: titleColor),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: _controller,
                 minLines: 7,
                 maxLines: 7,
-                style: const TextStyle(color: titleColor),
+                style: TextStyle(color: titleColor),
                 decoration: InputDecoration(
                   hintText: l10n.rCardNotesPlaceholder,
-                  hintStyle: const TextStyle(color: hintColor),
+                  hintStyle: TextStyle(color: mc.textTertiary),
                   contentPadding: const EdgeInsets.all(16),
                   filled: true,
-                  fillColor: const Color(0xFF1F1F1F),
+                  fillColor: context.colorScheme.surfaceContainerLow,
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(4),
-                    borderSide: BorderSide(color: fieldBorderColor),
+                    borderRadius: BorderRadius.circular(McRadius.xs),
+                    borderSide: BorderSide(color: mc.hairlineStrong),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(4),
-                    borderSide: BorderSide(color: fieldBorderColor, width: 2),
+                    borderRadius: BorderRadius.circular(McRadius.xs),
+                    borderSide: BorderSide(color: mc.control, width: 2),
                   ),
                 ),
               ),
             ],
           ),
         ),
-        Divider(height: 1, thickness: 1, color: dividerColor),
+        Divider(height: 1, thickness: 1, color: mc.hairline),
         SafeArea(
           top: false,
           left: false,
@@ -158,10 +148,7 @@ class _RCardNotesSheetState extends State<RCardNotesSheet> {
                 onPressed: () => Navigator.of(context).pop(),
                 style: TextButton.styleFrom(
                   foregroundColor: titleColor,
-                  textStyle: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  textStyle: textTheme.titleSmall,
                 ),
                 child: Text(l10n.generalCancel),
               ),
@@ -172,18 +159,8 @@ class _RCardNotesSheetState extends State<RCardNotesSheet> {
                   child: ElevatedButton(
                     onPressed: _canSave ? save : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: saveButtonColor,
-                      disabledBackgroundColor: saveButtonColor.withValues(
-                        alpha: 0.4,
-                      ),
-                      foregroundColor: Colors.black,
-                      elevation: 0,
                       padding: const EdgeInsets.symmetric(horizontal: 28),
-                      shape: const StadiumBorder(),
-                      textStyle: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      textStyle: textTheme.titleSmall,
                     ),
                     child: Text(l10n.generalSave),
                   ),

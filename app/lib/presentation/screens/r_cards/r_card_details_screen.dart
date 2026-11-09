@@ -154,12 +154,7 @@ class _RCardDetailsScreenState extends ConsumerState<RCardDetailsScreen> {
         appBar: AppBar(
           title: Text(
             l10n.tabsTitle(Tabs.rCards.name),
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              height: 1.6,
-              letterSpacing: 0.07,
-            ),
+            style: context.textTheme.titleLarge,
           ),
           actions: isOwnCard
               ? null
@@ -392,7 +387,7 @@ class _RCardDetailsContent extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     _DetailsSection(
-                      dividerColor: context.colorScheme.primary,
+                      dividerColor: context.mcColors.hairline,
                       rows: [
                         _DetailRowData(
                           icon: Icons.email_outlined,
@@ -445,8 +440,8 @@ class _RCardDetailsContent extends ConsumerWidget {
                             child: Text(
                               notesLabel,
                               style: context.textTheme.bodyMedium?.copyWith(
-                                color: context.colorScheme.primary,
-                                fontWeight: FontWeight.w600,
+                                color: context.mcColors.highlightSecondary,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
@@ -458,7 +453,7 @@ class _RCardDetailsContent extends ConsumerWidget {
                         Text(
                           card.notes!.trim(),
                           style: context.textTheme.bodyMedium?.copyWith(
-                            color: Colors.white,
+                            color: context.mcColors.textPrimary,
                           ),
                         ),
                       ],
@@ -473,10 +468,9 @@ class _RCardDetailsContent extends ConsumerWidget {
                             ),
                           ),
                           style: TextButton.styleFrom(
-                            foregroundColor: context.colorScheme.primary,
-                            textStyle: context.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
+                            foregroundColor:
+                                context.mcColors.highlightSecondary,
+                            textStyle: context.textTheme.titleMedium,
                           ),
                         ),
                       ),
@@ -507,7 +501,7 @@ class _DetailsSection extends StatelessWidget {
     return Column(
       children: [
         for (var i = 0; i < visible.length; i++) ...[
-          _DetailRow(row: visible[i], dividerColor: dividerColor),
+          _DetailRow(row: visible[i]),
           if (i != visible.length - 1)
             Divider(height: 1, thickness: 1, color: dividerColor),
         ],
@@ -517,15 +511,15 @@ class _DetailsSection extends StatelessWidget {
 }
 
 class _DetailRow extends StatelessWidget {
-  const _DetailRow({required this.row, required this.dividerColor});
+  const _DetailRow({required this.row});
 
   final _DetailRowData row;
-  final Color dividerColor;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final isNotShared = row.value == l10n.notShared;
+    final mc = context.mcColors;
 
     return InkWell(
       onTap: row.onTap,
@@ -533,25 +527,23 @@ class _DetailRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 14),
         child: Row(
           children: [
-            Icon(row.icon, color: Colors.white),
+            Icon(row.icon, color: mc.textPrimary),
             const SizedBox(width: 12),
             Expanded(
               child: Text.rich(
                 TextSpan(
                   style: context.textTheme.bodyMedium?.copyWith(
-                    color: Colors.white,
+                    color: mc.textPrimary,
                   ),
                   children: [
                     TextSpan(
                       text: '${row.label} ',
-                      style: const TextStyle(fontWeight: FontWeight.w600),
+                      style: const TextStyle(fontWeight: FontWeight.w500),
                     ),
                     TextSpan(
                       text: row.value ?? '',
                       style: TextStyle(
-                        color: isNotShared
-                            ? context.colorScheme.onSurface.withAlpha(160)
-                            : context.colorScheme.onSurfaceVariant,
+                        color: isNotShared ? mc.textTertiary : mc.textSecondary,
                       ),
                     ),
                   ],
@@ -563,7 +555,7 @@ class _DetailRow extends StatelessWidget {
             if (row.trailing != null) ...[
               const SizedBox(width: 8),
               IconTheme(
-                data: IconThemeData(color: dividerColor),
+                data: IconThemeData(color: mc.highlightSecondary),
                 child: row.trailing!,
               ),
             ],

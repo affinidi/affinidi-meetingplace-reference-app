@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../themes/tokens/mc_radius.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import 'vta_link_content.dart';
 
@@ -14,7 +15,7 @@ class VtaLinkPanel extends StatelessWidget {
       decoration: onboardingGradient(
         context,
         radius: 2,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(McRadius.lg),
       ),
       // The settings route has no Scaffold: without a Material, text falls
       // back to the underlined debug style and buttons have no ink.

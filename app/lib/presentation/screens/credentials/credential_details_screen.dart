@@ -33,7 +33,7 @@ class CredentialDetailsScreen extends ConsumerWidget {
         appBar: AppBar(
           title: Text(
             l10n.credentialDetails,
-            style: Theme.of(context).textTheme.headlineMedium,
+            style: Theme.of(context).textTheme.titleLarge,
           ),
         ),
         body: Center(child: Text(l10n.noCredentialsYet)),
@@ -44,7 +44,7 @@ class CredentialDetailsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(
           l10n.credentialDetails,
-          style: Theme.of(context).textTheme.headlineMedium,
+          style: Theme.of(context).textTheme.titleLarge,
         ),
         actions: [
           if (allowDelete)

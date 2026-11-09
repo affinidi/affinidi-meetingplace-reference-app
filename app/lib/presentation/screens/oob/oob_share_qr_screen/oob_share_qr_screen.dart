@@ -18,7 +18,8 @@ class OOBShareQrScreen extends HookConsumerWidget {
     final qrCodeViewFactory = ref.read(qrCodeViewFactoryProvider);
 
     final qrScannerTheme = context.qrScannerTheme;
-    final colorScheme = context.colorScheme;
+    final mc = context.mcColors;
+    final textTheme = context.textTheme;
     final l10n = context.l10n;
 
     Future<void> retry() async {
@@ -52,7 +53,6 @@ class OOBShareQrScreen extends HookConsumerWidget {
     }, []);
 
     return Scaffold(
-      backgroundColor: qrScannerTheme.backgroundColor,
       body: SafeArea(
         child: Column(
           spacing: 20,
@@ -77,10 +77,8 @@ class OOBShareQrScreen extends HookConsumerWidget {
                           child: Text(
                             context.l10n.oobQrPresentInvitationMessage,
                             textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: colorScheme.primary,
-                              fontSize: qrScannerTheme.titleFontSize + 2,
+                            style: textTheme.titleLarge?.copyWith(
+                              color: mc.textPrimary,
                             ),
                           ),
                         ),
@@ -94,11 +92,10 @@ class OOBShareQrScreen extends HookConsumerWidget {
                               onTap: sendInvitation,
                               child: Text(
                                 l10n.shareSheetCTA_QRCode,
-                                style: TextStyle(
-                                  color: colorScheme.primary,
-                                  fontSize: qrScannerTheme.titleFontSize + 2,
+                                style: textTheme.titleLarge?.copyWith(
+                                  color: mc.highlightSecondary,
                                   decoration: TextDecoration.underline,
-                                  decorationColor: Colors.blue,
+                                  decorationColor: mc.highlightSecondary,
                                 ),
                               ),
                             ),
@@ -114,12 +111,10 @@ class OOBShareQrScreen extends HookConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 IconButton.filled(
-                  style: IconButton.styleFrom(
-                    backgroundColor: qrScannerTheme.backgroundColor,
-                  ),
+                  style: IconButton.styleFrom(backgroundColor: mc.canvas),
                   icon: Icon(
                     Icons.cancel_outlined,
-                    color: colorScheme.primary,
+                    color: mc.textSecondary,
                     size: qrScannerTheme.iconSize * 0.7,
                   ),
                   onPressed: cancelOobFlow,

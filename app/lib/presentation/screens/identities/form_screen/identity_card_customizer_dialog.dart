@@ -52,14 +52,7 @@ class _IdentityCardCustomizerDialogState
 
   @override
   Widget build(BuildContext context) {
-    final customColors = context.customColors;
-
     return AlertDialog(
-      backgroundColor: customColors.grey900,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-        side: BorderSide(color: customColors.grey700),
-      ),
       title: Text(
         context.l10n.customiseIdentityCard,
         style: context.textTheme.bodyLarge,

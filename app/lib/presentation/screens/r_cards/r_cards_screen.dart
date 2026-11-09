@@ -10,6 +10,7 @@ import '../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../../navigation/routes/dashboard_routes.dart';
 import '../../../navigation/tabs/tabs.dart';
 import '../../painting/cached_base64_image.dart';
+import '../../themes/tokens/mc_radius.dart';
 import '../../widgets/cards/animated_stacked_card_deck.dart';
 import '../../widgets/cards/r_card_header_card.dart';
 import '../../widgets/section_banner.dart';
@@ -109,11 +110,11 @@ class RCardsScreen extends HookConsumerWidget {
                             vertical: 10,
                           ),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(McRadius.lg),
                             borderSide: BorderSide.none,
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(McRadius.lg),
                             borderSide: BorderSide.none,
                           ),
                         ),
@@ -134,7 +135,7 @@ class RCardsScreen extends HookConsumerWidget {
                     Icons.download_outlined,
                     color: hasAnyCards
                         ? colorScheme.onSurface
-                        : colorScheme.onSurface.withValues(alpha: 0.5),
+                        : context.mcColors.textTertiary,
                   ),
                 ),
               ],

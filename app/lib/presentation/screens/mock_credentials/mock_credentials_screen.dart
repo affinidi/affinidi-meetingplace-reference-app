@@ -6,6 +6,7 @@ import '../../../domain/models/identity/identity.dart';
 import '../../../domain/models/vtc/mock_credential_template.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../navigation/routes/route_paths.dart';
+import '../../themes/tokens/mc_typography.dart';
 import '../../widgets/section_banner.dart';
 import 'mock_credentials_controller.dart';
 import 'mock_credentials_state.dart';
@@ -32,15 +33,20 @@ class MockCredentialsScreen extends ConsumerWidget {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(switch (outcome) {
-            MockCredentialImport.imported => l10n.mockCredentialsImported(
-              _nameOf(context, identity),
-            ),
-            MockCredentialImport.notKept => l10n.mockCredentialsNotKept,
-            MockCredentialImport.failed when reason != null =>
-              l10n.mockCredentialsRefused(reason),
-            MockCredentialImport.failed => l10n.mockCredentialsImportFailed,
-          }),
+          content: Text(
+            switch (outcome) {
+              MockCredentialImport.imported => l10n.mockCredentialsImported(
+                _nameOf(context, identity),
+              ),
+              MockCredentialImport.notKept => l10n.mockCredentialsNotKept,
+              MockCredentialImport.failed when reason != null =>
+                l10n.mockCredentialsRefused(reason),
+              MockCredentialImport.failed => l10n.mockCredentialsImportFailed,
+            },
+            style: outcome == MockCredentialImport.imported
+                ? null
+                : TextStyle(color: context.mcColors.dangerText),
+          ),
         ),
       );
     }
@@ -155,11 +161,8 @@ class _TemplateCard extends StatelessWidget {
     final colorScheme = context.colorScheme;
     final textTheme = context.textTheme;
     final onCard = colorScheme.onSurface;
-    // As the call log's cards: the theme's own card colour is light, under
-    // light text.
     return Card(
       key: Key('mock_credential_${template.id}'),
-      color: colorScheme.inverseSurface.withValues(alpha: 0.5),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -172,10 +175,7 @@ class _TemplateCard extends StatelessWidget {
             ),
             Text(
               template.type,
-              style: textTheme.bodySmall?.copyWith(
-                color: onCard,
-                fontFamily: 'monospace',
-              ),
+              style: McTypography.code.copyWith(color: onCard),
             ),
             for (final MapEntry(:key, :value) in template.claims.entries)
               Text(
@@ -220,8 +220,6 @@ Future<Identity?> _chooseIdentity(
   List<Identity> identities,
 ) => showModalBottomSheet<Identity>(
   context: context,
-  // As the app's other sheets: the default one is light, under light text.
-  backgroundColor: context.colorScheme.inverseSurface,
   builder: (context) => SafeArea(
     child: Column(
       mainAxisSize: MainAxisSize.min,

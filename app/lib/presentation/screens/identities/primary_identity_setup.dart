@@ -53,10 +53,9 @@ class _PrimaryIdentitySetup extends ConsumerWidget {
             width: ScreensizeHelper.getConstrainedWidth(context),
             padding: const EdgeInsets.all(0),
             decoration: BoxDecoration(
-              color: context.colorScheme.surfaceContainerHighest.withValues(
-                alpha: 0.3,
-              ),
-              borderRadius: BorderRadius.circular(12),
+              color: context.colorScheme.surfaceContainerLow,
+              border: Border.all(color: context.mcColors.hairline),
+              borderRadius: BorderRadius.circular(McRadius.md),
             ),
             child: IdentityFormFields(
               identityId,

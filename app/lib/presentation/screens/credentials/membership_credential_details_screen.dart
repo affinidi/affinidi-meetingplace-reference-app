@@ -40,7 +40,7 @@ class MembershipCredentialDetailsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(
           l10n.membershipDetailsTitle,
-          style: context.textTheme.headlineMedium,
+          style: context.textTheme.titleLarge,
         ),
         actions: [
           if (entry != null)

@@ -130,7 +130,7 @@ class IdentityFormFields extends ConsumerWidget {
                       mobileField.label(context.l10n),
                       style: context.textTheme.bodyMedium?.copyWith(
                         color: context.colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     const SizedBox(width: 12),

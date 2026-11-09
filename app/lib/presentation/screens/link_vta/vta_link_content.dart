@@ -7,6 +7,7 @@ import '../../../application/services/vtc_service/vta_link_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../dialogs/qr_code_picker/qr_code_picker.dart';
+import '../../themes/tokens/mc_typography.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import 'vta_link_screen_controller.dart';
 
@@ -24,6 +25,7 @@ class VtaLinkContent extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final textTheme = context.textTheme;
+    final mc = context.mcColors;
     final screen = ref.watch(vtaLinkScreenControllerProvider);
     final state = screen.link;
     final controller = ref.read(vtaLinkScreenControllerProvider.notifier);
@@ -75,7 +77,7 @@ class VtaLinkContent extends HookConsumerWidget {
             Text(
               l10n.linkedVtaManualHint,
               textAlign: TextAlign.center,
-              style: textTheme.bodySmall?.copyWith(color: Colors.white70),
+              style: textTheme.bodySmall?.copyWith(color: mc.textSecondary),
             ),
             const SizedBox(height: 12),
             OnboardingTextField(
@@ -103,9 +105,9 @@ class VtaLinkContent extends HookConsumerWidget {
                 child: Text(
                   state.enrolmentCode ?? '',
                   key: const Key('vta_enrolment_code'),
-                  style: textTheme.headlineMedium?.copyWith(
-                    color: Colors.white,
-                    fontFamily: 'monospace',
+                  style: McTypography.code.copyWith(
+                    color: mc.textPrimary,
+                    fontSize: textTheme.headlineMedium?.fontSize,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 4,
                   ),
@@ -118,7 +120,7 @@ class VtaLinkContent extends HookConsumerWidget {
             Text(
               l10n.linkedVtaEnrolmentWarning,
               textAlign: TextAlign.center,
-              style: textTheme.bodySmall?.copyWith(color: Colors.white70),
+              style: textTheme.bodySmall?.copyWith(color: mc.textSecondary),
             ),
             const SizedBox(height: 12),
             vtaDidCard,
@@ -156,9 +158,9 @@ class VtaLinkContent extends HookConsumerWidget {
               child: SelectableText(
                 state.grantCommand,
                 key: const Key('vta_grant_commands'),
-                style: textTheme.bodySmall?.copyWith(
-                  color: Colors.white,
-                  fontFamily: 'monospace',
+                style: McTypography.code.copyWith(
+                  color: mc.textPrimary,
+                  fontSize: textTheme.bodySmall?.fontSize,
                 ),
               ),
             ),
@@ -166,7 +168,7 @@ class VtaLinkContent extends HookConsumerWidget {
             Text(
               l10n.linkedVtaGrantWarning,
               textAlign: TextAlign.center,
-              style: textTheme.bodySmall?.copyWith(color: Colors.white70),
+              style: textTheme.bodySmall?.copyWith(color: mc.textSecondary),
             ),
             const SizedBox(height: 24),
             _WaitingLine(state),
@@ -273,7 +275,9 @@ class _WaitingLine extends StatelessWidget {
             vtaLinkWaitingText(context.l10n, state),
             key: const Key('vta_link_waiting'),
             textAlign: TextAlign.center,
-            style: context.textTheme.bodyMedium?.copyWith(color: Colors.white),
+            style: context.textTheme.bodyMedium?.copyWith(
+              color: context.mcColors.textPrimary,
+            ),
           ),
         ),
       ],

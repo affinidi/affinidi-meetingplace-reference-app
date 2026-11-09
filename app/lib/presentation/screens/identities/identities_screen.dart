@@ -13,6 +13,7 @@ import '../../../infrastructure/providers/cache_manager_provider.dart';
 import '../../../navigation/routes/dashboard_routes.dart';
 import '../../../navigation/tabs/tabs.dart';
 import '../../helpers/screensize_helper.dart';
+import '../../themes/tokens/mc_radius.dart';
 import '../../widgets/action_button.dart';
 import '../../widgets/buttons/elevated_loading_button.dart';
 import '../../widgets/identity_picker/identity_picker.dart';
@@ -172,9 +173,10 @@ class _ActionsBar extends ConsumerWidget {
             IconButton(
               icon: Icon(
                 Icons.filter_list_alt,
+                // Selection is the text tier, never blue.
                 color: shouldShowFilter
-                    ? context.colorScheme.primary
-                    : context.colorScheme.onSurface.withValues(alpha: 0.7),
+                    ? context.mcColors.textPrimary
+                    : context.mcColors.textTertiary,
               ),
               onPressed: controller.toggleFilterVisibility,
             ),
@@ -216,6 +218,7 @@ class _SearchField extends HookConsumerWidget {
     final searchTextController = useTextEditingController();
     final text = useListenable(searchTextController).text;
     final colorScheme = context.colorScheme;
+    final mc = context.mcColors;
     final shouldShowFilter = ref.watch(
       identitiesScreenControllerProvider.select(
         (state) => state.shouldShowFilter,
@@ -236,8 +239,8 @@ class _SearchField extends HookConsumerWidget {
       child: Container(
         height: 35,
         decoration: BoxDecoration(
-          border: Border.all(color: colorScheme.outline, width: 0.8),
-          borderRadius: BorderRadius.circular(20.0),
+          border: Border.all(color: mc.hairlineStrong, width: 0.8),
+          borderRadius: BorderRadius.circular(McRadius.lg),
           color: colorScheme.surface,
         ),
         child: Row(
@@ -253,7 +256,7 @@ class _SearchField extends HookConsumerWidget {
                   style: context.textTheme.bodyMedium,
                   decoration: InputDecoration(
                     hintText: context.l10n.filter,
-                    hintStyle: TextStyle(color: colorScheme.outline),
+                    hintStyle: TextStyle(color: mc.textTertiary),
                     border: InputBorder.none,
                     isDense: true,
                     contentPadding: EdgeInsets.zero,

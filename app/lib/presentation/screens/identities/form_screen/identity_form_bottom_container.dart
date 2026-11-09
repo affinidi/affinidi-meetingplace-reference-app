@@ -79,7 +79,9 @@ class _IdentityFormBottomContainer extends ConsumerWidget {
               : canDelete
               ? handleDelete
               : context.pop,
-          color: context.colorScheme.error,
+          // Destructive: a danger outline, never a red fill.
+          isOutlined: true,
+          color: context.mcColors.dangerText,
           child: Text(
             canDelete ? context.l10n.generalDelete : context.l10n.generalCancel,
           ),
@@ -95,9 +97,14 @@ class _IdentityFormBottomContainer extends ConsumerWidget {
   }
 
   static void _showError(BuildContext context, String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: TextStyle(color: context.mcColors.dangerText),
+        ),
+      ),
+    );
   }
 
   /// Asks before deleting a persona, whose DID can never be used again.

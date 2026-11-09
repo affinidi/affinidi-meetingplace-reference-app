@@ -6,6 +6,8 @@ import '../../../application/services/identities_service/identities_service.dart
 import '../../../domain/models/vtc/vtc_membership_entry.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../themes/tokens/mc_colors.dart';
+import '../../themes/tokens/mc_radius.dart';
 import 'membership_credentials_controller.dart';
 import 'membership_credentials_state.dart';
 
@@ -103,6 +105,7 @@ class MembershipCredentialRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final colors = context.colorScheme;
+    final mc = context.mcColors;
     final identity = membershipIdentityName(context, ref, entry);
     final date = DateFormat.yMMMd(l10n.localeName);
     final when = switch ((entry.left, entry.card.validUntil)) {
@@ -116,8 +119,11 @@ class MembershipCredentialRow extends ConsumerWidget {
     };
 
     return Material(
-      color: colors.surfaceContainerHigh,
-      borderRadius: BorderRadius.circular(16),
+      color: colors.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(McRadius.lg),
+        side: BorderSide(color: mc.hairline),
+      ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
@@ -172,50 +178,67 @@ class MembershipStatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (label, color) = membershipStatusLabel(context.l10n, status);
-    return StatusChip(label: label, color: color);
+    final (label, color) = membershipStatusLabel(
+      context.l10n,
+      context.mcColors,
+      status,
+    );
+    return StatusChip(
+      label: label,
+      color: color,
+      danger: status?.state == VtcCardState.revoked,
+    );
   }
 }
 
-/// A state's word in its colour, light on the dark screen.
+/// A state's word, its status colour in the border.
 class StatusChip extends StatelessWidget {
-  const StatusChip({super.key, required this.label, required this.color});
+  const StatusChip({
+    super.key,
+    required this.label,
+    required this.color,
+    this.danger = false,
+  });
 
   final String label;
   final Color color;
 
+  /// Only danger may colour the word.
+  final bool danger;
+
   @override
   Widget build(BuildContext context) {
+    final mc = context.mcColors;
+    final textColor = danger ? mc.dangerText : mc.textPrimary;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withAlpha(40),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(McRadius.full),
         border: Border.all(color: color),
       ),
       child: Text(
         label,
-        style: context.textTheme.labelSmall?.copyWith(color: color),
+        style: context.textTheme.labelSmall?.copyWith(color: textColor),
       ),
     );
   }
 }
 
-/// A card's state as its chip shows it: the word and its colour, light on
-/// the dark screen.
+/// A card's state as its chip shows it: the word and its status colour.
 (String, Color) membershipStatusLabel(
   AppLocalizations l10n,
+  McColors mc,
   VtcCardStatus? status,
 ) => switch (status?.state) {
-  null => (l10n.membershipStatusChecking, Colors.white70),
-  VtcCardState.valid => (l10n.membershipStatusValid, Colors.lightGreen),
-  VtcCardState.revoked => (l10n.membershipStatusRevoked, Colors.redAccent),
-  VtcCardState.expired => (l10n.membershipStatusExpired, Colors.amber),
+  null => (l10n.membershipStatusChecking, mc.hairlineStrong),
+  VtcCardState.valid => (l10n.membershipStatusValid, mc.success),
+  VtcCardState.revoked => (l10n.membershipStatusRevoked, mc.dangerText),
+  VtcCardState.expired => (l10n.membershipStatusExpired, mc.warning),
   VtcCardState.notRevocable => (
     l10n.membershipStatusNotRevocable,
-    Colors.lightBlueAccent,
+    mc.highlightSecondary,
   ),
-  VtcCardState.unknown => (l10n.membershipStatusUnknown, Colors.white70),
+  VtcCardState.unknown => (l10n.membershipStatusUnknown, mc.hairlineStrong),
 };
 
 /// The name of the member's identity [entry]'s card is for.
