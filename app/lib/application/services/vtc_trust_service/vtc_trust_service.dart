@@ -239,6 +239,16 @@ class VtcTrustService {
     ),
   );
 
+  /// The directory entry [entryId] of [communityDid] as the community shows
+  /// it to the member, or null when it shows none or cannot be asked.
+  Future<DirectoryEntry?> memberEntry(
+    String communityDid, {
+    required String entryId,
+  }) => _shownOrNull(
+    'reading an entry',
+    () => _vtc.memberEntry(communityDid, entryId: entryId),
+  );
+
   /// The picture the member of [entry] in [communityDid] shows the member,
   /// or null when they show none or it cannot be fetched. Kept while the
   /// app runs, by the digest that names it.

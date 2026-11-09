@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
+import '../../../application/services/identities_service/identities_service.dart';
 import '../../../application/services/vtc_trust_service/vtc_trust_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../l10n/app_localizations.dart';
@@ -30,6 +34,8 @@ Future<PublishedRelationship?> vouchWithConsent(
   required String communityName,
   required String personaDid,
   required String name,
+  DirectoryEntry? entry,
+  String? entryId,
 }) async {
   final l10n = context.l10n;
   final consented = await _confirm(
@@ -49,9 +55,12 @@ Future<PublishedRelationship?> vouchWithConsent(
       await showVouchTrail(
         context,
         edge: edge,
+        communityDid: communityDid,
         communityName: communityName,
         name: name,
         isOwn: true,
+        entry: entry,
+        entryId: entryId,
       );
     }
     return edge;
@@ -117,16 +126,22 @@ Future<bool> withdrawWithConfirmation(
 Future<void> showVouchTrail(
   BuildContext context, {
   required PublishedRelationship edge,
+  required String communityDid,
   required String communityName,
   required String name,
   required bool isOwn,
+  DirectoryEntry? entry,
+  String? entryId,
 }) => showOnboardingSheet(
   context,
   VtcVouchTrail(
     edge: edge,
+    communityDid: communityDid,
     communityName: communityName,
     name: name,
     isOwn: isOwn,
+    entry: entry,
+    entryId: entryId,
   ),
 );
 
@@ -136,14 +151,20 @@ Future<void> showVouchTrail(
 /// members see it. The signed vouch and the community's record of it open
 /// in full from their steps.
 ///
-/// [isOwn] tells the member's vouch for [name] from [name]'s for them.
-class VtcVouchTrail extends StatelessWidget {
+/// [isOwn] tells the member's vouch for [name] from [name]'s for them. The
+/// two are drawn by their pictures where they show one: the member's of the
+/// identity they joined with, [name]'s from their [entry] in the directory,
+/// or the entry [entryId] names.
+class VtcVouchTrail extends HookConsumerWidget {
   const VtcVouchTrail({
     super.key,
     required this.edge,
     required this.communityName,
     required this.name,
     required this.isOwn,
+    this.communityDid,
+    this.entry,
+    this.entryId,
   });
 
   final PublishedRelationship edge;
@@ -151,9 +172,19 @@ class VtcVouchTrail extends StatelessWidget {
   final String name;
   final bool isOwn;
 
+  /// The community, to fetch pictures from; none are drawn without it.
+  final String? communityDid;
+
+  /// [name]'s directory entry, which names their picture.
+  final DirectoryEntry? entry;
+
+  /// The id of [name]'s directory entry, read when [entry] is not given.
+  final String? entryId;
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
+    final (yours, theirs) = _usePictures(ref);
     String time(DateTime at) =>
         DateFormat.yMMMd(l10n.localeName).add_Hm().format(at.toLocal());
     final vrc = edge.vrc ?? const <String, dynamic>{};
@@ -165,8 +196,16 @@ class VtcVouchTrail extends StatelessWidget {
     final you = l10n.vtcVouchTrailYou;
     final voucher = isOwn ? you : name;
     final vouchedFor = isOwn ? name : you;
-    final voucherNode = VtcFlowNode(Icons.person_outline, voucher);
-    final vouchedForNode = VtcFlowNode(Icons.person_outline, vouchedFor);
+    final voucherNode = VtcFlowNode(
+      Icons.person_outline,
+      voucher,
+      picture: isOwn ? yours : theirs,
+    );
+    final vouchedForNode = VtcFlowNode(
+      Icons.person_outline,
+      vouchedFor,
+      picture: isOwn ? theirs : yours,
+    );
     final vtaNode = VtcFlowNode(
       Icons.shield_outlined,
       isOwn ? l10n.membershipTrailYourVta : l10n.vtcVouchTrailTheirVta(name),
@@ -290,6 +329,43 @@ class VtcVouchTrail extends StatelessWidget {
       ],
     );
   }
+
+  /// The member's picture and [name]'s, each null until it arrives, or
+  /// when there is none.
+  (ImageProvider?, ImageProvider?) _usePictures(WidgetRef ref) {
+    final communityDid = this.communityDid;
+    final service = ref.read(vtcTrustServiceProvider);
+    final identities = ref.watch(
+      identitiesServiceProvider.select((state) => state.identities),
+    );
+    final yours = useFuture(
+      useMemoized(() async {
+        if (communityDid == null) return null;
+        final identityDid = await service.identityDid(communityDid);
+        final picture = identities
+            .where((identity) => identity.did == identityDid)
+            .firstOrNull
+            ?.card
+            .profilePic;
+        return picture == null ? null : MemoryImage(base64Decode(picture));
+      }, [communityDid, identities]),
+    ).data;
+    final theirs = useFuture(
+      useMemoized(() async {
+        if (communityDid == null) return null;
+        final shown =
+            entry ??
+            switch (entryId) {
+              final id? => await service.memberEntry(communityDid, entryId: id),
+              null => null,
+            };
+        if (shown == null) return null;
+        final picture = await service.memberPicture(communityDid, entry: shown);
+        return picture == null ? null : MemoryImage(picture);
+      }, [communityDid, entry?.avatarSha256, entryId]),
+    ).data;
+    return (yours, theirs);
+  }
 }
 
 /// A handshake beside [name] when the member and [name] vouched for one
@@ -300,12 +376,20 @@ class VtcVouchButton extends StatelessWidget {
     super.key,
     required this.edges,
     required this.name,
+    required this.communityDid,
     required this.communityName,
+    this.entry,
+    this.entryId,
   });
 
   final VtcEdges edges;
   final String name;
+  final String communityDid;
   final String communityName;
+
+  /// [name]'s directory entry, or its id, to draw their picture by.
+  final DirectoryEntry? entry;
+  final String? entryId;
 
   @override
   Widget build(BuildContext context) {
@@ -325,8 +409,11 @@ class VtcVouchButton extends StatelessWidget {
       onPressed: () => showVouches(
         context,
         edges: edges,
+        communityDid: communityDid,
         communityName: communityName,
         name: name,
+        entry: entry,
+        entryId: entryId,
       ),
     );
   }
@@ -337,8 +424,11 @@ class VtcVouchButton extends StatelessWidget {
 Future<void> showVouches(
   BuildContext context, {
   required VtcEdges edges,
+  required String communityDid,
   required String communityName,
   required String name,
+  DirectoryEntry? entry,
+  String? entryId,
 }) => showOnboardingSheet(
   context,
   Column(
@@ -349,17 +439,23 @@ Future<void> showVouches(
         VtcVouchTrail(
           key: const Key('vtc_vouch_trail_outgoing'),
           edge: edge,
+          communityDid: communityDid,
           communityName: communityName,
           name: name,
           isOwn: true,
+          entry: entry,
+          entryId: entryId,
         ),
       if (edges.incoming case final edge?)
         VtcVouchTrail(
           key: const Key('vtc_vouch_trail_incoming'),
           edge: edge,
+          communityDid: communityDid,
           communityName: communityName,
           name: name,
           isOwn: false,
+          entry: entry,
+          entryId: entryId,
         ),
     ],
   ),

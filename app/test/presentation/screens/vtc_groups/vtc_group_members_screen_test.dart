@@ -271,6 +271,56 @@ void main() {
     expect(find.byKey(const Key('vtc_vouch_trail_incoming')), findsOneWidget);
   });
 
+  testWidgets('draws a member by their picture in a vouch\'s diagram', (
+    tester,
+  ) async {
+    service
+      ..members = const [
+        DirectoryEntry(
+          entryId: 'dir_bob',
+          displayName: 'Bob',
+          did: _bob,
+          avatarSha256: 'sha-bob',
+        ),
+      ]
+      ..memberPictures = {
+        'sha-bob': img.encodePng(img.Image(width: 4, height: 4)),
+      }
+      ..edges = {
+        _bob: const VtcEdges(
+          incoming: PublishedRelationship(
+            id: 'edge-0',
+            issuerDid: _bob,
+            subjectDid: _me,
+            vrcDigestMultibase: 'zQm0',
+          ),
+        ),
+      };
+    await pumpScreen(tester);
+
+    await tester.tap(inMember('dir_bob', find.byKey(const Key('vtc_vouches'))));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('vtc_vouch_vouched')));
+    await tester.pumpAndSettle();
+
+    Finder pictured(Finder of) => find.descendant(
+      of: of,
+      matching: find.byWidgetPredicate(
+        (widget) =>
+            widget is Container &&
+            widget.decoration is BoxDecoration &&
+            (widget.decoration! as BoxDecoration).image != null,
+      ),
+    );
+    final flow = find.byKey(const Key('vtc_vouch_flow_vouched'));
+    expect(pictured(flow), findsOneWidget, reason: 'Bob, by his picture');
+    expect(
+      find.descendant(of: flow, matching: find.byIcon(Icons.person_outline)),
+      findsOneWidget,
+      reason: 'you, without one, as a person',
+    );
+  });
+
   testWidgets('opens the signed vouch a member gave you', (tester) async {
     service.edges = {
       _bob: const VtcEdges(

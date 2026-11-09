@@ -49,6 +49,7 @@ class VtcGroupMembersScreen extends HookConsumerWidget {
         communityName: communityName,
         personaDid: personaDid,
         name: name,
+        entry: entry,
       );
       if (edge != null) reload.value++;
     }
@@ -130,7 +131,9 @@ class VtcGroupMembersScreen extends HookConsumerWidget {
                     child: VtcVouchButton(
                       edges: memberEdges,
                       name: name,
+                      communityDid: communityDid,
                       communityName: communityName,
+                      entry: entry,
                     ),
                   ),
                   SizedBox.square(

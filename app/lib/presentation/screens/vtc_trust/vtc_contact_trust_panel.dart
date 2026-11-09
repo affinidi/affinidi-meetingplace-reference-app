@@ -54,6 +54,7 @@ class VtcContactTrustPanel extends HookConsumerWidget {
         communityName: row.communityName,
         personaDid: row.link.personaDid,
         name: nameOf(row.link),
+        entryId: row.link.entryId,
       );
       if (edge != null) reload.value++;
     }
@@ -98,6 +99,7 @@ class VtcContactTrustPanel extends HookConsumerWidget {
         communityName: communityName,
         personaDid: link.personaDid,
         name: nameOf(link),
+        entry: entry,
       );
       if (edge != null) reload.value++;
     }
@@ -206,7 +208,9 @@ class _TrustRowView extends StatelessWidget {
                       VtcVouchButton(
                         edges: edges,
                         name: name,
+                        communityDid: row.link.communityDid,
                         communityName: row.communityName,
+                        entryId: row.link.entryId,
                       ),
                   ],
                 ),

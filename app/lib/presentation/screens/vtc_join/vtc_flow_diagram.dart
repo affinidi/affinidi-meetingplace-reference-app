@@ -3,18 +3,21 @@ import 'package:flutter/material.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 
 /// One party in a [VtcFlowDiagram], such as this phone, the member's VTA or
-/// the community.
+/// the community, drawn as its [picture] where it has one, else its [icon].
 class VtcFlowNode {
   /// Creates a [VtcFlowNode].
-  const VtcFlowNode(this.icon, this.label);
+  const VtcFlowNode(this.icon, this.label, {this.picture});
 
   final IconData icon;
   final String label;
+
+  /// A person's picture, drawn in the circle in place of [icon].
+  final ImageProvider? picture;
 }
 
 /// Who takes part in a step, in the order things pass between them: each
-/// of [nodes] as an icon in a circle over its name, an arrow between each
-/// two, spread across the full width.
+/// of [nodes] as an icon, or a picture, in a circle over its name, an arrow
+/// between each two, spread across the full width.
 ///
 /// Only pictures the step's summary, which says the same in words, so
 /// screen readers skip it.
@@ -80,12 +83,17 @@ class VtcFlowDiagram extends StatelessWidget {
                       shape: BoxShape.circle,
                       color: Colors.white.withAlpha(25),
                       border: Border.all(color: Colors.white54),
+                      image: switch (node.picture) {
+                        final picture? => DecorationImage(
+                          image: picture,
+                          fit: BoxFit.cover,
+                        ),
+                        null => null,
+                      },
                     ),
-                    child: Icon(
-                      node.icon,
-                      size: _iconSize,
-                      color: Colors.white,
-                    ),
+                    child: node.picture == null
+                        ? Icon(node.icon, size: _iconSize, color: Colors.white)
+                        : null,
                   ),
                   Text(
                     node.label,
