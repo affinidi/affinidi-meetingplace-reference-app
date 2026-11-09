@@ -5,6 +5,7 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import '../../../application/services/vtc_service/vtc_service.dart';
 import '../../../domain/models/identity/identity.dart';
 import '../../../domain/models/vtc/vtc_card_delivery.dart';
+import '../../../domain/models/vtc/vtc_community.dart';
 import '../../../domain/models/vtc/vtc_identity_check.dart';
 import '../../../domain/models/vtc/vtc_left_membership.dart';
 import '../../../domain/models/vtc/vtc_membership_card.dart';
@@ -367,6 +368,9 @@ abstract class VtcJoinState with _$VtcJoinState {
 
     /// How far leaving the community got, while the member leaves.
     VtcLeaveStep? leaveStep,
+
+    /// How far applying got, while the application is sent.
+    VtcApplyStep? applyStep,
 
     /// The community's own check of the member's identity, once their VTA
     /// holds one.

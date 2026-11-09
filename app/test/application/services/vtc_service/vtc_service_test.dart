@@ -310,6 +310,31 @@ void main() {
       expect(await service.recordedMembership(fakeVtcDid), isNull);
     });
 
+    test('reports each step of an admission, in order', () async {
+      final steps = <VtcApplyStep>[];
+
+      await service.join(
+        await service.readCommunity(fakeVtcDid),
+        persona: joinAs,
+        onStep: steps.add,
+      );
+
+      expect(steps, VtcApplyStep.values);
+    });
+
+    test('reports no admission steps while the application waits', () async {
+      network.joinVerdict = {'effect': 'refer'};
+      final steps = <VtcApplyStep>[];
+
+      await service.join(
+        await service.readCommunity(fakeVtcDid),
+        persona: joinAs,
+        onStep: steps.add,
+      );
+
+      expect(steps, [VtcApplyStep.preparingIdentity, VtcApplyStep.sending]);
+    });
+
     test('records the membership once the application is approved', () async {
       network.joinVerdict = {'effect': 'refer'};
       await service.join(

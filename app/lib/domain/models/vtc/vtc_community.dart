@@ -1,5 +1,22 @@
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
+/// A step of applying to a community, in order, as the phone works on it.
+/// The last two follow only an admission.
+enum VtcApplyStep {
+  /// Recording the identity that applies, created on the VTA if new, and
+  /// unlocking its keys there.
+  preparingIdentity,
+
+  /// Sending the application, with what the member approved sharing.
+  sending,
+
+  /// Keeping the cards the community issued on the VTA.
+  keepingCards,
+
+  /// Confirming the membership back to the community.
+  confirming,
+}
+
 /// A Verifiable Trust Community the member belongs to or applied to, and the
 /// persona they are known by there.
 class VtcCommunity {

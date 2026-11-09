@@ -13,6 +13,7 @@ import 'package:mpx_flutter_reference_app/application/services/identities_servic
 import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
 import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_card_delivery.dart';
+import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_community.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_left_membership.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_vetting.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
@@ -422,8 +423,15 @@ void main() {
       expect(shared.claims.single.value, 'Chess club');
       expect(submits(), isEmpty, reason: 'nothing sent before approval');
 
+      final steps = <VtcApplyStep?>[];
+      container.listen(
+        vtcJoinControllerProvider.select((state) => state.applyStep),
+        (_, step) => steps.add(step),
+      );
+
       await controller().approveCredential();
 
+      expect(steps, [...VtcApplyStep.values, null]);
       // The VTA keeps consent receipts for did:key subjects only, so the
       // presentation is made here, of the credential as the VTA holds it.
       expect(
@@ -1170,6 +1178,7 @@ void main() {
       await controller().join();
 
       expect(state().failure, VtcJoinFailure.noDidHosting);
+      expect(state().applyStep, isNull);
     });
 
     test('leaves a joined community', () async {

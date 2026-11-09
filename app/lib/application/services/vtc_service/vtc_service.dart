@@ -442,7 +442,8 @@ class VtcService {
   ///
   /// Once admitted, the membership is confirmed back to the community and,
   /// unless [listInDirectory], the member's directory card is withdrawn.
-  /// Both are retried by [checkApplication] until they succeed.
+  /// Both are retried by [checkApplication] until they succeed. Each step
+  /// is reported to [onStep] as it starts.
   Future<JoinVerdict> join(
     JoinManifest manifest, {
     VtaPersona? persona,
@@ -450,22 +451,26 @@ class VtcService {
     Map<String, dynamic>? presentation,
     List<JoinAttribute> attributes = const [],
     bool listInDirectory = false,
+    void Function(VtcApplyStep step)? onStep,
   }) async {
     final vta = await _grantedVta();
     final statements = (criterion?.asksForVetting ?? false)
         ? (await _repository.findVetting(manifest.communityDid))?.statements
         : null;
+    onStep?.call(VtcApplyStep.preparingIdentity);
     await joiningIdentity(
       manifest,
       persona: persona,
       listInDirectory: listInDirectory,
     );
     final community = (await _repository.findCommunity(manifest.communityDid))!;
+    final signer = await _personaSigner(vta, community);
 
+    onStep?.call(VtcApplyStep.sending);
     final verdict = await _sdk.joinClient().apply(
       manifest,
       agent: vta,
-      persona: await _personaSigner(vta, community),
+      persona: signer,
       criterion: criterion,
       presentation: presentation,
       vettingStatements: statements ?? const [],
@@ -475,8 +480,10 @@ class VtcService {
       case JoinAdmitted(:final credentials, :final membershipCard):
         final member = community.withApplication(isMember: true);
         await _repository.saveCommunity(member);
+        onStep?.call(VtcApplyStep.keepingCards);
         final kept = await _keepCards(vta, credentials, community.contextId);
         _membershipsChanged.add(null);
+        onStep?.call(VtcApplyStep.confirming);
         await _settle(vta, member, membershipCard, verdict.requestId);
         if (membershipCard != null && !kept.contains(membershipCard)) {
           // Not the VTA's to show: read from there once it holds one.

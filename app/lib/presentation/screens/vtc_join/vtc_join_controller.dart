@@ -502,19 +502,28 @@ class VtcJoinController extends _$VtcJoinController {
   }) async {
     _preview = null;
     _sharing = null;
-    final verdict = await _service.join(
-      manifest,
-      persona: persona,
-      criterion: _chosenCriterion(manifest),
-      presentation: presentation,
-      attributes: attributes,
-      listInDirectory: state.listInDirectory,
-    );
+    final JoinVerdict verdict;
+    try {
+      verdict = await _service.join(
+        manifest,
+        persona: persona,
+        criterion: _chosenCriterion(manifest),
+        presentation: presentation,
+        attributes: attributes,
+        listInDirectory: state.listInDirectory,
+        onStep: _showApplyStep,
+      );
+    } catch (_) {
+      // Applying ended: later work must not show it.
+      if (ref.mounted) state = state.copyWith(applyStep: null);
+      rethrow;
+    }
     // The documents as recorded: an application already open keeps its own.
     final recorded = verdict is JoinPending
         ? await _service.community(manifest.communityDid)
         : null;
     state = state.copyWith(
+      applyStep: null,
       details: const [],
       sharedCredential: null,
       submitExchange: recorded?.submitExchange,
@@ -534,6 +543,11 @@ class VtcJoinController extends _$VtcJoinController {
         JoinNeedsMore() => VtcJoinStep.needsMore,
       },
     );
+  }
+
+  void _showApplyStep(VtcApplyStep step) {
+    // The screen may have closed while the community answered.
+    if (ref.mounted) state = state.copyWith(applyStep: step);
   }
 
   /// Records the identity applying, then shows the vetting it gathers.
