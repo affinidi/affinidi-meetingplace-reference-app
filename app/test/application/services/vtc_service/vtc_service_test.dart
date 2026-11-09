@@ -970,6 +970,17 @@ void main() {
           'visibility': {'did': 'members'},
         });
       });
+
+      test('sets the name members see, as the persona', () async {
+        await service.setDirectoryName(fakeVtcDid, name: 'Ada');
+
+        final update = network.memberRequests.single;
+        expect(update['type'], DirectoryTask.cardUpdate);
+        expect(update['issuer'], persona.did);
+        expect(update['payload'], {
+          'values': {'displayName': 'Ada'},
+        });
+      });
     });
 
     group('membership credentials', () {

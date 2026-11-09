@@ -3831,7 +3831,7 @@
 	"@vtcTrustVouchDocument": {
 		"description": "Title of the signed vouch credential"
 	},
-	"vtcTrustFailure": "{reason, select, notMember{You're not a member of {community} any more.} contactNotMember{{name} isn't a member of {community} any more.} notFindable{{name} hasn't let members of {community} find them yet.} searchTooShort{Enter at least three letters.} proofRejected{{community} didn't accept your VTA's signature.} notAllowed{{community} doesn't allow this.} tryLater{{community} is busy. Try again in a moment.} vtaUnavailable{Your VTA couldn't sign this. Try again when it's reachable.} network{Couldn't reach {community}.} other{Something went wrong. Try again.}}",
+	"vtcTrustFailure": "{reason, select, notMember{You're not a member of {community} any more.} contactNotMember{{name} isn't a member of {community} any more.} notFindable{{name} hasn't let members of {community} find them yet.} searchTooShort{Enter at least three letters.} nameRefused{{community} doesn't accept this name.} proofRejected{{community} didn't accept your VTA's signature.} notAllowed{{community} doesn't allow this.} tryLater{{community} is busy. Try again in a moment.} vtaUnavailable{Your VTA couldn't sign this. Try again when it's reachable.} network{Couldn't reach {community}.} other{Something went wrong. Try again.}}",
 	"@vtcTrustFailure": {
 		"description": "Why vouching or finding a member did not work",
 		"placeholders": {
@@ -3874,6 +3874,41 @@
 	"vtcGroupMembersUnlistedNote": "Members who chose not to be listed in the directory of {community} aren't shown.",
 	"@vtcGroupMembersUnlistedNote": {
 		"description": "Why some members of a group may be missing from its list",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcDirectoryNameLabel": "Your name in {community}",
+	"@vtcDirectoryNameLabel": {
+		"description": "Label of the name other members of a community see",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcDirectoryNameNote": "Members of {community} see this name.",
+	"@vtcDirectoryNameNote": {
+		"description": "Who sees the member's name in a community",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcDirectoryNameSave": "Save name",
+	"@vtcDirectoryNameSave": {
+		"description": "Saves the name other members see"
+	},
+	"vtcDirectoryNameSaved": "Saved. Members now see this name.",
+	"@vtcDirectoryNameSaved": {
+		"description": "The name other members see was saved"
+	},
+	"vtcDirectoryNameRefused": "{community} doesn't accept this name.",
+	"@vtcDirectoryNameRefused": {
+		"description": "The community refused the name",
 		"placeholders": {
 			"community": {
 				"type": "String"

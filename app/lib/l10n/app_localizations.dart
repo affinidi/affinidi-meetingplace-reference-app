@@ -5691,7 +5691,7 @@ abstract class AppLocalizations {
   /// Why vouching or finding a member did not work
   ///
   /// In en, this message translates to:
-  /// **'{reason, select, notMember{You\'re not a member of {community} any more.} contactNotMember{{name} isn\'t a member of {community} any more.} notFindable{{name} hasn\'t let members of {community} find them yet.} searchTooShort{Enter at least three letters.} proofRejected{{community} didn\'t accept your VTA\'s signature.} notAllowed{{community} doesn\'t allow this.} tryLater{{community} is busy. Try again in a moment.} vtaUnavailable{Your VTA couldn\'t sign this. Try again when it\'s reachable.} network{Couldn\'t reach {community}.} other{Something went wrong. Try again.}}'**
+  /// **'{reason, select, notMember{You\'re not a member of {community} any more.} contactNotMember{{name} isn\'t a member of {community} any more.} notFindable{{name} hasn\'t let members of {community} find them yet.} searchTooShort{Enter at least three letters.} nameRefused{{community} doesn\'t accept this name.} proofRejected{{community} didn\'t accept your VTA\'s signature.} notAllowed{{community} doesn\'t allow this.} tryLater{{community} is busy. Try again in a moment.} vtaUnavailable{Your VTA couldn\'t sign this. Try again when it\'s reachable.} network{Couldn\'t reach {community}.} other{Something went wrong. Try again.}}'**
   String vtcTrustFailure(String reason, String community, String name);
 
   /// Opens a community group's members, to vouch for them
@@ -5729,6 +5729,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Members who chose not to be listed in the directory of {community} aren\'t shown.'**
   String vtcGroupMembersUnlistedNote(String community);
+
+  /// Label of the name other members of a community see
+  ///
+  /// In en, this message translates to:
+  /// **'Your name in {community}'**
+  String vtcDirectoryNameLabel(String community);
+
+  /// Who sees the member's name in a community
+  ///
+  /// In en, this message translates to:
+  /// **'Members of {community} see this name.'**
+  String vtcDirectoryNameNote(String community);
+
+  /// Saves the name other members see
+  ///
+  /// In en, this message translates to:
+  /// **'Save name'**
+  String get vtcDirectoryNameSave;
+
+  /// The name other members see was saved
+  ///
+  /// In en, this message translates to:
+  /// **'Saved. Members now see this name.'**
+  String get vtcDirectoryNameSaved;
+
+  /// The community refused the name
+  ///
+  /// In en, this message translates to:
+  /// **'{community} doesn\'t accept this name.'**
+  String vtcDirectoryNameRefused(String community);
 
   /// The scanned community is one the member belongs to
   ///

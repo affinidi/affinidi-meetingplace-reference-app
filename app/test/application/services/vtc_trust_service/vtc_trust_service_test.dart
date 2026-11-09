@@ -91,9 +91,24 @@ class _FakeVtcService extends Fake implements VtcService {
     required String entryId,
   }) async => entries[entryId];
 
+  String? directoryName;
+
   @override
   Future<MyDirectoryCard> myDirectoryCard(String communityDid) async =>
-      MyDirectoryCard(entryId: 'dir_me', isDidVisibleToMembers: findable);
+      MyDirectoryCard(
+        entryId: 'dir_me',
+        isDidVisibleToMembers: findable,
+        displayName: directoryName,
+      );
+
+  @override
+  Future<void> setDirectoryName(
+    String communityDid, {
+    required String name,
+  }) async {
+    await _fail();
+    directoryName = name;
+  }
 
   @override
   Future<void> setFindableByMembers(
@@ -357,13 +372,37 @@ void main() {
     });
   });
 
-  group('VtcTrustService findable', () {
+  group('VtcTrustService directory card', () {
     test('reads and sets whether members can find the member', () async {
-      expect(await service.isFindable(_club), isFalse);
+      expect((await service.directoryCard(_club)).isDidVisibleToMembers, false);
 
       await service.setFindable(_club, findable: true);
 
-      expect(await service.isFindable(_club), isTrue);
+      expect((await service.directoryCard(_club)).isDidVisibleToMembers, true);
+    });
+
+    test('reads and sets the name members see', () async {
+      expect((await service.directoryCard(_club)).displayName, isNull);
+
+      await service.setDirectoryName(_club, name: 'Ada');
+
+      expect((await service.directoryCard(_club)).displayName, 'Ada');
+    });
+
+    test('says when the community does not take the name', () {
+      vtc.refusal = MeetingPlaceVtcSDKException.refused(
+        DirectoryTask.valueRefused,
+      );
+
+      expect(
+        service.setDirectoryName(_club, name: 'Ada'),
+        throwsFailure(VtcTrustFailure.nameRefused),
+      );
+    });
+
+    test('names the identity the member joined with', () async {
+      expect(await service.identityDid(_club), _me);
+      expect(await service.identityDid('did:webvh:QmOther:vtc.example'), null);
     });
 
     test('says when the community does not let members be found', () {

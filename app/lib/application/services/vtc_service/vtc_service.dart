@@ -1837,6 +1837,22 @@ class VtcService {
     );
   }
 
+  /// Sets the name other members of [communityDid] see for the member to
+  /// [name], or clears it when [name] is blank. Throws as [memberGroups]
+  /// does.
+  Future<void> setDirectoryName(
+    String communityDid, {
+    required String name,
+  }) async {
+    final (vta, signer) = await _asMember(communityDid);
+    await _sdk.directoryClient().setDisplayName(
+      communityDid,
+      agent: vta,
+      persona: signer,
+      name: name,
+    );
+  }
+
   /// Has the member's VTA vouch, as their identity in [communityDid], for
   /// the member [subjectDid], and the community keep it in its trust graph.
   /// Throws as [memberGroups] does.

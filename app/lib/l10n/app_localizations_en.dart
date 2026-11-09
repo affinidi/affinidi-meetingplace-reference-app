@@ -3788,6 +3788,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'contactNotMember': '$name isn\'t a member of $community any more.',
       'notFindable': '$name hasn\'t let members of $community find them yet.',
       'searchTooShort': 'Enter at least three letters.',
+      'nameRefused': '$community doesn\'t accept this name.',
       'proofRejected': '$community didn\'t accept your VTA\'s signature.',
       'notAllowed': '$community doesn\'t allow this.',
       'tryLater': '$community is busy. Try again in a moment.',
@@ -3819,6 +3820,27 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String vtcGroupMembersUnlistedNote(String community) {
     return 'Members who chose not to be listed in the directory of $community aren\'t shown.';
+  }
+
+  @override
+  String vtcDirectoryNameLabel(String community) {
+    return 'Your name in $community';
+  }
+
+  @override
+  String vtcDirectoryNameNote(String community) {
+    return 'Members of $community see this name.';
+  }
+
+  @override
+  String get vtcDirectoryNameSave => 'Save name';
+
+  @override
+  String get vtcDirectoryNameSaved => 'Saved. Members now see this name.';
+
+  @override
+  String vtcDirectoryNameRefused(String community) {
+    return '$community doesn\'t accept this name.';
   }
 
   @override

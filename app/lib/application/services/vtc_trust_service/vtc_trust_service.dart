@@ -23,6 +23,9 @@ enum VtcTrustFailure {
   /// A search too short for the community.
   searchTooShort,
 
+  /// The community does not take the name the member gave.
+  nameRefused,
+
   /// The community did not accept the VTA's signature.
   proofRejected,
 
@@ -229,14 +232,34 @@ class VtcTrustService {
     );
   }
 
-  /// Whether other members of [communityDid] can find the member.
+  /// The member's own directory card in [communityDid]: the name other
+  /// members see, and whether they can find the member.
   ///
   /// Throws [VtcTrustException].
-  Future<bool> isFindable(String communityDid) => _guard(
+  Future<MyDirectoryCard> directoryCard(String communityDid) => _guard(
     'reading the directory card',
-    () async =>
-        (await _vtc.myDirectoryCard(communityDid)).isDidVisibleToMembers,
+    () => _vtc.myDirectoryCard(communityDid),
   );
+
+  /// The DID of the identity the member joined [communityDid] with, or null
+  /// when they are no member.
+  Future<String?> identityDid(String communityDid) async {
+    final community = await _repository.findCommunity(communityDid);
+    return community != null && community.isMember
+        ? community.personaDid
+        : null;
+  }
+
+  /// Sets the name other members of [communityDid] see for the member, or
+  /// clears it when [name] is blank.
+  ///
+  /// Throws [VtcTrustException], with [VtcTrustFailure.nameRefused] when the
+  /// community does not take the name.
+  Future<void> setDirectoryName(String communityDid, {required String name}) =>
+      _guard(
+        'changing the directory name',
+        () => _vtc.setDirectoryName(communityDid, name: name),
+      );
 
   /// Lets other members of [communityDid] find the member when
   /// [findable], or stops them otherwise.
@@ -286,6 +309,8 @@ class VtcTrustService {
           RelationshipTask.subjectNotMember => VtcTrustFailure.contactNotMember,
           RelationshipTask.vrcInvalid => VtcTrustFailure.proofRejected,
           DirectoryTask.queryTooShort => VtcTrustFailure.searchTooShort,
+          DirectoryTask.valueInvalid ||
+          DirectoryTask.valueRefused => VtcTrustFailure.nameRefused,
           DirectoryTask.aboveCeiling ||
           'permissionDenied' => VtcTrustFailure.notAllowed,
           'unavailable' => VtcTrustFailure.tryLater,
