@@ -213,7 +213,7 @@ void main() {
         VtaIdentityCard(did: _did, identity: _identity(_card, onVta: true)),
       );
 
-      expect(find.text('VTA details'), findsOneWidget);
+      expect(find.byKey(const Key('vta_details_toggle')), findsOneWidget);
       expect(find.text('mpx-1'), findsNothing);
     });
 
@@ -225,7 +225,7 @@ void main() {
         VtaIdentityCard(did: _did, identity: _identity(_card)),
       );
 
-      expect(find.text('VTA details'), findsNothing);
+      expect(find.byKey(const Key('vta_details_toggle')), findsNothing);
     });
 
     testWidgets('scrolls the opened VTA details in a slot of fixed height', (

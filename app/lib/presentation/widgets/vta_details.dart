@@ -8,12 +8,13 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../application/services/vtc_service/vtc_service.dart';
 import '../../infrastructure/extensions/build_context_extensions.dart';
 import '../../l10n/app_localizations.dart';
+import '../themes/tokens/mc_colors.dart';
 import '../themes/tokens/mc_icons.dart';
-import '../themes/tokens/mc_radius.dart';
 
 /// Where an identity lives on the member's VTA: its context, its profile,
-/// and the profile as the VTA keeps it. Collapsed until the member opens it;
-/// the profile is read from the VTA the first time it is opened.
+/// and the profile as the VTA keeps it. Collapsed to the VTA's shield until
+/// the member taps it; the profile is read from the VTA the first time it
+/// is opened.
 class VtaDetails extends HookConsumerWidget {
   const VtaDetails({
     super.key,
@@ -29,6 +30,8 @@ class VtaDetails extends HookConsumerWidget {
   final Color? color;
 
   static const _animation = Duration(milliseconds: 200);
+  static const _iconSize = 16.0;
+  static const _tapRadius = 20.0;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -49,32 +52,45 @@ class VtaDetails extends HookConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        InkWell(
-          key: const Key('vta_details_toggle'),
-          onTap: toggle,
-          borderRadius: BorderRadius.circular(McRadius.sm),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            child: Row(
-              spacing: 6,
-              children: [
-                Icon(McIcons.server, size: 16, color: foreground),
-                Expanded(
-                  child: Text(
-                    l10n.vtaDetailsTitle,
-                    style: context.textTheme.labelLarge?.copyWith(
-                      color: foreground,
-                      fontWeight: FontWeight.bold,
+        // The VTA's shield, as in the trail diagrams, opens and closes the
+        // details; open, it turns blue and names what it shows.
+        // The title starts where a detail row's text does: the tap area's
+        // padding is the rows' gap.
+        Row(
+          children: [
+            // Drawn at a detail row's icon size, so it lines up with the
+            // icons above it; the tap area reaches past it to the end.
+            Semantics(
+              button: true,
+              toggled: expanded.value,
+              child: Tooltip(
+                message: l10n.vtaDetailsTitle,
+                child: InkResponse(
+                  key: const Key('vta_details_toggle'),
+                  onTap: toggle,
+                  radius: _tapRadius,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 8, 8, 8),
+                    child: Icon(
+                      McIcons.shield,
+                      size: _iconSize,
+                      color: expanded.value ? McColors.blue : foreground,
                     ),
                   ),
                 ),
-                Icon(
-                  expanded.value ? McIcons.chevronUp : McIcons.chevronDown,
-                  color: foreground,
-                ),
-              ],
+              ),
             ),
-          ),
+            if (expanded.value)
+              Expanded(
+                child: Text(
+                  l10n.vtaDetailsTitle,
+                  style: context.textTheme.labelLarge?.copyWith(
+                    color: foreground,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+          ],
         ),
         AnimatedSize(
           duration: _animation,

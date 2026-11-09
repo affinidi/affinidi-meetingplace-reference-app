@@ -5,6 +5,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_colors.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/vta_details.dart';
 
 import '../../fakes/fake_vta.dart';
@@ -74,7 +76,9 @@ void main() {
     ) async {
       await pump(tester);
 
-      expect(find.text('VTA details'), findsOneWidget);
+      expect(find.byIcon(McIcons.shield), findsOneWidget);
+      expect(find.byTooltip('VTA details'), findsOneWidget);
+      expect(find.text('VTA details'), findsNothing);
       expect(find.text('Context ID'), findsNothing);
       expect(find.text('mpx-1'), findsNothing);
       expect(profileReads(), isEmpty);
@@ -83,6 +87,12 @@ void main() {
     testWidgets('shows the context, the profile and its JSON', (tester) async {
       await pump(tester);
       await open(tester);
+
+      expect(find.text('VTA details'), findsOneWidget);
+      expect(
+        tester.widget<Icon>(find.byIcon(McIcons.shield)).color,
+        McColors.blue,
+      );
 
       expect(find.text('mpx-1'), findsOneWidget);
       expect(find.text('01PROFILE'), findsOneWidget);
