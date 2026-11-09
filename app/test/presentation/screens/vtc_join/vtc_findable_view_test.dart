@@ -100,16 +100,6 @@ void main() {
   Switch findableSwitch(WidgetTester tester) =>
       tester.widget<Switch>(find.byKey(const Key('vtc_findable_switch')));
 
-  String nameText(WidgetTester tester) => tester
-      .widget<EditableText>(
-        find.descendant(
-          of: find.byKey(const Key('vtc_directory_name')),
-          matching: find.byType(EditableText),
-        ),
-      )
-      .controller
-      .text;
-
   Future<void> tapKey(WidgetTester tester, String key) async {
     await tester.ensureVisible(find.byKey(Key(key)));
     await tester.tap(find.byKey(Key(key)));
@@ -124,44 +114,58 @@ void main() {
       find.textContaining('Let members of Club find you to vouch for you'),
       findsOneWidget,
     );
-    expect(find.text('Members of Club see this name.'), findsOneWidget);
+    expect(
+      find.text(
+        'Members of Club see you as John Doe, the name of the identity you '
+        'joined with.',
+      ),
+      findsOneWidget,
+    );
     expect(findableSwitch(tester).value, isFalse);
   });
 
-  testWidgets('starts an unnamed card from the identity joined with', (
+  testWidgets('sends the identity\'s name when letting members find you', (
     tester,
   ) async {
     await pumpView(tester);
+    expect(service.names, isEmpty, reason: 'nothing leaves before that');
 
-    expect(nameText(tester), 'John Doe');
-    expect(service.names, isEmpty, reason: 'nothing leaves before saving');
+    await tapKey(tester, 'vtc_findable_switch');
+
+    expect(service.names, ['John Doe']);
+    expect(service.changes, [true]);
   });
 
-  testWidgets('shows the name the community holds', (tester) async {
+  testWidgets('brings a findable member\'s name in step with the identity', (
+    tester,
+  ) async {
+    service
+      ..findable = true
+      ..name = 'Johnny';
+
+    await pumpView(tester);
+
+    expect(service.names, ['John Doe']);
+  });
+
+  testWidgets('leaves the name alone while members cannot find you', (
+    tester,
+  ) async {
     service.name = 'Johnny';
 
     await pumpView(tester);
 
-    expect(nameText(tester), 'Johnny');
-  });
-
-  testWidgets('saves the name members see', (tester) async {
-    await pumpView(tester);
-
-    await tester.enterText(find.byKey(const Key('vtc_directory_name')), 'JD');
-    await tapKey(tester, 'vtc_directory_name_save');
-
-    expect(service.names, ['JD']);
-    expect(find.text('Saved. Members now see this name.'), findsOneWidget);
+    expect(service.names, isEmpty);
   });
 
   testWidgets('says when the community does not take the name', (tester) async {
     service.refusal = VtcTrustFailure.nameRefused;
     await pumpView(tester);
 
-    await tapKey(tester, 'vtc_directory_name_save');
+    await tapKey(tester, 'vtc_findable_switch');
 
     expect(find.text("Club doesn't accept this name."), findsOneWidget);
+    expect(findableSwitch(tester).value, isFalse);
   });
 
   testWidgets('shows what the community answers', (tester) async {

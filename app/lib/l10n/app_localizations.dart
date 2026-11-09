@@ -5730,35 +5730,17 @@ abstract class AppLocalizations {
   /// **'Members who chose not to be listed in the directory of {community} aren\'t shown.'**
   String vtcGroupMembersUnlistedNote(String community);
 
-  /// Label of the name other members of a community see
-  ///
-  /// In en, this message translates to:
-  /// **'Your name in {community}'**
-  String vtcDirectoryNameLabel(String community);
-
-  /// Who sees the member's name in a community
-  ///
-  /// In en, this message translates to:
-  /// **'Members of {community} see this name.'**
-  String vtcDirectoryNameNote(String community);
-
-  /// Saves the name other members see
-  ///
-  /// In en, this message translates to:
-  /// **'Save name'**
-  String get vtcDirectoryNameSave;
-
-  /// The name other members see was saved
-  ///
-  /// In en, this message translates to:
-  /// **'Saved. Members now see this name.'**
-  String get vtcDirectoryNameSaved;
-
   /// The community refused the name
   ///
   /// In en, this message translates to:
   /// **'{community} doesn\'t accept this name.'**
   String vtcDirectoryNameRefused(String community);
+
+  /// The name other members of a community see, taken from the identity the member joined with
+  ///
+  /// In en, this message translates to:
+  /// **'Members of {community} see you as {name}, the name of the identity you joined with.'**
+  String vtcDirectoryNameShown(String community, String name);
 
   /// The scanned community is one the member belongs to
   ///

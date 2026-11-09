@@ -3880,37 +3880,23 @@
 			}
 		}
 	},
-	"vtcDirectoryNameLabel": "Your name in {community}",
-	"@vtcDirectoryNameLabel": {
-		"description": "Label of the name other members of a community see",
-		"placeholders": {
-			"community": {
-				"type": "String"
-			}
-		}
-	},
-	"vtcDirectoryNameNote": "Members of {community} see this name.",
-	"@vtcDirectoryNameNote": {
-		"description": "Who sees the member's name in a community",
-		"placeholders": {
-			"community": {
-				"type": "String"
-			}
-		}
-	},
-	"vtcDirectoryNameSave": "Save name",
-	"@vtcDirectoryNameSave": {
-		"description": "Saves the name other members see"
-	},
-	"vtcDirectoryNameSaved": "Saved. Members now see this name.",
-	"@vtcDirectoryNameSaved": {
-		"description": "The name other members see was saved"
-	},
 	"vtcDirectoryNameRefused": "{community} doesn't accept this name.",
 	"@vtcDirectoryNameRefused": {
 		"description": "The community refused the name",
 		"placeholders": {
 			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcDirectoryNameShown": "Members of {community} see you as {name}, the name of the identity you joined with.",
+	"@vtcDirectoryNameShown": {
+		"description": "The name other members of a community see, taken from the identity the member joined with",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			},
+			"name": {
 				"type": "String"
 			}
 		}

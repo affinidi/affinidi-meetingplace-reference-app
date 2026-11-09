@@ -3859,24 +3859,13 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String vtcDirectoryNameLabel(String community) {
-    return 'Your name in $community';
-  }
-
-  @override
-  String vtcDirectoryNameNote(String community) {
-    return 'Members of $community see this name.';
-  }
-
-  @override
-  String get vtcDirectoryNameSave => 'Save name';
-
-  @override
-  String get vtcDirectoryNameSaved => 'Saved. Members now see this name.';
-
-  @override
   String vtcDirectoryNameRefused(String community) {
     return '$community doesn\'t accept this name.';
+  }
+
+  @override
+  String vtcDirectoryNameShown(String community, String name) {
+    return 'Members of $community see you as $name, the name of the identity you joined with.';
   }
 
   @override

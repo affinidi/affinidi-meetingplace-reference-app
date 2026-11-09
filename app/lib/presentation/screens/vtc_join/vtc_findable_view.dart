@@ -9,12 +9,13 @@ import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 
 /// How other members of the community find the member to vouch for them:
-/// the name they see, and whether the community shows them the identity
-/// the member joined with, instead of its administrators only. Read from
-/// the community each time, never kept on the phone.
+/// whether the community shows them the identity the member joined with,
+/// instead of its administrators only, under that identity's name. Read
+/// from the community each time, never kept on the phone.
 ///
-/// A card the member never named starts from the name of the identity
-/// they joined with, which leaves the phone only once they save it.
+/// The name is always the identity's own, never one typed here. It is sent
+/// when the member lets others find them, and brought in step with the
+/// identity each time this opens while they can be found.
 class VtcFindableView extends HookConsumerWidget {
   const VtcFindableView({
     super.key,
@@ -33,9 +34,8 @@ class VtcFindableView extends HookConsumerWidget {
       identitiesServiceProvider.select((state) => state.identities),
     );
     final card = useState<MyDirectoryCard?>(null);
-    final nameField = useTextEditingController();
+    final identityName = useState('');
     final busy = useState(false);
-    final saved = useState(false);
     final failure = useState<String?>(null);
 
     String messageOf(VtcTrustFailure reason) => switch (reason) {
@@ -49,14 +49,24 @@ class VtcFindableView extends HookConsumerWidget {
     useEffect(() {
       Future<void> load() async {
         try {
-          final mine = await service.directoryCard(communityDid);
+          var mine = await service.directoryCard(communityDid);
           final identityDid = await service.identityDid(communityDid);
+          final name =
+              identities
+                  .where((identity) => identity.did == identityDid)
+                  .firstOrNull
+                  ?.card
+                  .displayName
+                  .trim() ??
+              '';
+          if (mine.isDidVisibleToMembers &&
+              name.isNotEmpty &&
+              mine.displayName != name) {
+            await service.setDirectoryName(communityDid, name: name);
+            mine = await service.directoryCard(communityDid);
+          }
           if (!context.mounted) return;
-          final joinedAs = identities
-              .where((identity) => identity.did == identityDid)
-              .firstOrNull;
-          nameField.text =
-              mine.displayName ?? joinedAs?.card.displayName.trim() ?? '';
+          identityName.value = name;
           card.value = mine;
         } on VtcTrustException catch (error) {
           if (context.mounted) failure.value = messageOf(error.failure);
@@ -65,11 +75,10 @@ class VtcFindableView extends HookConsumerWidget {
 
       load();
       return null;
-    }, [communityDid]);
+    }, [communityDid, identities]);
 
     Future<void> run(Future<void> Function() action) async {
       busy.value = true;
-      saved.value = false;
       failure.value = null;
       try {
         await action();
@@ -81,13 +90,13 @@ class VtcFindableView extends HookConsumerWidget {
       }
     }
 
-    Future<void> saveName() => run(() async {
-      await service.setDirectoryName(communityDid, name: nameField.text);
-      saved.value = true;
+    Future<void> change(bool findable) => run(() async {
+      final name = identityName.value;
+      if (findable && name.isNotEmpty) {
+        await service.setDirectoryName(communityDid, name: name);
+      }
+      await service.setFindable(communityDid, findable: findable);
     });
-
-    Future<void> change(bool findable) =>
-        run(() => service.setFindable(communityDid, findable: findable));
 
     final loaded = card.value;
     return GlassCard(
@@ -97,26 +106,6 @@ class VtcFindableView extends HookConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: 12,
         children: [
-          OnboardingTextField(
-            key: const Key('vtc_directory_name'),
-            controller: nameField,
-            label: l10n.vtcDirectoryNameLabel(communityName),
-            enabled: loaded != null && !busy.value,
-            onSubmitted: (_) => saveName(),
-          ),
-          Text(
-            saved.value
-                ? l10n.vtcDirectoryNameSaved
-                : l10n.vtcDirectoryNameNote(communityName),
-            style: onboardingNote(context),
-          ),
-          OnboardingButton(
-            key: const Key('vtc_directory_name_save'),
-            label: l10n.vtcDirectoryNameSave,
-            isOutlined: true,
-            isLoading: busy.value,
-            onPressed: loaded == null ? null : saveName,
-          ),
           // A Row, not a SwitchListTile: the onboarding layout measures
           // intrinsic heights, which a ListTile misreports.
           Row(
@@ -136,6 +125,12 @@ class VtcFindableView extends HookConsumerWidget {
               ),
             ],
           ),
+          if (identityName.value case final name when name.isNotEmpty)
+            Text(
+              l10n.vtcDirectoryNameShown(communityName, name),
+              key: const Key('vtc_directory_name'),
+              style: onboardingNote(context),
+            ),
           if (failure.value case final message?)
             OnboardingMessage(message, isError: true),
         ],
