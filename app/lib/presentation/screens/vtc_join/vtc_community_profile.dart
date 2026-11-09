@@ -6,7 +6,6 @@ import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
-import 'vtc_join_state.dart';
 
 /// The community's logo above the title; nothing while it cannot load.
 class VtcCommunityLogo extends StatelessWidget {
@@ -31,17 +30,28 @@ class VtcCommunityLogo extends StatelessWidget {
   }
 }
 
-/// Who the community is: its description, website, contact and DID, which
-/// can be copied.
+/// Who the community is: its description, website, contact, DID, which can
+/// be copied, and the join phrase it can be found by.
 class VtcCommunityProfile extends HookWidget {
-  const VtcCommunityProfile({required this.state});
+  const VtcCommunityProfile({
+    super.key,
+    required this.communityDid,
+    this.description,
+    this.website,
+    this.contactEmail,
+    this.joinPhrase,
+  });
 
-  final VtcJoinState state;
+  final String communityDid;
+  final String? description;
+  final Uri? website;
+  final String? contactEmail;
+  final String? joinPhrase;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final did = state.communityDid ?? '';
+    final did = communityDid;
     final copied = useState(false);
     final mc = context.mcColors;
 
@@ -57,20 +67,20 @@ class VtcCommunityProfile extends HookWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           spacing: 12,
           children: [
-            if (state.description case final description?)
+            if (description case final description?)
               Text(
                 description,
                 style: context.textTheme.bodyMedium?.copyWith(
                   color: mc.textPrimary,
                 ),
               ),
-            if (state.website case final website?)
+            if (website case final website?)
               OnboardingLine(
                 icon: McIcons.website,
                 title: l10n.vtcJoinWebsite,
                 subtitle: website.toString(),
               ),
-            if (state.contactEmail case final email?)
+            if (contactEmail case final email?)
               OnboardingLine(
                 icon: McIcons.email,
                 title: l10n.vtcJoinContact,
@@ -87,7 +97,7 @@ class VtcCommunityProfile extends HookWidget {
                     spacing: 2,
                     children: [
                       Text(
-                        l10n.vtcJoinDidHint,
+                        l10n.communityDidLabel,
                         style: context.textTheme.bodyMedium?.copyWith(
                           color: mc.textPrimary,
                         ),
@@ -112,6 +122,13 @@ class VtcCommunityProfile extends HookWidget {
                 ),
               ],
             ),
+            if (joinPhrase case final phrase?)
+              OnboardingLine(
+                key: const Key('vtc_community_join_phrase'),
+                icon: McIcons.key,
+                title: l10n.vtcJoinPhraseHeading,
+                subtitle: phrase,
+              ),
           ],
         ),
       ),

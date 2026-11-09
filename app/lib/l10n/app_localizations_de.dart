@@ -4787,6 +4787,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get communityChannelsTab => 'Channels';
 
   @override
+  String get communityInfoTab => 'Info';
+
+  @override
+  String get communityDidLabel => 'Community DID';
+
+  @override
   String get communityMembersTab => 'Members';
 
   @override

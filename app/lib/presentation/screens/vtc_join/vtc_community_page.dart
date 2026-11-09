@@ -369,8 +369,15 @@ class _WithAbout extends StatelessWidget {
           key: const Key('vtc_community_about'),
           icon: Icon(McIcons.info, color: context.mcColors.textSecondary),
           tooltip: context.l10n.vtcJoinProfileHeading,
-          onPressed: () =>
-              showOnboardingSheet(context, VtcCommunityProfile(state: state)),
+          onPressed: () => showOnboardingSheet(
+            context,
+            VtcCommunityProfile(
+              communityDid: state.communityDid ?? '',
+              description: state.description,
+              website: state.website,
+              contactEmail: state.contactEmail,
+            ),
+          ),
         ),
       ],
     );

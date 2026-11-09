@@ -6996,6 +6996,18 @@ abstract class AppLocalizations {
   /// **'Channels'**
   String get communityChannelsTab;
 
+  /// Tab of a community's screen showing what the community publishes about itself
+  ///
+  /// In en, this message translates to:
+  /// **'Info'**
+  String get communityInfoTab;
+
+  /// Label above a community's DID in its profile
+  ///
+  /// In en, this message translates to:
+  /// **'Community DID'**
+  String get communityDidLabel;
+
   /// Tab of a community's screen to search its members
   ///
   /// In en, this message translates to:

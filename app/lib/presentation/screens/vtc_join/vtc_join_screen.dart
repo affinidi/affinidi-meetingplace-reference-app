@@ -390,7 +390,12 @@ class _Review extends StatelessWidget {
         ),
         OnboardingSubtitle(l10n.vtcJoinWantsYou),
         Center(child: _Pill(l10n.vtcJoinWithVtaIdentity)),
-        VtcCommunityProfile(state: state),
+        VtcCommunityProfile(
+          communityDid: state.communityDid ?? '',
+          description: state.description,
+          website: state.website,
+          contactEmail: state.contactEmail,
+        ),
         if (state.denialReason case final reason?)
           OnboardingMessage(l10n.vtcJoinLastDenied(reason), isError: true),
         if (!state.canApply)

@@ -5156,6 +5156,14 @@
 	"@communityChannelsTab": {
 		"description": "Tab of a community's screen listing its channels"
 	},
+	"communityInfoTab": "Info",
+	"@communityInfoTab": {
+		"description": "Tab of a community's screen showing what the community publishes about itself"
+	},
+	"communityDidLabel": "Community DID",
+	"@communityDidLabel": {
+		"description": "Label above a community's DID in its profile"
+	},
 	"communityMembersTab": "Members",
 	"@communityMembersTab": {
 		"description": "Tab of a community's screen to search its members"
