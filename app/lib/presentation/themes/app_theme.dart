@@ -36,7 +36,10 @@ class AppTheme {
     vertical: McSpacing.s3,
   );
   static const _buttonMinimumSize = Size(64, 44);
+  // A button's Material replaces the ambient text style, so the family
+  // must be named here or labels fall back to the platform font.
   static const _buttonTextStyle = TextStyle(
+    fontFamily: McTypography.fontFamily,
     fontSize: 16,
     fontWeight: FontWeight.w500,
   );

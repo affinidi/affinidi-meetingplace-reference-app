@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_custom_colors.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/destructive_elevated_button_style.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/rounded_input_decoration.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_colors.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_radius.dart';
@@ -35,6 +36,26 @@ void main() {
         expect(style.shape?.resolve({}), isA<StadiumBorder>());
         expect(style.backgroundColor?.resolve({}), McColors.blue);
         expect(style.foregroundColor?.resolve({}), McColors.textOnPrimary);
+      });
+
+      test('sets every button label in Affinidi Sans', () {
+        final styles = {
+          'elevated': theme.elevatedButtonTheme.style,
+          'filled': theme.filledButtonTheme.style,
+          'outlined': theme.outlinedButtonTheme.style,
+          'text': theme.textButtonTheme.style,
+          'destructive': theme
+              .extension<DestructiveElevatedButtonStyle>()
+              ?.buttonStyle,
+        };
+
+        for (final MapEntry(key: name, value: style) in styles.entries) {
+          expect(
+            style?.textStyle?.resolve({})?.fontFamily,
+            McTypography.fontFamily,
+            reason: name,
+          );
+        }
       });
 
       test('never fills the navigation selection', () {
