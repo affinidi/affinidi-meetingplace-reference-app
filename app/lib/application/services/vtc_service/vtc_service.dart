@@ -2370,6 +2370,7 @@ class VtcService {
   /// their VTA holds, then those of the memberships they left, the latest
   /// first. A card of a membership left is shown once, as left. Test
   /// credentials this phone issued are not memberships of a community.
+  /// The cards read are kept, for [savedMembershipCredentials].
   ///
   /// Throws [VtaNotLinkedException] when no VTA is linked, and
   /// [MeetingPlaceVtcSDKException] when the VTA cannot be reached.
@@ -2377,6 +2378,19 @@ class VtcService {
     final held = await _sdk
         .communityImport(await _grantedVta())
         .membershipCards();
+    await _repository.saveMembershipCards(held);
+    return _membershipEntries(held);
+  }
+
+  /// The member's membership cards as [membershipCredentials] last read
+  /// them from the VTA, with the memberships left as recorded now. Asks
+  /// nothing of the VTA.
+  Future<List<VtcMembershipEntry>> savedMembershipCredentials() async =>
+      _membershipEntries(await _repository.membershipCards());
+
+  Future<List<VtcMembershipEntry>> _membershipEntries(
+    List<StoredCredential> held,
+  ) async {
     final mockIssuer = await _mockIssuer.did();
     final communities = await _repository.communities();
     final left = [...await _repository.leftMemberships()]

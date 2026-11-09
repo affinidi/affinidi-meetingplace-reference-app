@@ -1196,6 +1196,31 @@ void main() {
         expect(entries.single.left, isNull);
       });
 
+      test('shows the cards last read, without asking the VTA', () async {
+        expect(await service.savedMembershipCredentials(), isEmpty);
+        hold([card(status: FakeVtcNetwork.statusEntry(7))]);
+        await service.membershipCredentials();
+        final asked = network.vta.received.length;
+        network.vta.isDown = true;
+
+        final saved = await service.savedMembershipCredentials();
+
+        expect(saved.single.key, 'urn:uuid:vmc');
+        expect(saved.single.communityName, 'Football club');
+        expect(saved.single.stored?.id, 'urn:uuid:vmc');
+        expect(network.vta.received, hasLength(asked));
+      });
+
+      test('shows a card last read once, as left, after leaving', () async {
+        hold([card(status: FakeVtcNetwork.statusEntry(7))]);
+        await service.membershipCredentials();
+
+        await service.leave(fakeVtcDid);
+
+        final saved = await service.savedMembershipCredentials();
+        expect(saved.single.left, isNotNull);
+      });
+
       test("leaves out a community group's credential", () async {
         hold([
           card(status: FakeVtcNetwork.statusEntry(7)),
