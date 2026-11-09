@@ -154,6 +154,14 @@ void main() {
     expect(findableSwitch(tester).value, isFalse);
   });
 
+  testWidgets('colours the switch as every other switch', (tester) async {
+    await pumpView(tester);
+
+    final findable = findableSwitch(tester);
+    expect(findable.activeTrackColor, isNull);
+    expect(findable.activeThumbColor, isNull);
+  });
+
   testWidgets('sends the identity\'s name when letting members find you', (
     tester,
   ) async {

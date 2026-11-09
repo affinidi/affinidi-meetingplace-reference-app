@@ -137,8 +137,6 @@ class VtcFindableView extends HookConsumerWidget {
                 key: const Key('vtc_findable_switch'),
                 value: loaded?.isFindable ?? false,
                 onChanged: loaded == null || busy.value ? null : change,
-                activeTrackColor: Colors.white,
-                activeThumbColor: context.colorScheme.primary,
               ),
             ],
           ),
