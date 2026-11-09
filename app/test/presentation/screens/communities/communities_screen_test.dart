@@ -112,10 +112,32 @@ void main() {
         findsOneWidget,
       );
 
-      await tester.tap(find.byIcon(Icons.close));
+      await tester.tap(find.byKey(const Key('section_banner_back')));
       await tester.pumpAndSettle();
 
       expect(find.text(l10n.communitiesSubtitle), findsOneWidget);
+    });
+
+    testWidgets('goes back to the communities, keeping the settings menu', (
+      tester,
+    ) async {
+      final l10n = await getL10n();
+      await openCommunitiesTab(tester);
+      await saveCommunities();
+      await pullToRefresh(tester);
+      await tester.tap(find.text('Chess club'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('section_banner_back')), findsOneWidget);
+      expect(find.byIcon(Icons.menu), findsOneWidget);
+
+      // As the system's back button does.
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+
+      expect(find.text(l10n.communitiesSubtitle), findsOneWidget);
+      expect(find.text('Chess club'), findsOneWidget);
+      expect(find.byKey(const Key('section_banner_back')), findsNothing);
     });
   });
 }

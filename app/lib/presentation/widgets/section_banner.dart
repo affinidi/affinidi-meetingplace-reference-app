@@ -12,6 +12,7 @@ class SectionBanner extends StatelessWidget {
     required this.subtitle,
     this.showProgress,
     this.onClose,
+    this.onBack,
   });
 
   final String title;
@@ -19,6 +20,10 @@ class SectionBanner extends StatelessWidget {
   final bool? showProgress;
 
   final VoidCallback? onClose;
+
+  /// Goes back to the screen this one was opened from, shown before the
+  /// title; none when null.
+  final VoidCallback? onBack;
 
   void _openSettingsDrawer() {
     dashboardShellScaffoldKey.currentState?.openEndDrawer();
@@ -51,6 +56,24 @@ class SectionBanner extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.start,
               spacing: 12,
               children: [
+                if (onBack != null)
+                  SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: IconButton(
+                      key: const Key('section_banner_back'),
+                      padding: EdgeInsets.zero,
+                      tooltip: MaterialLocalizations.of(
+                        context,
+                      ).backButtonTooltip,
+                      icon: Icon(
+                        Icons.arrow_back,
+                        color: colorScheme.onSurface.withValues(alpha: 0.5),
+                        size: 28,
+                      ),
+                      onPressed: onBack,
+                    ),
+                  ),
                 Expanded(
                   flex: 1,
                   child: Column(

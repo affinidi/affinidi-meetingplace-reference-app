@@ -45,7 +45,7 @@ class CommunityScreen extends HookConsumerWidget {
           SectionBanner(
             title: name,
             subtitle: l10n.contactsPanelSubtitle,
-            onClose: () => Navigator.of(context).pop(),
+            onBack: () => Navigator.of(context).pop(),
           ),
           TabBar(
             controller: tabController,
