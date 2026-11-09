@@ -164,4 +164,7 @@ flutter:
         - asset: assets/fonts/affinidi_sans/AffinidiSans-ExtraBoldItalic.ttf
           weight: 800
           style: italic
+    - family: Phosphor
+      fonts:
+        - asset: assets/fonts/phosphor/Phosphor.ttf
 
