@@ -12,6 +12,10 @@ import '../../widgets/section_header.dart';
 import '../credentials/membership_credentials_list.dart';
 import '../vtc_join/vtc_join_screen.dart';
 import 'communities_controller.dart';
+import 'community_logo_provider.dart';
+
+/// Room for a community's logo, wider than the icon shown without one.
+const _logoSize = 32.0;
 
 /// The communities the member belongs to or is applying to. A community the
 /// member belongs to opens with its channels; one they are applying to opens
@@ -108,8 +112,8 @@ class CommunitiesScreen extends ConsumerWidget {
   }
 }
 
-/// One community: its name, and whether its decision on the member's
-/// application is pending.
+/// One community: its logo, if it gives one, its name, and whether its
+/// decision on the member's application is pending.
 class _CommunityRow extends StatelessWidget {
   const _CommunityRow({super.key, required this.community, this.onTap});
 
@@ -130,7 +134,7 @@ class _CommunityRow extends StatelessWidget {
       child: Row(
         spacing: 12,
         children: [
-          Icon(McIcons.community, color: colors.onSurface),
+          _CommunityLogo(communityDid: community.communityDid),
           Expanded(
             child: Text(
               community.name ?? l10n.membershipCredentialUnnamed,
@@ -148,6 +152,37 @@ class _CommunityRow extends StatelessWidget {
           else
             Icon(McIcons.chevronRight, color: colors.onSurfaceVariant),
         ],
+      ),
+    );
+  }
+}
+
+/// The community's logo in a white ring, as community logos are drawn for a
+/// light ground; the community icon until it loads, or when it gives none or
+/// cannot load.
+class _CommunityLogo extends ConsumerWidget {
+  const _CommunityLogo({required this.communityDid});
+
+  final String communityDid;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final icon = Icon(McIcons.community, color: context.colorScheme.onSurface);
+    final url = ref.watch(communityLogoProvider(communityDid)).value;
+    if (url == null) return icon;
+    return Container(
+      key: Key('community_logo_$communityDid'),
+      width: _logoSize,
+      height: _logoSize,
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.white,
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Image.network(
+        url.toString(),
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => icon,
       ),
     );
   }
