@@ -112,6 +112,12 @@ abstract class AppLocalizations {
   /// **'{tabName, select, connections{Invitations} contacts{Communities} identities{Identities} rCards{R-Cards} credentials{Credentials} settings{Settings} other{Invalid}}'**
   String tabsTitle(String tabName);
 
+  /// Screen reader text for the unread count on a navigation item
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 new item} other{{count} new items}}'**
+  String badgeCountSemantics(int count);
+
   /// No description provided for @rCardsPlaceholderMessage.
   ///
   /// In en, this message translates to:

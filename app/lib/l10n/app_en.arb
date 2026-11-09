@@ -12,6 +12,15 @@
 			}
 		}
 	},
+	"badgeCountSemantics": "{count, plural, =1{1 new item} other{{count} new items}}",
+	"@badgeCountSemantics": {
+		"description": "Screen reader text for the unread count on a navigation item",
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
 	"rCardsPlaceholderMessage": "R-Cards will appear here.",
 	"@rCardsPlaceholderMessage": {
 		"type": "text"

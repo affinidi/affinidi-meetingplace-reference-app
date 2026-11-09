@@ -25,6 +25,17 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String badgeCountSemantics(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count new items',
+      one: '1 new item',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get rCardsPlaceholderMessage => 'Las R-Cards aparecerán aquí.';
 
   @override

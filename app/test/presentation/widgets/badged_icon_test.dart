@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_colors.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
@@ -14,10 +15,11 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: Center(
             child: BadgedIcon(
-              label: 'Invitations',
               icon: const Icon(McIcons.connections),
               count: count,
             ),
@@ -45,6 +47,12 @@ void main() {
       expect(find.text('3'), findsOneWidget);
     });
   }
+
+  testWidgets('reads the count as new items', (tester) async {
+    await pumpIcon(tester, theme: AppTheme.dark, count: 3);
+
+    expect(find.bySemanticsLabel('3 new items'), findsOneWidget);
+  });
 
   testWidgets('shows only the icon without a count', (tester) async {
     await pumpIcon(tester, theme: AppTheme.dark, count: 0);

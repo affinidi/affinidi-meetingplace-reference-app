@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
 
-class BadgedIcon extends StatelessWidget {
-  BadgedIcon({
-    super.key,
-    required this.label,
-    required this.icon,
-    this.count = 0,
-  });
+import '../../infrastructure/extensions/build_context_extensions.dart';
 
-  final String label;
+class BadgedIcon extends StatelessWidget {
+  BadgedIcon({super.key, required this.icon, this.count = 0});
+
   final Widget icon;
   final int count;
 
@@ -20,6 +16,7 @@ class BadgedIcon extends StatelessWidget {
         ? Badge(
             label: Text(
               '$count',
+              semanticsLabel: context.l10n.badgeCountSemantics(count),
               textScaler:
                   (MediaQuery.maybeTextScalerOf(context) ??
                           TextScaler.noScaling)
