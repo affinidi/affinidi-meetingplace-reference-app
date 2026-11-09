@@ -98,7 +98,7 @@ void main() {
       const shown = 'did:webvh:QmPEQVM1JPTyrv...:ada-lovelace';
       expect(find.text(longDid), findsNothing);
       final did = tester.widget<Text>(find.text(shown));
-      expect(did.maxLines, 1);
+      expect(did.maxLines, 2);
       final context = tester.element(find.text(shown));
       expect(
         did.style?.fontSize,

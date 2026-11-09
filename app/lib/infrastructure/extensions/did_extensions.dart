@@ -18,22 +18,18 @@ extension DidExtensions on String {
   }
 
   /// Return a shortened "top...:last" representation of this DID: its first
-  /// [charCountTop] characters, then its last part from the last colon,
-  /// such as `:ada-lovelace`. A last part longer than [maxLastPart], such
-  /// as a `did:key`'s key, keeps only its last [charCountTail] characters.
-  String topAndLastPart({
-    int charCountTop = 24,
-    int maxLastPart = 20,
-    int charCountTail = 8,
-  }) {
+  /// [charCountTop] characters, then all of it from the last colon, such as
+  /// `:ada-lovelace`. When the last colon falls within the first characters,
+  /// as in a `did:key`, keeps its last [charCountTail] characters instead.
+  String topAndLastPart({int charCountTop = 24, int charCountTail = 8}) {
     final lastColon = lastIndexOf(':');
-    final lastPart = lastColon < 0 ? '' : substring(lastColon);
-    if (lastPart.isEmpty || lastPart.length > maxLastPart) {
+    if (lastColon < charCountTop) {
       return topAndTail(
         charCountTop: charCountTop,
         charCountTail: charCountTail,
       );
     }
+    final lastPart = substring(lastColon);
     const ellipsis = '...';
     // Whole while cutting would save no more than the ellipsis takes.
     if (length <= charCountTop + ellipsis.length + lastPart.length) {

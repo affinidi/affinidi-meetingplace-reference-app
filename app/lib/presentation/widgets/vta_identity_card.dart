@@ -257,7 +257,8 @@ class _DidMetadata extends StatelessWidget {
         Expanded(
           child: Text(
             did.topAndLastPart(),
-            maxLines: 1,
+            // Room for a long last part, which is never cut.
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: McTypography.code.copyWith(
               color: mc.textTertiary,
