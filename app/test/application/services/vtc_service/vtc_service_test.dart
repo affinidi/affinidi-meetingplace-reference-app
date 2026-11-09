@@ -1016,6 +1016,36 @@ void main() {
         });
       });
 
+      test('reads what the community shows of another member', () async {
+        network.answerTo[RelationshipTask.list] = (payload) => {
+          'items': [edge(issuer: bob)],
+        };
+        network.answerTo[DirectoryTask.cardPublic] = (_) => {
+          'card': {'@type': 'Card'},
+          'cardDigest': 'zQmCard',
+          'publishedAt': '2026-11-09T10:00:00Z',
+        };
+        network.refusals[MemberTask.credentials] = (403, 'permissionDenied');
+
+        final vouches = await service.relationshipsNaming(fakeVtcDid, did: bob);
+        final card = await service.memberPublicCard(
+          fakeVtcDid,
+          entryId: 'dir_bob',
+        );
+
+        expect(vouches.single.issuerDid, bob);
+        expect(
+          (network.memberRequests.first['payload'] as Map)['did'],
+          bob,
+          reason: 'listed by the other member, not the persona',
+        );
+        expect(card?['@type'], 'Card');
+        await expectLater(
+          service.memberCredentials(fakeVtcDid, did: bob),
+          throwsA(isA<MeetingPlaceVtcSDKException>()),
+        );
+      });
+
       test('sets the name members see, as the persona', () async {
         await service.setDirectoryName(fakeVtcDid, name: 'Ada');
 

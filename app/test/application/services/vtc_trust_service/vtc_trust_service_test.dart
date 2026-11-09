@@ -91,6 +91,39 @@ class _FakeVtcService extends Fake implements VtcService {
     required String entryId,
   }) async => entries[entryId];
 
+  List<PublishedRelationship> naming = [];
+  Map<String, dynamic>? publicCard;
+  MemberCredentials? membership;
+  MeetingPlaceVtcSDKException? cardRefusal;
+  MeetingPlaceVtcSDKException? membershipRefusal;
+
+  @override
+  Future<List<PublishedRelationship>> relationshipsNaming(
+    String communityDid, {
+    required String did,
+  }) async {
+    await _fail();
+    return naming;
+  }
+
+  @override
+  Future<Map<String, dynamic>?> memberPublicCard(
+    String communityDid, {
+    required String entryId,
+  }) async {
+    if (cardRefusal case final refusal?) throw refusal;
+    return publicCard;
+  }
+
+  @override
+  Future<MemberCredentials?> memberCredentials(
+    String communityDid, {
+    required String did,
+  }) async {
+    if (membershipRefusal case final refusal?) throw refusal;
+    return membership;
+  }
+
   String? directoryName;
 
   @override
@@ -258,6 +291,67 @@ void main() {
       expect(
         service.groupMembers(_club, groupId: 'g1'),
         throwsFailure(VtcTrustFailure.notAllowed),
+      );
+    });
+  });
+
+  group('VtcTrustService.memberCredentials', () {
+    const bobEntry = DirectoryEntry(
+      entryId: 'dir_bob',
+      displayName: 'Bob',
+      did: _bob,
+    );
+
+    test('gathers what the community shows of a member', () async {
+      vtc
+        ..naming = [_edge('edge-1', _carol, _bob)]
+        ..publicCard = {'@type': 'Card'}
+        ..membership = const MemberCredentials(
+          membershipCredential: {'id': 'urn:uuid:vmc'},
+        );
+
+      final shown = await service.memberCredentials(_club, entry: bobEntry);
+
+      expect(shown.vouches.single.id, 'edge-1');
+      expect(shown.publicCard, {'@type': 'Card'});
+      expect(shown.membership?.membershipCredential, {'id': 'urn:uuid:vmc'});
+      expect(shown.isEmpty, isFalse);
+    });
+
+    test('leaves out what the community will not show', () async {
+      vtc
+        ..naming = [_edge('edge-1', _bob, _me)]
+        ..cardRefusal = MeetingPlaceVtcSDKException.transportFailed('down')
+        ..membershipRefusal = MeetingPlaceVtcSDKException.refused(
+          'permissionDenied',
+        );
+
+      final shown = await service.memberCredentials(_club, entry: bobEntry);
+
+      expect(shown.vouches, hasLength(1));
+      expect(shown.publicCard, isNull);
+      expect(shown.membership, isNull);
+    });
+
+    test('reads no vouches of a member who shows no DID', () async {
+      vtc.publicCard = {'@type': 'Card'};
+
+      final shown = await service.memberCredentials(
+        _club,
+        entry: const DirectoryEntry(entryId: 'dir_bob', displayName: 'Bob'),
+      );
+
+      expect(shown.vouches, isEmpty);
+      expect(shown.publicCard, isNotNull);
+      expect(shown.membership, isNull);
+    });
+
+    test('says why the vouches could not be read', () {
+      vtc.refusal = MeetingPlaceVtcSDKException.transportFailed('down');
+
+      expect(
+        service.memberCredentials(_club, entry: bobEntry),
+        throwsFailure(VtcTrustFailure.network),
       );
     });
   });

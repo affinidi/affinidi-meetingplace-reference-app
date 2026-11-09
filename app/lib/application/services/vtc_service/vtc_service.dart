@@ -1886,6 +1886,54 @@ class VtcService {
     );
   }
 
+  /// Every vouch in [communityDid]'s trust graph naming the member [did],
+  /// either way round, as the community shows it to the member. Throws as
+  /// [memberGroups] does.
+  Future<List<PublishedRelationship>> relationshipsNaming(
+    String communityDid, {
+    required String did,
+  }) async {
+    final (vta, signer) = await _asMember(communityDid);
+    return _sdk.relationshipsClient().list(
+      communityDid,
+      agent: vta,
+      persona: signer,
+      did: did,
+    );
+  }
+
+  /// The external card the member of directory entry [entryId] published
+  /// in [communityDid], as they signed it, or null when they published
+  /// none. Throws as [memberGroups] does.
+  Future<Map<String, dynamic>?> memberPublicCard(
+    String communityDid, {
+    required String entryId,
+  }) async {
+    final (vta, signer) = await _asMember(communityDid);
+    return _sdk.directoryClient().publicCard(
+      communityDid,
+      agent: vta,
+      persona: signer,
+      entryId: entryId,
+    );
+  }
+
+  /// The membership pair [communityDid] holds for the member [did], or null
+  /// when [did] is no member. Only an administrator who manages members may
+  /// read it; anyone else is refused. Throws as [memberGroups] does.
+  Future<MemberCredentials?> memberCredentials(
+    String communityDid, {
+    required String did,
+  }) async {
+    final (vta, signer) = await _asMember(communityDid);
+    return _sdk.joinClient().memberCredentials(
+      communityDid,
+      agent: vta,
+      persona: signer,
+      did: did,
+    );
+  }
+
   /// Withdraws the member's vouch [id] from [communityDid]'s trust graph.
   /// One that is gone already counts as withdrawn. Throws as
   /// [memberGroups] does.

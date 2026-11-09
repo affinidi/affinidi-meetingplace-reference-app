@@ -73,6 +73,30 @@ class VtcEdges {
   bool get canVouchBack => incoming != null && outgoing == null;
 }
 
+/// What the community shows the member of another member's credentials.
+class VtcMemberCredentials {
+  /// Creates [VtcMemberCredentials].
+  const VtcMemberCredentials({
+    this.vouches = const [],
+    this.publicCard,
+    this.membership,
+  });
+
+  /// Every vouch naming the other member, either way round and with anyone.
+  final List<PublishedRelationship> vouches;
+
+  /// The external card the other member published, as they signed it.
+  final Map<String, dynamic>? publicCard;
+
+  /// The membership pair the community holds for them, shown to an
+  /// administrator who manages members only.
+  final MemberCredentials? membership;
+
+  /// Whether the community shows the member none at all.
+  bool get isEmpty =>
+      vouches.isEmpty && publicCard == null && membership == null;
+}
+
 /// Vouching for other members of the communities the member belongs to:
 /// finding them in the community's directory, remembering which member a
 /// contact is, and publishing, reading and withdrawing vouches.
@@ -142,6 +166,53 @@ class VtcTrustService {
     }
     return entries;
   });
+
+  /// The credentials of the member of [entry] in [communityDid] that the
+  /// community shows the member: the vouches naming them, their external
+  /// card if they published one, and the membership pair when the member
+  /// manages members. A card or pair the community will not show is left
+  /// out.
+  ///
+  /// Throws [VtcTrustException] when the vouches cannot be read.
+  Future<VtcMemberCredentials> memberCredentials(
+    String communityDid, {
+    required DirectoryEntry entry,
+  }) async {
+    final did = entry.did;
+    final vouches = did == null
+        ? const <PublishedRelationship>[]
+        : await _guard(
+            'reading vouches',
+            () => _vtc.relationshipsNaming(communityDid, did: did),
+          );
+    return VtcMemberCredentials(
+      vouches: vouches,
+      publicCard: await _shownOrNull(
+        'reading a public card',
+        () => _vtc.memberPublicCard(communityDid, entryId: entry.entryId),
+      ),
+      membership: did == null
+          ? null
+          : await _shownOrNull(
+              'reading a membership',
+              () => _vtc.memberCredentials(communityDid, did: did),
+            ),
+    );
+  }
+
+  /// What [read] answers, or null when the community does not show it or
+  /// cannot be asked: one credential missing leaves the others to show.
+  Future<T?> _shownOrNull<T>(String action, Future<T?> Function() read) async {
+    try {
+      return await read();
+    } on MeetingPlaceVtcSDKException catch (error) {
+      _logger.info(
+        'Not shown $action: ${error.refusalCode ?? error.code.name}',
+        name: _logKey,
+      );
+      return null;
+    }
+  }
 
   /// Remembers that the contact [channelDid] is the member of [entry] in
   /// [communityDid].
