@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../application/services/contacts_service/contacts_service.dart';
 import '../../../application/services/identities_service/identities_service.dart';
 import '../../../application/services/mediator_service/mediator_service.dart';
+import '../../../application/services/vtc_group_chat_service/vtc_group_chat_service.dart';
 import '../../../domain/models/contact_card/contact_card_field_definition.dart';
 import '../../../domain/models/contacts/contact.dart';
 import '../../../domain/models/contacts/contact_status.dart';
@@ -59,12 +60,14 @@ class ContactsScreenController extends _$ContactsScreenController {
 
         final newContacts = next.where((c) => newIds.contains(c.mediatorDid));
 
-        Future.microtask(() {
+        Future.microtask(() async {
           if (_isDisposed) return;
 
           final filteredContacts = _applyCurrentFilter(next);
           state = state.copyWith(contacts: _sortContacts(filteredContacts));
           _updateContactMediators(newContacts);
+          // A group chat just joined is recorded once its contact is made.
+          if (newIds.isNotEmpty) await _readCommunityChannels();
         });
       },
       fireImmediately: true,
@@ -83,6 +86,36 @@ class ContactsScreenController extends _$ContactsScreenController {
     }, fireImmediately: true);
 
     return ContactsScreenState();
+  }
+
+  /// Shows the channels of [communityDid] only.
+  Future<void> showCommunity(String communityDid) async {
+    // Another community's channels never show, not even while reading.
+    if (state.communityDid != communityDid) {
+      state = state.copyWith(
+        communityDid: communityDid,
+        communityOfferLinks: const {},
+        contacts: const [],
+        selectedContacts: const [],
+        isEditMode: false,
+      );
+    }
+    await _readCommunityChannels();
+  }
+
+  Future<void> _readCommunityChannels() async {
+    final communityDid = state.communityDid;
+    if (communityDid == null) return;
+    final offerLinks = await ref.refresh(
+      communityChannelOfferLinksProvider(communityDid).future,
+    );
+    if (_isDisposed || state.communityDid != communityDid) return;
+    state = state.copyWith(communityOfferLinks: offerLinks);
+    state = state.copyWith(
+      contacts: _sortContacts(
+        _applyCurrentFilter(ref.read(contactsServiceProvider).contacts),
+      ),
+    );
   }
 
   void cancelEdit() async {
@@ -119,7 +152,7 @@ class ContactsScreenController extends _$ContactsScreenController {
 
   void search(String query) {
     final lowerQuery = query.toLowerCase();
-    final allContacts = ref.read(contactsServiceProvider).contacts;
+    final allContacts = _communityContacts();
     final filteredContacts = allContacts.where((contact) {
       final searchableText = ContactCardFieldDefinitions.values
           .where((f) => f.hasTag(ContactCardFieldTags.searchable))
@@ -138,14 +171,14 @@ class ContactsScreenController extends _$ContactsScreenController {
   }
 
   void clearSearch() {
-    final allContacts = ref.read(contactsServiceProvider).contacts;
+    final allContacts = _communityContacts();
     if (state.contacts != allContacts) {
       state = state.copyWith(contacts: _sortContacts(allContacts));
     }
   }
 
   Future<void> applyFilter(ContactsScreenFilter filter) async {
-    final allContacts = ref.read(contactsServiceProvider).contacts;
+    final allContacts = _communityContacts();
     final filteredContacts = allContacts.where((contact) {
       return filter.categories.contains(contact.category);
     }).toList();
@@ -222,15 +255,32 @@ class ContactsScreenController extends _$ContactsScreenController {
   }
 
   List<Contact> _applyCurrentFilter(List<Contact> contacts) {
+    final communityContacts = _communityContacts(contacts);
     if (state.filter == ContactsScreenFilter.any) {
-      return contacts;
+      return communityContacts;
     }
 
-    return contacts
+    return communityContacts
         .where((contact) => state.filter.categories.contains(contact.category))
         .toList();
   }
+
+  /// Those of [contacts], else of all contacts, that are channels of the
+  /// community shown.
+  List<Contact> _communityContacts([List<Contact>? contacts]) {
+    final all = contacts ?? ref.read(contactsServiceProvider).contacts;
+    return all
+        .where(
+          (contact) => state.communityOfferLinks.contains(contact.offerLink),
+        )
+        .toList();
+  }
 }
+
+/// The offer links of the channels of [communityDid]: its groups' chats.
+@riverpod
+Future<Set<String>> communityChannelOfferLinks(Ref ref, String communityDid) =>
+    ref.read(vtcGroupChatServiceProvider).chatOfferLinks(communityDid);
 
 extension ContactsScreenControllerSelector on ContactsScreenControllerProvider {
   ProviderListenable<bool> get hasContacts =>

@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../widgets/section_banner.dart';
 import '../contacts/contacts_screen.dart';
+import '../contacts/contacts_screen_controller.dart';
 import 'communities_controller.dart';
 
-/// A community the member belongs to, with its channels. Opened from the
-/// Communities tab.
-class CommunityScreen extends ConsumerWidget {
+/// A community the member belongs to, with its channels: its groups' chats.
+/// Opened from the Communities tab.
+class CommunityScreen extends HookConsumerWidget {
   const CommunityScreen({super.key, required this.communityDid});
 
   final String communityDid;
@@ -16,6 +18,15 @@ class CommunityScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
+    useEffect(() {
+      // Not while building: showing the community changes the channels.
+      Future.microtask(
+        () => ref
+            .read(contactsScreenControllerProvider.notifier)
+            .showCommunity(communityDid),
+      );
+      return null;
+    }, [communityDid]);
     final community = ref
         .watch(communitiesControllerProvider)
         .value

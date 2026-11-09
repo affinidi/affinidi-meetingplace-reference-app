@@ -22,6 +22,12 @@ abstract class ContactsScreenState with _$ContactsScreenState {
     @Default({}) Map<String, Mediator> contactMediators,
     @Default(ContactsScreenFilter.any) ContactsScreenFilter filter,
     Identity? identity,
+
+    /// The community whose channels are shown.
+    String? communityDid,
+
+    /// The offer links of [communityDid]'s channels.
+    @Default(<String>{}) Set<String> communityOfferLinks,
   }) = _ContactsScreenState;
 
   bool isChatAvailable(Contact contact) =>

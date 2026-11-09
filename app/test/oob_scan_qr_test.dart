@@ -5,6 +5,7 @@ import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/exceptions/app_exception_type.dart';
 import 'package:mpx_flutter_reference_app/navigation/routes/dashboard_routes.dart';
 import 'package:mpx_flutter_reference_app/presentation/dialogs/qr_code_picker/qr_code_picker.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/contacts/contacts_screen_controller.dart';
 
 import 'fakes/fake_contacts.dart';
 import 'fakes/fake_identities.dart';
@@ -385,6 +386,13 @@ void main() {
               alreadyOnboarded: true,
               identities: [testIdentity],
               contacts: [FakeContacts.oobContact],
+              overrides: [
+                communityChannelOfferLinksProvider(
+                  'did:web:community.example',
+                ).overrideWith(
+                  (ref) async => {FakeContacts.oobContact.offerLink},
+                ),
+              ],
             );
             await tester.pumpAndSettle();
 

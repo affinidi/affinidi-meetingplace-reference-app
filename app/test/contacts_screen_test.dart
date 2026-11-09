@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
+import 'package:mpx_flutter_reference_app/domain/models/contacts/contact.dart';
 import 'package:mpx_flutter_reference_app/domain/models/contacts/contact_status.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/contact_extensions.dart';
 import 'package:mpx_flutter_reference_app/navigation/routes/dashboard_routes.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/contacts/contacts_screen_controller.dart';
 
 import 'fakes/fake_channels.dart';
 import 'fakes/fake_contacts.dart';
@@ -11,24 +14,34 @@ import 'fakes/fake_identities.dart';
 import 'fakes/fake_meeting_place_sdk.dart';
 import 'utils/app.dart';
 
+const communityDid = 'did:web:community.example';
+
 /// The channels screen, shown inside a community.
 final communityLocation = const CommunityRoute(
-  communityDid: 'did:web:community.example',
+  communityDid: communityDid,
 ).location;
 
+/// Makes [contacts] the community's channels.
+Override inCommunity(List<Contact> contacts) =>
+    communityChannelOfferLinksProvider(
+      communityDid,
+    ).overrideWith((ref) async => {for (final c in contacts) c.offerLink});
+
 Future<void> navigateToContactsScreen(WidgetTester tester) async {
+  final contacts = [
+    FakeContacts.individualContact,
+    FakeContacts.groupContact,
+    FakeContacts.pendingContact,
+    FakeContacts.oobContact,
+  ];
   await navigateToLocation(
     tester,
     communityLocation,
     isAuthenticated: true,
     alreadyOnboarded: true,
     identities: [FakeIdentities.primaryIdentity],
-    contacts: [
-      FakeContacts.individualContact,
-      FakeContacts.groupContact,
-      FakeContacts.pendingContact,
-      FakeContacts.oobContact,
-    ],
+    contacts: contacts,
+    overrides: [inCommunity(contacts)],
   );
   await tester.pumpAndSettle();
 }
@@ -237,6 +250,7 @@ void main() {
         alreadyOnboarded: true,
         identities: [FakeIdentities.primaryIdentity],
         contacts: [],
+        overrides: [inCommunity(const [])],
       );
       await tester.pumpAndSettle();
 
@@ -374,6 +388,9 @@ void main() {
         alreadyOnboarded: true,
         identities: [FakeIdentities.primaryIdentity],
         contacts: [FakeContacts.newContactWithMessage],
+        overrides: [
+          inCommunity([FakeContacts.newContactWithMessage]),
+        ],
       );
       await tester.pumpAndSettle();
 
@@ -390,6 +407,9 @@ void main() {
         alreadyOnboarded: true,
         identities: [FakeIdentities.primaryIdentity],
         contacts: [FakeContacts.newContactWithMessage],
+        overrides: [
+          inCommunity([FakeContacts.newContactWithMessage]),
+        ],
       );
       await tester.pumpAndSettle();
 
@@ -420,6 +440,9 @@ void main() {
         alreadyOnboarded: true,
         identities: [FakeIdentities.primaryIdentity],
         contacts: [contactWithMessages],
+        overrides: [
+          inCommunity([contactWithMessages]),
+        ],
         meetingPlaceCoreSDK: fakeSdk,
       );
       await tester.pumpAndSettle();
@@ -639,6 +662,26 @@ void main() {
         expect(transparentIndex, greaterThanOrEqualTo(0));
       },
     );
+  });
+
+  group('When opening a community', () {
+    testWidgets("should show the community's channels only", (tester) async {
+      final channel = FakeContacts.groupContact;
+      final elsewhere = FakeContacts.individualContact;
+      await navigateToLocation(
+        tester,
+        communityLocation,
+        identities: [FakeIdentities.primaryIdentity],
+        contacts: [channel, elsewhere],
+        overrides: [
+          inCommunity([channel]),
+        ],
+      );
+      await tester.pumpAndSettle();
+
+      expect(findContactByName(channel.displayName!), findsWidgets);
+      expect(findContactByName(elsewhere.displayName!), findsNothing);
+    });
   });
 
   group('When displaying contact types', () {

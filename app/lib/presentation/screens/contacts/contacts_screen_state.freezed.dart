@@ -14,7 +14,9 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ContactsScreenState {
 
- bool get isEditMode; bool get shouldShowGrid; bool get shouldShowFilter; List<Contact> get contacts; List<Contact> get selectedContacts; Map<String, Mediator> get contactMediators; ContactsScreenFilter get filter; Identity? get identity;
+ bool get isEditMode; bool get shouldShowGrid; bool get shouldShowFilter; List<Contact> get contacts; List<Contact> get selectedContacts; Map<String, Mediator> get contactMediators; ContactsScreenFilter get filter; Identity? get identity;/// The community whose channels are shown.
+ String? get communityDid;/// The offer links of [communityDid]'s channels.
+ Set<String> get communityOfferLinks;
 /// Create a copy of ContactsScreenState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +27,16 @@ $ContactsScreenStateCopyWith<ContactsScreenState> get copyWith => _$ContactsScre
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ContactsScreenState&&(identical(other.isEditMode, isEditMode) || other.isEditMode == isEditMode)&&(identical(other.shouldShowGrid, shouldShowGrid) || other.shouldShowGrid == shouldShowGrid)&&(identical(other.shouldShowFilter, shouldShowFilter) || other.shouldShowFilter == shouldShowFilter)&&const DeepCollectionEquality().equals(other.contacts, contacts)&&const DeepCollectionEquality().equals(other.selectedContacts, selectedContacts)&&const DeepCollectionEquality().equals(other.contactMediators, contactMediators)&&(identical(other.filter, filter) || other.filter == filter)&&(identical(other.identity, identity) || other.identity == identity));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ContactsScreenState&&(identical(other.isEditMode, isEditMode) || other.isEditMode == isEditMode)&&(identical(other.shouldShowGrid, shouldShowGrid) || other.shouldShowGrid == shouldShowGrid)&&(identical(other.shouldShowFilter, shouldShowFilter) || other.shouldShowFilter == shouldShowFilter)&&const DeepCollectionEquality().equals(other.contacts, contacts)&&const DeepCollectionEquality().equals(other.selectedContacts, selectedContacts)&&const DeepCollectionEquality().equals(other.contactMediators, contactMediators)&&(identical(other.filter, filter) || other.filter == filter)&&(identical(other.identity, identity) || other.identity == identity)&&(identical(other.communityDid, communityDid) || other.communityDid == communityDid)&&const DeepCollectionEquality().equals(other.communityOfferLinks, communityOfferLinks));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,isEditMode,shouldShowGrid,shouldShowFilter,const DeepCollectionEquality().hash(contacts),const DeepCollectionEquality().hash(selectedContacts),const DeepCollectionEquality().hash(contactMediators),filter,identity);
+int get hashCode => Object.hash(runtimeType,isEditMode,shouldShowGrid,shouldShowFilter,const DeepCollectionEquality().hash(contacts),const DeepCollectionEquality().hash(selectedContacts),const DeepCollectionEquality().hash(contactMediators),filter,identity,communityDid,const DeepCollectionEquality().hash(communityOfferLinks));
 
 @override
 String toString() {
-  return 'ContactsScreenState(isEditMode: $isEditMode, shouldShowGrid: $shouldShowGrid, shouldShowFilter: $shouldShowFilter, contacts: $contacts, selectedContacts: $selectedContacts, contactMediators: $contactMediators, filter: $filter, identity: $identity)';
+  return 'ContactsScreenState(isEditMode: $isEditMode, shouldShowGrid: $shouldShowGrid, shouldShowFilter: $shouldShowFilter, contacts: $contacts, selectedContacts: $selectedContacts, contactMediators: $contactMediators, filter: $filter, identity: $identity, communityDid: $communityDid, communityOfferLinks: $communityOfferLinks)';
 }
 
 
@@ -45,7 +47,7 @@ abstract mixin class $ContactsScreenStateCopyWith<$Res>  {
   factory $ContactsScreenStateCopyWith(ContactsScreenState value, $Res Function(ContactsScreenState) _then) = _$ContactsScreenStateCopyWithImpl;
 @useResult
 $Res call({
- bool isEditMode, bool shouldShowGrid, bool shouldShowFilter, List<Contact> contacts, List<Contact> selectedContacts, Map<String, Mediator> contactMediators, ContactsScreenFilter filter, Identity? identity
+ bool isEditMode, bool shouldShowGrid, bool shouldShowFilter, List<Contact> contacts, List<Contact> selectedContacts, Map<String, Mediator> contactMediators, ContactsScreenFilter filter, Identity? identity, String? communityDid, Set<String> communityOfferLinks
 });
 
 
@@ -62,7 +64,7 @@ class _$ContactsScreenStateCopyWithImpl<$Res>
 
 /// Create a copy of ContactsScreenState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? isEditMode = null,Object? shouldShowGrid = null,Object? shouldShowFilter = null,Object? contacts = null,Object? selectedContacts = null,Object? contactMediators = null,Object? filter = null,Object? identity = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? isEditMode = null,Object? shouldShowGrid = null,Object? shouldShowFilter = null,Object? contacts = null,Object? selectedContacts = null,Object? contactMediators = null,Object? filter = null,Object? identity = freezed,Object? communityDid = freezed,Object? communityOfferLinks = null,}) {
   return _then(_self.copyWith(
 isEditMode: null == isEditMode ? _self.isEditMode : isEditMode // ignore: cast_nullable_to_non_nullable
 as bool,shouldShowGrid: null == shouldShowGrid ? _self.shouldShowGrid : shouldShowGrid // ignore: cast_nullable_to_non_nullable
@@ -72,7 +74,9 @@ as List<Contact>,selectedContacts: null == selectedContacts ? _self.selectedCont
 as List<Contact>,contactMediators: null == contactMediators ? _self.contactMediators : contactMediators // ignore: cast_nullable_to_non_nullable
 as Map<String, Mediator>,filter: null == filter ? _self.filter : filter // ignore: cast_nullable_to_non_nullable
 as ContactsScreenFilter,identity: freezed == identity ? _self.identity : identity // ignore: cast_nullable_to_non_nullable
-as Identity?,
+as Identity?,communityDid: freezed == communityDid ? _self.communityDid : communityDid // ignore: cast_nullable_to_non_nullable
+as String?,communityOfferLinks: null == communityOfferLinks ? _self.communityOfferLinks : communityOfferLinks // ignore: cast_nullable_to_non_nullable
+as Set<String>,
   ));
 }
 /// Create a copy of ContactsScreenState
@@ -169,10 +173,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool isEditMode,  bool shouldShowGrid,  bool shouldShowFilter,  List<Contact> contacts,  List<Contact> selectedContacts,  Map<String, Mediator> contactMediators,  ContactsScreenFilter filter,  Identity? identity)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool isEditMode,  bool shouldShowGrid,  bool shouldShowFilter,  List<Contact> contacts,  List<Contact> selectedContacts,  Map<String, Mediator> contactMediators,  ContactsScreenFilter filter,  Identity? identity,  String? communityDid,  Set<String> communityOfferLinks)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ContactsScreenState() when $default != null:
-return $default(_that.isEditMode,_that.shouldShowGrid,_that.shouldShowFilter,_that.contacts,_that.selectedContacts,_that.contactMediators,_that.filter,_that.identity);case _:
+return $default(_that.isEditMode,_that.shouldShowGrid,_that.shouldShowFilter,_that.contacts,_that.selectedContacts,_that.contactMediators,_that.filter,_that.identity,_that.communityDid,_that.communityOfferLinks);case _:
   return orElse();
 
 }
@@ -190,10 +194,10 @@ return $default(_that.isEditMode,_that.shouldShowGrid,_that.shouldShowFilter,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool isEditMode,  bool shouldShowGrid,  bool shouldShowFilter,  List<Contact> contacts,  List<Contact> selectedContacts,  Map<String, Mediator> contactMediators,  ContactsScreenFilter filter,  Identity? identity)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool isEditMode,  bool shouldShowGrid,  bool shouldShowFilter,  List<Contact> contacts,  List<Contact> selectedContacts,  Map<String, Mediator> contactMediators,  ContactsScreenFilter filter,  Identity? identity,  String? communityDid,  Set<String> communityOfferLinks)  $default,) {final _that = this;
 switch (_that) {
 case _ContactsScreenState():
-return $default(_that.isEditMode,_that.shouldShowGrid,_that.shouldShowFilter,_that.contacts,_that.selectedContacts,_that.contactMediators,_that.filter,_that.identity);case _:
+return $default(_that.isEditMode,_that.shouldShowGrid,_that.shouldShowFilter,_that.contacts,_that.selectedContacts,_that.contactMediators,_that.filter,_that.identity,_that.communityDid,_that.communityOfferLinks);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -210,10 +214,10 @@ return $default(_that.isEditMode,_that.shouldShowGrid,_that.shouldShowFilter,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool isEditMode,  bool shouldShowGrid,  bool shouldShowFilter,  List<Contact> contacts,  List<Contact> selectedContacts,  Map<String, Mediator> contactMediators,  ContactsScreenFilter filter,  Identity? identity)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool isEditMode,  bool shouldShowGrid,  bool shouldShowFilter,  List<Contact> contacts,  List<Contact> selectedContacts,  Map<String, Mediator> contactMediators,  ContactsScreenFilter filter,  Identity? identity,  String? communityDid,  Set<String> communityOfferLinks)?  $default,) {final _that = this;
 switch (_that) {
 case _ContactsScreenState() when $default != null:
-return $default(_that.isEditMode,_that.shouldShowGrid,_that.shouldShowFilter,_that.contacts,_that.selectedContacts,_that.contactMediators,_that.filter,_that.identity);case _:
+return $default(_that.isEditMode,_that.shouldShowGrid,_that.shouldShowFilter,_that.contacts,_that.selectedContacts,_that.contactMediators,_that.filter,_that.identity,_that.communityDid,_that.communityOfferLinks);case _:
   return null;
 
 }
@@ -225,7 +229,7 @@ return $default(_that.isEditMode,_that.shouldShowGrid,_that.shouldShowFilter,_th
 
 
 class _ContactsScreenState extends ContactsScreenState {
-   _ContactsScreenState({this.isEditMode = false, this.shouldShowGrid = true, this.shouldShowFilter = false, final  List<Contact> contacts = const [], final  List<Contact> selectedContacts = const [], final  Map<String, Mediator> contactMediators = const {}, this.filter = ContactsScreenFilter.any, this.identity}): _contacts = contacts,_selectedContacts = selectedContacts,_contactMediators = contactMediators,super._();
+   _ContactsScreenState({this.isEditMode = false, this.shouldShowGrid = true, this.shouldShowFilter = false, final  List<Contact> contacts = const [], final  List<Contact> selectedContacts = const [], final  Map<String, Mediator> contactMediators = const {}, this.filter = ContactsScreenFilter.any, this.identity, this.communityDid, final  Set<String> communityOfferLinks = const <String>{}}): _contacts = contacts,_selectedContacts = selectedContacts,_contactMediators = contactMediators,_communityOfferLinks = communityOfferLinks,super._();
   
 
 @override@JsonKey() final  bool isEditMode;
@@ -254,6 +258,17 @@ class _ContactsScreenState extends ContactsScreenState {
 
 @override@JsonKey() final  ContactsScreenFilter filter;
 @override final  Identity? identity;
+/// The community whose channels are shown.
+@override final  String? communityDid;
+/// The offer links of [communityDid]'s channels.
+ final  Set<String> _communityOfferLinks;
+/// The offer links of [communityDid]'s channels.
+@override@JsonKey() Set<String> get communityOfferLinks {
+  if (_communityOfferLinks is EqualUnmodifiableSetView) return _communityOfferLinks;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableSetView(_communityOfferLinks);
+}
+
 
 /// Create a copy of ContactsScreenState
 /// with the given fields replaced by the non-null parameter values.
@@ -265,16 +280,16 @@ _$ContactsScreenStateCopyWith<_ContactsScreenState> get copyWith => __$ContactsS
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ContactsScreenState&&(identical(other.isEditMode, isEditMode) || other.isEditMode == isEditMode)&&(identical(other.shouldShowGrid, shouldShowGrid) || other.shouldShowGrid == shouldShowGrid)&&(identical(other.shouldShowFilter, shouldShowFilter) || other.shouldShowFilter == shouldShowFilter)&&const DeepCollectionEquality().equals(other._contacts, _contacts)&&const DeepCollectionEquality().equals(other._selectedContacts, _selectedContacts)&&const DeepCollectionEquality().equals(other._contactMediators, _contactMediators)&&(identical(other.filter, filter) || other.filter == filter)&&(identical(other.identity, identity) || other.identity == identity));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ContactsScreenState&&(identical(other.isEditMode, isEditMode) || other.isEditMode == isEditMode)&&(identical(other.shouldShowGrid, shouldShowGrid) || other.shouldShowGrid == shouldShowGrid)&&(identical(other.shouldShowFilter, shouldShowFilter) || other.shouldShowFilter == shouldShowFilter)&&const DeepCollectionEquality().equals(other._contacts, _contacts)&&const DeepCollectionEquality().equals(other._selectedContacts, _selectedContacts)&&const DeepCollectionEquality().equals(other._contactMediators, _contactMediators)&&(identical(other.filter, filter) || other.filter == filter)&&(identical(other.identity, identity) || other.identity == identity)&&(identical(other.communityDid, communityDid) || other.communityDid == communityDid)&&const DeepCollectionEquality().equals(other._communityOfferLinks, _communityOfferLinks));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,isEditMode,shouldShowGrid,shouldShowFilter,const DeepCollectionEquality().hash(_contacts),const DeepCollectionEquality().hash(_selectedContacts),const DeepCollectionEquality().hash(_contactMediators),filter,identity);
+int get hashCode => Object.hash(runtimeType,isEditMode,shouldShowGrid,shouldShowFilter,const DeepCollectionEquality().hash(_contacts),const DeepCollectionEquality().hash(_selectedContacts),const DeepCollectionEquality().hash(_contactMediators),filter,identity,communityDid,const DeepCollectionEquality().hash(_communityOfferLinks));
 
 @override
 String toString() {
-  return 'ContactsScreenState(isEditMode: $isEditMode, shouldShowGrid: $shouldShowGrid, shouldShowFilter: $shouldShowFilter, contacts: $contacts, selectedContacts: $selectedContacts, contactMediators: $contactMediators, filter: $filter, identity: $identity)';
+  return 'ContactsScreenState(isEditMode: $isEditMode, shouldShowGrid: $shouldShowGrid, shouldShowFilter: $shouldShowFilter, contacts: $contacts, selectedContacts: $selectedContacts, contactMediators: $contactMediators, filter: $filter, identity: $identity, communityDid: $communityDid, communityOfferLinks: $communityOfferLinks)';
 }
 
 
@@ -285,7 +300,7 @@ abstract mixin class _$ContactsScreenStateCopyWith<$Res> implements $ContactsScr
   factory _$ContactsScreenStateCopyWith(_ContactsScreenState value, $Res Function(_ContactsScreenState) _then) = __$ContactsScreenStateCopyWithImpl;
 @override @useResult
 $Res call({
- bool isEditMode, bool shouldShowGrid, bool shouldShowFilter, List<Contact> contacts, List<Contact> selectedContacts, Map<String, Mediator> contactMediators, ContactsScreenFilter filter, Identity? identity
+ bool isEditMode, bool shouldShowGrid, bool shouldShowFilter, List<Contact> contacts, List<Contact> selectedContacts, Map<String, Mediator> contactMediators, ContactsScreenFilter filter, Identity? identity, String? communityDid, Set<String> communityOfferLinks
 });
 
 
@@ -302,7 +317,7 @@ class __$ContactsScreenStateCopyWithImpl<$Res>
 
 /// Create a copy of ContactsScreenState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? isEditMode = null,Object? shouldShowGrid = null,Object? shouldShowFilter = null,Object? contacts = null,Object? selectedContacts = null,Object? contactMediators = null,Object? filter = null,Object? identity = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? isEditMode = null,Object? shouldShowGrid = null,Object? shouldShowFilter = null,Object? contacts = null,Object? selectedContacts = null,Object? contactMediators = null,Object? filter = null,Object? identity = freezed,Object? communityDid = freezed,Object? communityOfferLinks = null,}) {
   return _then(_ContactsScreenState(
 isEditMode: null == isEditMode ? _self.isEditMode : isEditMode // ignore: cast_nullable_to_non_nullable
 as bool,shouldShowGrid: null == shouldShowGrid ? _self.shouldShowGrid : shouldShowGrid // ignore: cast_nullable_to_non_nullable
@@ -312,7 +327,9 @@ as List<Contact>,selectedContacts: null == selectedContacts ? _self._selectedCon
 as List<Contact>,contactMediators: null == contactMediators ? _self._contactMediators : contactMediators // ignore: cast_nullable_to_non_nullable
 as Map<String, Mediator>,filter: null == filter ? _self.filter : filter // ignore: cast_nullable_to_non_nullable
 as ContactsScreenFilter,identity: freezed == identity ? _self.identity : identity // ignore: cast_nullable_to_non_nullable
-as Identity?,
+as Identity?,communityDid: freezed == communityDid ? _self.communityDid : communityDid // ignore: cast_nullable_to_non_nullable
+as String?,communityOfferLinks: null == communityOfferLinks ? _self._communityOfferLinks : communityOfferLinks // ignore: cast_nullable_to_non_nullable
+as Set<String>,
   ));
 }
 

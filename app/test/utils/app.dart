@@ -5,6 +5,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
@@ -89,6 +90,7 @@ Future<void> startApp(
   List<AttachmentPlugin>? attachmentPlugins,
   RCardsService Function()? rCardsServiceFactory,
   FakeEnvironment? environment,
+  List<Override> overrides = const [],
 }) async {
   TestWidgetsFlutterBinding.ensureInitialized();
   addTearDown(() async {
@@ -267,6 +269,7 @@ Future<void> startApp(
       if (qrCodeViewFactory != null)
         qrCodeViewFactoryProvider.overrideWith((ref) => qrCodeViewFactory),
       vtaLinkServiceProvider.overrideWith(FakeVtaLinkService.new),
+      ...overrides,
     ],
     child: data == null
         ? App(locale: locale)
@@ -302,6 +305,7 @@ Future<void> navigateToLocation(
   List<AttachmentPlugin>? attachmentPlugins,
   RCardsService Function()? rCardsServiceFactory,
   FakeEnvironment? environment,
+  List<Override> overrides = const [],
 }) async {
   await startApp(
     tester,
@@ -325,6 +329,7 @@ Future<void> navigateToLocation(
     attachmentPlugins: attachmentPlugins,
     rCardsServiceFactory: rCardsServiceFactory,
     environment: environment,
+    overrides: overrides,
   );
 
   await tester.pumpAndSettle();
