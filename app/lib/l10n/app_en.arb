@@ -3226,6 +3226,10 @@
 	"@vtcTrailDoneBy": {
 		"description": "Trail detail: who did a step, such as the member's VTA, the community or this phone"
 	},
+	"vtcTrailTasks": "Trust Tasks",
+	"@vtcTrailTasks": {
+		"description": "Trail detail: the Trust Tasks a step took, when it took more than one"
+	},
 	"vtcJoinTrailVta": "Signed by your VTA",
 	"@vtcJoinTrailVta": {
 		"description": "Trail step: the member's VTA signed the application"

@@ -108,5 +108,65 @@ void main() {
       expect(find.byKey(const Key('vtc_trail_marker_failed')), findsNothing);
       expect(find.byIcon(Icons.inbox_outlined), findsOneWidget);
     });
+
+    Future<void> pumpTasks(WidgetTester tester, List<String> tasks) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.dark,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: VtcTrailStep(
+              key: const Key('step'),
+              icon: Icons.draw_outlined,
+              stage: VtcTrailStage.done,
+              title: 'Signed',
+              summary: 'As your identity',
+              actor: 'Your VTA',
+              tasks: tasks,
+              details: const [
+                VtcTrailDetail(Icons.key_outlined, 'Signing key', 'key-1'),
+              ],
+              isLast: true,
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.byKey(const Key('step')));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('names its one Trust Task after who did it', (tester) async {
+      await pumpTasks(tester, ['https://trusttasks.org/spec/a/0.1']);
+
+      expect(find.text('Trust Task'), findsOneWidget);
+      final task = find.text('https://trusttasks.org/spec/a/0.1');
+      expect(
+        tester.getTopLeft(find.text('Your VTA')).dy,
+        lessThan(tester.getTopLeft(task).dy),
+      );
+      expect(
+        tester.getTopLeft(task).dy,
+        lessThan(tester.getTopLeft(find.text('key-1')).dy),
+      );
+    });
+
+    testWidgets('lists several Trust Tasks under one label', (tester) async {
+      await pumpTasks(tester, [
+        'https://trusttasks.org/spec/a/0.1',
+        'https://trusttasks.org/spec/b/0.1',
+      ]);
+
+      expect(find.text('Trust Tasks'), findsOneWidget);
+      expect(find.text('https://trusttasks.org/spec/a/0.1'), findsOneWidget);
+      expect(find.text('https://trusttasks.org/spec/b/0.1'), findsOneWidget);
+    });
+
+    testWidgets('names no Trust Task when it took none', (tester) async {
+      await pumpTasks(tester, []);
+
+      expect(find.text('Trust Task'), findsNothing);
+      expect(find.text('Trust Tasks'), findsNothing);
+    });
   });
 }

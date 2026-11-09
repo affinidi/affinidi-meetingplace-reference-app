@@ -5048,6 +5048,12 @@ abstract class AppLocalizations {
   /// **'Done by'**
   String get vtcTrailDoneBy;
 
+  /// Trail detail: the Trust Tasks a step took, when it took more than one
+  ///
+  /// In en, this message translates to:
+  /// **'Trust Tasks'**
+  String get vtcTrailTasks;
+
   /// Trail step: the member's VTA signed the application
   ///
   /// In en, this message translates to:

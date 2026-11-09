@@ -64,6 +64,7 @@ class VtcTrailStep extends HookWidget {
     this.busy = false,
     this.isLast = false,
     this.actor,
+    this.tasks = const [],
     this.highlights = const [],
     this.flow,
   });
@@ -86,6 +87,10 @@ class VtcTrailStep extends HookWidget {
   /// Who did the step, such as the member's VTA, if the trail says: the
   /// first of its details.
   final String? actor;
+
+  /// The Trust Tasks the step took, by Type URI: listed after [actor], so
+  /// whoever reads the details can match the step to the audit trails.
+  final List<String> tasks;
 
   /// Names in [summary], such as the member's identity and the community,
   /// set apart from the words around them.
@@ -114,6 +119,18 @@ class VtcTrailStep extends HookWidget {
           Icons.how_to_reg_outlined,
           context.l10n.vtcTrailDoneBy,
           actor,
+        ),
+      if (tasks case [final task])
+        VtcTrailDetail(
+          Icons.assignment_outlined,
+          context.l10n.vtcJoinTrailTask,
+          task,
+        )
+      else if (tasks.isNotEmpty)
+        VtcTrailDetail.list(
+          Icons.assignment_outlined,
+          context.l10n.vtcTrailTasks,
+          tasks,
         ),
       ...this.details,
     ];

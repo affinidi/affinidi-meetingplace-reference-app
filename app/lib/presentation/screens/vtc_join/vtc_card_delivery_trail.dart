@@ -115,6 +115,7 @@ class VtcCardDeliveryTrail extends StatelessWidget {
             done: l10n.vtcDeliveryPickedUpSummary(communityName),
             waiting: l10n.vtcDeliveryWaiting(communityName),
           ),
+          tasks: [if (issue != null) issue.type],
           details: [
             if (issue != null) ...[
               VtcTrailDetail(
@@ -122,11 +123,6 @@ class VtcCardDeliveryTrail extends StatelessWidget {
                 l10n.vtcDeliverySentBy,
                 issue.issuer,
                 isId: true,
-              ),
-              VtcTrailDetail(
-                Icons.assignment_outlined,
-                l10n.vtcJoinTrailTask,
-                issue.type,
               ),
               if (proof['cryptosuite'] case final String cryptosuite)
                 VtcTrailDetail(
@@ -178,14 +174,10 @@ class VtcCardDeliveryTrail extends StatelessWidget {
             done: l10n.vtcDeliveryConfirmedSummary,
             failed: l10n.vtcDeliveryConfirmedFailed,
           ),
-          details: [
+          tasks: [
             if (delivery.status(VtcDeliveryStep.confirmed) ==
                 VtcDeliveryStatus.done)
-              VtcTrailDetail(
-                Icons.assignment_outlined,
-                l10n.vtcJoinTrailTask,
-                MemberTask.vmc,
-              ),
+              MemberTask.vmc,
           ],
           isLast: true,
         ),

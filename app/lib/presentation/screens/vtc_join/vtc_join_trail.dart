@@ -159,6 +159,7 @@ class VtcJoinTrail extends StatelessWidget {
               ),
             _ => l10n.vtcJoinTrailVtaIdentity(communityName),
           },
+          tasks: [if (receipt != null) receipt.type],
           details: [
             if (receipt != null) ...[
               VtcTrailDetail(
@@ -166,11 +167,6 @@ class VtcJoinTrail extends StatelessWidget {
                 l10n.vtcJoinTrailIdentity,
                 receipt.signer,
                 isId: true,
-              ),
-              VtcTrailDetail(
-                Icons.assignment_outlined,
-                l10n.vtcJoinTrailTask,
-                receipt.type,
               ),
               ...proof(
                 cryptosuite: receipt.cryptosuite,
@@ -192,6 +188,7 @@ class VtcJoinTrail extends StatelessWidget {
           summary: receipt == null
               ? l10n.vtcJoinTrailNoReceipt
               : l10n.vtcJoinTrailCommunitySummary,
+          tasks: [?receipt?.answerType],
           details: [
             if (receipt != null) ...[
               VtcTrailDetail(
@@ -200,12 +197,6 @@ class VtcJoinTrail extends StatelessWidget {
                 receipt.answeredBy,
                 isId: true,
               ),
-              if (receipt.answerType case final type?)
-                VtcTrailDetail(
-                  Icons.assignment_outlined,
-                  l10n.vtcJoinTrailTask,
-                  type,
-                ),
               if (receipt.answeredAt case final at?)
                 VtcTrailDetail(
                   Icons.schedule,

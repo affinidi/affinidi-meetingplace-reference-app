@@ -310,6 +310,7 @@ class _MembershipTrail extends StatelessWidget {
             actor: leave == null
                 ? community
                 : l10n.membershipTrailLeftActor(community),
+            tasks: [if (receipt != null) receipt.type],
             details: [
               if (receipt != null) ...[
                 if (receipt.signedAt case final at?)
@@ -330,11 +331,6 @@ class _MembershipTrail extends StatelessWidget {
                     l10n.vtcJoinTrailAnsweredAt,
                     time(at),
                   ),
-                VtcTrailDetail(
-                  Icons.assignment_outlined,
-                  l10n.vtcJoinTrailTask,
-                  receipt.type,
-                ),
               ],
             ],
             document: leave?.toJson(),

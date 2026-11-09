@@ -3345,6 +3345,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vtcTrailDoneBy => 'Done by';
 
   @override
+  String get vtcTrailTasks => 'Trust Tasks';
+
+  @override
   String get vtcJoinTrailVta => 'Signed by your VTA';
 
   @override
