@@ -3613,6 +3613,475 @@
 			}
 		}
 	},
+	"vtcFindableHeading": "Let members find you",
+	"@vtcFindableHeading": {
+		"description": "Heading of the switch that lets other members find the member to vouch for them"
+	},
+	"vtcFindableIntro": "Let members of {name} find you to vouch for you. They'll see the identity you joined with.",
+	"@vtcFindableIntro": {
+		"description": "What letting other members find you does",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcFindableNotAllowed": "{name} doesn't let members show this.",
+	"@vtcFindableNotAllowed": {
+		"description": "The community does not let members show the identity they joined with",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcFindableFailed": "Couldn't change this. Try again.",
+	"@vtcFindableFailed": {
+		"description": "Reading or changing whether members can find you failed"
+	},
+	"vtcTrustHeading": "Community trust",
+	"@vtcTrustHeading": {
+		"description": "Heading of a contact's vouches in the communities they share with the member"
+	},
+	"vtcTrustVouchInCommunity": "Vouch in a community",
+	"@vtcTrustVouchInCommunity": {
+		"description": "Starts vouching for a contact in one of the member's communities"
+	},
+	"vtcTrustTheyVouched": "{name} vouched for you",
+	"@vtcTrustTheyVouched": {
+		"description": "The contact vouched for the member in this community",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcTrustNoVouch": "No vouches yet",
+	"@vtcTrustNoVouch": {
+		"description": "Neither vouched for the other in this community"
+	},
+	"vtcTrustVouch": "Vouch",
+	"@vtcTrustVouch": {
+		"description": "Vouches for a member"
+	},
+	"vtcTrustVouchBack": "Vouch back",
+	"@vtcTrustVouchBack": {
+		"description": "Vouches for a member who vouched for the member first"
+	},
+	"vtcTrustWithdraw": "Withdraw",
+	"@vtcTrustWithdraw": {
+		"description": "Withdraws the member's own vouch"
+	},
+	"vtcTrustPickCommunity": "Vouch in which community?",
+	"@vtcTrustPickCommunity": {
+		"description": "Title of the list of the member's communities to vouch in"
+	},
+	"vtcTrustSearchTitle": "Find {name} in {community}",
+	"@vtcTrustSearchTitle": {
+		"description": "Title of the member search",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			},
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcTrustSearchHint": "Name",
+	"@vtcTrustSearchHint": {
+		"description": "Hint of the member search field"
+	},
+	"vtcTrustSearchNone": "No members match.",
+	"@vtcTrustSearchNone": {
+		"description": "The member search found nobody"
+	},
+	"vtcTrustUnnamed": "Unnamed member",
+	"@vtcTrustUnnamed": {
+		"description": "A member who shows no name"
+	},
+	"vtcTrustNotFindable": "{name} hasn't let members of {community} find them yet.",
+	"@vtcTrustNotFindable": {
+		"description": "A member who does not show the identity they joined with",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			},
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcTrustConfirmMatchTitle": "Is this {contact}?",
+	"@vtcTrustConfirmMatchTitle": {
+		"description": "Asks whether a directory entry is the contact",
+		"placeholders": {
+			"contact": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcTrustConfirmMatchMessage": "Your vouches for {contact} in {community} will name {member}.",
+	"@vtcTrustConfirmMatchMessage": {
+		"description": "What picking a directory entry for a contact means",
+		"placeholders": {
+			"contact": {
+				"type": "String"
+			},
+			"community": {
+				"type": "String"
+			},
+			"member": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcTrustConfirmMatchAction": "Yes, that's them",
+	"@vtcTrustConfirmMatchAction": {
+		"description": "Confirms that a directory entry is the contact"
+	},
+	"vtcTrustConsentTitle": "Vouch for {name} in {community}?",
+	"@vtcTrustConsentTitle": {
+		"description": "Title of the consent to vouch",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			},
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcTrustConsentMessage": "This tells members of {community} that you and {name} know each other. You'll each also see what the other shares with their connections.",
+	"@vtcTrustConsentMessage": {
+		"description": "What vouching discloses",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			},
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcTrustWithdrawTitle": "Stop vouching for {name} in {community}?",
+	"@vtcTrustWithdrawTitle": {
+		"description": "Title of the confirmation to withdraw a vouch",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			},
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcTrustWithdrawMessage": "Members will no longer see it.",
+	"@vtcTrustWithdrawMessage": {
+		"description": "What withdrawing a vouch does"
+	},
+	"vtcTrustDoneTitle": "You vouched for {name}",
+	"@vtcTrustDoneTitle": {
+		"description": "Title of what happened once vouched",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcTrustSigned": "Signed by your VTA",
+	"@vtcTrustSigned": {
+		"description": "Step: the VTA signed the vouch"
+	},
+	"vtcTrustSignedSummary": "As the identity you joined {community} with.",
+	"@vtcTrustSignedSummary": {
+		"description": "Which identity signed the vouch",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcTrustStored": "Stored by {community}",
+	"@vtcTrustStored": {
+		"description": "Step: the community keeps the vouch",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcTrustVouchDocument": "Signed vouch",
+	"@vtcTrustVouchDocument": {
+		"description": "Title of the signed vouch credential"
+	},
+	"vtcTrustFailure": "{reason, select, notMember{You're not a member of {community} any more.} contactNotMember{{name} isn't a member of {community} any more.} notFindable{{name} hasn't let members of {community} find them yet.} searchTooShort{Enter at least three letters.} nameRefused{{community} doesn't accept this name.} proofRejected{{community} didn't accept your VTA's signature.} notAllowed{{community} doesn't allow this.} tryLater{{community} is busy. Try again in a moment.} vtaUnavailable{Your VTA couldn't sign this. Try again when it's reachable.} network{Couldn't reach {community}.} other{Something went wrong. Try again.}}",
+	"@vtcTrustFailure": {
+		"description": "Why vouching or finding a member did not work",
+		"placeholders": {
+			"reason": {
+				"type": "String"
+			},
+			"community": {
+				"type": "String"
+			},
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcGroupMembersOpen": "Members",
+	"@vtcGroupMembersOpen": {
+		"description": "Opens a community group's members, to vouch for them"
+	},
+	"vtcGroupMembersTitle": "Members of {group}",
+	"@vtcGroupMembersTitle": {
+		"description": "Title of a community group's members",
+		"placeholders": {
+			"group": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcGroupMembersNone": "No other members to show.",
+	"@vtcGroupMembersNone": {
+		"description": "A group shows the member no other members"
+	},
+	"vtcGroupMembersUnlistedNote": "Members who chose not to be listed in the directory of {community} aren't shown.",
+	"@vtcGroupMembersUnlistedNote": {
+		"description": "Why some members of a group may be missing from its list",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcDirectoryNameRefused": "{community} doesn't accept this name.",
+	"@vtcDirectoryNameRefused": {
+		"description": "The community refused the name",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcDirectoryNameShown": "Members of {community} see you as {name}, with the name and picture of the identity you joined with.",
+	"@vtcDirectoryNameShown": {
+		"description": "The name other members of a community see, taken from the identity the member joined with",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			},
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcTrustRecordDocument": "What {community} keeps",
+	"@vtcTrustRecordDocument": {
+		"description": "Title of the community's record of a vouch",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcVouchTrailYou": "You",
+	"@vtcVouchTrailYou": {
+		"description": "The member, as a party in a vouch's diagram"
+	},
+	"vtcVouchTrailTheirVta": "{name}'s VTA",
+	"@vtcVouchTrailTheirVta": {
+		"description": "Another member's VTA, as a party in a vouch's diagram",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcVouchTrailIn": "In {community}.",
+	"@vtcVouchTrailIn": {
+		"description": "The community a vouch is in, when it gives no date",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcVouchTrailValidFrom": "In {community}, valid from {date}.",
+	"@vtcVouchTrailValidFrom": {
+		"description": "The community a vouch is in, and when it holds from",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			},
+			"date": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcVouchTrailVouchedFor": "Vouched for",
+	"@vtcVouchTrailVouchedFor": {
+		"description": "Label of the identity a vouch is about"
+	},
+	"vtcVouchTrailSignedByTheirVta": "Signed by {name}'s VTA",
+	"@vtcVouchTrailSignedByTheirVta": {
+		"description": "Step: another member's VTA signed their vouch",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcVouchTrailSignedTheirSummary": "As the identity {name} joined {community} with.",
+	"@vtcVouchTrailSignedTheirSummary": {
+		"description": "Which identity signed another member's vouch",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			},
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcVouchTrailStoredSummary": "Members of {community} can see this vouch.",
+	"@vtcVouchTrailStoredSummary": {
+		"description": "Who sees a vouch the community keeps",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcVouchTrailRecord": "Record",
+	"@vtcVouchTrailRecord": {
+		"description": "Label of the community's id of a vouch"
+	},
+	"vtcVouchTrailStoredAt": "Stored at",
+	"@vtcVouchTrailStoredAt": {
+		"description": "Label of when the community stored a vouch"
+	},
+	"vtcVouchTrailTheVouch": "The vouch",
+	"@vtcVouchTrailTheVouch": {
+		"description": "Step: who vouched for whom"
+	},
+	"vtcTrustVouchedForEachOther": "You and {name} vouched for each other",
+	"@vtcTrustVouchedForEachOther": {
+		"description": "Both the member and another member vouched, each for the other",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcMemberCredentialsTitle": "{name}'s credentials",
+	"@vtcMemberCredentialsTitle": {
+		"description": "Title of another member's credentials",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcMemberCredentialsNote": "As {community} shows them to you.",
+	"@vtcMemberCredentialsNote": {
+		"description": "Whose view of another member's credentials this is",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcMemberCredentialsNone": "{community} shows you none of {name}'s credentials.",
+	"@vtcMemberCredentialsNone": {
+		"description": "The community shows no credential of another member",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			},
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcMemberCredentialsMembership": "Membership card",
+	"@vtcMemberCredentialsMembership": {
+		"description": "The membership card a community issued a member"
+	},
+	"vtcMemberCredentialsRole": "Role card",
+	"@vtcMemberCredentialsRole": {
+		"description": "The role card a community issued a member"
+	},
+	"vtcMemberCredentialsIssuedBy": "Issued by {community}",
+	"@vtcMemberCredentialsIssuedBy": {
+		"description": "Who issued a card",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcMemberCredentialsAcknowledgement": "Acknowledgement",
+	"@vtcMemberCredentialsAcknowledgement": {
+		"description": "A member's acknowledgement of their membership card"
+	},
+	"vtcMemberCredentialsAcknowledgementBound": "Signed by {name}, for this membership card",
+	"@vtcMemberCredentialsAcknowledgementBound": {
+		"description": "A member's acknowledgement names the card the community holds",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcMemberCredentialsAcknowledgementStale": "Signed by {name}, for an earlier membership card",
+	"@vtcMemberCredentialsAcknowledgementStale": {
+		"description": "A member's acknowledgement names an earlier card",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcMemberCredentialsPublicCard": "Public card",
+	"@vtcMemberCredentialsPublicCard": {
+		"description": "The external card a member published"
+	},
+	"vtcMemberCredentialsSignedBy": "Signed by {name}",
+	"@vtcMemberCredentialsSignedBy": {
+		"description": "Who signed a card",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcMemberCredentialsVouch": "{issuer} vouched for {subject}",
+	"@vtcMemberCredentialsVouch": {
+		"description": "A vouch between two members",
+		"placeholders": {
+			"issuer": {
+				"type": "String"
+			},
+			"subject": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcMemberCredentialsStoredAt": "Stored {date}",
+	"@vtcMemberCredentialsStoredAt": {
+		"description": "When the community stored a vouch",
+		"placeholders": {
+			"date": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcMemberCredentialsAnotherMember": "another member",
+	"@vtcMemberCredentialsAnotherMember": {
+		"description": "A member the app knows no name of"
+	},
 	"vtcJoinAlreadyMember": "You're already a member of {name}.",
 	"@vtcJoinAlreadyMember": {
 		"description": "The scanned community is one the member belongs to",

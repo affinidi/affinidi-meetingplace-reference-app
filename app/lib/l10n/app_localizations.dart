@@ -5498,6 +5498,388 @@ abstract class AppLocalizations {
   /// **'{reason, select, taken{That phrase is already taken in Meeting Place. Try another.} other{The phrase couldn\'t be published or withdrawn. Try again.}}'**
   String vtcJoinPhraseFailure(String reason);
 
+  /// Heading of the switch that lets other members find the member to vouch for them
+  ///
+  /// In en, this message translates to:
+  /// **'Let members find you'**
+  String get vtcFindableHeading;
+
+  /// What letting other members find you does
+  ///
+  /// In en, this message translates to:
+  /// **'Let members of {name} find you to vouch for you. They\'ll see the identity you joined with.'**
+  String vtcFindableIntro(String name);
+
+  /// The community does not let members show the identity they joined with
+  ///
+  /// In en, this message translates to:
+  /// **'{name} doesn\'t let members show this.'**
+  String vtcFindableNotAllowed(String name);
+
+  /// Reading or changing whether members can find you failed
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t change this. Try again.'**
+  String get vtcFindableFailed;
+
+  /// Heading of a contact's vouches in the communities they share with the member
+  ///
+  /// In en, this message translates to:
+  /// **'Community trust'**
+  String get vtcTrustHeading;
+
+  /// Starts vouching for a contact in one of the member's communities
+  ///
+  /// In en, this message translates to:
+  /// **'Vouch in a community'**
+  String get vtcTrustVouchInCommunity;
+
+  /// The contact vouched for the member in this community
+  ///
+  /// In en, this message translates to:
+  /// **'{name} vouched for you'**
+  String vtcTrustTheyVouched(String name);
+
+  /// Neither vouched for the other in this community
+  ///
+  /// In en, this message translates to:
+  /// **'No vouches yet'**
+  String get vtcTrustNoVouch;
+
+  /// Vouches for a member
+  ///
+  /// In en, this message translates to:
+  /// **'Vouch'**
+  String get vtcTrustVouch;
+
+  /// Vouches for a member who vouched for the member first
+  ///
+  /// In en, this message translates to:
+  /// **'Vouch back'**
+  String get vtcTrustVouchBack;
+
+  /// Withdraws the member's own vouch
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw'**
+  String get vtcTrustWithdraw;
+
+  /// Title of the list of the member's communities to vouch in
+  ///
+  /// In en, this message translates to:
+  /// **'Vouch in which community?'**
+  String get vtcTrustPickCommunity;
+
+  /// Title of the member search
+  ///
+  /// In en, this message translates to:
+  /// **'Find {name} in {community}'**
+  String vtcTrustSearchTitle(String name, String community);
+
+  /// Hint of the member search field
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get vtcTrustSearchHint;
+
+  /// The member search found nobody
+  ///
+  /// In en, this message translates to:
+  /// **'No members match.'**
+  String get vtcTrustSearchNone;
+
+  /// A member who shows no name
+  ///
+  /// In en, this message translates to:
+  /// **'Unnamed member'**
+  String get vtcTrustUnnamed;
+
+  /// A member who does not show the identity they joined with
+  ///
+  /// In en, this message translates to:
+  /// **'{name} hasn\'t let members of {community} find them yet.'**
+  String vtcTrustNotFindable(String name, String community);
+
+  /// Asks whether a directory entry is the contact
+  ///
+  /// In en, this message translates to:
+  /// **'Is this {contact}?'**
+  String vtcTrustConfirmMatchTitle(String contact);
+
+  /// What picking a directory entry for a contact means
+  ///
+  /// In en, this message translates to:
+  /// **'Your vouches for {contact} in {community} will name {member}.'**
+  String vtcTrustConfirmMatchMessage(
+    String contact,
+    String community,
+    String member,
+  );
+
+  /// Confirms that a directory entry is the contact
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, that\'s them'**
+  String get vtcTrustConfirmMatchAction;
+
+  /// Title of the consent to vouch
+  ///
+  /// In en, this message translates to:
+  /// **'Vouch for {name} in {community}?'**
+  String vtcTrustConsentTitle(String name, String community);
+
+  /// What vouching discloses
+  ///
+  /// In en, this message translates to:
+  /// **'This tells members of {community} that you and {name} know each other. You\'ll each also see what the other shares with their connections.'**
+  String vtcTrustConsentMessage(String name, String community);
+
+  /// Title of the confirmation to withdraw a vouch
+  ///
+  /// In en, this message translates to:
+  /// **'Stop vouching for {name} in {community}?'**
+  String vtcTrustWithdrawTitle(String name, String community);
+
+  /// What withdrawing a vouch does
+  ///
+  /// In en, this message translates to:
+  /// **'Members will no longer see it.'**
+  String get vtcTrustWithdrawMessage;
+
+  /// Title of what happened once vouched
+  ///
+  /// In en, this message translates to:
+  /// **'You vouched for {name}'**
+  String vtcTrustDoneTitle(String name);
+
+  /// Step: the VTA signed the vouch
+  ///
+  /// In en, this message translates to:
+  /// **'Signed by your VTA'**
+  String get vtcTrustSigned;
+
+  /// Which identity signed the vouch
+  ///
+  /// In en, this message translates to:
+  /// **'As the identity you joined {community} with.'**
+  String vtcTrustSignedSummary(String community);
+
+  /// Step: the community keeps the vouch
+  ///
+  /// In en, this message translates to:
+  /// **'Stored by {community}'**
+  String vtcTrustStored(String community);
+
+  /// Title of the signed vouch credential
+  ///
+  /// In en, this message translates to:
+  /// **'Signed vouch'**
+  String get vtcTrustVouchDocument;
+
+  /// Why vouching or finding a member did not work
+  ///
+  /// In en, this message translates to:
+  /// **'{reason, select, notMember{You\'re not a member of {community} any more.} contactNotMember{{name} isn\'t a member of {community} any more.} notFindable{{name} hasn\'t let members of {community} find them yet.} searchTooShort{Enter at least three letters.} nameRefused{{community} doesn\'t accept this name.} proofRejected{{community} didn\'t accept your VTA\'s signature.} notAllowed{{community} doesn\'t allow this.} tryLater{{community} is busy. Try again in a moment.} vtaUnavailable{Your VTA couldn\'t sign this. Try again when it\'s reachable.} network{Couldn\'t reach {community}.} other{Something went wrong. Try again.}}'**
+  String vtcTrustFailure(String reason, String community, String name);
+
+  /// Opens a community group's members, to vouch for them
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get vtcGroupMembersOpen;
+
+  /// Title of a community group's members
+  ///
+  /// In en, this message translates to:
+  /// **'Members of {group}'**
+  String vtcGroupMembersTitle(String group);
+
+  /// A group shows the member no other members
+  ///
+  /// In en, this message translates to:
+  /// **'No other members to show.'**
+  String get vtcGroupMembersNone;
+
+  /// Why some members of a group may be missing from its list
+  ///
+  /// In en, this message translates to:
+  /// **'Members who chose not to be listed in the directory of {community} aren\'t shown.'**
+  String vtcGroupMembersUnlistedNote(String community);
+
+  /// The community refused the name
+  ///
+  /// In en, this message translates to:
+  /// **'{community} doesn\'t accept this name.'**
+  String vtcDirectoryNameRefused(String community);
+
+  /// The name other members of a community see, taken from the identity the member joined with
+  ///
+  /// In en, this message translates to:
+  /// **'Members of {community} see you as {name}, with the name and picture of the identity you joined with.'**
+  String vtcDirectoryNameShown(String community, String name);
+
+  /// Title of the community's record of a vouch
+  ///
+  /// In en, this message translates to:
+  /// **'What {community} keeps'**
+  String vtcTrustRecordDocument(String community);
+
+  /// The member, as a party in a vouch's diagram
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get vtcVouchTrailYou;
+
+  /// Another member's VTA, as a party in a vouch's diagram
+  ///
+  /// In en, this message translates to:
+  /// **'{name}\'s VTA'**
+  String vtcVouchTrailTheirVta(String name);
+
+  /// The community a vouch is in, when it gives no date
+  ///
+  /// In en, this message translates to:
+  /// **'In {community}.'**
+  String vtcVouchTrailIn(String community);
+
+  /// The community a vouch is in, and when it holds from
+  ///
+  /// In en, this message translates to:
+  /// **'In {community}, valid from {date}.'**
+  String vtcVouchTrailValidFrom(String community, String date);
+
+  /// Label of the identity a vouch is about
+  ///
+  /// In en, this message translates to:
+  /// **'Vouched for'**
+  String get vtcVouchTrailVouchedFor;
+
+  /// Step: another member's VTA signed their vouch
+  ///
+  /// In en, this message translates to:
+  /// **'Signed by {name}\'s VTA'**
+  String vtcVouchTrailSignedByTheirVta(String name);
+
+  /// Which identity signed another member's vouch
+  ///
+  /// In en, this message translates to:
+  /// **'As the identity {name} joined {community} with.'**
+  String vtcVouchTrailSignedTheirSummary(String name, String community);
+
+  /// Who sees a vouch the community keeps
+  ///
+  /// In en, this message translates to:
+  /// **'Members of {community} can see this vouch.'**
+  String vtcVouchTrailStoredSummary(String community);
+
+  /// Label of the community's id of a vouch
+  ///
+  /// In en, this message translates to:
+  /// **'Record'**
+  String get vtcVouchTrailRecord;
+
+  /// Label of when the community stored a vouch
+  ///
+  /// In en, this message translates to:
+  /// **'Stored at'**
+  String get vtcVouchTrailStoredAt;
+
+  /// Step: who vouched for whom
+  ///
+  /// In en, this message translates to:
+  /// **'The vouch'**
+  String get vtcVouchTrailTheVouch;
+
+  /// Both the member and another member vouched, each for the other
+  ///
+  /// In en, this message translates to:
+  /// **'You and {name} vouched for each other'**
+  String vtcTrustVouchedForEachOther(String name);
+
+  /// Title of another member's credentials
+  ///
+  /// In en, this message translates to:
+  /// **'{name}\'s credentials'**
+  String vtcMemberCredentialsTitle(String name);
+
+  /// Whose view of another member's credentials this is
+  ///
+  /// In en, this message translates to:
+  /// **'As {community} shows them to you.'**
+  String vtcMemberCredentialsNote(String community);
+
+  /// The community shows no credential of another member
+  ///
+  /// In en, this message translates to:
+  /// **'{community} shows you none of {name}\'s credentials.'**
+  String vtcMemberCredentialsNone(String community, String name);
+
+  /// The membership card a community issued a member
+  ///
+  /// In en, this message translates to:
+  /// **'Membership card'**
+  String get vtcMemberCredentialsMembership;
+
+  /// The role card a community issued a member
+  ///
+  /// In en, this message translates to:
+  /// **'Role card'**
+  String get vtcMemberCredentialsRole;
+
+  /// Who issued a card
+  ///
+  /// In en, this message translates to:
+  /// **'Issued by {community}'**
+  String vtcMemberCredentialsIssuedBy(String community);
+
+  /// A member's acknowledgement of their membership card
+  ///
+  /// In en, this message translates to:
+  /// **'Acknowledgement'**
+  String get vtcMemberCredentialsAcknowledgement;
+
+  /// A member's acknowledgement names the card the community holds
+  ///
+  /// In en, this message translates to:
+  /// **'Signed by {name}, for this membership card'**
+  String vtcMemberCredentialsAcknowledgementBound(String name);
+
+  /// A member's acknowledgement names an earlier card
+  ///
+  /// In en, this message translates to:
+  /// **'Signed by {name}, for an earlier membership card'**
+  String vtcMemberCredentialsAcknowledgementStale(String name);
+
+  /// The external card a member published
+  ///
+  /// In en, this message translates to:
+  /// **'Public card'**
+  String get vtcMemberCredentialsPublicCard;
+
+  /// Who signed a card
+  ///
+  /// In en, this message translates to:
+  /// **'Signed by {name}'**
+  String vtcMemberCredentialsSignedBy(String name);
+
+  /// A vouch between two members
+  ///
+  /// In en, this message translates to:
+  /// **'{issuer} vouched for {subject}'**
+  String vtcMemberCredentialsVouch(String issuer, String subject);
+
+  /// When the community stored a vouch
+  ///
+  /// In en, this message translates to:
+  /// **'Stored {date}'**
+  String vtcMemberCredentialsStoredAt(String date);
+
+  /// A member the app knows no name of
+  ///
+  /// In en, this message translates to:
+  /// **'another member'**
+  String get vtcMemberCredentialsAnotherMember;
+
   /// The scanned community is one the member belongs to
   ///
   /// In en, this message translates to:

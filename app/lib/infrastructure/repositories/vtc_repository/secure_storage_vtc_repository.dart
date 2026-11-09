@@ -6,6 +6,7 @@ import '../../../domain/models/vtc/linked_vta.dart';
 import '../../../domain/models/vtc/vtc_community.dart';
 import '../../../domain/models/vtc/vtc_group_chat.dart';
 import '../../../domain/models/vtc/vtc_left_membership.dart';
+import '../../../domain/models/vtc/vtc_member_link.dart';
 import '../../../domain/models/vtc/vtc_vetter_desk.dart';
 import '../../../domain/models/vtc/vtc_vetting.dart';
 import '../../../domain/repositories/vtc_repository.dart';
@@ -29,6 +30,7 @@ class SecureStorageVtcRepository implements VtcRepository {
   static const _communitiesKey = 'vtc_communities';
   static const _leftMembershipsKey = 'vtc_left_memberships';
   static const _groupChatsKey = 'vtc_group_chats';
+  static const _memberLinksKey = 'vtc_member_links';
   static const _vettingsKey = 'vtc_vettings';
   static const _vetterDesksKey = 'vtc_vetter_desks';
 
@@ -120,6 +122,37 @@ class SecureStorageVtcRepository implements VtcRepository {
   }
 
   @override
+  Future<List<VtcMemberLink>> memberLinks({String? channelDid}) async {
+    final json = await _storage.read(key: _memberLinksKey);
+    if (json == null) return const [];
+    final links = [
+      for (final link in jsonDecode(json) as List<dynamic>)
+        VtcMemberLink.fromJson(link as Map<String, dynamic>),
+    ];
+    if (channelDid == null) return links;
+    return [...links.where((link) => link.channelDid == channelDid)];
+  }
+
+  @override
+  Future<void> saveMemberLink(VtcMemberLink link) async {
+    final others = (await memberLinks()).where(
+      (stored) =>
+          stored.communityDid != link.communityDid ||
+          stored.channelDid != link.channelDid,
+    );
+    await _saveMemberLinks([...others, link]);
+  }
+
+  @override
+  Future<void> removeMemberLinks(String communityDid) async {
+    await _saveMemberLinks([
+      ...(await memberLinks()).where(
+        (stored) => stored.communityDid != communityDid,
+      ),
+    ]);
+  }
+
+  @override
   Future<VtcVetting?> findVetting(String communityDid) async =>
       (await _vettings())
           .where((vetting) => vetting.communityDid == communityDid)
@@ -176,7 +209,13 @@ class SecureStorageVtcRepository implements VtcRepository {
     await _storage.delete(key: _leftMembershipsKey);
     await _storage.delete(key: _vettingsKey);
     await _storage.delete(key: _vetterDesksKey);
+    await _storage.delete(key: _memberLinksKey);
   }
+
+  Future<void> _saveMemberLinks(List<VtcMemberLink> links) => _storage.write(
+    key: _memberLinksKey,
+    value: jsonEncode([for (final link in links) link.toJson()]),
+  );
 
   Future<void> _saveGroupChats(List<VtcGroupChat> chats) => _storage.write(
     key: _groupChatsKey,

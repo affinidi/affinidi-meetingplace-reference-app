@@ -2,6 +2,7 @@ import '../models/vtc/linked_vta.dart';
 import '../models/vtc/vtc_community.dart';
 import '../models/vtc/vtc_group_chat.dart';
 import '../models/vtc/vtc_left_membership.dart';
+import '../models/vtc/vtc_member_link.dart';
 import '../models/vtc/vtc_vetter_desk.dart';
 import '../models/vtc/vtc_vetting.dart';
 
@@ -62,8 +63,19 @@ abstract interface class VtcRepository {
   /// Forgets the chat with [chatGroupId], if recorded.
   Future<void> removeGroupChat(String chatGroupId);
 
+  /// The contacts linked to members of communities, those of the contact
+  /// [channelDid] only when given.
+  Future<List<VtcMemberLink>> memberLinks({String? channelDid});
+
+  /// Records [link], replacing the link of the same contact in the same
+  /// community.
+  Future<void> saveMemberLink(VtcMemberLink link);
+
+  /// Forgets every contact linked to a member of [communityDid].
+  Future<void> removeMemberLinks(String communityDid);
+
   /// Forgets the linked VTA, every community, every left membership, all
-  /// vetting and every vetting desk.
+  /// vetting, every vetting desk and every contact linked to a member.
   ///
   /// Keeps the group chats: a chat this phone owns lets in only a group's
   /// members, and must keep refusing everyone else while no VTA is linked.

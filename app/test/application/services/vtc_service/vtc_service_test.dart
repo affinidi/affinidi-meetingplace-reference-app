@@ -1,9 +1,12 @@
+import 'dart:typed_data';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/mock_credential_template.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_card_delivery.dart';
+import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_member_link.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_membership_entry.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_vetter_desk.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_vetting.dart';
@@ -650,8 +653,9 @@ void main() {
         await Future<void>.delayed(Duration.zero);
         await listening.cancel();
 
-        final renewal = network.memberRequests.last;
-        expect(renewal['type'], MemberTask.renew);
+        final renewal = network.memberRequests.firstWhere(
+          (request) => request['type'] == MemberTask.renew,
+        );
         expect(renewal['issuer'], persona.did);
         expect(kept(), ['urn:uuid:vmc-renewed', 'urn:uuid:vac-renewed']);
         expect(changes, 1);
@@ -665,9 +669,47 @@ void main() {
         await Future<void>.delayed(Duration.zero);
         await listening.cancel();
 
-        expect(network.memberRequests.last['type'], MemberTask.renew);
+        expect(
+          network.memberRequests.map((request) => request['type']),
+          contains(MemberTask.renew),
+        );
         expect(kept(), isEmpty);
         expect(changes, 0);
+      });
+
+      test('confirms the renewed membership card back', () async {
+        network.memberRequests.clear();
+
+        await service.refreshMembership(fakeVtcDid);
+
+        expect(network.memberRequests.map((request) => request['type']), [
+          MemberTask.renew,
+          MemberTask.vmc,
+        ]);
+        final signed = network.vta.received.lastWhere(
+          (request) => request['type'] == VtaTask.signDocument,
+        );
+        final vc =
+            (signed['payload'] as Map)['document'] as Map<String, dynamic>;
+        expect(
+          (vc['credentialSubject'] as Map)['digestMultibase'],
+          digestMultibase({
+            'id': 'urn:uuid:vmc-renewed',
+            'type': ['VerifiableCredential', 'MembershipCredential'],
+            'issuer': fakeVtcDid,
+            'credentialSubject': {'id': persona.did},
+          }),
+          reason: 'bound to the renewed card, not the first one',
+        );
+      });
+
+      test('refreshes all the same when the confirmation is refused', () async {
+        network.refusals[MemberTask.vmc] = (409, 'vtc/members/vmc:conflict');
+        network.renewedRole = 'admin';
+
+        await service.refreshMembership(fakeVtcDid);
+
+        expect(kept(), ['urn:uuid:vmc-renewed', 'urn:uuid:vac-renewed']);
       });
 
       test('keeps the cards when the VTA holds no role card', () async {
@@ -764,6 +806,24 @@ void main() {
         expect(await service.community(fakeVtcDid), isNull);
       });
 
+      test('forgets the contacts linked to its members', () async {
+        final repository = SecureStorageVtcRepository();
+        await repository.saveMemberLink(
+          VtcMemberLink(
+            communityDid: fakeVtcDid,
+            channelDid: 'did:web:channel-bob',
+            entryId: 'dir_bob',
+            personaDid: 'did:webvh:bob',
+            name: 'Bob',
+            linkedAt: DateTime.utc(2026, 11, 9),
+          ),
+        );
+
+        await service.leave(fakeVtcDid);
+
+        expect(await repository.memberLinks(), isEmpty);
+      });
+
       test('keeps the card and the signed answer once left', () async {
         await service.leave(fakeVtcDid);
 
@@ -813,6 +873,232 @@ void main() {
         expect(archived(), isEmpty);
         expect((await service.community(fakeVtcDid))?.isMember, isTrue);
         expect(await SecureStorageVtcRepository().leftMemberships(), isEmpty);
+      });
+    });
+
+    group('trust graph', () {
+      const bob = 'did:webvh:QmBob:vta.example:bob';
+
+      setUp(() async {
+        await service.join(await service.readCommunity(fakeVtcDid));
+        network.memberRequests.clear();
+      });
+
+      Map<String, dynamic> edge({String id = 'edge-1', String? issuer}) => {
+        'id': id,
+        'issuerDid': issuer ?? persona.did,
+        'subjectDid': issuer == null ? bob : persona.did,
+        'vrcDigestMultibase': 'zQm$id',
+      };
+
+      test('vouches for a member as the persona', () async {
+        network.answerTo[RelationshipTask.publish] = (_) => edge();
+
+        final published = await service.publishRelationship(
+          fakeVtcDid,
+          subjectDid: bob,
+        );
+
+        expect(published.id, 'edge-1');
+        final request = network.memberRequests.single;
+        expect(request['type'], RelationshipTask.publish);
+        expect(request['issuer'], persona.did);
+        final vrc = (request['payload'] as Map)['vrc'] as Map;
+        expect(vrc['issuer'], persona.did);
+        expect(vrc['credentialSubject'], {'id': bob});
+        expect(vrc['proof'], isNotNull, reason: 'signed by the VTA');
+      });
+
+      test('lists the vouches of the persona, either way round', () async {
+        network.answerTo[RelationshipTask.list] = (_) => {
+          'items': [edge(), edge(id: 'edge-2', issuer: bob)],
+        };
+
+        final edges = await service.relationshipsOf(fakeVtcDid);
+
+        expect(edges.map((e) => e.id), ['edge-1', 'edge-2']);
+        final request = network.memberRequests.single;
+        expect((request['payload'] as Map)['did'], persona.did);
+      });
+
+      test('withdraws a vouch by its id', () async {
+        network.answerTo[RelationshipTask.revoke] = (payload) => {
+          'id': payload['id'],
+        };
+
+        await service.withdrawRelationship(fakeVtcDid, id: 'edge-1');
+
+        final request = network.memberRequests.single;
+        expect(request['type'], RelationshipTask.revoke);
+        expect(request['payload'], {'id': 'edge-1'});
+      });
+
+      test('passes on a community that refuses the vouch', () async {
+        network.refusals[RelationshipTask.publish] = (
+          422,
+          RelationshipTask.subjectNotMember,
+        );
+
+        await expectLater(
+          service.publishRelationship(fakeVtcDid, subjectDid: bob),
+          throwsA(
+            isA<MeetingPlaceVtcSDKException>().having(
+              (e) => e.refusalCode,
+              'refusalCode',
+              RelationshipTask.subjectNotMember,
+            ),
+          ),
+        );
+      });
+
+      test('refuses a community the phone holds no membership of', () {
+        expect(
+          service.publishRelationship('did:web:other.example', subjectDid: bob),
+          throwsA(isA<NotACommunityMemberException>()),
+        );
+      });
+
+      test('finds members by name', () async {
+        network.answerTo[DirectoryTask.entriesList] = (_) => {
+          'items': [
+            {
+              'entryId': 'dir_bob',
+              'fields': {'displayName': 'Bob', 'did': bob},
+            },
+          ],
+        };
+
+        final found = await service.searchMembers(fakeVtcDid, query: 'Bob');
+
+        expect(found.single.did, bob);
+        expect(
+          (network.memberRequests.single['payload'] as Map)['query'],
+          'Bob',
+        );
+      });
+
+      test('reads one member entry', () async {
+        network.answerTo[DirectoryTask.entriesShow] = (payload) => {
+          'entry': {
+            'entryId': payload['entryId'],
+            'fields': {'displayName': 'Bob'},
+          },
+        };
+
+        final entry = await service.memberEntry(fakeVtcDid, entryId: 'dir_bob');
+
+        expect(entry?.displayName, 'Bob');
+        expect(entry?.did, isNull);
+      });
+
+      test('reads and sets whether members can find the persona', () async {
+        network.answerTo[DirectoryTask.cardShow] = (_) => {
+          'card': {
+            'entryId': 'dir_me',
+            'visibility': {'did': 'members'},
+          },
+          'missingRequired': <String>[],
+        };
+
+        final card = await service.myDirectoryCard(fakeVtcDid);
+        await service.setFindableByMembers(fakeVtcDid, findable: true);
+
+        expect(card.isDidVisibleToMembers, isTrue);
+        final update = network.memberRequests.last;
+        expect(update['type'], DirectoryTask.cardUpdate);
+        expect(update['issuer'], persona.did);
+        expect(update['payload'], {
+          'visibility': {'did': 'members'},
+          // A card with no discoverability yet is made findable.
+          'discoverability': {
+            'listing': 'findable',
+            'search': 'byName',
+            'external': false,
+          },
+        });
+      });
+
+      test('reads what the community shows of another member', () async {
+        network.answerTo[RelationshipTask.list] = (payload) => {
+          'items': [edge(issuer: bob)],
+        };
+        network.answerTo[DirectoryTask.cardPublic] = (_) => {
+          'card': {'@type': 'Card'},
+          'cardDigest': 'zQmCard',
+          'publishedAt': '2026-11-09T10:00:00Z',
+        };
+        network.refusals[MemberTask.credentials] = (403, 'permissionDenied');
+
+        final vouches = await service.relationshipsNaming(fakeVtcDid, did: bob);
+        final card = await service.memberPublicCard(
+          fakeVtcDid,
+          entryId: 'dir_bob',
+        );
+
+        expect(vouches.single.issuerDid, bob);
+        expect(
+          (network.memberRequests.first['payload'] as Map)['did'],
+          bob,
+          reason: 'listed by the other member, not the persona',
+        );
+        expect(card?['@type'], 'Card');
+        await expectLater(
+          service.memberCredentials(fakeVtcDid, did: bob),
+          throwsA(isA<MeetingPlaceVtcSDKException>()),
+        );
+      });
+
+      test('shows a picture to members, uploaded first', () async {
+        const image = {'sha256': 'abc', 'mediaType': 'image/jpeg'};
+        network.answerTo[DirectoryTask.imagesUpload] = (_) => {
+          'image': image,
+          'expiresAt': '2026-11-10T10:00:00Z',
+        };
+
+        await service.setDirectoryPicture(
+          fakeVtcDid,
+          jpeg: Uint8List.fromList([1, 2, 3]),
+        );
+
+        expect(network.memberRequests.map((r) => r['type']), [
+          DirectoryTask.imagesUpload,
+          DirectoryTask.cardUpdate,
+        ]);
+        expect(network.memberRequests.last['payload'], {
+          'values': {'avatar': image},
+          'visibility': {'avatar': 'members'},
+        });
+      });
+
+      test('fetches the picture a member shows', () async {
+        network.answerTo[DirectoryTask.imagesGet] = (_) => {
+          'image': {'sha256': 'abc', 'mediaType': 'image/jpeg'},
+          'data': 'AQID',
+        };
+
+        final picture = await service.memberPicture(
+          fakeVtcDid,
+          entryId: 'dir_bob',
+          sha256: 'abc',
+        );
+
+        expect(picture, [1, 2, 3]);
+        expect(network.memberRequests.single['payload'], {
+          'entryId': 'dir_bob',
+          'field': 'avatar',
+          'sha256': 'abc',
+        });
+      });
+
+      test('sets the name members see, as the persona', () async {
+        await service.setDirectoryName(fakeVtcDid, name: 'Ada');
+
+        final update = network.memberRequests.single;
+        expect(update['type'], DirectoryTask.cardUpdate);
+        expect(update['issuer'], persona.did);
+        expect(update['payload'], {
+          'values': {'displayName': 'Ada'},
+        });
       });
     });
 

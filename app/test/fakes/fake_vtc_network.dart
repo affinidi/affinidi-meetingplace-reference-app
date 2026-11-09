@@ -196,6 +196,15 @@ class FakeVtcNetwork implements HttpClientAdapter {
   /// confirmations, directory card updates, leaves and renewals.
   final List<Map<String, dynamic>> memberRequests = [];
 
+  /// Answers to other member tasks, such as the trust graph's and the
+  /// directory's, by type, from the request's payload. Each request is kept
+  /// in [memberRequests].
+  final Map<String, Map<String, dynamic> Function(Map<String, dynamic>)>
+  answerTo = {};
+
+  /// HTTP status and code to refuse other member tasks with, by type.
+  final Map<String, (int, String)> refusals = {};
+
   /// A renewal's answer: fresh cards for [memberDid], the role card
   /// granting [renewedRole].
   Map<String, dynamic> _renewal(String memberDid) => {
@@ -566,6 +575,7 @@ class FakeVtcNetwork implements HttpClientAdapter {
       MemberTask.selfRemove => leaveRefusal,
       MemberTask.renew => renewRefusal,
       VettingCommunityTask.vettersProfile => vetterProfileRefusal,
+      final String type => refusals[type],
       _ => null,
     };
     if (memberRefusal != null) {
@@ -625,6 +635,10 @@ class FakeVtcNetwork implements HttpClientAdapter {
         MemberTask.renew => _renewal(request['issuer'] as String),
         _ => {'revision': 1},
       };
+    } else if (answerTo[type] case final answerFor?) {
+      memberRequests.add(request);
+      purpose = ProofPurpose.authentication;
+      answer = answerFor(payload);
     } else if (type == VettingCommunityTask.vettersList) {
       purpose = ProofPurpose.authentication;
       answer = {'vetters': listedVetters};

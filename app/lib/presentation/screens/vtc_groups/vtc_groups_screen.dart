@@ -9,6 +9,7 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import '../../../application/services/vtc_group_chat_service/vtc_group_chat_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../l10n/app_localizations.dart';
+import 'vtc_group_members_screen.dart';
 import 'vtc_groups_controller.dart';
 import 'vtc_groups_state.dart';
 
@@ -109,6 +110,15 @@ class VtcGroupsScreen extends ConsumerWidget {
                     );
                   },
                   onJoin: () => controller.joinChat(listing.group),
+                  onMembers: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => VtcGroupMembersScreen(
+                        communityDid: communityDid,
+                        communityName: communityName ?? communityDid,
+                        group: listing.group,
+                      ),
+                    ),
+                  ),
                 ),
             ],
           ),
@@ -162,6 +172,7 @@ class _GroupCard extends StatelessWidget {
     required this.onCreate,
     required this.onJoin,
     this.credentialUntil,
+    required this.onMembers,
   });
 
   final VtcGroup group;
@@ -173,6 +184,9 @@ class _GroupCard extends StatelessWidget {
   final DateTime? credentialUntil;
   final VoidCallback onCreate;
   final VoidCallback onJoin;
+
+  /// Opens the group's members, to vouch for them.
+  final VoidCallback onMembers;
 
   static const _radius = 16.0;
   static const _tint = 20;
@@ -253,6 +267,13 @@ class _GroupCard extends StatelessWidget {
                 canCreate ? l10n.vtcGroupChatCreate : l10n.vtcGroupChatJoin,
               ),
               onPressed: isBusy ? null : (canCreate ? onCreate : onJoin),
+            ),
+          if (group.showsMembersToMembers)
+            OutlinedButton.icon(
+              key: Key('vtc_group_members_${group.groupId}'),
+              icon: const Icon(Icons.people_outline),
+              label: Text(l10n.vtcGroupMembersOpen),
+              onPressed: onMembers,
             ),
         ],
       ),

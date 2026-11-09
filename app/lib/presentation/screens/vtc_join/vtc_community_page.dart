@@ -8,33 +8,24 @@ import '../../../application/services/vtc_service/vtc_service.dart';
 import '../../../domain/models/vtc/vtc_card_delivery.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
-import '../../../l10n/app_localizations.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import '../vtc_vetter_profile/vtc_vetter_profile_screen.dart';
 import '../vtc_vetting_desk/vtc_vetting_desk_screen.dart';
 import 'vtc_card_delivery_trail.dart';
 import 'vtc_community_profile.dart';
+import 'vtc_findable_view.dart';
 import 'vtc_flow_diagram.dart';
 import 'vtc_identity_check_view.dart';
 import 'vtc_join_phrase_view.dart';
 import 'vtc_join_state.dart';
 import 'vtc_membership_card_view.dart';
 import 'vtc_progress_line.dart';
+import 'vtc_role_name.dart';
 import 'vtc_trail_step.dart';
-
-/// Prefix of a role the community defined itself, as in `custom:coach`.
-const _customRolePrefix = 'custom:';
 
 /// The built-in role that manages the community's join phrase; a role the
 /// community defined itself never does, whatever its name.
 const _adminRole = 'admin';
-
-/// The member's [role] in plain words; a role the community defined itself
-/// by its own name, which never reads as a built-in one.
-String _roleName(AppLocalizations l10n, String role) =>
-    role.startsWith(_customRolePrefix)
-    ? role.substring(_customRolePrefix.length)
-    : l10n.vtcCommunityRoleName(role);
 
 /// The page of a community the member belongs to, which they come back to:
 /// a welcome right after joining, else the community's logo and name; their
@@ -195,8 +186,8 @@ class VtcCommunityPage extends HookConsumerWidget {
   }
 }
 
-/// The member's [role], with the community's settings beside it for an
-/// administrator and the vetting desk for a vetter.
+/// The member's [role], with the community's settings beside it and the
+/// vetting desk for a vetter.
 class _RoleLine extends StatelessWidget {
   const _RoleLine({
     required this.role,
@@ -217,12 +208,17 @@ class _RoleLine extends StatelessWidget {
     final l10n = context.l10n;
     final communityDid = this.communityDid;
     final actions = [
-      if (communityDid != null && role == _adminRole)
+      if (communityDid != null)
         IconButton(
           key: const Key('vtc_community_settings'),
           icon: const Icon(Icons.settings_outlined, color: Colors.white),
           tooltip: l10n.vtcCommunitySettings,
-          onPressed: () => _showSettings(context, communityDid, communityName),
+          onPressed: () => _showSettings(
+            context,
+            communityDid,
+            communityName,
+            isAdmin: role == _adminRole,
+          ),
         ),
       if (communityDid != null && canVet)
         IconButton(
@@ -240,7 +236,7 @@ class _RoleLine extends StatelessWidget {
       key: const Key('vtc_community_role'),
       icon: Icons.badge_outlined,
       title: l10n.vtcCommunityRole,
-      subtitle: _roleName(l10n, role),
+      subtitle: vtcRoleName(l10n, role),
       trailing: actions.isEmpty
           ? null
           : Row(mainAxisSize: MainAxisSize.min, children: actions),
@@ -372,7 +368,7 @@ class _WithAbout extends StatelessWidget {
           icon: const Icon(Icons.info_outline, color: Colors.white),
           tooltip: context.l10n.vtcJoinProfileHeading,
           onPressed: () =>
-              _showSheet(context, VtcCommunityProfile(state: state)),
+              showOnboardingSheet(context, VtcCommunityProfile(state: state)),
         ),
       ],
     );
@@ -381,33 +377,28 @@ class _WithAbout extends StatelessWidget {
 
 /// Opens the settings of the community at [communityDid]: for now its join
 /// phrase.
+/// The community's settings for the member: how other members find them,
+/// and, for an administrator, the community's join phrase.
 Future<void> _showSettings(
   BuildContext context,
   String communityDid,
-  String communityName,
-) => _showSheet(
+  String communityName, {
+  required bool isAdmin,
+}) => showOnboardingSheet(
   context,
-  VtcJoinPhraseView(communityDid: communityDid, communityName: communityName),
+  Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    spacing: 16,
+    children: [
+      if (isAdmin)
+        VtcJoinPhraseView(
+          communityDid: communityDid,
+          communityName: communityName,
+        ),
+      VtcFindableView(communityDid: communityDid, communityName: communityName),
+    ],
+  ),
 );
-
-/// Shows [child] in a sheet on the onboarding gradient.
-Future<void> _showSheet(BuildContext context, Widget child) {
-  const radius = BorderRadius.vertical(top: Radius.circular(24));
-  return showModalBottomSheet<void>(
-    context: context,
-    useRootNavigator: true,
-    isScrollControlled: true,
-    useSafeArea: true,
-    backgroundColor: Colors.transparent,
-    builder: (context) => DecoratedBox(
-      decoration: onboardingGradient(context, radius: 2, borderRadius: radius),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
-        child: child,
-      ),
-    ),
-  );
-}
 
 /// Where the card on show came from, as the Credentials tab draws it: the
 /// community issued it to the identity, which passed it on to the VTA.

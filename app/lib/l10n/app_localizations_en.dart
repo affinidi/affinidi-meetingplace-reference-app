@@ -3657,6 +3657,283 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get vtcFindableHeading => 'Let members find you';
+
+  @override
+  String vtcFindableIntro(String name) {
+    return 'Let members of $name find you to vouch for you. They\'ll see the identity you joined with.';
+  }
+
+  @override
+  String vtcFindableNotAllowed(String name) {
+    return '$name doesn\'t let members show this.';
+  }
+
+  @override
+  String get vtcFindableFailed => 'Couldn\'t change this. Try again.';
+
+  @override
+  String get vtcTrustHeading => 'Community trust';
+
+  @override
+  String get vtcTrustVouchInCommunity => 'Vouch in a community';
+
+  @override
+  String vtcTrustTheyVouched(String name) {
+    return '$name vouched for you';
+  }
+
+  @override
+  String get vtcTrustNoVouch => 'No vouches yet';
+
+  @override
+  String get vtcTrustVouch => 'Vouch';
+
+  @override
+  String get vtcTrustVouchBack => 'Vouch back';
+
+  @override
+  String get vtcTrustWithdraw => 'Withdraw';
+
+  @override
+  String get vtcTrustPickCommunity => 'Vouch in which community?';
+
+  @override
+  String vtcTrustSearchTitle(String name, String community) {
+    return 'Find $name in $community';
+  }
+
+  @override
+  String get vtcTrustSearchHint => 'Name';
+
+  @override
+  String get vtcTrustSearchNone => 'No members match.';
+
+  @override
+  String get vtcTrustUnnamed => 'Unnamed member';
+
+  @override
+  String vtcTrustNotFindable(String name, String community) {
+    return '$name hasn\'t let members of $community find them yet.';
+  }
+
+  @override
+  String vtcTrustConfirmMatchTitle(String contact) {
+    return 'Is this $contact?';
+  }
+
+  @override
+  String vtcTrustConfirmMatchMessage(
+    String contact,
+    String community,
+    String member,
+  ) {
+    return 'Your vouches for $contact in $community will name $member.';
+  }
+
+  @override
+  String get vtcTrustConfirmMatchAction => 'Yes, that\'s them';
+
+  @override
+  String vtcTrustConsentTitle(String name, String community) {
+    return 'Vouch for $name in $community?';
+  }
+
+  @override
+  String vtcTrustConsentMessage(String name, String community) {
+    return 'This tells members of $community that you and $name know each other. You\'ll each also see what the other shares with their connections.';
+  }
+
+  @override
+  String vtcTrustWithdrawTitle(String name, String community) {
+    return 'Stop vouching for $name in $community?';
+  }
+
+  @override
+  String get vtcTrustWithdrawMessage => 'Members will no longer see it.';
+
+  @override
+  String vtcTrustDoneTitle(String name) {
+    return 'You vouched for $name';
+  }
+
+  @override
+  String get vtcTrustSigned => 'Signed by your VTA';
+
+  @override
+  String vtcTrustSignedSummary(String community) {
+    return 'As the identity you joined $community with.';
+  }
+
+  @override
+  String vtcTrustStored(String community) {
+    return 'Stored by $community';
+  }
+
+  @override
+  String get vtcTrustVouchDocument => 'Signed vouch';
+
+  @override
+  String vtcTrustFailure(String reason, String community, String name) {
+    String _temp0 = intl.Intl.selectLogic(reason, {
+      'notMember': 'You\'re not a member of $community any more.',
+      'contactNotMember': '$name isn\'t a member of $community any more.',
+      'notFindable': '$name hasn\'t let members of $community find them yet.',
+      'searchTooShort': 'Enter at least three letters.',
+      'nameRefused': '$community doesn\'t accept this name.',
+      'proofRejected': '$community didn\'t accept your VTA\'s signature.',
+      'notAllowed': '$community doesn\'t allow this.',
+      'tryLater': '$community is busy. Try again in a moment.',
+      'vtaUnavailable':
+          'Your VTA couldn\'t sign this. Try again when it\'s reachable.',
+      'network': 'Couldn\'t reach $community.',
+      'other': 'Something went wrong. Try again.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get vtcGroupMembersOpen => 'Members';
+
+  @override
+  String vtcGroupMembersTitle(String group) {
+    return 'Members of $group';
+  }
+
+  @override
+  String get vtcGroupMembersNone => 'No other members to show.';
+
+  @override
+  String vtcGroupMembersUnlistedNote(String community) {
+    return 'Members who chose not to be listed in the directory of $community aren\'t shown.';
+  }
+
+  @override
+  String vtcDirectoryNameRefused(String community) {
+    return '$community doesn\'t accept this name.';
+  }
+
+  @override
+  String vtcDirectoryNameShown(String community, String name) {
+    return 'Members of $community see you as $name, with the name and picture of the identity you joined with.';
+  }
+
+  @override
+  String vtcTrustRecordDocument(String community) {
+    return 'What $community keeps';
+  }
+
+  @override
+  String get vtcVouchTrailYou => 'You';
+
+  @override
+  String vtcVouchTrailTheirVta(String name) {
+    return '$name\'s VTA';
+  }
+
+  @override
+  String vtcVouchTrailIn(String community) {
+    return 'In $community.';
+  }
+
+  @override
+  String vtcVouchTrailValidFrom(String community, String date) {
+    return 'In $community, valid from $date.';
+  }
+
+  @override
+  String get vtcVouchTrailVouchedFor => 'Vouched for';
+
+  @override
+  String vtcVouchTrailSignedByTheirVta(String name) {
+    return 'Signed by $name\'s VTA';
+  }
+
+  @override
+  String vtcVouchTrailSignedTheirSummary(String name, String community) {
+    return 'As the identity $name joined $community with.';
+  }
+
+  @override
+  String vtcVouchTrailStoredSummary(String community) {
+    return 'Members of $community can see this vouch.';
+  }
+
+  @override
+  String get vtcVouchTrailRecord => 'Record';
+
+  @override
+  String get vtcVouchTrailStoredAt => 'Stored at';
+
+  @override
+  String get vtcVouchTrailTheVouch => 'The vouch';
+
+  @override
+  String vtcTrustVouchedForEachOther(String name) {
+    return 'You and $name vouched for each other';
+  }
+
+  @override
+  String vtcMemberCredentialsTitle(String name) {
+    return '$name\'s credentials';
+  }
+
+  @override
+  String vtcMemberCredentialsNote(String community) {
+    return 'As $community shows them to you.';
+  }
+
+  @override
+  String vtcMemberCredentialsNone(String community, String name) {
+    return '$community shows you none of $name\'s credentials.';
+  }
+
+  @override
+  String get vtcMemberCredentialsMembership => 'Membership card';
+
+  @override
+  String get vtcMemberCredentialsRole => 'Role card';
+
+  @override
+  String vtcMemberCredentialsIssuedBy(String community) {
+    return 'Issued by $community';
+  }
+
+  @override
+  String get vtcMemberCredentialsAcknowledgement => 'Acknowledgement';
+
+  @override
+  String vtcMemberCredentialsAcknowledgementBound(String name) {
+    return 'Signed by $name, for this membership card';
+  }
+
+  @override
+  String vtcMemberCredentialsAcknowledgementStale(String name) {
+    return 'Signed by $name, for an earlier membership card';
+  }
+
+  @override
+  String get vtcMemberCredentialsPublicCard => 'Public card';
+
+  @override
+  String vtcMemberCredentialsSignedBy(String name) {
+    return 'Signed by $name';
+  }
+
+  @override
+  String vtcMemberCredentialsVouch(String issuer, String subject) {
+    return '$issuer vouched for $subject';
+  }
+
+  @override
+  String vtcMemberCredentialsStoredAt(String date) {
+    return 'Stored $date';
+  }
+
+  @override
+  String get vtcMemberCredentialsAnotherMember => 'another member';
+
+  @override
   String vtcJoinAlreadyMember(String name) {
     return 'You\'re already a member of $name.';
   }

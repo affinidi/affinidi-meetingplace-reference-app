@@ -1783,6 +1783,223 @@ class VtcService {
     );
   }
 
+  /// The members of [communityDid] whose directory entries match [query],
+  /// as the community shows them to the member. Throws as [memberGroups]
+  /// does.
+  Future<List<DirectoryEntry>> searchMembers(
+    String communityDid, {
+    required String query,
+  }) async {
+    final (vta, signer) = await _asMember(communityDid);
+    return _sdk.directoryClient().search(
+      communityDid,
+      agent: vta,
+      persona: signer,
+      query: query,
+    );
+  }
+
+  /// The directory entry [entryId] of [communityDid] as the community shows
+  /// it to the member, or null when it shows none. Throws as [memberGroups]
+  /// does.
+  Future<DirectoryEntry?> memberEntry(
+    String communityDid, {
+    required String entryId,
+  }) async {
+    final (vta, signer) = await _asMember(communityDid);
+    return _sdk.directoryClient().show(
+      communityDid,
+      agent: vta,
+      persona: signer,
+      entryId: entryId,
+    );
+  }
+
+  /// The member's own directory card in [communityDid]: whether other
+  /// members can find them to vouch for them. Throws as [memberGroups]
+  /// does.
+  Future<MyDirectoryCard> myDirectoryCard(String communityDid) async {
+    final (vta, signer) = await _asMember(communityDid);
+    return _sdk.directoryClient().myCard(
+      communityDid,
+      agent: vta,
+      persona: signer,
+    );
+  }
+
+  /// Lets every member of [communityDid] find the member's identity there
+  /// when [findable], to vouch for them, or keeps it to the community's
+  /// administrators otherwise. Throws as [memberGroups] does.
+  Future<void> setFindableByMembers(
+    String communityDid, {
+    required bool findable,
+  }) async {
+    final (vta, signer) = await _asMember(communityDid);
+    await _sdk.directoryClient().setDidVisibleToMembers(
+      communityDid,
+      agent: vta,
+      persona: signer,
+      visible: findable,
+    );
+  }
+
+  /// Sets the name other members of [communityDid] see for the member to
+  /// [name], or clears it when [name] is blank. Throws as [memberGroups]
+  /// does.
+  Future<void> setDirectoryName(
+    String communityDid, {
+    required String name,
+  }) async {
+    final (vta, signer) = await _asMember(communityDid);
+    await _sdk.directoryClient().setDisplayName(
+      communityDid,
+      agent: vta,
+      persona: signer,
+      name: name,
+    );
+  }
+
+  /// Shows [jpeg] to every member of [communityDid] as the member's picture
+  /// there, or takes the picture off when null. Throws as [memberGroups]
+  /// does.
+  Future<void> setDirectoryPicture(
+    String communityDid, {
+    required Uint8List? jpeg,
+  }) async {
+    final (vta, signer) = await _asMember(communityDid);
+    final client = _sdk.directoryClient();
+    final image = jpeg == null
+        ? null
+        : await client.uploadImage(
+            communityDid,
+            agent: vta,
+            persona: signer,
+            bytes: jpeg,
+            mediaType: 'image/jpeg',
+          );
+    await client.setAvatar(
+      communityDid,
+      agent: vta,
+      persona: signer,
+      image: image,
+    );
+  }
+
+  /// The picture the member of entry [entryId] of [communityDid] shows the
+  /// member, the one [sha256] names, or null when they show none. Throws as
+  /// [memberGroups] does.
+  Future<Uint8List?> memberPicture(
+    String communityDid, {
+    required String entryId,
+    required String sha256,
+  }) async {
+    final (vta, signer) = await _asMember(communityDid);
+    return _sdk.directoryClient().avatar(
+      communityDid,
+      agent: vta,
+      persona: signer,
+      entryId: entryId,
+      sha256: sha256,
+    );
+  }
+
+  /// Has the member's VTA vouch, as their identity in [communityDid], for
+  /// the member [subjectDid], and the community keep it in its trust graph.
+  /// Throws as [memberGroups] does.
+  Future<PublishedRelationship> publishRelationship(
+    String communityDid, {
+    required String subjectDid,
+  }) async {
+    final community = await _memberCommunity(communityDid);
+    final vta = await _grantedVta();
+    return _sdk.relationshipsClient().publish(
+      communityDid,
+      agent: vta,
+      persona: _persona(community),
+      signer: await _personaSigner(vta, community),
+      subjectDid: subjectDid,
+    );
+  }
+
+  /// Every vouch in [communityDid]'s trust graph the member's identity
+  /// there is a party to, either way round. Throws as [memberGroups] does.
+  Future<List<PublishedRelationship>> relationshipsOf(
+    String communityDid,
+  ) async {
+    final community = await _memberCommunity(communityDid);
+    final vta = await _grantedVta();
+    return _sdk.relationshipsClient().list(
+      communityDid,
+      agent: vta,
+      persona: await _personaSigner(vta, community),
+      did: community.personaDid,
+    );
+  }
+
+  /// Every vouch in [communityDid]'s trust graph naming the member [did],
+  /// either way round, as the community shows it to the member. Throws as
+  /// [memberGroups] does.
+  Future<List<PublishedRelationship>> relationshipsNaming(
+    String communityDid, {
+    required String did,
+  }) async {
+    final (vta, signer) = await _asMember(communityDid);
+    return _sdk.relationshipsClient().list(
+      communityDid,
+      agent: vta,
+      persona: signer,
+      did: did,
+    );
+  }
+
+  /// The external card the member of directory entry [entryId] published
+  /// in [communityDid], as they signed it, or null when they published
+  /// none. Throws as [memberGroups] does.
+  Future<Map<String, dynamic>?> memberPublicCard(
+    String communityDid, {
+    required String entryId,
+  }) async {
+    final (vta, signer) = await _asMember(communityDid);
+    return _sdk.directoryClient().publicCard(
+      communityDid,
+      agent: vta,
+      persona: signer,
+      entryId: entryId,
+    );
+  }
+
+  /// The membership pair [communityDid] holds for the member [did], or null
+  /// when [did] is no member. Only an administrator who manages members may
+  /// read it; anyone else is refused. Throws as [memberGroups] does.
+  Future<MemberCredentials?> memberCredentials(
+    String communityDid, {
+    required String did,
+  }) async {
+    final (vta, signer) = await _asMember(communityDid);
+    return _sdk.joinClient().memberCredentials(
+      communityDid,
+      agent: vta,
+      persona: signer,
+      did: did,
+    );
+  }
+
+  /// Withdraws the member's vouch [id] from [communityDid]'s trust graph.
+  /// One that is gone already counts as withdrawn. Throws as
+  /// [memberGroups] does.
+  Future<void> withdrawRelationship(
+    String communityDid, {
+    required String id,
+  }) async {
+    final (vta, signer) = await _asMember(communityDid);
+    await _sdk.relationshipsClient().revoke(
+      communityDid,
+      agent: vta,
+      persona: signer,
+      id: id,
+    );
+  }
+
   /// Picks up the credentials the groups [groupDids] of [communityDid]
   /// issued to the member's identity from its inbox, keeps them on the VTA,
   /// and only then removes them from the inbox. Returns how many it kept.
@@ -1922,7 +2139,9 @@ class VtcService {
   /// Asks [communityDid] for the member's current cards, and keeps them on
   /// their VTA when the role there changed, e.g. after an administrator
   /// promoted them: the card the community pushes on a role change may
-  /// never reach the VTA. A kept change fires [membershipsChanged].
+  /// never reach the VTA. A kept change fires [membershipsChanged]. The
+  /// renewed membership card is confirmed back to the community, as on
+  /// admission, best effort.
   ///
   /// Does nothing for a community this phone knows no membership of, or
   /// when the community no longer counts the persona as a member.
@@ -1933,13 +2152,26 @@ class VtcService {
     final community = await _repository.findCommunity(communityDid);
     if (community == null || !community.isMember) return;
     final vta = await _grantedVta();
-    final cards = await _sdk.joinClient().renew(
-      communityDid,
-      agent: vta,
-      persona: await _personaSigner(vta, community),
-    );
+    final signer = await _personaSigner(vta, community);
+    final client = _sdk.joinClient();
+    final cards = await client.renew(communityDid, agent: vta, persona: signer);
     _refreshedAt[communityDid] = DateTime.now();
     if (cards == null) return;
+
+    // A renewed card is a new one: the member's confirmation names the card
+    // by its digest, so the earlier one no longer completes the membership.
+    try {
+      await client.confirmMembership(
+        communityDid,
+        agent: vta,
+        persona: _persona(community),
+        signer: signer,
+        communityCard: cards.membership,
+      );
+    } on MeetingPlaceVtcSDKException {
+      // The community holds the membership either way; the next renewal
+      // confirms it again.
+    }
 
     final personaDid = community.personaDid;
     final heldRole = await _sdk
@@ -2056,6 +2288,8 @@ class VtcService {
       communityDid,
       personaDid: community.personaDid,
     );
+    // A vouch there now names nobody the member can act as.
+    await _repository.removeMemberLinks(communityDid);
     await _repository.removeCommunity(communityDid);
     _membershipsChanged.add(null);
   }
