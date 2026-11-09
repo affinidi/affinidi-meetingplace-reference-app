@@ -99,6 +99,7 @@ class VtcGroupMembersScreen extends HookConsumerWidget {
                   ? VtcVouchIcons(
                       edges: memberEdges,
                       name: name,
+                      communityName: communityName,
                       outgoingLabel: l10n.vtcTrustVouched,
                       incomingLabel: l10n.vtcTrustVouchesForYou,
                     )

@@ -201,6 +201,7 @@ class _TrustRowView extends StatelessWidget {
                   VtcVouchIcons(
                     edges: edges,
                     name: name,
+                    communityName: row.communityName,
                     outgoingLabel: l10n.vtcTrustYouVouched,
                     incomingLabel: l10n.vtcTrustTheyVouched(name),
                   ),

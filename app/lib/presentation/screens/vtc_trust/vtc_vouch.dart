@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../application/services/vtc_trust_service/vtc_trust_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../l10n/app_localizations.dart';
-import '../vtc_join/vtc_join_json_dialog.dart';
+import '../vtc_join/vtc_flow_diagram.dart';
 import '../vtc_join/vtc_trail_step.dart';
 
 /// What [failure] means to the member, about [name] in [community].
@@ -44,19 +45,12 @@ Future<PublishedRelationship?> vouchWithConsent(
         .read(vtcTrustServiceProvider)
         .vouch(communityDid, personaDid: personaDid);
     if (context.mounted) {
-      await showModalBottomSheet<void>(
-        context: context,
-        useRootNavigator: true,
-        isScrollControlled: true,
-        useSafeArea: true,
-        builder: (context) => SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: VtcVouchTrail(
-            edge: edge,
-            communityName: communityName,
-            name: name,
-          ),
-        ),
+      await showVouchTrail(
+        context,
+        edge: edge,
+        communityName: communityName,
+        name: name,
+        isOwn: true,
       );
     }
     return edge;
@@ -116,45 +110,148 @@ Future<bool> withdrawWithConfirmation(
   }
 }
 
-/// What vouching did, as steps the member follows: their VTA signed the
-/// vouch as their identity in the community, and the community keeps it
-/// where its members see it. The signed vouch opens in full.
+/// Shows the story of [edge], a vouch between the member and [name] in
+/// [communityName], as [VtcVouchTrail] draws it: the member's own when
+/// [isOwn], else [name]'s for the member.
+Future<void> showVouchTrail(
+  BuildContext context, {
+  required PublishedRelationship edge,
+  required String communityName,
+  required String name,
+  required bool isOwn,
+}) => showModalBottomSheet<void>(
+  context: context,
+  useRootNavigator: true,
+  isScrollControlled: true,
+  useSafeArea: true,
+  builder: (context) => SingleChildScrollView(
+    padding: const EdgeInsets.all(16),
+    child: VtcVouchTrail(
+      edge: edge,
+      communityName: communityName,
+      name: name,
+      isOwn: isOwn,
+    ),
+  ),
+);
+
+/// A vouch as steps, each pictured once opened as the membership card's
+/// steps are: who vouched for whom, the VTA signing it as the voucher's
+/// identity in the community, and the community keeping it where its
+/// members see it. The signed vouch and the community's record of it open
+/// in full from their steps.
+///
+/// [isOwn] tells the member's vouch for [name] from [name]'s for them.
 class VtcVouchTrail extends StatelessWidget {
   const VtcVouchTrail({
     super.key,
     required this.edge,
     required this.communityName,
     required this.name,
+    required this.isOwn,
   });
 
   final PublishedRelationship edge;
   final String communityName;
   final String name;
+  final bool isOwn;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    String time(DateTime at) =>
+        DateFormat.yMMMd(l10n.localeName).add_Hm().format(at.toLocal());
+    final vrc = edge.vrc ?? const <String, dynamic>{};
+    final proof = switch (vrc['proof']) {
+      final Map<String, dynamic> proof => proof,
+      _ => const <String, dynamic>{},
+    };
+    final validFrom = DateTime.tryParse('${vrc['validFrom']}');
+    final you = l10n.vtcVouchTrailYou;
+    final voucher = isOwn ? you : name;
+    final vouchedFor = isOwn ? name : you;
+    final voucherNode = VtcFlowNode(Icons.person_outline, voucher);
+    final vouchedForNode = VtcFlowNode(Icons.person_outline, vouchedFor);
+    final vtaNode = VtcFlowNode(
+      Icons.shield_outlined,
+      isOwn ? l10n.membershipTrailYourVta : l10n.vtcVouchTrailTheirVta(name),
+    );
+    final communityNode = VtcFlowNode(Icons.groups_outlined, communityName);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: 12,
       children: [
-        Text(l10n.vtcTrustDoneTitle(name), style: context.textTheme.titleLarge),
+        Text(
+          isOwn ? l10n.vtcTrustDoneTitle(name) : l10n.vtcTrustTheyVouched(name),
+          style: context.textTheme.titleLarge,
+        ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             VtcTrailStep(
-              key: const Key('vtc_vouch_signed'),
-              icon: Icons.draw_outlined,
+              key: const Key('vtc_vouch_vouched'),
+              icon: Icons.handshake_outlined,
               stage: VtcTrailStage.done,
-              title: l10n.vtcTrustSigned,
-              summary: l10n.vtcTrustSignedSummary(communityName),
+              title: l10n.vtcVouchTrailTheVouch,
+              flow: VtcFlowDiagram(
+                key: const Key('vtc_vouch_flow_vouched'),
+                nodes: [voucherNode, vouchedForNode],
+              ),
+              summary: validFrom == null
+                  ? l10n.vtcVouchTrailIn(communityName)
+                  : l10n.vtcVouchTrailValidFrom(communityName, time(validFrom)),
+              highlights: [communityName],
               details: [
                 VtcTrailDetail(
-                  Icons.fingerprint,
+                  Icons.person_outline,
                   l10n.vtcJoinTrailIdentity,
                   edge.issuerDid,
                   isId: true,
                 ),
+                VtcTrailDetail(
+                  Icons.person_pin_outlined,
+                  l10n.vtcVouchTrailVouchedFor,
+                  edge.subjectDid,
+                  isId: true,
+                ),
+              ],
+            ),
+            VtcTrailStep(
+              key: const Key('vtc_vouch_signed'),
+              icon: Icons.draw_outlined,
+              stage: VtcTrailStage.done,
+              title: isOwn
+                  ? l10n.vtcTrustSigned
+                  : l10n.vtcVouchTrailSignedByTheirVta(name),
+              flow: VtcFlowDiagram(
+                key: const Key('vtc_vouch_flow_signed'),
+                nodes: [vtaNode, voucherNode],
+              ),
+              summary: isOwn
+                  ? l10n.vtcTrustSignedSummary(communityName)
+                  : l10n.vtcVouchTrailSignedTheirSummary(name, communityName),
+              highlights: [communityName],
+              details: [
+                if (proof['cryptosuite'] case final String cryptosuite)
+                  VtcTrailDetail(
+                    Icons.enhanced_encryption_outlined,
+                    l10n.vtcJoinTrailCryptosuite,
+                    cryptosuite,
+                  ),
+                if (proof['verificationMethod'] case final String key)
+                  VtcTrailDetail(
+                    Icons.key_outlined,
+                    l10n.vtcJoinTrailKey,
+                    key,
+                    isId: true,
+                  ),
+                if (DateTime.tryParse('${proof['created']}') case final at?)
+                  VtcTrailDetail(
+                    Icons.schedule,
+                    l10n.vtcJoinTrailSignedAt,
+                    time(at),
+                  ),
               ],
               document: edge.vrc,
               documentTitle: l10n.vtcTrustVouchDocument,
@@ -165,7 +262,26 @@ class VtcVouchTrail extends StatelessWidget {
               icon: Icons.groups_outlined,
               stage: VtcTrailStage.done,
               title: l10n.vtcTrustStored(communityName),
-              summary: l10n.vtcTrustStoredSummary(communityName, name),
+              flow: VtcFlowDiagram(
+                key: const Key('vtc_vouch_flow_stored'),
+                nodes: [voucherNode, communityNode],
+              ),
+              summary: l10n.vtcVouchTrailStoredSummary(communityName),
+              highlights: [communityName],
+              details: [
+                VtcTrailDetail(
+                  Icons.tag,
+                  l10n.vtcVouchTrailRecord,
+                  edge.id,
+                  isId: true,
+                ),
+                if (edge.createdAt case final at?)
+                  VtcTrailDetail(
+                    Icons.schedule,
+                    l10n.vtcVouchTrailStoredAt,
+                    time(at),
+                  ),
+              ],
               document: edge.toJson(),
               documentTitle: l10n.vtcTrustRecordDocument(communityName),
               documentKey: const Key('vtc_vouch_record'),
@@ -181,73 +297,69 @@ class VtcVouchTrail extends StatelessWidget {
 /// The vouches between the member and [name], one icon each way round: an
 /// outgoing arrow for the member's vouch, labelled [outgoingLabel], and an
 /// incoming one for [name]'s, labelled [incomingLabel]. The label is the
-/// icon's tooltip and what a screen reader says. An icon opens the
-/// community's record of that vouch, with the signed credential inside.
+/// icon's tooltip and what a screen reader says. An icon opens the story
+/// of that vouch in [communityName] ([showVouchTrail]).
 class VtcVouchIcons extends StatelessWidget {
   const VtcVouchIcons({
     super.key,
     required this.edges,
     required this.name,
+    required this.communityName,
     required this.outgoingLabel,
     required this.incomingLabel,
   });
 
   final VtcEdges edges;
   final String name;
+  final String communityName;
   final String outgoingLabel;
   final String incomingLabel;
 
   @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (edges.outgoing case final edge?)
-          _icon(
-            context,
-            key: const Key('vtc_vouch_outgoing'),
-            icon: Icons.call_made,
-            label: outgoingLabel,
-            title: l10n.vtcTrustYourVouchDocument(name),
-            edge: edge,
-          ),
-        if (edges.incoming case final edge?)
-          _icon(
-            context,
-            key: const Key('vtc_vouch_incoming'),
-            icon: Icons.call_received,
-            label: incomingLabel,
-            title: l10n.vtcTrustTheirVouchDocument(name),
-            edge: edge,
-          ),
-      ],
-    );
-  }
+  Widget build(BuildContext context) => Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      if (edges.outgoing case final edge?)
+        _icon(
+          context,
+          key: const Key('vtc_vouch_outgoing'),
+          icon: Icons.call_made,
+          label: outgoingLabel,
+          edge: edge,
+          isOwn: true,
+        ),
+      if (edges.incoming case final edge?)
+        _icon(
+          context,
+          key: const Key('vtc_vouch_incoming'),
+          icon: Icons.call_received,
+          label: incomingLabel,
+          edge: edge,
+          isOwn: false,
+        ),
+    ],
+  );
 
-  static Widget _icon(
+  Widget _icon(
     BuildContext context, {
     required Key key,
     required IconData icon,
     required String label,
-    required String title,
     required PublishedRelationship edge,
-  }) {
-    return IconButton(
-      key: key,
-      icon: Icon(icon, size: 20),
-      tooltip: label,
-      visualDensity: VisualDensity.compact,
-      onPressed: () => showVtcJoinJson(
-        context,
-        title: title,
-        subtitle: context.l10n.vtcTrustRecordNote,
-        json: edge.toJson(),
-        icon: Icons.handshake_outlined,
-        textKey: const Key('vtc_vouch_json'),
-      ),
-    );
-  }
+    required bool isOwn,
+  }) => IconButton(
+    key: key,
+    icon: Icon(icon, size: 20),
+    tooltip: label,
+    visualDensity: VisualDensity.compact,
+    onPressed: () => showVouchTrail(
+      context,
+      edge: edge,
+      communityName: communityName,
+      name: name,
+      isOwn: isOwn,
+    ),
+  );
 }
 
 Future<bool> _confirm(

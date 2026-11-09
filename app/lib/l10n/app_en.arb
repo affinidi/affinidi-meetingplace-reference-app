@@ -3815,18 +3815,6 @@
 			}
 		}
 	},
-	"vtcTrustStoredSummary": "Members of {community} can see that you vouched for {name}.",
-	"@vtcTrustStoredSummary": {
-		"description": "Who sees the vouch",
-		"placeholders": {
-			"community": {
-				"type": "String"
-			},
-			"name": {
-				"type": "String"
-			}
-		}
-	},
 	"vtcTrustVouchDocument": "Signed vouch",
 	"@vtcTrustVouchDocument": {
 		"description": "Title of the signed vouch credential"
@@ -3901,28 +3889,6 @@
 			}
 		}
 	},
-	"vtcTrustYourVouchDocument": "Your vouch for {name}",
-	"@vtcTrustYourVouchDocument": {
-		"description": "Title of the member's signed vouch for another member",
-		"placeholders": {
-			"name": {
-				"type": "String"
-			}
-		}
-	},
-	"vtcTrustTheirVouchDocument": "{name}'s vouch for you",
-	"@vtcTrustTheirVouchDocument": {
-		"description": "Title of another member's signed vouch for the member",
-		"placeholders": {
-			"name": {
-				"type": "String"
-			}
-		}
-	},
-	"vtcTrustRecordNote": "As the community keeps it: its record of the vouch, with the signed credential in vrcJsonld.",
-	"@vtcTrustRecordNote": {
-		"description": "Explains the community's record of a vouch shown in full"
-	},
 	"vtcTrustRecordDocument": "What {community} keeps",
 	"@vtcTrustRecordDocument": {
 		"description": "Title of the community's record of a vouch",
@@ -3931,6 +3897,86 @@
 				"type": "String"
 			}
 		}
+	},
+	"vtcVouchTrailYou": "You",
+	"@vtcVouchTrailYou": {
+		"description": "The member, as a party in a vouch's diagram"
+	},
+	"vtcVouchTrailTheirVta": "{name}'s VTA",
+	"@vtcVouchTrailTheirVta": {
+		"description": "Another member's VTA, as a party in a vouch's diagram",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcVouchTrailIn": "In {community}.",
+	"@vtcVouchTrailIn": {
+		"description": "The community a vouch is in, when it gives no date",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcVouchTrailValidFrom": "In {community}, valid from {date}.",
+	"@vtcVouchTrailValidFrom": {
+		"description": "The community a vouch is in, and when it holds from",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			},
+			"date": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcVouchTrailVouchedFor": "Vouched for",
+	"@vtcVouchTrailVouchedFor": {
+		"description": "Label of the identity a vouch is about"
+	},
+	"vtcVouchTrailSignedByTheirVta": "Signed by {name}'s VTA",
+	"@vtcVouchTrailSignedByTheirVta": {
+		"description": "Step: another member's VTA signed their vouch",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcVouchTrailSignedTheirSummary": "As the identity {name} joined {community} with.",
+	"@vtcVouchTrailSignedTheirSummary": {
+		"description": "Which identity signed another member's vouch",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			},
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcVouchTrailStoredSummary": "Members of {community} can see this vouch.",
+	"@vtcVouchTrailStoredSummary": {
+		"description": "Who sees a vouch the community keeps",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcVouchTrailRecord": "Record",
+	"@vtcVouchTrailRecord": {
+		"description": "Label of the community's id of a vouch"
+	},
+	"vtcVouchTrailStoredAt": "Stored at",
+	"@vtcVouchTrailStoredAt": {
+		"description": "Label of when the community stored a vouch"
+	},
+	"vtcVouchTrailTheVouch": "The vouch",
+	"@vtcVouchTrailTheVouch": {
+		"description": "Step: who vouched for whom"
 	},
 	"vtcJoinAlreadyMember": "You're already a member of {name}.",
 	"@vtcJoinAlreadyMember": {

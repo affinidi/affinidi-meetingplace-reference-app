@@ -167,9 +167,47 @@ void main() {
     await tester.tap(inMember('dir_bob', find.byTooltip('Vouches for you')));
     await tester.pumpAndSettle();
 
-    expect(find.text("Bob's vouch for you"), findsOneWidget);
-    expect(find.byKey(const Key('vtc_vouch_json')), findsOneWidget);
-    expect(find.textContaining('RelationshipCredential'), findsWidgets);
+    expect(find.text('Bob vouched for you'), findsOneWidget);
+    expect(find.text("Signed by Bob's VTA"), findsOneWidget);
+    expect(
+      find.text('As the identity Bob joined Football club with.'),
+      findsOneWidget,
+    );
+
+    // Pictured once a step is opened: who passed what to whom.
+    List<String> flow(String step) {
+      final texts = find.descendant(
+        of: find.byKey(Key('vtc_vouch_flow_$step')),
+        matching: find.byType(Text),
+      );
+      final found = [
+        for (final element in texts.evaluate())
+          (
+            tester.getCenter(find.byWidget(element.widget)).dx,
+            (element.widget as Text).data!,
+          ),
+      ]..sort((a, b) => a.$1.compareTo(b.$1));
+      return [for (final (_, text) in found) text];
+    }
+
+    Future<void> expand(String step) async {
+      final finder = find.byKey(Key('vtc_vouch_$step'));
+      await tester.ensureVisible(finder);
+      await tester.tap(finder);
+      await tester.pumpAndSettle();
+    }
+
+    expect(find.byKey(const Key('vtc_vouch_flow_vouched')), findsNothing);
+    await expand('vouched');
+    expect(flow('vouched'), ['Bob', 'You']);
+    await expand('signed');
+    expect(flow('signed'), ["Bob's VTA", 'Bob']);
+    await expand('stored');
+    expect(flow('stored'), ['Bob', 'Football club']);
+
+    await tester.ensureVisible(find.byKey(const Key('vtc_vouch_record')));
+    await tester.tap(find.byKey(const Key('vtc_vouch_record')));
+    await tester.pumpAndSettle();
     expect(find.textContaining('vrcJsonld'), findsWidgets);
     expect(find.textContaining('edge-0'), findsWidgets);
   });

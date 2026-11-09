@@ -289,9 +289,13 @@ void main() {
     await tester.tap(find.byTooltip('You vouched'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Your vouch for Bob'), findsOneWidget);
-    expect(find.byKey(const Key('vtc_vouch_json')), findsOneWidget);
-    expect(find.textContaining('vrcJsonld'), findsWidgets);
+    expect(find.text('You vouched for Bob'), findsOneWidget);
+    expect(find.text('The vouch'), findsOneWidget);
+    expect(find.text('Signed by your VTA'), findsOneWidget);
+    expect(find.text('Stored by Football club'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('vtc_vouch_document')));
+    await tester.pumpAndSettle();
     expect(find.textContaining('RelationshipCredential'), findsWidgets);
   });
 

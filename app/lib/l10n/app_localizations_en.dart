@@ -3774,11 +3774,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String vtcTrustStoredSummary(String community, String name) {
-    return 'Members of $community can see that you vouched for $name.';
-  }
-
-  @override
   String get vtcTrustVouchDocument => 'Signed vouch';
 
   @override
@@ -3833,23 +3828,54 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String vtcTrustYourVouchDocument(String name) {
-    return 'Your vouch for $name';
-  }
-
-  @override
-  String vtcTrustTheirVouchDocument(String name) {
-    return '$name\'s vouch for you';
-  }
-
-  @override
-  String get vtcTrustRecordNote =>
-      'As the community keeps it: its record of the vouch, with the signed credential in vrcJsonld.';
-
-  @override
   String vtcTrustRecordDocument(String community) {
     return 'What $community keeps';
   }
+
+  @override
+  String get vtcVouchTrailYou => 'You';
+
+  @override
+  String vtcVouchTrailTheirVta(String name) {
+    return '$name\'s VTA';
+  }
+
+  @override
+  String vtcVouchTrailIn(String community) {
+    return 'In $community.';
+  }
+
+  @override
+  String vtcVouchTrailValidFrom(String community, String date) {
+    return 'In $community, valid from $date.';
+  }
+
+  @override
+  String get vtcVouchTrailVouchedFor => 'Vouched for';
+
+  @override
+  String vtcVouchTrailSignedByTheirVta(String name) {
+    return 'Signed by $name\'s VTA';
+  }
+
+  @override
+  String vtcVouchTrailSignedTheirSummary(String name, String community) {
+    return 'As the identity $name joined $community with.';
+  }
+
+  @override
+  String vtcVouchTrailStoredSummary(String community) {
+    return 'Members of $community can see this vouch.';
+  }
+
+  @override
+  String get vtcVouchTrailRecord => 'Record';
+
+  @override
+  String get vtcVouchTrailStoredAt => 'Stored at';
+
+  @override
+  String get vtcVouchTrailTheVouch => 'The vouch';
 
   @override
   String vtcJoinAlreadyMember(String name) {

@@ -5676,12 +5676,6 @@ abstract class AppLocalizations {
   /// **'Stored by {community}'**
   String vtcTrustStored(String community);
 
-  /// Who sees the vouch
-  ///
-  /// In en, this message translates to:
-  /// **'Members of {community} can see that you vouched for {name}.'**
-  String vtcTrustStoredSummary(String community, String name);
-
   /// Title of the signed vouch credential
   ///
   /// In en, this message translates to:
@@ -5742,29 +5736,77 @@ abstract class AppLocalizations {
   /// **'Members of {community} see you as {name}, the name of the identity you joined with.'**
   String vtcDirectoryNameShown(String community, String name);
 
-  /// Title of the member's signed vouch for another member
-  ///
-  /// In en, this message translates to:
-  /// **'Your vouch for {name}'**
-  String vtcTrustYourVouchDocument(String name);
-
-  /// Title of another member's signed vouch for the member
-  ///
-  /// In en, this message translates to:
-  /// **'{name}\'s vouch for you'**
-  String vtcTrustTheirVouchDocument(String name);
-
-  /// Explains the community's record of a vouch shown in full
-  ///
-  /// In en, this message translates to:
-  /// **'As the community keeps it: its record of the vouch, with the signed credential in vrcJsonld.'**
-  String get vtcTrustRecordNote;
-
   /// Title of the community's record of a vouch
   ///
   /// In en, this message translates to:
   /// **'What {community} keeps'**
   String vtcTrustRecordDocument(String community);
+
+  /// The member, as a party in a vouch's diagram
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get vtcVouchTrailYou;
+
+  /// Another member's VTA, as a party in a vouch's diagram
+  ///
+  /// In en, this message translates to:
+  /// **'{name}\'s VTA'**
+  String vtcVouchTrailTheirVta(String name);
+
+  /// The community a vouch is in, when it gives no date
+  ///
+  /// In en, this message translates to:
+  /// **'In {community}.'**
+  String vtcVouchTrailIn(String community);
+
+  /// The community a vouch is in, and when it holds from
+  ///
+  /// In en, this message translates to:
+  /// **'In {community}, valid from {date}.'**
+  String vtcVouchTrailValidFrom(String community, String date);
+
+  /// Label of the identity a vouch is about
+  ///
+  /// In en, this message translates to:
+  /// **'Vouched for'**
+  String get vtcVouchTrailVouchedFor;
+
+  /// Step: another member's VTA signed their vouch
+  ///
+  /// In en, this message translates to:
+  /// **'Signed by {name}\'s VTA'**
+  String vtcVouchTrailSignedByTheirVta(String name);
+
+  /// Which identity signed another member's vouch
+  ///
+  /// In en, this message translates to:
+  /// **'As the identity {name} joined {community} with.'**
+  String vtcVouchTrailSignedTheirSummary(String name, String community);
+
+  /// Who sees a vouch the community keeps
+  ///
+  /// In en, this message translates to:
+  /// **'Members of {community} can see this vouch.'**
+  String vtcVouchTrailStoredSummary(String community);
+
+  /// Label of the community's id of a vouch
+  ///
+  /// In en, this message translates to:
+  /// **'Record'**
+  String get vtcVouchTrailRecord;
+
+  /// Label of when the community stored a vouch
+  ///
+  /// In en, this message translates to:
+  /// **'Stored at'**
+  String get vtcVouchTrailStoredAt;
+
+  /// Step: who vouched for whom
+  ///
+  /// In en, this message translates to:
+  /// **'The vouch'**
+  String get vtcVouchTrailTheVouch;
 
   /// The scanned community is one the member belongs to
   ///
