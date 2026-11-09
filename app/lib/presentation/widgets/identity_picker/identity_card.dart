@@ -5,10 +5,8 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:pie_menu/pie_menu.dart';
 
-import '../../../domain/models/contact_card/contact_card_field_definition.dart';
 import '../../../domain/models/identity/identity.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
-import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/extensions/identities_extensions.dart';
 import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
@@ -17,6 +15,7 @@ import '../animated_menu.dart';
 import '../common/app_card.dart';
 import '../profile_picture.dart';
 import '../vta_details.dart';
+import 'identity_contact_rows.dart';
 
 enum IdentityCardSize { small, normal }
 
@@ -229,110 +228,10 @@ class _IdentityContentSection extends StatelessWidget {
       padding: identityCardSize.isSmall
           ? const EdgeInsets.only(top: 8, left: 20, right: 20)
           : const EdgeInsets.only(top: 12, left: 24, right: 24),
-      child: _IdentityContent(
-        identity: identity,
-        identityCardSize: identityCardSize,
+      child: IdentityContactRows(
+        card: identity.card,
+        small: identityCardSize.isSmall,
       ),
-    );
-  }
-}
-
-class _IdentityContent extends StatelessWidget {
-  const _IdentityContent({
-    required this.identityCardSize,
-    required this.identity,
-  });
-
-  final Identity identity;
-  final IdentityCardSize identityCardSize;
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = context.textTheme;
-    final l10n = context.l10n;
-
-    final fields = ContactCardFieldDefinitions.values
-        .where((field) => field.hasTag(ContactCardFieldTags.identityCard))
-        .toList(growable: false);
-
-    final name = identity.card.fullName.isNotEmpty
-        ? identity.card.fullName
-        : '';
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (name.isNotEmpty)
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  name,
-                  style: identityCardSize.isSmall
-                      ? textTheme.bodyMedium
-                      : textTheme.titleMedium,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  softWrap: true,
-                ),
-              ),
-              if (identityCardSize.isSmall) const Spacer(),
-            ],
-          ),
-        SizedBox(height: identityCardSize.isSmall ? 12 : 16),
-        for (final field in fields) ...[
-          _ContactInfoRow(
-            icon: field.icon,
-            value: field.valueFrom(identity.card).trim(),
-            notShared: l10n.notShared,
-            identityCardSize: identityCardSize,
-          ),
-          SizedBox(height: identityCardSize.isSmall ? 6 : 8),
-        ],
-      ],
-    );
-  }
-}
-
-class _ContactInfoRow extends StatelessWidget {
-  const _ContactInfoRow({
-    required this.icon,
-    required this.value,
-    required this.notShared,
-    required this.identityCardSize,
-  });
-
-  final IconData icon;
-
-  /// The field's value; empty when the identity does not share it.
-  final String value;
-  final String notShared;
-  final IdentityCardSize identityCardSize;
-
-  @override
-  Widget build(BuildContext context) {
-    final mc = context.mcColors;
-    final textTheme = context.textTheme;
-    final isShared = value.isNotEmpty;
-
-    return Row(
-      spacing: 8,
-      children: [
-        Icon(icon, color: mc.textSecondary, size: 16),
-        Expanded(
-          child: Text(
-            isShared ? value : notShared,
-            style:
-                (identityCardSize.isSmall
-                        ? textTheme.bodySmall
-                        : textTheme.bodyLarge)
-                    ?.copyWith(
-                      color: isShared ? mc.textPrimary : mc.textTertiary,
-                    ),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
     );
   }
 }
