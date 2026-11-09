@@ -9,10 +9,10 @@ import 'utils/app.dart';
 
 void main() {
   group('ConciergeVrcChatItem', () {
-    // The app follows the system brightness, so cover both themes.
+    // The app starts in dark mode whatever the system brightness.
     for (final brightness in Brightness.values) {
-      testWidgets('renders the pending concierge card in ${brightness.name} '
-          'mode', (tester) async {
+      testWidgets('renders the pending concierge card dark under a '
+          '${brightness.name} system', (tester) async {
         tester.platformDispatcher.platformBrightnessTestValue = brightness;
         addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
         final l10n = await getL10n();
@@ -29,7 +29,7 @@ void main() {
         expect(tester.takeException(), isNull);
         expect(
           Theme.of(tester.element(find.text(l10n.generateVrc))).brightness,
-          brightness,
+          Brightness.dark,
         );
       });
     }
