@@ -159,12 +159,49 @@ class VtcTrustService {
     required String groupId,
   }) => _guard('reading group members', () async {
     await _personaDid(communityDid);
+    return _otherActiveEntries(
+      communityDid,
+      await _vtc.groupMembers(communityDid, groupId: groupId),
+    );
+  });
+
+  /// The other active members of the groups of [communityDid] the member is
+  /// in, each once, as the directory shows them to the member. A community
+  /// puts every member in some groups, such as announcements, so these are
+  /// the members the member can see without searching. A group that shows
+  /// its members to administrators only is left out.
+  ///
+  /// Throws [VtcTrustException].
+  Future<List<DirectoryEntry>> communityMembers(String communityDid) =>
+      _guard('reading community members', () async {
+        await _personaDid(communityDid);
+        final members = <String, VtcGroupMember>{};
+        for (final VtcGroupListing(:group, :standing)
+            in await _vtc.memberGroups(communityDid)) {
+          if (standing != GroupStanding.member ||
+              group.showMembers == GroupAudience.admins) {
+            continue;
+          }
+          for (final member in await _vtc.groupMembers(
+            communityDid,
+            groupId: group.groupId,
+          )) {
+            // Active in one group is enough, whatever the others say.
+            if (member.isActive) members[member.entryId] = member;
+          }
+        }
+        return _otherActiveEntries(communityDid, members.values);
+      });
+
+  /// The directory entries of the active ones of [members], other than the
+  /// member, that the directory shows the member.
+  Future<List<DirectoryEntry>> _otherActiveEntries(
+    String communityDid,
+    Iterable<VtcGroupMember> members,
+  ) async {
     final me = (await _vtc.myDirectoryCard(communityDid)).entryId;
     final entries = <DirectoryEntry>[];
-    for (final member in await _vtc.groupMembers(
-      communityDid,
-      groupId: groupId,
-    )) {
+    for (final member in members) {
       if (!member.isActive || member.entryId == me) continue;
       final entry = await _vtc.memberEntry(
         communityDid,
@@ -173,7 +210,7 @@ class VtcTrustService {
       if (entry != null) entries.add(entry);
     }
     return entries;
-  });
+  }
 
   /// The credentials of the member of [entry] in [communityDid] that the
   /// community shows the member: the vouches naming them, their external

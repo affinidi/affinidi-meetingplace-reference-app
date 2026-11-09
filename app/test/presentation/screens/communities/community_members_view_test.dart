@@ -35,6 +35,17 @@ class _FakeTrustService extends Fake implements VtcTrustService {
     required DirectoryEntry entry,
   }) async => null;
 
+  /// The members of the member's groups.
+  List<DirectoryEntry> groupsMembers = const [
+    DirectoryEntry(entryId: 'dir_bea', displayName: 'Bea', role: 'member'),
+  ];
+
+  @override
+  Future<List<DirectoryEntry>> communityMembers(String communityDid) async {
+    if (refusal case final refusal?) throw VtcTrustException(refusal);
+    return groupsMembers;
+  }
+
   @override
   Future<List<DirectoryEntry>> findMembers(
     String communityDid, {
@@ -112,14 +123,40 @@ void main() {
     matching: finder,
   );
 
-  testWidgets('asks to search before showing anyone', (tester) async {
+  testWidgets("lists the members of the member's groups at once", (
+    tester,
+  ) async {
     final l10n = await pumpView(tester);
 
+    expect(inMember('dir_bea', find.text('Bea')), findsOneWidget);
+    expect(find.text('Bob'), findsNothing);
     expect(
       find.text(l10n.communityMembersPrompt('Football club')),
       findsOneWidget,
     );
     expect(service.queries, isEmpty);
+  });
+
+  testWidgets('says when the groups show nobody else', (tester) async {
+    final l10n = await pumpView(tester);
+    service.groupsMembers = const [];
+    await search(tester, 'bob');
+
+    await search(tester, ' ');
+
+    expect(find.textContaining(l10n.vtcGroupMembersNone), findsOneWidget);
+  });
+
+  testWidgets("shows the groups' members again after an empty search", (
+    tester,
+  ) async {
+    await pumpView(tester);
+    await search(tester, 'bob');
+    expect(find.text('Bea'), findsNothing);
+
+    await search(tester, '');
+
+    expect(inMember('dir_bea', find.text('Bea')), findsOneWidget);
   });
 
   testWidgets('lists the members the directory finds', (tester) async {

@@ -80,13 +80,26 @@ class _FakeVtcService extends Fake implements VtcService {
   List<VtcGroupMember> groupMembersList = const [];
   Map<String, DirectoryEntry> entries = const {};
 
+  /// The groups the member is in, and each one's members by its id, else
+  /// [groupMembersList].
+  List<VtcGroupListing> groups = const [];
+  Map<String, List<VtcGroupMember>> membersOf = const {};
+  final List<String> groupsRead = [];
+
+  @override
+  Future<List<VtcGroupListing>> memberGroups(String communityDid) async {
+    await _fail();
+    return groups;
+  }
+
   @override
   Future<List<VtcGroupMember>> groupMembers(
     String communityDid, {
     required String groupId,
   }) async {
     await _fail();
-    return groupMembersList;
+    groupsRead.add(groupId);
+    return membersOf[groupId] ?? groupMembersList;
   }
 
   @override
@@ -317,6 +330,89 @@ void main() {
       expect(
         service.groupMembers(_club, groupId: 'g1'),
         throwsFailure(VtcTrustFailure.notAllowed),
+      );
+    });
+  });
+
+  group('VtcTrustService.communityMembers', () {
+    VtcGroupListing listing(
+      String groupId, {
+      GroupStanding standing = GroupStanding.member,
+      GroupAudience showMembers = GroupAudience.groupMembers,
+    }) => VtcGroupListing(
+      group: VtcGroup(
+        groupId: groupId,
+        groupDid: 'did:webvh:QmGroup:vtc.example:group-dids:$groupId',
+        name: groupId,
+        isDynamic: false,
+        visibility: GroupAudience.members,
+        showMembers: showMembers,
+      ),
+      standing: standing,
+    );
+
+    setUp(() {
+      vtc.entries = const {
+        'dir_me': DirectoryEntry(entryId: 'dir_me', did: _me),
+        'dir_bob': DirectoryEntry(
+          entryId: 'dir_bob',
+          displayName: 'Bob',
+          did: _bob,
+        ),
+        'dir_carol': DirectoryEntry(
+          entryId: 'dir_carol',
+          displayName: 'Carol',
+          did: _carol,
+        ),
+      };
+    });
+
+    test(
+      "lists the other active members of the member's groups once",
+      () async {
+        vtc
+          ..groups = [listing('everyone'), listing('board')]
+          ..membersOf = const {
+            'everyone': [
+              VtcGroupMember(entryId: 'dir_me', state: 'active'),
+              VtcGroupMember(entryId: 'dir_bob', state: 'active'),
+              VtcGroupMember(entryId: 'dir_carol', state: 'pending'),
+            ],
+            'board': [
+              VtcGroupMember(entryId: 'dir_bob', state: 'active'),
+              VtcGroupMember(entryId: 'dir_carol', state: 'active'),
+            ],
+          };
+
+        final members = await service.communityMembers(_club);
+
+        expect(members.map((m) => m.entryId), ['dir_bob', 'dir_carol']);
+      },
+    );
+
+    test('leaves out groups the member is not in or cannot see', () async {
+      vtc
+        ..groups = [
+          listing('everyone'),
+          listing('waiting', standing: GroupStanding.pending),
+          listing('admins', showMembers: GroupAudience.admins),
+        ]
+        ..membersOf = const {
+          'everyone': [VtcGroupMember(entryId: 'dir_bob', state: 'active')],
+        };
+
+      final members = await service.communityMembers(_club);
+
+      expect(members.map((m) => m.entryId), ['dir_bob']);
+      expect(vtc.groupsRead, ['everyone']);
+    });
+
+    test('says why the community did not answer', () {
+      vtc.failure = MeetingPlaceVtcSDKException.transportFailed('down');
+
+      expect(
+        service.communityMembers(_club),
+        throwsFailure(VtcTrustFailure.network),
       );
     });
   });

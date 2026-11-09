@@ -9,9 +9,11 @@ import '../vtc_trust/vtc_member_search_screen.dart';
 import '../vtc_trust/vtc_member_tile.dart';
 import '../vtc_trust/vtc_vouch.dart';
 
-/// The other members of a community the member searches its directory for,
-/// each with the vouches between them and the member, to vouch for them.
-/// The directory answers searches only, never lists every member.
+/// The other members of a community: those of the member's groups, or
+/// those the member searches the directory for, each with the vouches
+/// between them and the member, to vouch for them. The directory answers
+/// searches only, never lists every member, so the groups' members show
+/// until the member searches.
 class CommunityMembersView extends HookConsumerWidget {
   const CommunityMembersView({
     super.key,
@@ -30,16 +32,20 @@ class CommunityMembersView extends HookConsumerWidget {
     final reload = useState(0);
     final load = useMemoized(() async {
       final text = query.value;
-      if (text == null) return null;
-      if (text.length < VtcMemberSearchScreen.minQueryLength) {
+      if (text != null && text.length < VtcMemberSearchScreen.minQueryLength) {
         throw const VtcTrustException(VtcTrustFailure.searchTooShort);
       }
       return (
-        await service.findMembers(communityDid, query: text),
+        text == null
+            ? await service.communityMembers(communityDid)
+            : await service.findMembers(communityDid, query: text),
         await service.edgesByMember(communityDid),
       );
     }, [query.value, reload.value]);
     final loaded = useFuture(load);
+    final none = query.value == null
+        ? l10n.vtcGroupMembersNone
+        : l10n.vtcTrustSearchNone;
 
     Future<void> vouch(DirectoryEntry entry, String name) async {
       final personaDid = entry.did;
@@ -66,16 +72,17 @@ class CommunityMembersView extends HookConsumerWidget {
             textInputAction: TextInputAction.search,
             decoration: InputDecoration(
               labelText: l10n.vtcTrustSearchHint,
+              helperText: l10n.communityMembersPrompt(communityName),
+              helperMaxLines: 2,
               prefixIcon: const Icon(Icons.search),
             ),
-            onSubmitted: (text) => query.value = text.trim(),
+            // Nothing to search for shows the groups' members again.
+            onSubmitted: (text) =>
+                query.value = text.trim().isEmpty ? null : text.trim(),
           ),
         ),
         Expanded(
           child: switch (loaded) {
-            _ when query.value == null => _Message(
-              l10n.communityMembersPrompt(communityName),
-            ),
             AsyncSnapshot(connectionState: ConnectionState.waiting) =>
               const Center(child: CircularProgressIndicator()),
             AsyncSnapshot(hasError: true, :final error) => _Message(
@@ -90,7 +97,7 @@ class CommunityMembersView extends HookConsumerWidget {
             ),
             AsyncSnapshot(data: (final members, _)) when members.isEmpty =>
               _Message(
-                '${l10n.vtcTrustSearchNone}\n\n'
+                '$none\n\n'
                 '${l10n.vtcGroupMembersUnlistedNote(communityName)}',
               ),
             AsyncSnapshot(data: (final members, final edges)) =>

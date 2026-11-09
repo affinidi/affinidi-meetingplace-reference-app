@@ -5016,9 +5016,9 @@
 	"@communityMembersTab": {
 		"description": "Tab of a community's screen to search its members"
 	},
-	"communityMembersPrompt": "Search the directory of {community} by name.",
+	"communityMembersPrompt": "Members of your groups are shown. Search the directory of {community} to find others.",
 	"@communityMembersPrompt": {
-		"description": "Shown on a community's Members tab before the member searches",
+		"description": "Hint under the search field of a community's Members tab",
 		"placeholders": {
 			"community": {
 				"type": "String"

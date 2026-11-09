@@ -6858,10 +6858,10 @@ abstract class AppLocalizations {
   /// **'Members'**
   String get communityMembersTab;
 
-  /// Shown on a community's Members tab before the member searches
+  /// Hint under the search field of a community's Members tab
   ///
   /// In en, this message translates to:
-  /// **'Search the directory of {community} by name.'**
+  /// **'Members of your groups are shown. Search the directory of {community} to find others.'**
   String communityMembersPrompt(String community);
 }
 
