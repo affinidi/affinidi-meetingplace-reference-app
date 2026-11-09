@@ -1853,6 +1853,50 @@ class VtcService {
     );
   }
 
+  /// Shows [jpeg] to every member of [communityDid] as the member's picture
+  /// there, or takes the picture off when null. Throws as [memberGroups]
+  /// does.
+  Future<void> setDirectoryPicture(
+    String communityDid, {
+    required Uint8List? jpeg,
+  }) async {
+    final (vta, signer) = await _asMember(communityDid);
+    final client = _sdk.directoryClient();
+    final image = jpeg == null
+        ? null
+        : await client.uploadImage(
+            communityDid,
+            agent: vta,
+            persona: signer,
+            bytes: jpeg,
+            mediaType: 'image/jpeg',
+          );
+    await client.setAvatar(
+      communityDid,
+      agent: vta,
+      persona: signer,
+      image: image,
+    );
+  }
+
+  /// The picture the member of entry [entryId] of [communityDid] shows the
+  /// member, the one [sha256] names, or null when they show none. Throws as
+  /// [memberGroups] does.
+  Future<Uint8List?> memberPicture(
+    String communityDid, {
+    required String entryId,
+    required String sha256,
+  }) async {
+    final (vta, signer) = await _asMember(communityDid);
+    return _sdk.directoryClient().avatar(
+      communityDid,
+      agent: vta,
+      persona: signer,
+      entryId: entryId,
+      sha256: sha256,
+    );
+  }
+
   /// Has the member's VTA vouch, as their identity in [communityDid], for
   /// the member [subjectDid], and the community keep it in its trust graph.
   /// Throws as [memberGroups] does.

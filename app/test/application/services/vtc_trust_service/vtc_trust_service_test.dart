@@ -1,6 +1,10 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image/image.dart' as img;
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_trust_service/vtc_trust_service.dart';
@@ -122,6 +126,28 @@ class _FakeVtcService extends Fake implements VtcService {
   }) async {
     if (membershipRefusal case final refusal?) throw refusal;
     return membership;
+  }
+
+  final List<Uint8List?> pictures = [];
+  int pictureFetches = 0;
+
+  @override
+  Future<void> setDirectoryPicture(
+    String communityDid, {
+    required Uint8List? jpeg,
+  }) async {
+    await _fail();
+    pictures.add(jpeg);
+  }
+
+  @override
+  Future<Uint8List?> memberPicture(
+    String communityDid, {
+    required String entryId,
+    required String sha256,
+  }) async {
+    pictureFetches++;
+    return Uint8List.fromList([1, 2, 3]);
   }
 
   String? directoryName;
@@ -353,6 +379,59 @@ void main() {
         service.memberCredentials(_club, entry: bobEntry),
         throwsFailure(VtcTrustFailure.network),
       );
+    });
+  });
+
+  group('VtcTrustService pictures', () {
+    String pictureOf(int width, int height) =>
+        base64Encode(img.encodePng(img.Image(width: width, height: height)));
+
+    test('scales an identity\'s picture for the directory', () {
+      final jpeg = directoryPicture(pictureOf(1000, 500))!;
+
+      final scaled = img.decodeJpg(jpeg)!;
+      expect(scaled.width, directoryPictureSide);
+      expect(scaled.height, directoryPictureSide ~/ 2);
+      expect(jpeg.length, lessThanOrEqualTo(directoryPictureMaxBytes));
+    });
+
+    test('keeps a small picture its size', () {
+      final scaled = img.decodeJpg(directoryPicture(pictureOf(100, 200))!)!;
+
+      expect((scaled.width, scaled.height), (100, 200));
+    });
+
+    test('takes no picture from what is none', () {
+      expect(directoryPicture('not base64!'), isNull);
+      expect(directoryPicture(base64Encode([1, 2, 3])), isNull);
+    });
+
+    test('sends the identity\'s picture, or takes it off', () async {
+      await service.setDirectoryPicture(_club, base64: pictureOf(10, 10));
+      await service.setDirectoryPicture(_club, base64: null);
+
+      expect(vtc.pictures.first, isNotNull);
+      expect(vtc.pictures.last, isNull);
+    });
+
+    test('fetches a member\'s picture once', () async {
+      const entry = DirectoryEntry(entryId: 'dir_bob', avatarSha256: 'abc');
+
+      await service.memberPicture(_club, entry: entry);
+      final again = await service.memberPicture(_club, entry: entry);
+
+      expect(again, [1, 2, 3]);
+      expect(vtc.pictureFetches, 1);
+    });
+
+    test('fetches nothing for a member who shows no picture', () async {
+      final picture = await service.memberPicture(
+        _club,
+        entry: const DirectoryEntry(entryId: 'dir_bob'),
+      );
+
+      expect(picture, isNull);
+      expect(vtc.pictureFetches, 0);
     });
   });
 

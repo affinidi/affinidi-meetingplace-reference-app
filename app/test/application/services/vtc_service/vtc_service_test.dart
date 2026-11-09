@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
@@ -1044,6 +1046,48 @@ void main() {
           service.memberCredentials(fakeVtcDid, did: bob),
           throwsA(isA<MeetingPlaceVtcSDKException>()),
         );
+      });
+
+      test('shows a picture to members, uploaded first', () async {
+        const image = {'sha256': 'abc', 'mediaType': 'image/jpeg'};
+        network.answerTo[DirectoryTask.imagesUpload] = (_) => {
+          'image': image,
+          'expiresAt': '2026-11-10T10:00:00Z',
+        };
+
+        await service.setDirectoryPicture(
+          fakeVtcDid,
+          jpeg: Uint8List.fromList([1, 2, 3]),
+        );
+
+        expect(network.memberRequests.map((r) => r['type']), [
+          DirectoryTask.imagesUpload,
+          DirectoryTask.cardUpdate,
+        ]);
+        expect(network.memberRequests.last['payload'], {
+          'values': {'avatar': image},
+          'visibility': {'avatar': 'members'},
+        });
+      });
+
+      test('fetches the picture a member shows', () async {
+        network.answerTo[DirectoryTask.imagesGet] = (_) => {
+          'image': {'sha256': 'abc', 'mediaType': 'image/jpeg'},
+          'data': 'AQID',
+        };
+
+        final picture = await service.memberPicture(
+          fakeVtcDid,
+          entryId: 'dir_bob',
+          sha256: 'abc',
+        );
+
+        expect(picture, [1, 2, 3]);
+        expect(network.memberRequests.single['payload'], {
+          'entryId': 'dir_bob',
+          'field': 'avatar',
+          'sha256': 'abc',
+        });
       });
 
       test('sets the name members see, as the persona', () async {

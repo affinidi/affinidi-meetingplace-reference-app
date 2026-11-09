@@ -1,4 +1,9 @@
+import 'dart:convert';
+import 'dart:math';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image/image.dart' as img;
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../domain/models/vtc/vtc_community.dart';
@@ -115,6 +120,9 @@ class VtcTrustService {
   final Ref _ref;
   final VtcRepository _repository;
 
+  /// Pictures fetched, by the digest that names each.
+  final Map<String, Uint8List> _pictures = {};
+
   VtcService get _vtc => _ref.read(vtcServiceProvider);
 
   AppLogger get _logger => _ref.read(appLoggerProvider);
@@ -212,6 +220,45 @@ class VtcTrustService {
       );
       return null;
     }
+  }
+
+  /// Shows every member of [communityDid] the picture of the identity the
+  /// member joined with, [base64] as its contact card holds it, scaled for
+  /// the directory; takes the picture off when [base64] is null or holds no
+  /// picture.
+  ///
+  /// Throws [VtcTrustException].
+  Future<void> setDirectoryPicture(
+    String communityDid, {
+    required String? base64,
+  }) => _guard(
+    'changing the directory picture',
+    () => _vtc.setDirectoryPicture(
+      communityDid,
+      jpeg: base64 == null ? null : directoryPicture(base64),
+    ),
+  );
+
+  /// The picture the member of [entry] in [communityDid] shows the member,
+  /// or null when they show none or it cannot be fetched. Kept while the
+  /// app runs, by the digest that names it.
+  Future<Uint8List?> memberPicture(
+    String communityDid, {
+    required DirectoryEntry entry,
+  }) async {
+    final sha256 = entry.avatarSha256;
+    if (sha256 == null) return null;
+    if (_pictures[sha256] case final picture?) return picture;
+    final picture = await _shownOrNull(
+      'reading a picture',
+      () => _vtc.memberPicture(
+        communityDid,
+        entryId: entry.entryId,
+        sha256: sha256,
+      ),
+    );
+    if (picture != null) _pictures[sha256] = picture;
+    return picture;
   }
 
   /// Remembers that the contact [channelDid] is the member of [entry] in
@@ -394,6 +441,51 @@ class VtcTrustService {
           VtcTrustFailure.network,
         _ => VtcTrustFailure.failed,
       };
+}
+
+/// Longest side of a picture on a directory card, in pixels.
+const directoryPictureSide = 256;
+
+/// Most bytes a community takes for a picture.
+const directoryPictureMaxBytes = 256 * 1024;
+
+/// [base64], an identity's picture, as a JPEG a community takes on a
+/// directory card: no side longer than [directoryPictureSide], and no more
+/// than [directoryPictureMaxBytes]. Null when it holds no picture.
+Uint8List? directoryPicture(String base64) {
+  final Uint8List bytes;
+  try {
+    bytes = base64Decode(base64);
+  } on FormatException {
+    return null;
+  }
+  // Only a picture's own signature reaches a decoder: decoders guessing at
+  // other bytes can read past their end rather than answer null.
+  if (!_isPicture(bytes)) return null;
+  final decoded = img.decodeImage(bytes);
+  if (decoded == null) return null;
+  final scaled = decoded.width >= decoded.height
+      ? img.copyResize(decoded, width: min(decoded.width, directoryPictureSide))
+      : img.copyResize(
+          decoded,
+          height: min(decoded.height, directoryPictureSide),
+        );
+  for (var quality = 85; quality >= 40; quality -= 15) {
+    final jpeg = img.encodeJpg(scaled, quality: quality);
+    if (jpeg.length <= directoryPictureMaxBytes) return jpeg;
+  }
+  return null;
+}
+
+/// Whether [bytes] start as a PNG, JPEG, GIF or WebP picture does.
+bool _isPicture(Uint8List bytes) {
+  bool startsWith(List<int> signature, [int at = 0]) =>
+      bytes.length >= at + signature.length &&
+      listEquals(bytes.sublist(at, at + signature.length), signature);
+  return startsWith(const [0x89, 0x50, 0x4e, 0x47]) ||
+      startsWith(const [0xff, 0xd8, 0xff]) ||
+      startsWith(ascii.encode('GIF8')) ||
+      (startsWith(ascii.encode('RIFF')) && startsWith(ascii.encode('WEBP'), 8));
 }
 
 /// The app's [VtcTrustService].
