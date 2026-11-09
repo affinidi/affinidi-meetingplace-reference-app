@@ -6,6 +6,7 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import '../../../application/services/vtc_trust_service/vtc_trust_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../widgets/onboarding_style/onboarding_style.dart';
 import '../vtc_join/vtc_flow_diagram.dart';
 import '../vtc_join/vtc_trail_step.dart';
 
@@ -119,19 +120,13 @@ Future<void> showVouchTrail(
   required String communityName,
   required String name,
   required bool isOwn,
-}) => showModalBottomSheet<void>(
-  context: context,
-  useRootNavigator: true,
-  isScrollControlled: true,
-  useSafeArea: true,
-  builder: (context) => SingleChildScrollView(
-    padding: const EdgeInsets.all(16),
-    child: VtcVouchTrail(
-      edge: edge,
-      communityName: communityName,
-      name: name,
-      isOwn: isOwn,
-    ),
+}) => showOnboardingSheet(
+  context,
+  VtcVouchTrail(
+    edge: edge,
+    communityName: communityName,
+    name: name,
+    isOwn: isOwn,
   ),
 );
 
@@ -184,7 +179,10 @@ class VtcVouchTrail extends StatelessWidget {
       children: [
         Text(
           isOwn ? l10n.vtcTrustDoneTitle(name) : l10n.vtcTrustTheyVouched(name),
-          style: context.textTheme.titleLarge,
+          style: context.textTheme.titleLarge?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -341,35 +339,29 @@ Future<void> showVouches(
   required VtcEdges edges,
   required String communityName,
   required String name,
-}) => showModalBottomSheet<void>(
-  context: context,
-  useRootNavigator: true,
-  isScrollControlled: true,
-  useSafeArea: true,
-  builder: (context) => SingleChildScrollView(
-    padding: const EdgeInsets.all(16),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 24,
-      children: [
-        if (edges.outgoing case final edge?)
-          VtcVouchTrail(
-            key: const Key('vtc_vouch_trail_outgoing'),
-            edge: edge,
-            communityName: communityName,
-            name: name,
-            isOwn: true,
-          ),
-        if (edges.incoming case final edge?)
-          VtcVouchTrail(
-            key: const Key('vtc_vouch_trail_incoming'),
-            edge: edge,
-            communityName: communityName,
-            name: name,
-            isOwn: false,
-          ),
-      ],
-    ),
+}) => showOnboardingSheet(
+  context,
+  Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    spacing: 24,
+    children: [
+      if (edges.outgoing case final edge?)
+        VtcVouchTrail(
+          key: const Key('vtc_vouch_trail_outgoing'),
+          edge: edge,
+          communityName: communityName,
+          name: name,
+          isOwn: true,
+        ),
+      if (edges.incoming case final edge?)
+        VtcVouchTrail(
+          key: const Key('vtc_vouch_trail_incoming'),
+          edge: edge,
+          communityName: communityName,
+          name: name,
+          isOwn: false,
+        ),
+    ],
   ),
 );
 

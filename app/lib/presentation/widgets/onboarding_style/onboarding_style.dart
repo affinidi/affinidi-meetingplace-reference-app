@@ -24,6 +24,25 @@ BoxDecoration onboardingGradient(
   );
 }
 
+/// Shows [child] in a sheet on the onboarding gradient.
+Future<void> showOnboardingSheet(BuildContext context, Widget child) {
+  const radius = BorderRadius.vertical(top: Radius.circular(24));
+  return showModalBottomSheet<void>(
+    context: context,
+    useRootNavigator: true,
+    isScrollControlled: true,
+    useSafeArea: true,
+    backgroundColor: Colors.transparent,
+    builder: (context) => DecoratedBox(
+      decoration: onboardingGradient(context, radius: 2, borderRadius: radius),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+        child: child,
+      ),
+    ),
+  );
+}
+
 /// The blue gradient, logo header and footer of onboarding, around a
 /// scrolling [child]. With [onClose], a close button leads the header, for
 /// a screen opened over another. Without [showBranding], neither the logo
