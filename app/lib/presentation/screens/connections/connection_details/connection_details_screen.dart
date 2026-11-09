@@ -27,9 +27,11 @@ import '../../../widgets/mnemonic_pill.dart';
 import '../../../widgets/profile_circle_avatar.dart';
 import '../../../widgets/qr/qr_code_view.dart';
 import '../../media/image_view_screen/image_view_screen.dart';
+import '../../vtc_trust/vtc_contact_trust_panel.dart';
 import 'connection_details_screen_controller.dart';
 
 part 'connection_details_actions_bar.dart';
+part 'connection_details_community_trust.dart';
 part 'connection_details_display_name.dart';
 part 'connection_details_group_details.dart';
 part 'connection_details_names.dart';
@@ -109,6 +111,7 @@ class ConnectionDetailsScreen extends HookConsumerWidget {
                           isGroupChat
                               ? _GroupDetailsPanel(contactId)
                               : _TheirDetailsPanel(contactId),
+                          if (!isGroupChat) _CommunityTrustPanel(contactId),
                           _SharedIdentityPanel(contactId),
                           _ConnectionDetailsPanel(contactId),
                           _ConnectionMnenomicPanel(contactId),

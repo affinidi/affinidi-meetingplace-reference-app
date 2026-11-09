@@ -3673,6 +3673,133 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vtcFindableFailed => 'Couldn\'t change this. Try again.';
 
   @override
+  String get vtcTrustHeading => 'Community trust';
+
+  @override
+  String get vtcTrustVouchInCommunity => 'Vouch in a community';
+
+  @override
+  String get vtcTrustYouVouched => 'You vouched';
+
+  @override
+  String vtcTrustTheyVouched(String name) {
+    return '$name vouched for you';
+  }
+
+  @override
+  String get vtcTrustNoVouch => 'No vouches yet';
+
+  @override
+  String get vtcTrustVouch => 'Vouch';
+
+  @override
+  String get vtcTrustVouchBack => 'Vouch back';
+
+  @override
+  String get vtcTrustWithdraw => 'Withdraw';
+
+  @override
+  String get vtcTrustPickCommunity => 'Vouch in which community?';
+
+  @override
+  String vtcTrustSearchTitle(String name, String community) {
+    return 'Find $name in $community';
+  }
+
+  @override
+  String get vtcTrustSearchHint => 'Name';
+
+  @override
+  String get vtcTrustSearchNone => 'No members match.';
+
+  @override
+  String get vtcTrustUnnamed => 'Unnamed member';
+
+  @override
+  String vtcTrustNotFindable(String name, String community) {
+    return '$name hasn\'t let members of $community find them yet.';
+  }
+
+  @override
+  String vtcTrustConfirmMatchTitle(String contact) {
+    return 'Is this $contact?';
+  }
+
+  @override
+  String vtcTrustConfirmMatchMessage(
+    String contact,
+    String community,
+    String member,
+  ) {
+    return 'Your vouches for $contact in $community will name $member.';
+  }
+
+  @override
+  String get vtcTrustConfirmMatchAction => 'Yes, that\'s them';
+
+  @override
+  String vtcTrustConsentTitle(String name, String community) {
+    return 'Vouch for $name in $community?';
+  }
+
+  @override
+  String vtcTrustConsentMessage(String name, String community) {
+    return 'This tells members of $community that you and $name know each other. You\'ll each also see what the other shares with their connections.';
+  }
+
+  @override
+  String vtcTrustWithdrawTitle(String name, String community) {
+    return 'Stop vouching for $name in $community?';
+  }
+
+  @override
+  String get vtcTrustWithdrawMessage => 'Members will no longer see it.';
+
+  @override
+  String vtcTrustDoneTitle(String name) {
+    return 'You vouched for $name';
+  }
+
+  @override
+  String get vtcTrustSigned => 'Signed by your VTA';
+
+  @override
+  String vtcTrustSignedSummary(String community) {
+    return 'As the identity you joined $community with.';
+  }
+
+  @override
+  String vtcTrustStored(String community) {
+    return 'Stored by $community';
+  }
+
+  @override
+  String vtcTrustStoredSummary(String community, String name) {
+    return 'Members of $community can see that you vouched for $name.';
+  }
+
+  @override
+  String get vtcTrustVouchDocument => 'Signed vouch';
+
+  @override
+  String vtcTrustFailure(String reason, String community, String name) {
+    String _temp0 = intl.Intl.selectLogic(reason, {
+      'notMember': 'You\'re not a member of $community any more.',
+      'contactNotMember': '$name isn\'t a member of $community any more.',
+      'notFindable': '$name hasn\'t let members of $community find them yet.',
+      'searchTooShort': 'Enter at least three letters.',
+      'proofRejected': '$community didn\'t accept your VTA\'s signature.',
+      'notAllowed': '$community doesn\'t allow this.',
+      'tryLater': '$community is busy. Try again in a moment.',
+      'vtaUnavailable':
+          'Your VTA couldn\'t sign this. Try again when it\'s reachable.',
+      'network': 'Couldn\'t reach $community.',
+      'other': 'Something went wrong. Try again.',
+    });
+    return '$_temp0';
+  }
+
+  @override
   String vtcJoinAlreadyMember(String name) {
     return 'You\'re already a member of $name.';
   }
