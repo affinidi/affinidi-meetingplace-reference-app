@@ -85,9 +85,16 @@ class _DrawerItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Even leading puts the label's glyphs on the icon's centre line;
+    // Affinidi Sans otherwise sets them about 2px low.
+    final titleStyle = ListTileTheme.of(context).titleTextStyle?.copyWith(
+      leadingDistribution: TextLeadingDistribution.even,
+    );
+
     return ListTile(
       minLeadingWidth: SettingsEndDrawer._itemIconSize,
       horizontalTitleGap: McSpacing.s2,
+      titleTextStyle: titleStyle,
       leading: Icon(icon, size: SettingsEndDrawer._itemIconSize),
       title: Text(label),
       onTap: onTap,

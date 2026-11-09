@@ -86,6 +86,17 @@ void main() {
         ),
       );
       expect(itemIcon.text.style?.color, mc.textSecondary);
+
+      final itemLabel = tester.widget<RichText>(
+        find.descendant(
+          of: find.text('Mock credentials'),
+          matching: find.byType(RichText),
+        ),
+      );
+      expect(
+        itemLabel.text.style?.leadingDistribution,
+        TextLeadingDistribution.even,
+      );
     });
   }
 }
