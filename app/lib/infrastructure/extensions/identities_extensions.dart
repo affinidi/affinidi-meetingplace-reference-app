@@ -8,59 +8,15 @@ import 'contact_card_extensions.dart';
 /// Extension methods on [Identity] for handling display properties,
 /// colors, gradients, images, and identity-specific information.
 extension IdentityExtensions on Identity {
-  /// Returns the card color for the identity.
-  Color getCardColor(ColorScheme colorScheme, {double intensity = 1.0}) {
-    if (card.cardColor != null && card.cardColor!.isNotEmpty) {
-      final colorValue = int.parse(card.cardColor!);
-      final customColor = Color(colorValue);
+  static const _placeholderCardColor = Color(0xFFB4B4B4);
 
-      if (intensity == 1.0) {
-        return customColor;
-      } else {
-        final red = (customColor.r * 255 * intensity).round();
-        final green = (customColor.g * 255 * intensity).round();
-        final blue = (customColor.b * 255 * intensity).round();
-        final alpha = (customColor.a * 255).round();
-
-        return Color.fromARGB(alpha, red, green, blue);
-      }
+  /// Returns the card color for the identity: the colour its owner chose,
+  /// else the primary colour, or a neutral grey for the "add new" option.
+  Color getCardColor(ColorScheme colorScheme) {
+    if (card.cardColor case final value? when value.isNotEmpty) {
+      return Color(int.parse(value));
     }
-
-    if (isPrimary) {
-      return Color.fromARGB(
-        255,
-        (colorScheme.primary.r * 255 * intensity).round(),
-        (colorScheme.primary.g * 255 * intensity).round(),
-        (colorScheme.primary.b * 255 * intensity).round(),
-      );
-    } else if (isPlaceholder) {
-      return Color.fromARGB(
-        255,
-        (180 * intensity).round(),
-        (180 * intensity).round(),
-        (180 * intensity).round(),
-      );
-    } else {
-      final defaultColor = colorScheme.primary;
-      final r = (defaultColor.r * 255 * intensity).round();
-      final g = (defaultColor.g * 255 * intensity).round();
-      final b = (defaultColor.b * 255 * intensity).round();
-      final a = (defaultColor.a * 255).round();
-      return Color.fromARGB(a, r, g, b);
-    }
-  }
-
-  /// Returns a linear gradient for the identity card.
-  LinearGradient getLinearGradient(
-    ColorScheme colorScheme, {
-    Alignment center = Alignment.bottomCenter,
-    double radius = 2.0,
-  }) {
-    return LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: [getCardColor(colorScheme), colorScheme.surface],
-    );
+    return isPlaceholder ? _placeholderCardColor : colorScheme.primary;
   }
 
   /// Returns `true` if this identity is the "add new" identity option.

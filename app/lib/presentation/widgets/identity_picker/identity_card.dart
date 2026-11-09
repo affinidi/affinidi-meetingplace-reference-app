@@ -11,7 +11,9 @@ import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/extensions/contact_card_extensions.dart';
 import '../../../infrastructure/extensions/identities_extensions.dart';
 import '../../themes/tokens/mc_radius.dart';
+import '../../themes/tokens/mc_typography.dart';
 import '../animated_menu.dart';
+import '../common/app_card.dart';
 import '../profile_picture.dart';
 
 enum IdentityCardSize { small, normal }
@@ -42,8 +44,8 @@ class IdentityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-
+    // A Mission Control product card: a large panel that carries the
+    // identity's own colour as its corner wash, behind the picture.
     return Center(
       child: Container(
         margin: const EdgeInsets.all(8),
@@ -51,47 +53,42 @@ class IdentityCard extends StatelessWidget {
           minHeight: identityCardSize.isSmall ? 200 : 400,
           maxWidth: 650,
         ),
-        decoration: BoxDecoration(
-          gradient: RadialGradient(
-            radius: 0.5,
-            center: Alignment.bottomRight,
-            colors: [
-              identity.getCardColor(colorScheme, intensity: 0.35),
-              colorScheme.surface,
+        child: AppCard(
+          accent: identity.getCardColor(context.colorScheme),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(McRadius.xl),
+            side: BorderSide(color: context.mcColors.hairline),
+          ),
+          child: Stack(
+            children: [
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _IdentityHeader(
+                    identity: identity,
+                    identityCardSize: identityCardSize,
+                  ),
+                  _IdentityContentSection(
+                    identity: identity,
+                    identityCardSize: identityCardSize,
+                  ),
+                ],
+              ),
+              _IdentityProfilePicture(
+                identity: identity,
+                size: identityCardSize.isSmall ? 110 : 130,
+                cacheManager: cacheManager,
+              ),
+              if (!identityCardSize.isSmall)
+                _IdentityActionButton(
+                  identity: identity,
+                  onDeleteIdentity: onDeleteIdentity,
+                  onFindOfferForIdentity: onFindOfferForIdentity,
+                  onEditIdentity: onEditIdentity,
+                  onPublishOfferForIdentity: onPublishOfferForIdentity,
+                ),
             ],
           ),
-          borderRadius: BorderRadius.circular(McRadius.xl),
-          border: Border.all(color: identity.getCardColor(colorScheme)),
-        ),
-        child: Stack(
-          children: [
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _IdentityHeader(
-                  identity: identity,
-                  identityCardSize: identityCardSize,
-                ),
-                _IdentityContentSection(
-                  identity: identity,
-                  identityCardSize: identityCardSize,
-                ),
-              ],
-            ),
-            _IdentityProfilePicture(
-              identity: identity,
-              size: identityCardSize.isSmall ? 110 : 130,
-              cacheManager: cacheManager,
-            ),
-            if (!identityCardSize.isSmall)
-              _IdentityActionButton(
-                identity: identity,
-                onDeleteIdentity: onDeleteIdentity,
-                onFindOfferForIdentity: onFindOfferForIdentity,
-                onEditIdentity: onEditIdentity,
-                onPublishOfferForIdentity: onPublishOfferForIdentity,
-              ),
-          ],
         ),
       ),
     );
@@ -110,23 +107,17 @@ class _IdentityHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = context.textTheme;
-    final colorScheme = context.colorScheme;
+    final mc = context.mcColors;
     final l10n = context.l10n;
 
     final rightInset = identityCardSize.isSmall ? 130.0 : 150.0;
 
+    // A section head: the kind of identity as an eyebrow, then its name.
     return Container(
       constraints: BoxConstraints(
         minHeight: identityCardSize.isSmall ? 45 : 90,
       ),
-      decoration: BoxDecoration(
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(McRadius.xl),
-          topRight: Radius.circular(McRadius.xl),
-        ),
-        gradient: identity.getLinearGradient(colorScheme),
-      ),
-      padding: EdgeInsets.fromLTRB(14, 14, rightInset, 14),
+      padding: EdgeInsets.fromLTRB(20, 16, rightInset, 14),
       child: Row(
         children: [
           Expanded(
@@ -137,26 +128,21 @@ class _IdentityHeader extends StatelessWidget {
               spacing: 4,
               children: [
                 Text(
-                  identity.getDisplayName(l10n: l10n),
-                  // On the identity's own card colour.
-                  style: textTheme.titleMedium?.copyWith(
-                    color: colorScheme.onPrimary,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  identity.getSubtitle(l10n: l10n),
-                  style:
-                      (identityCardSize.isSmall
-                              ? textTheme.labelMedium
-                              : textTheme.bodyMedium)
-                          ?.copyWith(
-                            color: colorScheme.onPrimary.withAlpha(180),
-                          ),
+                  identity.getSubtitle(l10n: l10n).toUpperCase(),
+                  style: McTypography.eyebrow.copyWith(color: mc.textSecondary),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   softWrap: true,
+                ),
+                Text(
+                  identity.getDisplayName(l10n: l10n),
+                  style:
+                      (identityCardSize.isSmall
+                              ? textTheme.titleMedium
+                              : textTheme.titleLarge)
+                          ?.copyWith(color: mc.textPrimary),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -260,10 +246,8 @@ class _IdentityContent extends StatelessWidget {
         for (final field in fields) ...[
           _ContactInfoRow(
             icon: field.icon,
-            text: _valueOrNotShared(
-              field.valueFrom(identity.card),
-              l10n.notShared,
-            ),
+            value: field.valueFrom(identity.card).trim(),
+            notShared: l10n.notShared,
             identityCardSize: identityCardSize,
           ),
           SizedBox(height: identityCardSize.isSmall ? 6 : 8),
@@ -271,39 +255,43 @@ class _IdentityContent extends StatelessWidget {
       ],
     );
   }
-
-  String _valueOrNotShared(String value, String notShared) {
-    final trimmed = value.trim();
-    return trimmed.isNotEmpty ? trimmed : notShared;
-  }
 }
 
 class _ContactInfoRow extends StatelessWidget {
   const _ContactInfoRow({
     required this.icon,
-    required this.text,
+    required this.value,
+    required this.notShared,
     required this.identityCardSize,
   });
 
   final IconData icon;
-  final String text;
+
+  /// The field's value; empty when the identity does not share it.
+  final String value;
+  final String notShared;
   final IdentityCardSize identityCardSize;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
+    final mc = context.mcColors;
     final textTheme = context.textTheme;
+    final isShared = value.isNotEmpty;
 
     return Row(
       spacing: 8,
       children: [
-        Icon(icon, color: colorScheme.onSurfaceVariant, size: 16),
+        Icon(icon, color: mc.textSecondary, size: 16),
         Expanded(
           child: Text(
-            text,
-            style: identityCardSize.isSmall
-                ? textTheme.labelMedium
-                : textTheme.titleMedium,
+            isShared ? value : notShared,
+            style:
+                (identityCardSize.isSmall
+                        ? textTheme.bodySmall
+                        : textTheme.bodyLarge)
+                    ?.copyWith(
+                      color: isShared ? mc.textPrimary : mc.textTertiary,
+                    ),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -384,32 +372,31 @@ class _ActionButton extends HookWidget {
   }
 
   List<_ActionItem> _buildActions(BuildContext context) {
-    final colorScheme = context.colorScheme;
+    final mc = context.mcColors;
     final isPrimary = identity.isPrimary;
 
     return [
       _ActionItem(
         icon: Icons.delete,
-        color: isPrimary
-            ? context.customColors.disabledGrey
-            : colorScheme.onSurface,
+        // A destructive menu item speaks in danger text.
+        color: isPrimary ? mc.textTertiary : mc.dangerText,
         action: _ActionButtonConfig.delete,
         isEnabled: !isPrimary,
       ),
       _ActionItem(
         icon: Icons.receipt,
-        color: colorScheme.onSurface,
+        color: mc.textPrimary,
         action: _ActionButtonConfig.connect,
         assetPath: 'assets/icons/receive.png',
       ),
       _ActionItem(
         icon: Icons.edit,
-        color: colorScheme.onSurface,
+        color: mc.textPrimary,
         action: _ActionButtonConfig.edit,
       ),
       _ActionItem(
         icon: Icons.publish,
-        color: colorScheme.onSurface,
+        color: mc.textPrimary,
         action: _ActionButtonConfig.publish,
         assetPath: 'assets/icons/publish.png',
       ),
@@ -567,18 +554,17 @@ class _ActionMenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
+    final mc = context.mcColors;
 
+    // A raised control on a hairline, as Mission Control's ghost controls.
     return Container(
       width: 60,
       height: 60,
       decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(64),
+        color: mc.raised,
+        shape: BoxShape.circle,
         border: Border.all(
-          color: action.isEnabled
-              ? colorScheme.onSurface
-              : context.theme.disabledColor,
+          color: action.isEnabled ? mc.hairlineStrong : mc.hairline,
         ),
       ),
       child: action.assetPath != null
