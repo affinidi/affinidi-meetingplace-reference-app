@@ -1032,6 +1032,7 @@ class VtcService {
       communityDid: communityDid,
       personaDid: community.personaDid,
       memberDid: memberDid,
+      signingKeyId: community.signingKeyId,
     );
   }
 
