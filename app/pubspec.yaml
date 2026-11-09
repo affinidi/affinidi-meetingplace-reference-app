@@ -131,3 +131,37 @@ flutter:
     - assets/videos/
     - assets/zkp/
 
+  fonts:
+    - family: Affinidi Sans
+      fonts:
+        - asset: assets/fonts/affinidi_sans/AffinidiSans-Light.ttf
+          weight: 300
+        - asset: assets/fonts/affinidi_sans/AffinidiSans-LightItalic.ttf
+          weight: 300
+          style: italic
+        - asset: assets/fonts/affinidi_sans/AffinidiSans-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/affinidi_sans/AffinidiSans-Italic.ttf
+          weight: 400
+          style: italic
+        - asset: assets/fonts/affinidi_sans/AffinidiSans-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/affinidi_sans/AffinidiSans-MediumItalic.ttf
+          weight: 500
+          style: italic
+        - asset: assets/fonts/affinidi_sans/AffinidiSans-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/affinidi_sans/AffinidiSans-SemiBoldItalic.ttf
+          weight: 600
+          style: italic
+        - asset: assets/fonts/affinidi_sans/AffinidiSans-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/affinidi_sans/AffinidiSans-BoldItalic.ttf
+          weight: 700
+          style: italic
+        - asset: assets/fonts/affinidi_sans/AffinidiSans-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/affinidi_sans/AffinidiSans-ExtraBoldItalic.ttf
+          weight: 800
+          style: italic
+
