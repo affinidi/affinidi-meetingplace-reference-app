@@ -174,6 +174,9 @@ void main() {
       await tester.tap(find.byKey(const Key('vtc_join_trail_vta')));
       await tester.pumpAndSettle();
       expect(find.text('did:webvh:persona'), findsOneWidget);
+      // The VTA's signing, then the application it signed.
+      expect(find.text('Trust Tasks'), findsOneWidget);
+      expect(find.text(VtaTask.signTrustTask), findsOneWidget);
       expect(find.text(JoinTask.submit), findsOneWidget);
       // Each detail with an icon for what it is.
       expect(find.byIcon(Icons.fingerprint), findsOneWidget);
@@ -192,7 +195,7 @@ void main() {
       expect(find.text('request-1'), findsOneWidget);
       // The answer's Trust Task, as for the VTA's.
       expect(find.text('${JoinTask.submit}#response'), findsOneWidget);
-      expect(find.text('Trust Task'), findsNWidgets(2));
+      expect(find.text('Trust Task'), findsOneWidget);
       expect(find.text('Document id'), findsNothing);
       // The answer's proof, as for the VTA's signature.
       expect(find.text('did:webvh:community#key-0'), findsOneWidget);
@@ -209,6 +212,16 @@ void main() {
       expect(find.text('Last check signed by your VTA at'), findsOneWidget);
       expect(find.text('Last check answered and verified at'), findsOneWidget);
       expect(find.text('did:webvh:community#key-1'), findsOneWidget);
+
+      // The card still to come names the tasks that will bring it.
+      final card = find.byKey(const Key('vtc_join_trail_card'));
+      await tester.ensureVisible(card);
+      await tester.pumpAndSettle();
+      await tester.tap(card);
+      await tester.pumpAndSettle();
+      expect(find.text(credentialIssueTask), findsOneWidget);
+      expect(find.text(VtaTask.credentialsReceive), findsOneWidget);
+      expect(find.text(MemberTask.vmc), findsOneWidget);
     });
 
     testWidgets('shows each signed document in full', (tester) async {
@@ -311,6 +324,9 @@ void main() {
       expect(find.text('Issued by'), findsOneWidget);
       expect(find.text('did:key:z6MkIssuer'), findsOneWidget);
       expect(find.text('Valid until'), findsOneWidget);
+      // Found and read on the VTA.
+      expect(find.text(VtaTask.credentialsQuery), findsOneWidget);
+      expect(find.text(VtaTask.credentialsGet), findsOneWidget);
 
       await tester.tap(
         find.byKey(const Key('vtc_join_trail_presentation_document')),
@@ -435,9 +451,14 @@ void main() {
         find.text('Sent earlier; this phone keeps no receipt for it'),
         findsOneWidget,
       );
-      // Nothing to open or show.
-      expect(find.byIcon(Icons.expand_more), findsNothing);
+      // No document to show; only the VTA's signing and the card still to
+      // come open, to the tasks they take.
       expect(find.byIcon(Icons.receipt_long_outlined), findsNothing);
+      expect(find.byIcon(Icons.expand_more), findsNWidgets(2));
+      await tester.tap(find.byKey(const Key('vtc_join_trail_vta')));
+      await tester.pumpAndSettle();
+      expect(find.text(VtaTask.signTrustTask), findsOneWidget);
+      expect(find.text(JoinTask.submit), findsNothing);
     });
   });
 }

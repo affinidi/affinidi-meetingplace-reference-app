@@ -111,6 +111,9 @@ class VtcJoinTrail extends StatelessWidget {
             summary: l10n.vtcJoinTrailPresentationSummary(
               credentials.map(_typesOf).join(', '),
             ),
+            // Found and read on the VTA; the presentation itself is built
+            // on this phone.
+            tasks: const [VtaTask.credentialsQuery, VtaTask.credentialsGet],
             details: [
               if (presentation['holder'] case final String holder)
                 VtcTrailDetail(
@@ -159,7 +162,8 @@ class VtcJoinTrail extends StatelessWidget {
               ),
             _ => l10n.vtcJoinTrailVtaIdentity(communityName),
           },
-          tasks: [if (receipt != null) receipt.type],
+          // The VTA signs the application as the member's identity.
+          tasks: [VtaTask.signTrustTask, ?receipt?.type],
           details: [
             if (receipt != null) ...[
               VtcTrailDetail(
@@ -272,6 +276,13 @@ class VtcJoinTrail extends StatelessWidget {
           stage: VtcTrailStage.next,
           title: l10n.vtcJoinTrailCard,
           summary: l10n.vtcJoinTrailCardSummary,
+          // Sent by the community, kept on the VTA, and the membership
+          // confirmed back to the community.
+          tasks: const [
+            credentialIssueTask,
+            VtaTask.credentialsReceive,
+            MemberTask.vmc,
+          ],
           isLast: true,
         ),
       ],
