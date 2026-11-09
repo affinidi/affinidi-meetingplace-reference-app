@@ -3919,6 +3919,10 @@
 			}
 		}
 	},
+	"vtcTrustRecordNote": "As the community keeps it: its record of the vouch, with the signed credential in vrcJsonld.",
+	"@vtcTrustRecordNote": {
+		"description": "Explains the community's record of a vouch shown in full"
+	},
 	"vtcJoinAlreadyMember": "You're already a member of {name}.",
 	"@vtcJoinAlreadyMember": {
 		"description": "The scanned community is one the member belongs to",

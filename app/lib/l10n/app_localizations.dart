@@ -5754,6 +5754,12 @@ abstract class AppLocalizations {
   /// **'{name}\'s vouch for you'**
   String vtcTrustTheirVouchDocument(String name);
 
+  /// Explains the community's record of a vouch shown in full
+  ///
+  /// In en, this message translates to:
+  /// **'As the community keeps it: its record of the vouch, with the signed credential in vrcJsonld.'**
+  String get vtcTrustRecordNote;
+
   /// The scanned community is one the member belongs to
   ///
   /// In en, this message translates to:

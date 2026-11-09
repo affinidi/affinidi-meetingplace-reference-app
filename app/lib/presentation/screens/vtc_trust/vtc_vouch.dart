@@ -178,8 +178,8 @@ class VtcVouchTrail extends StatelessWidget {
 /// The vouches between the member and [name], one icon each way round: an
 /// outgoing arrow for the member's vouch, labelled [outgoingLabel], and an
 /// incoming one for [name]'s, labelled [incomingLabel]. The label is the
-/// icon's tooltip and what a screen reader says. An icon opens the signed
-/// credential the community keeps for that vouch.
+/// icon's tooltip and what a screen reader says. An icon opens the
+/// community's record of that vouch, with the signed credential inside.
 class VtcVouchIcons extends StatelessWidget {
   const VtcVouchIcons({
     super.key,
@@ -230,21 +230,19 @@ class VtcVouchIcons extends StatelessWidget {
     required String title,
     required PublishedRelationship edge,
   }) {
-    final vrc = edge.vrc;
     return IconButton(
       key: key,
       icon: Icon(icon, size: 20),
       tooltip: label,
       visualDensity: VisualDensity.compact,
-      onPressed: vrc == null
-          ? null
-          : () => showVtcJoinJson(
-              context,
-              title: title,
-              json: vrc,
-              icon: Icons.handshake_outlined,
-              textKey: const Key('vtc_vouch_json'),
-            ),
+      onPressed: () => showVtcJoinJson(
+        context,
+        title: title,
+        subtitle: context.l10n.vtcTrustRecordNote,
+        json: edge.toJson(),
+        icon: Icons.handshake_outlined,
+        textKey: const Key('vtc_vouch_json'),
+      ),
     );
   }
 }

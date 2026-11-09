@@ -284,6 +284,8 @@ void main() {
 
     expect(find.text('Your vouch for Bob'), findsOneWidget);
     expect(find.byKey(const Key('vtc_vouch_json')), findsOneWidget);
+    expect(find.textContaining('vrcJsonld'), findsWidgets);
+    expect(find.textContaining('RelationshipCredential'), findsWidgets);
   });
 
   testWidgets('says why a vouch did not work', (tester) async {

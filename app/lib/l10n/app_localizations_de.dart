@@ -3889,6 +3889,10 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get vtcTrustRecordNote =>
+      'As the community keeps it: its record of the vouch, with the signed credential in vrcJsonld.';
+
+  @override
   String vtcJoinAlreadyMember(String name) {
     return 'You\'re already a member of $name.';
   }

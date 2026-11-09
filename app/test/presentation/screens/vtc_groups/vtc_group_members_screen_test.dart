@@ -170,6 +170,8 @@ void main() {
     expect(find.text("Bob's vouch for you"), findsOneWidget);
     expect(find.byKey(const Key('vtc_vouch_json')), findsOneWidget);
     expect(find.textContaining('RelationshipCredential'), findsWidgets);
+    expect(find.textContaining('vrcJsonld'), findsWidgets);
+    expect(find.textContaining('edge-0'), findsWidgets);
   });
 
   testWidgets('says when there is nobody else to show', (tester) async {
