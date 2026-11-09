@@ -3846,6 +3846,31 @@
 			}
 		}
 	},
+	"vtcGroupMembersOpen": "Members",
+	"@vtcGroupMembersOpen": {
+		"description": "Opens a community group's members, to vouch for them"
+	},
+	"vtcGroupMembersTitle": "Members of {group}",
+	"@vtcGroupMembersTitle": {
+		"description": "Title of a community group's members",
+		"placeholders": {
+			"group": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcGroupMembersNone": "No other members to show.",
+	"@vtcGroupMembersNone": {
+		"description": "A group shows the member no other members"
+	},
+	"vtcTrustVouched": "Vouched",
+	"@vtcTrustVouched": {
+		"description": "Badge: the member vouched for this member"
+	},
+	"vtcTrustVouchesForYou": "Vouches for you",
+	"@vtcTrustVouchesForYou": {
+		"description": "Badge: this member vouched for the member"
+	},
 	"vtcJoinAlreadyMember": "You're already a member of {name}.",
 	"@vtcJoinAlreadyMember": {
 		"description": "The scanned community is one the member belongs to",

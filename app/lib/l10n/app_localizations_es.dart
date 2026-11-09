@@ -3836,6 +3836,23 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get vtcGroupMembersOpen => 'Members';
+
+  @override
+  String vtcGroupMembersTitle(String group) {
+    return 'Members of $group';
+  }
+
+  @override
+  String get vtcGroupMembersNone => 'No other members to show.';
+
+  @override
+  String get vtcTrustVouched => 'Vouched';
+
+  @override
+  String get vtcTrustVouchesForYou => 'Vouches for you';
+
+  @override
   String vtcJoinAlreadyMember(String name) {
     return 'You\'re already a member of $name.';
   }

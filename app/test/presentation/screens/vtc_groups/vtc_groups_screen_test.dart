@@ -160,6 +160,13 @@ void main() {
     expect(find.byKey(const Key('vtc_group_join_g2')), findsOneWidget);
   });
 
+  testWidgets('offers the members of groups that show them', (tester) async {
+    await pumpScreen(tester);
+
+    expect(find.byKey(const Key('vtc_group_members_g1')), findsOneWidget);
+    expect(find.byKey(const Key('vtc_group_members_g2')), findsOneWidget);
+  });
+
   testWidgets('shows the link to publish once the chat is created', (
     tester,
   ) async {

@@ -114,6 +114,32 @@ class VtcTrustService {
     return [...found.where((entry) => entry.did != me)];
   });
 
+  /// The other active members of the group [groupId] of [communityDid], as
+  /// the directory shows them to the member. A member whose entry shows
+  /// the member nothing is left out.
+  ///
+  /// Throws [VtcTrustException].
+  Future<List<DirectoryEntry>> groupMembers(
+    String communityDid, {
+    required String groupId,
+  }) => _guard('reading group members', () async {
+    await _personaDid(communityDid);
+    final me = (await _vtc.myDirectoryCard(communityDid)).entryId;
+    final entries = <DirectoryEntry>[];
+    for (final member in await _vtc.groupMembers(
+      communityDid,
+      groupId: groupId,
+    )) {
+      if (!member.isActive || member.entryId == me) continue;
+      final entry = await _vtc.memberEntry(
+        communityDid,
+        entryId: member.entryId,
+      );
+      if (entry != null) entries.add(entry);
+    }
+    return entries;
+  });
+
   /// Remembers that the contact [channelDid] is the member of [entry] in
   /// [communityDid].
   ///

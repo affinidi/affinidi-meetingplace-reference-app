@@ -73,6 +73,24 @@ class _FakeVtcService extends Fake implements VtcService {
     return found;
   }
 
+  List<VtcGroupMember> groupMembersList = const [];
+  Map<String, DirectoryEntry> entries = const {};
+
+  @override
+  Future<List<VtcGroupMember>> groupMembers(
+    String communityDid, {
+    required String groupId,
+  }) async {
+    await _fail();
+    return groupMembersList;
+  }
+
+  @override
+  Future<DirectoryEntry?> memberEntry(
+    String communityDid, {
+    required String entryId,
+  }) async => entries[entryId];
+
   @override
   Future<MyDirectoryCard> myDirectoryCard(String communityDid) async =>
       MyDirectoryCard(entryId: 'dir_me', isDidVisibleToMembers: findable);
@@ -189,6 +207,43 @@ void main() {
         throwsFailure(VtcTrustFailure.notFindable),
       );
       expect(await service.links('did:web:channel-bob'), isEmpty);
+    });
+  });
+
+  group('VtcTrustService.groupMembers', () {
+    test(
+      'lists the other active members as the directory shows them',
+      () async {
+        vtc
+          ..groupMembersList = const [
+            VtcGroupMember(entryId: 'dir_me', state: 'active'),
+            VtcGroupMember(entryId: 'dir_bob', state: 'active'),
+            VtcGroupMember(entryId: 'dir_new', state: 'pending'),
+            VtcGroupMember(entryId: 'dir_hidden', state: 'active'),
+          ]
+          ..entries = const {
+            'dir_me': DirectoryEntry(entryId: 'dir_me', did: _me),
+            'dir_bob': DirectoryEntry(
+              entryId: 'dir_bob',
+              displayName: 'Bob',
+              did: _bob,
+            ),
+            'dir_new': DirectoryEntry(entryId: 'dir_new', displayName: 'New'),
+          };
+
+        final members = await service.groupMembers(_club, groupId: 'g1');
+
+        expect(members.map((m) => m.entryId), ['dir_bob']);
+      },
+    );
+
+    test('says when the group hides its members', () {
+      vtc.refusal = MeetingPlaceVtcSDKException.refused('permissionDenied');
+
+      expect(
+        service.groupMembers(_club, groupId: 'g1'),
+        throwsFailure(VtcTrustFailure.notAllowed),
+      );
     });
   });
 
