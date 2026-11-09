@@ -7,6 +7,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
+import '../../../domain/models/vtc/vtc_community.dart';
 import '../../../domain/models/vtc/vtc_left_membership.dart';
 import '../../../domain/models/vtc/vtc_vetting.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
@@ -88,10 +89,21 @@ class VtcJoinScreen extends HookConsumerWidget {
       showBranding: state.step != VtcJoinStep.vetting,
       child: switch (state.step) {
         VtcJoinStep.scanning => _EnterCode(onSubmit: controller.onScanned),
-        VtcJoinStep.working => switch ((state.openStep, state.leaveStep)) {
-          (final step?, _) => Center(child: _Opening(step: step)),
-          (_, final step?) => Center(
+        VtcJoinStep.working => switch ((
+          state.openStep,
+          state.leaveStep,
+          state.applyStep,
+        )) {
+          (final step?, _, _) => Center(child: _Opening(step: step)),
+          (_, final step?, _) => Center(
             child: _Leaving(step: step, communityName: name),
+          ),
+          (_, _, final step?) => Center(
+            child: _Applying(
+              step: step,
+              communityName: name,
+              withCredential: state.sharedCredential != null,
+            ),
           ),
           _ => const Center(child: OnboardingSpinner()),
         },
@@ -1921,6 +1933,50 @@ class _Leaving extends StatelessWidget {
                 communityName,
               ),
               VtcLeaveStep.archivingCard => l10n.vtcLeaveStepArchiving,
+            },
+            stage: _stageOf(each, step),
+          ),
+      ],
+    );
+  }
+}
+
+/// Applying to a community, step by step, as [_Opening] shows opening it.
+/// The steps after an admission show only while it is on its way.
+class _Applying extends StatelessWidget {
+  const _Applying({
+    required this.step,
+    required this.communityName,
+    required this.withCredential,
+  });
+
+  /// The step under way.
+  final VtcApplyStep step;
+  final String communityName;
+
+  /// Whether the application carries a credential the member approved.
+  final bool withCredential;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return VtcBackgroundPanel(
+      key: const Key('vtc_join_applying'),
+      title: l10n.vtcApplyLoading(communityName),
+      children: [
+        for (final each in VtcApplyStep.values)
+          VtcProgressLine(
+            key: Key('vtc_apply_step_${each.name}'),
+            title: switch (each) {
+              VtcApplyStep.preparingIdentity => l10n.vtcApplyStepIdentity,
+              VtcApplyStep.sending =>
+                withCredential
+                    ? l10n.vtcApplyStepSendingCredential(communityName)
+                    : l10n.vtcApplyStepSending(communityName),
+              VtcApplyStep.keepingCards => l10n.vtcApplyStepKeeping,
+              VtcApplyStep.confirming => l10n.vtcApplyStepConfirming(
+                communityName,
+              ),
             },
             stage: _stageOf(each, step),
           ),

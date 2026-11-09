@@ -6228,6 +6228,42 @@ abstract class AppLocalizations {
   /// **'Archiving your card on your VTA'**
   String get vtcLeaveStepArchiving;
 
+  /// Heading over the steps of applying to a community
+  ///
+  /// In en, this message translates to:
+  /// **'Applying to {name}…'**
+  String vtcApplyLoading(String name);
+
+  /// Step of applying: recording the identity that applies, created on the VTA if new, and unlocking its keys
+  ///
+  /// In en, this message translates to:
+  /// **'Getting your identity ready on your VTA'**
+  String get vtcApplyStepIdentity;
+
+  /// Step of applying: sending the signed application
+  ///
+  /// In en, this message translates to:
+  /// **'Sending your application to {name}'**
+  String vtcApplyStepSending(String name);
+
+  /// Step of applying: sending the signed application with the credential the member approved
+  ///
+  /// In en, this message translates to:
+  /// **'Sending your application and credential to {name}'**
+  String vtcApplyStepSendingCredential(String name);
+
+  /// Step of applying, once admitted: keeping the issued cards on the member's VTA
+  ///
+  /// In en, this message translates to:
+  /// **'Keeping your membership card on your VTA'**
+  String get vtcApplyStepKeeping;
+
+  /// Step of applying, once admitted: confirming the membership back to the community
+  ///
+  /// In en, this message translates to:
+  /// **'Confirming your membership with {name}'**
+  String vtcApplyStepConfirming(String name);
+
   /// Step of getting the membership card: asking the member's VTA for the card the community issued
   ///
   /// In en, this message translates to:

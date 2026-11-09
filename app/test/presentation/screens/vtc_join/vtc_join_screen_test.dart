@@ -1135,8 +1135,24 @@ void main() {
           tester,
           find.widgetWithText(ElevatedButton, 'Share and apply'),
         );
+        // The steps show once the first call to the VTA starts.
+        final applying = find.byKey(const Key('vtc_join_applying'));
+        for (var i = 0; i < 50 && applying.evaluate().isEmpty; i++) {
+          await tester.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 1)),
+          );
+          await tester.pump();
+        }
+        expect(applying, findsOneWidget);
+        expect(find.text('Applying to Football club…'), findsOneWidget);
+        expect(
+          find.text('Sending your application and credential to Football club'),
+          findsOneWidget,
+        );
+
         await settle(tester);
 
+        expect(applying, findsNothing);
         expect(find.text("You're a member of Football club."), findsOneWidget);
         final submit = network.joinRequests.lastWhere(
           (r) => r['type'] == JoinTask.submit,
@@ -1343,11 +1359,7 @@ void main() {
       network.joinManifest = {
         ...network.joinManifest,
         'criteria': [
-          {
-            'id': 'open',
-            'admission': 'review',
-            'requirementsDigest': 'zOpen',
-          },
+          {'id': 'open', 'admission': 'review', 'requirementsDigest': 'zOpen'},
           {
             'id': 'invited',
             'admission': 'automatic',

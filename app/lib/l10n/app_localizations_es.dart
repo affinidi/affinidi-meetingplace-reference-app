@@ -4190,6 +4190,32 @@ class AppLocalizationsEs extends AppLocalizations {
   String get vtcLeaveStepArchiving => 'Archiving your card on your VTA';
 
   @override
+  String vtcApplyLoading(String name) {
+    return 'Applying to $name…';
+  }
+
+  @override
+  String get vtcApplyStepIdentity => 'Getting your identity ready on your VTA';
+
+  @override
+  String vtcApplyStepSending(String name) {
+    return 'Sending your application to $name';
+  }
+
+  @override
+  String vtcApplyStepSendingCredential(String name) {
+    return 'Sending your application and credential to $name';
+  }
+
+  @override
+  String get vtcApplyStepKeeping => 'Keeping your membership card on your VTA';
+
+  @override
+  String vtcApplyStepConfirming(String name) {
+    return 'Confirming your membership with $name';
+  }
+
+  @override
   String vtcCardStepFinding(String name) {
     return 'Looking on your VTA for the card $name issued you';
   }

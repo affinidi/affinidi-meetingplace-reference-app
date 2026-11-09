@@ -4354,6 +4354,50 @@
 	"@vtcLeaveStepArchiving": {
 		"description": "Step of leaving a community: archiving the membership card on the member's VTA"
 	},
+	"vtcApplyLoading": "Applying to {name}…",
+	"@vtcApplyLoading": {
+		"description": "Heading over the steps of applying to a community",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcApplyStepIdentity": "Getting your identity ready on your VTA",
+	"@vtcApplyStepIdentity": {
+		"description": "Step of applying: recording the identity that applies, created on the VTA if new, and unlocking its keys"
+	},
+	"vtcApplyStepSending": "Sending your application to {name}",
+	"@vtcApplyStepSending": {
+		"description": "Step of applying: sending the signed application",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcApplyStepSendingCredential": "Sending your application and credential to {name}",
+	"@vtcApplyStepSendingCredential": {
+		"description": "Step of applying: sending the signed application with the credential the member approved",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcApplyStepKeeping": "Keeping your membership card on your VTA",
+	"@vtcApplyStepKeeping": {
+		"description": "Step of applying, once admitted: keeping the issued cards on the member's VTA"
+	},
+	"vtcApplyStepConfirming": "Confirming your membership with {name}",
+	"@vtcApplyStepConfirming": {
+		"description": "Step of applying, once admitted: confirming the membership back to the community",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
 	"vtcCardStepFinding": "Looking on your VTA for the card {name} issued you",
 	"@vtcCardStepFinding": {
 		"description": "Step of getting the membership card: asking the member's VTA for the card the community issued",
