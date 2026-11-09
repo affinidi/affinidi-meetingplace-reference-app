@@ -14,19 +14,14 @@ import '../vtc_vetter_profile/vtc_vetter_profile_screen.dart';
 import '../vtc_vetting_desk/vtc_vetting_desk_screen.dart';
 import 'vtc_card_delivery_trail.dart';
 import 'vtc_community_profile.dart';
-import 'vtc_findable_view.dart';
+import 'vtc_community_settings.dart';
 import 'vtc_flow_diagram.dart';
 import 'vtc_identity_check_view.dart';
-import 'vtc_join_phrase_view.dart';
 import 'vtc_join_state.dart';
 import 'vtc_membership_card_view.dart';
 import 'vtc_progress_line.dart';
 import 'vtc_role_name.dart';
 import 'vtc_trail_step.dart';
-
-/// The built-in role that manages the community's join phrase; a role the
-/// community defined itself never does, whatever its name.
-const _adminRole = 'admin';
 
 /// The page of a community the member belongs to, which they come back to:
 /// a welcome right after joining, else the community's logo and name; their
@@ -215,11 +210,13 @@ class _RoleLine extends StatelessWidget {
           key: const Key('vtc_community_settings'),
           icon: Icon(McIcons.settings, color: iconColor),
           tooltip: l10n.vtcCommunitySettings,
-          onPressed: () => _showSettings(
+          onPressed: () => showOnboardingSheet(
             context,
-            communityDid,
-            communityName,
-            isAdmin: role == _adminRole,
+            VtcCommunitySettings(
+              communityDid: communityDid,
+              communityName: communityName,
+              role: role,
+            ),
           ),
         ),
       if (communityDid != null && canVet)
@@ -383,31 +380,6 @@ class _WithAbout extends StatelessWidget {
     );
   }
 }
-
-/// Opens the settings of the community at [communityDid]: for now its join
-/// phrase.
-/// The community's settings for the member: how other members find them,
-/// and, for an administrator, the community's join phrase.
-Future<void> _showSettings(
-  BuildContext context,
-  String communityDid,
-  String communityName, {
-  required bool isAdmin,
-}) => showOnboardingSheet(
-  context,
-  Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    spacing: 16,
-    children: [
-      if (isAdmin)
-        VtcJoinPhraseView(
-          communityDid: communityDid,
-          communityName: communityName,
-        ),
-      VtcFindableView(communityDid: communityDid, communityName: communityName),
-    ],
-  ),
-);
 
 /// Where the card on show came from, as the Credentials tab draws it: the
 /// community issued it to the identity, which passed it on to the VTA.
