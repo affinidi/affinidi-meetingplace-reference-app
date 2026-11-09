@@ -3,7 +3,7 @@
 	"@appName": {
 		"type": "text"
 	},
-	"tabsTitle": "{tabName, select, connections{Invitations} contacts{Channels} identities{Identities} rCards{R-Cards} credentials{Credentials} settings{Settings} other{Invalid}}",
+	"tabsTitle": "{tabName, select, connections{Invitations} contacts{Communities} identities{Identities} rCards{R-Cards} credentials{Credentials} settings{Settings} other{Invalid}}",
 	"@tabsTitle": {
 		"type": "text",
 		"placeholders": {

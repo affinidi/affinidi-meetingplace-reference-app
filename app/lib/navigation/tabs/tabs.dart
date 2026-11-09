@@ -18,7 +18,7 @@ enum Tabs {
       case Tabs.connections:
         return const Icon(Icons.compare_arrows, size: 32);
       case Tabs.contacts:
-        return const Icon(Icons.chat);
+        return const Icon(Icons.groups);
       case Tabs.identities:
         return const Icon(Icons.fingerprint);
       case Tabs.rCards:

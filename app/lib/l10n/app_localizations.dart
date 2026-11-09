@@ -109,7 +109,7 @@ abstract class AppLocalizations {
   /// No description provided for @tabsTitle.
   ///
   /// In en, this message translates to:
-  /// **'{tabName, select, connections{Invitations} contacts{Channels} identities{Identities} rCards{R-Cards} credentials{Credentials} settings{Settings} other{Invalid}}'**
+  /// **'{tabName, select, connections{Invitations} contacts{Communities} identities{Identities} rCards{R-Cards} credentials{Credentials} settings{Settings} other{Invalid}}'**
   String tabsTitle(String tabName);
 
   /// No description provided for @rCardsPlaceholderMessage.

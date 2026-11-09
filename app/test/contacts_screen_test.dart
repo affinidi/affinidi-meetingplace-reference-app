@@ -43,6 +43,13 @@ void main() {
       expect(find.text(l10n.tabsTitle('contacts')), findsWidgets);
     });
 
+    testWidgets('should name the tab Communities', (tester) async {
+      await navigateToContactsScreen(tester);
+
+      expect(find.text('Communities'), findsWidgets);
+      expect(find.byIcon(Icons.groups), findsOneWidget);
+    });
+
     testWidgets('should show the contacts panel subtitle', (tester) async {
       final l10n = await getL10n();
       await navigateToContactsScreen(tester);

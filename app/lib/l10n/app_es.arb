@@ -249,7 +249,7 @@
 	"subtitleAddNew": "Crear un nuevo alias",
 	"subtitleAlias": "Identidad de alias",
 	"subtitlePrimary": "Su identidad principal",
-	"tabsTitle": "{tabName, select, connections{Invitaciones} contacts{Canales} identities{Identidades} rCards{Tarjetas-R} settings{Configuración} other{Inválido}}",
+	"tabsTitle": "{tabName, select, connections{Invitaciones} contacts{Comunidades} identities{Identidades} rCards{Tarjetas-R} settings{Configuración} other{Inválido}}",
 	"theirDetails": "Sus detalles",
 	"thisFieldIsRequired": "Este campo es obligatorio",
 	"timeAgoDay": "{days, plural, =1{1 day ago} other{{days} days ago}}",

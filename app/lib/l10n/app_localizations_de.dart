@@ -15,7 +15,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String tabsTitle(String tabName) {
     String _temp0 = intl.Intl.selectLogic(tabName, {
       'connections': 'Einladungen',
-      'contacts': 'Kanäle',
+      'contacts': 'Communitys',
       'identities': 'Identitäten',
       'rCards': 'R-Karten',
       'credentials': 'Anmeldeinformationen',
