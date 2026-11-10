@@ -6456,6 +6456,12 @@ abstract class AppLocalizations {
   /// **'Vetting for {name}'**
   String vtcVetterTitle(String name);
 
+  /// Headline of the vetter's step checking the applicant's details against their ID
+  ///
+  /// In en, this message translates to:
+  /// **'Check the applicant'**
+  String get vtcVetterDetailsTitle;
+
   /// What the vetting desk is for
   ///
   /// In en, this message translates to:
@@ -6591,7 +6597,7 @@ abstract class AppLocalizations {
   /// Name of a step of vetting an applicant, above the progress bar
   ///
   /// In en, this message translates to:
-  /// **'{step, select, ticket{Show your ticket} match{Compare codes} details{Check the applicant} other{Done}}'**
+  /// **'{step, select, ticket{Show your ticket} match{Compare codes} details{Check their details} other{Done}}'**
   String vtcVettingFlowStep(String step);
 
   /// How vetting an applicant ended, on its last step

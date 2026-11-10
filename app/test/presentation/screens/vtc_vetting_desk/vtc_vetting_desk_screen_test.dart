@@ -404,7 +404,9 @@ void main() {
     await waitFor(tester, find.byKey(const Key('vtc_vetter_card_waiting')));
     expect(flowStep(tester), VtcVettingFlowStep.details);
     expect(waiting(tester), isTrue);
-    expect(find.text('Step 3 of 4 · Check the applicant'), findsOneWidget);
+    expect(find.text('Step 3 of 4 · Check their details'), findsOneWidget);
+    expect(find.text('Check the applicant'), findsOneWidget);
+    expect(find.text('Vetting for Football club'), findsNothing);
     expect(find.byKey(const Key('vtc_vetter_card_waiting')), findsOneWidget);
 
     await tester.runAsync(() => fixture.sendCard(session));

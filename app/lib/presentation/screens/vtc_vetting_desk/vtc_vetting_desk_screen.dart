@@ -240,12 +240,12 @@ class VtcVettingFlowScreen extends HookConsumerWidget {
               title: l10n.vtcVettingFlowStep(step.name),
             ),
             // Comparing codes, the codes are the headline, as on the
-            // applicant's phone.
-            OnboardingTitle(
-              comparingCodes
-                  ? l10n.vtcJoinMatchTitle
-                  : l10n.vtcVetterTitle(communityName),
-            ),
+            // applicant's phone; checking them, the applicant is.
+            OnboardingTitle(switch (step) {
+              _ when comparingCodes => l10n.vtcJoinMatchTitle,
+              VtcVettingFlowStep.details => l10n.vtcVetterDetailsTitle,
+              _ => l10n.vtcVetterTitle(communityName),
+            }),
             switch ((step, state.current, state.ended)) {
               (VtcVettingFlowStep.done, _, final ended?) => _Outcome(
                 session: ended,

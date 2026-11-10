@@ -4391,6 +4391,9 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get vtcVetterDetailsTitle => 'Check the applicant';
+
+  @override
   String get vtcVetterIntro =>
       'Show your ticket to someone who wants to join. You\'ll check their details in person.';
 
@@ -4487,7 +4490,7 @@ class AppLocalizationsDe extends AppLocalizations {
     String _temp0 = intl.Intl.selectLogic(step, {
       'ticket': 'Show your ticket',
       'match': 'Compare codes',
-      'details': 'Check the applicant',
+      'details': 'Check their details',
       'other': 'Done',
     });
     return '$_temp0';
