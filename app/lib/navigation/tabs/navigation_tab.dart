@@ -12,6 +12,8 @@ class NavigationTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (!tab.showsBadge) return tab.icon;
+
     final count = ref.watch(
       notificationServiceProvider.select(
         (state) => state.counters[tab.serviceKey] ?? 0,

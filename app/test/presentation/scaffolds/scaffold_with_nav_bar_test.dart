@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mpx_flutter_reference_app/application/services/control_plane_service/control_plane_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/control_plane_service/control_plane_service_state.dart';
+import 'package:mpx_flutter_reference_app/application/services/notification_service/notification_counter_type.dart';
 import 'package:mpx_flutter_reference_app/application/services/notification_service/notification_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/notification_service/notification_service_state.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/configuration/environment.dart';
@@ -21,7 +22,10 @@ void main() {
 
   setUp(() => refreshes = 0);
 
-  Future<void> pumpTabs(WidgetTester tester) async {
+  Future<void> pumpTabs(
+    WidgetTester tester, {
+    Map<NotificationCounterType, int> counters = const {},
+  }) async {
     final router = GoRouter(
       initialLocation: '/${Tabs.contacts.name}',
       routes: [
@@ -53,7 +57,7 @@ void main() {
             _FakeControlPlaneService.new,
           ),
           notificationServiceProvider.overrideWith(
-            _FakeNotificationService.new,
+            () => _FakeNotificationService(counters),
           ),
           membershipCredentialsControllerProvider.overrideWith(
             () => _CountingController(() => refreshes++),
@@ -84,6 +88,23 @@ void main() {
       findsNWidgets(Tabs.values.length - 1),
     );
     expect(find.byIcon(Tabs.rCards.iconData), findsNothing);
+  });
+
+  testWidgets('shows no count on Communities', (tester) async {
+    await pumpTabs(
+      tester,
+      counters: {
+        NotificationCounterType.contacts: 3,
+        NotificationCounterType.identities: 2,
+      },
+    );
+
+    Finder badgeOn(Tabs tab) => find.ancestor(
+      of: find.byIcon(tab.iconData),
+      matching: find.byType(Badge),
+    );
+    expect(badgeOn(Tabs.contacts), findsNothing);
+    expect(badgeOn(Tabs.identities), findsOneWidget);
   });
 
   testWidgets('leaves the first opening of Credentials to read the cards', (
@@ -135,8 +156,13 @@ class _FakeControlPlaneService extends ControlPlaneService {
 }
 
 class _FakeNotificationService extends NotificationService {
+  _FakeNotificationService(this._counters);
+
+  final Map<NotificationCounterType, int> _counters;
+
   @override
-  NotificationServiceState build() => NotificationServiceState();
+  NotificationServiceState build() =>
+      NotificationServiceState(counters: _counters);
 }
 
 class _CountingController extends MembershipCredentialsController {

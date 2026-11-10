@@ -29,6 +29,10 @@ enum Tabs {
   /// Whether the bottom navigation offers the tab. R-Cards keeps its
   /// branch, as chat still opens an r-card's details through it.
   bool get isInNavigationBar => this != Tabs.rCards;
+
+  /// Whether the tab's navigation item shows a count of unseen items.
+  /// Communities shows none.
+  bool get showsBadge => this != Tabs.contacts;
 }
 
 enum TabTitleKey {
