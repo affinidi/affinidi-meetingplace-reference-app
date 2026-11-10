@@ -46,8 +46,9 @@ class QrCodeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Dark modules on white with a quiet zone in both modes, so the code
-    // scans reliably and exports as a standalone image.
+    // Dark modules on white with a quiet zone in both modes, at error
+    // correction M, as Mission Control asks of QR codes, so the code scans
+    // reliably and exports as a standalone image.
     return RepaintBoundary(
       key: _qrKey,
       child: DecoratedBox(
@@ -60,6 +61,7 @@ class QrCodeView extends StatelessWidget {
           child: QrImageView(
             data: data,
             version: QrVersions.auto,
+            errorCorrectionLevel: QrErrorCorrectLevel.M,
             size: size ?? context.qrScannerTheme.iconSize * 3,
             gapless: true,
             dataModuleStyle: const QrDataModuleStyle(
