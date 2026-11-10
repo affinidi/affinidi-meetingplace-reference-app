@@ -87,7 +87,6 @@ class _FakeTrustService extends Fake implements VtcTrustService {
       subjectDid: personaDid,
       vrcDigestMultibase: 'zQmedge-1',
     );
-    edges = {personaDid: VtcEdges(outgoing: edge)};
     return edge;
   }
 }
@@ -296,6 +295,7 @@ void main() {
   ) async {
     service.groupsMembers = [...service.groupsMembers, _bobEntry];
     final l10n = await pumpView(tester);
+    final listings = service.listings;
 
     await tester.tap(inMember('dir_bob', find.text(l10n.vtcTrustVouch)));
     await tester.pumpAndSettle();
@@ -312,6 +312,8 @@ void main() {
       inMember('dir_bob', find.byTooltip('You vouched for Bob')),
       findsOneWidget,
     );
+    // Shown from the vouch itself: the members were not read again.
+    expect(service.listings, listings);
   });
 
   testWidgets('lets the member choose whether other members find them', (

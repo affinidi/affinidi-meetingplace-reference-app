@@ -50,6 +50,22 @@ class CommunityMembersController extends _$CommunityMembersController {
     }
   }
 
+  /// Shows [edge], the member's vouch for [personaDid], at once, without
+  /// reading the vouches again.
+  void vouched(String personaDid, PublishedRelationship edge) {
+    // Nothing shown yet: the vouch comes with the members once read.
+    final value = state.value;
+    if (value == null) return;
+    final (members, edges) = value;
+    state = AsyncData((
+      members,
+      {
+        ...edges,
+        personaDid: (edges[personaDid] ?? const VtcEdges()).vouched(edge),
+      },
+    ));
+  }
+
   Future<CommunityMembers> _read() async {
     final service = ref.read(vtcTrustServiceProvider);
     // Read together; a failure of the vouches still reaches the caller,

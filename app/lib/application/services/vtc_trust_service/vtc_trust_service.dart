@@ -77,6 +77,10 @@ class VtcEdges {
   /// Whether the other member vouched for the member and has not been
   /// vouched for back.
   bool get canVouchBack => incoming != null && outgoing == null;
+
+  /// These vouches once the member vouched with [edge].
+  VtcEdges vouched(PublishedRelationship edge) =>
+      VtcEdges(outgoing: edge, incoming: incoming);
 }
 
 /// What the community shows the member of another member's credentials.

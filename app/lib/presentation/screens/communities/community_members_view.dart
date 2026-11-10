@@ -56,7 +56,7 @@ class CommunityMembersView extends HookConsumerWidget {
         entry: entry,
       );
       if (edge == null) return;
-      await sync();
+      ref.read(cache.notifier).vouched(personaDid, edge);
     }
 
     // One scroll view: on a short screen the list still gets room below
