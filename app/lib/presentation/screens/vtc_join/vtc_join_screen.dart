@@ -939,14 +939,19 @@ class _WaysIn extends StatelessWidget {
 /// A way in, as a card in the deck of ways in: the kind of admission as an
 /// eyebrow over what it takes, or why this app cannot apply under it yet,
 /// the way's symbol at the top end, and what it asks for below. Each kind
-/// carries its own colour as the corner wash and symbol, as a product
-/// does; a way this app cannot apply under stays plain and muted.
+/// carries its own colour as the corner wash, a faint tint and the symbol,
+/// as a product does; a way this app cannot apply under stays plain and
+/// muted.
 class _WayCard extends StatelessWidget {
   const _WayCard(this.way);
 
   final VtcJoinWay way;
 
   static const _symbolSize = 24.0;
+
+  /// Strength of the tint across the whole card: a hint of the kind's
+  /// colour under the stronger corner wash, not a fill.
+  static const _tintStrength = 0.05;
 
   @override
   Widget build(BuildContext context) {
@@ -970,68 +975,72 @@ class _WayCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(McRadius.md),
           side: BorderSide(color: mc.hairline),
         ),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(
-            McSpacing.s5,
-            McSpacing.s4,
-            McSpacing.s5,
-            McSpacing.s4,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: McSpacing.s3,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: McSpacing.s3,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: McSpacing.s1,
-                      children: [
-                        Text(
-                          l10n.vtcJoinWayKind(_kindOf(way)).toUpperCase(),
-                          style: McTypography.eyebrow.copyWith(
-                            color: mc.textSecondary,
-                          ),
-                        ),
-                        // A sentence, not a name: shown whole.
-                        Text(
-                          _titleOf(l10n, way),
-                          style: textTheme.titleMedium?.copyWith(
-                            color: supported
-                                ? mc.textPrimary
-                                : mc.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(
-                    _iconOf(way),
-                    size: _symbolSize,
-                    color: accent ?? mc.textTertiary,
-                  ),
-                ],
-              ),
-              for (final (icon, value) in details)
+        child: ColoredBox(
+          key: const Key('vtc_join_way_tint'),
+          color: accent?.withValues(alpha: _tintStrength) ?? Colors.transparent,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(
+              McSpacing.s5,
+              McSpacing.s4,
+              McSpacing.s5,
+              McSpacing.s4,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: McSpacing.s3,
+              children: [
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: McSpacing.s2,
+                  spacing: McSpacing.s3,
                   children: [
-                    Icon(icon, size: 16, color: mc.textSecondary),
                     Expanded(
-                      child: Text(
-                        value,
-                        style: textTheme.bodySmall?.copyWith(
-                          color: mc.textPrimary,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: McSpacing.s1,
+                        children: [
+                          Text(
+                            l10n.vtcJoinWayKind(_kindOf(way)).toUpperCase(),
+                            style: McTypography.eyebrow.copyWith(
+                              color: mc.textSecondary,
+                            ),
+                          ),
+                          // A sentence, not a name: shown whole.
+                          Text(
+                            _titleOf(l10n, way),
+                            style: textTheme.titleMedium?.copyWith(
+                              color: supported
+                                  ? mc.textPrimary
+                                  : mc.textSecondary,
+                            ),
+                          ),
+                        ],
                       ),
+                    ),
+                    Icon(
+                      _iconOf(way),
+                      size: _symbolSize,
+                      color: accent ?? mc.textTertiary,
                     ),
                   ],
                 ),
-            ],
+                for (final (icon, value) in details)
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: McSpacing.s2,
+                    children: [
+                      Icon(icon, size: 16, color: mc.textSecondary),
+                      Expanded(
+                        child: Text(
+                          value,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: mc.textPrimary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
           ),
         ),
       ),

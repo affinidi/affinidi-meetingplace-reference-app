@@ -1543,13 +1543,23 @@ void main() {
       AppCard topCard() => tester.widget(
         find.descendant(of: deck, matching: find.byType(AppCard)).last,
       );
+      ColoredBox topTint() => tester.widget(
+        find
+            .descendant(
+              of: deck,
+              matching: find.byKey(const Key('vtc_join_way_tint')),
+            )
+            .last,
+      );
 
       expect(
         find.descendant(of: deck, matching: find.text('REVIEWED')),
         findsOneWidget,
       );
-      // A card, not a hero panel, washed in its kind's colour, with no blur.
+      // A card, not a hero panel, washed and faintly tinted in its kind's
+      // colour, with no blur.
       expect(topCard().accent, McColors.purple);
+      expect(topTint().color, McColors.purple.withValues(alpha: 0.05));
       expect(
         (topCard().shape! as RoundedRectangleBorder).borderRadius,
         BorderRadius.circular(McRadius.md),
@@ -1570,6 +1580,7 @@ void main() {
       );
       // A way this app cannot apply under stays plain.
       expect(topCard().accent, isNull);
+      expect(topTint().color, Colors.transparent);
     });
 
     testWidgets('shows a single way in as a deck of one', (tester) async {
