@@ -229,7 +229,9 @@ class OnboardingTextField extends StatelessWidget {
 }
 
 /// The primary action, in the theme's primary button style. Outlined, it is
-/// a frame for a secondary action such as removing a link.
+/// a frame for a secondary action such as removing a link. Destructive, it
+/// is in the theme's danger colour, for an action that throws away what is
+/// under way.
 class OnboardingButton extends StatelessWidget {
   const OnboardingButton({
     super.key,
@@ -237,18 +239,29 @@ class OnboardingButton extends StatelessWidget {
     required this.onPressed,
     this.isLoading = false,
     this.isOutlined = false,
+    this.isDestructive = false,
   });
 
   final String label;
   final VoidCallback? onPressed;
   final bool isLoading;
   final bool isOutlined;
+  final bool isDestructive;
 
   @override
   Widget build(BuildContext context) {
     if (isLoading) return const Center(child: OnboardingSpinner());
     const padding = EdgeInsets.symmetric(vertical: 16);
     final text = Text(label);
+    if (isDestructive) {
+      return ElevatedButton(
+        onPressed: onPressed,
+        style: context.destructiveElevatedButtonStyle.copyWith(
+          padding: const WidgetStatePropertyAll(padding),
+        ),
+        child: text,
+      );
+    }
     if (isOutlined) {
       return OutlinedButton(
         onPressed: onPressed,

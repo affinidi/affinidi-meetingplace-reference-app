@@ -16,6 +16,7 @@ import 'package:mpx_flutter_reference_app/presentation/screens/vtc_vetting_desk/
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_vetting_desk/vtc_vetting_desk_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_vetting_desk/vtc_vetting_desk_state.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_colors.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 
 import '../../../fakes/fake_vetter_desk.dart';
@@ -223,6 +224,23 @@ void main() {
     expect(flowStep(tester), isNull);
     final decline = (await tester.runAsync(fixture.sentToApplicant))!.last;
     expect(decline.type, VettingTask.decline);
+    await close(tester);
+  });
+
+  testWidgets('offers a new ticket in the danger colour', (tester) async {
+    await pumpDesk(tester);
+    await showTicket(tester);
+
+    final button = tester.widget<ElevatedButton>(
+      find.descendant(
+        of: find.byKey(const Key('vtc_vetter_new_ticket')),
+        matching: find.byType(ElevatedButton),
+      ),
+    );
+    expect(
+      button.style?.foregroundColor?.resolve({}),
+      AppTheme.dark.extension<McColors>()!.dangerText,
+    );
     await close(tester);
   });
 

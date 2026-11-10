@@ -486,7 +486,7 @@ class _TicketView extends StatelessWidget {
           OnboardingButton(
             key: const Key('vtc_vetter_new_ticket'),
             label: l10n.vtcVetterNewTicket,
-            isOutlined: true,
+            isDestructive: true,
             isLoading: state.busy,
             onPressed: controller.createTicket,
           ),
