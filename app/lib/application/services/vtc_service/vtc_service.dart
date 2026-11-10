@@ -302,6 +302,15 @@ class VtcService {
   Future<void> unlink() async {
     final linkedVta = await _repository.getLinkedVta();
     if (linkedVta != null) await _vtaClient(linkedVta).signOut();
+    await forget();
+  }
+
+  /// Forgets the VTA link, the manager key, the communities and the
+  /// approval key on this phone only, without asking the VTA.
+  ///
+  /// For a link a previous install left in the platform keystore: the VTA
+  /// may no longer be reachable, and its sessions expire on their own.
+  Future<void> forget() async {
     _client = null;
     _signers.clear();
     await _forgetConnectionKeys();
