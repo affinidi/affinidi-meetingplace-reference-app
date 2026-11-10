@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_community.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/build_context_extensions.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/communities/community_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/credentials/membership_credentials_list.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_findable_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_sign_in/vtc_sign_in_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/common/app_card.dart';
@@ -157,6 +160,23 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text(l10n.communitiesSubtitle), findsOneWidget);
+    });
+
+    testWidgets('reads whether members find the member on opening it', (
+      tester,
+    ) async {
+      await openCommunitiesTab(tester);
+      await saveCommunities();
+      await pullToRefresh(tester);
+
+      await tester.tap(find.text('Chess club'));
+      await tester.pumpAndSettle();
+
+      // Before the Settings tab is opened.
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(CommunityScreen)),
+      );
+      expect(container.exists(vtcFindableControllerProvider(chessDid)), isTrue);
     });
 
     testWidgets('shows what a community is in its Info tab', (tester) async {

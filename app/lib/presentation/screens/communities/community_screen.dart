@@ -8,6 +8,7 @@ import '../../widgets/filter_tab_bar.dart';
 import '../../widgets/section_header.dart';
 import '../contacts/contacts_screen.dart';
 import '../contacts/contacts_screen_controller.dart';
+import '../vtc_join/vtc_findable_controller.dart';
 import 'communities_controller.dart';
 import 'community_info_view.dart';
 import 'community_members_controller.dart';
@@ -33,8 +34,11 @@ class CommunityScreen extends HookConsumerWidget {
         ref
             .read(contactsScreenControllerProvider.notifier)
             .showCommunity(communityDid);
-        // Read the members now, for the Members tab to show at once.
-        ref.read(communityMembersControllerProvider(communityDid));
+        // Read the members and the member's directory card now, for the
+        // Members and Settings tabs to show them at once.
+        ref
+          ..read(communityMembersControllerProvider(communityDid))
+          ..read(vtcFindableControllerProvider(communityDid));
       });
       return null;
     }, [communityDid]);
