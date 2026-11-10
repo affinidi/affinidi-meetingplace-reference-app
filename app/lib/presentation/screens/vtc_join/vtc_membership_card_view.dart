@@ -54,7 +54,8 @@ class VtcMembershipCardView extends StatelessWidget {
 
 /// A card a community issued, as a card on the page: the
 /// community and [title], what the card states, whom it is about and for
-/// how long, and the [credential] in full behind an icon.
+/// how long, and the [credential] in full behind an icon, with the `pnm`
+/// command that fetches it from the member's VTA.
 class VtcCardView extends StatelessWidget {
   const VtcCardView({
     super.key,
@@ -172,6 +173,7 @@ class VtcCardView extends StatelessWidget {
                             json: credential,
                             icon: documentIcon,
                             subtitle: credentialType,
+                            command: pnmCredentialCommand(credential['id']),
                           ),
                         ),
                       ],
