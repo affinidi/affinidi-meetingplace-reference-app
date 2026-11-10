@@ -23,6 +23,7 @@ class McColors extends ThemeExtension<McColors> {
     required this.textOnAccent,
     required this.hairline,
     required this.hairlineStrong,
+    required this.gridLine,
     required this.control,
     required this.ok,
     required this.bad,
@@ -63,6 +64,7 @@ class McColors extends ThemeExtension<McColors> {
     textOnAccent: Color(0xFF000000),
     hairline: Color(0x1FF4F6FB),
     hairlineStrong: Color(0x33F4F6FB),
+    gridLine: Color(0x2E7BD7DD),
     control: Color(0x5EF4F6FB),
     ok: Color(0xFF26D07C),
     bad: Color(0xFFFF5F6D),
@@ -91,6 +93,7 @@ class McColors extends ThemeExtension<McColors> {
     textOnAccent: Color(0xFFFFFFFF),
     hairline: Color(0x1F000000),
     hairlineStrong: Color(0x33000000),
+    gridLine: Color(0x080A182A),
     control: Color(0x6E000000),
     ok: Color(0xFF009957),
     bad: Color(0xFFEB4C5D),
@@ -123,6 +126,9 @@ class McColors extends ThemeExtension<McColors> {
   final Color textOnAccent;
   final Color hairline;
   final Color hairlineStrong;
+
+  /// The 1px gap between hairline grid cells, and the grid's edge.
+  final Color gridLine;
   final Color control;
   final Color ok;
   final Color bad;
@@ -160,6 +166,7 @@ class McColors extends ThemeExtension<McColors> {
     Color? textOnAccent,
     Color? hairline,
     Color? hairlineStrong,
+    Color? gridLine,
     Color? control,
     Color? ok,
     Color? bad,
@@ -187,6 +194,7 @@ class McColors extends ThemeExtension<McColors> {
       textOnAccent: textOnAccent ?? this.textOnAccent,
       hairline: hairline ?? this.hairline,
       hairlineStrong: hairlineStrong ?? this.hairlineStrong,
+      gridLine: gridLine ?? this.gridLine,
       control: control ?? this.control,
       ok: ok ?? this.ok,
       bad: bad ?? this.bad,
@@ -219,6 +227,7 @@ class McColors extends ThemeExtension<McColors> {
       textOnAccent: Color.lerp(textOnAccent, other.textOnAccent, t)!,
       hairline: Color.lerp(hairline, other.hairline, t)!,
       hairlineStrong: Color.lerp(hairlineStrong, other.hairlineStrong, t)!,
+      gridLine: Color.lerp(gridLine, other.gridLine, t)!,
       control: Color.lerp(control, other.control, t)!,
       ok: Color.lerp(ok, other.ok, t)!,
       bad: Color.lerp(bad, other.bad, t)!,
