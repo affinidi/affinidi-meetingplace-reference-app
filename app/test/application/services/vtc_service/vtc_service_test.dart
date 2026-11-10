@@ -1539,7 +1539,7 @@ void main() {
           membership(),
         ], grant: authority());
 
-        final card = (await service.groupCards()).single;
+        final card = (await service.groupCards(fakeVtcDid)).single;
 
         expect(card.key, 'urn:uuid:group-card');
         expect(card.groupDid, groupDid);
@@ -1553,24 +1553,24 @@ void main() {
       test('lists a card unnamed when the community is down', () async {
         hold([membership()], grant: authority());
 
-        final card = (await service.groupCards()).single;
+        final card = (await service.groupCards(fakeVtcDid)).single;
 
         expect(card.groupName, isNull);
       });
 
       test('lists none the VTA keeps not for the identity', () async {
         hold([]);
-        expect(await service.groupCards(), isEmpty);
+        expect(await service.groupCards(fakeVtcDid), isEmpty);
 
         hold([membership(subject: 'did:webvh:QmSomeoneElse:vta.example')]);
-        expect(await service.groupCards(), isEmpty);
+        expect(await service.groupCards(fakeVtcDid), isEmpty);
       });
 
       test('reads a card valid, then revoked with its grant', () async {
         hold([
           membership(),
         ], grant: authority(status: FakeVtcNetwork.statusEntry(3)));
-        final card = (await service.groupCards()).single;
+        final card = (await service.groupCards(fakeVtcDid)).single;
 
         final valid = await service.checkGroupCardStatus(card);
         expect(valid.state, VtcCardState.valid);
@@ -1585,7 +1585,7 @@ void main() {
         hold([
           membership(validUntil: '2020-01-01T00:00:00Z'),
         ], grant: authority(status: FakeVtcNetwork.statusEntry(3)));
-        final expiredCard = (await service.groupCards()).single;
+        final expiredCard = (await service.groupCards(fakeVtcDid)).single;
         hold(
           [membership()],
           grant: authority(
@@ -1593,7 +1593,7 @@ void main() {
             status: FakeVtcNetwork.statusEntry(3),
           ),
         );
-        final expiredGrant = (await service.groupCards()).single;
+        final expiredGrant = (await service.groupCards(fakeVtcDid)).single;
 
         expect(
           (await service.checkGroupCardStatus(expiredCard)).state,
@@ -1608,7 +1608,7 @@ void main() {
 
       test('cannot tell without the grant, or the community', () async {
         hold([membership()]);
-        final withoutGrant = (await service.groupCards()).single;
+        final withoutGrant = (await service.groupCards(fakeVtcDid)).single;
         expect(withoutGrant.authority, isNull);
         expect(
           (await service.checkGroupCardStatus(withoutGrant)).state,
@@ -1618,7 +1618,7 @@ void main() {
         hold([
           membership(),
         ], grant: authority(status: FakeVtcNetwork.statusEntry(3)));
-        final card = (await service.groupCards()).single;
+        final card = (await service.groupCards(fakeVtcDid)).single;
         network.isStatusListDown = true;
 
         final status = await service.checkGroupCardStatus(card);

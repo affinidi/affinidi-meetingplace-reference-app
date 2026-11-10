@@ -2502,52 +2502,47 @@ class VtcService {
         );
   }
 
-  /// The cards the groups of the member's communities issued to their
-  /// identity in each, as the member's VTA keeps them: the longest-lasting
-  /// one of each group, with the community's grant to the group and the
-  /// group's name, community by community. A name is missing when its
-  /// community cannot be reached.
+  /// The cards the groups of [communityDid] issued to the member's identity
+  /// there, as the member's VTA keeps them: the longest-lasting one of each
+  /// group, with the community's grant to the group and the group's name. A
+  /// name is missing when the community cannot be reached.
   ///
-  /// Throws [VtaNotLinkedException] when no VTA is linked, and
-  /// [MeetingPlaceVtcSDKException] when the VTA refuses or cannot be reached.
-  Future<List<VtcGroupCard>> groupCards() async {
+  /// Throws as [memberGroups] does.
+  Future<List<VtcGroupCard>> groupCards(String communityDid) async {
+    final community = await _memberCommunity(communityDid);
     final vta = await _grantedVta();
     final mockIssuer = await _mockIssuer.did();
+    final held = await vta.findCredentials(
+      type: GroupAdmissionVerifier.membershipType,
+      subjectDid: community.personaDid,
+    );
+    final longest = <String, HeldCredential>{};
+    for (final credential in held) {
+      final groupDid = credential.issuerDid;
+      // The community's own card, and test ones, are no group's.
+      if (groupDid == null ||
+          groupDid == communityDid ||
+          groupDid == mockIssuer) {
+        continue;
+      }
+      if (longest[groupDid] case final kept?
+          when !_outlasts(credential, kept)) {
+        continue;
+      }
+      longest[groupDid] = credential;
+    }
+    if (longest.isEmpty) return const [];
+    final names = await _groupNames(communityDid);
     final cards = <VtcGroupCard>[];
-    for (final community in await _repository.communities()) {
-      if (!community.isMember) continue;
-      final held = await vta.findCredentials(
-        type: GroupAdmissionVerifier.membershipType,
-        subjectDid: community.personaDid,
+    for (final MapEntry(key: groupDid, value: credential) in longest.entries) {
+      final card = await _groupCard(
+        vta,
+        community,
+        credential,
+        groupDid: groupDid,
+        groupName: names[groupDid],
       );
-      final longest = <String, HeldCredential>{};
-      for (final credential in held) {
-        final groupDid = credential.issuerDid;
-        // The community's own card, and test ones, are no group's.
-        if (groupDid == null ||
-            groupDid == community.communityDid ||
-            groupDid == mockIssuer) {
-          continue;
-        }
-        if (longest[groupDid] case final kept?
-            when !_outlasts(credential, kept)) {
-          continue;
-        }
-        longest[groupDid] = credential;
-      }
-      if (longest.isEmpty) continue;
-      final names = await _groupNames(community.communityDid);
-      for (final MapEntry(key: groupDid, value: credential)
-          in longest.entries) {
-        final card = await _groupCard(
-          vta,
-          community,
-          credential,
-          groupDid: groupDid,
-          groupName: names[groupDid],
-        );
-        if (card != null) cards.add(card);
-      }
+      if (card != null) cards.add(card);
     }
     return cards;
   }
