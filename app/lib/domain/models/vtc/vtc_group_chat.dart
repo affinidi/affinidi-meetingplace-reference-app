@@ -18,6 +18,7 @@ class VtcGroupChat {
     this.posting = GroupChatPosting.everyone,
     this.members = const {},
     this.moderators = const {},
+    this.authority,
   });
 
   /// Restores a [VtcGroupChat] stored with [toJson].
@@ -37,6 +38,7 @@ class VtcGroupChat {
     moderators: {
       ...(json['moderators'] as List<dynamic>? ?? const []).whereType<String>(),
     },
+    authority: json['authority'] as Map<String, dynamic>?,
   );
 
   /// The Meeting Place group's id.
@@ -68,11 +70,18 @@ class VtcGroupChat {
   /// owner's record only.
   final Set<String> moderators;
 
-  /// A copy with [posting], [members] and [moderators] replaced where given.
+  /// The community's authority credential to the group, as the last join
+  /// let in carried it: its revocation is how the owner's phone tells a
+  /// deleted group from one it may no longer see. The owner's record only.
+  final Map<String, dynamic>? authority;
+
+  /// A copy with [posting], [members], [moderators] and [authority]
+  /// replaced where given.
   VtcGroupChat copyWith({
     GroupChatPosting? posting,
     Map<String, String>? members,
     Set<String>? moderators,
+    Map<String, dynamic>? authority,
   }) => VtcGroupChat(
     chatGroupId: chatGroupId,
     communityDid: communityDid,
@@ -83,6 +92,7 @@ class VtcGroupChat {
     posting: posting ?? this.posting,
     members: members ?? this.members,
     moderators: moderators ?? this.moderators,
+    authority: authority ?? this.authority,
   );
 
   /// This record as JSON, for [VtcGroupChat.fromJson].
@@ -96,5 +106,6 @@ class VtcGroupChat {
     'posting': posting.name,
     'members': members,
     'moderators': moderators.toList(),
+    'authority': ?authority,
   };
 }

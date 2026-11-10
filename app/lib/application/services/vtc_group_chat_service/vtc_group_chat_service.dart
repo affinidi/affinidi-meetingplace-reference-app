@@ -669,6 +669,7 @@ class VtcGroupChatService {
       chat.copyWith(
         members: {...chat.members, memberDid: entryId},
         moderators: isManager ? {...chat.moderators, memberDid} : null,
+        authority: proof.authority,
       ),
     );
     return false;
@@ -678,6 +679,7 @@ class VtcGroupChatService {
   /// reads who may post from the community's link again, and, in a chat
   /// this phone owns, removes those the community no longer lists as active
   /// members, and makes the group's managers, and only them, moderators.
+  /// A chat whose group the community deleted loses everyone it let in.
   ///
   /// A chat whose group cannot be read now is left as it is. Requests to
   /// join left waiting are decided again first.
@@ -709,11 +711,20 @@ class VtcGroupChatService {
   }
 
   Future<void> _sync(MeetingPlaceCoreSDK sdk, VtcGroupChat chat) async {
-    final active = {
-      for (final member in await _vtc.groupMembers(
+    final List<VtcGroupMember> listed;
+    try {
+      listed = await _vtc.groupMembers(
         chat.communityDid,
         groupId: chat.groupId,
-      ))
+      );
+    } on MeetingPlaceVtcSDKException catch (error) {
+      if (!await _isDeleted(chat, error)) rethrow;
+      // A deleted group has no members left, and no managers.
+      await _keepInStep(sdk, chat, active: const {}, managers: const {});
+      return;
+    }
+    final active = {
+      for (final member in listed)
         if (member.isActive) member.entryId,
     };
     final managers = {
@@ -722,7 +733,17 @@ class VtcGroupChatService {
         groupId: chat.groupId,
       )).group.managers,
     };
+    await _keepInStep(sdk, chat, active: active, managers: managers);
+  }
 
+  /// Removes from [chat] those let in whose entry is not [active], and makes
+  /// those whose entry is among [managers], and only them, moderators.
+  Future<void> _keepInStep(
+    MeetingPlaceCoreSDK sdk,
+    VtcGroupChat chat, {
+    required Set<String> active,
+    required Set<String> managers,
+  }) async {
     final members = {...chat.members};
     final moderators = {...chat.moderators};
     for (final MapEntry(key: memberDid, value: entryId)
@@ -747,6 +768,21 @@ class VtcGroupChatService {
     await _repository.saveGroupChat(
       chat.copyWith(members: members, moderators: moderators),
     );
+  }
+
+  /// Whether [error], refusing to list [chat]'s group, means the community
+  /// deleted it. A group the owner may no longer see is refused alike, so
+  /// only the group's authority, revoked by the deletion alone, tells.
+  Future<bool> _isDeleted(
+    VtcGroupChat chat,
+    MeetingPlaceVtcSDKException error,
+  ) async {
+    final authority = chat.authority;
+    if (authority == null ||
+        !(error.refusalCode?.endsWith(':notFound') ?? false)) {
+      return false;
+    }
+    return _vtc.isGroupAuthorityRevoked(authority);
   }
 
   Future<void> _setModerator(

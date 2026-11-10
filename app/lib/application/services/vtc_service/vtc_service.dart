@@ -2699,6 +2699,14 @@ class VtcService {
     memberDid: memberDid,
   );
 
+  /// Whether the community revoked [authority], a group's authority
+  /// credential [verifyGroupJoin] accepted: it does so only when it deletes
+  /// the group. Throws [MeetingPlaceVtcSDKException] when its status list
+  /// cannot be read.
+  Future<bool> isGroupAuthorityRevoked(Map<String, dynamic> authority) async =>
+      (await _sdk.statusListClient().check(authority)).state ==
+      CredentialStatusState.revoked;
+
   /// The member's VTA, and their identity's signer in [communityDid].
   Future<(VtaClient, SignInPersona)> _asMember(String communityDid) async {
     final community = await _memberCommunity(communityDid);

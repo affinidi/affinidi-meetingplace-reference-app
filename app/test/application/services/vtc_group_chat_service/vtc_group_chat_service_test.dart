@@ -44,6 +44,13 @@ class _FakeVtcService extends Fake implements VtcService {
   bool hidesMembers = false;
   GroupChatLink? link;
 
+  /// The code the community refuses to list the group's members with.
+  String? membersRefusal;
+
+  /// Whether the group's authority shows as revoked, and those checked.
+  bool isAuthorityRevoked = false;
+  final authoritiesChecked = <Map<String, dynamic>>[];
+
   VtcGroup get group => VtcGroup(
     groupId: 'g1',
     groupDid: _groupDid,
@@ -79,7 +86,16 @@ class _FakeVtcService extends Fake implements VtcService {
     if (isCommunityDown) {
       throw MeetingPlaceVtcSDKException.transportFailed('down');
     }
+    if (membersRefusal case final code?) {
+      throw MeetingPlaceVtcSDKException.refused(code);
+    }
     return members;
+  }
+
+  @override
+  Future<bool> isGroupAuthorityRevoked(Map<String, dynamic> authority) async {
+    authoritiesChecked.add(authority);
+    return isAuthorityRevoked;
   }
 
   @override
@@ -282,10 +298,14 @@ Channel _joinRequest({String memberDid = _memberDid}) => Channel(
   otherPartyPermanentChannelDid: memberDid,
 );
 
+const _authority = {'type': 'AuthorityCredential'};
+
 final _proof = const GroupJoinProof(
   presentation: {'type': 'VerifiablePresentation'},
-  authority: {'type': 'AuthorityCredential'},
+  authority: _authority,
 ).toAttachments();
+
+const _membersNotFound = 'vtc/groups/members/list:notFound';
 
 void main() {
   late _FakeVtcService vtc;
@@ -331,6 +351,12 @@ void main() {
       expect(sdk.approved, [_memberDid]);
       expect(sdk.moderators, isEmpty);
       expect((await stored()).members, {_memberDid: 'entry-member'});
+    });
+
+    test("remembers the group's authority the request carried", () async {
+      await service.decideJoinRequest(_joinRequest(), _proof);
+
+      expect((await stored()).authority, _authority);
     });
 
     test('lets in a manager of the group as a moderator', () async {
@@ -500,6 +526,58 @@ void main() {
 
       expect(sdk.removed, isEmpty);
       expect(sdk.moderators, isEmpty);
+    });
+
+    group('when the community no longer finds the group', () {
+      setUp(() async {
+        vtc.membersRefusal = _membersNotFound;
+        await repository.saveGroupChat(
+          (await stored()).copyWith(authority: _authority),
+        );
+      });
+
+      test('removes everyone once the community deleted it', () async {
+        vtc.isAuthorityRevoked = true;
+
+        await service.syncChats();
+
+        expect(sdk.removed, unorderedEquals([_memberDid, _ownerDid]));
+        expect((await stored()).members, isEmpty);
+        expect((await stored()).moderators, isEmpty);
+      });
+
+      test('keeps everyone while it only hides the group', () async {
+        await service.syncChats();
+
+        expect(vtc.authoritiesChecked, [_authority]);
+        expect(sdk.removed, isEmpty);
+        expect((await stored()).members, hasLength(2));
+      });
+
+      test(
+        "keeps everyone when it never learnt the group's authority",
+        () async {
+          await repository.saveGroupChat(
+            ownedChat.copyWith(members: {_memberDid: 'entry-member'}),
+          );
+
+          await service.syncChats();
+
+          expect(vtc.authoritiesChecked, isEmpty);
+          expect(sdk.removed, isEmpty);
+        },
+      );
+
+      test('keeps everyone when the community refuses otherwise', () async {
+        vtc
+          ..membersRefusal = 'vtc/groups/members/list:cursorInvalid'
+          ..isAuthorityRevoked = true;
+
+        await service.syncChats();
+
+        expect(vtc.authoritiesChecked, isEmpty);
+        expect(sdk.removed, isEmpty);
+      });
     });
   });
 
