@@ -43,6 +43,8 @@ class VtcContactTrustPanel extends HookConsumerWidget {
     // The member's vouches made here, by community and the identity vouched
     // for, shown without reading the vouches again.
     final vouched = useState(const <(String, String), PublishedRelationship>{});
+    // The vouches read again as the member opened them, by the same key.
+    final refreshed = useState(const <(String, String), VtcEdges>{});
     if (channelDid == null || trust == null || trust.communities.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -56,11 +58,18 @@ class VtcContactTrustPanel extends HookConsumerWidget {
     void showVouched(VtcMemberLink link, PublishedRelationship edge) =>
         vouched.value = {...vouched.value, keyOf(link): edge};
 
-    _TrustRow shown(_TrustRow row) =>
-        switch ((row.edges, vouched.value[keyOf(row.link)])) {
-          (final edges?, final edge?) => row.withEdges(edges.vouched(edge)),
-          _ => row,
-        };
+    _TrustRow shown(_TrustRow row) {
+      final key = keyOf(row.link);
+      final edges = refreshed.value[key] ?? row.edges;
+      return switch ((edges, vouched.value[key])) {
+        (final edges?, final edge?) => row.withEdges(edges.vouched(edge)),
+        (final edges?, null) => row.withEdges(edges),
+        _ => row,
+      };
+    }
+
+    void showRefreshed(VtcMemberLink link, VtcEdges edges) =>
+        refreshed.value = {...refreshed.value, keyOf(link): edges};
 
     Future<void> vouch(_TrustRow row) async {
       final edge = await vouchWithConsent(
@@ -86,6 +95,7 @@ class VtcContactTrustPanel extends HookConsumerWidget {
       );
       if (!withdrawn) return;
       vouched.value = {...vouched.value}..remove(keyOf(row.link));
+      refreshed.value = {...refreshed.value}..remove(keyOf(row.link));
       reload.value++;
     }
 
@@ -134,6 +144,7 @@ class VtcContactTrustPanel extends HookConsumerWidget {
               name: nameOf(row.link),
               onVouch: () => vouch(row),
               onWithdraw: (edge) => withdraw(row, edge),
+              onRefreshed: (edges) => showRefreshed(row.link, edges),
             ),
             const Divider(),
           ],
@@ -180,12 +191,14 @@ class _TrustRowView extends StatelessWidget {
     required this.name,
     required this.onVouch,
     required this.onWithdraw,
+    required this.onRefreshed,
   });
 
   final _TrustRow row;
   final String name;
   final VoidCallback onVouch;
   final void Function(PublishedRelationship edge) onWithdraw;
+  final ValueChanged<VtcEdges> onRefreshed;
 
   @override
   Widget build(BuildContext context) {
@@ -229,6 +242,7 @@ class _TrustRowView extends StatelessWidget {
                         communityDid: row.link.communityDid,
                         communityName: row.communityName,
                         entryId: row.link.entryId,
+                        onRefreshed: onRefreshed,
                       ),
                   ],
                 ),

@@ -37,6 +37,8 @@ class VtcGroupMembersScreen extends HookConsumerWidget {
     // The member's vouches made here, by DID, shown without reading the
     // vouches again.
     final vouched = useState(const <String, PublishedRelationship>{});
+    // The vouches read again as the member opened them, by DID.
+    final refreshed = useState(const <String, VtcEdges>{});
 
     Future<void> vouch(DirectoryEntry entry, String name) async {
       final personaDid = entry.did;
@@ -87,7 +89,10 @@ class VtcGroupMembersScreen extends HookConsumerWidget {
               );
             }
             final entry = members[index - 1];
-            final shown = edges[entry.did] ?? const VtcEdges();
+            final shown =
+                refreshed.value[entry.did] ??
+                edges[entry.did] ??
+                const VtcEdges();
             return VtcMemberTile(
               key: Key('vtc_group_member_${entry.entryId}'),
               communityDid: communityDid,
@@ -99,6 +104,13 @@ class VtcGroupMembersScreen extends HookConsumerWidget {
               },
               names: vtcMemberNames(members),
               onVouch: (name) => vouch(entry, name),
+              onRefreshed: switch (entry.did) {
+                final did? => (edges) => refreshed.value = {
+                  ...refreshed.value,
+                  did: edges,
+                },
+                null => null,
+              },
             );
           },
         ),

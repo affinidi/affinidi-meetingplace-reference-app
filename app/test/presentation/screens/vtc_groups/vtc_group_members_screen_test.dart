@@ -313,6 +313,11 @@ void main() {
     expect(find.byKey(const Key('vtc_vouches_refreshing')), findsNothing);
     expect(find.byKey(const Key('vtc_vouch_trail_outgoing')), findsOneWidget);
     expect(find.byKey(const Key('vtc_vouch_trail_incoming')), findsOneWidget);
+
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pumpAndSettle();
+    expect(inMember('dir_carol', find.byIcon(McIcons.check)), findsOneWidget);
+    expect(inMember('dir_carol', find.byIcon(McIcons.pending)), findsNothing);
   });
 
   testWidgets('keeps the vouches shown when reading them again fails', (

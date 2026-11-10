@@ -373,6 +373,39 @@ void main() {
     expect(find.text('Vouch'), findsOneWidget);
   });
 
+  testWidgets('shows a vouch back made since, once the vouches are opened', (
+    tester,
+  ) async {
+    service
+      ..stored.add(linkToBob())
+      ..outgoing = const PublishedRelationship(
+        id: 'edge-1',
+        issuerDid: _me,
+        subjectDid: _bob,
+        vrcDigestMultibase: 'zQm1',
+      );
+    await pumpPanel(tester);
+    service.incoming = const PublishedRelationship(
+      id: 'edge-0',
+      issuerDid: _bob,
+      subjectDid: _me,
+      vrcDigestMultibase: 'zQm0',
+    );
+
+    await tester.tap(
+      find.byTooltip('You vouched for Bob. Waiting for them to vouch back.'),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Bob vouched for you'), findsOneWidget);
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byTooltip('You and Bob vouched for each other'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('opens the signed vouch the member gave', (tester) async {
     service
       ..stored.add(linkToBob())

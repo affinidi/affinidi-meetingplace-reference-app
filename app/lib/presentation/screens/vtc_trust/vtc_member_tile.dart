@@ -20,6 +20,7 @@ class VtcMemberTile extends StatelessWidget {
     required this.edges,
     required this.names,
     required this.onVouch,
+    this.onRefreshed,
   });
 
   final String communityDid;
@@ -34,6 +35,10 @@ class VtcMemberTile extends StatelessWidget {
 
   /// Vouches for this member, given the name the row shows.
   final void Function(String name) onVouch;
+
+  /// Takes the vouches with this member as read once the member opened
+  /// them.
+  final ValueChanged<VtcEdges>? onRefreshed;
 
   /// The room each icon of a row takes, kept when it shows none.
   static const _iconSlot = 40.0;
@@ -74,6 +79,7 @@ class VtcMemberTile extends StatelessWidget {
               communityDid: communityDid,
               communityName: communityName,
               entry: entry,
+              onRefreshed: onRefreshed,
             ),
           ),
           SizedBox.square(

@@ -117,6 +117,11 @@ class CommunityMembersView extends HookConsumerWidget {
                   edges: edges[entry.did] ?? const VtcEdges(),
                   names: vtcMemberNames(members),
                   onVouch: (name) => vouch(entry, name),
+                  onRefreshed: switch (entry.did) {
+                    final did? =>
+                      (edges) => ref.read(cache.notifier).refreshed(did, edges),
+                    null => null,
+                  },
                 );
               },
             ),

@@ -76,6 +76,10 @@ class _FakeTrustService extends Fake implements VtcTrustService {
       edges;
 
   @override
+  Future<VtcEdges> edgesWith(String communityDid, String personaDid) async =>
+      edges[personaDid] ?? const VtcEdges();
+
+  @override
   Future<PublishedRelationship> vouch(
     String communityDid, {
     required String personaDid,
@@ -316,6 +320,46 @@ void main() {
       findsOneWidget,
     );
     // Shown from the vouch itself: the members were not read again.
+    expect(service.listings, listings);
+  });
+
+  testWidgets('shows the vouches as read again once opened', (tester) async {
+    const mine = PublishedRelationship(
+      id: 'edge-1',
+      issuerDid: _me,
+      subjectDid: _bob,
+      vrcDigestMultibase: 'zQmedge-1',
+    );
+    service
+      ..groupsMembers = [...service.groupsMembers, _bobEntry]
+      ..edges = {_bob: const VtcEdges(outgoing: mine)};
+    final l10n = await pumpView(tester);
+    final listings = service.listings;
+    // Bob vouched back since the members were read.
+    service.edges = {
+      _bob: const VtcEdges(
+        outgoing: mine,
+        incoming: PublishedRelationship(
+          id: 'edge-2',
+          issuerDid: _bob,
+          subjectDid: _me,
+          vrcDigestMultibase: 'zQmedge-2',
+        ),
+      ),
+    };
+
+    await tester.tap(inMember('dir_bob', find.byKey(const Key('vtc_vouches'))));
+    await tester.pumpAndSettle();
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pumpAndSettle();
+
+    expect(
+      inMember(
+        'dir_bob',
+        find.byTooltip(l10n.vtcTrustVouchedForEachOther('Bob')),
+      ),
+      findsOneWidget,
+    );
     expect(service.listings, listings);
   });
 
