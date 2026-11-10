@@ -17,7 +17,7 @@ import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_sign_in/vtc_sign_in_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_vetting_desk/vtc_vetting_desk_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
-import 'package:mpx_flutter_reference_app/presentation/widgets/common/app_card.dart';
+import 'package:mpx_flutter_reference_app/presentation/widgets/common/hairline_grid.dart';
 
 import '../../../fakes/fake_identities.dart';
 import '../../../utils/app.dart';
@@ -124,37 +124,46 @@ void main() {
       expect(find.byKey(const Key('join_community_button')), findsOneWidget);
     });
 
-    testWidgets('draws each community as a panel, pending in warning', (
-      tester,
-    ) async {
-      await openCommunitiesTab(tester);
+    testWidgets(
+      'draws the communities as a hairline grid, pending in warning',
+      (tester) async {
+        await openCommunitiesTab(tester);
 
-      await saveCommunities();
-      await pullToRefresh(tester);
+        await saveCommunities();
+        await pullToRefresh(tester);
 
-      for (final did in [footballDid, chessDid]) {
-        expect(
-          find.descendant(
-            of: find.byKey(Key('community_$did')),
-            matching: find.byType(AppCard),
-          ),
-          findsOneWidget,
+        for (final did in [footballDid, chessDid]) {
+          expect(
+            find.ancestor(
+              of: find.byKey(Key('community_$did')),
+              matching: find.byType(HairlineGrid),
+            ),
+            findsOneWidget,
+          );
+        }
+        // Two to a row on a phone held upright.
+        final chess = tester.getTopLeft(
+          find.byKey(const Key('community_$chessDid')),
         );
-      }
-      final pending = tester.widget<StatusChip>(
-        find.descendant(
-          of: find.byKey(const Key('community_$footballDid')),
-          matching: find.byType(StatusChip),
-        ),
-      );
-      expect(
-        pending.color,
-        tester
-            .element(find.byKey(const Key('community_$footballDid')))
-            .mcColors
-            .warning,
-      );
-    });
+        final football = tester.getTopLeft(
+          find.byKey(const Key('community_$footballDid')),
+        );
+        expect(football.dy, chess.dy);
+        final pending = tester.widget<StatusChip>(
+          find.descendant(
+            of: find.byKey(const Key('community_$footballDid')),
+            matching: find.byType(StatusChip),
+          ),
+        );
+        expect(
+          pending.color,
+          tester
+              .element(find.byKey(const Key('community_$footballDid')))
+              .mcColors
+              .warning,
+        );
+      },
+    );
 
     testWidgets('opens a joined community with its channels and members', (
       tester,

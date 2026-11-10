@@ -5,9 +5,10 @@ import '../../../domain/models/vtc/vtc_community.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../navigation/routes/dashboard_routes.dart';
 import '../../../navigation/tabs/tabs.dart';
+import '../../helpers/screensize_helper.dart';
 import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_spacing.dart';
-import '../../widgets/common/app_card.dart';
+import '../../widgets/common/hairline_grid.dart';
 import '../../widgets/images/logo_avatar.dart';
 import '../../widgets/section_header.dart';
 import '../credentials/membership_credentials_list.dart';
@@ -17,6 +18,14 @@ import 'community_logo_provider.dart';
 
 /// Room for a community's logo, wider than the icon shown without one.
 const _logoSize = 32.0;
+
+/// Communities to a row on a phone held upright, and where there is more
+/// width.
+const _narrowColumns = 2;
+const _wideColumns = 3;
+
+/// A long name wraps once, then ends in an ellipsis.
+const _nameMaxLines = 2;
 
 /// The communities the member belongs to or is applying to. A community the
 /// member belongs to opens with its channels; one they are applying to opens
@@ -82,12 +91,11 @@ class CommunitiesScreen extends ConsumerWidget {
                       horizontal: McSpacing.s4,
                       vertical: McSpacing.s2,
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      spacing: McSpacing.s3,
+                    child: HairlineGrid(
+                      columns: _columns(context),
                       children: [
                         for (final community in communities)
-                          _CommunityRow(
+                          _CommunityCell(
                             key: Key('community_${community.communityDid}'),
                             community: community,
                             onTap: () => open(community),
@@ -116,6 +124,14 @@ class CommunitiesScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  /// More communities to a row where the screen is wide enough.
+  int _columns(BuildContext context) {
+    final helper = ScreensizeHelper();
+    return helper.isLandscape(context) || helper.isBigScreen(context)
+        ? _wideColumns
+        : _narrowColumns;
   }
 }
 
@@ -162,10 +178,11 @@ class _JoinCallToAction extends StatelessWidget {
   }
 }
 
-/// One community: its logo, if it gives one, its name, and whether its
-/// decision on the member's application is pending.
-class _CommunityRow extends StatelessWidget {
-  const _CommunityRow({super.key, required this.community, this.onTap});
+/// One community's grid cell: its logo, if it gives one, its name, and
+/// whether its decision on the member's application is pending. The whole
+/// cell opens it, with the flat hover wash and no ripple.
+class _CommunityCell extends StatelessWidget {
+  const _CommunityCell({super.key, required this.community, this.onTap});
 
   final VtcCommunity community;
   final VoidCallback? onTap;
@@ -173,35 +190,33 @@ class _CommunityRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final colors = context.colorScheme;
+    final mc = context.mcColors;
 
-    return AppCard(
+    return InkWell(
       onTap: onTap,
-      padding: const EdgeInsets.symmetric(
-        horizontal: McSpacing.s4,
-        vertical: McSpacing.s3,
-      ),
-      child: Row(
-        spacing: 12,
-        children: [
-          _CommunityLogo(communityDid: community.communityDid),
-          Expanded(
-            child: Text(
+      hoverColor: mc.hoverWash,
+      highlightColor: mc.hoverWash,
+      splashFactory: NoSplash.splashFactory,
+      child: Padding(
+        padding: const EdgeInsets.all(McSpacing.s4),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: McSpacing.s3,
+          children: [
+            _CommunityLogo(communityDid: community.communityDid),
+            Text(
               community.name ?? l10n.membershipCredentialUnnamed,
-              style: context.textTheme.titleMedium?.copyWith(
-                color: colors.onSurface,
+              maxLines: _nameMaxLines,
+              overflow: TextOverflow.ellipsis,
+              style: context.textTheme.titleSmall?.copyWith(
+                color: mc.textPrimary,
                 fontWeight: FontWeight.w500,
               ),
             ),
-          ),
-          if (community.isApplying)
-            StatusChip(
-              label: l10n.communityPending,
-              color: context.mcColors.warning,
-            )
-          else
-            Icon(McIcons.chevronRight, color: colors.onSurfaceVariant),
-        ],
+            if (community.isApplying)
+              StatusChip(label: l10n.communityPending, color: mc.warning),
+          ],
+        ),
       ),
     );
   }
