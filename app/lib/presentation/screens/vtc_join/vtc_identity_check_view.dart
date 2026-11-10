@@ -11,7 +11,8 @@ import 'vtc_join_json_dialog.dart';
 
 /// The community's own check of the member's identity: how it checked,
 /// what it relied on and confirmed, and when, with the signed statement in
-/// full behind a button.
+/// full behind a button, along with the `pnm` command that fetches it from
+/// the member's VTA.
 class VtcIdentityCheckView extends StatelessWidget {
   const VtcIdentityCheckView({
     super.key,
@@ -96,6 +97,7 @@ class VtcIdentityCheckView extends StatelessWidget {
                 json: check.credential,
                 icon: McIcons.credentials,
                 subtitle: _statementKind,
+                command: pnmCredentialCommand(check.credential['id']),
               ),
             ),
           ),
