@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../application/services/vtc_service/vtc_service.dart';
@@ -9,11 +8,11 @@ import '../../widgets/onboarding_style/onboarding_style.dart';
 import '../vtc_join/vtc_membership_card_view.dart';
 import '../vtc_join/vtc_role_name.dart';
 import 'community_logo_provider.dart';
+import 'community_tabs_providers.dart';
 
 /// The member's membership of a community: their role there and the
-/// membership card it issued, both as their VTA keeps them. Read from the
-/// VTA each time this opens, never kept on the phone.
-class CommunityMembershipView extends HookConsumerWidget {
+/// membership card it issued, both as their VTA keeps them.
+class CommunityMembershipView extends ConsumerWidget {
   const CommunityMembershipView({
     super.key,
     required this.communityDid,
@@ -26,25 +25,19 @@ class CommunityMembershipView extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final load = useMemoized(() async {
-      final service = ref.read(vtcServiceProvider);
-      return (
-        await service.communityRole(communityDid),
-        await service.membershipCard(communityDid),
-      );
-    }, [communityDid]);
-    final loaded = useFuture(load);
+    final role = ref.watch(communityRoleProvider(communityDid));
+    final card = ref.watch(communityMembershipCardProvider(communityDid));
     final logoUrl = ref.watch(communityLogoProvider(communityDid)).value;
 
-    if (loaded.error case final error?) {
+    if (role.error ?? card.error case final error?) {
       return _Message(switch (error) {
         VtaNotLinkedException() => l10n.membershipCredentialsVtaMissing,
         _ => l10n.membershipCredentialsUnreachable,
       });
     }
-    final data = loaded.data;
-    if (data == null) return const Center(child: OnboardingSpinner());
-    final (role, card) = data;
+    if (!role.hasValue || !card.hasValue) {
+      return const Center(child: OnboardingSpinner());
+    }
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -52,14 +45,14 @@ class CommunityMembershipView extends HookConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: 12,
         children: [
-          if (role != null)
+          if (role.value case final role?)
             OnboardingLine(
               key: const Key('community_membership_role'),
               icon: McIcons.badge,
               title: l10n.vtcCommunityRole,
               subtitle: vtcRoleName(l10n, role),
             ),
-          if (card != null)
+          if (card.value case final card?)
             VtcMembershipCardView(
               card: card,
               communityName: communityName,
