@@ -375,8 +375,8 @@ Future<GroupChatPosting?> _askPosting(BuildContext context) {
 /// The service entry the community's operator adds to the group's DID
 /// document, so members can find the chat and know the community linked
 /// it: shown once the chat is created, and again from the group's icon. An
-/// operator using `pnm` can copy the command that opens that document for
-/// editing.
+/// operator using `pnm` can copy the command that adds it to that document
+/// directly.
 class _ChatLinkDialog extends StatelessWidget {
   const _ChatLinkDialog({required this.link, required this.groupDid});
 
@@ -419,7 +419,8 @@ class _ChatLinkDialog extends StatelessWidget {
       actions: [
         TextButton(
           key: const Key('vtc_group_chat_link_copy_command'),
-          onPressed: () => copy('pnm did-mgmt dids edit --did $groupDid'),
+          onPressed: () =>
+              copy(_pnmAddServiceCommand(groupDid, link.toService(groupDid))),
           child: Text(l10n.vtcGroupChatLinkCopyCommand),
         ),
         TextButton(
@@ -433,4 +434,19 @@ class _ChatLinkDialog extends StatelessWidget {
       ],
     );
   }
+}
+
+/// The `pnm` command that publishes [groupDid]'s current DID document with
+/// [service] added, in place of any entry with the same id, so no editor
+/// opens. It needs `jq`, and runs in bash and zsh; `pnm` still asks before
+/// publishing.
+String _pnmAddServiceCommand(String groupDid, Map<String, dynamic> service) {
+  // Single-quoted for the shell, so a quote in the service closes and
+  // reopens the quoting rather than ending the argument.
+  final serviceArg = "'${jsonEncode(service).replaceAll("'", r"'\''")}'";
+  return 'pnm did-mgmt dids edit --did $groupDid --document <('
+      'pnm did-mgmt dids get-log --did $groupDid'
+      ' | jq -s --argjson s $serviceArg'
+      r" 'last.state | .service = [(.service // [])[] | select(.id != $s.id)]"
+      r" + [$s]')";
 }

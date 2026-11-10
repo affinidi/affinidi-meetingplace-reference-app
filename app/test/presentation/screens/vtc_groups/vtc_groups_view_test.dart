@@ -266,7 +266,7 @@ void main() {
     expect(service.data, contains('$_managedDid#meeting-place'));
   });
 
-  testWidgets('copies the pnm command that edits the group DID', (
+  testWidgets('copies the pnm command that adds the service to the group DID', (
     tester,
   ) async {
     String? copied;
@@ -288,7 +288,15 @@ void main() {
     await tester.tap(find.byKey(const Key('vtc_group_chat_link_copy_command')));
     await tester.pump();
 
-    expect(copied, 'pnm did-mgmt dids edit --did $_managedDid');
+    expect(
+      copied,
+      startsWith(
+        'pnm did-mgmt dids edit --did $_managedDid --document '
+        '<(pnm did-mgmt dids get-log --did $_managedDid | jq ',
+      ),
+    );
+    expect(copied, contains('"id":"$_managedDid#meeting-place"'));
+    expect(copied, contains('select(.id != \$s.id)'));
   });
 
   testWidgets('shows the link to publish again for a chat this phone owns', (

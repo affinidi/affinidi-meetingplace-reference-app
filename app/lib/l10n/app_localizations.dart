@@ -6402,7 +6402,7 @@ abstract class AppLocalizations {
   /// **'Copy'**
   String get vtcGroupChatLinkCopy;
 
-  /// Button that copies the pnm command an operator runs to edit the group's DID document; pnm is a command-line tool's name and stays as is
+  /// Button that copies the pnm command an operator runs to add the chat's service to the group's DID document; pnm is a command-line tool's name and stays as is
   ///
   /// In en, this message translates to:
   /// **'Copy pnm command'**

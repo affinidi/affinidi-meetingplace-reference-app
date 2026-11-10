@@ -4464,7 +4464,7 @@
 	},
 	"vtcGroupChatLinkCopyCommand": "Copy pnm command",
 	"@vtcGroupChatLinkCopyCommand": {
-		"description": "Button that copies the pnm command an operator runs to edit the group's DID document; pnm is a command-line tool's name and stays as is"
+		"description": "Button that copies the pnm command an operator runs to add the chat's service to the group's DID document; pnm is a command-line tool's name and stays as is"
 	},
 	"vtcGroupChatLinkShow": "Show the chat's link",
 	"@vtcGroupChatLinkShow": {
