@@ -149,6 +149,19 @@ void main() {
           find.byKey(const Key('community_$footballDid')),
         );
         expect(football.dy, chess.dy);
+        // The logo sits centred in its cell.
+        final chessCell = find.byKey(const Key('community_$chessDid'));
+        expect(
+          tester
+              .getCenter(
+                find.descendant(
+                  of: chessCell,
+                  matching: find.byIcon(McIcons.community),
+                ),
+              )
+              .dx,
+          tester.getCenter(chessCell).dx,
+        );
         final pending = tester.widget<StatusChip>(
           find.descendant(
             of: find.byKey(const Key('community_$footballDid')),

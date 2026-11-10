@@ -17,7 +17,8 @@ import 'communities_controller.dart';
 import 'community_logo_provider.dart';
 
 /// Room for a community's logo, wider than the icon shown without one.
-const _logoSize = 32.0;
+const _logoSize = 48.0;
+const _iconSize = 32.0;
 
 /// Communities to a row on a phone held upright, and where there is more
 /// width.
@@ -200,12 +201,12 @@ class _CommunityCell extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(McSpacing.s4),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           spacing: McSpacing.s3,
           children: [
             _CommunityLogo(communityDid: community.communityDid),
             Text(
               community.name ?? l10n.membershipCredentialUnnamed,
+              textAlign: TextAlign.center,
               maxLines: _nameMaxLines,
               overflow: TextOverflow.ellipsis,
               style: context.textTheme.titleSmall?.copyWith(
@@ -231,7 +232,11 @@ class _CommunityLogo extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final icon = Icon(McIcons.community, color: context.colorScheme.onSurface);
+    final icon = Icon(
+      McIcons.community,
+      size: _iconSize,
+      color: context.colorScheme.onSurface,
+    );
     final url = ref.watch(communityLogoProvider(communityDid)).value;
     if (url == null) return icon;
     return LogoAvatar(
