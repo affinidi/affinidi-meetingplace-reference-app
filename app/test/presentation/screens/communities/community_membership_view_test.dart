@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -25,6 +27,10 @@ class _FakeVtcService extends Fake implements VtcService {
     },
   );
   Exception? failure;
+  final cardChanges = StreamController<void>.broadcast();
+
+  @override
+  Stream<void> get membershipsChanged => cardChanges.stream;
 
   @override
   Future<String?> communityRole(String communityDid) async {
@@ -84,6 +90,22 @@ void main() {
       findsOneWidget,
     );
     expect(find.byType(VtcMembershipCardView), findsOneWidget);
+  });
+
+  testWidgets('shows the new role once the cards change', (tester) async {
+    await pumpView(tester);
+    service.role = 'admin';
+
+    service.cardChanges.add(null);
+    await tester.pumpAndSettle();
+
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('community_membership_role')),
+        matching: find.text('Administrator'),
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('says the card is on its way until the VTA holds it', (

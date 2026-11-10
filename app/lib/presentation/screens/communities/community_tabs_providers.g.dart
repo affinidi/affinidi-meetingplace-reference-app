@@ -9,22 +9,22 @@ part of 'community_tabs_providers.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 /// The member's role in [communityDid], as their VTA keeps it, or null when
-/// it holds no role card. Read while a community's page shows, never kept on
-/// the phone.
+/// it holds no role card. Read while a community's page shows, and again as
+/// the cards change, never kept on the phone.
 
 @ProviderFor(communityRole)
 const communityRoleProvider = CommunityRoleFamily._();
 
 /// The member's role in [communityDid], as their VTA keeps it, or null when
-/// it holds no role card. Read while a community's page shows, never kept on
-/// the phone.
+/// it holds no role card. Read while a community's page shows, and again as
+/// the cards change, never kept on the phone.
 
 final class CommunityRoleProvider
     extends $FunctionalProvider<AsyncValue<String?>, String?, FutureOr<String?>>
     with $FutureModifier<String?>, $FutureProvider<String?> {
   /// The member's role in [communityDid], as their VTA keeps it, or null when
-  /// it holds no role card. Read while a community's page shows, never kept on
-  /// the phone.
+  /// it holds no role card. Read while a community's page shows, and again as
+  /// the cards change, never kept on the phone.
   const CommunityRoleProvider._({
     required CommunityRoleFamily super.from,
     required String super.argument,
@@ -68,11 +68,11 @@ final class CommunityRoleProvider
   }
 }
 
-String _$communityRoleHash() => r'fddc7f5f281ebf76d38b090542697c20e3c012ef';
+String _$communityRoleHash() => r'738cbce73a858063bba813cab35ad9cdf43d894e';
 
 /// The member's role in [communityDid], as their VTA keeps it, or null when
-/// it holds no role card. Read while a community's page shows, never kept on
-/// the phone.
+/// it holds no role card. Read while a community's page shows, and again as
+/// the cards change, never kept on the phone.
 
 final class CommunityRoleFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<String?>, String> {
@@ -86,8 +86,8 @@ final class CommunityRoleFamily extends $Family
       );
 
   /// The member's role in [communityDid], as their VTA keeps it, or null when
-  /// it holds no role card. Read while a community's page shows, never kept on
-  /// the phone.
+  /// it holds no role card. Read while a community's page shows, and again as
+  /// the cards change, never kept on the phone.
 
   CommunityRoleProvider call(String communityDid) =>
       CommunityRoleProvider._(argument: communityDid, from: this);
@@ -98,14 +98,14 @@ final class CommunityRoleFamily extends $Family
 
 /// The membership card [communityDid] issued the member, as their VTA keeps
 /// it, or null while it is on its way. Read while a community's page shows,
-/// never kept on the phone.
+/// and again as the cards change, never kept on the phone.
 
 @ProviderFor(communityMembershipCard)
 const communityMembershipCardProvider = CommunityMembershipCardFamily._();
 
 /// The membership card [communityDid] issued the member, as their VTA keeps
 /// it, or null while it is on its way. Read while a community's page shows,
-/// never kept on the phone.
+/// and again as the cards change, never kept on the phone.
 
 final class CommunityMembershipCardProvider
     extends
@@ -119,7 +119,7 @@ final class CommunityMembershipCardProvider
         $FutureProvider<VtcMembershipCard?> {
   /// The membership card [communityDid] issued the member, as their VTA keeps
   /// it, or null while it is on its way. Read while a community's page shows,
-  /// never kept on the phone.
+  /// and again as the cards change, never kept on the phone.
   const CommunityMembershipCardProvider._({
     required CommunityMembershipCardFamily super.from,
     required String super.argument,
@@ -166,11 +166,11 @@ final class CommunityMembershipCardProvider
 }
 
 String _$communityMembershipCardHash() =>
-    r'7d29a6c8b030a30e9780eccce76018caf58e1758';
+    r'a52091875884c8b878a205e131b8a6303fbf8552';
 
 /// The membership card [communityDid] issued the member, as their VTA keeps
 /// it, or null while it is on its way. Read while a community's page shows,
-/// never kept on the phone.
+/// and again as the cards change, never kept on the phone.
 
 final class CommunityMembershipCardFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<VtcMembershipCard?>, String> {
@@ -185,7 +185,7 @@ final class CommunityMembershipCardFamily extends $Family
 
   /// The membership card [communityDid] issued the member, as their VTA keeps
   /// it, or null while it is on its way. Read while a community's page shows,
-  /// never kept on the phone.
+  /// and again as the cards change, never kept on the phone.
 
   CommunityMembershipCardProvider call(String communityDid) =>
       CommunityMembershipCardProvider._(argument: communityDid, from: this);

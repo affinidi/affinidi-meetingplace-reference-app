@@ -10,20 +10,23 @@ part of 'community_members_controller.dart';
 // ignore_for_file: type=lint, type=warning
 /// The members of [communityDid]'s groups, read once the community is
 /// opened and kept while the app runs, so its Members tab shows them at
-/// once. The tab [sync]s them each time it opens.
+/// once. The tab [sync]s them each time it opens, and they sync when the
+/// member's role there changes, which the directory shows.
 
 @ProviderFor(CommunityMembersController)
 const communityMembersControllerProvider = CommunityMembersControllerFamily._();
 
 /// The members of [communityDid]'s groups, read once the community is
 /// opened and kept while the app runs, so its Members tab shows them at
-/// once. The tab [sync]s them each time it opens.
+/// once. The tab [sync]s them each time it opens, and they sync when the
+/// member's role there changes, which the directory shows.
 final class CommunityMembersControllerProvider
     extends
         $AsyncNotifierProvider<CommunityMembersController, CommunityMembers> {
   /// The members of [communityDid]'s groups, read once the community is
   /// opened and kept while the app runs, so its Members tab shows them at
-  /// once. The tab [sync]s them each time it opens.
+  /// once. The tab [sync]s them each time it opens, and they sync when the
+  /// member's role there changes, which the directory shows.
   const CommunityMembersControllerProvider._({
     required CommunityMembersControllerFamily super.from,
     required String super.argument,
@@ -62,11 +65,12 @@ final class CommunityMembersControllerProvider
 }
 
 String _$communityMembersControllerHash() =>
-    r'5bbc418020e315a2971a6f0cef55d9f00ba24f6b';
+    r'2aba4ed38dc5cb390a58eb68d07306d5b5658ee1';
 
 /// The members of [communityDid]'s groups, read once the community is
 /// opened and kept while the app runs, so its Members tab shows them at
-/// once. The tab [sync]s them each time it opens.
+/// once. The tab [sync]s them each time it opens, and they sync when the
+/// member's role there changes, which the directory shows.
 
 final class CommunityMembersControllerFamily extends $Family
     with
@@ -88,7 +92,8 @@ final class CommunityMembersControllerFamily extends $Family
 
   /// The members of [communityDid]'s groups, read once the community is
   /// opened and kept while the app runs, so its Members tab shows them at
-  /// once. The tab [sync]s them each time it opens.
+  /// once. The tab [sync]s them each time it opens, and they sync when the
+  /// member's role there changes, which the directory shows.
 
   CommunityMembersControllerProvider call(String communityDid) =>
       CommunityMembersControllerProvider._(argument: communityDid, from: this);
@@ -99,7 +104,8 @@ final class CommunityMembersControllerFamily extends $Family
 
 /// The members of [communityDid]'s groups, read once the community is
 /// opened and kept while the app runs, so its Members tab shows them at
-/// once. The tab [sync]s them each time it opens.
+/// once. The tab [sync]s them each time it opens, and they sync when the
+/// member's role there changes, which the directory shows.
 
 abstract class _$CommunityMembersController
     extends $AsyncNotifier<CommunityMembers> {

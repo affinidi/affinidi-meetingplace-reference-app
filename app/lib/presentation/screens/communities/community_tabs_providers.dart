@@ -11,21 +11,36 @@ part 'community_tabs_providers.g.dart';
 /// community, and the tabs ask again each time the community opens.
 Duration? _noRetry(int retryCount, Object error) => null;
 
+/// Reads [ref]'s provider again each time the member's membership cards
+/// change, e.g. once a community's new role card is kept.
+void _readAgainOnCardChanges(Ref ref) {
+  final changes = ref
+      .read(vtcServiceProvider)
+      .membershipsChanged
+      .listen((_) => ref.invalidateSelf());
+  ref.onDispose(changes.cancel);
+}
+
 /// The member's role in [communityDid], as their VTA keeps it, or null when
-/// it holds no role card. Read while a community's page shows, never kept on
-/// the phone.
+/// it holds no role card. Read while a community's page shows, and again as
+/// the cards change, never kept on the phone.
 @Riverpod(retry: _noRetry)
-Future<String?> communityRole(Ref ref, String communityDid) =>
-    ref.read(vtcServiceProvider).communityRole(communityDid);
+Future<String?> communityRole(Ref ref, String communityDid) {
+  _readAgainOnCardChanges(ref);
+  return ref.read(vtcServiceProvider).communityRole(communityDid);
+}
 
 /// The membership card [communityDid] issued the member, as their VTA keeps
 /// it, or null while it is on its way. Read while a community's page shows,
-/// never kept on the phone.
+/// and again as the cards change, never kept on the phone.
 @Riverpod(retry: _noRetry)
 Future<VtcMembershipCard?> communityMembershipCard(
   Ref ref,
   String communityDid,
-) => ref.read(vtcServiceProvider).membershipCard(communityDid);
+) {
+  _readAgainOnCardChanges(ref);
+  return ref.read(vtcServiceProvider).membershipCard(communityDid);
+}
 
 /// What a community publishes about itself, or null when it cannot be read,
 /// and the join phrase this phone published for it, or null when none is or

@@ -1,6 +1,7 @@
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../application/services/vtc_service/vtc_service.dart';
 import '../../../application/services/vtc_trust_service/vtc_trust_service.dart';
 
 part 'community_members_controller.g.dart';
@@ -14,13 +15,22 @@ typedef CommunityMembers = (
 
 /// The members of [communityDid]'s groups, read once the community is
 /// opened and kept while the app runs, so its Members tab shows them at
-/// once. The tab [sync]s them each time it opens.
+/// once. The tab [sync]s them each time it opens, and they sync when the
+/// member's role there changes, which the directory shows.
 @Riverpod(keepAlive: true)
 class CommunityMembersController extends _$CommunityMembersController {
   var _isSyncing = false;
 
   @override
-  Future<CommunityMembers> build(String communityDid) => _read();
+  Future<CommunityMembers> build(String communityDid) {
+    final roleChanges = ref
+        .read(vtcServiceProvider)
+        .roleChanged
+        .where((change) => change.communityDid == communityDid)
+        .listen((_) => sync());
+    ref.onDispose(roleChanges.cancel);
+    return _read();
+  }
 
   /// Reads the members again, keeping those shown until the community
   /// answers. A failure keeps them too: they are only out of date. Nothing

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -23,6 +25,10 @@ const _club = 'did:webvh:QmClub:vtc.example';
 class _FakeVtcService extends Fake implements VtcService {
   String? role;
   Exception? failure;
+  final cardChanges = StreamController<void>.broadcast();
+
+  @override
+  Stream<void> get membershipsChanged => cardChanges.stream;
 
   @override
   Future<String?> communityRole(String communityDid) async {
@@ -96,6 +102,19 @@ void main() {
     await pumpView(tester);
 
     expect(find.byType(VtcFindableView), findsOneWidget);
+    expect(find.byType(VtcJoinPhraseView), findsOneWidget);
+  });
+
+  testWidgets('lets a member promoted meanwhile manage the join phrase', (
+    tester,
+  ) async {
+    vtc.role = 'member';
+    await pumpView(tester);
+    vtc.role = 'admin';
+
+    vtc.cardChanges.add(null);
+    await tester.pumpAndSettle();
+
     expect(find.byType(VtcJoinPhraseView), findsOneWidget);
   });
 
