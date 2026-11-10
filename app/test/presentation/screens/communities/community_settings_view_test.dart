@@ -101,7 +101,6 @@ void main() {
 
     await pumpView(tester);
 
-    expect(find.byType(VtcFindableView), findsOneWidget);
     expect(find.byType(VtcJoinPhraseView), findsOneWidget);
   });
 
@@ -119,26 +118,30 @@ void main() {
   });
 
   for (final role in ['member', 'custom:admin', null]) {
-    testWidgets('offers ${role ?? 'no role'} only how members find them', (
-      tester,
-    ) async {
+    testWidgets('offers ${role ?? 'no role'} no join phrase', (tester) async {
       vtc.role = role;
 
       await pumpView(tester);
 
-      expect(find.byType(VtcFindableView), findsOneWidget);
       expect(find.byType(VtcJoinPhraseView), findsNothing);
     });
   }
 
-  testWidgets('still offers how members find them when the VTA is unlinked', (
-    tester,
-  ) async {
+  testWidgets('offers no join phrase when the VTA is unlinked', (tester) async {
     vtc.failure = const VtaNotLinkedException();
 
     await pumpView(tester);
 
-    expect(find.byType(VtcFindableView), findsOneWidget);
     expect(find.byType(VtcJoinPhraseView), findsNothing);
+  });
+
+  testWidgets('leaves how members find the member to the Members tab', (
+    tester,
+  ) async {
+    vtc.role = 'admin';
+
+    await pumpView(tester);
+
+    expect(find.byType(VtcFindableView), findsNothing);
   });
 }

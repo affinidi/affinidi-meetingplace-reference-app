@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'vtc_findable_view.dart';
 import 'vtc_join_phrase_view.dart';
 
-/// The built-in role that manages the community's join phrase; a role the
-/// community defined itself never does, whatever its name.
-const _adminRole = 'admin';
+/// Whether [role] is the built-in role that manages the community's join
+/// phrase; a role the community defined itself never is, whatever its name.
+bool managesJoinPhrase(String? role) => role == 'admin';
 
 /// The community's settings for the member: how other members find them,
 /// and, for an administrator, the community's join phrase.
@@ -28,7 +28,7 @@ class VtcCommunitySettings extends StatelessWidget {
     crossAxisAlignment: CrossAxisAlignment.stretch,
     spacing: 16,
     children: [
-      if (role == _adminRole)
+      if (managesJoinPhrase(role))
         VtcJoinPhraseView(
           communityDid: communityDid,
           communityName: communityName,

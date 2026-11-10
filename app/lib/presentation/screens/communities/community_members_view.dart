@@ -6,6 +6,7 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import '../../../application/services/vtc_trust_service/vtc_trust_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../themes/tokens/mc_icons.dart';
+import '../vtc_join/vtc_findable_view.dart';
 import '../vtc_trust/vtc_member_search_screen.dart';
 import '../vtc_trust/vtc_member_tile.dart';
 import '../vtc_trust/vtc_vouch.dart';
@@ -15,7 +16,8 @@ import 'community_tabs_providers.dart';
 
 const _syncingBarHeight = 2.0;
 
-/// The other members of a community: those of the member's groups, or
+/// Whether other members of a community find the member, and the other
+/// members: those of the member's groups, or
 /// those the member searches the directory for, each with the vouches
 /// between them and the member, to vouch for them. The directory answers
 /// searches only, never lists every member, so the groups' members show
@@ -107,53 +109,69 @@ class CommunityMembersView extends HookConsumerWidget {
       }
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
+    // One scroll view: on a short screen the list still gets room below
+    // the settings and the search.
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+          sliver: SliverToBoxAdapter(
+            child: VtcFindableView(
+              communityDid: communityDid,
+              communityName: communityName,
+            ),
+          ),
+        ),
         if (canVet)
-          Padding(
+          SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            child: OutlinedButton.icon(
-              key: const Key('community_members_vetting_desk'),
-              icon: const Icon(McIcons.userCheck),
-              label: Text(l10n.vtcVetterStart),
-              onPressed: () => VtcVettingDeskScreen.show(
-                context,
-                communityDid: communityDid,
-                communityName: communityName,
+            sliver: SliverToBoxAdapter(
+              child: OutlinedButton.icon(
+                key: const Key('community_members_vetting_desk'),
+                icon: const Icon(McIcons.userCheck),
+                label: Text(l10n.vtcVetterStart),
+                onPressed: () => VtcVettingDeskScreen.show(
+                  context,
+                  communityDid: communityDid,
+                  communityName: communityName,
+                ),
               ),
             ),
           ),
-        Padding(
+        SliverPadding(
           padding: const EdgeInsets.all(16),
-          child: TextField(
-            key: const Key('community_members_search_field'),
-            textInputAction: TextInputAction.search,
-            decoration: InputDecoration(
-              labelText: l10n.vtcTrustSearchHint,
-              helperText: l10n.communityMembersPrompt(communityName),
-              helperMaxLines: 2,
-              prefixIcon: const Icon(McIcons.search),
+          sliver: SliverToBoxAdapter(
+            child: TextField(
+              key: const Key('community_members_search_field'),
+              textInputAction: TextInputAction.search,
+              decoration: InputDecoration(
+                labelText: l10n.vtcTrustSearchHint,
+                helperText: l10n.communityMembersPrompt(communityName),
+                helperMaxLines: 2,
+                prefixIcon: const Icon(McIcons.search),
+              ),
+              // Nothing to search for shows the groups' members again.
+              onSubmitted: (text) =>
+                  query.value = text.trim().isEmpty ? null : text.trim(),
             ),
-            // Nothing to search for shows the groups' members again.
-            onSubmitted: (text) =>
-                query.value = text.trim().isEmpty ? null : text.trim(),
           ),
         ),
         // Height kept so the list does not shift as syncing starts and ends.
-        SizedBox(
-          height: _syncingBarHeight,
-          child: showSyncing
-              ? const LinearProgressIndicator(
-                  key: Key('community_members_syncing'),
-                )
-              : null,
+        SliverToBoxAdapter(
+          child: SizedBox(
+            height: _syncingBarHeight,
+            child: showSyncing
+                ? const LinearProgressIndicator(
+                    key: Key('community_members_syncing'),
+                  )
+                : null,
+          ),
         ),
-        Expanded(
-          child: switch (loaded) {
-            AsyncSnapshot(connectionState: ConnectionState.waiting) =>
-              const Center(child: CircularProgressIndicator()),
-            AsyncSnapshot(hasError: true, :final error) => _Message(
+        switch (loaded) {
+          AsyncSnapshot(connectionState: ConnectionState.waiting) =>
+            const _Remaining(Center(child: CircularProgressIndicator())),
+          AsyncSnapshot(hasError: true, :final error) => _Remaining(
+            _Message(
               vtcTrustFailureMessage(
                 l10n,
                 error is VtcTrustException
@@ -163,46 +181,59 @@ class CommunityMembersView extends HookConsumerWidget {
                 name: query.value ?? '',
               ),
             ),
-            AsyncSnapshot(data: (final members, _)) when members.isEmpty =>
+          ),
+          AsyncSnapshot(data: (final members, _)) when members.isEmpty =>
+            _Remaining(
               _Message(
                 '$none\n\n'
                 '${l10n.vtcGroupMembersUnlistedNote(communityName)}',
               ),
-            AsyncSnapshot(data: (final members, final edges)) =>
-              ListView.separated(
-                // The note first: the community never says who is unlisted.
-                itemCount: members.length + 1,
-                separatorBuilder: (_, _) => const Divider(height: 1),
-                itemBuilder: (context, index) {
-                  if (index == 0) {
-                    return Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Text(
-                        l10n.vtcGroupMembersUnlistedNote(communityName),
-                        style: context.textTheme.bodySmall?.copyWith(
-                          color: context.colorScheme.onSurfaceVariant,
-                        ),
+            ),
+          AsyncSnapshot(data: (final members, final edges)) =>
+            SliverList.separated(
+              // The note first: the community never says who is unlisted.
+              itemCount: members.length + 1,
+              separatorBuilder: (_, _) => const Divider(height: 1),
+              itemBuilder: (context, index) {
+                if (index == 0) {
+                  return Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(
+                      l10n.vtcGroupMembersUnlistedNote(communityName),
+                      style: context.textTheme.bodySmall?.copyWith(
+                        color: context.colorScheme.onSurfaceVariant,
                       ),
-                    );
-                  }
-                  final entry = members[index - 1];
-                  return VtcMemberTile(
-                    key: Key('community_member_${entry.entryId}'),
-                    communityDid: communityDid,
-                    communityName: communityName,
-                    entry: entry,
-                    edges: edges[entry.did] ?? const VtcEdges(),
-                    names: vtcMemberNames(members),
-                    onVouch: (name) => vouch(entry, name),
+                    ),
                   );
-                },
-              ),
-            _ => const Center(child: CircularProgressIndicator()),
-          },
-        ),
+                }
+                final entry = members[index - 1];
+                return VtcMemberTile(
+                  key: Key('community_member_${entry.entryId}'),
+                  communityDid: communityDid,
+                  communityName: communityName,
+                  entry: entry,
+                  edges: edges[entry.did] ?? const VtcEdges(),
+                  names: vtcMemberNames(members),
+                  onVouch: (name) => vouch(entry, name),
+                );
+              },
+            ),
+          _ => const _Remaining(Center(child: CircularProgressIndicator())),
+        },
       ],
     );
   }
+}
+
+/// [child] in the room left below the list's head.
+class _Remaining extends StatelessWidget {
+  const _Remaining(this.child);
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) =>
+      SliverFillRemaining(hasScrollBody: false, child: child);
 }
 
 class _Message extends StatelessWidget {

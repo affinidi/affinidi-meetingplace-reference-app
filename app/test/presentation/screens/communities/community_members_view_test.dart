@@ -5,19 +5,38 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
+import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service.dart';
+import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service_state.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_trust_service/vtc_trust_service.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_role_change.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/communities/community_members_view.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_findable_view.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
+
+import '../../../fakes/fake_identities.dart';
+import '../../../fakes/fake_identities_service.dart';
 
 const _club = 'did:webvh:QmClub:vtc.example';
 const _me = 'did:webvh:QmMe:vta.example:me';
 const _bob = 'did:webvh:QmBob:vta.example:bob';
 
-/// A community's directory, searched by name.
+/// A community's directory, searched by name, where the member is not shown
+/// to other members.
 class _FakeTrustService extends Fake implements VtcTrustService {
+  @override
+  Future<MyDirectoryCard> directoryCard(String communityDid) async =>
+      const MyDirectoryCard(
+        entryId: 'dir_me',
+        isDidVisibleToMembers: false,
+        isHidden: false,
+      );
+
+  @override
+  Future<String?> identityDid(String communityDid) async =>
+      FakeIdentities.primaryIdentity.did;
+
   List<DirectoryEntry> members = const [
     DirectoryEntry(
       entryId: 'dir_bob',
@@ -116,6 +135,13 @@ class _FakeVtcService extends Fake implements VtcService {
   }
 }
 
+FakeIdentitiesService identities() => FakeIdentitiesService(
+  IdentitiesServiceState(
+    currentIdentity: FakeIdentities.primaryIdentity,
+    identities: [FakeIdentities.primaryIdentity],
+  ),
+);
+
 void main() {
   late _FakeTrustService service;
   late _FakeVtcService vtc;
@@ -131,6 +157,7 @@ void main() {
         overrides: [
           vtcTrustServiceProvider.overrideWithValue(service),
           vtcServiceProvider.overrideWithValue(vtc),
+          identitiesServiceProvider.overrideWith(identities),
         ],
         child: MaterialApp(
           theme: AppTheme.dark,
@@ -181,6 +208,7 @@ void main() {
       overrides: [
         vtcTrustServiceProvider.overrideWithValue(service),
         vtcServiceProvider.overrideWithValue(vtc),
+        identitiesServiceProvider.overrideWith(identities),
       ],
     );
     addTearDown(container.dispose);
@@ -434,5 +462,13 @@ void main() {
 
       expect(find.byKey(vettingDesk), findsOneWidget);
     });
+  });
+
+  testWidgets('lets the member choose whether other members find them', (
+    tester,
+  ) async {
+    await pumpView(tester);
+
+    expect(find.byType(VtcFindableView), findsOneWidget);
   });
 }

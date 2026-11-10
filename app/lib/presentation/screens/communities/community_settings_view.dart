@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../vtc_join/vtc_community_settings.dart';
+import '../vtc_join/vtc_join_phrase_view.dart';
 import 'community_tabs_providers.dart';
 
-/// The member's settings for a community: how other members find them at
-/// once, and the community's join phrase too once their role says they
-/// administer it.
+/// The member's settings for a community: its join phrase, once their role
+/// says they administer it.
 class CommunitySettingsView extends ConsumerWidget {
   const CommunitySettingsView({
     super.key,
@@ -19,17 +19,17 @@ class CommunitySettingsView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Null also when the VTA cannot be asked: the settings every member
-    // has still show.
+    // Null also when the VTA cannot be asked.
     final role = ref.watch(communityRoleProvider(communityDid)).value;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
-      child: VtcCommunitySettings(
-        communityDid: communityDid,
-        communityName: communityName,
-        role: role,
-      ),
+      child: managesJoinPhrase(role)
+          ? VtcJoinPhraseView(
+              communityDid: communityDid,
+              communityName: communityName,
+            )
+          : null,
     );
   }
 }

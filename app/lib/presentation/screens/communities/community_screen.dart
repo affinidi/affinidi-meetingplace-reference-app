@@ -40,7 +40,7 @@ class CommunityScreen extends HookConsumerWidget {
             .read(contactsScreenControllerProvider.notifier)
             .showCommunity(communityDid);
         // Read the members and the member's directory card now, for the
-        // Members and Settings tabs to show them at once.
+        // Members tab to show them at once.
         ref
           ..read(communityMembersControllerProvider(communityDid))
           ..read(vtcFindableControllerProvider(communityDid));
