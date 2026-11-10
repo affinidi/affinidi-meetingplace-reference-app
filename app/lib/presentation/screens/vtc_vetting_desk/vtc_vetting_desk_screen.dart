@@ -594,18 +594,18 @@ class _SessionView extends HookWidget {
               ),
             ),
           ),
-          // Held still while the answer is recorded, rather than swapped for
-          // a spinner, so the codes stay in view.
+          // Always active, rather than swapped for a spinner, so the codes
+          // stay in view; the controller drops an answer given twice.
           OnboardingButton(
             key: const Key('vtc_vetter_match_yes'),
             label: l10n.vtcJoinMatchYes,
-            onPressed: busy ? null : () => controller.confirmMatch(requestId),
+            onPressed: () => controller.confirmMatch(requestId),
           ),
           OnboardingButton(
             key: const Key('vtc_vetter_match_no'),
             label: l10n.vtcJoinMatchNo,
             isDestructive: true,
-            onPressed: busy ? null : () => controller.mismatch(requestId),
+            onPressed: () => controller.mismatch(requestId),
           ),
         ],
       );

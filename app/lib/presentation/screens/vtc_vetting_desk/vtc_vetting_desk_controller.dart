@@ -44,6 +44,10 @@ class VtcVettingDeskController extends _$VtcVettingDeskController {
   /// Whether a check was asked for while one ran, to run once it ends.
   bool _checkAgain = false;
 
+  /// The sessions whose match codes the vetter's answer is being recorded
+  /// for.
+  final _answering = <String>{};
+
   @override
   VtcVettingDeskState build(String communityDid) {
     ref.onDispose(() {
@@ -189,15 +193,35 @@ class VtcVettingDeskController extends _$VtcVettingDeskController {
   }
 
   /// Records that the codes match, with the applicant present.
-  Future<void> confirmMatch(String requestId) => _run(() async {
-    state = state.copyWith(
-      desk: await _service.confirmVettingMatch(communityDid, requestId),
-    );
-  });
+  Future<void> confirmMatch(String requestId) => _answerMatch(
+    requestId,
+    () => _run(() async {
+      state = state.copyWith(
+        desk: await _service.confirmVettingMatch(communityDid, requestId),
+      );
+    }),
+  );
 
   /// Ends the session because the codes differ.
-  Future<void> mismatch(String requestId) =>
-      decline(requestId, message: mismatchMessage);
+  Future<void> mismatch(String requestId) => _answerMatch(
+    requestId,
+    () => decline(requestId, message: mismatchMessage),
+  );
+
+  /// Gives the vetter's [answer] on the codes of [requestId], unless one is
+  /// still being recorded: the buttons stay active, so a second tap is
+  /// dropped rather than answering twice.
+  Future<void> _answerMatch(
+    String requestId,
+    Future<void> Function() answer,
+  ) async {
+    if (!_answering.add(requestId)) return;
+    try {
+      await answer();
+    } finally {
+      _answering.remove(requestId);
+    }
+  }
 
   /// Issues the applicant a statement: the member checked their details in
   /// person against [documentClasses].

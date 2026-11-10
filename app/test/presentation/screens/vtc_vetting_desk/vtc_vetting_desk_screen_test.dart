@@ -526,6 +526,41 @@ void main() {
     await close(tester);
   });
 
+  testWidgets('declines once when the codes are told apart twice', (
+    tester,
+  ) async {
+    await pumpDesk(tester);
+    final ticket = await showTicket(tester);
+    await tester.runAsync(() => fixture.requestWith(ticket.spoken));
+    await check(tester);
+    final sentBefore = (await tester.runAsync(fixture.sentToApplicant))!.length;
+    final container = ProviderScope.containerOf(tester.element(desk));
+    final controller = container.read(
+      vtcVettingDeskControllerProvider(fakeVtcDid).notifier,
+    );
+    final requestId = container
+        .read(vtcVettingDeskControllerProvider(fakeVtcDid))
+        .current!
+        .request
+        .requestId;
+
+    // A second tap while the first is recorded: the buttons stay active.
+    await tester.runAsync(
+      () => Future.wait([
+        controller.mismatch(requestId),
+        controller.mismatch(requestId),
+      ]),
+    );
+    await waitFor(tester, find.byKey(const Key('vtc_vetter_outcome')));
+
+    final sent = (await tester.runAsync(fixture.sentToApplicant))!;
+    expect(
+      sent.skip(sentBefore).where((m) => m.type == VettingTask.decline),
+      hasLength(1),
+    );
+    await close(tester);
+  });
+
   testWidgets('declines while waiting for the applicant\'s details', (
     tester,
   ) async {
