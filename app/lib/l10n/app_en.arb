@@ -4137,6 +4137,131 @@
 	"@vtcGroupsOpen": {
 		"description": "Button on a membership card that opens the member's groups in the community"
 	},
+	"vtcRoomsOpen": "Rooms",
+	"@vtcRoomsOpen": {
+		"description": "Button on a membership card that opens the community's data rooms the member is offered or in"
+	},
+	"vtcRoomsTitle": "Rooms",
+	"@vtcRoomsTitle": {
+		"description": "Title of the community's data rooms, as the member sees them"
+	},
+	"vtcRoomsNone": "No rooms yet. When a group you're in is given a room, it's offered to you here.",
+	"@vtcRoomsNone": {
+		"description": "Shown when the community offers the member no room and they are in none"
+	},
+	"vtcRoomsOffersHeading": "Offered to you",
+	"@vtcRoomsOffersHeading": {
+		"description": "Heading above the rooms the community offers the member, to accept"
+	},
+	"vtcRoomsMineHeading": "Your rooms",
+	"@vtcRoomsMineHeading": {
+		"description": "Heading above the rooms the member is in"
+	},
+	"vtcRoomsAccept": "Accept",
+	"@vtcRoomsAccept": {
+		"description": "Button that accepts the community's offer of a place in a room"
+	},
+	"vtcRoomsAccepted": "You're in {room}.",
+	"@vtcRoomsAccepted": {
+		"description": "Shown once the member accepted a room's offer",
+		"placeholders": {
+			"room": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcRoomsReadWrite": "Read and write",
+	"@vtcRoomsReadWrite": {
+		"description": "What the member may do in a room: read and add records"
+	},
+	"vtcRoomsReadOnly": "Read only",
+	"@vtcRoomsReadOnly": {
+		"description": "What the member may do in a room: only read records"
+	},
+	"vtcRoomsClosed": "Not open to you now",
+	"@vtcRoomsClosed": {
+		"description": "A room the member was in, which is suspended, removed or archived"
+	},
+	"vtcRoomsSealed": "Sealed: only the room's members can read what's written here.",
+	"@vtcRoomsSealed": {
+		"description": "A sealed room: the community hosting it cannot read its records"
+	},
+	"vtcRoomsOpenTier": "Open: the community hosting this room can read what's written here.",
+	"@vtcRoomsOpenTier": {
+		"description": "An open room: the community hosting it can read its records"
+	},
+	"vtcRoomsVtaMissing": "Link your VTA to use rooms.",
+	"@vtcRoomsVtaMissing": {
+		"description": "Shown when no VTA is linked, so rooms cannot be used"
+	},
+	"vtcRoomsFailed": "Couldn't reach the room. Try again.",
+	"@vtcRoomsFailed": {
+		"description": "Shown when the community or the VTA could not be reached or refused"
+	},
+	"vtcRoomRecordsNone": "Nothing has been written here yet.",
+	"@vtcRoomRecordsNone": {
+		"description": "Shown in a room with no records, to a member who may only read"
+	},
+	"vtcRoomRecordsNoneWriter": "Nothing has been written here yet. Tap Write to add the first record.",
+	"@vtcRoomRecordsNoneWriter": {
+		"description": "Shown in a room with no records, to a member who may write"
+	},
+	"vtcRoomReadOnlyNote": "You can read this room. Only members who may write can add to it.",
+	"@vtcRoomReadOnlyNote": {
+		"description": "Above a room's records, for a member who may only read"
+	},
+	"vtcRoomRecordUnopened": "This record couldn't be opened or its signature didn't check out.",
+	"@vtcRoomRecordUnopened": {
+		"description": "A record the member's VTA could not open, or whose author signature failed"
+	},
+	"vtcRoomRecordUntitled": "Untitled",
+	"@vtcRoomRecordUntitled": {
+		"description": "A record with no title"
+	},
+	"vtcRoomRecordOutdated": "Marked as outdated",
+	"@vtcRoomRecordOutdated": {
+		"description": "A record a curator marked as outdated"
+	},
+	"vtcRoomRecordByYou": "Written by you",
+	"@vtcRoomRecordByYou": {
+		"description": "Under a record the member wrote, its author signature checked"
+	},
+	"vtcRoomRecordByMember": "Written by another member",
+	"@vtcRoomRecordByMember": {
+		"description": "Under a record another member of the room wrote, its author signature checked"
+	},
+	"vtcRoomWrite": "Write",
+	"@vtcRoomWrite": {
+		"description": "Button that adds a record to a room"
+	},
+	"vtcRoomWriteTitle": "New record",
+	"@vtcRoomWriteTitle": {
+		"description": "Title of the dialog that writes a record to a room"
+	},
+	"vtcRoomWriteTitleLabel": "Title",
+	"@vtcRoomWriteTitleLabel": {
+		"description": "Field for a new record's title"
+	},
+	"vtcRoomWriteBodyLabel": "Text",
+	"@vtcRoomWriteBodyLabel": {
+		"description": "Field for a new record's text"
+	},
+	"vtcRoomWriteSend": "Post",
+	"@vtcRoomWriteSend": {
+		"description": "Button that writes the new record to the room"
+	},
+	"vtcRoomWriteCancel": "Cancel",
+	"@vtcRoomWriteCancel": {
+		"description": "Button that closes the new record dialog without writing"
+	},
+	"vtcRoomWritten": "Posted.",
+	"@vtcRoomWritten": {
+		"description": "Shown once a record was written to the room"
+	},
+	"vtcRoomWriteRefused": "You can only read this room, so you can't add to it.",
+	"@vtcRoomWriteRefused": {
+		"description": "Shown when the member's VTA refuses to write because the member may only read"
+	},
 	"vtcGroupsTitle": "Groups",
 	"@vtcGroupsTitle": {
 		"description": "Title of the member's groups in a community, above the community's name"
