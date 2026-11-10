@@ -330,7 +330,7 @@ void main() {
     await pumpScreen(tester);
 
     await tapVisible(tester, const Key('vtc_group_create_g1'));
-    expect(find.byType(BottomSheet), findsOneWidget);
+    expect(find.byKey(const Key('vtc_group_posting_sheet')), findsOneWidget);
     expect(find.text('Who can post in this chat?'), findsOneWidget);
     await tester.tap(find.byKey(const Key('vtc_group_posting_managers')));
     await tester.pumpAndSettle();
@@ -349,6 +349,17 @@ void main() {
     await tester.tapAt(const Offset(4, 4));
     await tester.pumpAndSettle();
 
+    expect(chats.created, isEmpty);
+  });
+
+  testWidgets('creates no chat when the sheet is closed', (tester) async {
+    await pumpScreen(tester);
+
+    await tapVisible(tester, const Key('vtc_group_create_g1'));
+    await tester.tap(find.byKey(const Key('vtc_group_posting_close')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('vtc_group_posting_sheet')), findsNothing);
     expect(chats.created, isEmpty);
   });
 

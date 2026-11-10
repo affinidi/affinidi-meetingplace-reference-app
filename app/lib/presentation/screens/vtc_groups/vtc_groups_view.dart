@@ -13,7 +13,6 @@ import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../../themes/tokens/mc_spacing.dart';
 import '../../themes/tokens/mc_typography.dart';
-import '../../widgets/bottom_sheet_menu.dart';
 import 'vtc_group_members_screen.dart';
 import 'vtc_groups_controller.dart';
 import 'vtc_groups_state.dart';
@@ -340,40 +339,158 @@ class _Line extends StatelessWidget {
 
 /// Asks the manager, in a bottom sheet, who may post in the chat about to be
 /// created; null when they dismiss the sheet.
-Future<GroupChatPosting?> _askPosting(BuildContext context) {
-  final l10n = context.l10n;
-  final options = [
-    (
-      GroupChatPosting.everyone,
-      l10n.vtcGroupChatPostingEveryone,
-      l10n.vtcGroupChatPostingEveryoneHint,
-    ),
-    (
-      GroupChatPosting.managers,
-      l10n.vtcGroupChatPostingManagers,
-      l10n.vtcGroupChatPostingManagersHint,
-    ),
-  ];
-  return showModalBottomSheet<GroupChatPosting>(
-    useRootNavigator: true,
-    isScrollControlled: true,
-    showDragHandle: true,
-    useSafeArea: true,
-    context: context,
-    builder: (context) => BottomSheetMenu(
-      header: l10n.vtcGroupChatPostingTitle,
-      itemCount: options.length,
-      itemBuilder: (context, index) {
-        final (posting, title, subtitle) = options[index];
-        return ListTile(
-          key: Key('vtc_group_posting_${posting.name}'),
-          title: Text(title),
-          subtitle: Text(subtitle),
-          onTap: () => Navigator.of(context, rootNavigator: true).pop(posting),
-        );
-      },
-    ),
-  );
+Future<GroupChatPosting?> _askPosting(BuildContext context) =>
+    showModalBottomSheet<GroupChatPosting>(
+      context: context,
+      useRootNavigator: true,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const _PostingSheet(),
+    );
+
+/// The sheet [_askPosting] shows: one option per rule, each saying what
+/// members may do under it.
+class _PostingSheet extends StatelessWidget {
+  const _PostingSheet();
+
+  static const _radius = Radius.circular(McRadius.xl);
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final mc = context.mcColors;
+    final colors = context.colorScheme;
+    void choose(GroupChatPosting posting) =>
+        Navigator.of(context, rootNavigator: true).pop(posting);
+
+    return DecoratedBox(
+      key: const Key('vtc_group_posting_sheet'),
+      decoration: BoxDecoration(
+        color: mc.raised,
+        borderRadius: const BorderRadius.vertical(top: _radius),
+        border: Border(top: BorderSide(color: mc.hairline)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.only(top: 10, bottom: 6),
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: mc.hairlineStrong,
+                    borderRadius: BorderRadius.circular(McRadius.xs),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 8, bottom: 16),
+                child: Row(
+                  spacing: 12,
+                  children: [
+                    CircleAvatar(
+                      radius: 20,
+                      backgroundColor: colors.secondary,
+                      child: Icon(McIcons.chats, color: colors.onSecondary),
+                    ),
+                    Expanded(
+                      child: Text(
+                        l10n.vtcGroupChatPostingTitle,
+                        style: context.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      key: const Key('vtc_group_posting_close'),
+                      icon: const Icon(McIcons.close),
+                      tooltip: l10n.generalClose,
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true).pop(),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: 12,
+                children: [
+                  _PostingOption(
+                    posting: GroupChatPosting.everyone,
+                    icon: McIcons.group,
+                    title: l10n.vtcGroupChatPostingEveryone,
+                    subtitle: l10n.vtcGroupChatPostingEveryoneHint,
+                    onTap: choose,
+                  ),
+                  _PostingOption(
+                    posting: GroupChatPosting.managers,
+                    icon: McIcons.announce,
+                    title: l10n.vtcGroupChatPostingManagers,
+                    subtitle: l10n.vtcGroupChatPostingManagersHint,
+                    onTap: choose,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// One rule in the [_PostingSheet], in a box like a group's.
+class _PostingOption extends StatelessWidget {
+  const _PostingOption({
+    required this.posting,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final GroupChatPosting posting;
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final ValueChanged<GroupChatPosting> onTap;
+
+  static const _radius = BorderRadius.all(Radius.circular(McRadius.lg));
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: context.colorScheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: _radius,
+        side: BorderSide(color: context.mcColors.hairline),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        key: Key('vtc_group_posting_${posting.name}'),
+        onTap: () => onTap(posting),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            spacing: 12,
+            children: [
+              Expanded(
+                child: _Line(icon: icon, title: title, subtitle: subtitle),
+              ),
+              Icon(McIcons.chevronRight, color: context.mcColors.textSecondary),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 /// The service entry the community's operator adds to the group's DID
