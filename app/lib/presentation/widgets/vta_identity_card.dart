@@ -27,6 +27,7 @@ class VtaIdentityCard extends ConsumerWidget {
     required this.did,
     this.identity,
     this.missingCredential = false,
+    this.role,
   });
 
   final String did;
@@ -38,6 +39,10 @@ class VtaIdentityCard extends ConsumerWidget {
   /// Whether the identity lacks a credential it needs, e.g. to join under
   /// a way into a community that asks for one; marked under its name.
   final bool missingCredential;
+
+  /// The identity's role where it is shown, e.g. in a community, in plain
+  /// words; shown under its name.
+  final String? role;
 
   static const _radius = Radius.circular(McRadius.xl);
 
@@ -137,6 +142,29 @@ class VtaIdentityCard extends ConsumerWidget {
                             ),
                         ],
                       ),
+                      if (role case final role?)
+                        Row(
+                          key: const Key('vta_identity_role'),
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          spacing: 4,
+                          children: [
+                            Icon(
+                              McIcons.badge,
+                              size: 16,
+                              color: mc.textSecondary,
+                            ),
+                            Flexible(
+                              child: Text(
+                                role,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: textTheme.labelMedium?.copyWith(
+                                  color: mc.textSecondary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       if (missingCredential)
                         Row(
                           key: const Key('vta_identity_missing_credential'),

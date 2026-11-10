@@ -224,6 +224,36 @@ void main() {
       expect(find.byIcon(McIcons.email), findsNothing);
     });
 
+    testWidgets('shows the role under the name', (tester) async {
+      await _pump(
+        tester,
+        VtaIdentityCard(
+          did: _did,
+          identity: _identity(_card),
+          role: 'Moderator',
+        ),
+      );
+
+      final role = find.byKey(const Key('vta_identity_role'));
+      expect(
+        find.descendant(of: role, matching: find.text('Moderator')),
+        findsOneWidget,
+      );
+      expect(
+        tester.getTopLeft(role).dy,
+        greaterThan(tester.getBottomLeft(find.text('Ada L')).dy),
+      );
+    });
+
+    testWidgets('shows no role when it has none', (tester) async {
+      await _pump(
+        tester,
+        VtaIdentityCard(did: _did, identity: _identity(_card)),
+      );
+
+      expect(find.byKey(const Key('vta_identity_role')), findsNothing);
+    });
+
     testWidgets('puts the VTA details beside the name', (tester) async {
       await _pump(
         tester,
