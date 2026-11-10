@@ -458,6 +458,25 @@ void main() {
     await close(tester);
   });
 
+  testWidgets('leaves out what it still checks when asked to', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      const Scaffold(
+        body: VtcVettingDeskView(
+          communityDid: fakeVtcDid,
+          communityName: 'Football club',
+          showBackgroundTasks: false,
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(find.byKey(const Key('vtc_vetter_show_ticket')), findsOneWidget);
+    expect(find.byKey(const Key('vtc_vetter_progress')), findsNothing);
+    await close(tester);
+  });
+
   testWidgets('shows the vetter card it checked', (tester) async {
     final card = find.byKey(const Key('vtc_vetter_role_card'));
 

@@ -79,10 +79,15 @@ class VtcVettingDeskView extends HookConsumerWidget {
     super.key,
     required this.communityDid,
     required this.communityName,
+    this.showBackgroundTasks = true,
   });
 
   final String communityDid;
   final String communityName;
+
+  /// Whether to list what the desk still checks and reads while open; the
+  /// community's Vetting tab leaves it out.
+  final bool showBackgroundTasks;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -111,7 +116,8 @@ class VtcVettingDeskView extends HookConsumerWidget {
           ],
           VtcVettingDeskStep.open => [
             OnboardingSubtitle(l10n.vtcVetterIntro),
-            if (state.checkingCard || state.readingRequirements)
+            if (showBackgroundTasks &&
+                (state.checkingCard || state.readingRequirements))
               _Progress(state: state, communityName: communityName),
             if (!state.readingRequirements)
               _Requirements(

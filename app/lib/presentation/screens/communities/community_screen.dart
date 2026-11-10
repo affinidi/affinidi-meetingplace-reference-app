@@ -139,6 +139,7 @@ class CommunityScreen extends HookConsumerWidget {
                     child: VtcVettingDeskView(
                       communityDid: communityDid,
                       communityName: name,
+                      showBackgroundTasks: false,
                     ),
                   ),
               ],
