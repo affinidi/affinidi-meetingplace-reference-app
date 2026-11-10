@@ -27,6 +27,7 @@ class VtcGroupChatWatcher with WidgetsBindingObserver {
   final Duration interval;
 
   Future<void>? _syncing;
+  bool _syncAgain = false;
   Timer? _timer;
 
   @override
@@ -56,10 +57,23 @@ class VtcGroupChatWatcher with WidgetsBindingObserver {
     _timer = null;
   }
 
-  /// Brings the chats in step and joins those of the member's groups now,
-  /// unless that is already running.
+  /// Brings the chats in step and joins those of the member's groups now.
+  /// Asked while that is running, it runs once more after: the running sync
+  /// may have read the community before what asked for it changed, such as
+  /// a membership approved meanwhile.
   Future<void> sync() {
-    return _syncing ??= _sync().whenComplete(() => _syncing = null);
+    if (_syncing case final syncing?) {
+      _syncAgain = true;
+      return syncing;
+    }
+    return _syncing = _syncUntilCaughtUp().whenComplete(() => _syncing = null);
+  }
+
+  Future<void> _syncUntilCaughtUp() async {
+    do {
+      _syncAgain = false;
+      await _sync();
+    } while (_syncAgain);
   }
 
   Future<void> _sync() async {
