@@ -44,10 +44,8 @@ class VtcRoomScreen extends HookConsumerWidget {
     // Records the member wrote here, shown at once: reading the room back
     // through the VTA takes a while.
     final posted = useState(const <_Opened>[]);
-    final writing = useState(false);
-    // The title and text being written, shown at the top until the room
-    // takes them: sealing and storing a record takes a few seconds.
-    final pending = useState<(String, String?)?>(null);
+    // The title and text being written, shown until the room has it.
+    final posting = useState<(String, String?)?>(null);
     final load = useMemoized(() async {
       final listing = await service.roomRecords(communityDid, room);
       final newest = [
@@ -84,8 +82,7 @@ class VtcRoomScreen extends HookConsumerWidget {
       final messenger = ScaffoldMessenger.of(context);
       final (title, text) = draft;
       final body = text.isEmpty ? null : text;
-      writing.value = true;
-      pending.value = (title, body);
+      posting.value = (title, body);
       try {
         final written = await service.writeRoomRecord(
           communityDid,
@@ -131,10 +128,7 @@ class VtcRoomScreen extends HookConsumerWidget {
               : error.runtimeType,
         );
       } finally {
-        if (context.mounted) {
-          writing.value = false;
-          pending.value = null;
-        }
+        if (context.mounted) posting.value = null;
       }
     }
 
@@ -175,61 +169,42 @@ class VtcRoomScreen extends HookConsumerWidget {
       floatingActionButton: room.canWrite
           ? FloatingActionButton.extended(
               key: const Key('vtc_room_write'),
-              icon: writing.value
+              icon: posting.value != null
                   ? const SizedBox.square(
                       dimension: 16,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(McIcons.edit),
               label: Text(
-                writing.value ? l10n.vtcRoomPosting : l10n.vtcRoomWrite,
+                posting.value != null ? l10n.vtcRoomPosting : l10n.vtcRoomWrite,
               ),
-              onPressed: writing.value ? null : write,
+              onPressed: posting.value != null ? null : write,
             )
           : null,
       body: switch ((loaded, records)) {
         (AsyncSnapshot(hasError: true, :final error), _) => _Message(
           vtcRoomsFailureMessage(l10n, error),
         ),
-        (_, final records?) when records.isEmpty && pending.value == null =>
+        (_, final records?) when records.isEmpty && posting.value == null =>
           _Message(
             room.canWrite
                 ? l10n.vtcRoomRecordsNoneWriter
                 : l10n.vtcRoomRecordsNone,
           ),
-        (_, final records?) => () {
-          // Ahead of the records: the read-only note, else the record being
-          // posted.
-          final lead = !room.canWrite || pending.value != null ? 1 : 0;
-          return ListView.separated(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
-            itemCount: records.length + lead,
-            separatorBuilder: (_, _) => const SizedBox(height: 16),
-            itemBuilder: (context, index) {
-              if (index < lead) {
-                return switch (pending.value) {
-                  (final title, final body) when room.canWrite => _PostingCard(
-                    title: title,
-                    body: body,
-                  ),
-                  _ => Text(
-                    l10n.vtcRoomReadOnlyNote,
-                    key: const Key('vtc_room_read_only'),
-                    style: context.textTheme.bodySmall?.copyWith(
-                      color: context.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                };
-              }
-              final (summary, record) = records[index - lead];
-              return _RecordCard(
-                summary: summary,
-                record: record,
-                myDid: myDid,
-              );
-            },
-          );
-        }(),
+        (_, final records?) => _Separated([
+          if (!room.canWrite)
+            Text(
+              l10n.vtcRoomReadOnlyNote,
+              key: const Key('vtc_room_read_only'),
+              style: context.textTheme.bodySmall?.copyWith(
+                color: context.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          if (posting.value case (final title, final body))
+            _PostingCard(title: title, body: body),
+          for (final (summary, record) in records)
+            _RecordCard(summary: summary, record: record, myDid: myDid),
+        ]),
         _ => const Center(child: CircularProgressIndicator()),
       },
     );
@@ -242,58 +217,6 @@ class VtcRoomScreen extends HookConsumerWidget {
 
 /// A record as the room lists it, and opened; null when it could not be.
 typedef _Opened = (RoomRecordSummary, RoomRecord?);
-
-/// The record the member is posting, drawn as a record is, faded, with a
-/// spinner, until the room takes it.
-class _PostingCard extends StatelessWidget {
-  const _PostingCard({required this.title, required this.body});
-
-  final String title;
-  final String? body;
-
-  @override
-  Widget build(BuildContext context) {
-    final muted = context.textTheme.bodySmall?.copyWith(
-      color: context.colorScheme.onSurfaceVariant,
-    );
-    return Opacity(
-      key: const Key('vtc_room_posting'),
-      opacity: 0.6,
-      child: Container(
-        padding: const EdgeInsets.all(16 - McSpacing.hairline),
-        decoration: BoxDecoration(
-          color: context.colorScheme.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(McRadius.lg),
-          border: Border.all(color: context.mcColors.hairline),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: 8,
-          children: [
-            Text(
-              title,
-              style: context.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            if (body case final body?)
-              Text(body, style: context.textTheme.bodyMedium),
-            Row(
-              spacing: 8,
-              children: [
-                const SizedBox.square(
-                  dimension: 12,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-                Text(context.l10n.vtcRoomPosting, style: muted),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 class _RecordCard extends StatelessWidget {
   const _RecordCard({
@@ -318,49 +241,37 @@ class _RecordCard extends StatelessWidget {
     );
     final record = this.record;
     final updatedAt = record?.updatedAt ?? summary.updatedAt;
-    return Container(
+    return _Card(
       key: Key('vtc_room_record_${summary.key}'),
-      // The hairline border takes its width from the padding, so the
-      // content keeps its size.
-      padding: const EdgeInsets.all(16 - McSpacing.hairline),
-      decoration: BoxDecoration(
-        color: context.colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(McRadius.lg),
-        border: Border.all(color: context.mcColors.hairline),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: 8,
-        children: [
-          if (record == null)
-            Text(l10n.vtcRoomRecordUnopened, style: muted)
-          else ...[
-            Text(
-              record.title ?? l10n.vtcRoomRecordUntitled,
-              style: context.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            if (record.body case final body?)
-              Text(body, style: context.textTheme.bodyMedium),
-            if (record.status == RoomRecordStatus.deprecated)
-              Text(l10n.vtcRoomRecordOutdated, style: muted),
-          ],
+      children: [
+        if (record == null)
+          Text(l10n.vtcRoomRecordUnopened, style: muted)
+        else ...[
           Text(
-            [
-              // Only once opened: the author is then the one who signed.
-              if (record?.author case final author?)
-                author == myDid
-                    ? l10n.vtcRoomRecordByYou
-                    : l10n.vtcRoomRecordByMember,
-              DateFormat.yMMMd(
-                l10n.localeName,
-              ).add_jm().format(updatedAt.toLocal()),
-            ].join(' · '),
-            style: muted,
+            record.title ?? l10n.vtcRoomRecordUntitled,
+            style: context.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w500,
+            ),
           ),
+          if (record.body case final body?)
+            Text(body, style: context.textTheme.bodyMedium),
+          if (record.status == RoomRecordStatus.deprecated)
+            Text(l10n.vtcRoomRecordOutdated, style: muted),
         ],
-      ),
+        Text(
+          [
+            // Only once opened: the author is then the one who signed.
+            if (record?.author case final author?)
+              author == myDid
+                  ? l10n.vtcRoomRecordByYou
+                  : l10n.vtcRoomRecordByMember,
+            DateFormat.yMMMd(
+              l10n.localeName,
+            ).add_jm().format(updatedAt.toLocal()),
+          ].join(' · '),
+          style: muted,
+        ),
+      ],
     );
   }
 }
@@ -426,6 +337,84 @@ class _WriteDialog extends HookWidget {
       ],
     );
   }
+}
+
+/// The draft being written, shown at the top of the room until the room
+/// has it.
+class _PostingCard extends StatelessWidget {
+  const _PostingCard({required this.title, required this.body});
+
+  final String title;
+  final String? body;
+
+  @override
+  Widget build(BuildContext context) => _Card(
+    key: const Key('vtc_room_posting'),
+    children: [
+      Text(
+        title,
+        style: context.textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      if (body case final body?)
+        Text(body, style: context.textTheme.bodyMedium),
+      Row(
+        spacing: 8,
+        children: [
+          const SizedBox.square(
+            dimension: 12,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+          Text(
+            context.l10n.vtcRoomPosting,
+            style: context.textTheme.bodySmall?.copyWith(
+              color: context.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    ],
+  );
+}
+
+/// A record's card in the room.
+class _Card extends StatelessWidget {
+  const _Card({super.key, required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    // The hairline border takes its width from the padding, so the
+    // content keeps its size.
+    padding: const EdgeInsets.all(16 - McSpacing.hairline),
+    decoration: BoxDecoration(
+      color: context.colorScheme.surfaceContainerLow,
+      borderRadius: BorderRadius.circular(McRadius.lg),
+      border: Border.all(color: context.mcColors.hairline),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 8,
+      children: children,
+    ),
+  );
+}
+
+/// The room's lines, a gap between each.
+class _Separated extends StatelessWidget {
+  const _Separated(this.children);
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) => ListView.separated(
+    padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+    itemCount: children.length,
+    separatorBuilder: (_, _) => const SizedBox(height: 16),
+    itemBuilder: (_, index) => children[index],
+  );
 }
 
 class _Message extends StatelessWidget {

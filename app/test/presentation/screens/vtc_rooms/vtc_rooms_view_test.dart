@@ -62,6 +62,9 @@ class _FakeVtcService extends Fake implements VtcService {
   final Map<String, RoomRecord> records = {};
   Exception? refuseWrite;
 
+  /// Holds each write until completed, as a slow VTA does.
+  Completer<void>? holdWrite;
+
   /// Whether the room lists records written here, as a host does once it
   /// has caught up.
   bool listsWritten = true;
@@ -115,9 +118,6 @@ class _FakeVtcService extends Fake implements VtcService {
     required String key,
   }) async => records[key];
 
-  /// Holds each write open until completed, to see it while it is posted.
-  Completer<void>? holdWrite;
-
   @override
   Future<RoomWrite> writeRoomRecord(
     String communityDid,
@@ -125,8 +125,8 @@ class _FakeVtcService extends Fake implements VtcService {
     required String title,
     String? body,
   }) async {
-    if (refuseWrite case final error?) throw error;
     await holdWrite?.future;
+    if (refuseWrite case final error?) throw error;
     written.add((title, body));
     final key = 'k${records.length + 1}';
     writtenKeys.add(key);
@@ -283,10 +283,10 @@ void main() {
       expect(find.textContaining('Written by you'), findsOneWidget);
     });
 
-    testWidgets('shows the record as posting until the room takes it', (
+    testWidgets('shows a record as posting until the room has it', (
       tester,
     ) async {
-      service.holdWrite = Completer<void>();
+      final hold = service.holdWrite = Completer<void>();
       await pump(
         tester,
         VtcRoomScreen(
@@ -303,8 +303,8 @@ void main() {
       );
       await tester.pump();
       await tester.tap(find.byKey(const Key('vtc_room_write_send')));
-      // The dialog closes while the write is held open.
-      await tester.pump(const Duration(seconds: 1));
+      // The spinners never settle while the write is held.
+      await tester.pump(const Duration(milliseconds: 500));
 
       final posting = find.byKey(const Key('vtc_room_posting'));
       expect(posting, findsOneWidget);
@@ -312,14 +312,60 @@ void main() {
         find.descendant(of: posting, matching: find.text('Opening keynote')),
         findsOneWidget,
       );
-      expect(find.text('Posting…'), findsNWidgets(2));
+      expect(
+        find.descendant(of: posting, matching: find.text('Posting…')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('vtc_room_write')),
+          matching: find.text('Posting…'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Tap Write'), findsNothing);
 
-      service.holdWrite!.complete();
+      hold.complete();
+      await tester.pumpAndSettle();
+
+      expect(posting, findsNothing);
+      expect(find.text('Opening keynote'), findsOneWidget);
+      expect(find.textContaining('Written by you'), findsOneWidget);
+      expect(find.text('Write'), findsOneWidget);
+    });
+
+    testWidgets('drops the posting record when the write fails', (
+      tester,
+    ) async {
+      final hold = service.holdWrite = Completer<void>();
+      service.refuseWrite = MeetingPlaceVtcSDKException.refused(
+        'rooms/keys/act:actionNotHeld',
+      );
+      await pump(
+        tester,
+        VtcRoomScreen(
+          communityDid: _club,
+          room: _room(actions: {RoomAction.read, RoomAction.write}),
+        ),
+      );
+
+      await tester.tap(find.byKey(const Key('vtc_room_write')));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const Key('vtc_room_write_title')),
+        'Sneaky',
+      );
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('vtc_room_write_send')));
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.byKey(const Key('vtc_room_posting')), findsOneWidget);
+
+      hold.complete();
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('vtc_room_posting')), findsNothing);
-      expect(find.text('Posting…'), findsNothing);
-      expect(find.text('Opening keynote'), findsOneWidget);
+      expect(find.text('Sneaky'), findsNothing);
+      expect(find.textContaining('Tap Write'), findsOneWidget);
     });
 
     testWidgets('shows each record posted before the room lists it', (
