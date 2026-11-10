@@ -9,6 +9,7 @@ import '../../themes/tokens/mc_colors.dart';
 import '../../themes/tokens/mc_elevation.dart';
 import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
+import '../../themes/tokens/mc_spacing.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import 'vtc_detail_line.dart';
 import 'vtc_join_json_dialog.dart';
@@ -136,19 +137,24 @@ class VtcCardView extends StatelessWidget {
                 border: Border(top: BorderSide(color: mc.insetTop)),
               ),
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 8, 16),
+                padding: const EdgeInsets.fromLTRB(
+                  McSpacing.s4,
+                  McSpacing.s4,
+                  McSpacing.s2,
+                  McSpacing.s4,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   spacing: 14,
                   children: [
                     Row(
-                      spacing: 12,
+                      spacing: McSpacing.s3,
                       children: [
                         _Logo(url: logoUrl, size: _logoSize),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            spacing: 2,
+                            spacing: McSpacing.s05,
                             children: [
                               Text(
                                 communityName,
@@ -184,10 +190,10 @@ class VtcCardView extends StatelessWidget {
                         child: _Chip(icon: icon, label: label),
                       ),
                     Padding(
-                      padding: const EdgeInsets.only(right: 8),
+                      padding: const EdgeInsets.only(right: McSpacing.s2),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
-                        spacing: 12,
+                        spacing: McSpacing.s3,
                         children: [
                           VtcDetailLine(
                             icon: McIcons.identities,
@@ -214,7 +220,7 @@ class VtcCardView extends StatelessWidget {
                               value: date(until),
                             ),
                           Row(
-                            spacing: 8,
+                            spacing: McSpacing.s2,
                             children: [
                               Icon(
                                 McIcons.cloudDone,
@@ -296,7 +302,10 @@ class _Chip extends StatelessWidget {
         borderRadius: BorderRadius.circular(McRadius.full),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 10,
+          vertical: McSpacing.s1,
+        ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           spacing: 6,

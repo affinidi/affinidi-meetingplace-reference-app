@@ -5,6 +5,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
+import '../../themes/tokens/mc_spacing.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 
 /// The community's logo above the title; nothing while it cannot load.
@@ -65,7 +66,7 @@ class VtcCommunityProfile extends HookWidget {
       child: SelectionArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: 12,
+          spacing: McSpacing.s3,
           children: [
             if (description case final description?)
               Text(
@@ -88,13 +89,13 @@ class VtcCommunityProfile extends HookWidget {
               ),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 12,
+              spacing: McSpacing.s3,
               children: [
                 Icon(McIcons.identities, size: 20, color: mc.textSecondary),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: 2,
+                    spacing: McSpacing.s05,
                     children: [
                       Text(
                         l10n.communityDidLabel,

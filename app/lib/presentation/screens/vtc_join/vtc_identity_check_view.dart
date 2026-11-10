@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../domain/models/vtc/vtc_identity_check.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../themes/tokens/mc_icons.dart';
+import '../../themes/tokens/mc_spacing.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import 'vtc_claim_type_label.dart';
 import 'vtc_detail_line.dart';
@@ -41,7 +42,7 @@ class VtcIdentityCheckView extends StatelessWidget {
       title: heading,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: 12,
+        spacing: McSpacing.s3,
         children: [
           VtcDetailLine(
             icon: McIcons.userCheck,

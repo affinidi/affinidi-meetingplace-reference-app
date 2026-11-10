@@ -4,6 +4,7 @@ import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../themes/tokens/mc_colors.dart';
 import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
+import '../../themes/tokens/mc_spacing.dart';
 import 'vtc_trail_step.dart';
 
 /// A step of something the phone does in the background: a tick once
@@ -22,13 +23,13 @@ class VtcProgressLine extends StatelessWidget {
     final mc = context.mcColors;
     final isNext = stage == VtcTrailStage.next;
     return Row(
-      spacing: 12,
+      spacing: McSpacing.s3,
       children: [
         SizedBox.square(
           dimension: _markerSize,
           child: switch (stage) {
             VtcTrailStage.current => const Padding(
-              padding: EdgeInsets.all(2),
+              padding: EdgeInsets.all(McSpacing.s05),
               child: CircularProgressIndicator(
                 strokeWidth: 2.5,
                 color: McColors.blue,
@@ -72,9 +73,9 @@ class VtcWaitingForParty extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 32),
+      padding: const EdgeInsets.symmetric(vertical: McSpacing.s8),
       child: Column(
-        spacing: 20,
+        spacing: McSpacing.s5,
         children: [
           const SizedBox.square(
             dimension: _spinnerSize,

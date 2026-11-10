@@ -78,7 +78,7 @@ class VtcFlowDiagram extends StatelessWidget {
               width: _nodeWidth,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                spacing: 2,
+                spacing: McSpacing.s05,
                 children: [
                   Container(
                     width: _nodeSize,

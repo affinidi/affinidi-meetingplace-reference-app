@@ -6,6 +6,7 @@ import 'package:meeting_place_core/meeting_place_core.dart';
 
 import '../../../application/services/community_offer_service/community_offer_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_spacing.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import '../../widgets/qr/qr_code_view.dart';
 
@@ -78,7 +79,7 @@ class VtcJoinPhraseView extends HookConsumerWidget {
       title: l10n.vtcJoinPhraseHeading,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: 12,
+        spacing: McSpacing.s3,
         children: [
           if (offer == null)
             Text(

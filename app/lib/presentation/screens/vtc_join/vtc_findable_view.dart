@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../application/services/vtc_trust_service/vtc_trust_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_spacing.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import 'vtc_findable_controller.dart';
 
@@ -81,7 +82,7 @@ class VtcFindableView extends HookConsumerWidget {
       title: l10n.vtcFindableHeading,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: 12,
+        spacing: McSpacing.s3,
         children: [
           // A Row, not a SwitchListTile: the onboarding layout measures
           // intrinsic heights, which a ListTile misreports.

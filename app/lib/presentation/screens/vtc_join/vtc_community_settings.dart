@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../themes/tokens/mc_spacing.dart';
 import 'vtc_findable_view.dart';
 import 'vtc_join_phrase_view.dart';
 
@@ -26,7 +27,7 @@ class VtcCommunitySettings extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
-    spacing: 16,
+    spacing: McSpacing.s4,
     children: [
       if (managesJoinPhrase(role))
         VtcJoinPhraseView(

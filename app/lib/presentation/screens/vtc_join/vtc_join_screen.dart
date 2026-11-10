@@ -360,9 +360,9 @@ class _EnterCode extends HookConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         OnboardingTitle(l10n.vtcJoinIntroTitle),
-        const SizedBox(height: 8),
+        const SizedBox(height: McSpacing.s2),
         OnboardingSubtitle(l10n.vtcJoinIntro),
-        const SizedBox(height: 24),
+        const SizedBox(height: McSpacing.s6),
         OnboardingTextField(
           key: const Key('vtc_join_did'),
           controller: field,
@@ -378,12 +378,12 @@ class _EnterCode extends HookConsumerWidget {
             },
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: McSpacing.s6),
         OnboardingButton(
           label: l10n.vtcJoinContinueAction,
           onPressed: code.isEmpty ? null : () => submit(code),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: McSpacing.s3),
         OnboardingButton(
           label: l10n.vtcJoinScanAction,
           isOutlined: true,
@@ -421,7 +421,7 @@ class _Review extends StatelessWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 12,
+      spacing: McSpacing.s3,
       children: [
         if (state.logoUrl case final logoUrl?) VtcCommunityLogo(logoUrl),
         OnboardingTitle(
@@ -459,9 +459,9 @@ class _Review extends StatelessWidget {
             onListInDirectory: onListInDirectory,
           ),
         _WaysIn(state: state, onChoose: onChooseWay),
-        const SizedBox(height: 12),
+        const SizedBox(height: McSpacing.s3),
         Row(
-          spacing: 12,
+          spacing: McSpacing.s3,
           children: [
             Expanded(
               child: OnboardingButton(
@@ -503,7 +503,10 @@ class _Pill extends StatelessWidget {
         borderRadius: BorderRadius.circular(McRadius.full),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(
+          horizontal: McSpacing.s3,
+          vertical: 6,
+        ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           spacing: 6,
@@ -573,7 +576,7 @@ class _Consent extends StatelessWidget {
           for (final item in items) ...[item, const _Divider()],
           if (state.listsNewMembers case final listed?)
             Padding(
-              padding: const EdgeInsets.only(top: 8),
+              padding: const EdgeInsets.only(top: McSpacing.s2),
               child: Text(
                 listed
                     ? l10n.vtcJoinDirectoryListed
@@ -589,7 +592,7 @@ class _Consent extends StatelessWidget {
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: 2,
+                    spacing: McSpacing.s05,
                     children: [
                       Text(
                         l10n.vtcJoinListMe,
@@ -702,20 +705,20 @@ class _FieldDetail extends StatelessWidget {
       fontWeight: FontWeight.w500,
     );
     return Padding(
-      padding: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.only(top: McSpacing.s2),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 8,
+        spacing: McSpacing.s2,
         children: [
           // Screen readers already read each field as its own line.
           ExcludeSemantics(child: Text('•', style: labelStyle)),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 2,
+              spacing: McSpacing.s05,
               children: [
                 Row(
-                  spacing: 8,
+                  spacing: McSpacing.s2,
                   children: [
                     Expanded(child: Text(field.label, style: labelStyle)),
                     if (field.source == DirectoryFieldSource.admin)
@@ -751,7 +754,10 @@ class _Tag extends StatelessWidget {
       borderRadius: BorderRadius.circular(McRadius.full),
     ),
     child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: const EdgeInsets.symmetric(
+        horizontal: McSpacing.s2,
+        vertical: McSpacing.s05,
+      ),
       child: Text(
         text,
         style: context.textTheme.labelSmall?.copyWith(
@@ -809,13 +815,13 @@ class _ConsentItem extends HookWidget {
           padding: const EdgeInsets.symmetric(vertical: 10),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 12,
+            spacing: McSpacing.s3,
             children: [
               Icon(icon, size: 20, color: iconColor ?? mc.textSecondary),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 4,
+                  spacing: McSpacing.s1,
                   children: [
                     Text(
                       title,
@@ -865,7 +871,7 @@ class _WaysIn extends StatelessWidget {
       title: l10n.vtcJoinWaysHeading,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: 12,
+        spacing: McSpacing.s3,
         children: [
           if (ways.isNotEmpty)
             SwipeableCards<VtcJoinWay>(
@@ -1056,7 +1062,7 @@ class _ChooseIdentity extends HookWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 12,
+      spacing: McSpacing.s3,
       children: [
         OnboardingTitle(l10n.vtcJoinChooseIdentity),
         SwipeableCards<String?>(
@@ -1082,7 +1088,7 @@ class _ChooseIdentity extends HookWidget {
             textAlign: TextAlign.center,
             style: onboardingNote(context),
           ),
-        const SizedBox(height: 12),
+        const SizedBox(height: McSpacing.s3),
         OnboardingButton(
           label: l10n.vtcJoinUseIdentity,
           onPressed: missingCredential(options[current.value])
@@ -1113,15 +1119,15 @@ class _ApproveDetails extends StatelessWidget {
     final l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 12,
+      spacing: McSpacing.s3,
       children: [
         OnboardingTitle(l10n.vtcJoinShareDetails(state.communityName ?? '')),
-        const SizedBox(height: 12),
+        const SizedBox(height: McSpacing.s3),
         GlassCard(
           title: l10n.vtcJoinDetailsHeading,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: 12,
+            spacing: McSpacing.s3,
             children: [
               for (final detail in state.details)
                 OnboardingLine(
@@ -1132,7 +1138,7 @@ class _ApproveDetails extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: McSpacing.s3),
         OnboardingButton(label: l10n.vtcJoinShareAction, onPressed: onShare),
         OnboardingTextButton(label: l10n.generalCancel, onPressed: onCancel),
       ],
@@ -1161,15 +1167,15 @@ class _ApproveCredential extends StatelessWidget {
     if (credential == null) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 12,
+      spacing: McSpacing.s3,
       children: [
         OnboardingTitle(l10n.vtcJoinShareCredential(state.communityName ?? '')),
-        const SizedBox(height: 12),
+        const SizedBox(height: McSpacing.s3),
         GlassCard(
           title: credential.types.last,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: 4,
+            spacing: McSpacing.s1,
             children: [
               if (credential.issuerDid case final issuer?) ...[
                 Text(
@@ -1188,7 +1194,7 @@ class _ApproveCredential extends StatelessWidget {
           title: l10n.vtcJoinCredentialClaimsHeading,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: 12,
+            spacing: McSpacing.s3,
             children: [
               for (final claim in credential.claims)
                 OnboardingLine(
@@ -1200,7 +1206,7 @@ class _ApproveCredential extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: McSpacing.s3),
         OnboardingButton(label: l10n.vtcJoinShareAction, onPressed: onShare),
         OnboardingTextButton(label: l10n.generalCancel, onPressed: onCancel),
       ],
@@ -1335,7 +1341,7 @@ class _VettingFlow extends StatelessWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 12,
+      spacing: McSpacing.s3,
       children: [
         OnboardingStepProgress(
           key: const Key('vtc_join_vetting_progress'),
@@ -1374,7 +1380,7 @@ class _VettingOutcome extends StatelessWidget {
     return Column(
       key: const Key('vtc_join_vetting_outcome'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 12,
+      spacing: McSpacing.s3,
       children: [
         Icon(
           status == VtcVettingStatus.vouched
@@ -1462,7 +1468,7 @@ class _Vetting extends HookConsumerWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 12,
+      spacing: McSpacing.s3,
       children: [
         if (state.logoUrl case final logoUrl?) VtcCommunityLogo(logoUrl),
         OnboardingStepProgress(
@@ -1481,7 +1487,7 @@ class _Vetting extends HookConsumerWidget {
             child: Column(
               key: const Key('vtc_join_vetting_requirements'),
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              spacing: 8,
+              spacing: McSpacing.s2,
               children: [
                 for (final need in progress?.needs ?? const <VettingNeed>[])
                   if (need case MoreByMethod(:final method, :final count))
@@ -1508,7 +1514,7 @@ class _Vetting extends HookConsumerWidget {
             title: l10n.vtcJoinVettersHeading,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              spacing: 12,
+              spacing: McSpacing.s3,
               children: [
                 for (final request in requests.reversed)
                   OnboardingLine(
@@ -1539,7 +1545,7 @@ class _Vetting extends HookConsumerWidget {
             l10n.vtcJoinVettingFailure(failure.name),
             isError: true,
           ),
-        const SizedBox(height: 12),
+        const SizedBox(height: McSpacing.s3),
         if (progress?.satisfied ?? false)
           OnboardingButton(
             key: const Key('vtc_join_vetting_send'),
@@ -1596,7 +1602,7 @@ class _ChooseVetter extends StatelessWidget {
     final l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 12,
+      spacing: McSpacing.s3,
       children: [
         OnboardingTitle(l10n.vtcJoinChooseVetterTitle),
         if (state.vetters.isEmpty)
@@ -1619,7 +1625,7 @@ class _ChooseVetter extends StatelessWidget {
               ),
             ),
         ],
-        const SizedBox(height: 12),
+        const SizedBox(height: McSpacing.s3),
         OnboardingTextButton(label: l10n.generalCancel, onPressed: onBack),
       ],
     );
@@ -1646,7 +1652,7 @@ class _VettingCode extends HookWidget {
     final code = field.text.trim();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 12,
+      spacing: McSpacing.s3,
       children: [
         OnboardingTitle(
           l10n.vtcJoinVettingCodeTitle(
@@ -1666,7 +1672,7 @@ class _VettingCode extends HookWidget {
             l10n.vtcJoinVettingFailure(failure.name),
             isError: true,
           ),
-        const SizedBox(height: 12),
+        const SizedBox(height: McSpacing.s3),
         OnboardingButton(
           label: l10n.vtcJoinContinueAction,
           onPressed: code.isEmpty ? null : () => onSubmit(code),
@@ -1701,7 +1707,7 @@ class _ConfirmMatch extends StatelessWidget {
     };
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 12,
+      spacing: McSpacing.s3,
       children: [
         OnboardingTitle(l10n.vtcJoinMatchTitle),
         OnboardingSubtitle(l10n.vtcJoinMatchIntro(vetter)),
@@ -1728,7 +1734,7 @@ class _ConfirmMatch extends StatelessWidget {
               MaterialLocalizations.of(context).formatMediumDate(until),
             ),
           ),
-        const SizedBox(height: 12),
+        const SizedBox(height: McSpacing.s3),
         OnboardingButton(
           key: const Key('vtc_join_match_yes'),
           label: l10n.vtcJoinMatchYes,
@@ -1764,7 +1770,7 @@ class _ApproveVettingCard extends StatelessWidget {
     final vetter = _vetterName(l10n, state, state.vetterDid);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 12,
+      spacing: McSpacing.s3,
       children: [
         OnboardingTitle(l10n.vtcJoinVettingCardTitle(vetter)),
         VtcDetailsCard(
@@ -1776,7 +1782,7 @@ class _ApproveVettingCard extends StatelessWidget {
           ],
           note: l10n.vtcJoinVettingCardNote(vetter),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: McSpacing.s3),
         OnboardingButton(
           key: const Key('vtc_join_vetting_card_share'),
           label: l10n.vtcJoinShareAction,
@@ -1814,7 +1820,7 @@ class _Pending extends StatelessWidget {
     final name = state.communityName ?? '';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 12,
+      spacing: McSpacing.s3,
       children: [
         if (state.logoUrl case final logoUrl?) VtcCommunityLogo(logoUrl),
         OnboardingTitle(name),
@@ -1833,7 +1839,7 @@ class _Pending extends StatelessWidget {
             autoCheckInterval: VtcJoinController.pendingCheckInterval,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: McSpacing.s3),
         OnboardingButton(label: l10n.generalDone, onPressed: onDone),
         OnboardingButton(
           label: l10n.vtcJoinCheckAgain,
@@ -1872,10 +1878,10 @@ class _Outcome extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 12,
+      spacing: McSpacing.s3,
       children: [
         Icon(icon, size: 72, color: context.mcColors.textPrimary),
-        const SizedBox(height: 4),
+        const SizedBox(height: McSpacing.s1),
         Text(
           message,
           textAlign: TextAlign.center,
@@ -1884,7 +1890,7 @@ class _Outcome extends StatelessWidget {
           ),
         ),
         ?trail,
-        const SizedBox(height: 12),
+        const SizedBox(height: McSpacing.s3),
         OnboardingButton(label: context.l10n.generalDone, onPressed: onDone),
         ?secondary,
       ],
@@ -1909,12 +1915,12 @@ class _Failed extends StatelessWidget {
     final l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 12,
+      spacing: McSpacing.s3,
       children: [
         Icon(McIcons.error, size: 72, color: context.mcColors.dangerText),
-        const SizedBox(height: 4),
+        const SizedBox(height: McSpacing.s1),
         OnboardingMessage(message, isError: true),
-        const SizedBox(height: 12),
+        const SizedBox(height: McSpacing.s3),
         OnboardingButton(label: l10n.generalRetry, onPressed: onRetry),
         OnboardingTextButton(label: l10n.generalCancel, onPressed: onCancel),
       ],

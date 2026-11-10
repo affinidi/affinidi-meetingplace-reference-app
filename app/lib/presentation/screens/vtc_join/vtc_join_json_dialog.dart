@@ -8,6 +8,7 @@ import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../themes/tokens/mc_colors.dart';
 import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
+import '../../themes/tokens/mc_spacing.dart';
 import '../../themes/tokens/mc_typography.dart';
 
 /// The `pnm` command that fetches the credential the member's VTA keeps
@@ -118,9 +119,14 @@ class _JsonSheet extends HookWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 8, 12),
+              padding: const EdgeInsets.fromLTRB(
+                McSpacing.s5,
+                McSpacing.s2,
+                McSpacing.s2,
+                McSpacing.s3,
+              ),
               child: Row(
-                spacing: 12,
+                spacing: McSpacing.s3,
                 children: [
                   CircleAvatar(
                     radius: 20,
@@ -130,7 +136,7 @@ class _JsonSheet extends HookWidget {
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 2,
+                      spacing: McSpacing.s05,
                       children: [
                         Text(
                           title,
@@ -180,7 +186,12 @@ class _JsonSheet extends HookWidget {
             ),
             Expanded(
               child: Container(
-                margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                margin: const EdgeInsets.fromLTRB(
+                  McSpacing.s4,
+                  0,
+                  McSpacing.s4,
+                  McSpacing.s4,
+                ),
                 decoration: BoxDecoration(
                   color: _JsonColors.background(colors),
                   borderRadius: BorderRadius.circular(McRadius.lg),
@@ -189,7 +200,7 @@ class _JsonSheet extends HookWidget {
                 clipBehavior: Clip.antiAlias,
                 child: SingleChildScrollView(
                   controller: scrollController,
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(McSpacing.s4),
                   child: SelectableText.rich(
                     TextSpan(children: spans),
                     key: textKey,

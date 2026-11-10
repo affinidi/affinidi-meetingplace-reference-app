@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
+import '../../themes/tokens/mc_spacing.dart';
 import '../../themes/tokens/mc_typography.dart';
 import '../../widgets/common/app_card.dart';
 import '../../widgets/identity_picker/identity_card.dart';
@@ -63,14 +64,14 @@ class VtcDetailsCard extends StatelessWidget {
               side: BorderSide(color: mc.hairline),
             ),
             padding: const EdgeInsets.fromLTRB(
-              20,
-              _pictureSize / 2 + 8,
-              20,
+              McSpacing.s5,
+              _pictureSize / 2 + McSpacing.s2,
+              McSpacing.s5,
               14,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              spacing: 4,
+              spacing: McSpacing.s1,
               children: [
                 Text(
                   heading.toUpperCase(),
@@ -85,7 +86,7 @@ class VtcDetailsCard extends StatelessWidget {
                       color: mc.textPrimary,
                     ),
                   ),
-                const SizedBox(height: 8),
+                const SizedBox(height: McSpacing.s2),
                 for (final detail in rows) _DetailRow(detail: detail),
                 if (note case final note?) ...[
                   Divider(height: 12, color: mc.hairline),
@@ -121,9 +122,9 @@ class _DetailRow extends StatelessWidget {
     final textTheme = context.textTheme;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: McSpacing.s1),
       child: Row(
-        spacing: 8,
+        spacing: McSpacing.s2,
         children: [
           Icon(_icon(detail.type), color: mc.textSecondary, size: 16),
           Expanded(

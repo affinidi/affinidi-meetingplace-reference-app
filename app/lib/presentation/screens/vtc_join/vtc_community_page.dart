@@ -9,6 +9,7 @@ import '../../../domain/models/vtc/vtc_card_delivery.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../themes/tokens/mc_icons.dart';
+import '../../themes/tokens/mc_spacing.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import '../vtc_vetter_profile/vtc_vetter_profile_screen.dart';
 import '../vtc_vetting_desk/vtc_vetting_desk_screen.dart';
@@ -99,7 +100,7 @@ class VtcCommunityPage extends HookConsumerWidget {
         : !canVet.hasError && couldVet.data == true;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 12,
+      spacing: McSpacing.s3,
       children: [
         if (state.wasMember) ...[
           if (state.logoUrl case final logoUrl?) VtcCommunityLogo(logoUrl),
@@ -116,7 +117,7 @@ class VtcCommunityPage extends HookConsumerWidget {
           ),
         ] else ...[
           Icon(McIcons.verified, size: 72, color: mc.success),
-          const SizedBox(height: 4),
+          const SizedBox(height: McSpacing.s1),
           _WithAbout(
             state: state,
             child: Text(
@@ -143,7 +144,7 @@ class VtcCommunityPage extends HookConsumerWidget {
             key: const Key('vtc_community_vetting_check_failed'),
             isError: true,
           ),
-        const SizedBox(height: 4),
+        const SizedBox(height: McSpacing.s1),
         if (card != null) ...[
           VtcMembershipCardView(
             card: card,
@@ -161,7 +162,7 @@ class VtcCommunityPage extends HookConsumerWidget {
           Row(
             key: const Key('vtc_membership_card_pending'),
             mainAxisAlignment: MainAxisAlignment.center,
-            spacing: 8,
+            spacing: McSpacing.s2,
             children: [
               Icon(McIcons.pending, size: 16, color: mc.textSecondary),
               Flexible(
@@ -174,7 +175,7 @@ class VtcCommunityPage extends HookConsumerWidget {
           ),
         if (state.identityCheck case final check?)
           VtcIdentityCheckView(check: check, checkerName: name),
-        const SizedBox(height: 12),
+        const SizedBox(height: McSpacing.s3),
         OnboardingButton(label: l10n.generalDone, onPressed: onDone),
         leave,
       ],
@@ -287,7 +288,7 @@ class _VetterProfilePrompt extends HookConsumerWidget {
     final l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 8,
+      spacing: McSpacing.s2,
       children: [
         OnboardingMessage(
           l10n.vtcVetterProfileNeeded,
@@ -435,15 +436,15 @@ class _CardArrival extends HookWidget {
     final mc = context.mcColors;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 8,
+      spacing: McSpacing.s2,
       children: [
         InkWell(
           key: const Key('vtc_delivery_toggle'),
           onTap: () => expanded.value = !expanded.value,
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
+            padding: const EdgeInsets.symmetric(vertical: McSpacing.s2),
             child: Row(
-              spacing: 8,
+              spacing: McSpacing.s2,
               children: [
                 Icon(McIcons.route, color: mc.textSecondary),
                 Expanded(

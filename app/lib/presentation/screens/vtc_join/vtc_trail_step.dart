@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../themes/tokens/mc_colors.dart';
 import '../../themes/tokens/mc_icons.dart';
+import '../../themes/tokens/mc_spacing.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import 'vtc_detail_line.dart';
 import 'vtc_flow_diagram.dart';
@@ -153,7 +154,7 @@ class VtcTrailStep extends HookWidget {
       child: IntrinsicHeight(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: 12,
+          spacing: McSpacing.s3,
           children: [
             Column(
               children: [
@@ -176,7 +177,10 @@ class VtcTrailStep extends HookWidget {
             ),
             Expanded(
               child: Padding(
-                padding: EdgeInsets.only(top: 6, bottom: isLast ? 0 : 16),
+                padding: EdgeInsets.only(
+                  top: 6,
+                  bottom: isLast ? 0 : McSpacing.s4,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -188,7 +192,7 @@ class VtcTrailStep extends HookWidget {
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            spacing: 4,
+                            spacing: McSpacing.s1,
                             children: [
                               Text(
                                 title,
@@ -223,7 +227,7 @@ class VtcTrailStep extends HookWidget {
                           ),
                         if (canExpand)
                           Padding(
-                            padding: const EdgeInsets.only(top: 4),
+                            padding: const EdgeInsets.only(top: McSpacing.s1),
                             child: Icon(
                               expanded.value
                                   ? McIcons.chevronUp

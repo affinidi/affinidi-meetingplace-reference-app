@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_spacing.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 
 /// One fact on the page, such as the key that signed: an [icon] for
@@ -32,13 +33,13 @@ class VtcDetailLine extends StatelessWidget {
     );
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: 8,
+      spacing: McSpacing.s2,
       children: [
         Icon(icon, size: 16, color: mc.textSecondary),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 2,
+            spacing: McSpacing.s05,
             children: [
               Text(label, style: onboardingNote(context)),
               if (items.isNotEmpty)
