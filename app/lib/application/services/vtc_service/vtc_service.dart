@@ -510,8 +510,10 @@ class VtcService {
   /// [MeetingPlaceVtcSDKException] when the VTA or the community refuses or
   /// cannot be reached.
   ///
-  /// Once admitted, the membership is confirmed back to the community and,
-  /// unless [listInDirectory], the member's directory card is withdrawn.
+  /// Once admitted, the membership is confirmed back to the community and
+  /// the member's directory card is withdrawn, or, when [listInDirectory],
+  /// shows other members the identity they joined with, so they can find
+  /// the member to vouch for them.
   /// Both are retried by [checkApplication] until they succeed. Each step
   /// is reported to [onStep] as it starts.
   Future<JoinVerdict> join(
@@ -634,9 +636,10 @@ class VtcService {
   }
 
   /// Completes [member]'s admission on the community's side: confirms the
-  /// membership with [membershipCard], the card the community issued, and,
-  /// unless the member opted in, withdraws their directory card. Records
-  /// whether both succeeded; neither failure undoes the membership.
+  /// membership with [membershipCard], the card the community issued, and
+  /// withdraws their directory card, or lets other members find them when
+  /// they opted in. Records whether both succeeded; neither failure undoes
+  /// the membership.
   ///
   /// Returns whether the community took the confirmation.
   Future<bool> _settle(
@@ -663,7 +666,20 @@ class VtcService {
         confirmed = settled = false;
       }
     }
-    if (!member.listInDirectory) {
+    if (member.listInDirectory) {
+      try {
+        await _sdk.directoryClient().setDidVisibleToMembers(
+          member.communityDid,
+          agent: vta,
+          persona: signer,
+          visible: true,
+        );
+      } on MeetingPlaceVtcSDKException catch (error) {
+        // A community that does not let members be found refuses each
+        // time: nothing to retry, the member stays listed only.
+        if (error.refusalCode != DirectoryTask.aboveCeiling) settled = false;
+      }
+    } else {
       try {
         await client.hideDirectoryCard(
           member.communityDid,

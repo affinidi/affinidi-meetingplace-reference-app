@@ -522,6 +522,65 @@ void main() {
       expect((await service.community(fakeVtcDid))?.isSettled, isTrue);
     });
 
+    group('listed in the directory', () {
+      setUp(() {
+        network.answerTo[DirectoryTask.cardShow] = (_) => {
+          'card': {'entryId': 'dir_me'},
+          'missingRequired': <String>[],
+        };
+      });
+
+      test('lets members find the identity joined with', () async {
+        await service.join(
+          await service.readCommunity(fakeVtcDid),
+          persona: joinAs,
+          listInDirectory: true,
+        );
+
+        final update = network.memberRequests.last;
+        expect(update['type'], DirectoryTask.cardUpdate);
+        expect(update['payload'], {
+          'visibility': {'did': 'members'},
+          'discoverability': {
+            'listing': 'findable',
+            'search': 'byName',
+            'external': false,
+          },
+        });
+        expect((await service.community(fakeVtcDid))?.isSettled, isTrue);
+      });
+
+      test(
+        'settles when the community does not let members be found',
+        () async {
+          network.refusals[DirectoryTask.cardUpdate] = (
+            403,
+            DirectoryTask.aboveCeiling,
+          );
+
+          await service.join(
+            await service.readCommunity(fakeVtcDid),
+            persona: joinAs,
+            listInDirectory: true,
+          );
+
+          expect((await service.community(fakeVtcDid))?.isSettled, isTrue);
+        },
+      );
+
+      test('retries later when the community fails otherwise', () async {
+        network.refusals[DirectoryTask.cardUpdate] = (503, 'unavailable');
+
+        await service.join(
+          await service.readCommunity(fakeVtcDid),
+          persona: joinAs,
+          listInDirectory: true,
+        );
+
+        expect((await service.community(fakeVtcDid))?.isSettled, isFalse);
+      });
+    });
+
     test('reads the membership card the VTA holds', () async {
       await service.join(
         await service.readCommunity(fakeVtcDid),
