@@ -44,6 +44,10 @@ class CommunityMembershipView extends ConsumerWidget {
         ref.watch(communityGroupCardsProvider(communityDid)).value ?? const [];
     final logoUrl = ref.watch(communityLogoProvider(communityDid)).value;
     final joinedAs = _joinedAs(ref);
+    final roleName = switch (role.value) {
+      final role? => vtcRoleName(l10n, role),
+      null => null,
+    };
 
     if (role.error ?? card.error case final error?) {
       return _Message(switch (error) {
@@ -67,13 +71,15 @@ class CommunityMembershipView extends ConsumerWidget {
               key: const Key('community_membership_identity'),
               did: did,
               identity: identity,
-            ),
-          if (role.value case final role?)
+              role: roleName,
+            )
+          // Without the identity's card, the role stands on its own.
+          else if (roleName != null)
             OnboardingLine(
               key: const Key('community_membership_role'),
               icon: McIcons.badge,
               title: l10n.vtcCommunityRole,
-              subtitle: vtcRoleName(l10n, role),
+              subtitle: roleName,
             ),
           if (card.value case final card?)
             VtcMembershipCardView(

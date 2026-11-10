@@ -241,6 +241,22 @@ void main() {
       expect(tester.widget<VtaIdentityCard>(identityCard()).did, _me);
     });
 
+    testWidgets('shows the role on the identity\'s card, not on its own', (
+      tester,
+    ) async {
+      identities = IdentitiesServiceState(
+        identities: [_vtaIdentity('did:webvh:QmAda:vta.example:ada', 'Ada')],
+      );
+
+      await pumpView(tester);
+
+      expect(
+        find.descendant(of: identityCard(), matching: find.text('Moderator')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('community_membership_role')), findsNothing);
+    });
+
     testWidgets('shows none for a membership of a new identity', (
       tester,
     ) async {
