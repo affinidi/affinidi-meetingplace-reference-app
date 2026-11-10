@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -49,9 +50,14 @@ Future<PublishedRelationship?> vouchWithConsent(
   if (!consented || !context.mounted) return null;
 
   try {
-    final edge = await ref
-        .read(vtcTrustServiceProvider)
-        .vouch(communityDid, personaDid: personaDid);
+    final edge = await _whileWorking(
+      context,
+      title: l10n.vtcTrustVouching(name),
+      detail: l10n.vtcTrustVouchingDetail(communityName),
+      () => ref
+          .read(vtcTrustServiceProvider)
+          .vouch(communityDid, personaDid: personaDid),
+    );
     if (context.mounted) {
       await showVouchTrail(
         context,
@@ -486,6 +492,58 @@ Future<bool> _confirm(
     ),
   );
   return confirmed ?? false;
+}
+
+/// Runs [work] behind a dialog that cannot be dismissed, saying [title]
+/// and [detail], so the member sees it is under way and cannot start it
+/// again meanwhile.
+Future<T> _whileWorking<T>(
+  BuildContext context,
+  Future<T> Function() work, {
+  required String title,
+  required String detail,
+}) async {
+  final navigator = Navigator.of(context, rootNavigator: true);
+  unawaited(
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      useRootNavigator: true,
+      builder: (context) => PopScope(
+        canPop: false,
+        child: AlertDialog(
+          key: const Key('vtc_vouch_progress'),
+          content: Row(
+            spacing: 16,
+            children: [
+              const CircularProgressIndicator.adaptive(),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 4,
+                  children: [
+                    Text(title, style: context.textTheme.titleMedium),
+                    Text(
+                      detail,
+                      style: context.textTheme.bodySmall?.copyWith(
+                        color: context.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+  try {
+    return await work();
+  } finally {
+    if (navigator.mounted) navigator.pop();
+  }
 }
 
 void _tell(BuildContext context, String message) => ScaffoldMessenger.of(

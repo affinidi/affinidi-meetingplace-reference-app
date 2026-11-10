@@ -5760,6 +5760,18 @@ abstract class AppLocalizations {
   /// **'Members will no longer see it.'**
   String get vtcTrustWithdrawMessage;
 
+  /// Shown while the vouch is being signed and stored
+  ///
+  /// In en, this message translates to:
+  /// **'Vouching for {name}…'**
+  String vtcTrustVouching(String name);
+
+  /// What happens while vouching
+  ///
+  /// In en, this message translates to:
+  /// **'Your VTA signs it, then {community} stores it.'**
+  String vtcTrustVouchingDetail(String community);
+
   /// Title of what happened once vouched
   ///
   /// In en, this message translates to:

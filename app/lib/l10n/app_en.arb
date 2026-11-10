@@ -3893,6 +3893,24 @@
 	"@vtcTrustWithdrawMessage": {
 		"description": "What withdrawing a vouch does"
 	},
+	"vtcTrustVouching": "Vouching for {name}…",
+	"@vtcTrustVouching": {
+		"description": "Shown while the vouch is being signed and stored",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcTrustVouchingDetail": "Your VTA signs it, then {community} stores it.",
+	"@vtcTrustVouchingDetail": {
+		"description": "What happens while vouching",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			}
+		}
+	},
 	"vtcTrustDoneTitle": "You vouched for {name}",
 	"@vtcTrustDoneTitle": {
 		"description": "Title of what happened once vouched",

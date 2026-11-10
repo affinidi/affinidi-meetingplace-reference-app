@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -44,6 +45,9 @@ class _FakeTrustService extends Fake implements VtcTrustService {
   PublishedRelationship? incoming;
   VtcTrustFailure? refusal;
   final List<String> vouched = [];
+
+  /// Holds vouching back until completed.
+  Completer<void>? held;
   final List<String> withdrawn = [];
 
   @override
@@ -87,6 +91,7 @@ class _FakeTrustService extends Fake implements VtcTrustService {
     String communityDid, {
     required String personaDid,
   }) async {
+    await held?.future;
     if (refusal case final refusal?) throw VtcTrustException(refusal);
     vouched.add(personaDid);
     return outgoing = PublishedRelationship(
@@ -189,6 +194,31 @@ void main() {
     expect(find.text('What Football club keeps'), findsOneWidget);
     expect(find.textContaining('vrcJsonld'), findsWidgets);
     expect(find.textContaining('edge-1'), findsWidgets);
+  });
+
+  testWidgets('shows that it is vouching until it is done', (tester) async {
+    final held = service.held = Completer<void>();
+    service.stored.add(linkToBob());
+    await pumpPanel(tester);
+
+    await tapText(tester, 'Vouch');
+    await tester.tap(find.text('Vouch').last);
+    // Not settled: the progress indicator spins while vouching.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.byKey(const Key('vtc_vouch_progress')), findsOneWidget);
+    expect(find.text('Vouching for Bob…'), findsOneWidget);
+    expect(
+      find.text('Your VTA signs it, then Football club stores it.'),
+      findsOneWidget,
+    );
+
+    held.complete();
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('vtc_vouch_progress')), findsNothing);
+    expect(find.text('You vouched for Bob'), findsOneWidget);
   });
 
   testWidgets('publishes nothing without consent', (tester) async {
@@ -317,6 +347,7 @@ void main() {
       find.text("Bob isn't a member of Football club any more."),
       findsOneWidget,
     );
+    expect(find.byKey(const Key('vtc_vouch_progress')), findsNothing);
   });
 
   testWidgets('leaves out links to communities the member left', (

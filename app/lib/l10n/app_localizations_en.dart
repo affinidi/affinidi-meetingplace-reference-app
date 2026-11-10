@@ -3832,6 +3832,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vtcTrustWithdrawMessage => 'Members will no longer see it.';
 
   @override
+  String vtcTrustVouching(String name) {
+    return 'Vouching for $name…';
+  }
+
+  @override
+  String vtcTrustVouchingDetail(String community) {
+    return 'Your VTA signs it, then $community stores it.';
+  }
+
+  @override
   String vtcTrustDoneTitle(String name) {
     return 'You vouched for $name';
   }
