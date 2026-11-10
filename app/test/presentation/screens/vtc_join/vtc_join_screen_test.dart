@@ -1708,8 +1708,16 @@ void main() {
         vettingMatchCode(session.id),
       );
       expect(find.textContaining('Bob is a vetter of Football club'), findsOne);
+      final mismatch = find.byKey(const Key('vtc_join_match_no'));
+      final button = tester.widget<ElevatedButton>(
+        find.descendant(of: mismatch, matching: find.byType(ElevatedButton)),
+      );
+      expect(
+        button.style?.foregroundColor?.resolve({}),
+        Theme.of(tester.element(mismatch)).extension<McColors>()!.dangerText,
+      );
 
-      await tapVisible(tester, find.byKey(const Key('vtc_join_match_no')));
+      await tapVisible(tester, mismatch);
       await settle(tester);
 
       expect(find.text('Step 5 of 5 · Done'), findsOneWidget);

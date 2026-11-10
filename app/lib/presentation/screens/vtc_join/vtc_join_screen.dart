@@ -1731,9 +1731,10 @@ class _ConfirmMatch extends StatelessWidget {
           label: l10n.vtcJoinMatchYes,
           onPressed: onMatch,
         ),
-        OnboardingTextButton(
+        OnboardingButton(
           key: const Key('vtc_join_match_no'),
           label: l10n.vtcJoinMatchNo,
+          isDestructive: true,
           onPressed: onMismatch,
         ),
       ],
