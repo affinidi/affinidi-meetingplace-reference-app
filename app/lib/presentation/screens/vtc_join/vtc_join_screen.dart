@@ -27,6 +27,7 @@ import '../../widgets/vta_identity_card.dart';
 import 'vtc_claim_type_label.dart';
 import 'vtc_community_page.dart';
 import 'vtc_community_profile.dart';
+import 'vtc_details_card.dart';
 import 'vtc_join_controller.dart';
 import 'vtc_join_json_dialog.dart';
 import 'vtc_join_state.dart';
@@ -1745,24 +1746,14 @@ class _ApproveVettingCard extends StatelessWidget {
       spacing: 12,
       children: [
         OnboardingTitle(l10n.vtcJoinVettingCardTitle(vetter)),
-        GlassCard(
-          title: l10n.vtcJoinVettingCardHeading,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: 12,
-            children: [
-              for (final detail in state.details)
-                OnboardingLine(
-                  icon: McIcons.badge,
-                  title: detail.value,
-                  subtitle: vtcClaimTypeLabel(l10n, detail.type),
-                ),
-              Text(
-                l10n.vtcJoinVettingCardNote(vetter),
-                style: onboardingNote(context),
-              ),
-            ],
-          ),
+        VtcDetailsCard(
+          key: const Key('vtc_join_vetting_card'),
+          heading: l10n.vtcJoinVettingCardHeading,
+          details: [
+            for (final detail in state.details)
+              (type: detail.type, value: detail.value),
+          ],
+          note: l10n.vtcJoinVettingCardNote(vetter),
         ),
         const SizedBox(height: 12),
         OnboardingButton(

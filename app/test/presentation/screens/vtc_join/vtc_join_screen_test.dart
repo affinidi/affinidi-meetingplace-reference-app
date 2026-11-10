@@ -16,6 +16,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/services/camera_service
 import 'package:mpx_flutter_reference_app/infrastructure/services/camera_service/camera_service_state.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/vtc/user_verification_key.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_details_card.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_findable_view.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_flow_diagram.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_controller.dart';
@@ -1662,6 +1663,8 @@ void main() {
       await settle(tester);
       await tapVisible(tester, find.byKey(const Key('vtc_join_match_yes')));
       await settle(tester);
+      // The details as an identity card, as the vetter sees them.
+      expect(find.byType(VtcDetailsCard), findsOneWidget);
       final decline = find.byKey(const Key('vtc_join_vetting_card_decline'));
       final declineButton = tester.widget<ElevatedButton>(
         find.descendant(of: decline, matching: find.byType(ElevatedButton)),

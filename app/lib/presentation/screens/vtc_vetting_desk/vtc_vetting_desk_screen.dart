@@ -15,6 +15,7 @@ import '../../themes/tokens/mc_typography.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import '../../widgets/qr/qr_code_view.dart';
 import '../vtc_join/vtc_claim_type_label.dart';
+import '../vtc_join/vtc_details_card.dart';
 import '../vtc_join/vtc_membership_card_view.dart';
 import '../vtc_join/vtc_progress_line.dart';
 import '../vtc_join/vtc_trail_step.dart';
@@ -638,22 +639,14 @@ class _SessionView extends HookWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: 12,
       children: [
-        GlassCard(
+        VtcDetailsCard(
           key: const Key('vtc_vetter_card'),
-          title: l10n.vtcVetterCardHeading,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: 8,
-            children: [
-              Text(l10n.vtcVetterCardIntro, style: onboardingNote(context)),
-              for (final claim in details)
-                OnboardingLine(
-                  icon: McIcons.badge,
-                  title: vtcClaimTypeLabel(l10n, claim.type),
-                  subtitle: '${claim.value}',
-                ),
-            ],
-          ),
+          heading: l10n.vtcVetterCardHeading,
+          details: [
+            for (final claim in details)
+              (type: claim.type, value: '${claim.value}'),
+          ],
+          note: l10n.vtcVetterCardIntro,
         ),
         Text(
           l10n.vtcVetterDocumentHeading,

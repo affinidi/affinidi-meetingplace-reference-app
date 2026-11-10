@@ -11,6 +11,7 @@ import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_vetter_desk.dart
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_community_page.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_details_card.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_state.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_progress_line.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_vetter_profile/vtc_vetter_profile_screen.dart';
@@ -408,7 +409,14 @@ void main() {
 
     await tester.runAsync(() => fixture.sendCard(session));
     await check(tester);
-    expect(find.text('Ada Lovelace'), findsOneWidget);
+    // As an identity card, the name heading it.
+    expect(
+      find.descendant(
+        of: find.byType(VtcDetailsCard),
+        matching: find.text('Ada Lovelace'),
+      ),
+      findsOneWidget,
+    );
     expect(waiting(tester), isFalse);
     final issue = find.byKey(const Key('vtc_vetter_issue'));
     await tap(tester, issue);

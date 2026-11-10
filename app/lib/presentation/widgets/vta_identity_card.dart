@@ -187,7 +187,7 @@ class VtaIdentityCard extends ConsumerWidget {
             right: 0,
             top: -_pictureSize / 2,
             child: Center(
-              child: _Avatar(
+              child: IdentityCardAvatar(
                 picture: picture,
                 icon: did == null ? McIcons.personAdd : McIcons.person,
               ),
@@ -201,8 +201,12 @@ class VtaIdentityCard extends ConsumerWidget {
 
 /// The identity's picture in the canvas-coloured ring an identity card's
 /// picture wears, or [icon] when it has none.
-class _Avatar extends StatelessWidget {
-  const _Avatar({required this.picture, required this.icon});
+class IdentityCardAvatar extends StatelessWidget {
+  const IdentityCardAvatar({
+    super.key,
+    required this.picture,
+    required this.icon,
+  });
 
   final ImageProvider<Object>? picture;
   final IconData icon;
@@ -223,7 +227,7 @@ class _Avatar extends StatelessWidget {
         ),
       ),
       child: CircleAvatar(
-        radius: VtaIdentityCard._pictureSize / 2 - _ring,
+        radius: IdentityCard.pictureSize / 2 - _ring,
         backgroundColor: colorScheme.surfaceContainerHigh,
         backgroundImage: picture,
         child: picture == null
