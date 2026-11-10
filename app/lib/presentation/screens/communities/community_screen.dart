@@ -77,9 +77,13 @@ class CommunityScreen extends HookConsumerWidget {
 
     final name = community?.name ?? l10n.membershipCredentialUnnamed;
     final logoUrl = ref.watch(communityLogoProvider(communityDid)).value;
-    // Last, so the other tabs keep their place as it comes and goes.
+    // Last, so the other tabs keep their place as it comes and goes. Until
+    // the VTA answers, its last answer stands, for the tab to show at once;
+    // the desk checks the card again before any ticket.
+    final canVetCheck = ref.watch(communityCanVetProvider(communityDid));
     final canVet =
-        ref.watch(communityCanVetProvider(communityDid)).value ?? false;
+        canVetCheck.value ??
+        (!canVetCheck.hasError && (community?.isVetter ?? false));
     final tabCount = canVet ? 5 : 4;
     // The tab on show stays on show as the Vetting tab comes and goes.
     final shownTab = useRef(0);

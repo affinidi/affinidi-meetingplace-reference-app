@@ -322,6 +322,35 @@ void main() {
       expect(find.byType(VtcVettingDeskView), findsOneWidget);
     });
 
+    testWidgets('shows a known vetter the Vetting tab before the VTA answers', (
+      tester,
+    ) async {
+      final l10n = await getL10n();
+      final answer = Completer<bool>();
+      await openCommunitiesTab(
+        tester,
+        overrides: [
+          communityCanVetProvider(
+            chessDid,
+          ).overrideWith((ref) => answer.future),
+        ],
+      );
+      await saveCommunities();
+      final repository = SecureStorageVtcRepository();
+      final chess = await repository.findCommunity(chessDid);
+      await repository.saveCommunity(chess!.withVetter(isVetter: true));
+      await pullToRefresh(tester);
+      await tester.tap(find.text('Chess club'));
+      await tester.pumpAndSettle();
+
+      expect(find.text(l10n.communityVettingTab), findsOneWidget);
+
+      answer.complete(false);
+      await tester.pumpAndSettle();
+
+      expect(find.text(l10n.communityVettingTab), findsNothing);
+    });
+
     testWidgets('offers no Vetting tab to a member who is not a vetter', (
       tester,
     ) async {
