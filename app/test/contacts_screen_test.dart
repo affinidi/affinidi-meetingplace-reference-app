@@ -137,12 +137,14 @@ void main() {
       await navigateToContactsScreen(tester);
 
       final groupContact = FakeContacts.groupContact;
+      // A group's card is the member's own identity, not the group's.
       final card = groupContact.card;
-      final groupName = [
+      final identityName = [
         card.firstName,
         card.lastName ?? '',
       ].where((s) => s.isNotEmpty).join(' ');
-      expect(findContactByName(groupName), findsWidgets);
+      expect(findContactByName(groupContact.displayName!), findsWidgets);
+      expect(findContactByName(identityName), findsNothing);
     });
 
     testWidgets('should show badge count when greater than 0', (tester) async {
@@ -372,13 +374,15 @@ void main() {
       final contactName1 =
           FakeContacts.individualContact.displayName ?? 'Contact';
       final groupContact = FakeContacts.groupContact;
+      // A group's card is the member's own identity, not the group's.
       final card = groupContact.card;
-      final groupName = [
+      final identityName = [
         card.firstName,
         card.lastName ?? '',
       ].where((s) => s.isNotEmpty).join(' ');
       expect(findContactByName(contactName1), findsWidgets);
-      expect(findContactByName(groupName), findsWidgets);
+      expect(findContactByName(groupContact.displayName!), findsWidgets);
+      expect(findContactByName(identityName), findsNothing);
     });
   });
 
@@ -721,13 +725,15 @@ void main() {
       await navigateToContactsScreen(tester);
 
       final groupContact = FakeContacts.groupContact;
+      // A group's card is the member's own identity, not the group's.
       final card = groupContact.card;
-      final groupName = [
+      final identityName = [
         card.firstName,
         card.lastName ?? '',
       ].where((s) => s.isNotEmpty).join(' ');
 
-      expect(findContactByName(groupName), findsWidgets);
+      expect(findContactByName(groupContact.displayName!), findsWidgets);
+      expect(findContactByName(identityName), findsNothing);
       expect(groupContact.isGroup, isTrue);
     });
   });

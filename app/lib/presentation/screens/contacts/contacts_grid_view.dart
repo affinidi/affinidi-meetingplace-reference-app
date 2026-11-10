@@ -79,9 +79,7 @@ class _ContactGridItem extends ConsumerWidget {
     final secondaryName = _resolveSecondaryContactName(
       contact: contact,
       primaryName: primaryName,
-      fullName: fullName,
       displayName: displayName,
-      defaultGroupName: trimmedDefaultGroupName,
     );
     final showCustomDisplayName = secondaryName != null;
 

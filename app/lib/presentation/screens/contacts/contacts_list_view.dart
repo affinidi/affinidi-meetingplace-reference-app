@@ -21,13 +21,10 @@ String _resolvePrimaryContactName({
 String? _resolveSecondaryContactName({
   required Contact contact,
   required String primaryName,
-  required String fullName,
   String? displayName,
-  String? defaultGroupName,
 }) {
-  if (contact.isGroup) {
-    return fullName != primaryName ? fullName : null;
-  }
+  // A group's card is the member's own identity, not the group's.
+  if (contact.isGroup) return null;
 
   return displayName != null &&
           displayName.isNotEmpty &&
@@ -125,9 +122,7 @@ class _ContactListItem extends ConsumerWidget {
     final secondaryName = _resolveSecondaryContactName(
       contact: contact,
       primaryName: primaryName,
-      fullName: fullName,
       displayName: displayName,
-      defaultGroupName: trimmedDefaultGroupName,
     );
     final showCustomDisplayName = secondaryName != null;
     final dateAdded = DateFormat.yMMMd(
