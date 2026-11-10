@@ -4,6 +4,7 @@ import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
@@ -14,6 +15,7 @@ import '../../../domain/models/vtc/vtc_vetting.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/services/camera_service/camera_service.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../navigation/routes/dashboard_routes.dart';
 import '../../dialogs/qr_code_picker/qr_code_picker.dart';
 import '../../effects/confetti/confetti_overlay.dart';
 import '../../themes/tokens/mc_colors.dart';
@@ -62,13 +64,19 @@ class VtcJoinScreen extends HookConsumerWidget {
   final String? leaveCommunityName;
 
   /// Opens joining over the current screen, at the community of [code] if
-  /// given.
-  static Future<void> show(BuildContext context, {String? code}) =>
-      Navigator.of(context, rootNavigator: true).push<void>(
-        MaterialPageRoute<void>(
-          builder: (context) => VtcJoinScreen(code: code),
-        ),
-      );
+  /// given; a community joined once vetted opens at its channels.
+  static Future<void> show(BuildContext context, {String? code}) async {
+    final router = GoRouter.of(context);
+    final joinedDid = await Navigator.of(context, rootNavigator: true)
+        .push<String>(
+          MaterialPageRoute<String>(
+            builder: (context) => VtcJoinScreen(code: code),
+          ),
+        );
+    if (joinedDid != null) {
+      router.go(CommunityRoute(communityDid: joinedDid).location);
+    }
+  }
 
   /// Leaves the community of [communityDid] over the current screen,
   /// showing its steps and the outcome. Ask the member to confirm first,
@@ -110,6 +118,24 @@ class VtcJoinScreen extends HookConsumerWidget {
     final name = state.communityName ?? '';
     void close() => Navigator.of(context).pop();
 
+    // Joining is all that is left once vetted: a community that admits the
+    // member then opens at its channels, rather than its page here.
+    final sentVetted = useRef(false);
+    Future<void> sendVetted() {
+      sentVetted.value = true;
+      return controller.sendVettedApplication();
+    }
+
+    ref.listen(vtcJoinControllerProvider, (previous, next) {
+      if (next.step == VtcJoinStep.scanning) sentVetted.value = false;
+      if (!sentVetted.value ||
+          next.step != VtcJoinStep.joined ||
+          previous?.step == VtcJoinStep.joined) {
+        return;
+      }
+      Navigator.of(context).pop(next.communityDid);
+    });
+
     if (state.applicantStep case final step?) {
       final request = state.vetting?.requestTo(state.flowVetterDid ?? '');
       return ConfettiOverlay(
@@ -119,7 +145,12 @@ class VtcJoinScreen extends HookConsumerWidget {
         child: OnboardingLayout(
           onClose: close,
           showBranding: false,
-          child: _VettingFlow(state: state, step: step, controller: controller),
+          child: _VettingFlow(
+            state: state,
+            step: step,
+            controller: controller,
+            onJoin: sendVetted,
+          ),
         ),
       );
     }
@@ -174,7 +205,7 @@ class VtcJoinScreen extends HookConsumerWidget {
           state: state,
           onScan: controller.scanVettingTicket,
           onEnterCode: controller.enterVettingCode,
-          onSend: controller.sendVettedApplication,
+          onSend: sendVetted,
           onStop: () async {
             if (await _confirm(
               context,
@@ -1238,11 +1269,16 @@ class _VettingFlow extends StatelessWidget {
     required this.state,
     required this.step,
     required this.controller,
+    required this.onJoin,
   });
 
   final VtcJoinState state;
   final VtcApplicantStep step;
   final VtcJoinController controller;
+
+  /// Applies with the statements gathered, once they meet what the
+  /// community asks.
+  final VoidCallback onJoin;
 
   @override
   Widget build(BuildContext context) {
@@ -1338,7 +1374,7 @@ class _VettingFlow extends StatelessWidget {
         communityName: state.communityName ?? '',
         satisfied: state.vettingProgress?.satisfied ?? false,
         onBack: controller.backToVetting,
-        onJoin: controller.sendVettedApplication,
+        onJoin: onJoin,
       ),
     };
 
