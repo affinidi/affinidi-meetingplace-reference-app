@@ -1908,15 +1908,21 @@ void main() {
       expect(network.sentToMembers.last.next, network.vetterDid);
     });
 
-    test('picks up where it was when the community is opened again', () async {
+    test('starts over when the community is opened again', () async {
       await askVetter();
+      await network.vetterAccepts(applicant, request().request);
+      await controller().checkVetting();
       container.dispose();
       useService();
 
       await controller().onScanned(fakeVtcDid);
 
-      expect(state().step, VtcJoinStep.vetting);
-      expect(request().status, VtcVettingStatus.requested);
+      expect(state().step, VtcJoinStep.review);
+      expect(state().vetting, isNull);
+      expect(await service.vetting(fakeVtcDid), isNull);
+      // The request, then the note that ends the vetter's wait.
+      expect(network.sentToMembers, hasLength(2));
+      expect(network.sentToMembers.last.next, network.vetterDid);
     });
   });
 }

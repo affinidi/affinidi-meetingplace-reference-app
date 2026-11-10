@@ -251,6 +251,13 @@ class VtcJoinController extends _$VtcJoinController {
           community = await _service.community(manifest.communityDid);
         }
       }
+      // A vetting left unfinished starts over: the member chooses a way in
+      // again. Stopping forgets the identity recorded for it too.
+      if (_stepOf(community) == VtcJoinStep.review &&
+          await _service.vetting(manifest.communityDid) != null) {
+        await _service.stopVetting(manifest.communityDid);
+        community = await _service.community(manifest.communityDid);
+      }
       _showOpenStep(VtcOpenStep.checkingCredentials);
       _holders = await _credentialHolders(manifest, community);
       state = state.copyWith(
@@ -286,17 +293,6 @@ class VtcJoinController extends _$VtcJoinController {
         requestId: community?.joinRequestId,
         denialReason: community?.rejectionReason,
       );
-      // Vetting under way picks up where it was.
-      final vetting = await _service.vetting(manifest.communityDid);
-      final vetted = manifest.criteria
-          .where((criterion) => criterion.id == vetting?.criterionId)
-          .firstOrNull;
-      if (state.step == VtcJoinStep.review &&
-          vetting != null &&
-          (vetted?.asksOnlyForVetting ?? false)) {
-        state = state.copyWith(chosenWayId: vetted!.id);
-        _showVetting(vetting);
-      }
     });
     // Opening ended, also when it failed: later work must not show it.
     if (ref.mounted) state = state.copyWith(openStep: null);
