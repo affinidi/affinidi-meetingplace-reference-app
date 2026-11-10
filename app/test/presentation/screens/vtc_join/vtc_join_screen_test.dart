@@ -311,6 +311,10 @@ void main() {
       await enterCode(tester, fakeVtcDid);
       expect(title('Football club'), findsOneWidget);
       expect(find.text('wants you to join'), findsOneWidget);
+      expect(
+        find.widgetWithText(Chip, 'WITH AN IDENTITY FROM YOUR VTA'),
+        findsOneWidget,
+      );
       expect(find.text('Ways in'), findsOneWidget);
       expect(
         tester
@@ -969,7 +973,7 @@ void main() {
         'Role',
         seenBy,
         'You can widen to: all members',
-        'Set by admins',
+        'SET BY ADMINS',
       ]) {
         expect(find.text(text), findsOneWidget, reason: text);
       }
@@ -1008,7 +1012,7 @@ void main() {
       expect(find.text('•'), findsOneWidget);
       expect(find.text('Seen by: all members'), findsOneWidget);
       expect(find.textContaining('You can widen to'), findsNothing);
-      expect(find.text('Set by admins'), findsNothing);
+      expect(find.text('SET BY ADMINS'), findsNothing);
     });
 
     testWidgets('names the details the community asks for', (tester) async {

@@ -484,7 +484,9 @@ class _Review extends StatelessWidget {
                 ),
         ),
         OnboardingSubtitle(l10n.vtcJoinWantsYou),
-        Center(child: _Pill(l10n.vtcJoinWithVtaIdentity)),
+        Center(
+          child: _Chip(l10n.vtcJoinWithVtaIdentity, icon: McIcons.account),
+        ),
         VtcCommunityProfile(
           communityDid: state.communityDid ?? '',
           description: state.description,
@@ -536,43 +538,29 @@ class _Review extends StatelessWidget {
   }
 }
 
-/// A rounded, outlined label, such as which identity joins.
-class _Pill extends StatelessWidget {
-  const _Pill(this.text);
+/// A Mission Control chip, such as which identity joins, with [icon] before
+/// [text] when given: the chip theme's hairline, small radius and mono
+/// label, in capitals as instrument labels are.
+class _Chip extends StatelessWidget {
+  const _Chip(this.text, {this.icon});
 
   final String text;
+  final IconData? icon;
 
   @override
-  Widget build(BuildContext context) {
-    final mc = context.mcColors;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        border: Border.all(color: mc.hairlineStrong),
-        borderRadius: BorderRadius.circular(McRadius.full),
+  Widget build(BuildContext context) => Chip(
+    avatar: switch (icon) {
+      final icon? => Icon(
+        icon,
+        size: 14,
+        color: context.mcColors.textSecondary,
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: McSpacing.s3,
-          vertical: McSpacing.s1,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          spacing: McSpacing.s1,
-          children: [
-            Icon(McIcons.account, size: 18, color: mc.textSecondary),
-            Flexible(
-              child: Text(
-                text,
-                style: context.textTheme.bodySmall?.copyWith(
-                  color: mc.textPrimary,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+      null => null,
+    },
+    label: Text(text.toUpperCase()),
+    // A label, not a control: no room for a tap.
+    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+  );
 }
 
 /// What the community gets and shows once the member joins, one line each,
@@ -775,7 +763,7 @@ class _FieldDetail extends StatelessWidget {
                   children: [
                     Expanded(child: Text(field.label, style: labelStyle)),
                     if (field.source == DirectoryFieldSource.admin)
-                      _Tag(l10n.vtcJoinFieldSetByAdmins),
+                      _Chip(l10n.vtcJoinFieldSetByAdmins),
                   ],
                 ),
                 if (field.description case final description?)
@@ -792,33 +780,6 @@ class _FieldDetail extends StatelessWidget {
       ),
     );
   }
-}
-
-/// A small outlined label, as [_Pill] but without an icon.
-class _Tag extends StatelessWidget {
-  const _Tag(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) => DecoratedBox(
-    decoration: BoxDecoration(
-      border: Border.all(color: context.mcColors.hairlineStrong),
-      borderRadius: BorderRadius.circular(McRadius.full),
-    ),
-    child: Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: McSpacing.s2,
-        vertical: McSpacing.s05,
-      ),
-      child: Text(
-        text,
-        style: context.textTheme.labelSmall?.copyWith(
-          color: context.mcColors.textSecondary,
-        ),
-      ),
-    ),
-  );
 }
 
 /// A thin rule between the lines of a list.
