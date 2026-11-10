@@ -60,6 +60,11 @@ class _FakeVtcService extends Fake implements VtcService {
   final Map<String, RoomRecord> records = {};
   Exception? refuseWrite;
 
+  /// Whether the room lists records written here, as a host does once it
+  /// has caught up.
+  bool listsWritten = true;
+  final Set<String> writtenKeys = {};
+
   @override
   Future<RoomOffers> roomOffers(String communityDid) async =>
       RoomOffers(offers: offers, renewals: const []);
@@ -91,12 +96,13 @@ class _FakeVtcService extends Fake implements VtcService {
     complete: true,
     records: [
       for (final record in records.values)
-        RoomRecordSummary(
-          key: record.key,
-          version: record.version,
-          status: record.status,
-          updatedAt: _at,
-        ),
+        if (listsWritten || !writtenKeys.contains(record.key))
+          RoomRecordSummary(
+            key: record.key,
+            version: record.version,
+            status: record.status,
+            updatedAt: _at,
+          ),
     ],
   );
 
@@ -117,6 +123,7 @@ class _FakeVtcService extends Fake implements VtcService {
     if (refuseWrite case final error?) throw error;
     written.add((title, body));
     final key = 'k${records.length + 1}';
+    writtenKeys.add(key);
     records[key] = RoomRecord(
       roomId: room.roomId,
       key: key,
@@ -242,6 +249,47 @@ void main() {
       expect(find.text('Opening keynote'), findsOneWidget);
       expect(find.text('Welcome to DevCon 2026'), findsOneWidget);
       expect(find.textContaining('Written by you'), findsOneWidget);
+    });
+
+    testWidgets('shows each record posted before the room lists it', (
+      tester,
+    ) async {
+      service.listsWritten = false;
+      await pump(
+        tester,
+        VtcRoomScreen(
+          communityDid: _club,
+          room: _room(actions: {RoomAction.read, RoomAction.write}),
+        ),
+      );
+
+      for (final title in ['Opening keynote', 'Closing panel']) {
+        await tester.tap(find.byKey(const Key('vtc_room_write')));
+        await tester.pumpAndSettle();
+        await tester.enterText(
+          find.byKey(const Key('vtc_room_write_title')),
+          title,
+        );
+        await tester.pump();
+        await tester.tap(find.byKey(const Key('vtc_room_write_send')));
+        await tester.pumpAndSettle();
+      }
+
+      expect(find.text('Opening keynote'), findsOneWidget);
+      expect(find.text('Closing panel'), findsOneWidget);
+      expect(find.textContaining('Written by you'), findsNWidgets(2));
+      // Newest first.
+      expect(
+        tester.getTopLeft(find.text('Closing panel')).dy,
+        lessThan(tester.getTopLeft(find.text('Opening keynote')).dy),
+      );
+
+      // Once the room lists them, each is shown once.
+      service.listsWritten = true;
+      await tester.tap(find.byKey(const Key('vtc_room_refresh')));
+      await tester.pumpAndSettle();
+      expect(find.text('Opening keynote'), findsOneWidget);
+      expect(find.text('Closing panel'), findsOneWidget);
     });
 
     testWidgets('shows an attendee the talks, with no way to write', (

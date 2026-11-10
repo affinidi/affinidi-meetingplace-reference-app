@@ -37,28 +37,34 @@ class VtcRoomScreen extends HookConsumerWidget {
     final reload = useState(0);
     final me = useMemoized(() => service.roomMemberDid(communityDid));
     final myDid = useFuture(me).data;
+    // Records the member wrote here, shown at once: reading the room back
+    // through the VTA takes a while.
+    final posted = useState(const <_Opened>[]);
+    final writing = useState(false);
     final load = useMemoized(() async {
       final listing = await service.roomRecords(communityDid, room);
-      final newest = [...listing.records]
-        ..sort((a, b) => b.version.compareTo(a.version));
-      final opened = <(RoomRecordSummary, RoomRecord?)>[];
-      for (final summary in newest.take(_maxOpened)) {
-        if (summary.status == RoomRecordStatus.retracted) continue;
-        try {
-          final record = await service.roomRecord(
-            communityDid,
-            room,
-            key: summary.key,
-          );
-          // The room's own profile is not a member's record.
-          if (record == null) continue;
-          opened.add((summary, record));
-        } on MeetingPlaceVtcSDKException catch (error) {
-          _log(ref, 'opening a record', error.code.name);
-          opened.add((summary, null));
-        }
-      }
-      return opened;
+      final newest = [
+        for (final summary in listing.records)
+          if (summary.status != RoomRecordStatus.retracted) summary,
+      ]..sort((a, b) => b.version.compareTo(a.version));
+      // Opened side by side: each is its own round trip to the VTA.
+      final opened = await Future.wait(
+        newest.take(_maxOpened).map<Future<_Opened?>>((summary) async {
+          try {
+            final record = await service.roomRecord(
+              communityDid,
+              room,
+              key: summary.key,
+            );
+            // The room's own profile is not a member's record.
+            return record == null ? null : (summary, record);
+          } on MeetingPlaceVtcSDKException catch (error) {
+            _log(ref, 'opening a record', error.code.name);
+            return (summary, null);
+          }
+        }),
+      );
+      return opened.nonNulls.toList();
     }, [reload.value]);
     final loaded = useFuture(load);
 
@@ -69,14 +75,41 @@ class VtcRoomScreen extends HookConsumerWidget {
       );
       if (draft == null || !context.mounted) return;
       final messenger = ScaffoldMessenger.of(context);
+      final (title, text) = draft;
+      final body = text.isEmpty ? null : text;
+      writing.value = true;
       try {
-        await service.writeRoomRecord(
+        final written = await service.writeRoomRecord(
           communityDid,
           room,
-          title: draft.$1,
-          body: draft.$2.isEmpty ? null : draft.$2,
+          title: title,
+          body: body,
         );
         messenger.showSnackBar(SnackBar(content: Text(l10n.vtcRoomWritten)));
+        // The member left the room while it was written.
+        if (!context.mounted) return;
+        final now = DateTime.now().toUtc();
+        posted.value = [
+          (
+            RoomRecordSummary(
+              key: written.key,
+              version: written.version,
+              status: RoomRecordStatus.active,
+              updatedAt: now,
+            ),
+            RoomRecord(
+              roomId: room.roomId,
+              key: written.key,
+              version: written.version,
+              status: RoomRecordStatus.active,
+              author: myDid,
+              updatedAt: now,
+              title: title,
+              body: body,
+            ),
+          ),
+          ...posted.value,
+        ];
         reload.value++;
       } on Exception catch (error) {
         messenger.showSnackBar(
@@ -89,8 +122,23 @@ class VtcRoomScreen extends HookConsumerWidget {
               ? error.code.name
               : error.runtimeType,
         );
+      } finally {
+        if (context.mounted) writing.value = false;
       }
     }
+
+    final refreshing = loaded.connectionState == ConnectionState.waiting;
+    // What the room read back, and what the member wrote that it does not
+    // show yet, newest first.
+    final records = switch (loaded.data) {
+      final read? => [
+        ...posted.value.where(
+          (mine) => !read.any((other) => other.$1.key == mine.$1.key),
+        ),
+        ...read,
+      ]..sort((a, b) => b.$1.version.compareTo(a.$1.version)),
+      null => null,
+    };
 
     return Scaffold(
       appBar: AppBar(
@@ -100,30 +148,42 @@ class VtcRoomScreen extends HookConsumerWidget {
             key: const Key('vtc_room_refresh'),
             icon: const Icon(Icons.refresh),
             tooltip: l10n.vtcJoinCheckAgain,
-            onPressed: loaded.connectionState == ConnectionState.waiting
-                ? null
-                : () => reload.value++,
+            onPressed: refreshing ? null : () => reload.value++,
           ),
         ],
+        bottom: refreshing && records != null
+            ? const PreferredSize(
+                preferredSize: Size.fromHeight(2),
+                child: LinearProgressIndicator(
+                  key: Key('vtc_room_refreshing'),
+                  minHeight: 2,
+                ),
+              )
+            : null,
       ),
       floatingActionButton: room.canWrite
           ? FloatingActionButton.extended(
               key: const Key('vtc_room_write'),
-              icon: const Icon(Icons.edit_outlined),
+              icon: writing.value
+                  ? const SizedBox.square(
+                      dimension: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.edit_outlined),
               label: Text(l10n.vtcRoomWrite),
-              onPressed: write,
+              onPressed: writing.value ? null : write,
             )
           : null,
-      body: switch (loaded) {
-        AsyncSnapshot(hasError: true, :final error) => _Message(
+      body: switch ((loaded, records)) {
+        (AsyncSnapshot(hasError: true, :final error), _) => _Message(
           vtcRoomsFailureMessage(l10n, error),
         ),
-        AsyncSnapshot(data: final records?) when records.isEmpty => _Message(
+        (_, final records?) when records.isEmpty => _Message(
           room.canWrite
               ? l10n.vtcRoomRecordsNoneWriter
               : l10n.vtcRoomRecordsNone,
         ),
-        AsyncSnapshot(data: final records?) => ListView.separated(
+        (_, final records?) => ListView.separated(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
           itemCount: records.length + (room.canWrite ? 0 : 1),
           separatorBuilder: (_, _) => const SizedBox(height: 12),
@@ -150,6 +210,9 @@ class VtcRoomScreen extends HookConsumerWidget {
       .read(appLoggerProvider)
       .warning('Failed $action: $code', name: _logKey);
 }
+
+/// A record as the room lists it, and opened; null when it could not be.
+typedef _Opened = (RoomRecordSummary, RoomRecord?);
 
 class _RecordCard extends StatelessWidget {
   const _RecordCard({
