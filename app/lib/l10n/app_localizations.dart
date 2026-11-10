@@ -7146,12 +7146,6 @@ abstract class AppLocalizations {
   /// **'Channels'**
   String get communityChannelsTab;
 
-  /// Tab of a community's screen, for a vetter there, with their vetting desk
-  ///
-  /// In en, this message translates to:
-  /// **'Vetting'**
-  String get communityVettingTab;
-
   /// Tab of a community's screen with the member's role and membership card there
   ///
   /// In en, this message translates to:

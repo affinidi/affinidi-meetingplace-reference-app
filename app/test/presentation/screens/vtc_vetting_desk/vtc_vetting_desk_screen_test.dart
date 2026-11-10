@@ -645,23 +645,6 @@ void main() {
     await close(tester);
   });
 
-  testWidgets('leaves out what it still checks when asked to', (tester) async {
-    await pump(
-      tester,
-      const Scaffold(
-        body: VtcVettingDeskView(
-          communityDid: fakeVtcDid,
-          communityName: 'Football club',
-          showBackgroundTasks: false,
-        ),
-      ),
-    );
-    await tester.pump();
-    expect(find.byKey(const Key('vtc_vetter_show_ticket')), findsOneWidget);
-    expect(find.byKey(const Key('vtc_vetter_progress')), findsNothing);
-    await close(tester);
-  });
-
   testWidgets('opens the vetter profile', (tester) async {
     await pumpDesk(tester);
     final open = find.byKey(const Key('vtc_vetter_profile_open'));

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -8,6 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../application/services/vtc_service/vtc_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../navigation/tabs/tabs.dart';
+import '../../themes/tokens/mc_icons.dart';
 import '../../widgets/filter_tab_bar.dart';
 import '../../widgets/section_header.dart';
 import '../contacts/contacts_screen.dart';
@@ -30,13 +30,16 @@ import 'removal_notice.dart';
 /// its description, with what else it publishes about itself folded under
 /// that, with its channels, its groups' chats, its members, the member's
 /// groups and their chats, the data rooms offered to the member and those
-/// they are in, the member's role and membership card there, and the
-/// vetting desk for a vetter; its join phrase beside its name for an
-/// administrator. Opened from the Communities tab.
+/// they are in, and the member's role and membership card there; beside
+/// its name, its join phrase for an administrator and the vetting desk,
+/// on a page of its own, for a vetter. Opened from the Communities tab.
 class CommunityScreen extends HookConsumerWidget {
   const CommunityScreen({super.key, required this.communityDid});
 
   final String communityDid;
+
+  /// Channels, Members, Groups, Rooms and Membership.
+  static const _tabCount = 5;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -84,26 +87,13 @@ class CommunityScreen extends HookConsumerWidget {
 
     final name = community?.name ?? l10n.membershipCredentialUnnamed;
     final logoUrl = ref.watch(communityLogoProvider(communityDid)).value;
-    // Last, so the other tabs keep their place as it comes and goes. Until
-    // the VTA answers, its last answer stands, for the tab to show at once;
-    // the desk checks the card again before any ticket.
+    // Until the VTA answers, its last answer stands, for the desk's icon to
+    // show at once; the desk checks the card again before any ticket.
     final canVetCheck = ref.watch(communityCanVetProvider(communityDid));
     final canVet =
         canVetCheck.value ??
         (!canVetCheck.hasError && (community?.isVetter ?? false));
-    final tabCount = canVet ? 6 : 5;
-    // The tab on show stays on show as the Vetting tab comes and goes.
-    final shownTab = useRef(0);
-    final tabController = useTabController(
-      initialLength: tabCount,
-      initialIndex: min(shownTab.value, tabCount - 1),
-      keys: [tabCount],
-    );
-    useEffect(() {
-      void keep() => shownTab.value = tabController.index;
-      tabController.addListener(keep);
-      return () => tabController.removeListener(keep);
-    }, [tabController]);
+    final tabController = useTabController(initialLength: _tabCount);
 
     return SafeArea(
       child: Column(
@@ -113,9 +103,29 @@ class CommunityScreen extends HookConsumerWidget {
             icon: Tabs.contacts.iconData,
             logoUrl: logoUrl,
             title: name,
-            titleAction: CommunityJoinPhraseAction(
-              communityDid: communityDid,
-              communityName: name,
+            titleAction: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CommunityJoinPhraseAction(
+                  communityDid: communityDid,
+                  communityName: name,
+                ),
+                if (canVet)
+                  IconButton(
+                    key: const Key('community_vetting_desk'),
+                    visualDensity: VisualDensity.compact,
+                    icon: Icon(
+                      McIcons.userCheck,
+                      color: context.mcColors.textSecondary,
+                    ),
+                    tooltip: l10n.vtcVetterStart,
+                    onPressed: () => VtcVettingDeskScreen.show(
+                      context,
+                      communityDid: communityDid,
+                      communityName: name,
+                    ),
+                  ),
+              ],
             ),
             subtitle: info?.$1?.description ?? '',
             // Nothing to unfold until it is read.
@@ -137,7 +147,6 @@ class CommunityScreen extends HookConsumerWidget {
               l10n.communityGroupsTab,
               l10n.communityRoomsTab,
               l10n.communityMembershipTab,
-              if (canVet) l10n.communityVettingTab,
             ],
           ),
           Expanded(
@@ -155,15 +164,6 @@ class CommunityScreen extends HookConsumerWidget {
                   communityDid: communityDid,
                   communityName: name,
                 ),
-                if (canVet)
-                  SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
-                    child: VtcVettingDeskView(
-                      communityDid: communityDid,
-                      communityName: name,
-                      showBackgroundTasks: false,
-                    ),
-                  ),
               ],
             ),
           ),

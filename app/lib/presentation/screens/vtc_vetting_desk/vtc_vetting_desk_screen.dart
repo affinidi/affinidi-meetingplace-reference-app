@@ -72,22 +72,16 @@ class VtcVettingDeskScreen extends StatelessWidget {
   }
 }
 
-/// What [VtcVettingDeskScreen] shows below its title, for a page of its
-/// own or a community's Vetting tab.
+/// What [VtcVettingDeskScreen] shows below its title.
 class VtcVettingDeskView extends HookConsumerWidget {
   const VtcVettingDeskView({
     super.key,
     required this.communityDid,
     required this.communityName,
-    this.showBackgroundTasks = true,
   });
 
   final String communityDid;
   final String communityName;
-
-  /// Whether to list what the desk still checks and reads while open; the
-  /// community's Vetting tab leaves it out.
-  final bool showBackgroundTasks;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -116,8 +110,7 @@ class VtcVettingDeskView extends HookConsumerWidget {
           ],
           VtcVettingDeskStep.open => [
             OnboardingSubtitle(l10n.vtcVetterIntro),
-            if (showBackgroundTasks &&
-                (state.checkingCard || state.readingRequirements))
+            if (state.checkingCard || state.readingRequirements)
               _Progress(state: state, communityName: communityName),
             if (!state.readingRequirements)
               _Requirements(

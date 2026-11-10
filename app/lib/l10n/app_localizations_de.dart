@@ -4867,9 +4867,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get communityChannelsTab => 'Channels';
 
   @override
-  String get communityVettingTab => 'Vetting';
-
-  @override
   String get communityMembershipTab => 'Membership';
 
   @override

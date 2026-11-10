@@ -366,9 +366,7 @@ void main() {
       expect(container.exists(communityInfoProvider(chessDid)), isTrue);
     });
 
-    testWidgets('shows a vetter their vetting desk in a tab of its own', (
-      tester,
-    ) async {
+    testWidgets('opens the vetting desk from beside the name', (tester) async {
       final l10n = await getL10n();
       await openCommunitiesTab(
         tester,
@@ -381,16 +379,24 @@ void main() {
       await tester.tap(find.text('Chess club'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text(l10n.communityVettingTab));
+      // A page of its own, not a tab.
+      expect(find.text('Vetting'), findsNothing);
+      final desk = find.byKey(const Key('community_vetting_desk'));
+      expect(
+        find.descendant(of: desk, matching: find.byIcon(McIcons.userCheck)),
+        findsOneWidget,
+      );
+      expect(find.byTooltip(l10n.vtcVetterStart), findsOneWidget);
+
+      await tester.tap(desk);
       await tester.pumpAndSettle();
 
-      expect(find.byType(VtcVettingDeskView), findsOneWidget);
+      expect(find.byType(VtcVettingDeskScreen), findsOneWidget);
     });
 
-    testWidgets('shows a known vetter the Vetting tab before the VTA answers', (
+    testWidgets('shows a known vetter the desk before the VTA answers', (
       tester,
     ) async {
-      final l10n = await getL10n();
       final answer = Completer<bool>();
       await openCommunitiesTab(
         tester,
@@ -407,16 +413,17 @@ void main() {
       await pullToRefresh(tester);
       await tester.tap(find.text('Chess club'));
       await tester.pumpAndSettle();
+      final desk = find.byKey(const Key('community_vetting_desk'));
 
-      expect(find.text(l10n.communityVettingTab), findsOneWidget);
+      expect(desk, findsOneWidget);
 
       answer.complete(false);
       await tester.pumpAndSettle();
 
-      expect(find.text(l10n.communityVettingTab), findsNothing);
+      expect(desk, findsNothing);
     });
 
-    testWidgets('offers no Vetting tab to a member who is not a vetter', (
+    testWidgets('offers no vetting desk to a member who is not a vetter', (
       tester,
     ) async {
       final l10n = await getL10n();
@@ -432,7 +439,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text(l10n.communityMembershipTab), findsOneWidget);
-      expect(find.text(l10n.communityVettingTab), findsNothing);
+      expect(find.byKey(const Key('community_vetting_desk')), findsNothing);
     });
 
     testWidgets('shows what a community is about under its name', (

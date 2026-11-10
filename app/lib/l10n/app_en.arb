@@ -5256,10 +5256,6 @@
 	"@communityChannelsTab": {
 		"description": "Tab of a community's screen listing its channels"
 	},
-	"communityVettingTab": "Vetting",
-	"@communityVettingTab": {
-		"description": "Tab of a community's screen, for a vetter there, with their vetting desk"
-	},
 	"communityMembershipTab": "Membership",
 	"@communityMembershipTab": {
 		"description": "Tab of a community's screen with the member's role and membership card there"
