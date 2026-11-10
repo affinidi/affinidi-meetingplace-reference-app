@@ -33,12 +33,16 @@ class _FakeVtcGroupChatService extends Fake implements VtcGroupChatService {
 class _FakeVtcService extends Fake implements VtcService {
   final membershipChanges = StreamController<void>.broadcast();
   final arrivals = StreamController<String>.broadcast();
+  final confirmations = StreamController<String>.broadcast();
 
   @override
   Stream<void> get membershipsChanged => membershipChanges.stream;
 
   @override
   Stream<String> get inboxArrived => arrivals.stream;
+
+  @override
+  Stream<String> get membershipConfirmed => confirmations.stream;
 }
 
 void main() {
@@ -101,6 +105,13 @@ void main() {
 
     test('syncs as a message reaches a watched community inbox', () async {
       vtc.arrivals.add('did:webvh:QmVtc:vtc.example');
+      await pumpEventQueue();
+
+      expect(service.calls, ['join', 'sync']);
+    });
+
+    test('syncs as the community takes a membership confirmation', () async {
+      vtc.confirmations.add('did:webvh:QmVtc:vtc.example');
       await pumpEventQueue();
 
       expect(service.calls, ['join', 'sync']);

@@ -268,6 +268,47 @@ void main() {
       },
     );
 
+    group('membershipConfirmed', () {
+      setUp(() {
+        // Lets the membership confirmation through, so the join settles.
+        network.vta.answers[VtaTask.signDocument] = {
+          'document': {
+            'issuer': persona.did,
+            'proof': {'proofPurpose': 'assertionMethod'},
+          },
+        };
+      });
+
+      test('names the community once it takes the confirmation', () async {
+        final confirmed = <String>[];
+        final listening = service.membershipConfirmed.listen(confirmed.add);
+
+        await service.join(
+          await service.readCommunity(fakeVtcDid),
+          persona: joinAs,
+        );
+        await Future<void>.delayed(Duration.zero);
+        await listening.cancel();
+
+        expect(confirmed, [fakeVtcDid]);
+      });
+
+      test('stays quiet when the community refuses the confirmation', () async {
+        network.refusals[MemberTask.vmc] = (409, 'vtc/members/vmc:conflict');
+        final confirmed = <String>[];
+        final listening = service.membershipConfirmed.listen(confirmed.add);
+
+        await service.join(
+          await service.readCommunity(fakeVtcDid),
+          persona: joinAs,
+        );
+        await Future<void>.delayed(Duration.zero);
+        await listening.cancel();
+
+        expect(confirmed, isEmpty);
+      });
+    });
+
     group('as a new persona of an identity', () {
       final ada = FakeIdentities.primaryIdentity.copyWith(
         vtaContextId: 'mpx-ada',

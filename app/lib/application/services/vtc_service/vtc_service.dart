@@ -115,6 +115,13 @@ class VtcService {
   /// membership is left.
   Stream<void> get membershipsChanged => _membershipsChanged.stream;
 
+  final _membershipConfirmed = StreamController<String>.broadcast();
+
+  /// Fires the community's DID each time the community takes the member's
+  /// confirmation of their admission, after the cards it issued are kept:
+  /// it may put the member in its groups only then.
+  Stream<String> get membershipConfirmed => _membershipConfirmed.stream;
+
   final _roleChanged = StreamController<VtcRoleChange>.broadcast();
 
   /// Fires each time the member's role in a community changes, as the card
@@ -668,6 +675,7 @@ class VtcService {
       }
     }
     await _repository.saveCommunity(member.settled(settled));
+    if (confirmed) _membershipConfirmed.add(member.communityDid);
     return confirmed;
   }
 
