@@ -1670,11 +1670,19 @@ void main() {
 
       final json = find.byKey(const Key('vtc_join_manifest_json'));
       expect(json, findsNothing);
+      final button = find.byTooltip("Show the community's manifest");
+      // A scroll, for the community's terms, rather than code brackets.
+      expect(
+        find.descendant(of: button, matching: find.byIcon(McIcons.manifest)),
+        findsOneWidget,
+      );
 
-      await tapVisible(tester, find.byTooltip("Show the community's manifest"));
+      await tapVisible(tester, button);
       await tester.pumpAndSettle();
 
       expect(find.text('Manifest'), findsOneWidget);
+      // The sheet's header carries the same symbol.
+      expect(find.byIcon(McIcons.manifest), findsNWidgets(2));
       final shown = tester.widget<SelectableText>(json).textSpan!.toPlainText();
       expect(jsonDecode(shown), network.joinManifest);
       expect(shown, contains('"unreadable"'));

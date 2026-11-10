@@ -375,6 +375,7 @@ Future<void> _showManifest(
   context,
   title: context.l10n.vtcJoinManifestHeading,
   json: manifest,
+  icon: McIcons.manifest,
   textKey: const Key('vtc_join_manifest_json'),
 );
 
@@ -479,7 +480,10 @@ class _Review extends StatelessWidget {
               ? null
               : IconButton(
                   key: const Key('vtc_join_manifest'),
-                  icon: Icon(McIcons.code, color: context.mcColors.textPrimary),
+                  icon: Icon(
+                    McIcons.manifest,
+                    color: context.mcColors.textPrimary,
+                  ),
                   tooltip: l10n.vtcJoinShowManifest,
                   onPressed: () => _showManifest(context, state.manifest),
                 ),

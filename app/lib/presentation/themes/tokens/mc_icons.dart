@@ -291,6 +291,9 @@ abstract final class McIcons {
   /// Phosphor `sign-out`.
   static const IconData logout = IconData(0xe42a, fontFamily: fontFamily);
 
+  /// Phosphor `scroll`: a community's manifest, its terms for joining.
+  static const IconData manifest = IconData(0xeb7a, fontFamily: fontFamily);
+
   /// Phosphor `tree-structure`.
   static const IconData mediator = IconData(0xe67c, fontFamily: fontFamily);
 
