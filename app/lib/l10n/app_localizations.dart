@@ -7200,6 +7200,12 @@ abstract class AppLocalizations {
   /// **'Membership'**
   String get communityMembershipTab;
 
+  /// Headline above the cards a community and its groups issued the member, on the community's Membership tab
+  ///
+  /// In en, this message translates to:
+  /// **'Credentials'**
+  String get communityMembershipCredentials;
+
   /// Note in a community's info sheet when its public profile cannot be read
   ///
   /// In en, this message translates to:

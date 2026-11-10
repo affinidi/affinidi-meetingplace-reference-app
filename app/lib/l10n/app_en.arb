@@ -5285,6 +5285,10 @@
 	"@communityMembershipTab": {
 		"description": "Tab of a community's screen with the member's role and membership card there"
 	},
+	"communityMembershipCredentials": "Credentials",
+	"@communityMembershipCredentials": {
+		"description": "Headline above the cards a community and its groups issued the member, on the community's Membership tab"
+	},
 	"communityInfoUnavailable": "The community's profile can't be read right now.",
 	"@communityInfoUnavailable": {
 		"description": "Note in a community's info sheet when its public profile cannot be read"

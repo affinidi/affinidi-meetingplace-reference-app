@@ -194,6 +194,19 @@ void main() {
     expect(find.byType(VtcMembershipCardView), findsOneWidget);
   });
 
+  testWidgets('heads the cards with a credentials headline', (tester) async {
+    final l10n = await pumpView(tester);
+
+    final headline = find.text(l10n.communityMembershipCredentials);
+    expect(headline, findsOneWidget);
+    expect(
+      tester.getTopLeft(headline).dy,
+      lessThan(
+        tester.getTopLeft(find.byKey(const Key('vtc_membership_card'))).dy,
+      ),
+    );
+  });
+
   testWidgets('shows the card before the role is read', (tester) async {
     service.roleRead = Completer();
 

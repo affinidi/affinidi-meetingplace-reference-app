@@ -89,6 +89,12 @@ class CommunityMembershipView extends ConsumerWidget {
               title: l10n.vtcCommunityRole,
               subtitle: roleName,
             ),
+          Text(
+            l10n.communityMembershipCredentials,
+            style: context.textTheme.titleMedium?.copyWith(
+              color: context.mcColors.textPrimary,
+            ),
+          ),
           if (card.value case final card?)
             VtcMembershipCardView(
               card: card,
