@@ -6591,7 +6591,7 @@ abstract class AppLocalizations {
   /// Name of a step of vetting an applicant, above the progress bar
   ///
   /// In en, this message translates to:
-  /// **'{step, select, ticket{Show your ticket} match{Compare codes} details{Check their details} other{Done}}'**
+  /// **'{step, select, ticket{Show your ticket} match{Compare codes} details{Check the applicant} other{Done}}'**
   String vtcVettingFlowStep(String step);
 
   /// How vetting an applicant ended, on its last step

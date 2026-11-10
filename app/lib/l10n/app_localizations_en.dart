@@ -4441,7 +4441,7 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.selectLogic(step, {
       'ticket': 'Show your ticket',
       'match': 'Compare codes',
-      'details': 'Check their details',
+      'details': 'Check the applicant',
       'other': 'Done',
     });
     return '$_temp0';

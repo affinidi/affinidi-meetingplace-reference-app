@@ -4751,7 +4751,7 @@
 	"@vtcVetterResume": {
 		"description": "On the vetting desk: goes back to the ticket or applicant left open"
 	},
-	"vtcVettingFlowStep": "{step, select, ticket{Show your ticket} match{Compare codes} details{Check their details} other{Done}}",
+	"vtcVettingFlowStep": "{step, select, ticket{Show your ticket} match{Compare codes} details{Check the applicant} other{Done}}",
 	"@vtcVettingFlowStep": {
 		"description": "Name of a step of vetting an applicant, above the progress bar",
 		"placeholders": {
