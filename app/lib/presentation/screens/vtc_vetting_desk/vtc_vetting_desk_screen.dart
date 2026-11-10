@@ -26,7 +26,7 @@ import 'vtc_vetting_desk_state.dart';
 /// the community asks vetters to check, showing a ticket, which starts
 /// [VtcVettingFlowScreen], the member's vetter card, and the statements
 /// they issued.
-class VtcVettingDeskScreen extends HookConsumerWidget {
+class VtcVettingDeskScreen extends StatelessWidget {
   const VtcVettingDeskScreen({
     super.key,
     required this.communityDid,
@@ -50,15 +50,9 @@ class VtcVettingDeskScreen extends HookConsumerWidget {
   );
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(vtcVettingDeskControllerProvider(communityDid));
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
     void close() => Navigator.of(context).pop();
-    Future<void> showFlow() => VtcVettingFlowScreen.show(
-      context,
-      communityDid: communityDid,
-      communityName: communityName,
-    );
 
     return OnboardingLayout(
       onClose: close,
@@ -67,74 +61,106 @@ class VtcVettingDeskScreen extends HookConsumerWidget {
         spacing: 12,
         children: [
           OnboardingTitle(l10n.vtcVetterTitle(communityName)),
-          ...switch (state.step) {
-            VtcVettingDeskStep.loading => [
-              const Center(child: CircularProgressIndicator()),
-            ],
-            VtcVettingDeskStep.notVetter => [
-              OnboardingMessage(
-                l10n.vtcVetterNotVetter(communityName),
-                key: const Key('vtc_vetter_not_vetter'),
-                isError: true,
-              ),
-            ],
-            VtcVettingDeskStep.open => [
-              OnboardingSubtitle(l10n.vtcVetterIntro),
-              if (state.checkingCard || state.readingRequirements)
-                _Progress(state: state, communityName: communityName),
-              if (!state.readingRequirements)
-                _Requirements(
-                  requirements: state.requirements,
-                  communityName: communityName,
-                ),
-              if (state.flowStep(clock.now()) != null)
-                OnboardingButton(
-                  key: const Key('vtc_vetter_resume'),
-                  label: l10n.vtcVetterResume,
-                  onPressed: showFlow,
-                )
-              else
-                OnboardingButton(
-                  key: const Key('vtc_vetter_show_ticket'),
-                  label: l10n.vtcVetterShowTicket,
-                  onPressed: showFlow,
-                ),
-              if (state.vetterCard case final card?)
-                VtcCardView(
-                  cardKey: const Key('vtc_vetter_role_card'),
-                  documentKey: const Key('vtc_vetter_role_card_document'),
-                  communityName: communityName,
-                  title: l10n.vtcVetterCardTitle,
-                  credential: card.credential,
-                  credentialType: 'AuthorityCredential',
-                  documentIcon: McIcons.userCheck,
-                  holderLabel: l10n.vtcVetterCardHolder,
-                  holderDid: card.vetterDid,
-                  issuer: card.issuer,
-                  validFrom: card.validFrom,
-                  validUntil: card.validUntil,
-                ),
-              OnboardingButton(
-                key: const Key('vtc_vetter_profile_open'),
-                label: l10n.vtcVetterProfileOpen,
-                isOutlined: true,
-                onPressed: () => VtcVetterProfileScreen.show(
-                  context,
-                  communityDid: communityDid,
-                  communityName: communityName,
-                ),
-              ),
-              _IssuedList(issued: state.issued),
-            ],
-          },
-          if (state.failure case final failure?)
-            OnboardingMessage(
-              l10n.vtcVetterFailure(failure.name),
-              isError: true,
-            ),
+          VtcVettingDeskView(
+            communityDid: communityDid,
+            communityName: communityName,
+          ),
           OnboardingTextButton(label: l10n.generalDone, onPressed: close),
         ],
       ),
+    );
+  }
+}
+
+/// What [VtcVettingDeskScreen] shows below its title, for a page of its
+/// own or a community's Vetting tab.
+class VtcVettingDeskView extends HookConsumerWidget {
+  const VtcVettingDeskView({
+    super.key,
+    required this.communityDid,
+    required this.communityName,
+  });
+
+  final String communityDid;
+  final String communityName;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(vtcVettingDeskControllerProvider(communityDid));
+    final l10n = context.l10n;
+    Future<void> showFlow() => VtcVettingFlowScreen.show(
+      context,
+      communityDid: communityDid,
+      communityName: communityName,
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 12,
+      children: [
+        ...switch (state.step) {
+          VtcVettingDeskStep.loading => [
+            const Center(child: CircularProgressIndicator()),
+          ],
+          VtcVettingDeskStep.notVetter => [
+            OnboardingMessage(
+              l10n.vtcVetterNotVetter(communityName),
+              key: const Key('vtc_vetter_not_vetter'),
+              isError: true,
+            ),
+          ],
+          VtcVettingDeskStep.open => [
+            OnboardingSubtitle(l10n.vtcVetterIntro),
+            if (state.checkingCard || state.readingRequirements)
+              _Progress(state: state, communityName: communityName),
+            if (!state.readingRequirements)
+              _Requirements(
+                requirements: state.requirements,
+                communityName: communityName,
+              ),
+            if (state.flowStep(clock.now()) != null)
+              OnboardingButton(
+                key: const Key('vtc_vetter_resume'),
+                label: l10n.vtcVetterResume,
+                onPressed: showFlow,
+              )
+            else
+              OnboardingButton(
+                key: const Key('vtc_vetter_show_ticket'),
+                label: l10n.vtcVetterShowTicket,
+                onPressed: showFlow,
+              ),
+            if (state.vetterCard case final card?)
+              VtcCardView(
+                cardKey: const Key('vtc_vetter_role_card'),
+                documentKey: const Key('vtc_vetter_role_card_document'),
+                communityName: communityName,
+                title: l10n.vtcVetterCardTitle,
+                credential: card.credential,
+                credentialType: 'AuthorityCredential',
+                documentIcon: McIcons.userCheck,
+                holderLabel: l10n.vtcVetterCardHolder,
+                holderDid: card.vetterDid,
+                issuer: card.issuer,
+                validFrom: card.validFrom,
+                validUntil: card.validUntil,
+              ),
+            OnboardingButton(
+              key: const Key('vtc_vetter_profile_open'),
+              label: l10n.vtcVetterProfileOpen,
+              isOutlined: true,
+              onPressed: () => VtcVetterProfileScreen.show(
+                context,
+                communityDid: communityDid,
+                communityName: communityName,
+              ),
+            ),
+            _IssuedList(issued: state.issued),
+          ],
+        },
+        if (state.failure case final failure?)
+          OnboardingMessage(l10n.vtcVetterFailure(failure.name), isError: true),
+      ],
     );
   }
 }
