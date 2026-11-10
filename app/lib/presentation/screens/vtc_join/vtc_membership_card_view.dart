@@ -182,8 +182,9 @@ class VtcCardView extends HookWidget {
   final String? communityName;
   final Uri? logoUrl;
 
-  /// Whether the community's logo leads the card; not where the community
-  /// already heads the screen, as on its Membership tab.
+  /// Whether the community's logo leads the card, else [documentIcon]
+  /// tells what kind of card it is: where the community already heads the
+  /// screen, as on its Membership tab.
   final bool showLogo;
   final String title;
 
@@ -264,6 +265,12 @@ class VtcCardView extends HookWidget {
                           _Logo(
                             key: const Key('vtc_card_logo'),
                             url: logoUrl,
+                            size: _logoSize,
+                          )
+                        else
+                          _TypeIcon(
+                            key: const Key('vtc_card_type_icon'),
+                            icon: documentIcon,
                             size: _logoSize,
                           ),
                         Expanded(
@@ -418,6 +425,25 @@ class _Logo extends StatelessWidget {
             ),
     );
   }
+}
+
+/// What kind of card it is, as an icon in a ring the size of [_Logo].
+class _TypeIcon extends StatelessWidget {
+  const _TypeIcon({super.key, required this.icon, required this.size});
+
+  final IconData icon;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: size,
+    height: size,
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      border: Border.all(color: context.mcColors.hairlineStrong),
+    ),
+    child: Icon(icon, color: McColors.blue, size: size / 2),
+  );
 }
 
 /// A small outlined label, such as what else the card states.

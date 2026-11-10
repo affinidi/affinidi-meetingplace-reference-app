@@ -101,11 +101,20 @@ void main() {
       tester,
     ) async {
       final logo = find.byKey(const Key('vtc_card_logo'));
+      final typeIcon = find.byKey(const Key('vtc_card_type_icon'));
       await pumpCard(tester);
       expect(logo, findsOneWidget);
+      expect(typeIcon, findsNothing);
 
       await pumpCard(tester, showLogo: false);
       expect(logo, findsNothing);
+      expect(
+        find.descendant(
+          of: typeIcon,
+          matching: find.byIcon(McIcons.membership),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('shows its details at once unless collapsible', (tester) async {

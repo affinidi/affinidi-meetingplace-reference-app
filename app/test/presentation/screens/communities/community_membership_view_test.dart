@@ -367,7 +367,9 @@ void main() {
     );
   });
 
-  testWidgets('leaves the community\'s logo off its cards', (tester) async {
+  testWidgets('leads each card with its type\'s icon, not the logo', (
+    tester,
+  ) async {
     service
       ..heldVetterCard = _vetterCard
       ..groupCardsHeld = [
@@ -384,17 +386,28 @@ void main() {
 
     await pumpView(tester);
 
-    for (final key in [
-      'vtc_membership_card',
-      'vtc_vetter_role_card',
-      'vtc_group_card_urn:uuid:hiking',
+    for (final (key, icon) in [
+      ('vtc_membership_card', McIcons.membership),
+      ('vtc_vetter_role_card', McIcons.userCheck),
+      ('vtc_group_card_urn:uuid:hiking', McIcons.group),
     ]) {
+      final card = find.byKey(Key(key));
       expect(
         find.descendant(
-          of: find.byKey(Key(key)),
+          of: card,
           matching: find.byKey(const Key('vtc_card_logo')),
         ),
         findsNothing,
+      );
+      expect(
+        find.descendant(
+          of: find.descendant(
+            of: card,
+            matching: find.byKey(const Key('vtc_card_type_icon')),
+          ),
+          matching: find.byIcon(icon),
+        ),
+        findsOneWidget,
       );
     }
   });
