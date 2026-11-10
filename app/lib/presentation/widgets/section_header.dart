@@ -18,6 +18,7 @@ class SectionHeader extends StatelessWidget {
     required this.subtitle,
     this.logoUrl,
     this.titleAction,
+    this.subtitleAction,
     this.showProgress,
     this.onClose,
     this.onBack,
@@ -37,6 +38,10 @@ class SectionHeader extends StatelessWidget {
   final Widget? titleAction;
 
   final String subtitle;
+
+  /// An action about [subtitle], right after it; none when null.
+  final Widget? subtitleAction;
+
   final bool? showProgress;
 
   final VoidCallback? onClose;
@@ -65,6 +70,13 @@ class SectionHeader extends StatelessWidget {
     final iconView = SizedBox(
       height: titleLineHeight,
       child: Icon(icon, size: _iconSize, color: mc.textSecondary),
+    );
+
+    final subtitleText = Text(
+      subtitle,
+      maxLines: 3,
+      overflow: TextOverflow.ellipsis,
+      style: textTheme.bodyMedium?.copyWith(color: mc.textSecondary),
     );
 
     final headline = Row(
@@ -97,12 +109,15 @@ class SectionHeader extends StatelessWidget {
                 ),
                 null => Text(title, style: titleStyle),
               },
-              Text(
-                subtitle,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: textTheme.bodyMedium?.copyWith(color: mc.textSecondary),
-              ),
+              switch (subtitleAction) {
+                final action? => Row(
+                  children: [
+                    Flexible(child: subtitleText),
+                    action,
+                  ],
+                ),
+                null => subtitleText,
+              },
             ],
           ),
         ),

@@ -77,13 +77,6 @@ void main() {
       );
     });
 
-    testWidgets('should show the contacts panel subtitle', (tester) async {
-      final l10n = await getL10n();
-      await navigateToContactsScreen(tester);
-
-      expect(find.text(l10n.contactsPanelSubtitle), findsOneWidget);
-    });
-
     testWidgets('should show the new connection button', (tester) async {
       await navigateToContactsScreen(tester);
 

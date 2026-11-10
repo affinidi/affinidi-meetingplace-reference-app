@@ -491,10 +491,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get generalOk => 'DE ACUERDO';
 
   @override
-  String get contactsPanelSubtitle =>
-      'Toca un contacto para chatear, toca dos veces para ver los detalles, toca y mantén presionado para eliminar.';
-
-  @override
   String get noContactsYet => 'No hay contactos en esta vista';
 
   @override
@@ -4885,9 +4881,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get communityChannelsTab => 'Channels';
-
-  @override
-  String get communityInfoTab => 'Info';
 
   @override
   String get communityVettingTab => 'Vetting';

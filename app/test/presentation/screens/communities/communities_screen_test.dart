@@ -223,7 +223,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Chess club'), findsOneWidget);
-      expect(find.text(l10n.contactsPanelSubtitle), findsOneWidget);
       expect(find.text(l10n.communityChannelsTab), findsOneWidget);
       expect(find.text(l10n.communityMembersTab), findsOneWidget);
       expect(find.text(l10n.noContactsYet), findsOneWidget);
@@ -355,7 +354,7 @@ void main() {
       await tester.tap(find.text('Chess club'));
       await tester.pumpAndSettle();
 
-      // Before the Membership and Info tabs are opened.
+      // Before the Membership tab is opened.
       final container = ProviderScope.containerOf(
         tester.element(find.byType(CommunityScreen)),
       );
@@ -432,11 +431,52 @@ void main() {
       await tester.tap(find.text('Chess club'));
       await tester.pumpAndSettle();
 
-      expect(find.text(l10n.communityInfoTab), findsOneWidget);
+      expect(find.text(l10n.communityMembershipTab), findsOneWidget);
       expect(find.text(l10n.communityVettingTab), findsNothing);
     });
 
-    testWidgets('shows what a community is in its Info tab', (tester) async {
+    testWidgets('shows what a community is about under its name', (
+      tester,
+    ) async {
+      final l10n = await getL10n();
+      await openCommunitiesTab(
+        tester,
+        overrides: [
+          communityInfoProvider(chessDid).overrideWith(
+            (ref) async => (
+              CommunityProfile(
+                communityDid: chessDid,
+                description: 'Chess for everyone',
+                website: Uri.parse('https://chess.example/club'),
+                contactEmail: 'hello@chess.example',
+              ),
+              null,
+            ),
+          ),
+        ],
+      );
+      await saveCommunities();
+      await pullToRefresh(tester);
+      await tester.tap(find.text('Chess club'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Chess for everyone'), findsOneWidget);
+      expect(find.text('Info'), findsNothing);
+
+      await tester.tap(find.byKey(const Key('community_info')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('https://chess.example/club'), findsOneWidget);
+      expect(find.text('hello@chess.example'), findsOneWidget);
+      expect(find.text(l10n.communityDidLabel), findsOneWidget);
+      // Shown once: under the name, not again in the sheet.
+      expect(find.text('Chess for everyone'), findsOneWidget);
+      expect(find.text(l10n.communityInfoUnavailable), findsNothing);
+    });
+
+    testWidgets("opens a community's DID beside its description", (
+      tester,
+    ) async {
       final l10n = await getL10n();
       await openCommunitiesTab(tester);
       await saveCommunities();
@@ -444,7 +484,7 @@ void main() {
       await tester.tap(find.text('Chess club'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text(l10n.communityInfoTab));
+      await tester.tap(find.byKey(const Key('community_info')));
       await tester.pumpAndSettle();
 
       expect(find.text(l10n.vtcJoinProfileHeading), findsOneWidget);

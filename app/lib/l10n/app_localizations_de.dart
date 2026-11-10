@@ -498,10 +498,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get generalOk => 'Okay';
 
   @override
-  String get contactsPanelSubtitle =>
-      'Tippen Sie auf einen Kontakt, um zu chatten, doppeltippen Sie, um Details anzuzeigen, tippen und halten Sie ihn gedrückt, um ihn zu löschen.';
-
-  @override
   String get noContactsYet => 'Keine Kontakte in dieser Ansicht';
 
   @override
@@ -4895,9 +4891,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get communityChannelsTab => 'Channels';
-
-  @override
-  String get communityInfoTab => 'Info';
 
   @override
   String get communityVettingTab => 'Vetting';

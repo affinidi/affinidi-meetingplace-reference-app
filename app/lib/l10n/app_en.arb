@@ -453,7 +453,6 @@
 	},
 	"aliasProfileDescription": "Your alias profile helps you keep your identity private and in your control.",
 	"generalOk": "Ok",
-	"contactsPanelSubtitle": "Tap a channel to chat, double-tap to view details, tap and hold to delete.",
 	"noContactsYet": "No channels in this view",
 	"contactDeleteHeading": "Delete channel",
 	"contactDeletePrompt": "{amount, plural, =0{Are you sure you want to delete this channel?} =1{Are you sure you want to delete this channel?} other{Are you sure you want to delete {amount} selected channels?}}",
@@ -5278,10 +5277,6 @@
 	"@communityChannelsTab": {
 		"description": "Tab of a community's screen listing its channels"
 	},
-	"communityInfoTab": "Info",
-	"@communityInfoTab": {
-		"description": "Tab of a community's screen showing what the community publishes about itself"
-	},
 	"communityVettingTab": "Vetting",
 	"@communityVettingTab": {
 		"description": "Tab of a community's screen, for a vetter there, with their vetting desk"
@@ -5292,7 +5287,7 @@
 	},
 	"communityInfoUnavailable": "The community's profile can't be read right now.",
 	"@communityInfoUnavailable": {
-		"description": "Note on a community's Info tab when its public profile cannot be read"
+		"description": "Note in a community's info sheet when its public profile cannot be read"
 	},
 	"communityDidLabel": "Community DID",
 	"@communityDidLabel": {

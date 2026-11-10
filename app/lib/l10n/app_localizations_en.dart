@@ -484,10 +484,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generalOk => 'Ok';
 
   @override
-  String get contactsPanelSubtitle =>
-      'Tap a channel to chat, double-tap to view details, tap and hold to delete.';
-
-  @override
   String get noContactsYet => 'No channels in this view';
 
   @override
@@ -4849,9 +4845,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get communityChannelsTab => 'Channels';
-
-  @override
-  String get communityInfoTab => 'Info';
 
   @override
   String get communityVettingTab => 'Vetting';

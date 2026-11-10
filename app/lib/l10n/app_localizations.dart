@@ -688,12 +688,6 @@ abstract class AppLocalizations {
   /// **'Ok'**
   String get generalOk;
 
-  /// No description provided for @contactsPanelSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Tap a channel to chat, double-tap to view details, tap and hold to delete.'**
-  String get contactsPanelSubtitle;
-
   /// No description provided for @noContactsYet.
   ///
   /// In en, this message translates to:
@@ -7194,12 +7188,6 @@ abstract class AppLocalizations {
   /// **'Channels'**
   String get communityChannelsTab;
 
-  /// Tab of a community's screen showing what the community publishes about itself
-  ///
-  /// In en, this message translates to:
-  /// **'Info'**
-  String get communityInfoTab;
-
   /// Tab of a community's screen, for a vetter there, with their vetting desk
   ///
   /// In en, this message translates to:
@@ -7212,7 +7200,7 @@ abstract class AppLocalizations {
   /// **'Membership'**
   String get communityMembershipTab;
 
-  /// Note on a community's Info tab when its public profile cannot be read
+  /// Note in a community's info sheet when its public profile cannot be read
   ///
   /// In en, this message translates to:
   /// **'The community\'s profile can\'t be read right now.'**
