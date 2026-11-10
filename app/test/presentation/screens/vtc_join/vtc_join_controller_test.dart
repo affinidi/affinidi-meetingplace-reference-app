@@ -690,12 +690,37 @@ void main() {
       expect(community?.isSettled, isTrue);
     });
 
-    test('stays in the directory when the member opted in', () async {
+    test('lets members find the member under the name joined with', () async {
+      var shown = <String, dynamic>{'entryId': 'dir_me'};
+      network.answerTo[DirectoryTask.cardShow] = (_) => {
+        'card': shown,
+        'missingRequired': <String>[],
+      };
       await controller().onScanned(fakeVtcDid);
       controller().setListInDirectory(true);
       await join();
 
-      expect(memberTasks(), [MemberTask.vmc]);
+      final [confirmation, show, findable] = network.memberRequests;
+      expect(confirmation['type'], MemberTask.vmc);
+      expect(show['type'], DirectoryTask.cardShow);
+      expect((findable['payload'] as Map)['visibility'], {'did': 'members'});
+      expect((await service.community(fakeVtcDid))?.isSettled, isTrue);
+
+      // The community now shows members the DID, still under no name.
+      shown = {
+        ...shown,
+        'visibility': {'did': 'members'},
+      };
+      Map<dynamic, dynamic>? named;
+      for (var i = 0; i < _vtaReadChecks && named == null; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+        named = network.memberRequests
+            .skip(3)
+            .map((r) => r['payload'] as Map)
+            .where((payload) => payload.containsKey('values'))
+            .firstOrNull;
+      }
+      expect(named?['values'], {'displayName': 'Ada'});
     });
 
     test('is a member, still to settle, when confirming fails', () async {

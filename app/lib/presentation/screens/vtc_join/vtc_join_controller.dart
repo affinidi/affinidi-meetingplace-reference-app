@@ -17,6 +17,7 @@ import '../../../domain/models/vtc/vtc_left_membership.dart';
 import '../../../domain/models/vtc/vtc_membership_card.dart';
 import '../../../domain/models/vtc/vtc_vetting.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
+import 'vtc_findable_controller.dart';
 import 'vtc_join_state.dart';
 
 part 'vtc_join_controller.g.dart';
@@ -145,9 +146,20 @@ class VtcJoinController extends _$VtcJoinController {
         unawaited(readIdentityCheck());
         unawaited(readRole());
         unawaited(refreshRole());
+        // At once, not only once the community is opened: members who can
+        // find the member see the name and picture they joined with.
+        if (next.listInDirectory) unawaited(_syncDirectoryCard());
       }
     });
     return VtcJoinState();
+  }
+
+  /// Brings the member's directory card in step with the identity they
+  /// joined with.
+  Future<void> _syncDirectoryCard() async {
+    final communityDid = _manifest?.communityDid;
+    if (communityDid == null) return;
+    await ref.read(vtcFindableControllerProvider(communityDid).notifier).sync();
   }
 
   /// Picks up what reaches the identity's inbox over a live connection to
