@@ -19,7 +19,10 @@ class VtcGroupChatWatcher with WidgetsBindingObserver {
   VtcGroupChatWatcher(this._service, {this.interval = defaultInterval});
 
   /// How often the chats are synced while the app is in the foreground.
-  static const defaultInterval = Duration(minutes: 1);
+  ///
+  /// Short, because the owner's phone is what removes from a chat those the
+  /// community took out of its group, and nothing tells the phone sooner.
+  static const defaultInterval = Duration(seconds: 15);
 
   final VtcGroupChatService _service;
 
