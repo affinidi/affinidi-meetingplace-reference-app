@@ -1600,10 +1600,12 @@ void main() {
       );
       expect(network.sentToMembers, hasLength(1));
 
-      // Waiting on Bob spins on, so no settling before the tap.
-      final back = find.byKey(const Key('vtc_join_vetting_back'));
-      await tester.ensureVisible(back);
-      await tester.tap(back);
+      // Waiting offers no way back but closing; the overview, once back on
+      // it, shows Bob asked.
+      expect(find.text('Back to the overview'), findsNothing);
+      ProviderScope.containerOf(
+        tester.element(find.byType(VtcJoinScreen)),
+      ).read(vtcJoinControllerProvider.notifier).backToVetting();
       await settle(tester);
       expect(find.text('Step 1 of 5 · Meet a vetter'), findsOneWidget);
       expect(find.text('Listed as Bob'), findsOneWidget);

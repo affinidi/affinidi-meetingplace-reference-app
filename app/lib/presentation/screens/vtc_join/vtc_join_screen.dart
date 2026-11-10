@@ -1242,11 +1242,6 @@ class _VettingFlow extends StatelessWidget {
     final vetter = _vetterName(l10n, state, vetterDid);
     final work = state.vettingWork;
     final waiting = state.step == VtcJoinStep.vetting;
-    final back = OnboardingTextButton(
-      key: const Key('vtc_join_vetting_back'),
-      label: l10n.vtcApplicantBackToOverview,
-      onPressed: controller.backToVetting,
-    );
 
     /// The lines of [steps], each done, under way or still to come, up to
     /// the work under way. Once the phone waits on the vetter, the last
@@ -1307,39 +1302,25 @@ class _VettingFlow extends StatelessWidget {
             l10n.vtcApplicantListingVetters(state.communityName ?? ''),
           ),
         ]),
-      (VtcApplicantStep.ticket, _) => Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: 12,
-        children: [
-          lines([
-            (VtcVettingWork.unlockingIdentity, l10n.vtcApplicantUnlocking),
-            (
-              VtcVettingWork.sendingRequest,
-              l10n.vtcApplicantSendingRequest(vetter),
-            ),
-            (null, l10n.vtcApplicantWaitingSession(vetter)),
-          ]),
-          if (waiting) back,
-        ],
-      ),
+      (VtcApplicantStep.ticket, _) => lines([
+        (VtcVettingWork.unlockingIdentity, l10n.vtcApplicantUnlocking),
+        (
+          VtcVettingWork.sendingRequest,
+          l10n.vtcApplicantSendingRequest(vetter),
+        ),
+        (null, l10n.vtcApplicantWaitingSession(vetter)),
+      ]),
       (VtcApplicantStep.match, _) => lines([
         (VtcVettingWork.preparingDetails, l10n.vtcApplicantPreparing),
       ]),
-      (VtcApplicantStep.details, _) => Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: 12,
-        children: [
-          lines([
-            (VtcVettingWork.recordingDisclosure, l10n.vtcApplicantRecording),
-            (
-              VtcVettingWork.sendingDetails,
-              l10n.vtcApplicantSendingDetails(vetter),
-            ),
-            (null, l10n.vtcApplicantWaitingCheck(vetter)),
-          ]),
-          if (waiting) back,
-        ],
-      ),
+      (VtcApplicantStep.details, _) => lines([
+        (VtcVettingWork.recordingDisclosure, l10n.vtcApplicantRecording),
+        (
+          VtcVettingWork.sendingDetails,
+          l10n.vtcApplicantSendingDetails(vetter),
+        ),
+        (null, l10n.vtcApplicantWaitingCheck(vetter)),
+      ]),
       // Shown by the overview, on a page of its own.
       (VtcApplicantStep.meet, _) => const SizedBox.shrink(),
       (VtcApplicantStep.done, _) => _VettingOutcome(
