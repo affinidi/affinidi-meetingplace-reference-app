@@ -20,6 +20,11 @@ void main() {
     for (var i = 0; i < count; i++) Text('Cell $i', key: Key('cell_$i')),
   ];
 
+  Finder lines() => find.descendant(
+    of: find.byType(HairlineGrid),
+    matching: find.byType(ColoredBox),
+  );
+
   testWidgets('lays the items out in rows of the given columns', (
     tester,
   ) async {
@@ -34,18 +39,23 @@ void main() {
     expect(third.dy, greaterThan(first.dy));
   });
 
-  testWidgets('fills a short last row with empty cells', (tester) async {
+  testWidgets('draws no line around a single item', (tester) async {
+    await pumpGrid(tester, HairlineGrid(columns: 2, children: cells(1)));
+
+    expect(lines(), findsNothing);
+  });
+
+  testWidgets('rules only between items, leaving empty slots blank', (
+    tester,
+  ) async {
     await pumpGrid(tester, HairlineGrid(columns: 2, children: cells(3)));
 
-    // Two full rows of cells, each on the canvas.
-    final cellMaterials = find.descendant(
-      of: find.byType(HairlineGrid),
-      matching: find.byType(Material),
-    );
-    expect(cellMaterials, findsNWidgets(4));
-    final last = tester.getSize(cellMaterials.last);
-    final first = tester.getSize(cellMaterials.first);
-    expect(last, first);
+    // One between the first two, one under the first row; none beside the
+    // third item, which has no neighbour.
+    expect(lines(), findsNWidgets(2));
+    final third = tester.getSize(find.byKey(const Key('cell_2')));
+    final first = tester.getSize(find.byKey(const Key('cell_0')));
+    expect(third.height, first.height);
   });
 
   testWidgets('makes every cell in a row as tall as the tallest', (
@@ -82,22 +92,8 @@ void main() {
         theme: theme,
       );
 
-      final line = tester.widget<ColoredBox>(
-        find.descendant(
-          of: find.byType(HairlineGrid),
-          matching: find.byType(ColoredBox),
-        ),
-      );
+      final line = tester.widget<ColoredBox>(lines());
       expect(line.color, mc.gridLine);
-      final cell = tester.widget<Material>(
-        find
-            .descendant(
-              of: find.byType(HairlineGrid),
-              matching: find.byType(Material),
-            )
-            .first,
-      );
-      expect(cell.color, mc.canvas);
     });
   }
 }
