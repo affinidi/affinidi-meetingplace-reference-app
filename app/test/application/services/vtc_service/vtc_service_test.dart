@@ -1689,6 +1689,21 @@ void main() {
       expect(network.inboxOpens, 2);
     });
 
+    test('borrows the keys once for checks at the same time', () async {
+      await approve();
+
+      await Future.wait([
+        service.checkApplication(fakeVtcDid),
+        service.checkApplication(fakeVtcDid),
+      ]);
+
+      // Two keys, lent once.
+      expect(
+        vtaTasks().where((type) => type == VtaTask.exportSecret).length,
+        2,
+      );
+    });
+
     test('reports nothing for a card the VTA already holds', () async {
       network.vta
         ..answers[VtaTask.credentialsQuery] = {
