@@ -70,7 +70,16 @@ class _FakeTrustService extends Fake implements VtcTrustService {
     _carol: VtcEdges(outgoing: _edge('edge-1', _me, _carol)),
   };
   VtcTrustFailure? refusal;
+
+  /// Refuses reading the vouches with one member.
+  VtcTrustFailure? edgesRefusal;
   final List<String> vouched = [];
+
+  @override
+  Future<VtcEdges> edgesWith(String communityDid, String personaDid) async {
+    if (edgesRefusal case final refusal?) throw VtcTrustException(refusal);
+    return edges[personaDid] ?? const VtcEdges();
+  }
 
   @override
   Future<List<DirectoryEntry>> groupMembers(
@@ -271,10 +280,54 @@ void main() {
       findsOneWidget,
     );
 
+    // As the community shows them, once it stored the vouch.
+    service.edges = {
+      ...service.edges,
+      _bob: VtcEdges(
+        outgoing: _edge('edge-2', _me, _bob),
+        incoming: service.edges[_bob]?.incoming,
+      ),
+    };
     await tester.tap(inMember('dir_bob', find.byKey(const Key('vtc_vouches'))));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('vtc_vouch_trail_outgoing')), findsOneWidget);
     expect(find.byKey(const Key('vtc_vouch_trail_incoming')), findsOneWidget);
+  });
+
+  testWidgets('reads the vouches again when they are opened', (tester) async {
+    await pumpScreen(tester);
+    // Carol vouched back since the members were read.
+    service.edges = {
+      ...service.edges,
+      _carol: VtcEdges(
+        outgoing: _edge('edge-1', _me, _carol),
+        incoming: _edge('edge-3', _carol, _me),
+      ),
+    };
+
+    await tester.tap(
+      inMember('dir_carol', find.byKey(const Key('vtc_vouches'))),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('vtc_vouches_refreshing')), findsNothing);
+    expect(find.byKey(const Key('vtc_vouch_trail_outgoing')), findsOneWidget);
+    expect(find.byKey(const Key('vtc_vouch_trail_incoming')), findsOneWidget);
+  });
+
+  testWidgets('keeps the vouches shown when reading them again fails', (
+    tester,
+  ) async {
+    await pumpScreen(tester);
+    service.edgesRefusal = VtcTrustFailure.network;
+
+    await tester.tap(
+      inMember('dir_carol', find.byKey(const Key('vtc_vouches'))),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('vtc_vouch_trail_outgoing')), findsOneWidget);
+    expect(find.byKey(const Key('vtc_vouch_trail_incoming')), findsNothing);
   });
 
   testWidgets('draws a member by their picture in a vouch\'s diagram', (

@@ -391,6 +391,7 @@ class VtcVouchButton extends StatelessWidget {
     required this.communityName,
     this.entry,
     this.entryId,
+    this.onRefreshed,
   });
 
   final VtcEdges edges;
@@ -401,6 +402,9 @@ class VtcVouchButton extends StatelessWidget {
   /// [name]'s directory entry, or its id, to draw their picture by.
   final DirectoryEntry? entry;
   final String? entryId;
+
+  /// Takes the vouches as the community shows them once opened.
+  final ValueChanged<VtcEdges>? onRefreshed;
 
   @override
   Widget build(BuildContext context) {
@@ -438,13 +442,16 @@ class VtcVouchButton extends StatelessWidget {
         name: name,
         entry: entry,
         entryId: entryId,
+        onRefreshed: onRefreshed,
       ),
     );
   }
 }
 
-/// Shows the story of each vouch in [edges] between the member and [name]
-/// in [communityName], the member's own first, as [VtcVouchTrail] draws it.
+/// Shows the story of each vouch between the member and [name] in
+/// [communityName], the member's own first, as [VtcVouchTrail] draws it:
+/// [edges] at once, then as the community shows them now, which
+/// [onRefreshed] takes.
 Future<void> showVouches(
   BuildContext context, {
   required VtcEdges edges,
@@ -453,37 +460,107 @@ Future<void> showVouches(
   required String name,
   DirectoryEntry? entry,
   String? entryId,
+  ValueChanged<VtcEdges>? onRefreshed,
 }) => showOnboardingSheet(
   context,
-  Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    spacing: 24,
-    children: [
-      if (edges.outgoing case final edge?)
-        VtcVouchTrail(
-          key: const Key('vtc_vouch_trail_outgoing'),
-          edge: edge,
-          communityDid: communityDid,
-          communityName: communityName,
-          name: name,
-          isOwn: true,
-          entry: entry,
-          entryId: entryId,
-        ),
-      if (edges.incoming case final edge?)
-        VtcVouchTrail(
-          key: const Key('vtc_vouch_trail_incoming'),
-          edge: edge,
-          communityDid: communityDid,
-          communityName: communityName,
-          name: name,
-          isOwn: false,
-          entry: entry,
-          entryId: entryId,
-        ),
-    ],
+  _VouchesSheet(
+    edges: edges,
+    communityDid: communityDid,
+    communityName: communityName,
+    name: name,
+    entry: entry,
+    entryId: entryId,
+    onRefreshed: onRefreshed,
   ),
 );
+
+class _VouchesSheet extends HookConsumerWidget {
+  const _VouchesSheet({
+    required this.edges,
+    required this.communityDid,
+    required this.communityName,
+    required this.name,
+    this.entry,
+    this.entryId,
+    this.onRefreshed,
+  });
+
+  final VtcEdges edges;
+  final String communityDid;
+  final String communityName;
+  final String name;
+  final DirectoryEntry? entry;
+  final String? entryId;
+  final ValueChanged<VtcEdges>? onRefreshed;
+
+  static const _refreshingBarHeight = 2.0;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // The other member: whom the member vouched for, or who vouched first.
+    final otherDid = edges.outgoing?.subjectDid ?? edges.incoming?.issuerDid;
+    final refreshed = useFuture(
+      useMemoized(() async {
+        if (otherDid == null) return null;
+        try {
+          final read = await ref
+              .read(vtcTrustServiceProvider)
+              .edgesWith(communityDid, otherDid);
+          if (context.mounted) onRefreshed?.call(read);
+          return read;
+        } on VtcTrustException {
+          // Only out of date: the vouches already shown stay.
+          return null;
+        }
+      }),
+    );
+    final shown = refreshed.data ?? edges;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Height kept so the vouches do not shift as reading ends.
+        SizedBox(
+          height: _refreshingBarHeight,
+          child: refreshed.connectionState == ConnectionState.waiting
+              ? const LinearProgressIndicator(
+                  key: Key('vtc_vouches_refreshing'),
+                )
+              : null,
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: 24,
+          children: [
+            if (shown.outgoing case final edge?)
+              VtcVouchTrail(
+                key: const Key('vtc_vouch_trail_outgoing'),
+                edge: edge,
+                communityDid: communityDid,
+                communityName: communityName,
+                name: name,
+                isOwn: true,
+                entry: entry,
+                entryId: entryId,
+              ),
+            if (shown.incoming case final edge?)
+              VtcVouchTrail(
+                key: const Key('vtc_vouch_trail_incoming'),
+                edge: edge,
+                communityDid: communityDid,
+                communityName: communityName,
+                name: name,
+                isOwn: false,
+                entry: entry,
+                entryId: entryId,
+              ),
+            if (shown.outgoing == null && shown.incoming == null)
+              Text(context.l10n.vtcTrustNoVouch),
+          ],
+        ),
+      ],
+    );
+  }
+}
 
 Future<bool> _confirm(
   BuildContext context, {
