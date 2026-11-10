@@ -60,10 +60,10 @@ class CommunitiesScreen extends ConsumerWidget {
               Align(
                 alignment: Alignment.centerRight,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: McSpacing.s4),
                   child: TextButton.icon(
                     key: const Key('join_community_button'),
-                    icon: const Icon(McIcons.personAdd),
+                    icon: const Icon(McIcons.add),
                     label: Text(l10n.vtcJoinMenuTitle),
                     onPressed: join,
                   ),
@@ -74,12 +74,12 @@ class CommunitiesScreen extends ConsumerWidget {
                     when communities.isNotEmpty =>
                   Padding(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
+                      horizontal: McSpacing.s4,
+                      vertical: McSpacing.s2,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
-                      spacing: 12,
+                      spacing: McSpacing.s3,
                       children: [
                         for (final community in communities)
                           _CommunityRow(
