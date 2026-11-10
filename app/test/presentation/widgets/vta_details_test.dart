@@ -166,6 +166,36 @@ void main() {
       expect(find.text('Copied to clipboard'), findsOneWidget);
     });
 
+    testWidgets('copies the command that reads the profile from the VTA', (
+      tester,
+    ) async {
+      String? copied;
+      final messenger = tester.binding.defaultBinaryMessenger;
+      messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+        if (call.method == 'Clipboard.setData') {
+          copied = (call.arguments as Map)['text'] as String;
+        }
+        return null;
+      });
+      addTearDown(
+        () => messenger.setMockMethodCallHandler(SystemChannels.platform, null),
+      );
+      await pump(tester);
+      await open(tester);
+
+      await tester.tap(find.byKey(const Key('vta_details_copy_command')));
+      await tester.pump();
+
+      expect(
+        copied,
+        'pnm persona local profile get --context mpx-1 --profile-id 01PROFILE',
+      );
+      expect(find.byIcon(McIcons.check), findsOneWidget);
+
+      await tester.pump(const Duration(seconds: 2));
+      expect(find.byIcon(McIcons.terminal), findsOneWidget);
+    });
+
     testWidgets('says when the profile cannot be read, and retries', (
       tester,
     ) async {

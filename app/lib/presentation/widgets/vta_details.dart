@@ -43,9 +43,18 @@ class VtaDetailsButton extends StatelessWidget {
   }
 }
 
+/// The `pnm` command that reads the profile [profileId] in [contextId] from
+/// the member's VTA, as the sheet shows it.
+String pnmProfileCommand({
+  required String contextId,
+  required String profileId,
+}) =>
+    'pnm persona local profile get --context $contextId '
+    '--profile-id $profileId';
+
 /// Shows where an identity lives on the member's VTA in a sheet: its
 /// context, its profile, and the profile as the VTA keeps it, read from the
-/// VTA as the sheet opens.
+/// VTA as the sheet opens, with the `pnm` command that reads it too.
 Future<void> showVtaDetails(
   BuildContext context, {
   required String contextId,
@@ -66,6 +75,7 @@ class _VtaDetailsSheet extends HookConsumerWidget {
   final String profileId;
 
   static const _radius = Radius.circular(McRadius.xl);
+  static const _copiedFor = Duration(seconds: 2);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -76,6 +86,18 @@ class _VtaDetailsSheet extends HookConsumerWidget {
         .read(vtcServiceProvider)
         .identityProfileDocument(contextId: contextId, profileId: profileId);
     final document = useState(useMemoized(read));
+    final commandCopied = useState(false);
+
+    Future<void> copyCommand() async {
+      await Clipboard.setData(
+        ClipboardData(
+          text: pnmProfileCommand(contextId: contextId, profileId: profileId),
+        ),
+      );
+      commandCopied.value = true;
+      await Future<void>.delayed(_copiedFor);
+      if (context.mounted) commandCopied.value = false;
+    }
 
     return DraggableScrollableSheet(
       expand: false,
@@ -121,6 +143,16 @@ class _VtaDetailsSheet extends HookConsumerWidget {
                         fontWeight: FontWeight.w500,
                       ),
                     ),
+                  ),
+                  IconButton(
+                    key: const Key('vta_details_copy_command'),
+                    icon: Icon(
+                      commandCopied.value ? McIcons.check : McIcons.terminal,
+                    ),
+                    tooltip: commandCopied.value
+                        ? l10n.copiedToClipboard
+                        : l10n.linkedVtaCopyCommand,
+                    onPressed: copyCommand,
                   ),
                   IconButton(
                     key: const Key('vta_details_close'),
