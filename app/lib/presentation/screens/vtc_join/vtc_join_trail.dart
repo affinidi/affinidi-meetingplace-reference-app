@@ -4,6 +4,7 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../themes/tokens/mc_icons.dart';
+import 'vtc_join_json_dialog.dart';
 import 'vtc_trail_step.dart';
 
 /// Where an open application stands, drawn as the path it took: the
@@ -143,6 +144,11 @@ class VtcJoinTrail extends StatelessWidget {
             document: presentation,
             documentTitle: l10n.vtcJoinTrailPresentationDocument,
             documentKey: const Key('vtc_join_trail_presentation_document'),
+            // One command fetches one credential: none for several.
+            documentCommand: switch (credentials) {
+              [final credential] => pnmCredentialCommand(credential['id']),
+              _ => null,
+            },
           ),
         VtcTrailStep(
           key: const Key('vtc_join_trail_vta'),

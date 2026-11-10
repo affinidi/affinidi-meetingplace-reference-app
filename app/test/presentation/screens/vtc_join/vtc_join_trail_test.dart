@@ -341,6 +341,57 @@ void main() {
         jsonDecode(json.textSpan!.toPlainText()),
         presented.request.payload['vp'],
       );
+      // The one credential presented, as the VTA keeps it.
+      String? copied;
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          if (call.method == 'Clipboard.setData') {
+            copied = (call.arguments as Map)['text'] as String;
+          }
+          return null;
+        },
+      );
+      addTearDown(
+        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        ),
+      );
+      await tester.tap(find.byKey(const Key('vtc_join_json_copy_command')));
+      await tester.pump(const Duration(seconds: 2));
+      expect(copied, 'pnm cred-vault get urn:uuid:credential');
+    });
+
+    testWidgets('offers no command for several presented credentials', (
+      tester,
+    ) async {
+      final both = exchange(
+        type: JoinTask.submit,
+        id: 'urn:uuid:submit',
+        payload: {
+          'vp': {
+            'type': ['VerifiablePresentation'],
+            'holder': 'did:webvh:persona',
+            'verifiableCredential': [
+              credential,
+              {...credential, 'id': 'urn:uuid:other'},
+            ],
+          },
+        },
+        answer: {'requestId': 'request-1'},
+        signedAt: '2026-11-04T10:12:00Z',
+        answeredAt: '2026-11-04T10:13:00Z',
+      );
+      await pumpTrail(tester, submit: both);
+
+      await tester.tap(
+        find.byKey(const Key('vtc_join_trail_presentation_document')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('vtc_join_json_copy')), findsOneWidget);
+      expect(find.byKey(const Key('vtc_join_json_copy_command')), findsNothing);
     });
 
     testWidgets('has no presentation step without credentials', (tester) async {
