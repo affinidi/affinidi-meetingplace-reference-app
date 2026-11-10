@@ -2246,10 +2246,51 @@ void main() {
       expect(network.inboxArrivals.hasListener, isFalse);
     });
 
-    test('does nothing for a community it knows no membership of', () async {
+    test('does nothing for a community it knows nothing of', () async {
       await service.watchCommunity('did:web:other.example');
 
       expect(network.inboxArrivals.hasListener, isFalse);
+    });
+
+    test('tells each arrival in the watched inbox', () async {
+      await service.watchCommunity(fakeVtcDid);
+      final arrived = service.inboxArrived.first;
+
+      network.inboxArrivals.add(null);
+
+      expect(await arrived.timeout(const Duration(seconds: 5)), fakeVtcDid);
+    });
+
+    test('keeps watching while another still holds the watch', () async {
+      await service.watchCommunity(fakeVtcDid);
+      await service.watchCommunity(fakeVtcDid);
+
+      await service.unwatchCommunity(fakeVtcDid);
+      expect(network.inboxArrivals.hasListener, isTrue);
+
+      await service.unwatchCommunity(fakeVtcDid);
+      expect(network.inboxArrivals.hasListener, isFalse);
+    });
+
+    test('watches the inbox of an applicant, not yet a member', () async {
+      const appliedDid = 'did:web:applied.example';
+      await SecureStorageVtcRepository().saveCommunity(
+        VtcCommunity(
+          communityDid: appliedDid,
+          personaDid: member.did,
+          contextId: 'mpx-bob',
+          name: 'Applied club',
+          isMember: false,
+          joinRequestId: 'request-1',
+        ),
+      );
+      addTearDown(() => service.unwatchCommunity(appliedDid));
+
+      await service.watchCommunity(appliedDid);
+      final arrived = service.inboxArrived.first;
+      network.inboxArrivals.add(null);
+
+      expect(await arrived.timeout(const Duration(seconds: 5)), appliedDid);
     });
   });
 }

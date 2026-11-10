@@ -118,6 +118,14 @@ class VtcService {
   /// promoted them.
   Stream<VtcRoleChange> get roleChanged => _roleChanged.stream;
 
+  final _inboxArrived = StreamController<String>.broadcast();
+
+  /// Fires the community's DID each time a message reaches the member's
+  /// identity's inbox there while [watchCommunity] watches it, e.g. one an
+  /// applicant or a vetter sent, to read it at once rather than at the next
+  /// check.
+  Stream<String> get inboxArrived => _inboxArrived.stream;
+
   /// The identities' inboxes watched live, by community.
   final Map<String, _InboxWatch> _watches = {};
 
@@ -1102,27 +1110,34 @@ class VtcService {
     _roleChanged.add(VtcRoleChange(communityDid: communityDid, role: role));
   }
 
-  /// Keeps the cards [communityDid] sends the member's identity there as
-  /// they arrive, until [unwatchCommunity], e.g. while the community's page
-  /// shows: an administrator changing the member's role re-issues their
+  /// Watches the inbox of the member's identity for [communityDid] live,
+  /// until as many [unwatchCommunity] calls, e.g. while the community's
+  /// page or a vetting shows: each arrival fires [inboxArrived].
+  ///
+  /// For a member, also keeps the cards the community sends as they
+  /// arrive: an administrator changing the member's role re-issues their
   /// role card. Keeps those already waiting first. Kept cards fire
   /// [membershipsChanged], and a new role [roleChanged].
   ///
   /// Holds the identity's keys, lent by the VTA, while watching. Does
-  /// nothing when already watching, when no VTA is linked or the phone
-  /// knows no membership, or when the identity's inbox cannot be reached:
-  /// coming back to the foreground still finds a new role.
+  /// nothing more when already watching, when no VTA is linked or the
+  /// phone knows no such community, or when the identity's inbox cannot be
+  /// reached: coming back to the foreground still finds a new role, and
+  /// what a vetting waits on is still checked now and then.
   Future<void> watchCommunity(String communityDid) async {
-    if (_watches.containsKey(communityDid)) return;
+    if (_watches[communityDid] case final watch?) {
+      watch.holders++;
+      return;
+    }
     final watch = _watches[communityDid] = _InboxWatch(
       () => _keepPushedCards(communityDid),
       settle: _arrivalSettle,
     );
     try {
       final community = await _repository.findCommunity(communityDid);
-      if (community == null || !community.isMember) return;
+      if (community == null) return;
       final vta = await _grantedVta();
-      await _keepWaitingCards(vta, community);
+      if (community.isMember) await _keepWaitingCards(vta, community);
       if (!_watches.containsKey(communityDid)) {
         // Unwatched meanwhile: forget the keys borrowed for it.
         await endCardCollection(communityDid);
@@ -1130,8 +1145,14 @@ class VtcService {
       }
       if (_watches[communityDid] != watch) return;
       final collection = await _collection(vta, community);
+      await collection.inbox.open();
+      // Unwatched while the inbox opened: unwatching closed it.
+      if (_watches[communityDid] != watch) return;
       watch.subscription = collection.inbox.arrivals().listen(
-        (_) => watch.arrived(),
+        (_) {
+          _inboxArrived.add(communityDid);
+          watch.arrived();
+        },
         // The connection retries on its own; coming back to the foreground
         // covers a lasting failure.
         onError: (Object _) {},
@@ -1143,11 +1164,13 @@ class VtcService {
     }
   }
 
-  /// Stops [watchCommunity] for [communityDid] and forgets the keys lent
-  /// for it. Does nothing when not watching.
+  /// Lets go of one [watchCommunity] for [communityDid]; once none is
+  /// left, stops watching and forgets the keys lent for it. Does nothing
+  /// when not watching.
   Future<void> unwatchCommunity(String communityDid) async {
-    final watch = _watches.remove(communityDid);
-    if (watch == null) return;
+    final watch = _watches[communityDid];
+    if (watch == null || --watch.holders > 0) return;
+    _watches.remove(communityDid);
     await watch.cancel();
     await endCardCollection(communityDid);
   }
@@ -2850,6 +2873,9 @@ class _InboxWatch {
   final Future<void> Function() _read;
   final Duration _settle;
   StreamSubscription<void>? subscription;
+
+  /// How many [VtcService.watchCommunity] calls hold the watch.
+  int holders = 1;
   Timer? _timer;
   bool _isReading = false;
   bool _readAgain = false;
