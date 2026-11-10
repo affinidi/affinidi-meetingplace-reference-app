@@ -16,7 +16,6 @@ import '../../widgets/onboarding_style/onboarding_style.dart';
 import '../../widgets/qr/qr_code_view.dart';
 import '../vtc_join/vtc_claim_type_label.dart';
 import '../vtc_join/vtc_details_card.dart';
-import '../vtc_join/vtc_membership_card_view.dart';
 import '../vtc_join/vtc_progress_line.dart';
 import '../vtc_join/vtc_trail_step.dart';
 import '../vtc_vetter_profile/vtc_vetter_profile_screen.dart';
@@ -25,8 +24,8 @@ import 'vtc_vetting_desk_state.dart';
 
 /// The member's vetting desk for a community where they are a vetter: what
 /// the community asks vetters to check, showing a ticket, which starts
-/// [VtcVettingFlowScreen], the member's vetter card, and the statements
-/// they issued.
+/// [VtcVettingFlowScreen], and the statements they issued. The member's
+/// vetter card shows on the community's Membership tab.
 class VtcVettingDeskScreen extends StatelessWidget {
   const VtcVettingDeskScreen({
     super.key,
@@ -136,21 +135,6 @@ class VtcVettingDeskView extends HookConsumerWidget {
                 key: const Key('vtc_vetter_show_ticket'),
                 label: l10n.vtcVetterShowTicket,
                 onPressed: showFlow,
-              ),
-            if (state.vetterCard case final card?)
-              VtcCardView(
-                cardKey: const Key('vtc_vetter_role_card'),
-                documentKey: const Key('vtc_vetter_role_card_document'),
-                communityName: communityName,
-                title: l10n.vtcVetterCardTitle,
-                credential: card.credential,
-                credentialType: 'AuthorityCredential',
-                documentIcon: McIcons.userCheck,
-                holderLabel: l10n.vtcVetterCardHolder,
-                holderDid: card.vetterDid,
-                issuer: card.issuer,
-                validFrom: card.validFrom,
-                validUntil: card.validUntil,
               ),
             OnboardingButton(
               key: const Key('vtc_vetter_profile_open'),

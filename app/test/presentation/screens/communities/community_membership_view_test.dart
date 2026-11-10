@@ -8,19 +8,21 @@ import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_s
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_community.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_left_membership.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_membership_card.dart';
+import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_vetter_card.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_logger_provider.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/communities/community_membership_view.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_membership_card_view.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 
 import '../../../mocks/fake_app_logger.dart';
 
 const _club = 'did:webvh:QmClub:vtc.example';
 const _me = 'did:webvh:QmMe:vta.example:me';
 
-/// The member's role and membership card, as their VTA keeps them, and
-/// their membership until they leave.
+/// The member's role, membership card and vetter card, as their VTA keeps
+/// them, and their membership until they leave.
 class _FakeVtcService extends Fake implements VtcService {
   bool member = true;
 
@@ -34,6 +36,7 @@ class _FakeVtcService extends Fake implements VtcService {
       'credentialSubject': {'id': _me},
     },
   );
+  VtcVetterCard? heldVetterCard;
   Exception? failure;
   final cardChanges = StreamController<void>.broadcast();
 
@@ -51,6 +54,10 @@ class _FakeVtcService extends Fake implements VtcService {
     String communityDid, {
     void Function(MembershipCardStep step)? onStep,
   }) async => card;
+
+  @override
+  Future<VtcVetterCard?> vetterCard(String communityDid) async =>
+      heldVetterCard;
 
   @override
   Future<CommunityProfile> readProfile(String communityDid) async =>
@@ -130,6 +137,49 @@ void main() {
       findsOneWidget,
     );
     expect(find.byType(VtcMembershipCardView), findsOneWidget);
+  });
+
+  testWidgets('folds each card\'s details away until opened', (tester) async {
+    await pumpView(tester);
+    expect(find.text(_me), findsNothing);
+
+    await tester.tap(find.byIcon(McIcons.chevronDown));
+    await tester.pumpAndSettle();
+
+    expect(find.text(_me), findsOneWidget);
+  });
+
+  testWidgets('lists a vetter\'s card under the membership card', (
+    tester,
+  ) async {
+    service.heldVetterCard = const VtcVetterCard(
+      issuer: _club,
+      vetterDid: _me,
+      credential: {
+        'type': ['VerifiableCredential', 'AuthorityCredential'],
+        'issuer': _club,
+        'credentialSubject': {'id': _me},
+      },
+    );
+
+    await pumpView(tester);
+
+    final membershipCard = find.byKey(const Key('vtc_membership_card'));
+    final vetterCard = find.byKey(const Key('vtc_vetter_role_card'));
+    expect(vetterCard, findsOneWidget);
+    expect(
+      tester.getTopLeft(vetterCard).dy,
+      greaterThan(tester.getTopLeft(membershipCard).dy),
+    );
+    expect(find.byIcon(McIcons.chevronDown), findsNWidgets(2));
+  });
+
+  testWidgets('shows no vetter card to a member who is not a vetter', (
+    tester,
+  ) async {
+    await pumpView(tester);
+
+    expect(find.byKey(const Key('vtc_vetter_role_card')), findsNothing);
   });
 
   testWidgets('shows the new role once the cards change', (tester) async {

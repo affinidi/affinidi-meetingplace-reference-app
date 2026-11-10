@@ -11,9 +11,10 @@ import '../vtc_join/vtc_role_name.dart';
 import 'community_logo_provider.dart';
 import 'community_tabs_providers.dart';
 
-/// The member's membership of a community: their role there and the
-/// membership card it issued, both as their VTA keeps them, and a way to
-/// leave it.
+/// The member's membership of a community: their role there and the cards
+/// it issued them, the membership card and a vetter's role card, as their
+/// VTA keeps them, each with its details folded away, and a way to leave
+/// it.
 class CommunityMembershipView extends ConsumerWidget {
   const CommunityMembershipView({
     super.key,
@@ -29,6 +30,10 @@ class CommunityMembershipView extends ConsumerWidget {
     final l10n = context.l10n;
     final role = ref.watch(communityRoleProvider(communityDid));
     final card = ref.watch(communityMembershipCardProvider(communityDid));
+    // Only a vetter holds one; the Vetting tab says when it cannot be read.
+    final vetterCard = ref
+        .watch(communityVetterCardProvider(communityDid))
+        .value;
     final logoUrl = ref.watch(communityLogoProvider(communityDid)).value;
 
     if (role.error ?? card.error case final error?) {
@@ -59,6 +64,7 @@ class CommunityMembershipView extends ConsumerWidget {
               card: card,
               communityName: communityName,
               logoUrl: logoUrl,
+              collapsible: true,
             )
           else
             Row(
@@ -74,6 +80,13 @@ class CommunityMembershipView extends ConsumerWidget {
                   ),
                 ),
               ],
+            ),
+          if (vetterCard != null)
+            VtcVetterCardView(
+              card: vetterCard,
+              communityName: communityName,
+              logoUrl: logoUrl,
+              collapsible: true,
             ),
           const SizedBox(height: 12),
           ElevatedButton(
