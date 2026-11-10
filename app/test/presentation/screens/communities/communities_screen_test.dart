@@ -1,12 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_community.dart';
+import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_removal.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/build_context_extensions.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/communities/community_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/communities/community_tabs_providers.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/communities/removal_notice.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/credentials/membership_credentials_list.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_findable_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_sign_in/vtc_sign_in_screen.dart';
@@ -167,6 +171,58 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text(l10n.communitiesSubtitle), findsOneWidget);
+    });
+
+    testWidgets('closes a community that removed the member, saying why', (
+      tester,
+    ) async {
+      final l10n = await getL10n();
+      final removals = StreamController<VtcRemoval>.broadcast();
+      addTearDown(removals.close);
+      await openCommunitiesTab(
+        tester,
+        overrides: [vtcRemovalsProvider.overrideWith((ref) => removals.stream)],
+      );
+      await saveCommunities();
+      await pullToRefresh(tester);
+      await tester.tap(find.text('Chess club'));
+      await tester.pumpAndSettle();
+
+      removals.add(
+        const VtcRemoval(
+          communityDid: chessDid,
+          name: 'Chess club',
+          reason: 'Spam.',
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(CommunityScreen), findsNothing);
+      expect(find.text(l10n.communitiesSubtitle), findsOneWidget);
+      expect(
+        find.text(l10n.vtcRemovedWithReason('Chess club', 'Spam.')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('stays on a community when another removed the member', (
+      tester,
+    ) async {
+      final removals = StreamController<VtcRemoval>.broadcast();
+      addTearDown(removals.close);
+      await openCommunitiesTab(
+        tester,
+        overrides: [vtcRemovalsProvider.overrideWith((ref) => removals.stream)],
+      );
+      await saveCommunities();
+      await pullToRefresh(tester);
+      await tester.tap(find.text('Chess club'));
+      await tester.pumpAndSettle();
+
+      removals.add(const VtcRemoval(communityDid: footballDid));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(CommunityScreen), findsOneWidget);
     });
 
     testWidgets('reads whether members find the member on opening it', (

@@ -8,6 +8,7 @@ import '../../infrastructure/configuration/environment.dart';
 import '../../infrastructure/extensions/build_context_extensions.dart';
 import '../../navigation/tabs/navigation_tab_destination.dart';
 import '../../navigation/tabs/tabs.dart';
+import '../screens/communities/removal_notice.dart';
 import '../screens/communities/role_change_notice.dart';
 import '../screens/credentials/membership_credentials_controller.dart';
 import '../themes/tokens/mc_colors.dart';
@@ -25,6 +26,7 @@ class ScaffoldWithNavBar extends ConsumerWidget {
     final l10n = context.l10n;
     final isZkpEnabled = ref.read(environmentProvider).zkpEnabled;
     listenForRoleChanges(ref, context);
+    listenForRemovals(ref, context);
 
     final visibleTabs = isZkpEnabled
         ? Tabs.values

@@ -3115,6 +3115,16 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String vtcRemoved(String community) {
+    return '$community removed you';
+  }
+
+  @override
+  String vtcRemovedWithReason(String community, String reason) {
+    return '$community removed you: $reason';
+  }
+
+  @override
   String get vtcJoinProfileHeading => 'About the community';
 
   @override

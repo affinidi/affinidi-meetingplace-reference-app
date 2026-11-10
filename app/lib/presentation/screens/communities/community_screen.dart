@@ -22,6 +22,7 @@ import 'community_members_controller.dart';
 import 'community_members_view.dart';
 import 'community_membership_view.dart';
 import 'community_tabs_providers.dart';
+import 'removal_notice.dart';
 
 /// A community the member belongs to, under its logo if it gives one, with
 /// its channels, its groups' chats, its members, the member's role and
@@ -54,6 +55,13 @@ class CommunityScreen extends HookConsumerWidget {
       unawaited(service.watchCommunity(communityDid));
       return () => unawaited(service.unwatchCommunity(communityDid));
     }, [communityDid]);
+    // The member no longer belongs to a community that removed them; the
+    // shell tells them.
+    ref.listen(vtcRemovalsProvider, (_, next) {
+      if (next.value?.communityDid == communityDid && context.mounted) {
+        unawaited(Navigator.of(context).maybePop());
+      }
+    });
     // Read what the header and the Membership and Info tabs show as soon
     // as the community opens, and keep it while it shows, for them to show
     // it at once.

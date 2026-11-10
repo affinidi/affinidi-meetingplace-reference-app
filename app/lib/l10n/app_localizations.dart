@@ -4604,6 +4604,18 @@ abstract class AppLocalizations {
   /// **'Your role in {community} is now {role}'**
   String vtcRoleChanged(String community, String role);
 
+  /// Shown once a community removed the member, e.g. an administrator did, and the phone forgot it; the community gave no reason
+  ///
+  /// In en, this message translates to:
+  /// **'{community} removed you'**
+  String vtcRemoved(String community);
+
+  /// Shown once a community removed the member and the phone forgot it; reason is the community's own words
+  ///
+  /// In en, this message translates to:
+  /// **'{community} removed you: {reason}'**
+  String vtcRemovedWithReason(String community, String reason);
+
   /// No description provided for @vtcJoinProfileHeading.
   ///
   /// In en, this message translates to:

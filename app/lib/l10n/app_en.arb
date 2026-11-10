@@ -2962,6 +2962,27 @@
 			}
 		}
 	},
+	"vtcRemoved": "{community} removed you",
+	"@vtcRemoved": {
+		"description": "Shown once a community removed the member, e.g. an administrator did, and the phone forgot it; the community gave no reason",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcRemovedWithReason": "{community} removed you: {reason}",
+	"@vtcRemovedWithReason": {
+		"description": "Shown once a community removed the member and the phone forgot it; reason is the community's own words",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			},
+			"reason": {
+				"type": "String"
+			}
+		}
+	},
 	"vtcJoinProfileHeading": "About the community",
 	"vtcJoinWebsite": "Website",
 	"vtcJoinContact": "Contact",
