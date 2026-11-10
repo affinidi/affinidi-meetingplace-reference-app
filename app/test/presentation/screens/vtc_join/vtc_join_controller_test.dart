@@ -363,9 +363,21 @@ void main() {
       await controller().onScanned(fakeVtcDid);
       await controller().join();
       await controller().useIdentity(persona.did);
+      final steps = <VtcApplyStep?>[];
+      bool? createdBeforeSteps;
+      container.listen(
+        vtcJoinControllerProvider.select((state) => state.applyStep),
+        (_, step) {
+          createdBeforeSteps ??= createdPersona();
+          steps.add(step);
+        },
+      );
 
       await controller().useDid(newDid: true);
 
+      // The steps show from creating the new DID on, not after it.
+      expect(createdBeforeSteps, isFalse);
+      expect(steps, [...VtcApplyStep.values, null]);
       expect(state().step, VtcJoinStep.joined);
       final created = network.vta.received.lastWhere(
         (r) => r['type'] == VtaTask.didsCreate,

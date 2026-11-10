@@ -1467,8 +1467,23 @@ void main() {
         expect(find.text('A new DID for this community'), findsOneWidget);
         expect(find.text("This identity's own DID"), findsOneWidget);
 
-        await chooseDid(tester, 'vtc_join_new_did');
+        await tapVisible(tester, find.byKey(const Key('vtc_join_new_did')));
+        // The steps show while the new DID is created on the VTA.
+        final applying = find.byKey(const Key('vtc_join_applying'));
+        for (var i = 0; i < 50 && applying.evaluate().isEmpty; i++) {
+          await tester.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 1)),
+          );
+          await tester.pump();
+        }
+        expect(applying, findsOneWidget);
+        expect(
+          find.text('Getting your identity ready on your VTA'),
+          findsOneWidget,
+        );
+        await settle(tester);
 
+        expect(applying, findsNothing);
         expect(find.text("You're a member of Football club."), findsOneWidget);
         expect(vtaTasks(), contains(VtaTask.localBindingSet));
       });

@@ -446,6 +446,8 @@ class VtcJoinController extends _$VtcJoinController {
     state = state.copyWith(step: VtcJoinStep.working);
 
     await _run(() async {
+      // A new DID is created on the VTA before anything else is asked.
+      _showApplyStep(VtcApplyStep.preparingIdentity);
       final persona = newDid
           ? await _service.joiningIdentity(
               manifest,
@@ -455,6 +457,9 @@ class VtcJoinController extends _$VtcJoinController {
           : VtaPersona(did: identity.did, contextId: identity.vtaContextId!);
       await _apply(manifest, persona: persona);
     });
+    // Applying ended, also when it failed or waits on the member: later work
+    // must not show it.
+    if (ref.mounted) state = state.copyWith(applyStep: null);
   }
 
   /// Shares the profile details the member approved, through the VTA, and
