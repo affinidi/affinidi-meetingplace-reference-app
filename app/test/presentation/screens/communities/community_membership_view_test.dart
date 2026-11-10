@@ -47,6 +47,9 @@ class _FakeVtcService extends Fake implements VtcService {
   bool member = true;
 
   String? role = 'moderator';
+
+  /// When set, the role is read only once it completes.
+  Completer<void>? roleRead;
   VtcMembershipCard? card = const VtcMembershipCard(
     issuer: _club,
     memberDid: _me,
@@ -67,6 +70,7 @@ class _FakeVtcService extends Fake implements VtcService {
 
   @override
   Future<String?> communityRole(String communityDid) async {
+    await roleRead?.future;
     if (failure case final failure?) throw failure;
     return role;
   }
@@ -177,6 +181,26 @@ void main() {
       findsOneWidget,
     );
     expect(find.byType(VtcMembershipCardView), findsOneWidget);
+  });
+
+  testWidgets('shows the card before the role is read', (tester) async {
+    service.roleRead = Completer();
+
+    await pumpView(tester);
+
+    expect(find.byType(VtcMembershipCardView), findsOneWidget);
+    expect(find.byKey(const Key('community_membership_role')), findsNothing);
+
+    service.roleRead!.complete();
+    await tester.pumpAndSettle();
+
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('community_membership_role')),
+        matching: find.text('Moderator'),
+      ),
+      findsOneWidget,
+    );
   });
 
   group('identity', () {

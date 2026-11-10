@@ -50,7 +50,8 @@ class CommunityMembershipView extends ConsumerWidget {
         _ => l10n.membershipCredentialsUnreachable,
       });
     }
-    if (!role.hasValue || !card.hasValue) {
+    // The card shows as soon as it is read; the role joins it once read.
+    if (!card.hasValue) {
       return const Center(child: OnboardingSpinner());
     }
 
