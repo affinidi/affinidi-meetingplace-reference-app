@@ -56,6 +56,7 @@ class VtcVettingDeskScreen extends StatelessWidget {
 
     return OnboardingLayout(
       onClose: close,
+      showBranding: false,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: McSpacing.s3,

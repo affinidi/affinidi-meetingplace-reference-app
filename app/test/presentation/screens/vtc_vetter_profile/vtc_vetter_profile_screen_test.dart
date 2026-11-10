@@ -94,6 +94,12 @@ void main() {
     expect(listed.value, isFalse);
     expect(find.text('en'), findsOneWidget);
     expect(
+      find.image(
+        const AssetImage('assets/images/meeting-place-splash-white-1024.png'),
+      ),
+      findsNothing,
+    );
+    expect(
       tester
           .widget<ElevatedButton>(
             find.descendant(

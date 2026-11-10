@@ -164,6 +164,20 @@ void main() {
     );
   });
 
+  testWidgets('shows the desk without the logo', (tester) async {
+    await pumpDesk(tester);
+    await settle(tester);
+
+    expect(find.text('Vetting for Football club'), findsOneWidget);
+    expect(
+      find.image(
+        const AssetImage('assets/images/meeting-place-splash-white-1024.png'),
+      ),
+      findsNothing,
+    );
+    await close(tester);
+  });
+
   testWidgets('shows a ticket to scan or read out', (tester) async {
     await pumpDesk(tester);
     await waitFor(tester, find.byKey(const Key('vtc_vetter_show_ticket')));
