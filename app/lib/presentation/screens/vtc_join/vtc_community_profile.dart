@@ -31,8 +31,8 @@ class VtcCommunityLogo extends StatelessWidget {
   }
 }
 
-/// Who the community is: its description, website, contact, DID, which can
-/// be copied, and the join phrase it can be found by.
+/// Who the community is: its description, website and DID, which can both
+/// be copied, contact, and the join phrase it can be found by.
 class VtcCommunityProfile extends HookWidget {
   const VtcCommunityProfile({
     super.key,
@@ -54,11 +54,17 @@ class VtcCommunityProfile extends HookWidget {
     final l10n = context.l10n;
     final did = communityDid;
     final copied = useState(false);
+    final websiteCopied = useState(false);
     final mc = context.mcColors;
 
     Future<void> copyDid() async {
       await Clipboard.setData(ClipboardData(text: did));
       copied.value = true;
+    }
+
+    Future<void> copyWebsite(Uri website) async {
+      await Clipboard.setData(ClipboardData(text: website.toString()));
+      websiteCopied.value = true;
     }
 
     return GlassCard(
@@ -80,6 +86,19 @@ class VtcCommunityProfile extends HookWidget {
                 icon: McIcons.website,
                 title: l10n.vtcJoinWebsite,
                 subtitle: website.toString(),
+                trailing: IconButton(
+                  key: const Key('vtc_community_copy_website'),
+                  icon: Icon(
+                    websiteCopied.value ? McIcons.check : McIcons.copy,
+                    size: 18,
+                    color: mc.textSecondary,
+                  ),
+                  tooltip: websiteCopied.value
+                      ? l10n.copiedToClipboard
+                      : l10n.vtcJoinCopyWebsite,
+                  visualDensity: VisualDensity.compact,
+                  onPressed: () => copyWebsite(website),
+                ),
               ),
             if (contactEmail case final email?)
               OnboardingLine(

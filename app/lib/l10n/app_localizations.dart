@@ -4652,6 +4652,12 @@ abstract class AppLocalizations {
   /// **'Website'**
   String get vtcJoinWebsite;
 
+  /// Button that copies the community's website address
+  ///
+  /// In en, this message translates to:
+  /// **'Copy website'**
+  String get vtcJoinCopyWebsite;
+
   /// No description provided for @vtcJoinContact.
   ///
   /// In en, this message translates to:

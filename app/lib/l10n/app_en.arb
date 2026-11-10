@@ -3000,6 +3000,10 @@
 	},
 	"vtcJoinProfileHeading": "About the community",
 	"vtcJoinWebsite": "Website",
+	"vtcJoinCopyWebsite": "Copy website",
+	"@vtcJoinCopyWebsite": {
+		"description": "Button that copies the community's website address"
+	},
 	"vtcJoinContact": "Contact",
 	"vtcJoinAudience": "{audience, select, admins{the administrators} groups{your groups} connections{your connections} members{all members} public{anyone} other{some people}}",
 	"@vtcJoinAudience": {

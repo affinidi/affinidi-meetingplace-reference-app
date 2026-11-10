@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_community_profile.dart';
@@ -41,6 +42,39 @@ void main() {
     expect(find.text('knight moves'), findsOneWidget);
   });
 
+  testWidgets('copies the community website', (tester) async {
+    final clipboard = <String>[];
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async {
+        if (call.method == 'Clipboard.setData') {
+          clipboard.add((call.arguments as Map)['text'] as String);
+        }
+        return null;
+      },
+    );
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      ),
+    );
+
+    await pumpProfile(
+      tester,
+      VtcCommunityProfile(
+        communityDid: 'did:web:chess.example',
+        website: Uri.parse('https://chess.example'),
+      ),
+    );
+
+    await tester.tap(find.byKey(const Key('vtc_community_copy_website')));
+    await tester.pump();
+
+    expect(clipboard, ['https://chess.example']);
+    expect(find.byTooltip('Copied to clipboard'), findsOneWidget);
+  });
+
   testWidgets('leaves out what the community does not publish', (tester) async {
     await pumpProfile(
       tester,
@@ -49,6 +83,7 @@ void main() {
 
     expect(find.text('Community DID'), findsOneWidget);
     expect(find.text('Website'), findsNothing);
+    expect(find.byKey(const Key('vtc_community_copy_website')), findsNothing);
     expect(find.text('Contact'), findsNothing);
     expect(find.byKey(const Key('vtc_community_join_phrase')), findsNothing);
   });

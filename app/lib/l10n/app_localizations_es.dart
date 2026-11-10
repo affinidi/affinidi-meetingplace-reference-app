@@ -3136,6 +3136,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get vtcJoinWebsite => 'Website';
 
   @override
+  String get vtcJoinCopyWebsite => 'Copy website';
+
+  @override
   String get vtcJoinContact => 'Contact';
 
   @override
