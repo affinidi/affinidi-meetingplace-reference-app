@@ -18,6 +18,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_reposi
 import 'package:mpx_flutter_reference_app/infrastructure/vtc/mock_credential_issuer.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/vtc/user_verification_key.dart';
 
+import '../../../fakes/fake_identities.dart';
 import '../../../fakes/fake_persona.dart';
 import '../../../fakes/fake_vetter_desk.dart';
 import '../../../fakes/fake_vta.dart';
@@ -265,6 +266,67 @@ void main() {
         expect(vtaTasks(), isNot(contains(VtaTask.didsCreate)));
       },
     );
+
+    group('as a new persona of an identity', () {
+      final ada = FakeIdentities.primaryIdentity.copyWith(
+        vtaContextId: 'mpx-ada',
+        vtaProfileId: '01PROFILE',
+      );
+
+      Map<String, dynamic> payloadOf(String type) =>
+          network.vta.received.lastWhere(
+                (request) => request['type'] == type,
+              )['payload']
+              as Map<String, dynamic>;
+
+      setUp(() {
+        network.vta.answers[VtaTask.didsCreate] = {
+          'did': persona.did,
+          'contextId': 'mpx-ada',
+          'signingKeyId': '${persona.did}#key-1',
+        };
+      });
+
+      test("joins in the identity's context, wearing its profile", () async {
+        final verdict = await service.join(
+          await service.readCommunity(fakeVtcDid),
+          identity: ada,
+        );
+
+        expect(verdict, isA<JoinAdmitted>());
+        expect(payloadOf(VtaTask.didsCreate)['contextId'], 'mpx-ada');
+        expect(payloadOf(VtaTask.localBindingSet), {
+          'contextId': 'mpx-ada',
+          'personaDid': persona.did,
+          'profileId': '01PROFILE',
+        });
+        final community = await service.community(fakeVtcDid);
+        expect(community?.personaDid, persona.did);
+        expect(community?.contextId, 'mpx-ada');
+        expect(vtaTasks(), isNot(contains(VtaTask.contextsList)));
+      });
+
+      test('applies again as the persona recorded', () async {
+        final manifest = await service.readCommunity(fakeVtcDid);
+        await service.joiningIdentity(manifest, persona: joinAs);
+
+        await service.joiningIdentity(manifest, identity: ada);
+
+        expect(vtaTasks(), isNot(contains(VtaTask.didsCreate)));
+        expect((await service.community(fakeVtcDid))?.personaDid, joinAs.did);
+      });
+
+      test('refuses an identity the VTA does not hold', () async {
+        await expectLater(
+          service.joiningIdentity(
+            await service.readCommunity(fakeVtcDid),
+            identity: FakeIdentities.primaryIdentity,
+          ),
+          throwsArgumentError,
+        );
+        expect(vtaTasks(), isNot(contains(VtaTask.didsCreate)));
+      });
+    });
 
     test('is a member even when the VTA keeps no card', () async {
       network.vta.refusals[VtaTask.credentialsReceive] = {

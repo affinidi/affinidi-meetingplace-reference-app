@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
+import '../../../domain/models/identity/identity.dart';
 import '../../../domain/models/vtc/linked_vta.dart';
 import '../../../domain/models/vtc/mock_credential_template.dart';
 import '../../../domain/models/vtc/vta_enrolment_offer.dart';
@@ -472,8 +473,9 @@ class VtcService {
   /// gathered ([vetting]) when it asks for vetting.
   ///
   /// The first application to a community is made as [persona], one of
-  /// [vtaPersonas], or else as a new persona the VTA creates; a later one
-  /// applies as the same persona. Once admitted, the issued cards are kept
+  /// [vtaPersonas], else as a new persona of [identity] wearing its profile,
+  /// or else as a new persona the VTA creates; a later one applies as the
+  /// same persona. Once admitted, the issued cards are kept
   /// on the VTA, where other apps of the member find them; an admission
   /// returns its membership card only when the VTA kept it.
   ///
@@ -488,6 +490,7 @@ class VtcService {
   Future<JoinVerdict> join(
     JoinManifest manifest, {
     VtaPersona? persona,
+    Identity? identity,
     JoinCriterion? criterion,
     Map<String, dynamic>? presentation,
     List<JoinAttribute> attributes = const [],
@@ -502,6 +505,7 @@ class VtcService {
     await joiningIdentity(
       manifest,
       persona: persona,
+      identity: identity,
       listInDirectory: listInDirectory,
     );
     final community = (await _repository.findCommunity(manifest.communityDid))!;
@@ -553,13 +557,17 @@ class VtcService {
   }
 
   /// The identity that applies to [manifest]'s community: the one recorded
-  /// for it, else [persona], else a new persona the VTA creates. Recorded
+  /// for it, else [persona], else a new persona of [identity] wearing its
+  /// profile, so the community sees the identity's details under a DID no
+  /// other community knows, else a new persona the VTA creates. Recorded
   /// before anything is sent, so a retry applies as the same identity.
   ///
-  /// Throws as [join] does.
+  /// Throws [ArgumentError] when [identity] is not a persona of the VTA,
+  /// else as [join] does.
   Future<VtaPersona> joiningIdentity(
     JoinManifest manifest, {
     VtaPersona? persona,
+    Identity? identity,
     bool listInDirectory = false,
   }) async {
     final recorded = await _repository.findCommunity(manifest.communityDid);
@@ -570,10 +578,18 @@ class VtcService {
       return _persona(recorded);
     }
 
+    if (identity != null && !identity.isVtaPersona) {
+      throw ArgumentError.value(identity.id, 'identity', 'not a VTA persona');
+    }
     final vta = await _grantedVta();
-    persona ??= await vta.createPersona(
-      label: manifest.name ?? manifest.communityDid,
-    );
+    final label = manifest.name ?? manifest.communityDid;
+    persona ??= identity == null
+        ? await vta.createPersona(label: label)
+        : await vta.createPersonaFor(
+            contextId: identity.vtaContextId!,
+            profileId: identity.vtaProfileId!,
+            label: label,
+          );
     await _repository.saveCommunity(
       VtcCommunity(
         communityDid: manifest.communityDid,
