@@ -423,8 +423,6 @@ class _TicketView extends StatelessWidget {
     required this.creating,
   });
 
-  static const _qrSize = 200.0;
-
   final VtcVettingDeskState state;
   final VtcVettingDeskController controller;
 
@@ -437,20 +435,25 @@ class _TicketView extends StatelessWidget {
     final ticket = state.liveTicket(clock.now());
 
     if (ticket != null) {
+      final qrSize = context.qrScannerTheme.iconSize * 2.5;
       return GlassCard(
         title: l10n.vtcVetterTicketHeading,
         child: Column(
           spacing: 12,
           children: [
-            // A fixed size: the layout measures its content's height,
-            // which the QR code cannot report. It includes the view's
-            // quiet zone on both sides.
-            SizedBox.square(
-              dimension: _qrSize + 2 * McSpacing.s3,
-              child: QrCodeView(
-                key: const Key('vtc_vetter_ticket_qr'),
-                data: '${ticket.scanned}',
-                size: _qrSize,
+            // As large as the app's other QR codes, scaled down to fit the
+            // card on a narrow phone. A fixed size: the layout measures its
+            // content's height, which the QR code cannot report. It
+            // includes the view's quiet zone on both sides.
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: SizedBox.square(
+                dimension: qrSize + 2 * McSpacing.s3,
+                child: QrCodeView(
+                  key: const Key('vtc_vetter_ticket_qr'),
+                  data: '${ticket.scanned}',
+                  size: qrSize,
+                ),
               ),
             ),
             Text(l10n.vtcVetterTicketCodeHint, style: onboardingNote(context)),

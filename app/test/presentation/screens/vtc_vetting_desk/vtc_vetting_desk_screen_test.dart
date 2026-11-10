@@ -19,6 +19,7 @@ import 'package:mpx_flutter_reference_app/presentation/screens/vtc_vetting_desk/
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_colors.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../fakes/fake_vetter_desk.dart';
 import '../../../fakes/fake_vtc_network.dart';
@@ -234,6 +235,38 @@ void main() {
 
     expect(find.byKey(const Key('vtc_vetter_new_ticket')), findsNothing);
     expect(find.byType(VtcWaitingForParty), findsNothing);
+    await close(tester);
+  });
+
+  /// The size the ticket's QR code is drawn at.
+  double? ticketQrSize(WidgetTester tester) => tester
+      .widget<QrImageView>(
+        find.descendant(
+          of: find.byKey(const Key('vtc_vetter_ticket_qr')),
+          matching: find.byType(QrImageView),
+        ),
+      )
+      .size;
+
+  testWidgets('shows the ticket as large as other QR codes', (tester) async {
+    await pumpDesk(tester);
+    await showTicket(tester);
+
+    expect(ticketQrSize(tester), 250);
+    await close(tester);
+  });
+
+  testWidgets('fits the ticket on a narrow phone', (tester) async {
+    await pumpDesk(tester);
+    await showTicket(tester);
+    await tester.binding.setSurfaceSize(const Size(320, 1600));
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
+    // Drawn at full size, then scaled down on screen.
+    final shown = tester.getRect(find.byKey(const Key('vtc_vetter_ticket_qr')));
+    expect(shown.width, lessThan(250));
+    expect(shown.right, lessThanOrEqualTo(320));
     await close(tester);
   });
 
