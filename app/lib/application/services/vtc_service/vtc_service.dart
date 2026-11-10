@@ -2855,6 +2855,10 @@ class VtcService {
     final communities = await _repository.communities();
     final left = [...await _repository.leftMemberships()]
       ..sort((a, b) => b.leftAt.compareTo(a.leftAt));
+    final personaContexts = {
+      for (final community in communities)
+        community.personaDid: community.contextId,
+    };
 
     final leftEntries = [
       for (final membership in left)
@@ -2863,6 +2867,7 @@ class VtcService {
             VtcMembershipEntry(
               card: card,
               communityName: membership.name,
+              contextId: personaContexts[card.memberDid],
               left: membership,
             ),
     ];
@@ -2880,6 +2885,7 @@ class VtcService {
             VtcMembershipEntry(
               card: card,
               stored: record,
+              contextId: personaContexts[card.memberDid],
               communityName:
                   communities
                       .where((c) => c.communityDid == card.issuer)

@@ -233,17 +233,26 @@ class StatusChip extends StatelessWidget {
   VtcCardState.unknown => (l10n.membershipStatusUnknown, mc.hairlineStrong),
 };
 
-/// The name of the member's identity [entry]'s card is for.
+/// The name of the member's identity [entry]'s card is for: the identity
+/// of the card's DID, else the one whose VTA context holds the card's
+/// persona, as a community knows a persona of its own.
 String membershipIdentityName(
   BuildContext context,
   WidgetRef ref,
   VtcMembershipEntry entry,
 ) {
-  final identity = ref
-      .watch(identitiesServiceProvider)
-      .identities
-      .where((identity) => identity.did == entry.card.memberDid)
-      .firstOrNull;
+  final identities = ref.watch(identitiesServiceProvider).identities;
+  final identity =
+      identities
+          .where((identity) => identity.did == entry.card.memberDid)
+          .firstOrNull ??
+      identities
+          .where(
+            (identity) =>
+                entry.contextId != null &&
+                identity.vtaContextId == entry.contextId,
+          )
+          .firstOrNull;
   final name = identity?.card.displayName.trim() ?? '';
   return name.isEmpty ? context.l10n.membershipCredentialOtherIdentity : name;
 }

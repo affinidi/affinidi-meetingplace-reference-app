@@ -10,6 +10,7 @@ class VtcMembershipEntry {
   const VtcMembershipEntry({
     required this.card,
     this.communityName,
+    this.contextId,
     this.left,
     this.stored,
   });
@@ -22,6 +23,10 @@ class VtcMembershipEntry {
 
   /// The community's name, if known.
   final String? communityName;
+
+  /// The VTA context of the persona the card is for, if known: it names the
+  /// member's identity, since each community knows a persona of its own.
+  final String? contextId;
 
   /// The membership's end, if the member left.
   final VtcLeftMembership? left;

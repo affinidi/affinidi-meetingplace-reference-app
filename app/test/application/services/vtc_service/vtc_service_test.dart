@@ -1356,6 +1356,7 @@ void main() {
 
         expect(entries.single.key, 'urn:uuid:vmc');
         expect(entries.single.communityName, 'Football club');
+        expect(entries.single.contextId, 'vta');
         expect(entries.single.left, isNull);
       });
 

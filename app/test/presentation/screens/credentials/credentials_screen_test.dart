@@ -12,6 +12,7 @@ import 'package:mpx_flutter_reference_app/application/services/identities_servic
 import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service_state.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
 import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
+import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_community.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_left_membership.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
@@ -138,7 +139,11 @@ void main() {
     network.revoked.add(2);
   });
 
-  Future<void> pumpScreen(WidgetTester tester, {bool settles = true}) async {
+  Future<void> pumpScreen(
+    WidgetTester tester, {
+    bool settles = true,
+    List<Identity>? identities,
+  }) async {
     await tester.binding.setSurfaceSize(const Size(800, 1400));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
@@ -151,7 +156,8 @@ void main() {
           identitiesServiceProvider.overrideWith(
             () => FakeIdentitiesService(
               IdentitiesServiceState(
-                identities: [_identity(ada, 'Ada'), _identity(bo, 'Bo')],
+                identities:
+                    identities ?? [_identity(ada, 'Ada'), _identity(bo, 'Bo')],
               ),
             ),
           ),
@@ -310,6 +316,34 @@ void main() {
     expect(find.text('Chess club'), findsOneWidget);
     expect(find.text('Football club'), findsOneWidget);
   });
+
+  testWidgets(
+    "names the identity of a card's persona, or none not on this phone",
+    (tester) async {
+      // Ada joined the chess club as a persona of her identity, under a DID
+      // of its own; Bo's identity is not on this phone.
+      await SecureStorageVtcRepository().saveCommunity(
+        const VtcCommunity(
+          communityDid: fakeVtcDid,
+          personaDid: ada,
+          contextId: 'mpx-ada',
+          name: 'Chess club',
+        ),
+      );
+      final adaIdentity = _identity(
+        'did:webvh:QmAdaPrimary:host.example',
+        'Ada',
+      ).copyWith(vtaContextId: 'mpx-ada');
+
+      await pumpScreen(tester, identities: [adaIdentity]);
+
+      expect(find.text('as Ada · until Nov 4, 2027'), findsOneWidget);
+      expect(
+        find.text('as an identity not on this phone · left Nov 5, 2026'),
+        findsOneWidget,
+      );
+    },
+  );
 
   testWidgets("shows what each card's community says of it", (tester) async {
     await pumpScreen(tester);
