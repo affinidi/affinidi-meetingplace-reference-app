@@ -91,15 +91,7 @@ class _FakeTrustService extends Fake implements VtcTrustService {
     required String personaDid,
   }) async {
     vouched.add(personaDid);
-    final edge = _edge('edge-2', _me, personaDid);
-    edges = {
-      ...edges,
-      personaDid: VtcEdges(
-        outgoing: edge,
-        incoming: edges[personaDid]?.incoming,
-      ),
-    };
-    return edge;
+    return _edge('edge-2', _me, personaDid);
   }
 }
 
@@ -244,6 +236,8 @@ void main() {
     expect(find.text('You vouched for Bob'), findsOneWidget);
     await tester.tapAt(const Offset(10, 10));
     await tester.pumpAndSettle();
+    // Shown from the vouch itself: the fake's vouches never change.
+    expect(inMember('dir_bob', find.text('Vouch back')), findsNothing);
     expect(
       inMember('dir_bob', find.byTooltip('You and Bob vouched for each other')),
       findsOneWidget,

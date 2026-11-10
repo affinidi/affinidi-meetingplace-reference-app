@@ -27,15 +27,16 @@ class VtcGroupMembersScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final service = ref.read(vtcTrustServiceProvider);
-    final reload = useState(0);
     final load = useMemoized(
       () async => (
         await service.groupMembers(communityDid, groupId: group.groupId),
         await service.edgesByMember(communityDid),
       ),
-      [reload.value],
     );
     final loaded = useFuture(load);
+    // The member's vouches made here, by DID, shown without reading the
+    // vouches again.
+    final vouched = useState(const <String, PublishedRelationship>{});
 
     Future<void> vouch(DirectoryEntry entry, String name) async {
       final personaDid = entry.did;
@@ -49,7 +50,7 @@ class VtcGroupMembersScreen extends HookConsumerWidget {
         name: name,
         entry: entry,
       );
-      if (edge != null) reload.value++;
+      if (edge != null) vouched.value = {...vouched.value, personaDid: edge};
     }
 
     return Scaffold(
@@ -86,12 +87,16 @@ class VtcGroupMembersScreen extends HookConsumerWidget {
               );
             }
             final entry = members[index - 1];
+            final shown = edges[entry.did] ?? const VtcEdges();
             return VtcMemberTile(
               key: Key('vtc_group_member_${entry.entryId}'),
               communityDid: communityDid,
               communityName: communityName,
               entry: entry,
-              edges: edges[entry.did] ?? const VtcEdges(),
+              edges: switch (vouched.value[entry.did]) {
+                final edge? => shown.vouched(edge),
+                null => shown,
+              },
               names: vtcMemberNames(members),
               onVouch: (name) => vouch(entry, name),
             );
