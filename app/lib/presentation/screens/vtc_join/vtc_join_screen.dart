@@ -1650,7 +1650,8 @@ class _Vetting extends HookConsumerWidget {
               children: [
                 for (final request in requests.reversed)
                   OnboardingLine(
-                    key: Key('vtc_join_vetter_${request.status.name}'),
+                    // One request per vetter; several can share a status.
+                    key: Key('vtc_join_request_${request.vetterDid}'),
                     icon: _vettingIcon(request.status),
                     title: switch (request.vetterName) {
                       // Their own choice of name, not checked.

@@ -11,6 +11,7 @@ import 'package:mpx_flutter_reference_app/application/services/identities_servic
 import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service_state.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
 import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
+import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_vetting.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_logger.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/services/camera_service/camera_service.dart';
@@ -1691,6 +1692,38 @@ void main() {
           .message;
       expect(details, 'How they vet: in person\nDID: ${network.vetterDid}');
       expect(find.text('Waiting for them to answer'), findsOneWidget);
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+
+    testWidgets('lists each vetter asked, also when they stand alike', (
+      tester,
+    ) async {
+      await askBob(tester);
+      // A second vetter asked, waiting to answer just like Bob.
+      final repository = SecureStorageVtcRepository();
+      final vetting = (await tester.runAsync(
+        () => repository.findVetting(fakeVtcDid),
+      ))!;
+      await tester.runAsync(
+        () => repository.saveVetting(
+          vetting.withRequest(
+            VtcVettingRequest(
+              vetterDid: persona.did,
+              vetterName: 'Carol',
+              request: vetting.requests.single.request,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpWidget(const SizedBox.shrink());
+
+      await pumpScreen(tester);
+      await enterCode(tester, fakeVtcDid);
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('Listed as Bob'), findsOneWidget);
+      expect(find.text('Listed as Carol'), findsOneWidget);
+      expect(find.text('Waiting for them to answer'), findsNWidgets(2));
       await tester.pumpWidget(const SizedBox.shrink());
     });
 
