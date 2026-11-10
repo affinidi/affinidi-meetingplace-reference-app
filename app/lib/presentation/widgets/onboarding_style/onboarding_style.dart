@@ -7,6 +7,7 @@ import '../../helpers/screensize_helper.dart';
 import '../../themes/tokens/mc_colors.dart';
 import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
+import '../../themes/tokens/mc_spacing.dart';
 import '../../themes/tokens/mc_typography.dart';
 import '../common/app_card.dart';
 
@@ -488,7 +489,8 @@ class MonospaceDid extends StatelessWidget {
   }
 }
 
-/// A message in place on the gradient: a panel, or the error colours.
+/// A message in place on the gradient: a panel, or for an error the danger
+/// text over Mission Control's edge light, as colour never fills a box.
 class OnboardingMessage extends StatelessWidget {
   const OnboardingMessage(
     this.text, {
@@ -503,28 +505,83 @@ class OnboardingMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
     final mc = context.mcColors;
+    final message = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Text(
+        text,
+        key: textKey,
+        textAlign: TextAlign.center,
+        style: context.textTheme.bodyMedium?.copyWith(
+          color: isError ? mc.dangerText : mc.textPrimary,
+        ),
+      ),
+    );
+    if (isError) return _EdgeLight(color: mc.bad, child: message);
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: isError
-            ? colorScheme.errorContainer
-            : colorScheme.surfaceContainerLow,
-        border: Border.all(
-          color: isError ? mc.dangerText.withValues(alpha: 0.55) : mc.hairline,
-        ),
+        color: context.colorScheme.surfaceContainerLow,
+        border: Border.all(color: mc.hairline),
         borderRadius: BorderRadius.circular(McRadius.md),
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Text(
-          text,
-          key: textKey,
-          textAlign: TextAlign.center,
-          style: context.textTheme.bodyMedium?.copyWith(
-            color: isError ? colorScheme.onErrorContainer : mc.textPrimary,
+      child: message,
+    );
+  }
+}
+
+/// Mission Control's edge light under [child]: a hairline in [color] along
+/// the bottom edge, fading at both ends, and on dark a faint light rising
+/// from it. Marks a callout or alert in place of a box or a leading rule.
+class _EdgeLight extends StatelessWidget {
+  const _EdgeLight({required this.color, required this.child});
+
+  final Color color;
+  final Widget child;
+
+  /// Where the line reaches full strength, in from each end.
+  static const _lineFade = 0.2;
+
+  /// The light's strength where it meets the line, and how far up it
+  /// reaches before it is gone.
+  static const _glowStrength = 0.12;
+  static const _glowReach = 0.75;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final clear = color.withValues(alpha: 0);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: isDark
+            ? RadialGradient(
+                center: Alignment.bottomCenter,
+                colors: [
+                  color.withValues(alpha: _glowStrength),
+                  clear,
+                ],
+                stops: const [0, _glowReach],
+              )
+            : null,
+      ),
+      child: Stack(
+        children: [
+          child,
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: DecoratedBox(
+              key: const Key('edge_light_line'),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [clear, color, color, clear],
+                  stops: const [0, _lineFade, 1 - _lineFade, 1],
+                ),
+              ),
+              child: const SizedBox(height: McSpacing.hairline),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
