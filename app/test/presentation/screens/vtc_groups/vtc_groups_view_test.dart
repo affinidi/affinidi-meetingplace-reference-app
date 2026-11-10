@@ -325,12 +325,12 @@ void main() {
     expect(service.data, contains('$_managedDid#meeting-place'));
   });
 
-  testWidgets('asks who may post, and links only managers posting', (
-    tester,
-  ) async {
+  testWidgets('asks who may post in a bottom sheet, and links only managers '
+      'posting', (tester) async {
     await pumpScreen(tester);
 
     await tapVisible(tester, const Key('vtc_group_create_g1'));
+    expect(find.byType(BottomSheet), findsOneWidget);
     expect(find.text('Who can post in this chat?'), findsOneWidget);
     await tester.tap(find.byKey(const Key('vtc_group_posting_managers')));
     await tester.pumpAndSettle();

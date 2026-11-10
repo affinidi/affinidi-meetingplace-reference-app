@@ -13,6 +13,7 @@ import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../../themes/tokens/mc_spacing.dart';
 import '../../themes/tokens/mc_typography.dart';
+import '../../widgets/bottom_sheet_menu.dart';
 import 'vtc_group_members_screen.dart';
 import 'vtc_groups_controller.dart';
 import 'vtc_groups_state.dart';
@@ -337,37 +338,40 @@ class _Line extends StatelessWidget {
   }
 }
 
-/// Asks the manager who may post in the chat about to be created; null when
-/// they dismiss the question.
+/// Asks the manager, in a bottom sheet, who may post in the chat about to be
+/// created; null when they dismiss the sheet.
 Future<GroupChatPosting?> _askPosting(BuildContext context) {
   final l10n = context.l10n;
-  return showDialog<GroupChatPosting>(
+  final options = [
+    (
+      GroupChatPosting.everyone,
+      l10n.vtcGroupChatPostingEveryone,
+      l10n.vtcGroupChatPostingEveryoneHint,
+    ),
+    (
+      GroupChatPosting.managers,
+      l10n.vtcGroupChatPostingManagers,
+      l10n.vtcGroupChatPostingManagersHint,
+    ),
+  ];
+  return showModalBottomSheet<GroupChatPosting>(
+    useRootNavigator: true,
+    isScrollControlled: true,
+    showDragHandle: true,
+    useSafeArea: true,
     context: context,
-    builder: (context) => SimpleDialog(
-      title: Text(l10n.vtcGroupChatPostingTitle),
-      children: [
-        for (final (posting, title, subtitle) in [
-          (
-            GroupChatPosting.everyone,
-            l10n.vtcGroupChatPostingEveryone,
-            l10n.vtcGroupChatPostingEveryoneHint,
-          ),
-          (
-            GroupChatPosting.managers,
-            l10n.vtcGroupChatPostingManagers,
-            l10n.vtcGroupChatPostingManagersHint,
-          ),
-        ])
-          SimpleDialogOption(
-            key: Key('vtc_group_posting_${posting.name}'),
-            onPressed: () => Navigator.of(context).pop(posting),
-            child: ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(title),
-              subtitle: Text(subtitle),
-            ),
-          ),
-      ],
+    builder: (context) => BottomSheetMenu(
+      header: l10n.vtcGroupChatPostingTitle,
+      itemCount: options.length,
+      itemBuilder: (context, index) {
+        final (posting, title, subtitle) = options[index];
+        return ListTile(
+          key: Key('vtc_group_posting_${posting.name}'),
+          title: Text(title),
+          subtitle: Text(subtitle),
+          onTap: () => Navigator.of(context, rootNavigator: true).pop(posting),
+        );
+      },
     ),
   );
 }
