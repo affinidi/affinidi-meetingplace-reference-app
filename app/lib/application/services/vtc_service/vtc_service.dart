@@ -12,6 +12,7 @@ import '../../../domain/models/vtc/mock_credential_template.dart';
 import '../../../domain/models/vtc/vta_enrolment_offer.dart';
 import '../../../domain/models/vtc/vtc_card_delivery.dart';
 import '../../../domain/models/vtc/vtc_community.dart';
+import '../../../domain/models/vtc/vtc_group_card.dart';
 import '../../../domain/models/vtc/vtc_identity_check.dart';
 import '../../../domain/models/vtc/vtc_left_membership.dart';
 import '../../../domain/models/vtc/vtc_membership_card.dart';
@@ -2501,6 +2502,83 @@ class VtcService {
         );
   }
 
+  /// The card of the group [groupDid] of [communityDid] that the member's
+  /// VTA keeps for their identity there, the longest-lasting one if it keeps
+  /// several, with the community's grant to the group; null when it keeps
+  /// none. Throws as [memberGroups] does.
+  Future<VtcGroupCard?> groupCard(
+    String communityDid, {
+    required String groupDid,
+  }) async {
+    final community = await _memberCommunity(communityDid);
+    final vta = await _grantedVta();
+    final held = await vta.findCredentials(
+      type: GroupAdmissionVerifier.membershipType,
+      issuerDid: groupDid,
+      subjectDid: community.personaDid,
+    );
+    HeldCredential? longest;
+    for (final credential in held) {
+      final until = credential.validUntil;
+      final longestUntil = longest?.validUntil;
+      // One without an end outlasts any other.
+      if (longest == null ||
+          (longestUntil != null &&
+              (until == null || until.isAfter(longestUntil)))) {
+        longest = credential;
+      }
+    }
+    if (longest == null) return null;
+    final membership = switch (await vta.credential(longest.id)) {
+      final Map<String, dynamic> json => VtcMembershipCard.fromCredential(json),
+      null => null,
+    };
+    if (membership == null ||
+        membership.issuer != groupDid ||
+        membership.memberDid != community.personaDid) {
+      return null;
+    }
+    final grant = (await vta.findCredentials(
+      type: GroupAdmissionVerifier.authorityType,
+      issuerDid: communityDid,
+      subjectDid: groupDid,
+    )).firstOrNull;
+    return VtcGroupCard(
+      membership: membership,
+      authority: grant == null ? null : await vta.credential(grant.id),
+    );
+  }
+
+  /// Reads whether [card] still holds: neither it nor the community's grant
+  /// to its group has expired, and the community has not revoked the grant
+  /// in its signed status list. The group's credential itself names no list.
+  ///
+  /// Never throws: a card without the grant, or a list that cannot be read
+  /// or checked, is [VtcCardState.unknown].
+  Future<VtcCardStatus> checkGroupCardStatus(VtcGroupCard card) async {
+    final now = DateTime.now();
+    if ([
+      card.membership.validUntil,
+      card.authorityValidUntil,
+    ].nonNulls.any(now.isAfter)) {
+      return const VtcCardStatus(state: VtcCardState.expired);
+    }
+    final authority = card.authority;
+    if (authority == null) {
+      return const VtcCardStatus(state: VtcCardState.unknown);
+    }
+    final CredentialStatusCheck check;
+    try {
+      check = await _sdk.statusListClient().check(authority);
+    } on MeetingPlaceVtcSDKException catch (error) {
+      return VtcCardStatus(state: VtcCardState.unknown, failure: error.code);
+    }
+    if (check.state == CredentialStatusState.noStatus) {
+      return const VtcCardStatus(state: VtcCardState.notRevocable);
+    }
+    return _checkedStatus(check);
+  }
+
   /// Has the member's VTA prove to the chat of the group [groupDid] of
   /// [communityDid] that the member belongs to the group, bound to
   /// [memberDid], the DID the member joins the chat as. Null when the VTA
@@ -2938,14 +3016,19 @@ class VtcService {
         ),
       );
     }
-    return VtcCardStatus(
-      state: revoked ? VtcCardState.revoked : VtcCardState.valid,
-      checkedAt: check.checkedAt,
-      statusListUrl: check.statusList,
-      index: check.index,
-      statusList: check.statusListCredential,
-    );
+    return _checkedStatus(check);
   }
+
+  /// What a status list read for a card says of it.
+  VtcCardStatus _checkedStatus(CredentialStatusCheck check) => VtcCardStatus(
+    state: check.state == CredentialStatusState.revoked
+        ? VtcCardState.revoked
+        : VtcCardState.valid,
+    checkedAt: check.checkedAt,
+    statusListUrl: check.statusList,
+    index: check.index,
+    statusList: check.statusListCredential,
+  );
 
   /// The last status stored for [entry]'s membership left, as stored now.
   Future<VtcStatusRecord?> _lastKnown(VtcMembershipEntry entry) async {

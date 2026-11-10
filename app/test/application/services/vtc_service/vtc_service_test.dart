@@ -1458,6 +1458,162 @@ void main() {
         expect(network.statusListFetches, 0);
       });
     });
+
+    group('group cards', () {
+      const groupDid = 'did:webvh:QmGroup:vtc.example:group-dids:g1';
+
+      Map<String, dynamic> membership({
+        String id = 'urn:uuid:group-card',
+        String issuer = groupDid,
+        String? validUntil = '2999-01-01T00:00:00Z',
+      }) => {
+        'id': id,
+        'type': ['VerifiableCredential', 'MembershipCredential'],
+        'issuer': issuer,
+        'validUntil': ?validUntil,
+        'credentialSubject': {'id': persona.did},
+      };
+
+      Map<String, dynamic> authority({
+        String validUntil = '2999-01-01T00:00:00Z',
+        Map<String, dynamic>? status,
+      }) => {
+        'id': 'urn:uuid:authority',
+        'type': ['VerifiableCredential', 'AuthorityCredential'],
+        'issuer': fakeVtcDid,
+        'validUntil': validUntil,
+        'credentialSubject': {'id': groupDid},
+        'credentialStatus': ?status,
+      };
+
+      /// Has the VTA keep [memberships] and [grant], answering each query
+      /// with the credentials of the type it asks for.
+      void hold(
+        List<Map<String, dynamic>> memberships, {
+        Map<String, dynamic>? grant,
+      }) {
+        final all = [...memberships, ?grant];
+        network.vta.answerTo[VtaTask.credentialsQuery] = (payload) => {
+          'credentials': [
+            for (final credential in all)
+              if ((credential['type'] as List).contains(payload['type']))
+                {
+                  'id': credential['id'],
+                  'types': credential['type'],
+                  'validUntil': credential['validUntil'],
+                },
+          ],
+        };
+        network.vta.answerTo[VtaTask.credentialsGet] = (payload) => {
+          'credential': all.firstWhere((c) => c['id'] == payload['id']),
+        };
+      }
+
+      setUp(() async {
+        await service.join(await service.readCommunity(fakeVtcDid));
+      });
+
+      test("reads the group's card with the community's grant", () async {
+        hold([
+          membership(id: 'urn:uuid:old', validUntil: '2998-01-01T00:00:00Z'),
+          membership(),
+        ], grant: authority());
+
+        final card = await service.groupCard(fakeVtcDid, groupDid: groupDid);
+
+        expect(card?.groupDid, groupDid);
+        expect(card?.membership.credential['id'], 'urn:uuid:group-card');
+        expect(card?.authority?['id'], 'urn:uuid:authority');
+        expect(card?.authorityValidUntil, DateTime.utc(2999));
+      });
+
+      test(
+        'reads none when the VTA keeps none, or not for the group',
+        () async {
+          hold([]);
+          expect(
+            await service.groupCard(fakeVtcDid, groupDid: groupDid),
+            isNull,
+          );
+
+          hold([membership(issuer: 'did:webvh:QmOther:vtc.example:g2')]);
+          expect(
+            await service.groupCard(fakeVtcDid, groupDid: groupDid),
+            isNull,
+          );
+        },
+      );
+
+      test('reads a card valid, then revoked with its grant', () async {
+        hold([
+          membership(),
+        ], grant: authority(status: FakeVtcNetwork.statusEntry(3)));
+        final card = (await service.groupCard(fakeVtcDid, groupDid: groupDid))!;
+
+        final valid = await service.checkGroupCardStatus(card);
+        expect(valid.state, VtcCardState.valid);
+        expect(valid.index, 3);
+
+        network.revoked.add(3);
+        final revoked = await service.checkGroupCardStatus(card);
+        expect(revoked.state, VtcCardState.revoked);
+      });
+
+      test('says when the card or its grant expired', () async {
+        hold([
+          membership(validUntil: '2020-01-01T00:00:00Z'),
+        ], grant: authority(status: FakeVtcNetwork.statusEntry(3)));
+        final expiredCard = (await service.groupCard(
+          fakeVtcDid,
+          groupDid: groupDid,
+        ))!;
+        hold(
+          [membership()],
+          grant: authority(
+            validUntil: '2020-01-01T00:00:00Z',
+            status: FakeVtcNetwork.statusEntry(3),
+          ),
+        );
+        final expiredGrant = (await service.groupCard(
+          fakeVtcDid,
+          groupDid: groupDid,
+        ))!;
+
+        expect(
+          (await service.checkGroupCardStatus(expiredCard)).state,
+          VtcCardState.expired,
+        );
+        expect(
+          (await service.checkGroupCardStatus(expiredGrant)).state,
+          VtcCardState.expired,
+        );
+        expect(network.statusListFetches, 0);
+      });
+
+      test('cannot tell without the grant, or the community', () async {
+        hold([membership()]);
+        final withoutGrant = (await service.groupCard(
+          fakeVtcDid,
+          groupDid: groupDid,
+        ))!;
+        expect(withoutGrant.authority, isNull);
+        expect(
+          (await service.checkGroupCardStatus(withoutGrant)).state,
+          VtcCardState.unknown,
+        );
+
+        hold([
+          membership(),
+        ], grant: authority(status: FakeVtcNetwork.statusEntry(3)));
+        final card = (await service.groupCard(fakeVtcDid, groupDid: groupDid))!;
+        network.isStatusListDown = true;
+
+        final status = await service.checkGroupCardStatus(card);
+
+        expect(status.state, VtcCardState.unknown);
+        expect(status.failure, MeetingPlaceVtcSDKErrorCode.transportFailed);
+      });
+    });
   });
 
   group('VtcService mock credentials', () {
