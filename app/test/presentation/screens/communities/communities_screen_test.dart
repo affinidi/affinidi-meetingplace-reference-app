@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_community.dart';
@@ -9,6 +10,7 @@ import 'package:mpx_flutter_reference_app/presentation/screens/communities/commu
 import 'package:mpx_flutter_reference_app/presentation/screens/credentials/membership_credentials_list.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_findable_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_sign_in/vtc_sign_in_screen.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/vtc_vetting_desk/vtc_vetting_desk_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 import 'package:mpx_flutter_reference_app/presentation/widgets/common/app_card.dart';
 
@@ -18,11 +20,15 @@ import '../../../utils/app.dart';
 const chessDid = 'did:web:chess.example';
 const footballDid = 'did:web:football.example';
 
-Future<void> openCommunitiesTab(WidgetTester tester) async {
+Future<void> openCommunitiesTab(
+  WidgetTester tester, {
+  List<Override> overrides = const [],
+}) async {
   await navigateToLocation(
     tester,
     '/contacts',
     identities: [FakeIdentities.primaryIdentity],
+    overrides: overrides,
   );
   await tester.pumpAndSettle();
 }
@@ -198,6 +204,46 @@ void main() {
         isTrue,
       );
       expect(container.exists(communityInfoProvider(chessDid)), isTrue);
+    });
+
+    testWidgets('shows a vetter their vetting desk in a tab of its own', (
+      tester,
+    ) async {
+      final l10n = await getL10n();
+      await openCommunitiesTab(
+        tester,
+        overrides: [
+          communityCanVetProvider(chessDid).overrideWith((ref) async => true),
+        ],
+      );
+      await saveCommunities();
+      await pullToRefresh(tester);
+      await tester.tap(find.text('Chess club'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text(l10n.communityVettingTab));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(VtcVettingDeskView), findsOneWidget);
+    });
+
+    testWidgets('offers no Vetting tab to a member who is not a vetter', (
+      tester,
+    ) async {
+      final l10n = await getL10n();
+      await openCommunitiesTab(
+        tester,
+        overrides: [
+          communityCanVetProvider(chessDid).overrideWith((ref) async => false),
+        ],
+      );
+      await saveCommunities();
+      await pullToRefresh(tester);
+      await tester.tap(find.text('Chess club'));
+      await tester.pumpAndSettle();
+
+      expect(find.text(l10n.communityInfoTab), findsOneWidget);
+      expect(find.text(l10n.communityVettingTab), findsNothing);
     });
 
     testWidgets('shows what a community is in its Info tab', (tester) async {

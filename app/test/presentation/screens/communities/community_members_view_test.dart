@@ -111,28 +111,12 @@ class _FakeTrustService extends Fake implements VtcTrustService {
   }
 }
 
-/// Tells the member's role changes in communities, and whether they may vet.
+/// Tells the member's role changes in communities.
 class _FakeVtcService extends Fake implements VtcService {
   final roleChanges = StreamController<VtcRoleChange>.broadcast();
-  final cardChanges = StreamController<void>.broadcast();
-
-  /// Whether the member holds a vetter card for the community.
-  bool isVetter = false;
-
-  /// Why checking the vetter card fails, if it does.
-  Exception? vetterCheckFailure;
 
   @override
   Stream<VtcRoleChange> get roleChanged => roleChanges.stream;
-
-  @override
-  Stream<void> get membershipsChanged => cardChanges.stream;
-
-  @override
-  Future<bool> canVet(String communityDid) async {
-    if (vetterCheckFailure case final failure?) throw failure;
-    return isVetter;
-  }
 }
 
 FakeIdentitiesService identities() => FakeIdentitiesService(
@@ -410,58 +394,6 @@ void main() {
       inMember('dir_bob', find.byTooltip('You vouched for Bob')),
       findsOneWidget,
     );
-  });
-
-  group('vetting', () {
-    const vettingDesk = Key('community_members_vetting_desk');
-
-    testWidgets('offers a vetter to vet applicants', (tester) async {
-      vtc.isVetter = true;
-
-      final l10n = await pumpView(tester);
-
-      expect(
-        find.descendant(
-          of: find.byKey(vettingDesk),
-          matching: find.text(l10n.vtcVetterStart),
-        ),
-        findsOneWidget,
-      );
-    });
-
-    testWidgets('offers no vetting to a member who is not a vetter', (
-      tester,
-    ) async {
-      await pumpView(tester);
-
-      expect(find.byKey(vettingDesk), findsNothing);
-    });
-
-    testWidgets('offers no vetting when the vetter card cannot be checked', (
-      tester,
-    ) async {
-      vtc
-        ..isVetter = true
-        ..vetterCheckFailure = Exception('VTA unreachable');
-
-      await pumpView(tester);
-
-      expect(find.byKey(vettingDesk), findsNothing);
-    });
-
-    testWidgets('offers vetting once the community makes the member a vetter', (
-      tester,
-    ) async {
-      await pumpView(tester);
-      expect(find.byKey(vettingDesk), findsNothing);
-
-      vtc
-        ..isVetter = true
-        ..cardChanges.add(null);
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(vettingDesk), findsOneWidget);
-    });
   });
 
   testWidgets('lets the member choose whether other members find them', (

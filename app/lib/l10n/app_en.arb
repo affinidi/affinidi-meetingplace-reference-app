@@ -4592,7 +4592,7 @@
 	},
 	"vtcVetterStart": "Vet applicants",
 	"@vtcVetterStart": {
-		"description": "Opens the vetting desk of a community where the member is a vetter: the tooltip of the button next to their role, and the button on the community's Members tab"
+		"description": "Tooltip of the button next to the member's role that opens the vetting desk of a community where the member is a vetter"
 	},
 	"vtcVetterTitle": "Vetting for {name}",
 	"@vtcVetterTitle": {
@@ -5159,6 +5159,10 @@
 	"communityInfoTab": "Info",
 	"@communityInfoTab": {
 		"description": "Tab of a community's screen showing what the community publishes about itself"
+	},
+	"communityVettingTab": "Vetting",
+	"@communityVettingTab": {
+		"description": "Tab of a community's screen, for a vetter there, with their vetting desk"
 	},
 	"communityMembershipTab": "Membership",
 	"@communityMembershipTab": {

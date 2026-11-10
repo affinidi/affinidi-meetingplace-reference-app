@@ -10,9 +10,7 @@ import '../vtc_join/vtc_findable_view.dart';
 import '../vtc_trust/vtc_member_search_screen.dart';
 import '../vtc_trust/vtc_member_tile.dart';
 import '../vtc_trust/vtc_vouch.dart';
-import '../vtc_vetting_desk/vtc_vetting_desk_screen.dart';
 import 'community_members_controller.dart';
-import 'community_tabs_providers.dart';
 
 const _syncingBarHeight = 2.0;
 
@@ -22,8 +20,7 @@ const _syncingBarHeight = 2.0;
 /// between them and the member, to vouch for them. The directory answers
 /// searches only, never lists every member, so the groups' members show
 /// until the member searches. Those are kept from opening the community
-/// and synced each time this tab opens; a search is read each time. A
-/// vetter starts vetting applicants from here.
+/// and synced each time this tab opens; a search is read each time.
 class CommunityMembersView extends HookConsumerWidget {
   const CommunityMembersView({
     super.key,
@@ -51,10 +48,6 @@ class CommunityMembersView extends HookConsumerWidget {
     final isSyncing =
         useFuture(syncing.value).connectionState == ConnectionState.waiting;
     final listed = ref.watch(cache);
-    // Hidden while unknown or when the check fails: the desk checks the
-    // vetter card again before any ticket.
-    final canVet =
-        ref.watch(communityCanVetProvider(communityDid)).value ?? false;
     // Only over members already shown: until then the list itself waits.
     final showSyncing = isSyncing && query.value == null && listed.hasValue;
     final search = useMemoized(() async {
@@ -122,22 +115,6 @@ class CommunityMembersView extends HookConsumerWidget {
             ),
           ),
         ),
-        if (canVet)
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            sliver: SliverToBoxAdapter(
-              child: OutlinedButton.icon(
-                key: const Key('community_members_vetting_desk'),
-                icon: const Icon(McIcons.userCheck),
-                label: Text(l10n.vtcVetterStart),
-                onPressed: () => VtcVettingDeskScreen.show(
-                  context,
-                  communityDid: communityDid,
-                  communityName: communityName,
-                ),
-              ),
-            ),
-          ),
         SliverPadding(
           padding: const EdgeInsets.all(16),
           sliver: SliverToBoxAdapter(

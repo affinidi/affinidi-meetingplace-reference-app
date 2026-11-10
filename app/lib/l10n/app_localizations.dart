@@ -6432,7 +6432,7 @@ abstract class AppLocalizations {
   /// **'Details for your vetter'**
   String get vtcJoinVettingCardHeading;
 
-  /// Opens the vetting desk of a community where the member is a vetter: the tooltip of the button next to their role, and the button on the community's Members tab
+  /// Tooltip of the button next to the member's role that opens the vetting desk of a community where the member is a vetter
   ///
   /// In en, this message translates to:
   /// **'Vet applicants'**
@@ -7001,6 +7001,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Info'**
   String get communityInfoTab;
+
+  /// Tab of a community's screen, for a vetter there, with their vetting desk
+  ///
+  /// In en, this message translates to:
+  /// **'Vetting'**
+  String get communityVettingTab;
 
   /// Tab of a community's screen with the member's role and membership card there
   ///

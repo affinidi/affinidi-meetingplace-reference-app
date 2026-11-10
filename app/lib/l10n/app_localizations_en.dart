@@ -4744,6 +4744,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get communityInfoTab => 'Info';
 
   @override
+  String get communityVettingTab => 'Vetting';
+
+  @override
   String get communityMembershipTab => 'Membership';
 
   @override

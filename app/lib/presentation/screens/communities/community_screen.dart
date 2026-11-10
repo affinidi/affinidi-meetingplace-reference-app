@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -12,6 +13,7 @@ import '../../widgets/section_header.dart';
 import '../contacts/contacts_screen.dart';
 import '../contacts/contacts_screen_controller.dart';
 import '../vtc_join/vtc_findable_controller.dart';
+import '../vtc_vetting_desk/vtc_vetting_desk_screen.dart';
 import 'communities_controller.dart';
 import 'community_info_view.dart';
 import 'community_join_phrase_action.dart';
@@ -23,9 +25,9 @@ import 'community_tabs_providers.dart';
 
 /// A community the member belongs to, under its logo if it gives one, with
 /// its channels, its groups' chats, its members, the member's role and
-/// membership card there, and what it publishes about itself; its join
-/// phrase beside its name for an administrator. Opened from the
-/// Communities tab.
+/// membership card there, what it publishes about itself, and the vetting
+/// desk for a vetter; its join phrase beside its name for an
+/// administrator. Opened from the Communities tab.
 class CommunityScreen extends HookConsumerWidget {
   const CommunityScreen({super.key, required this.communityDid});
 
@@ -52,11 +54,10 @@ class CommunityScreen extends HookConsumerWidget {
       unawaited(service.watchCommunity(communityDid));
       return () => unawaited(service.unwatchCommunity(communityDid));
     }, [communityDid]);
-    // Read what the header and the Members, Membership and Info tabs show
-    // as soon as the community opens, and keep it while it shows, for them
-    // to show it at once.
+    // Read what the header and the Membership and Info tabs show as soon
+    // as the community opens, and keep it while it shows, for them to show
+    // it at once.
     ref
-      ..listen(communityCanVetProvider(communityDid), (_, _) {})
       ..listen(communityRoleProvider(communityDid), (_, _) {})
       ..listen(communityMembershipCardProvider(communityDid), (_, _) {})
       ..listen(communityInfoProvider(communityDid), (_, _) {});
@@ -68,7 +69,22 @@ class CommunityScreen extends HookConsumerWidget {
 
     final name = community?.name ?? l10n.membershipCredentialUnnamed;
     final logoUrl = ref.watch(communityLogoProvider(communityDid)).value;
-    final tabController = useTabController(initialLength: 4);
+    // Last, so the other tabs keep their place as it comes and goes.
+    final canVet =
+        ref.watch(communityCanVetProvider(communityDid)).value ?? false;
+    final tabCount = canVet ? 5 : 4;
+    // The tab on show stays on show as the Vetting tab comes and goes.
+    final shownTab = useRef(0);
+    final tabController = useTabController(
+      initialLength: tabCount,
+      initialIndex: min(shownTab.value, tabCount - 1),
+      keys: [tabCount],
+    );
+    useEffect(() {
+      void keep() => shownTab.value = tabController.index;
+      tabController.addListener(keep);
+      return () => tabController.removeListener(keep);
+    }, [tabController]);
 
     return SafeArea(
       child: Column(
@@ -92,6 +108,7 @@ class CommunityScreen extends HookConsumerWidget {
               l10n.communityMembersTab,
               l10n.communityMembershipTab,
               l10n.communityInfoTab,
+              if (canVet) l10n.communityVettingTab,
             ],
           ),
           Expanded(
@@ -108,6 +125,14 @@ class CommunityScreen extends HookConsumerWidget {
                   communityName: name,
                 ),
                 CommunityInfoView(communityDid: communityDid),
+                if (canVet)
+                  SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: VtcVettingDeskView(
+                      communityDid: communityDid,
+                      communityName: name,
+                    ),
+                  ),
               ],
             ),
           ),
