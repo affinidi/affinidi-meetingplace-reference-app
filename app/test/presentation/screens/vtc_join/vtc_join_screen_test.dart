@@ -1660,6 +1660,14 @@ void main() {
       await settle(tester);
       await tapVisible(tester, find.byKey(const Key('vtc_join_match_yes')));
       await settle(tester);
+      final decline = find.byKey(const Key('vtc_join_vetting_card_decline'));
+      final declineButton = tester.widget<ElevatedButton>(
+        find.descendant(of: decline, matching: find.byType(ElevatedButton)),
+      );
+      expect(
+        declineButton.style?.foregroundColor?.resolve({}),
+        Theme.of(tester.element(decline)).extension<McColors>()!.dangerText,
+      );
       await tapVisible(
         tester,
         find.byKey(const Key('vtc_join_vetting_card_share')),

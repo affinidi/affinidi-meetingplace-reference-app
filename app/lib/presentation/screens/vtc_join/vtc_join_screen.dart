@@ -1789,8 +1789,10 @@ class _ApproveVettingCard extends StatelessWidget {
           label: l10n.vtcJoinShareAction,
           onPressed: onShare,
         ),
-        OnboardingTextButton(
+        OnboardingButton(
+          key: const Key('vtc_join_vetting_card_decline'),
           label: l10n.vtcJoinVettingCardDecline,
+          isDestructive: true,
           onPressed: onDecline,
         ),
       ],
