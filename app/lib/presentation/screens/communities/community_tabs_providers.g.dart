@@ -194,26 +194,125 @@ final class CommunityMembershipCardFamily extends $Family
   String toString() => r'communityMembershipCardProvider';
 }
 
-/// Whether the member may vet for [communityDid]: their VTA keeps a vetter
-/// role card the community issued them that is in date and not revoked.
-/// Read while a community's page shows, and again as the cards change; the
-/// vetting desk checks the card again before any ticket.
+/// The vetter role card [communityDid] issued the member, as their VTA
+/// keeps it, in date and not revoked, or null when they may not vet there.
+/// Read while a community's page shows, for its Membership and Vetting
+/// tabs, and again as the cards change; the vetting desk checks the card
+/// again before any ticket.
+
+@ProviderFor(communityVetterCard)
+const communityVetterCardProvider = CommunityVetterCardFamily._();
+
+/// The vetter role card [communityDid] issued the member, as their VTA
+/// keeps it, in date and not revoked, or null when they may not vet there.
+/// Read while a community's page shows, for its Membership and Vetting
+/// tabs, and again as the cards change; the vetting desk checks the card
+/// again before any ticket.
+
+final class CommunityVetterCardProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<VtcVetterCard?>,
+          VtcVetterCard?,
+          FutureOr<VtcVetterCard?>
+        >
+    with $FutureModifier<VtcVetterCard?>, $FutureProvider<VtcVetterCard?> {
+  /// The vetter role card [communityDid] issued the member, as their VTA
+  /// keeps it, in date and not revoked, or null when they may not vet there.
+  /// Read while a community's page shows, for its Membership and Vetting
+  /// tabs, and again as the cards change; the vetting desk checks the card
+  /// again before any ticket.
+  const CommunityVetterCardProvider._({
+    required CommunityVetterCardFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: _noRetry,
+         name: r'communityVetterCardProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$communityVetterCardHash();
+
+  @override
+  String toString() {
+    return r'communityVetterCardProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<VtcVetterCard?> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<VtcVetterCard?> create(Ref ref) {
+    final argument = this.argument as String;
+    return communityVetterCard(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is CommunityVetterCardProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$communityVetterCardHash() =>
+    r'd05b8b5ce60038e95bf135c738396b5bdcb862e8';
+
+/// The vetter role card [communityDid] issued the member, as their VTA
+/// keeps it, in date and not revoked, or null when they may not vet there.
+/// Read while a community's page shows, for its Membership and Vetting
+/// tabs, and again as the cards change; the vetting desk checks the card
+/// again before any ticket.
+
+final class CommunityVetterCardFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<VtcVetterCard?>, String> {
+  const CommunityVetterCardFamily._()
+    : super(
+        retry: _noRetry,
+        name: r'communityVetterCardProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// The vetter role card [communityDid] issued the member, as their VTA
+  /// keeps it, in date and not revoked, or null when they may not vet there.
+  /// Read while a community's page shows, for its Membership and Vetting
+  /// tabs, and again as the cards change; the vetting desk checks the card
+  /// again before any ticket.
+
+  CommunityVetterCardProvider call(String communityDid) =>
+      CommunityVetterCardProvider._(argument: communityDid, from: this);
+
+  @override
+  String toString() => r'communityVetterCardProvider';
+}
+
+/// Whether the member may vet for [communityDid]: they hold the
+/// [communityVetterCard].
 
 @ProviderFor(communityCanVet)
 const communityCanVetProvider = CommunityCanVetFamily._();
 
-/// Whether the member may vet for [communityDid]: their VTA keeps a vetter
-/// role card the community issued them that is in date and not revoked.
-/// Read while a community's page shows, and again as the cards change; the
-/// vetting desk checks the card again before any ticket.
+/// Whether the member may vet for [communityDid]: they hold the
+/// [communityVetterCard].
 
 final class CommunityCanVetProvider
     extends $FunctionalProvider<AsyncValue<bool>, bool, FutureOr<bool>>
     with $FutureModifier<bool>, $FutureProvider<bool> {
-  /// Whether the member may vet for [communityDid]: their VTA keeps a vetter
-  /// role card the community issued them that is in date and not revoked.
-  /// Read while a community's page shows, and again as the cards change; the
-  /// vetting desk checks the card again before any ticket.
+  /// Whether the member may vet for [communityDid]: they hold the
+  /// [communityVetterCard].
   const CommunityCanVetProvider._({
     required CommunityCanVetFamily super.from,
     required String super.argument,
@@ -257,12 +356,10 @@ final class CommunityCanVetProvider
   }
 }
 
-String _$communityCanVetHash() => r'91ef96ca74a1d5ea750ff29bb65683d4f76d6983';
+String _$communityCanVetHash() => r'67a7bd549d50a73b46f1a4412f3be96b13b93e8e';
 
-/// Whether the member may vet for [communityDid]: their VTA keeps a vetter
-/// role card the community issued them that is in date and not revoked.
-/// Read while a community's page shows, and again as the cards change; the
-/// vetting desk checks the card again before any ticket.
+/// Whether the member may vet for [communityDid]: they hold the
+/// [communityVetterCard].
 
 final class CommunityCanVetFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<bool>, String> {
@@ -275,10 +372,8 @@ final class CommunityCanVetFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// Whether the member may vet for [communityDid]: their VTA keeps a vetter
-  /// role card the community issued them that is in date and not revoked.
-  /// Read while a community's page shows, and again as the cards change; the
-  /// vetting desk checks the card again before any ticket.
+  /// Whether the member may vet for [communityDid]: they hold the
+  /// [communityVetterCard].
 
   CommunityCanVetProvider call(String communityDid) =>
       CommunityCanVetProvider._(argument: communityDid, from: this);

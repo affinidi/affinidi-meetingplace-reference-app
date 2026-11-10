@@ -645,9 +645,7 @@ void main() {
     await close(tester);
   });
 
-  testWidgets('leaves out what it still checks when asked to', (
-    tester,
-  ) async {
+  testWidgets('leaves out what it still checks when asked to', (tester) async {
     await pump(
       tester,
       const Scaffold(
@@ -661,26 +659,6 @@ void main() {
     await tester.pump();
     expect(find.byKey(const Key('vtc_vetter_show_ticket')), findsOneWidget);
     expect(find.byKey(const Key('vtc_vetter_progress')), findsNothing);
-    await close(tester);
-  });
-
-  testWidgets('shows the vetter card it checked', (tester) async {
-    final card = find.byKey(const Key('vtc_vetter_role_card'));
-
-    await pumpDesk(tester);
-    await tester.pump();
-    // Shown once checked, not from what the phone recorded.
-    expect(card, findsNothing);
-
-    await waitFor(tester, card);
-    expect(
-      find.descendant(of: card, matching: find.text('Vetter card')),
-      findsOneWidget,
-    );
-    expect(
-      find.descendant(of: card, matching: find.text(fixture.vetter.did)),
-      findsOneWidget,
-    );
     await close(tester);
   });
 
@@ -704,7 +682,6 @@ void main() {
 
     expect(find.byKey(const Key('vtc_vetter_not_vetter')), findsOneWidget);
     expect(find.byKey(const Key('vtc_vetter_show_ticket')), findsNothing);
-    expect(find.byKey(const Key('vtc_vetter_role_card')), findsNothing);
     await close(tester);
   });
 

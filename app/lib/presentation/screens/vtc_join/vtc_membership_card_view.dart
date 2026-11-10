@@ -5,6 +5,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
 
 import '../../../domain/models/vtc/vtc_membership_card.dart';
+import '../../../domain/models/vtc/vtc_vetter_card.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../themes/tokens/mc_colors.dart';
 import '../../themes/tokens/mc_elevation.dart';
@@ -51,6 +52,46 @@ class VtcMembershipCardView extends StatelessWidget {
       ],
       holderLabel: l10n.vtcMembershipCardMember,
       holderDid: card.memberDid,
+      issuer: card.issuer,
+      validFrom: card.validFrom,
+      validUntil: card.validUntil,
+      collapsible: collapsible,
+    );
+  }
+}
+
+/// The vetter role card a community issued, as [VtcMembershipCardView]
+/// shows the membership card.
+class VtcVetterCardView extends StatelessWidget {
+  const VtcVetterCardView({
+    super.key,
+    required this.card,
+    required this.communityName,
+    this.logoUrl,
+    this.collapsible = false,
+  });
+
+  final VtcVetterCard card;
+  final String communityName;
+  final Uri? logoUrl;
+
+  /// See [VtcCardView.collapsible].
+  final bool collapsible;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return VtcCardView(
+      cardKey: const Key('vtc_vetter_role_card'),
+      documentKey: const Key('vtc_vetter_role_card_document'),
+      communityName: communityName,
+      logoUrl: logoUrl,
+      title: l10n.vtcVetterCardTitle,
+      credential: card.credential,
+      credentialType: 'AuthorityCredential',
+      documentIcon: McIcons.userCheck,
+      holderLabel: l10n.vtcVetterCardHolder,
+      holderDid: card.vetterDid,
       issuer: card.issuer,
       validFrom: card.validFrom,
       validUntil: card.validUntil,

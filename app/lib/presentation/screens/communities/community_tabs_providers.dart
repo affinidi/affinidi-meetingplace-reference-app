@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../application/services/community_offer_service/community_offer_service.dart';
 import '../../../application/services/vtc_service/vtc_service.dart';
 import '../../../domain/models/vtc/vtc_membership_card.dart';
+import '../../../domain/models/vtc/vtc_vetter_card.dart';
 
 part 'community_tabs_providers.g.dart';
 
@@ -42,16 +43,22 @@ Future<VtcMembershipCard?> communityMembershipCard(
   return ref.read(vtcServiceProvider).membershipCard(communityDid);
 }
 
-/// Whether the member may vet for [communityDid]: their VTA keeps a vetter
-/// role card the community issued them that is in date and not revoked.
-/// Read while a community's page shows, for its Vetting tab, and again as
-/// the cards change; the vetting desk checks the card again before any
-/// ticket.
+/// The vetter role card [communityDid] issued the member, as their VTA
+/// keeps it, in date and not revoked, or null when they may not vet there.
+/// Read while a community's page shows, for its Membership and Vetting
+/// tabs, and again as the cards change; the vetting desk checks the card
+/// again before any ticket.
 @Riverpod(retry: _noRetry)
-Future<bool> communityCanVet(Ref ref, String communityDid) {
+Future<VtcVetterCard?> communityVetterCard(Ref ref, String communityDid) {
   _readAgainOnCardChanges(ref);
-  return ref.read(vtcServiceProvider).canVet(communityDid);
+  return ref.read(vtcServiceProvider).vetterCard(communityDid);
 }
+
+/// Whether the member may vet for [communityDid]: they hold the
+/// [communityVetterCard].
+@Riverpod(retry: _noRetry)
+Future<bool> communityCanVet(Ref ref, String communityDid) async =>
+    await ref.watch(communityVetterCardProvider(communityDid).future) != null;
 
 /// What a community publishes about itself, or null when it cannot be read,
 /// and the join phrase this phone published for it, or null when none is or
