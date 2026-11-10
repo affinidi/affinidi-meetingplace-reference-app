@@ -160,6 +160,11 @@ class VtcJoinScreen extends HookConsumerWidget {
           onChoose: controller.useIdentity,
           onCancel: close,
         ),
+        VtcJoinStep.chooseDid => _ChooseDid(
+          communityName: name,
+          onChoose: (newDid) => controller.useDid(newDid: newDid),
+          onCancel: close,
+        ),
         VtcJoinStep.approveDetails => _ApproveDetails(
           state: state,
           onShare: controller.approveDetails,
@@ -1036,7 +1041,8 @@ String _titleOf(AppLocalizations l10n, VtcJoinWay way) => switch (way) {
 
 /// Which identity on the member's VTA joins, in a deck to swipe through as
 /// MPX picks an identity: a new one first, which no other community can link
-/// to, then those the VTA already holds.
+/// to, then those the VTA already holds. Under a way in asking for a
+/// credential, the community sees the DID of the identity holding it.
 class _ChooseIdentity extends HookWidget {
   const _ChooseIdentity({
     required this.state,
@@ -1089,11 +1095,80 @@ class _ChooseIdentity extends HookWidget {
             style: onboardingNote(context),
           ),
         const SizedBox(height: McSpacing.s3),
+        if (holders != null)
+          Text(
+            l10n.vtcJoinCredentialShowsIdentity,
+            key: const Key('vtc_join_credential_shows_identity'),
+            textAlign: TextAlign.center,
+            style: onboardingNote(context),
+          ),
         OnboardingButton(
           label: l10n.vtcJoinUseIdentity,
           onPressed: missingCredential(options[current.value])
               ? null
               : () => onChoose(options[current.value]),
+        ),
+        OnboardingTextButton(label: l10n.generalCancel, onPressed: onCancel),
+      ],
+    );
+  }
+}
+
+/// Which DID of the chosen identity [communityName] sees: a new one for it
+/// alone, recommended, or the identity's own, which every community joined
+/// with it sees.
+class _ChooseDid extends StatelessWidget {
+  const _ChooseDid({
+    required this.communityName,
+    required this.onChoose,
+    required this.onCancel,
+  });
+
+  final String communityName;
+
+  /// Called with whether the community sees a new DID.
+  final ValueChanged<bool> onChoose;
+  final VoidCallback onCancel;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: McSpacing.s3,
+      children: [
+        OnboardingTitle(l10n.vtcJoinChooseDid(communityName)),
+        const SizedBox(height: McSpacing.s3),
+        GlassCard(
+          title: l10n.vtcJoinNewDid,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: McSpacing.s3,
+            children: [
+              Text(l10n.vtcJoinNewDidNote, style: onboardingNote(context)),
+              OnboardingButton(
+                key: const Key('vtc_join_new_did'),
+                label: l10n.vtcJoinUseNewDid,
+                onPressed: () => onChoose(true),
+              ),
+            ],
+          ),
+        ),
+        GlassCard(
+          title: l10n.vtcJoinIdentityDid,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: McSpacing.s3,
+            children: [
+              Text(l10n.vtcJoinIdentityDidNote, style: onboardingNote(context)),
+              OnboardingButton(
+                key: const Key('vtc_join_identity_did'),
+                label: l10n.vtcJoinUseIdentityDid,
+                isOutlined: true,
+                onPressed: () => onChoose(false),
+              ),
+            ],
+          ),
         ),
         OnboardingTextButton(label: l10n.generalCancel, onPressed: onCancel),
       ],

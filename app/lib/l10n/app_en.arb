@@ -2891,6 +2891,22 @@
 			}
 		}
 	},
+	"vtcJoinChooseDid": "Which DID should {name} see?",
+	"@vtcJoinChooseDid": {
+		"description": "Asks whether the community sees a new DID of the chosen identity or the identity's own DID",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcJoinNewDid": "A new DID for this community",
+	"vtcJoinNewDidNote": "Recommended: it shares this identity's details, but no other community can link you through it.",
+	"vtcJoinUseNewDid": "Join with a new DID",
+	"vtcJoinIdentityDid": "This identity's own DID",
+	"vtcJoinIdentityDidNote": "Every community you join with it sees the same DID, so they can tell it's you.",
+	"vtcJoinUseIdentityDid": "Join with this identity's DID",
+	"vtcJoinCredentialShowsIdentity": "This way in asks for a credential, so the community sees the DID of the identity that holds it.",
 	"vtcJoinNewIdentityNote": "Recommended: your VTA creates it for this community, so other communities can't link you through it.",
 	"vtcJoinWaysHeading": "Ways in",
 	"vtcJoinManifestHeading": "Manifest",
