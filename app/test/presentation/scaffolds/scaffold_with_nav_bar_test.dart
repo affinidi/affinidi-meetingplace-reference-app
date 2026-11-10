@@ -71,9 +71,20 @@ void main() {
   }
 
   Future<void> open(WidgetTester tester, Tabs tab) async {
-    await tester.tap(find.byType(NavigationDestination).at(tab.index));
+    final shown = Tabs.values.where((tab) => tab.isInNavigationBar).toList();
+    await tester.tap(find.byType(NavigationDestination).at(shown.indexOf(tab)));
     await tester.pumpAndSettle();
   }
+
+  testWidgets('offers no R-Cards tab', (tester) async {
+    await pumpTabs(tester);
+
+    expect(
+      find.byType(NavigationDestination),
+      findsNWidgets(Tabs.values.length - 1),
+    );
+    expect(find.byIcon(Tabs.rCards.iconData), findsNothing);
+  });
 
   testWidgets('leaves the first opening of Credentials to read the cards', (
     tester,

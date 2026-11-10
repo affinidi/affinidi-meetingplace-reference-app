@@ -28,9 +28,10 @@ class ScaffoldWithNavBar extends ConsumerWidget {
     listenForRoleChanges(ref, context);
     listenForRemovals(ref, context);
 
-    final visibleTabs = isZkpEnabled
-        ? Tabs.values
-        : Tabs.values.where((tab) => tab != Tabs.credentials).toList();
+    final visibleTabs = Tabs.values
+        .where((tab) => tab.isInNavigationBar)
+        .where((tab) => isZkpEnabled || tab != Tabs.credentials)
+        .toList();
     final visibleBranchIndexes = visibleTabs.map((tab) => tab.index).toList();
 
     final currentIndex = navigationShell.currentIndex;

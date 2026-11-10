@@ -25,6 +25,10 @@ enum Tabs {
   };
 
   Widget get icon => Icon(iconData);
+
+  /// Whether the bottom navigation offers the tab. R-Cards keeps its
+  /// branch, as chat still opens an r-card's details through it.
+  bool get isInNavigationBar => this != Tabs.rCards;
 }
 
 enum TabTitleKey {
