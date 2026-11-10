@@ -7,6 +7,9 @@ import '../../../application/services/vtc_service/vtc_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../themes/tokens/mc_icons.dart';
+import '../../themes/tokens/mc_radius.dart';
+import '../../widgets/onboarding_style/onboarding_style.dart';
 import 'vtc_room_screen.dart';
 
 const _logKey = 'VtcRoomsView';
@@ -130,53 +133,57 @@ class _Rooms extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     if (offers.isEmpty && rooms.isEmpty) return _Message(l10n.vtcRoomsNone);
-    return ListView(
+    return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(16),
-      children: [
-        if (offers.isNotEmpty) ...[
-          _Heading(l10n.vtcRoomsOffersHeading),
-          for (final offer in offers)
-            _RoomCard(
-              key: Key('vtc_room_offer_${offer.roomId}'),
-              summary: offer,
-              action: FilledButton.icon(
-                key: Key('vtc_room_accept_${offer.roomId}'),
-                icon: accepting == offer.roomId
-                    ? const SizedBox.square(
-                        dimension: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.login),
-                label: Text(l10n.vtcRoomsAccept),
-                onPressed: accepting == null ? () => onAccept(offer) : null,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 16,
+        children: [
+          if (offers.isNotEmpty) ...[
+            _Heading(l10n.vtcRoomsOffersHeading),
+            for (final offer in offers)
+              _RoomCard(
+                key: Key('vtc_room_offer_${offer.roomId}'),
+                summary: offer,
+                action: FilledButton.icon(
+                  key: Key('vtc_room_accept_${offer.roomId}'),
+                  icon: accepting == offer.roomId
+                      ? const SizedBox.square(
+                          dimension: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(McIcons.login),
+                  label: Text(l10n.vtcRoomsAccept),
+                  onPressed: accepting == null ? () => onAccept(offer) : null,
+                ),
               ),
-            ),
-        ],
-        if (rooms.isNotEmpty) ...[
-          _Heading(l10n.vtcRoomsMineHeading),
-          for (final room in rooms)
-            _RoomCard(
-              key: Key('vtc_room_${room.roomId}'),
-              summary: room,
-              // What the room gives the member, whether or not it is open
-              // to them now; [closed] says when it is not.
-              readOnly:
-                  room.readOnly || !room.actions.contains(RoomAction.write),
-              closed: !room.canRead,
-              onTap: room.canRead
-                  ? () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => VtcRoomScreen(
-                          communityDid: communityDid,
-                          room: room,
+          ],
+          if (rooms.isNotEmpty) ...[
+            _Heading(l10n.vtcRoomsMineHeading),
+            for (final room in rooms)
+              _RoomCard(
+                key: Key('vtc_room_${room.roomId}'),
+                summary: room,
+                // What the room gives the member, whether or not it is open
+                // to them now; [closed] says when it is not.
+                readOnly:
+                    room.readOnly || !room.actions.contains(RoomAction.write),
+                closed: !room.canRead,
+                onTap: room.canRead
+                    ? () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => VtcRoomScreen(
+                            communityDid: communityDid,
+                            room: room,
+                          ),
                         ),
-                      ),
-                    )
-                  : null,
-            ),
+                      )
+                    : null,
+              ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }
@@ -187,14 +194,16 @@ class _Heading extends StatelessWidget {
   final String text;
 
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(top: 8, bottom: 8),
-    child: Text(text, style: context.textTheme.titleMedium),
+  Widget build(BuildContext context) => Text(
+    text,
+    style: context.textTheme.titleMedium?.copyWith(
+      color: context.mcColors.textPrimary,
+    ),
   );
 }
 
-/// A room in a frosted box, as a group is drawn: its name, what the member
-/// may do there, and who can read what is written.
+/// A room in a box, as a group is drawn: its name, what the member may do
+/// there, and who can read what is written.
 class _RoomCard extends StatelessWidget {
   const _RoomCard({
     super.key,
@@ -211,69 +220,63 @@ class _RoomCard extends StatelessWidget {
   final bool? readOnly;
   final bool closed;
 
+  static const _radius = BorderRadius.all(Radius.circular(McRadius.lg));
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final writes = readOnly == null ? summary.canWrite : !readOnly!;
-    final muted = context.textTheme.bodySmall?.copyWith(
-      color: context.colorScheme.onSurfaceVariant,
-    );
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Material(
-        color: Colors.white.withAlpha(20),
-        borderRadius: BorderRadius.circular(16),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              spacing: 8,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        summary.label,
-                        style: context.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+    final sealed = summary.visibility.isSealed;
+    return Material(
+      color: context.colorScheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: _radius,
+        side: BorderSide(color: context.mcColors.hairline),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: 16,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      summary.label,
+                      style: context.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                    if (onTap != null) const Icon(Icons.chevron_right),
-                  ],
-                ),
-                if (summary.description case final description?)
-                  Text(description, style: context.textTheme.bodyMedium),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 4,
-                  children: [
-                    Chip(
-                      avatar: Icon(
-                        writes
-                            ? Icons.edit_outlined
-                            : Icons.visibility_outlined,
-                        size: 16,
-                      ),
-                      label: Text(
-                        writes ? l10n.vtcRoomsReadWrite : l10n.vtcRoomsReadOnly,
-                      ),
+                  ),
+                  if (onTap != null)
+                    Icon(
+                      McIcons.chevronRight,
+                      color: context.mcColors.textSecondary,
                     ),
-                    if (closed) Chip(label: Text(l10n.vtcRoomsClosed)),
-                  ],
-                ),
+                ],
+              ),
+              if (summary.description case final description?)
                 Text(
-                  summary.visibility.isSealed
-                      ? l10n.vtcRoomsSealed
-                      : l10n.vtcRoomsOpenTier,
-                  style: muted,
+                  description,
+                  style: context.textTheme.bodyMedium?.copyWith(
+                    color: context.colorScheme.onSurfaceVariant,
+                  ),
                 ),
-                ?action,
-              ],
-            ),
+              OnboardingLine(
+                icon: writes ? McIcons.edit : McIcons.visible,
+                title: writes ? l10n.vtcRoomsReadWrite : l10n.vtcRoomsReadOnly,
+                subtitle: closed ? l10n.vtcRoomsClosed : null,
+              ),
+              OnboardingLine(
+                icon: sealed ? McIcons.lock : McIcons.public,
+                title: sealed ? l10n.vtcRoomsSealed : l10n.vtcRoomsOpenTier,
+              ),
+              ?action,
+            ],
           ),
         ),
       ),
