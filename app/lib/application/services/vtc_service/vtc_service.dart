@@ -1819,11 +1819,12 @@ class VtcService {
     String communityDid,
     RoomMembership room,
   ) async {
-    final (vta, _) = await _roomMember(communityDid);
+    final (vta, persona) = await _roomMember(communityDid);
     return _sdk.roomsClient().records(
       holder: vta,
       roomId: room.roomId,
       host: room.host,
+      memberDid: persona.did,
     );
   }
 
@@ -1835,12 +1836,13 @@ class VtcService {
     RoomMembership room, {
     required String key,
   }) async {
-    final (vta, _) = await _roomMember(communityDid);
+    final (vta, persona) = await _roomMember(communityDid);
     return _sdk.roomsClient().record(
       holder: vta,
       roomId: room.roomId,
       host: room.host,
       key: key,
+      memberDid: persona.did,
     );
   }
 
