@@ -617,8 +617,7 @@ void main() {
     );
 
     testWidgets(
-      'should display appropriate border color in grid view for pending '
-      'contact',
+      'should display a plain icon in grid view for pending contact',
       (tester) async {
         await navigateToContactsScreen(tester);
 
@@ -628,30 +627,30 @@ void main() {
           await tester.pumpAndSettle();
         }
 
-        final allContainers = find.byType(Container);
-        final containers = tester.widgetList<Container>(allContainers);
+        final pendingRing = find.descendant(
+          of: find
+              .ancestor(
+                of: find.text('Display Charlie'),
+                matching: find.byType(GestureDetector),
+              )
+              .first,
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is Container &&
+                widget.decoration is BoxDecoration &&
+                (widget.decoration as BoxDecoration).shape == BoxShape.circle &&
+                (widget.decoration as BoxDecoration).border != null,
+          ),
+        );
+        expect(pendingRing, findsAtLeastNWidgets(1));
 
-        final borderedContainers = containers.where((container) {
-          final decoration = container.decoration;
-          return decoration is BoxDecoration &&
-              decoration.border != null &&
-              decoration.shape == BoxShape.circle;
-        }).toList();
-
-        expect(borderedContainers.isNotEmpty, isTrue);
-
-        final pendingIndex = borderedContainers.indexWhere((container) {
-          final decoration = container.decoration as BoxDecoration;
-          final border = decoration.border as Border;
-          final element = find.byWidget(container).evaluate().first;
-          final color = FakeContacts.pendingContact.getStatusColor(
-            element,
-            asAvatar: true,
-          );
-          return border.top.color == color && border.top.width == 2;
-        });
-
-        expect(pendingIndex, greaterThanOrEqualTo(0));
+        // The outermost bordered circle is the status ring.
+        final decoration =
+            tester.widget<Container>(pendingRing.first).decoration
+                as BoxDecoration;
+        final border = decoration.border as Border;
+        expect(border.top.color, Colors.transparent);
+        expect(find.byIcon(McIcons.star), findsNothing);
       },
     );
 

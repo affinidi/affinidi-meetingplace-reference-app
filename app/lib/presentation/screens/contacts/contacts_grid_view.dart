@@ -113,10 +113,14 @@ class _ContactGridItem extends ConsumerWidget {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: contact.getStatusColor(
-                              context,
-                              asAvatar: true,
-                            ),
+                            // A pending channel shows no ring on its icon.
+                            color:
+                                contact.status == ContactStatus.pendingApproval
+                                ? Colors.transparent
+                                : contact.getStatusColor(
+                                    context,
+                                    asAvatar: true,
+                                  ),
                             width: 2,
                           ),
                         ),

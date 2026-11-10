@@ -240,7 +240,7 @@ class _ContactTile extends StatelessWidget {
             child: Stack(
               clipBehavior: Clip.none,
               children: [
-                _ContactAvatar(contact: contact, isList: true),
+                _ContactAvatar(contact: contact),
                 if (contact.badgeCount > 0 || contact.isOobContact)
                   Positioned(
                     bottom: -5,
