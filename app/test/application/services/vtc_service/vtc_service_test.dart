@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -2179,6 +2180,27 @@ void main() {
         'requestId': first.request.requestId,
         'code': 'couldNotVerify',
       });
+    });
+
+    test('keeps a decline made while the desk is checked', () async {
+      await requestWith((await service.createVettingTicket(fakeVtcDid)).spoken);
+      final [session] = (await service.checkVetterDesk(fakeVtcDid))!.sessions;
+
+      final held = network.inboxListHeld = Completer<void>();
+      final check = service.checkVetterDesk(fakeVtcDid);
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      final decline = service.declineVetting(
+        fakeVtcDid,
+        session.request.requestId,
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      held.complete();
+      await Future.wait([check, decline]);
+
+      expect(
+        (await service.vetterDesk(fakeVtcDid))!.sessions.single.status,
+        VtcVetterSessionStatus.declined,
+      );
     });
   });
 

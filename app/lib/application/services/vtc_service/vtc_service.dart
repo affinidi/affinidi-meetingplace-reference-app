@@ -21,6 +21,7 @@ import '../../../domain/models/vtc/vtc_vetter_card.dart';
 import '../../../domain/models/vtc/vtc_vetter_desk.dart';
 import '../../../domain/models/vtc/vtc_vetting.dart';
 import '../../../domain/repositories/vtc_repository.dart';
+import '../../../infrastructure/helpers/keyed_lock.dart';
 import '../../../infrastructure/providers/vtc_sdk_provider.dart';
 import '../../../infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
 import '../../../infrastructure/vtc/mock_credential_issuer.dart';
@@ -155,6 +156,12 @@ class VtcService {
   /// memory only: the card's details are personal, and the message waits in
   /// the identity's inbox until the session ends.
   final Map<String, (String, ReceivedVettingCard)> _vettingCards = {};
+
+  /// Changes to each community's vetter desk, one at a time: a desk is
+  /// read, then saved once the network answered, so a change made in
+  /// between would otherwise be lost, e.g. a decline overwritten by the
+  /// periodic check that read the session while still open.
+  final _deskLocks = KeyedLock<String>();
 
   /// How long lent keys are held without a check before they are forgotten.
   static const _collectionIdle = Duration(minutes: 5);
@@ -1046,19 +1053,21 @@ class VtcService {
       }
       rethrow;
     }
-    final desk =
-        (await _repository.findVetterDesk(communityDid) ??
-                VtcVetterDesk(communityDid: communityDid))
-            .withProfile(
-              VtcVetterProfileRecord(
-                profile: profile,
-                listed: published.listed,
-                updatedAt: published.updatedAt,
-                roleCardId: roleCard['id'] as String?,
-              ),
-            );
-    await _repository.saveVetterDesk(desk);
-    return desk;
+    return _deskLocks.synchronized(communityDid, () async {
+      final desk =
+          (await _repository.findVetterDesk(communityDid) ??
+                  VtcVetterDesk(communityDid: communityDid))
+              .withProfile(
+                VtcVetterProfileRecord(
+                  profile: profile,
+                  listed: published.listed,
+                  updatedAt: published.updatedAt,
+                  roleCardId: roleCard['id'] as String?,
+                ),
+              );
+      await _repository.saveVetterDesk(desk);
+      return desk;
+    });
   }
 
   /// Whether the member may vet for [communityDid] but the community holds
@@ -1286,10 +1295,12 @@ class VtcService {
       validity: vettingTicketValidity,
       now: now,
     );
-    final desk =
-        await _repository.findVetterDesk(communityDid) ??
-        VtcVetterDesk(communityDid: communityDid);
-    await _repository.saveVetterDesk(desk.withTicket(ticket, now));
+    await _deskLocks.synchronized(communityDid, () async {
+      final desk =
+          await _repository.findVetterDesk(communityDid) ??
+          VtcVetterDesk(communityDid: communityDid);
+      await _repository.saveVetterDesk(desk.withTicket(ticket, now));
+    });
     return ticket;
   }
 
@@ -1300,20 +1311,21 @@ class VtcService {
   ///
   /// The applicants are told when they can be reached; their sessions end
   /// on the desk either way, so none is left to resume.
-  Future<VtcVetterDesk?> restartVetterDesk(String communityDid) async {
-    final desk = await _repository.findVetterDesk(communityDid);
-    if (desk == null) return null;
-    final open = desk.sessions.where((session) => session.isOpen).toList();
-    if (desk.tickets.isEmpty && open.isEmpty) return desk;
-    var restarted = desk.withoutTickets();
-    if (open.isNotEmpty) await _tellDeclined(communityDid, open);
-    for (final session in open) {
-      restarted = restarted.withSession(session.declined());
-      _forgetCard(session.request.requestId);
-    }
-    await _repository.saveVetterDesk(restarted);
-    return restarted;
-  }
+  Future<VtcVetterDesk?> restartVetterDesk(String communityDid) =>
+      _deskLocks.synchronized(communityDid, () async {
+        final desk = await _repository.findVetterDesk(communityDid);
+        if (desk == null) return null;
+        final open = desk.sessions.where((session) => session.isOpen).toList();
+        if (desk.tickets.isEmpty && open.isEmpty) return desk;
+        var restarted = desk.withoutTickets();
+        if (open.isNotEmpty) await _tellDeclined(communityDid, open);
+        for (final session in open) {
+          restarted = restarted.withSession(session.declined());
+          _forgetCard(session.request.requestId);
+        }
+        await _repository.saveVetterDesk(restarted);
+        return restarted;
+      });
 
   /// Tells the applicants of [sessions] the member will not vouch for them.
   /// One who cannot be reached is not told: their request lapses.
@@ -1364,7 +1376,7 @@ class VtcService {
     String communityDid, {
     List<String>? requiredClaims,
     void Function(VtcRequestStep step)? onRequestStep,
-  }) async {
+  }) => _deskLocks.synchronized(communityDid, () async {
     var desk = await _repository.findVetterDesk(communityDid);
     final member = await _repository.findCommunity(communityDid);
     if (desk == null || member == null) return desk;
@@ -1436,7 +1448,7 @@ class VtcService {
     await _repository.saveVetterDesk(desk!);
     await _removeFromInbox(collection, handled);
     return desk;
-  }
+  });
 
   /// The card the applicant of [requestId] sent, as checked, or null while
   /// none has arrived. Its details are shown for the session only.
@@ -1448,12 +1460,12 @@ class VtcService {
   Future<VtcVetterDesk> confirmVettingMatch(
     String communityDid,
     String requestId,
-  ) async {
+  ) => _deskLocks.synchronized(communityDid, () async {
     final (desk, session) = await _vetterSessionOf(communityDid, requestId);
     final updated = desk.withSession(session.confirmed());
     await _repository.saveVetterDesk(updated);
     return updated;
-  }
+  });
 
   /// Issues the applicant of [requestId] a vetting statement signed by the
   /// member's VTA as their identity in [communityDid]: the vetter checked
@@ -1467,7 +1479,7 @@ class VtcService {
     String communityDid,
     String requestId, {
     required List<String> documentClasses,
-  }) async {
+  }) => _deskLocks.synchronized(communityDid, () async {
     final (desk, session) = await _vetterSessionOf(communityDid, requestId);
     final card = _vettingCards[requestId];
     final opened = session.session;
@@ -1485,7 +1497,7 @@ class VtcService {
     _forgetCard(requestId);
     await _removeFromInbox(collection, [card.$1]);
     return updated;
-  }
+  });
 
   /// Tells the applicant of [requestId] the member, as a vetter for
   /// [communityDid], will not vouch for them, with a [code] such as
@@ -1498,7 +1510,7 @@ class VtcService {
     String requestId, {
     String? code,
     String? message,
-  }) async {
+  }) => _deskLocks.synchronized(communityDid, () async {
     final (desk, session) = await _vetterSessionOf(communityDid, requestId);
     final member = (await _repository.findCommunity(communityDid))!;
     final (_, collection, vetter) = await _vetter(member);
@@ -1509,7 +1521,7 @@ class VtcService {
     _forgetCard(requestId);
     await _removeFromInbox(collection, [?card?.$1]);
     return updated;
-  }
+  });
 
   /// The statements the member issued as a vetter for [communityDid], as
   /// their VTA records them, newest first, also those issued from another

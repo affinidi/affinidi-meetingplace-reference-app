@@ -93,6 +93,10 @@ class FakeVtcNetwork implements HttpClientAdapter {
   /// How many times an identity signed in to its inbox.
   int inboxOpens = 0;
 
+  /// While set, listing an inbox waits for it to complete, so a test can
+  /// act while a read of the inbox is under way.
+  Completer<void>? inboxListHeld;
+
   /// Signals a message reaching an identity's inbox, over the live
   /// connection held while listened to.
   final inboxArrivals = StreamController<void>.broadcast();
@@ -803,7 +807,10 @@ class _FakeInbox implements MediatorInbox {
   final FakeVtcNetwork _network;
 
   @override
-  Future<List<String>> listIds() async => _network.inbox.keys.toList();
+  Future<List<String>> listIds() async {
+    await _network.inboxListHeld?.future;
+    return _network.inbox.keys.toList();
+  }
 
   @override
   Future<Map<String, dynamic>?> fetch(String id) async => _network.inbox[id];
