@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -19,6 +20,7 @@ import 'package:mpx_flutter_reference_app/presentation/screens/vtc_vetting_desk/
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_colors.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
+import 'package:mpx_flutter_reference_app/presentation/widgets/onboarding_style/onboarding_style.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../../fakes/fake_vetter_desk.dart';
@@ -267,6 +269,42 @@ void main() {
     final shown = tester.getRect(find.byKey(const Key('vtc_vetter_ticket_qr')));
     expect(shown.width, lessThan(250));
     expect(shown.right, lessThanOrEqualTo(320));
+    await close(tester);
+  });
+
+  testWidgets('keeps the codes in view while a match is recorded', (
+    tester,
+  ) async {
+    await pumpDesk(tester);
+    final ticket = await showTicket(tester);
+    await tester.runAsync(() => fixture.requestWith(ticket.spoken));
+    await check(tester);
+    // A check still reading the inbox holds the match back, as on a slow
+    // network.
+    final held = fixture.network.inboxListHeld = Completer<void>();
+    final container = ProviderScope.containerOf(tester.element(desk));
+    final checking = container
+        .read(vtcVettingDeskControllerProvider(fakeVtcDid).notifier)
+        .check();
+
+    final yes = find.byKey(const Key('vtc_vetter_match_yes'));
+    await tester.ensureVisible(yes);
+    await tester.tap(yes);
+    await tester.pump();
+
+    expect(find.byType(OnboardingSpinner), findsNothing);
+    for (final key in ['vtc_vetter_match_yes', 'vtc_vetter_match_no']) {
+      final button = tester.widget<ElevatedButton>(
+        find.descendant(
+          of: find.byKey(Key(key)),
+          matching: find.byType(ElevatedButton),
+        ),
+      );
+      expect(button.onPressed, isNull, reason: key);
+    }
+    held.complete();
+    await tester.runAsync(() => checking);
+    await waitFor(tester, find.byKey(const Key('vtc_vetter_card_waiting')));
     await close(tester);
   });
 

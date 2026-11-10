@@ -586,17 +586,18 @@ class _SessionView extends HookWidget {
               ),
             ),
           ),
+          // Held still while the answer is recorded, rather than swapped for
+          // a spinner, so the codes stay in view.
           OnboardingButton(
             key: const Key('vtc_vetter_match_yes'),
             label: l10n.vtcJoinMatchYes,
-            isLoading: busy,
-            onPressed: () => controller.confirmMatch(requestId),
+            onPressed: busy ? null : () => controller.confirmMatch(requestId),
           ),
           OnboardingButton(
             key: const Key('vtc_vetter_match_no'),
             label: l10n.vtcJoinMatchNo,
             isDestructive: true,
-            onPressed: () => controller.mismatch(requestId),
+            onPressed: busy ? null : () => controller.mismatch(requestId),
           ),
         ],
       );
