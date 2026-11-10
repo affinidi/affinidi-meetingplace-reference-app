@@ -288,23 +288,62 @@ void main() {
     bool createdPersona() =>
         network.vta.received.any((r) => r['type'] == VtaTask.didsCreate);
 
-    test('joins as an identity the VTA already holds', () async {
+    Map<String, dynamic> submit() =>
+        network.joinRequests.lastWhere((r) => r['type'] == JoinTask.submit);
+
+    test(
+      'asks which DID the community sees once an identity is chosen',
+      () async {
+        vtaHoldsPersona();
+        await controller().onScanned(fakeVtcDid);
+
+        await controller().join();
+        expect(state().step, VtcJoinStep.chooseIdentity);
+        expect(state().identityChoices, [persona.did]);
+        expect(state().identities[persona.did]?.card.displayName, 'Ada');
+
+        await controller().useIdentity(persona.did);
+
+        expect(state().step, VtcJoinStep.chooseDid);
+        expect(createdPersona(), isFalse);
+        expect(
+          network.joinRequests.map((r) => r['type']),
+          isNot(contains(JoinTask.submit)),
+        );
+      },
+    );
+
+    test("joins as a new DID wearing the identity's profile", () async {
       vtaHoldsPersona();
       await controller().onScanned(fakeVtcDid);
-
       await controller().join();
-      expect(state().step, VtcJoinStep.chooseIdentity);
-      expect(state().identityChoices, [persona.did]);
-      expect(state().identities[persona.did]?.card.displayName, 'Ada');
-
       await controller().useIdentity(persona.did);
+
+      await controller().useDid(newDid: true);
+
+      expect(state().step, VtcJoinStep.joined);
+      final created = network.vta.received.lastWhere(
+        (r) => r['type'] == VtaTask.didsCreate,
+      );
+      expect((created['payload'] as Map)['contextId'], 'vta');
+      final bound = network.vta.received.lastWhere(
+        (r) => r['type'] == VtaTask.localBindingSet,
+      );
+      expect((bound['payload'] as Map)['profileId'], '01PROFILE');
+      expect(submit()['issuer'], persona.did);
+    });
+
+    test("joins as the identity's own DID when chosen", () async {
+      vtaHoldsPersona();
+      await controller().onScanned(fakeVtcDid);
+      await controller().join();
+      await controller().useIdentity(persona.did);
+
+      await controller().useDid(newDid: false);
 
       expect(state().step, VtcJoinStep.joined);
       expect(createdPersona(), isFalse);
-      final submit = network.joinRequests.lastWhere(
-        (r) => r['type'] == JoinTask.submit,
-      );
-      expect(submit['issuer'], persona.did);
+      expect(submit()['issuer'], persona.did);
     });
 
     test('joins as a new identity when chosen', () async {
@@ -434,6 +473,7 @@ void main() {
       await controller().join();
       await controller().useIdentity(persona.did);
 
+      // The credential names the identity's own DID: no other is offered.
       expect(state().step, VtcJoinStep.approveCredential);
       final shared = state().sharedCredential!;
       expect(shared.types, membership);

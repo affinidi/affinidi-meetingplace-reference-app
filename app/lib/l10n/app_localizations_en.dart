@@ -2979,6 +2979,35 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String vtcJoinChooseDid(String name) {
+    return 'Which DID should $name see?';
+  }
+
+  @override
+  String get vtcJoinNewDid => 'A new DID for this community';
+
+  @override
+  String get vtcJoinNewDidNote =>
+      'Recommended: it shares this identity\'s details, but no other community can link you through it.';
+
+  @override
+  String get vtcJoinUseNewDid => 'Join with a new DID';
+
+  @override
+  String get vtcJoinIdentityDid => 'This identity\'s own DID';
+
+  @override
+  String get vtcJoinIdentityDidNote =>
+      'Every community you join with it sees the same DID, so they can tell it\'s you.';
+
+  @override
+  String get vtcJoinUseIdentityDid => 'Join with this identity\'s DID';
+
+  @override
+  String get vtcJoinCredentialShowsIdentity =>
+      'This way in asks for a credential, so the community sees the DID of the identity that holds it.';
+
+  @override
   String get vtcJoinNewIdentityNote =>
       'Recommended: your VTA creates it for this community, so other communities can\'t link you through it.';
 

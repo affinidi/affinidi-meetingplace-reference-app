@@ -39,6 +39,10 @@ class VtcJoinController extends _$VtcJoinController {
 
   JoinManifest? _manifest;
   List<VtaPersona> _personas = const [];
+
+  /// The identity chosen to join, while the member chooses which of its
+  /// DIDs the community sees.
+  Identity? _chosenIdentity;
   Timer? _pendingCheck;
 
   /// The identity whose details await approval, and what the VTA would
@@ -380,6 +384,10 @@ class VtcJoinController extends _$VtcJoinController {
   /// Joins as the VTA identity [personaDid], or as a new identity when
   /// null. Only an identity the VTA offered is used, and under a way in
   /// asking for a credential only one holding it.
+  ///
+  /// For an identity, the member then chooses which DID the community sees
+  /// ([useDid]); under a way in asking for a credential, it is the
+  /// identity's own, the DID the credential names.
   Future<void> useIdentity(String? personaDid) async {
     final manifest = _manifest;
     if (state.step != VtcJoinStep.chooseIdentity || manifest == null) return;
@@ -387,9 +395,39 @@ class VtcJoinController extends _$VtcJoinController {
     if (personaDid != null && persona == null) return;
     final holders = state.credentialHolders;
     if (holders != null && !holders.contains(personaDid)) return;
+    if (persona != null && holders == null) {
+      _chosenIdentity = state.identities[persona.did];
+      state = state.copyWith(step: VtcJoinStep.chooseDid);
+      return;
+    }
     state = state.copyWith(step: VtcJoinStep.working);
 
     await _run(() => _apply(manifest, persona: persona));
+  }
+
+  /// Joins as the identity chosen with [useIdentity]: under a new DID of
+  /// its own for this community when [newDid], which no other community
+  /// can link to, else under the identity's own DID.
+  Future<void> useDid({required bool newDid}) async {
+    final manifest = _manifest;
+    final identity = _chosenIdentity;
+    if (state.step != VtcJoinStep.chooseDid ||
+        manifest == null ||
+        identity == null) {
+      return;
+    }
+    state = state.copyWith(step: VtcJoinStep.working);
+
+    await _run(() async {
+      final persona = newDid
+          ? await _service.joiningIdentity(
+              manifest,
+              identity: identity,
+              listInDirectory: state.listInDirectory,
+            )
+          : VtaPersona(did: identity.did, contextId: identity.vtaContextId!);
+      await _apply(manifest, persona: persona);
+    });
   }
 
   /// Shares the profile details the member approved, through the VTA, and

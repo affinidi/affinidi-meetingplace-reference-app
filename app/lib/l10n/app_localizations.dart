@@ -4490,6 +4490,54 @@ abstract class AppLocalizations {
   /// **'{position} of {total} · swipe to see the others'**
   String vtcJoinIdentityPosition(int position, int total);
 
+  /// Asks whether the community sees a new DID of the chosen identity or the identity's own DID
+  ///
+  /// In en, this message translates to:
+  /// **'Which DID should {name} see?'**
+  String vtcJoinChooseDid(String name);
+
+  /// No description provided for @vtcJoinNewDid.
+  ///
+  /// In en, this message translates to:
+  /// **'A new DID for this community'**
+  String get vtcJoinNewDid;
+
+  /// No description provided for @vtcJoinNewDidNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended: it shares this identity\'s details, but no other community can link you through it.'**
+  String get vtcJoinNewDidNote;
+
+  /// No description provided for @vtcJoinUseNewDid.
+  ///
+  /// In en, this message translates to:
+  /// **'Join with a new DID'**
+  String get vtcJoinUseNewDid;
+
+  /// No description provided for @vtcJoinIdentityDid.
+  ///
+  /// In en, this message translates to:
+  /// **'This identity\'s own DID'**
+  String get vtcJoinIdentityDid;
+
+  /// No description provided for @vtcJoinIdentityDidNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Every community you join with it sees the same DID, so they can tell it\'s you.'**
+  String get vtcJoinIdentityDidNote;
+
+  /// No description provided for @vtcJoinUseIdentityDid.
+  ///
+  /// In en, this message translates to:
+  /// **'Join with this identity\'s DID'**
+  String get vtcJoinUseIdentityDid;
+
+  /// No description provided for @vtcJoinCredentialShowsIdentity.
+  ///
+  /// In en, this message translates to:
+  /// **'This way in asks for a credential, so the community sees the DID of the identity that holds it.'**
+  String get vtcJoinCredentialShowsIdentity;
+
   /// No description provided for @vtcJoinNewIdentityNote.
   ///
   /// In en, this message translates to:

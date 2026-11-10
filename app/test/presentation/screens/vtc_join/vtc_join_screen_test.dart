@@ -1102,6 +1102,10 @@ void main() {
 
         // The deck starts on Ada, who holds it.
         expect(find.text('2 of 3 · swipe to see the others'), findsOneWidget);
+        expect(
+          find.byKey(const Key('vtc_join_credential_shows_identity')),
+          findsOneWidget,
+        );
         expect(useIdentity(tester).onPressed, isNotNull);
 
         await swipeIdentities(tester);
@@ -1184,6 +1188,29 @@ void main() {
         await settle(tester);
       }
 
+      Future<void> chooseAda(WidgetTester tester) async {
+        await tester.ensureVisible(
+          find.byKey(const Key('vtc_join_identities')),
+        );
+        await tester.pumpAndSettle();
+        await tester.timedDrag(
+          find.byKey(const Key('vtc_join_identities')),
+          const Offset(-500, 0),
+          const Duration(milliseconds: 300),
+        );
+        await tester.pumpAndSettle();
+        await tapVisible(
+          tester,
+          find.widgetWithText(ElevatedButton, 'Join with this identity'),
+        );
+        await settle(tester);
+      }
+
+      Future<void> chooseDid(WidgetTester tester, String key) async {
+        await tapVisible(tester, find.byKey(Key(key)));
+        await settle(tester);
+      }
+
       testWidgets('offers a new identity first, in a deck', (tester) async {
         await reachIdentities(tester);
 
@@ -1217,21 +1244,8 @@ void main() {
             },
           };
         await reachIdentities(tester);
-        await tester.ensureVisible(
-          find.byKey(const Key('vtc_join_identities')),
-        );
-        await tester.pumpAndSettle();
-        await tester.timedDrag(
-          find.byKey(const Key('vtc_join_identities')),
-          const Offset(-500, 0),
-          const Duration(milliseconds: 300),
-        );
-        await tester.pumpAndSettle();
-        await tapVisible(
-          tester,
-          find.widgetWithText(ElevatedButton, 'Join with this identity'),
-        );
-        await settle(tester);
+        await chooseAda(tester);
+        await chooseDid(tester, 'vtc_join_identity_did');
 
         await tester.ensureVisible(
           find.byKey(const Key('vtc_join_card_route')),
@@ -1266,10 +1280,28 @@ void main() {
           find.widgetWithText(ElevatedButton, 'Join with this identity'),
         );
         await settle(tester);
+        await chooseDid(tester, 'vtc_join_identity_did');
 
         expect(find.text("You're a member of Football club."), findsOneWidget);
         expect(vtaTasks(), isNot(contains(VtaTask.didsCreate)));
         expect((await service.community(fakeVtcDid))?.personaDid, persona.did);
+      });
+
+      testWidgets("joins as a new DID of the identity's", (tester) async {
+        await reachIdentities(tester);
+        await chooseAda(tester);
+
+        expect(
+          find.text('Which DID should Football club see?'),
+          findsOneWidget,
+        );
+        expect(find.text('A new DID for this community'), findsOneWidget);
+        expect(find.text("This identity's own DID"), findsOneWidget);
+
+        await chooseDid(tester, 'vtc_join_new_did');
+
+        expect(find.text("You're a member of Football club."), findsOneWidget);
+        expect(vtaTasks(), contains(VtaTask.localBindingSet));
       });
     });
 

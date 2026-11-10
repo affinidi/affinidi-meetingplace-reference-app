@@ -27,6 +27,10 @@ enum VtcJoinStep {
   /// The member chooses which identity on their VTA joins.
   chooseIdentity,
 
+  /// The member chooses whether the community sees a new DID of the chosen
+  /// identity's, or the identity's own.
+  chooseDid,
+
   /// The member approves sharing the profile details the community asks
   /// for, as their VTA holds them.
   approveDetails,
