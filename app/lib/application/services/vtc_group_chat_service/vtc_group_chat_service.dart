@@ -188,18 +188,19 @@ class VtcGroupChatService {
     final offer =
         _ref.read(connectionsServiceProvider).publishedOffer
             as GroupConnectionOffer;
-    await _repository.saveGroupChat(
-      VtcGroupChat(
-        chatGroupId: offer.groupId,
-        communityDid: communityDid,
-        groupId: current.groupId,
-        groupDid: current.groupDid,
-        name: current.name,
-        isOwner: true,
-        posting: posting,
-      ),
+    final chat = VtcGroupChat(
+      chatGroupId: offer.groupId,
+      communityDid: communityDid,
+      groupId: current.groupId,
+      groupDid: current.groupDid,
+      name: current.name,
+      isOwner: true,
+      posting: posting,
     );
+    await _repository.saveGroupChat(chat);
     _chatsChanged.add(null);
+    // Applied again before anyone is let in, and on every sync.
+    await _applyPosting(await _ref.read(meetingPlaceSdkProvider.future), chat);
     return GroupChatLink(
       mnemonic: offer.mnemonic,
       controlPlaneDid: environment.controlPlaneDid,
@@ -658,6 +659,9 @@ class VtcGroupChatService {
       return false;
     }
 
+    // Who may post holds before the member is in: a request is left waiting
+    // rather than let into a chat that would let them post.
+    if (!await _applyPosting(sdk, chat)) return true;
     await sdk.approveConnectionRequest(
       ApproveConnectionRequestParams(channel: channel),
     );
@@ -677,8 +681,9 @@ class VtcGroupChatService {
 
   /// Brings every chat this phone owns or joined in step with its group:
   /// reads who may post from the community's link again, and, in a chat
-  /// this phone owns, removes those the community no longer lists as active
-  /// members, and makes the group's managers, and only them, moderators.
+  /// this phone owns, has the chat itself hold to it, removes those the
+  /// community no longer lists as active members, and makes the group's
+  /// managers, and only them, moderators.
   /// A chat whose group the community deleted loses everyone it let in, and
   /// its owner leaves it, which deletes it on Meeting Place.
   ///
@@ -690,6 +695,7 @@ class VtcGroupChatService {
     for (final chat in await _repository.groupChats()) {
       try {
         final current = await _readPosting(chat);
+        if (current.isOwner) await _applyPosting(sdk, current);
         if (current.isOwner && current.members.isNotEmpty) {
           await _sync(sdk, current);
         }
@@ -805,6 +811,25 @@ class VtcGroupChatService {
     '$step after ${watch.elapsedMilliseconds} ms',
     name: _logKey,
   );
+
+  /// Has the chat [chat] this phone owns hold to who may post in it, as
+  /// [VtcGroupChat.posting] says, so it refuses everything else a member who
+  /// may not post sends; and whether it does: false, logged, when the chat
+  /// cannot be reached now. Sends nothing when the chat already holds to it.
+  Future<bool> _applyPosting(MeetingPlaceCoreSDK sdk, VtcGroupChat chat) async {
+    try {
+      await sdk.setGroupMembersCanPost(
+        SetGroupMembersCanPostRequest(
+          groupId: chat.chatGroupId,
+          membersCanPost: chat.posting == GroupChatPosting.everyone,
+        ),
+      );
+      return true;
+    } on Exception catch (error) {
+      _logFailure('setting who may post', error.runtimeType);
+      return false;
+    }
+  }
 
   void _logFailure(String action, Object code) =>
       _logger.warning('Failed $action: $code', name: _logKey);

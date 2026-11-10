@@ -184,6 +184,24 @@ class _FakeSdk extends Fake implements MeetingPlaceMatrixSDK {
   Future<void> setGroupModerator(SetGroupModeratorRequest request) async =>
       moderators[request.memberDid] = request.isModerator;
 
+  /// Whether members may post, by the chat it was set for.
+  final membersCanPost = <String, bool>{};
+  bool isChatUnreachable = false;
+
+  @override
+  Future<void> setGroupMembersCanPost(
+    SetGroupMembersCanPostRequest request,
+  ) async {
+    if (isChatUnreachable) {
+      throw MeetingPlaceCoreSDKException(
+        message: 'chat unreachable',
+        code: 'generic',
+        innerException: StateError('chat unreachable'),
+      );
+    }
+    membersCanPost[request.groupId] = request.membersCanPost;
+  }
+
   @override
   Future<FindOfferResult> findOffer({required String mnemonic}) async =>
       FindOfferResult(connectionOffer: offerToFind);
@@ -364,6 +382,28 @@ void main() {
       expect(sdk.approved, [_memberDid]);
       expect(sdk.moderators, isEmpty);
       expect((await stored()).members, {_memberDid: 'entry-member'});
+    });
+
+    test('makes the chat read-only before letting in a member where only '
+        'managers post', () async {
+      await repository.saveGroupChat(
+        ownedChat.copyWith(posting: GroupChatPosting.managers),
+      );
+
+      await service.decideJoinRequest(_joinRequest(), _proof);
+
+      expect(sdk.membersCanPost, {'chat-1': false});
+      expect(sdk.approved, [_memberDid]);
+    });
+
+    test('leaves the request waiting while the chat cannot be made to hold '
+        'to who may post', () async {
+      sdk.isChatUnreachable = true;
+
+      await service.decideJoinRequest(_joinRequest(), _proof);
+
+      expect(sdk.approved, isEmpty);
+      expect(sdk.rejected, isEmpty);
     });
 
     test("remembers the group's authority the request carried", () async {
@@ -644,6 +684,36 @@ void main() {
       await service.syncChats();
 
       expect((await stored()).posting, GroupChatPosting.managers);
+    });
+
+    test('has a chat this phone owns hold to who may post', () async {
+      vtc.link = const GroupChatLink(
+        mnemonic: 'identity-wg',
+        controlPlaneDid: 'did:web:control-plane.example',
+        posting: GroupChatPosting.managers,
+      );
+
+      await service.syncChats();
+
+      expect(sdk.membersCanPost, {'chat-1': false});
+    });
+
+    test('leaves who may post to the owner in a chat this phone '
+        'joined', () async {
+      await repository.saveGroupChat(
+        const VtcGroupChat(
+          chatGroupId: 'chat-1',
+          communityDid: _communityDid,
+          groupId: 'g1',
+          groupDid: _groupDid,
+          name: 'Identity WG',
+          isOwner: false,
+        ),
+      );
+
+      await service.syncChats();
+
+      expect(sdk.membersCanPost, isEmpty);
     });
 
     test('keeps who may post when the link is gone', () async {
