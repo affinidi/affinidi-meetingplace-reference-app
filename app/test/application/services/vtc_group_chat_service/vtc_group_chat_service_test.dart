@@ -184,6 +184,12 @@ class _FakeSdk extends Fake implements MeetingPlaceMatrixSDK {
   Future<void> setGroupModerator(SetGroupModeratorRequest request) async =>
       moderators[request.memberDid] = request.isModerator;
 
+  /// Who moderates the chat, as the chat itself says.
+  Set<String> chatModerators = {};
+
+  @override
+  Future<Set<String>> groupModerators(Channel channel) async => chatModerators;
+
   /// Whether members may post, by the chat it was set for.
   final membersCanPost = <String, bool>{};
   bool isChatUnreachable = false;
@@ -565,6 +571,24 @@ void main() {
       expect(sdk.moderators, {_memberDid: true, _ownerDid: false});
       expect((await stored()).moderators, {_memberDid});
       expect(sdk.removed, isEmpty);
+    });
+
+    test('makes a manager a moderator again when the chat lost it', () async {
+      await repository.saveGroupChat(
+        (await stored()).copyWith(moderators: {_memberDid}),
+      );
+      sdk.channels = {_groupDid: _ownerChannel()};
+      sdk.chatModerators = {_ownerDid};
+      vtc.members = const [
+        VtcGroupMember(entryId: 'entry-owner', state: 'active'),
+        VtcGroupMember(entryId: 'entry-member', state: 'active'),
+      ];
+      vtc.managers = const ['entry-member'];
+
+      await service.syncChats();
+
+      expect(sdk.moderators, {_memberDid: true, _ownerDid: false});
+      expect((await stored()).moderators, {_memberDid});
     });
 
     test('changes nothing while the community is down', () async {

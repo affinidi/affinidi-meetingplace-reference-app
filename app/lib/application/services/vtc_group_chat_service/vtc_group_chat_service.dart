@@ -730,7 +730,7 @@ class VtcGroupChatService {
     required Set<String> managers,
   }) async {
     final members = {...chat.members};
-    final moderators = {...chat.moderators};
+    final moderators = await _chatModerators(sdk, chat);
     for (final MapEntry(key: memberDid, value: entryId)
         in chat.members.entries) {
       if (!active.contains(entryId)) {
@@ -753,6 +753,25 @@ class VtcGroupChatService {
     await _repository.saveGroupChat(
       chat.copyWith(members: members, moderators: moderators),
     );
+  }
+
+  /// The members let into [chat] who moderate it, as the chat itself says,
+  /// or as this phone recorded while it cannot find the chat. The chat is
+  /// asked because a change to it may not have held, and a record that
+  /// says it did would keep a manager unable to post for good.
+  Future<Set<String>> _chatModerators(
+    MeetingPlaceCoreSDK sdk,
+    VtcGroupChat chat,
+  ) async {
+    final channel = await sdk.findChannelByOtherPartyPermanentDid(
+      chat.groupDid,
+    );
+    if (channel == null) return {...chat.moderators};
+    final moderators = await sdk.groupModerators(channel);
+    return {
+      for (final memberDid in chat.members.keys)
+        if (moderators.contains(memberDid)) memberDid,
+    };
   }
 
   /// Whether [error], refusing to list [chat]'s group, means the community
