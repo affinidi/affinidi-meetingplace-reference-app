@@ -184,36 +184,27 @@ void main() {
     expect(inMember('dir_bob', find.byIcon(McIcons.check)), findsOneWidget);
   });
 
-  testWidgets('aligns the icons right of every member\'s name', (tester) async {
+  testWidgets('aligns the vouch icons right of every member\'s name', (
+    tester,
+  ) async {
     await pumpScreen(tester);
 
-    for (final entryId in ['dir_bob', 'dir_carol', 'dir_dan', 'dir_anon']) {
-      expect(
-        inMember(entryId, find.byKey(const Key('vtc_member_credentials'))),
-        findsOneWidget,
-      );
-    }
     final name = tester.getTopRight(inMember('dir_bob', find.text('Bob')));
-    final vouches = tester.getCenter(
-      inMember('dir_bob', find.byKey(const Key('vtc_vouches'))),
+    Offset vouchesOf(String entryId) => tester.getCenter(
+      inMember(entryId, find.byKey(const Key('vtc_vouches'))),
     );
-    final credentials = tester.getCenter(
-      inMember('dir_bob', find.byKey(const Key('vtc_member_credentials'))),
-    );
-    expect(vouches.dx, greaterThan(name.dx));
-    expect(credentials.dx, greaterThan(vouches.dx));
-    // Right-aligned: Carol's icons line up with Bob's, whatever the names.
+    expect(vouchesOf('dir_bob').dx, greaterThan(name.dx));
+    // Right-aligned: Carol's icon lines up with Bob's, whatever the names.
     expect(
-      tester
-          .getCenter(
-            inMember(
-              'dir_carol',
-              find.byKey(const Key('vtc_member_credentials')),
-            ),
-          )
-          .dx,
-      moreOrLessEquals(credentials.dx),
+      vouchesOf('dir_carol').dx,
+      moreOrLessEquals(vouchesOf('dir_bob').dx),
     );
+  });
+
+  testWidgets('offers no way to open a member\'s credentials', (tester) async {
+    await pumpScreen(tester);
+
+    expect(find.byIcon(McIcons.credentials), findsNothing);
   });
 
   testWidgets('shows each member\'s role under their name', (tester) async {

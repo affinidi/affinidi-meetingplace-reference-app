@@ -102,7 +102,6 @@ class VtcGroupMembersScreen extends HookConsumerWidget {
                 final edge? => shown.vouched(edge),
                 null => shown,
               },
-              names: vtcMemberNames(members),
               onVouch: (name) => vouch(entry, name),
               onRefreshed: switch (entry.did) {
                 final did? => (edges) => refreshed.value = {

@@ -5,12 +5,11 @@ import '../../../application/services/vtc_trust_service/vtc_trust_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../vtc_join/vtc_role_name.dart';
 import 'vtc_member_avatar.dart';
-import 'vtc_member_credentials.dart';
 import 'vtc_vouch.dart';
 
 /// Another member of a community, as its directory shows them: their
-/// picture, name and role, the vouches between them and the member, an
-/// offer to vouch for them, and their credentials.
+/// picture, name and role, the vouches between them and the member, and
+/// an offer to vouch for them.
 class VtcMemberTile extends StatelessWidget {
   const VtcMemberTile({
     super.key,
@@ -18,7 +17,6 @@ class VtcMemberTile extends StatelessWidget {
     required this.communityName,
     required this.entry,
     required this.edges,
-    required this.names,
     required this.onVouch,
     this.onRefreshed,
   });
@@ -30,9 +28,6 @@ class VtcMemberTile extends StatelessWidget {
   /// The vouches between this member and the member on this phone.
   final VtcEdges edges;
 
-  /// The names of the members shown, by their DID, to name who vouched.
-  final Map<String, String> names;
-
   /// Vouches for this member, given the name the row shows.
   final void Function(String name) onVouch;
 
@@ -40,7 +35,7 @@ class VtcMemberTile extends StatelessWidget {
   /// them.
   final ValueChanged<VtcEdges>? onRefreshed;
 
-  /// The room each icon of a row takes, kept when it shows none.
+  /// The room the vouch icon takes, kept when it shows none.
   static const _iconSlot = 40.0;
 
   @override
@@ -57,8 +52,8 @@ class VtcMemberTile extends StatelessWidget {
         ),
         null => null,
       },
-      // The icons last, in a slot each, so they line up on the right in
-      // every row whether or not it offers to vouch.
+      // The icon last, in its slot, so it lines up on the right in every
+      // row whether or not it offers to vouch.
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -82,28 +77,8 @@ class VtcMemberTile extends StatelessWidget {
               onRefreshed: onRefreshed,
             ),
           ),
-          SizedBox.square(
-            dimension: _iconSlot,
-            child: VtcMemberCredentialsButton(
-              communityDid: communityDid,
-              communityName: communityName,
-              entry: entry,
-              name: name,
-              names: names,
-            ),
-          ),
         ],
       ),
     );
   }
 }
-
-/// The names [entries] show, by their DID, for [VtcMemberTile.names].
-Map<String, String> vtcMemberNames(Iterable<DirectoryEntry> entries) => {
-  for (final entry in entries)
-    if ((entry.did, entry.displayName ?? entry.nickname) case (
-      final did?,
-      final shown?,
-    ))
-      did: shown,
-};

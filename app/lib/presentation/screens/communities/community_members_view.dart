@@ -115,7 +115,6 @@ class CommunityMembersView extends HookConsumerWidget {
                   communityName: communityName,
                   entry: entry,
                   edges: edges[entry.did] ?? const VtcEdges(),
-                  names: vtcMemberNames(members),
                   onVouch: (name) => vouch(entry, name),
                   onRefreshed: switch (entry.did) {
                     final did? =>
