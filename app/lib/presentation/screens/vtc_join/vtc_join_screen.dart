@@ -662,9 +662,8 @@ class _Consent extends StatelessWidget {
 
 /// Whether members may find the member in the community's directory: a
 /// choice of the member's own, so a panel apart from what the community
-/// asks for. One sentence says what it does; the small print opens on tap,
-/// as a consent line's does.
-class _Findable extends HookWidget {
+/// asks for, explained in one sentence.
+class _Findable extends StatelessWidget {
   const _Findable({
     required this.state,
     required this.communityName,
@@ -678,61 +677,16 @@ class _Findable extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final mc = context.mcColors;
-    final expanded = useState(false);
-    final listed = state.listsNewMembers;
-    final details = [
-      if (listed != null)
-        _Note(
-          listed ? l10n.vtcJoinDirectoryListed : l10n.vtcJoinDirectoryHidden,
-        ),
-      _Note(l10n.vtcJoinListMeNote),
-      if (state.directoryDisclosure?.externalCards ?? false)
-        _Note(l10n.vtcJoinExternalCards),
-    ];
-
     return GlassCard(
       title: l10n.vtcFindableHeading,
-      child: listed == false
+      child: state.listsNewMembers == false
           ? _Note(l10n.vtcJoinDirectoryHidden)
           // A Row, not a SwitchListTile: the onboarding layout measures
           // intrinsic heights, which a ListTile misreports.
           : Row(
+              spacing: McSpacing.s2,
               children: [
-                Expanded(
-                  // Tells screen readers the line opens, as the chevron
-                  // tells the eye.
-                  child: Semantics(
-                    button: true,
-                    expanded: expanded.value,
-                    child: InkWell(
-                      key: const Key('vtc_join_findable_more'),
-                      onTap: () => expanded.value = !expanded.value,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        spacing: McSpacing.s2,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              spacing: McSpacing.s1,
-                              children: [
-                                _Note(l10n.vtcJoinFindableNote(communityName)),
-                                if (expanded.value) ...details,
-                              ],
-                            ),
-                          ),
-                          Icon(
-                            expanded.value
-                                ? McIcons.chevronUp
-                                : McIcons.chevronDown,
-                            color: mc.textSecondary,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
+                Expanded(child: _Note(l10n.vtcJoinFindableNote(communityName))),
                 Switch.adaptive(
                   key: const Key('vtc_join_list_me'),
                   value: state.listInDirectory,

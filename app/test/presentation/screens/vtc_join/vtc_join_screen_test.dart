@@ -1006,13 +1006,14 @@ void main() {
         ),
         findsOneWidget,
       );
-      const smallPrint = 'If this is off, you may be listed for a moment';
-      expect(find.textContaining(smallPrint), findsNothing);
-
-      await tapVisible(tester, find.byKey(const Key('vtc_join_findable_more')));
-      await tester.pumpAndSettle();
-
-      expect(find.textContaining(smallPrint), findsOneWidget);
+      // Nothing more to open.
+      expect(
+        find.descendant(
+          of: section,
+          matching: find.byIcon(McIcons.chevronDown),
+        ),
+        findsNothing,
+      );
     });
 
     testWidgets('offers no wider audience than a field allows', (tester) async {

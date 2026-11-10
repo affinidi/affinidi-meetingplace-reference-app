@@ -2945,9 +2945,7 @@
 	},
 	"vtcJoinDetailsHeading": "Profile details the community asks for",
 	"vtcJoinDetailsNote": "You see the values from your VTA and approve sharing them before anything is sent.",
-	"vtcJoinDirectoryListed": "This community lists new members in its member directory.",
 	"vtcJoinDirectoryHidden": "This community doesn't list new members in its member directory.",
-	"vtcJoinListMeNote": "If this is off, you may be listed for a moment when you join, until Meeting Place takes your card out of the directory.",
 	"vtcCommunityRole": "Your role",
 	"@vtcCommunityRole": {
 		"description": "Label of the member's role in a community on its page"
@@ -3014,7 +3012,6 @@
 		}
 	},
 	"vtcJoinFieldSetByAdmins": "Set by admins",
-	"vtcJoinExternalCards": "You may publish your card beyond the community, if you choose to.",
 	"vtcJoinUnnamedCommunity": "A community",
 	"vtcJoinThisCommunity": "this community",
 	"vtcJoinWantsYou": "wants you to join",

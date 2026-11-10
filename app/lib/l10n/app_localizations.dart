@@ -4586,23 +4586,11 @@ abstract class AppLocalizations {
   /// **'You see the values from your VTA and approve sharing them before anything is sent.'**
   String get vtcJoinDetailsNote;
 
-  /// No description provided for @vtcJoinDirectoryListed.
-  ///
-  /// In en, this message translates to:
-  /// **'This community lists new members in its member directory.'**
-  String get vtcJoinDirectoryListed;
-
   /// No description provided for @vtcJoinDirectoryHidden.
   ///
   /// In en, this message translates to:
   /// **'This community doesn\'t list new members in its member directory.'**
   String get vtcJoinDirectoryHidden;
-
-  /// No description provided for @vtcJoinListMeNote.
-  ///
-  /// In en, this message translates to:
-  /// **'If this is off, you may be listed for a moment when you join, until Meeting Place takes your card out of the directory.'**
-  String get vtcJoinListMeNote;
 
   /// Label of the member's role in a community on its page
   ///
@@ -4675,12 +4663,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Set by admins'**
   String get vtcJoinFieldSetByAdmins;
-
-  /// No description provided for @vtcJoinExternalCards.
-  ///
-  /// In en, this message translates to:
-  /// **'You may publish your card beyond the community, if you choose to.'**
-  String get vtcJoinExternalCards;
 
   /// No description provided for @vtcJoinUnnamedCommunity.
   ///

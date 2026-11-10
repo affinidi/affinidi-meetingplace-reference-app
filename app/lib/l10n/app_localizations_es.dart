@@ -3084,16 +3084,8 @@ class AppLocalizationsEs extends AppLocalizations {
       'You see the values from your VTA and approve sharing them before anything is sent.';
 
   @override
-  String get vtcJoinDirectoryListed =>
-      'This community lists new members in its member directory.';
-
-  @override
   String get vtcJoinDirectoryHidden =>
       'This community doesn\'t list new members in its member directory.';
-
-  @override
-  String get vtcJoinListMeNote =>
-      'If this is off, you may be listed for a moment when you join, until Meeting Place takes your card out of the directory.';
 
   @override
   String get vtcCommunityRole => 'Your role';
@@ -3156,10 +3148,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get vtcJoinFieldSetByAdmins => 'Set by admins';
-
-  @override
-  String get vtcJoinExternalCards =>
-      'You may publish your card beyond the community, if you choose to.';
 
   @override
   String get vtcJoinUnnamedCommunity => 'A community';
