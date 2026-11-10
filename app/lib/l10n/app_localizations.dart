@@ -4904,6 +4904,12 @@ abstract class AppLocalizations {
   /// **'Leave community'**
   String get vtcJoinLeaveAction;
 
+  /// Opens the community the administrators just admitted the member to, at its channels
+  ///
+  /// In en, this message translates to:
+  /// **'Go to community'**
+  String get vtcJoinGoToCommunity;
+
   /// Asks the member to confirm leaving a community
   ///
   /// In en, this message translates to:
