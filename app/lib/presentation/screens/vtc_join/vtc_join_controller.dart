@@ -1245,10 +1245,27 @@ class VtcJoinController extends _$VtcJoinController {
     final manifest = _manifest;
     if (state.step != VtcJoinStep.joined || manifest == null) return;
     state = state.copyWith(step: VtcJoinStep.working);
+    await _leave(manifest.communityDid);
+  }
 
+  /// Leaves [communityDid] without opening it first, as from the
+  /// community's Membership tab, which asks the member to confirm first.
+  Future<void> leaveCommunity(
+    String communityDid, {
+    required String communityName,
+  }) async {
+    if (state.step != VtcJoinStep.scanning) return;
+    state = state.copyWith(
+      step: VtcJoinStep.working,
+      communityName: communityName,
+    );
+    await _leave(communityDid);
+  }
+
+  Future<void> _leave(String communityDid) async {
     await _run(() async {
       try {
-        await _service.leave(manifest.communityDid, onStep: _showLeaveStep);
+        await _service.leave(communityDid, onStep: _showLeaveStep);
       } on MeetingPlaceVtcSDKException catch (error) {
         if (error.httpStatus != _lastAdministratorStatus) rethrow;
         return _fail(VtcJoinFailure.lastAdministrator);

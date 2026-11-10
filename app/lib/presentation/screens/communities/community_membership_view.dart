@@ -5,13 +5,15 @@ import '../../../application/services/vtc_service/vtc_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../themes/tokens/mc_icons.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
+import '../vtc_join/vtc_join_screen.dart';
 import '../vtc_join/vtc_membership_card_view.dart';
 import '../vtc_join/vtc_role_name.dart';
 import 'community_logo_provider.dart';
 import 'community_tabs_providers.dart';
 
 /// The member's membership of a community: their role there and the
-/// membership card it issued, both as their VTA keeps them.
+/// membership card it issued, both as their VTA keeps them, and a way to
+/// leave it.
 class CommunityMembershipView extends ConsumerWidget {
   const CommunityMembershipView({
     super.key,
@@ -73,9 +75,33 @@ class CommunityMembershipView extends ConsumerWidget {
                 ),
               ],
             ),
+          const SizedBox(height: 12),
+          ElevatedButton(
+            key: const Key('community_membership_leave'),
+            onPressed: () => _leave(context, ref),
+            style: context.destructiveElevatedButtonStyle,
+            child: Text(l10n.vtcJoinLeaveAction),
+          ),
         ],
       ),
     );
+  }
+
+  /// Leaves the community once the member confirms, then closes it: they
+  /// no longer belong to it.
+  Future<void> _leave(BuildContext context, WidgetRef ref) async {
+    // Read now: the view may be gone once leaving ends.
+    final service = ref.read(vtcServiceProvider);
+    if (!await confirmLeaveCommunity(context, communityName)) return;
+    if (!context.mounted) return;
+    await VtcJoinScreen.showLeaving(
+      context,
+      communityDid: communityDid,
+      communityName: communityName,
+    );
+    // Still a member when leaving failed or was refused.
+    final community = await service.community(communityDid);
+    if (community == null && context.mounted) Navigator.of(context).pop();
   }
 }
 

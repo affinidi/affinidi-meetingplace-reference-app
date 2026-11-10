@@ -39,11 +39,24 @@ import 'vtc_vetter_details.dart';
 /// apply as an identity from the member's VTA. In the look of linking the
 /// VTA, the review laid out like a consent screen.
 class VtcJoinScreen extends HookConsumerWidget {
-  const VtcJoinScreen({super.key, this.code});
+  const VtcJoinScreen({super.key, this.code})
+    : leaveCommunityDid = null,
+      leaveCommunityName = null;
+
+  const VtcJoinScreen._leaving({
+    required String communityDid,
+    required String communityName,
+  }) : code = null,
+       leaveCommunityDid = communityDid,
+       leaveCommunityName = communityName;
 
   /// The code of the community to open at once, as if it were scanned: its
   /// DID or join phrase; null to ask for a code.
   final String? code;
+
+  /// The community to leave at once, and its name; null unless leaving.
+  final String? leaveCommunityDid;
+  final String? leaveCommunityName;
 
   /// Opens joining over the current screen, at the community of [code] if
   /// given.
@@ -54,6 +67,22 @@ class VtcJoinScreen extends HookConsumerWidget {
         ),
       );
 
+  /// Leaves the community of [communityDid] over the current screen,
+  /// showing its steps and the outcome. Ask the member to confirm first,
+  /// with [confirmLeaveCommunity].
+  static Future<void> showLeaving(
+    BuildContext context, {
+    required String communityDid,
+    required String communityName,
+  }) => Navigator.of(context, rootNavigator: true).push<void>(
+    MaterialPageRoute<void>(
+      builder: (context) => VtcJoinScreen._leaving(
+        communityDid: communityDid,
+        communityName: communityName,
+      ),
+    ),
+  );
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(vtcJoinControllerProvider);
@@ -62,6 +91,15 @@ class VtcJoinScreen extends HookConsumerWidget {
       if (code case final code?) {
         // Not while building: reading the community changes the state.
         Future.microtask(() => controller.onScanned(code));
+      }
+      if (leaveCommunityDid case final did?) {
+        // Not while building: leaving changes the state.
+        Future.microtask(
+          () => controller.leaveCommunity(
+            did,
+            communityName: leaveCommunityName ?? '',
+          ),
+        );
       }
       return null;
     }, const []);
@@ -158,12 +196,7 @@ class VtcJoinScreen extends HookConsumerWidget {
             label: l10n.vtcJoinLeaveAction,
             isOutlined: true,
             onPressed: () async {
-              if (await _confirm(
-                context,
-                title: l10n.vtcJoinLeaveTitle(name),
-                message: l10n.vtcJoinLeaveMessage,
-                action: l10n.vtcJoinLeaveAction,
-              )) {
+              if (await confirmLeaveCommunity(context, name)) {
                 await controller.leave();
               }
             },
@@ -238,6 +271,17 @@ class VtcJoinScreen extends HookConsumerWidget {
       },
     );
   }
+}
+
+/// Asks the member to confirm leaving the community named [name].
+Future<bool> confirmLeaveCommunity(BuildContext context, String name) {
+  final l10n = context.l10n;
+  return _confirm(
+    context,
+    title: l10n.vtcJoinLeaveTitle(name),
+    message: l10n.vtcJoinLeaveMessage,
+    action: l10n.vtcJoinLeaveAction,
+  );
 }
 
 /// Asks the member to confirm a step that cannot be undone, such as
