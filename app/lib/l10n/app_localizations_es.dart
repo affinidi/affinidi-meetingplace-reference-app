@@ -3231,9 +3231,6 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get vtcJoinMembershipDidField => 'membership ID';
-
-  @override
   String vtcJoinListAnd(String rest, String last) {
     return '$rest and $last';
   }

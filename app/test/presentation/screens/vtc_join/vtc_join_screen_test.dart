@@ -960,8 +960,8 @@ void main() {
       expect(find.text('hello@club.example'), findsOneWidget);
       expect(find.text('Keep notes about you'), findsOneWidget);
 
-      // Grouped by who sees it by default, the membership ID among them.
-      const group = 'Show your Role and membership ID to the administrators';
+      // Grouped by who sees it by default.
+      const group = 'Show your Role to the administrators';
       expect(find.text(group), findsOneWidget);
       const seenBy = 'Seen by: the administrators';
       expect(find.text(seenBy), findsNothing);
@@ -1013,6 +1013,28 @@ void main() {
       expect(find.text('Seen by: all members'), findsOneWidget);
       expect(find.textContaining('You can widen to'), findsNothing);
       expect(find.text('SET BY ADMINS'), findsNothing);
+    });
+
+    testWidgets('shows the membership DID where a new card shows it', (
+      tester,
+    ) async {
+      // As a community ships: the DID may reach members, but a new card
+      // shows it to administrators only.
+      network.joinManifest = {
+        ...network.joinManifest,
+        'directoryDisclosure': {
+          ..._disclosure([
+            _field('Name', 'members'),
+            {..._field('DID', 'admins'), 'ceiling': 'members'},
+          ]),
+          'membershipIdentifiers': 'members',
+        },
+      };
+      await pumpScreen(tester);
+      await enterCode(tester, fakeVtcDid);
+
+      expect(find.text('Show your Name to all members'), findsOneWidget);
+      expect(find.text('Show your DID to the administrators'), findsOneWidget);
     });
 
     testWidgets('names the details the community asks for', (tester) async {

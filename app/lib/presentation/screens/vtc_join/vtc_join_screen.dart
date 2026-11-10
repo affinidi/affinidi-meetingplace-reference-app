@@ -664,7 +664,8 @@ class _Consent extends StatelessWidget {
   }
 
   /// One line per audience, widest first: which directory values reach it
-  /// by default, the membership DID among them.
+  /// by default. The membership DID is the `did` field among them:
+  /// `membershipIdentifiers` is only how far it may ever reach.
   static List<Widget> _audienceItems(
     BuildContext context,
     DirectoryDisclosure disclosure,
@@ -679,8 +680,7 @@ class _Consent extends StatelessWidget {
               for (final field in disclosure.fields)
                 if (field.defaultVisibility == group) field,
             ]
-            case final fields
-            when fields.isNotEmpty || disclosure.membershipIdentifiers == group)
+            case final fields when fields.isNotEmpty)
           _ConsentItem(
             icon: switch (group) {
               DirectoryAudience.admins => McIcons.admin,
@@ -692,11 +692,7 @@ class _Consent extends StatelessWidget {
                 ? context.mcColors.warning
                 : null,
             title: l10n.vtcJoinShowsTo(
-              _listOf(l10n, [
-                for (final field in fields) field.label,
-                if (disclosure.membershipIdentifiers == group)
-                  l10n.vtcJoinMembershipDidField,
-              ]),
+              _listOf(l10n, [for (final field in fields) field.label]),
               audience(group),
             ),
             details: [

@@ -4808,12 +4808,6 @@ abstract class AppLocalizations {
   /// **'Show your {fields} to {audience}'**
   String vtcJoinShowsTo(String fields, String audience);
 
-  /// No description provided for @vtcJoinMembershipDidField.
-  ///
-  /// In en, this message translates to:
-  /// **'membership ID'**
-  String get vtcJoinMembershipDidField;
-
   /// The last item of a list joined to the others, as in 'name, team and role'
   ///
   /// In en, this message translates to:

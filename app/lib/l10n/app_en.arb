@@ -3060,7 +3060,6 @@
 			}
 		}
 	},
-	"vtcJoinMembershipDidField": "membership ID",
 	"vtcJoinListAnd": "{rest} and {last}",
 	"@vtcJoinListAnd": {
 		"description": "The last item of a list joined to the others, as in 'name, team and role'",
