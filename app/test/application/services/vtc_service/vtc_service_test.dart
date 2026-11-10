@@ -327,6 +327,19 @@ void main() {
         );
         expect(vtaTasks(), isNot(contains(VtaTask.didsCreate)));
       });
+
+      test('refuses a first application naming no identity', () async {
+        await expectLater(
+          service.join(await service.readCommunity(fakeVtcDid)),
+          throwsArgumentError,
+        );
+        expect(vtaTasks(), isNot(contains(VtaTask.didsCreate)));
+        expect(await service.community(fakeVtcDid), isNull);
+        expect(
+          network.joinRequests.map((r) => r['type']),
+          isNot(contains(JoinTask.submit)),
+        );
+      });
     });
 
     test('is a member even when the VTA keeps no card', () async {
@@ -453,7 +466,10 @@ void main() {
           },
         };
       network.joinVerdict = {'effect': 'refer'};
-      await service.join(await service.readCommunity(fakeVtcDid));
+      await service.join(
+        await service.readCommunity(fakeVtcDid),
+        persona: joinAs,
+      );
       network.joinStatus = 'approved';
 
       await service.checkApplication(fakeVtcDid);
@@ -612,7 +628,10 @@ void main() {
 
     test('keeps the reason a rejection gives', () async {
       network.joinVerdict = {'effect': 'refer'};
-      await service.join(await service.readCommunity(fakeVtcDid));
+      await service.join(
+        await service.readCommunity(fakeVtcDid),
+        persona: joinAs,
+      );
       network.joinStatus = 'rejected';
       network.joinRejectionReason = 'Members only';
 
@@ -625,7 +644,10 @@ void main() {
 
     test('checks every open application when asked', () async {
       network.joinVerdict = {'effect': 'refer'};
-      await service.join(await service.readCommunity(fakeVtcDid));
+      await service.join(
+        await service.readCommunity(fakeVtcDid),
+        persona: joinAs,
+      );
       network.joinStatus = 'approved';
 
       await service.checkApplications();
@@ -915,7 +937,10 @@ void main() {
       test('asks nothing while the application waits', () async {
         network.joinVerdict = {'effect': 'refer'};
         await service.leave(fakeVtcDid);
-        await service.join(await service.readCommunity(fakeVtcDid));
+        await service.join(
+          await service.readCommunity(fakeVtcDid),
+          persona: joinAs,
+        );
         network.memberRequests.clear();
 
         await service.refreshMembership(fakeVtcDid);
@@ -945,7 +970,10 @@ void main() {
 
     group('leave', () {
       setUp(() async {
-        await service.join(await service.readCommunity(fakeVtcDid));
+        await service.join(
+          await service.readCommunity(fakeVtcDid),
+          persona: joinAs,
+        );
         network.vta
           ..answers[VtaTask.credentialsQuery] = {
             'credentials': [
@@ -1060,7 +1088,10 @@ void main() {
       const bob = 'did:webvh:QmBob:vta.example:bob';
 
       setUp(() async {
-        await service.join(await service.readCommunity(fakeVtcDid));
+        await service.join(
+          await service.readCommunity(fakeVtcDid),
+          persona: joinAs,
+        );
         network.memberRequests.clear();
       });
 
@@ -1330,7 +1361,10 @@ void main() {
       }
 
       setUp(() async {
-        await service.join(await service.readCommunity(fakeVtcDid));
+        await service.join(
+          await service.readCommunity(fakeVtcDid),
+          persona: joinAs,
+        );
       });
 
       test('tells when a card is kept and when it is left', () async {
@@ -1341,7 +1375,10 @@ void main() {
         await Future<void>.delayed(Duration.zero);
         expect(changes, 1);
 
-        await service.join(await service.readCommunity(fakeVtcDid));
+        await service.join(
+          await service.readCommunity(fakeVtcDid),
+          persona: joinAs,
+        );
         await Future<void>.delayed(Duration.zero);
         expect(changes, 2);
       });
@@ -1356,7 +1393,7 @@ void main() {
 
         expect(entries.single.key, 'urn:uuid:vmc');
         expect(entries.single.communityName, 'Football club');
-        expect(entries.single.contextId, 'vta');
+        expect(entries.single.contextId, joinAs.contextId);
         expect(entries.single.left, isNull);
       });
 
@@ -1528,7 +1565,10 @@ void main() {
       };
 
       setUp(() async {
-        await service.join(await service.readCommunity(fakeVtcDid));
+        await service.join(
+          await service.readCommunity(fakeVtcDid),
+          persona: joinAs,
+        );
       });
 
       test("lists each group's longest-lasting card, named", () async {

@@ -103,6 +103,14 @@ void main() {
       container.read(vtcJoinControllerProvider.notifier);
   VtcJoinState state() => container.read(vtcJoinControllerProvider);
 
+  /// The member's identity as the VTA holds it, for a membership the test
+  /// sets up through the service.
+  VtaPersona identityPersona() => VtaPersona(
+    did: persona.did,
+    contextId: 'vta',
+    signingKeyId: '${persona.did}#key-0',
+  );
+
   /// Applies, joining as the member's identity under a new DID of its own
   /// once asked which identity joins and which DID the community sees.
   Future<void> join() async {
@@ -785,7 +793,10 @@ void main() {
     });
 
     test('says when the scanned community is already joined', () async {
-      await service.join(await service.readCommunity(fakeVtcDid));
+      await service.join(
+        await service.readCommunity(fakeVtcDid),
+        persona: identityPersona(),
+      );
 
       await controller().onScanned(fakeVtcDid);
 
@@ -1356,7 +1367,10 @@ void main() {
     });
 
     test('leaves a joined community', () async {
-      await service.join(await service.readCommunity(fakeVtcDid));
+      await service.join(
+        await service.readCommunity(fakeVtcDid),
+        persona: identityPersona(),
+      );
       await controller().onScanned(fakeVtcDid);
 
       await controller().leave();
@@ -1367,7 +1381,10 @@ void main() {
     });
 
     test('shows each step of leaving, then forgets it', () async {
-      await service.join(await service.readCommunity(fakeVtcDid));
+      await service.join(
+        await service.readCommunity(fakeVtcDid),
+        persona: identityPersona(),
+      );
       await controller().onScanned(fakeVtcDid);
       final steps = <VtcLeaveStep?>[];
       container.listen(
@@ -1382,7 +1399,10 @@ void main() {
 
     test('says when the member is the last administrator', () async {
       network.leaveRefusal = (409, 'conflict');
-      await service.join(await service.readCommunity(fakeVtcDid));
+      await service.join(
+        await service.readCommunity(fakeVtcDid),
+        persona: identityPersona(),
+      );
       await controller().onScanned(fakeVtcDid);
 
       await controller().leave();
@@ -1450,7 +1470,10 @@ void main() {
               CommunityImport.roleOf(card, fakeVtcDid, persona.did) ?? heldRole;
           return {'status': 'valid'};
         };
-      await service.join(await service.readCommunity(fakeVtcDid));
+      await service.join(
+        await service.readCommunity(fakeVtcDid),
+        persona: identityPersona(),
+      );
     });
 
     /// Waits until the screen shows [role].

@@ -493,11 +493,11 @@ class VtcService {
   /// gathered ([vetting]) when it asks for vetting.
   ///
   /// The first application to a community is made as [persona], one of
-  /// [vtaPersonas], else as a new persona of [identity] wearing its profile,
-  /// or else as a new persona the VTA creates; a later one applies as the
-  /// same persona. Once admitted, the issued cards are kept
-  /// on the VTA, where other apps of the member find them; an admission
-  /// returns its membership card only when the VTA kept it.
+  /// [vtaPersonas], else as a new persona of [identity] wearing its profile;
+  /// it names one of them. A later one applies as the same persona. Once
+  /// admitted, the issued cards are kept on the VTA, where other apps of the
+  /// member find them; an admission returns its membership card only when
+  /// the VTA kept it.
   ///
   /// Throws [VtaNotLinkedException] when no VTA is linked, and
   /// [MeetingPlaceVtcSDKException] when the VTA or the community refuses or
@@ -579,10 +579,11 @@ class VtcService {
   /// The identity that applies to [manifest]'s community: the one recorded
   /// for it, else [persona], else a new persona of [identity] wearing its
   /// profile, so the community sees the identity's details under a DID no
-  /// other community knows, else a new persona the VTA creates. Recorded
-  /// before anything is sent, so a retry applies as the same identity.
+  /// other community knows. Recorded before anything is sent, so a retry
+  /// applies as the same identity.
   ///
-  /// Throws [ArgumentError] when [identity] is not a persona of the VTA,
+  /// Throws [ArgumentError] when a first application names neither
+  /// [persona] nor [identity], or [identity] is not a persona of the VTA,
   /// else as [join] does.
   Future<VtaPersona> joiningIdentity(
     JoinManifest manifest, {
@@ -598,18 +599,19 @@ class VtcService {
       return _persona(recorded);
     }
 
+    // A persona of no identity has no profile, so the community would know
+    // the member by no name.
+    if (persona == null && identity == null) {
+      throw ArgumentError('A first application names the identity joining');
+    }
     if (identity != null && !identity.isVtaPersona) {
       throw ArgumentError.value(identity.id, 'identity', 'not a VTA persona');
     }
-    final vta = await _grantedVta();
-    final label = manifest.name ?? manifest.communityDid;
-    persona ??= identity == null
-        ? await vta.createPersona(label: label)
-        : await vta.createPersonaFor(
-            contextId: identity.vtaContextId!,
-            profileId: identity.vtaProfileId!,
-            label: label,
-          );
+    persona ??= await (await _grantedVta()).createPersonaFor(
+      contextId: identity!.vtaContextId!,
+      profileId: identity.vtaProfileId!,
+      label: manifest.name ?? manifest.communityDid,
+    );
     await _repository.saveCommunity(
       VtcCommunity(
         communityDid: manifest.communityDid,
