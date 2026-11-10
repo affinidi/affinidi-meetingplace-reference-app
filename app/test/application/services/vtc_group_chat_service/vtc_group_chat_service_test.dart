@@ -532,7 +532,10 @@ void main() {
 
   group('VtcGroupChatService.joinGroupChats', () {
     late _JoinRecordingService joining;
-    final member = FakeIdentities.primaryIdentity;
+    final member = FakeIdentities.primaryIdentity.copyWith(
+      vtaContextId: 'mpx-1',
+      vtaProfileId: '01PROFILE',
+    );
 
     setUp(() {
       vtc.memberCommunities = [
@@ -599,6 +602,18 @@ void main() {
     test('names the identity that is the member as the one to act', () async {
       expect((await joining.memberIdentity(_communityDid))?.id, member.id);
       expect(await joining.memberIdentity('did:webvh:QmOther:x'), isNull);
+    });
+
+    test('names the identity a persona of its own joined as', () async {
+      vtc.memberCommunities = const [
+        VtcCommunity(
+          communityDid: _communityDid,
+          personaDid: 'did:webvh:QmClub:host.example',
+          contextId: 'mpx-1',
+        ),
+      ];
+
+      expect((await joining.memberIdentity(_communityDid))?.id, member.id);
     });
 
     test('leaves a community whose member is not on this phone', () async {

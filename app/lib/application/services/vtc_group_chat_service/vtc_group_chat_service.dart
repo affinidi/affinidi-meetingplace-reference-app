@@ -101,10 +101,12 @@ class VtcGroupChatService {
     return _identityOf(community);
   }
 
+  /// The identity whose VTA context holds [community]'s persona: its own
+  /// DID, or a persona it joined this community with alone.
   Identity? _identityOf(VtcCommunity community) => _ref
       .read(identitiesServiceProvider)
       .identities
-      .where((identity) => identity.did == community.personaDid)
+      .where((identity) => identity.vtaContextId == community.contextId)
       .firstOrNull;
 
   /// Creates the chat of the group [group] of [communityDid] as [identity],
