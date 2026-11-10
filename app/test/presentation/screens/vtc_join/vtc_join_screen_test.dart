@@ -1513,7 +1513,7 @@ void main() {
       expect(join().onPressed, isNull);
     });
 
-    testWidgets('draws ways in as plain cards', (tester) async {
+    testWidgets('colours a way in by its kind of admission', (tester) async {
       network.joinManifest = {
         ...network.joinManifest,
         'criteria': [
@@ -1537,8 +1537,8 @@ void main() {
         find.descendant(of: deck, matching: find.text('REVIEWED')),
         findsOneWidget,
       );
-      // A card, not a hero panel, with no product wash and no blur.
-      expect(topCard().accent, isNull);
+      // A card, not a hero panel, washed in its kind's colour, with no blur.
+      expect(topCard().accent, McColors.purple);
       expect(
         (topCard().shape! as RoundedRectangleBorder).borderRadius,
         BorderRadius.circular(McRadius.md),
@@ -1557,15 +1557,25 @@ void main() {
         ),
         findsOneWidget,
       );
+      // A way this app cannot apply under stays plain.
       expect(topCard().accent, isNull);
     });
 
     testWidgets('shows a single way in as a deck of one', (tester) async {
       await pumpScreen(tester);
       await enterCode(tester, fakeVtcDid);
+      final deck = find.byKey(const Key('vtc_join_ways'));
 
-      expect(find.byKey(const Key('vtc_join_ways')), findsOneWidget);
+      expect(deck, findsOneWidget);
       expect(find.byKey(const Key('vtc_join_way_position')), findsNothing);
+      expect(
+        tester
+            .widget<AppCard>(
+              find.descendant(of: deck, matching: find.byType(AppCard)),
+            )
+            .accent,
+        McColors.blue,
+      );
     });
 
     testWidgets('shows the manifest as sent from the title', (tester) async {

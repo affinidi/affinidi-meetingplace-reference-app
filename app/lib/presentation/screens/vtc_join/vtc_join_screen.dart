@@ -16,6 +16,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../navigation/routes/dashboard_routes.dart';
 import '../../dialogs/qr_code_picker/qr_code_picker.dart';
 import '../../effects/confetti/confetti_overlay.dart';
+import '../../themes/tokens/mc_colors.dart';
 import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../../themes/tokens/mc_spacing.dart';
@@ -913,9 +914,9 @@ class _WaysIn extends StatelessWidget {
 
 /// A way in, as a card in the deck of ways in: the kind of admission as an
 /// eyebrow over what it takes, or why this app cannot apply under it yet,
-/// the way's symbol at the top end, and what it asks for below. Plain, with
-/// no corner wash: that marks a product, not whether a way is supported,
-/// which the muted title and symbol already show.
+/// the way's symbol at the top end, and what it asks for below. Each kind
+/// carries its own colour as the corner wash and symbol, as a product
+/// does; a way this app cannot apply under stays plain and muted.
 class _WayCard extends StatelessWidget {
   const _WayCard(this.way);
 
@@ -929,6 +930,7 @@ class _WayCard extends StatelessWidget {
     final textTheme = context.textTheme;
     final l10n = context.l10n;
     final supported = way.unsupported == null;
+    final accent = _accentOf(way);
     final details = <(IconData, String)>[
       if (way.credentialType case final type?)
         (McIcons.credentials, l10n.vtcJoinWayWithCredential(type)),
@@ -939,6 +941,7 @@ class _WayCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(McSpacing.s2),
       child: AppCard(
+        accent: accent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(McRadius.md),
           side: BorderSide(color: mc.hairline),
@@ -984,7 +987,7 @@ class _WayCard extends StatelessWidget {
                   Icon(
                     _iconOf(way),
                     size: _symbolSize,
-                    color: supported ? mc.textPrimary : mc.textTertiary,
+                    color: accent ?? mc.textTertiary,
                   ),
                 ],
               ),
@@ -1014,6 +1017,14 @@ class _WayCard extends StatelessWidget {
 
 /// The kind of admission [way] offers, for its card's eyebrow.
 String _kindOf(VtcJoinWay way) => way.automatic ? 'automatic' : 'reviewed';
+
+/// The colour of [way]'s kind of admission, or null when this app cannot
+/// apply under it.
+Color? _accentOf(VtcJoinWay way) => way.unsupported != null
+    ? null
+    : way.automatic
+    ? McColors.blue
+    : McColors.purple;
 
 IconData _iconOf(VtcJoinWay way) => way.unsupported != null
     ? McIcons.block
