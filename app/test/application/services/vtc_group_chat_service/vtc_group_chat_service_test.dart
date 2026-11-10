@@ -107,8 +107,13 @@ class _FakeVtcService extends Fake implements VtcService {
   Future<List<VtcGroupListing>> memberGroups(String communityDid) async =>
       groupsOf[communityDid] ?? const [];
 
+  int linkLookups = 0;
+
   @override
-  Future<GroupChatLink?> groupChatLink(String groupDid) async => link;
+  Future<GroupChatLink?> groupChatLink(String groupDid) async {
+    linkLookups++;
+    return link;
+  }
 
   @override
   Future<int> collectGroupCredentials(
@@ -585,6 +590,10 @@ void main() {
     );
 
     setUp(() {
+      vtc.link = const GroupChatLink(
+        mnemonic: 'group-chat',
+        controlPlaneDid: '',
+      );
       vtc.memberCommunities = [
         VtcCommunity(
           communityDid: _communityDid,
@@ -786,6 +795,22 @@ void main() {
           ),
         ),
       );
+    });
+
+    test('joins a chat once while a join of it is under way', () async {
+      final joins = [
+        for (var i = 0; i < 2; i++)
+          service.joinChat(
+            _communityDid,
+            vtc.group,
+            identity: FakeIdentities.primaryIdentity,
+          ),
+      ];
+
+      for (final join in joins) {
+        await expectLater(join, throwsA(isA<VtcGroupChatException>()));
+      }
+      expect(vtc.linkLookups, 1);
     });
 
     test('refuses when the community linked no chat', () async {

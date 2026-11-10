@@ -60,6 +60,11 @@ class VtcGroupsController extends _$VtcGroupsController {
     if (!ref.mounted) return;
     state = state.copyWith(isLoading: false, groups: groups);
 
+    // Each group's chat first, as the actions on it hang on it; the
+    // credentials and joining the linked chats follow.
+    await _readChats(groups);
+    if (!ref.mounted) return;
+
     try {
       await _vtc.collectGroupCredentials(
         communityDid,
@@ -69,43 +74,62 @@ class VtcGroupsController extends _$VtcGroupsController {
       _log('collecting group credentials', error.code.name);
     }
     final credentialsUntil = <String, DateTime>{};
-    for (final listing in groups) {
-      try {
-        if (await _vtc.groupCredentialValidUntil(
+    await Future.wait([
+      for (final listing in groups)
+        _vtc
+            .groupCredentialValidUntil(
               communityDid,
               groupDid: listing.group.groupDid,
             )
-            case final until?) {
-          credentialsUntil[listing.group.groupId] = until;
-        }
-      } on MeetingPlaceVtcSDKException catch (error) {
-        _log('reading a group credential', error.code.name);
-      }
-    }
+            .then((until) {
+              if (until != null) {
+                credentialsUntil[listing.group.groupId] = until;
+              }
+            })
+            .catchError((Object error) {
+              _log(
+                'reading a group credential',
+                (error as MeetingPlaceVtcSDKException).code.name,
+              );
+            }, test: (error) => error is MeetingPlaceVtcSDKException),
+    ]);
+    if (!ref.mounted) return;
+    state = state.copyWith(credentialsUntil: credentialsUntil);
+
     // A member of a group is in its chat without asking: join any linked
     // since the last time, so only a chat that cannot be joined now is
     // left to ask for.
+    if (!state.chats.values.contains(VtcGroupChatStatus.linked)) return;
     try {
       await _chats.joinGroupChats();
     } on Exception catch (error) {
       _log('joining group chats', error.runtimeType);
     }
     if (!ref.mounted) return;
+    await _readChats(groups);
+  }
+
+  /// Where the chat of each of [groups] stands: the chats this phone owns
+  /// or joined, else whether the community linked one, read all at once.
+  Future<void> _readChats(List<VtcGroupListing> groups) async {
     final chats = await _chats.chats();
-    final statuses = <String, VtcGroupChatStatus>{};
-    for (final listing in groups) {
-      final group = listing.group;
-      final chat = chats
-          .where((chat) => chat.groupDid == group.groupDid)
-          .firstOrNull;
-      statuses[group.groupId] = switch (chat) {
-        VtcGroupChat(isOwner: true) => VtcGroupChatStatus.owned,
-        VtcGroupChat() => VtcGroupChatStatus.joined,
-        null => await _linkStatus(group.groupDid),
-      };
-    }
+    final statuses = await Future.wait([
+      for (final VtcGroupListing(:group) in groups)
+        switch (chats
+            .where((chat) => chat.groupDid == group.groupDid)
+            .firstOrNull) {
+          VtcGroupChat(isOwner: true) => Future.value(VtcGroupChatStatus.owned),
+          VtcGroupChat() => Future.value(VtcGroupChatStatus.joined),
+          null => _linkStatus(group.groupDid),
+        },
+    ]);
     if (!ref.mounted) return;
-    state = state.copyWith(chats: statuses, credentialsUntil: credentialsUntil);
+    state = state.copyWith(
+      chats: {
+        for (final (index, listing) in groups.indexed)
+          listing.group.groupId: statuses[index],
+      },
+    );
   }
 
   /// Creates the chat of [group] as the member's current identity, where

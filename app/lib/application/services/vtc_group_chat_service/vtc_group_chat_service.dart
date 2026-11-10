@@ -90,6 +90,9 @@ class VtcGroupChatService {
   /// decide again at the next sync.
   final _undecided = <String, ChannelAttachmentEvent>{};
 
+  /// Joins under way, by the group's DID.
+  final _joiningChats = <String, Future<void>>{};
+
   final _chatsChanged = StreamController<void>.broadcast();
 
   /// Fires when this phone records a chat it created or joined, so lists of
@@ -210,7 +213,21 @@ class VtcGroupChatService {
   /// the member's VTA keeps no credential of the group;
   /// [MeetingPlaceVtcSDKException] when the VTA or the community cannot be
   /// reached; and the Meeting Place error when accepting fails.
+  ///
+  /// A join of the group's chat already under way, such as one started
+  /// without asking, is waited for rather than asked again: a second request
+  /// would put the member to the owner twice.
   Future<void> joinChat(
+    String communityDid,
+    VtcGroup group, {
+    required Identity identity,
+  }) => _joiningChats[group.groupDid] ??=
+      _joinChat(communityDid, group, identity: identity).whenComplete(() {
+        // Not the removed join itself, which whenComplete would wait for.
+        _joiningChats.remove(group.groupDid);
+      });
+
+  Future<void> _joinChat(
     String communityDid,
     VtcGroup group, {
     required Identity identity,
@@ -226,20 +243,22 @@ class VtcGroupChatService {
       throw const VtcGroupChatException(VtcGroupChatFailure.otherMeetingPlace);
     }
 
-    // The community delivers the credential once; pick it up if waiting.
-    try {
-      await _vtc.collectGroupCredentials(
-        communityDid,
-        groupDids: {group.groupDid},
-      );
-    } on MeetingPlaceVtcSDKException catch (error) {
-      _logFailure('collecting group credentials', error.code.name);
-    }
+    // The community delivers the credential once: picked up from the
+    // mailbox only when the VTA does not keep it yet, as opening the
+    // mailbox is slow.
     if (!await _vtc.holdsGroupCredential(
       communityDid,
       groupDid: group.groupDid,
     )) {
-      throw const VtcGroupChatException(VtcGroupChatFailure.noGroupCredential);
+      await _collectCredentials(communityDid, {group.groupDid});
+      if (!await _vtc.holdsGroupCredential(
+        communityDid,
+        groupDid: group.groupDid,
+      )) {
+        throw const VtcGroupChatException(
+          VtcGroupChatFailure.noGroupCredential,
+        );
+      }
     }
 
     final sdk = await _ref.read(meetingPlaceSdkProvider.future);
@@ -317,20 +336,58 @@ class VtcGroupChatService {
         _logFailure('reading groups', error.code.name);
         continue;
       }
-      for (final VtcGroupListing(:group, :standing) in listings) {
-        if (standing != GroupStanding.member ||
-            joined.contains(group.groupDid)) {
-          continue;
-        }
+      final candidates = [
+        for (final VtcGroupListing(:group, :standing) in listings)
+          if (standing == GroupStanding.member &&
+              !joined.contains(group.groupDid))
+            group,
+      ];
+      // Which have a chat linked, read all at once; then the credentials of
+      // those, picked up in one visit to the mailbox, not one per group.
+      final linked = [
+        for (final (group, isLinked) in await Future.wait([
+          for (final group in candidates)
+            _vtc
+                .groupChatLink(group.groupDid)
+                .then((link) => (group, link != null))
+                .catchError((Object _) => (group, false)),
+        ]))
+          if (isLinked) group,
+      ];
+      if (linked.isEmpty) continue;
+      await _collectCredentials(community.communityDid, {
+        for (final group in linked) group.groupDid,
+      });
+      for (final group in linked) {
         try {
+          _logger.info('Joining a group chat automatically', name: _logKey);
           await joinChat(community.communityDid, group, identity: identity);
           joined.add(group.groupDid);
-        } on VtcGroupChatException {
-          // Not linked or not deliverable yet: tried again next time.
+          _logger.info('Joined a group chat automatically', name: _logKey);
+        } on VtcGroupChatException catch (error) {
+          // Not linked or not deliverable yet: tried again next time. The
+          // reason is logged, as nothing else tells why a member is not in.
+          if (error.failure != VtcGroupChatFailure.notLinked) {
+            _logFailure('joining a group chat', error.failure.name);
+          }
         } on Exception catch (error) {
           _logFailure('joining a group chat', error.runtimeType);
         }
       }
+    }
+  }
+
+  /// Picks up the credentials of the groups [groupDids] of [communityDid]
+  /// the community delivered, best effort: one not picked up now is next
+  /// time.
+  Future<void> _collectCredentials(
+    String communityDid,
+    Set<String> groupDids,
+  ) async {
+    try {
+      await _vtc.collectGroupCredentials(communityDid, groupDids: groupDids);
+    } on MeetingPlaceVtcSDKException catch (error) {
+      _logFailure('collecting group credentials', error.code.name);
     }
   }
 
