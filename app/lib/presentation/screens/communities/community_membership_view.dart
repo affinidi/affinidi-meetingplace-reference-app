@@ -75,7 +75,6 @@ class CommunityMembershipView extends ConsumerWidget {
           if (card.value case final card?)
             VtcMembershipCardView(
               card: card,
-              communityName: communityName,
               logoUrl: logoUrl,
               collapsible: true,
             )
@@ -97,7 +96,6 @@ class CommunityMembershipView extends ConsumerWidget {
           if (vetterCard != null)
             VtcVetterCardView(
               card: vetterCard,
-              communityName: communityName,
               logoUrl: logoUrl,
               collapsible: true,
             ),

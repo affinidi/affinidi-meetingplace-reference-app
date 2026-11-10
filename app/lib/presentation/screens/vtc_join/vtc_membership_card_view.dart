@@ -17,19 +17,21 @@ import 'vtc_detail_line.dart';
 import 'vtc_join_json_dialog.dart';
 
 /// The membership card a community issued, as a card on the page: the
-/// community, what the card states, and the credential in full behind an
-/// icon.
+/// community, unless the page is the community's own, what the card states,
+/// and the credential in full behind an icon.
 class VtcMembershipCardView extends StatelessWidget {
   const VtcMembershipCardView({
     super.key,
     required this.card,
-    required this.communityName,
+    this.communityName,
     this.logoUrl,
     this.collapsible = false,
   });
 
   final VtcMembershipCard card;
-  final String communityName;
+
+  /// See [VtcCardView.communityName].
+  final String? communityName;
   final Uri? logoUrl;
 
   /// See [VtcCardView.collapsible].
@@ -66,13 +68,15 @@ class VtcVetterCardView extends StatelessWidget {
   const VtcVetterCardView({
     super.key,
     required this.card,
-    required this.communityName,
+    this.communityName,
     this.logoUrl,
     this.collapsible = false,
   });
 
   final VtcVetterCard card;
-  final String communityName;
+
+  /// See [VtcCardView.communityName].
+  final String? communityName;
   final Uri? logoUrl;
 
   /// See [VtcCardView.collapsible].
@@ -100,8 +104,9 @@ class VtcVetterCardView extends StatelessWidget {
   }
 }
 
-/// A card a community issued, as a card on the page: the
-/// community and [title], what the card states, whom it is about and for
+/// A card a community issued, as a card on the page: [title] under the
+/// community's name, or alone on a page of the community, what the card
+/// states, whom it is about and for
 /// how long, and the [credential] in full behind an icon, with the `pnm`
 /// command that fetches it from the member's VTA.
 class VtcCardView extends HookWidget {
@@ -109,8 +114,8 @@ class VtcCardView extends HookWidget {
     super.key,
     required this.cardKey,
     required this.documentKey,
-    required this.communityName,
     required this.title,
+    this.communityName,
     required this.credential,
     required this.credentialType,
     required this.documentIcon,
@@ -126,7 +131,10 @@ class VtcCardView extends HookWidget {
 
   final Key cardKey;
   final Key documentKey;
-  final String communityName;
+
+  /// The community that issued the card, named over [title]; null on the
+  /// community's own page, where [title] heads the card.
+  final String? communityName;
   final Uri? logoUrl;
   final String title;
 
@@ -210,7 +218,7 @@ class VtcCardView extends HookWidget {
                             spacing: McSpacing.s05,
                             children: [
                               Text(
-                                communityName,
+                                communityName ?? title,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: textTheme.titleMedium?.copyWith(
@@ -218,7 +226,8 @@ class VtcCardView extends HookWidget {
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
-                              Text(title, style: onboardingNote(context)),
+                              if (communityName != null)
+                                Text(title, style: onboardingNote(context)),
                             ],
                           ),
                         ),

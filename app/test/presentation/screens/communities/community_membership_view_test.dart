@@ -231,6 +231,38 @@ void main() {
     });
   });
 
+  testWidgets('heads each card with its name, not the community\'s', (
+    tester,
+  ) async {
+    service.heldVetterCard = const VtcVetterCard(
+      issuer: _club,
+      vetterDid: _me,
+      credential: {
+        'type': ['VerifiableCredential', 'AuthorityCredential'],
+        'issuer': _club,
+        'credentialSubject': {'id': _me},
+      },
+    );
+
+    final l10n = await pumpView(tester);
+
+    expect(find.text('Football club'), findsNothing);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('vtc_membership_card')),
+        matching: find.text(l10n.vtcMembershipCardTitle),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('vtc_vetter_role_card')),
+        matching: find.text(l10n.vtcVetterCardTitle),
+      ),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('folds each card\'s details away until opened', (tester) async {
     await pumpView(tester);
     expect(find.text(_me), findsNothing);
