@@ -26,11 +26,11 @@ import 'vtc_trail_step.dart';
 
 /// The page of a community the member belongs to, which they come back to:
 /// a welcome right after joining, else the community's logo and name; their
-/// role, with the community's settings and the vetting desk behind icons
-/// beside it for an administrator and a vetter, the membership card it
-/// issued — or that it is on its way to the member's VTA — then Done, or
-/// [doneLabel], and [leave]. What the community is waits behind an icon
-/// beside its name.
+/// role, with the community's settings, once back rather than in the
+/// welcome, and the vetting desk for a vetter behind icons beside it, the
+/// membership card it issued — or that it is on its way to the member's
+/// VTA — then Done, or [doneLabel], and [leave]. What the community is
+/// waits behind an icon beside its name.
 class VtcCommunityPage extends HookConsumerWidget {
   const VtcCommunityPage({
     required this.state,
@@ -140,6 +140,7 @@ class VtcCommunityPage extends HookConsumerWidget {
             communityDid: communityDid,
             communityName: name,
             canVet: offersVetting,
+            showSettings: state.wasMember,
           ),
         if (communityDid != null && canVet.data == true)
           _VetterProfilePrompt(communityDid: communityDid, communityName: name),
@@ -191,14 +192,15 @@ class VtcCommunityPage extends HookConsumerWidget {
   }
 }
 
-/// The member's [role], with the community's settings beside it and the
-/// vetting desk for a vetter.
+/// The member's [role], with the community's settings beside it when
+/// [showSettings] and the vetting desk for a vetter.
 class _RoleLine extends StatelessWidget {
   const _RoleLine({
     required this.role,
     required this.communityDid,
     required this.communityName,
     required this.canVet,
+    required this.showSettings,
   });
 
   final String role;
@@ -208,13 +210,15 @@ class _RoleLine extends StatelessWidget {
   /// Whether the member's vetter card for the community holds.
   final bool canVet;
 
+  final bool showSettings;
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final communityDid = this.communityDid;
     final iconColor = context.mcColors.textPrimary;
     final actions = [
-      if (communityDid != null)
+      if (communityDid != null && showSettings)
         IconButton(
           key: const Key('vtc_community_settings'),
           icon: Icon(McIcons.settings, color: iconColor),

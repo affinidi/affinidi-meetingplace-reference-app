@@ -385,6 +385,14 @@ void main() {
         await settle(tester);
       }
 
+      /// Joins, then opens the community again as its page.
+      Future<void> joinAndReopen(WidgetTester tester) async {
+        await joinCommunity(tester);
+        await tester.pumpWidget(const SizedBox.shrink());
+        await pumpScreen(tester, communityDid: fakeVtcDid);
+        await settle(tester);
+      }
+
       Future<void> openAbout(WidgetTester tester) async {
         await tester.tap(find.byKey(const Key('vtc_community_about')));
         await settle(tester);
@@ -435,7 +443,9 @@ void main() {
           .widget<OnboardingLine>(find.byKey(const Key('vtc_community_role')))
           .subtitle;
 
-      testWidgets('welcomes without the logo', (tester) async {
+      testWidgets('welcomes without the logo or settings', (tester) async {
+        vtaHoldsRole('member');
+
         await joinCommunity(tester);
 
         expect(find.text("You're a member of Football club."), findsOneWidget);
@@ -447,6 +457,8 @@ void main() {
           ),
           findsNothing,
         );
+        expect(find.byKey(const Key('vtc_community_role')), findsOneWidget);
+        expect(find.byKey(const Key('vtc_community_settings')), findsNothing);
       });
 
       testWidgets('shows the role the community granted', (tester) async {
@@ -470,7 +482,7 @@ void main() {
       ) async {
         vtaHoldsRole('admin');
 
-        await joinCommunity(tester);
+        await joinAndReopen(tester);
         expect(find.byType(VtcJoinPhraseView), findsNothing);
 
         await tester.tap(find.byKey(const Key('vtc_community_settings')));
@@ -484,7 +496,7 @@ void main() {
       ) async {
         vtaHoldsRole('admin');
 
-        await joinCommunity(tester);
+        await joinAndReopen(tester);
 
         final line = tester.getRect(
           find.byKey(const Key('vtc_community_role')),
@@ -509,7 +521,7 @@ void main() {
         ) async {
           vtaHoldsRole(role);
 
-          await joinCommunity(tester);
+          await joinAndReopen(tester);
           await tester.tap(find.byKey(const Key('vtc_community_settings')));
           await settle(tester);
 
