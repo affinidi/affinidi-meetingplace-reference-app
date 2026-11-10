@@ -124,11 +124,13 @@ void main() {
   /// Lets the fake network answer, then the spinner give way. Settles for
   /// a second at most: a step waiting on the vetter spins until they act.
   Future<void> settle(WidgetTester tester) async {
-    for (var i = 0; i < 5; i++) {
+    for (var i = 0; i < 30; i++) {
       await tester.runAsync(
-        () => Future<void>.delayed(const Duration(milliseconds: 50)),
+        () => Future<void>.delayed(const Duration(milliseconds: 10)),
       );
-      await tester.pump();
+      // Some fake time too: a step may wait on a short timer between its
+      // real I/O.
+      await tester.pump(const Duration(milliseconds: 10));
     }
     for (var i = 0; i < 10 && tester.binding.hasScheduledFrame; i++) {
       await tester.pump(const Duration(milliseconds: 100));
