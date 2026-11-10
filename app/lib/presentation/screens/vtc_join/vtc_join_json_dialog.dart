@@ -10,6 +10,12 @@ import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../../themes/tokens/mc_typography.dart';
 
+/// The `pnm` command that fetches the credential the member's VTA keeps
+/// under [id], or null without one. The app keeps a credential under its
+/// own `id`, so a credential's `id` names it on the VTA as well.
+String? pnmCredentialCommand(Object? id) =>
+    id is String ? 'pnm cred-vault get $id' : null;
+
 /// Shows [json] in a sheet under [title], with [icon] and an optional
 /// [subtitle] such as the document's Trust Task type: indented, coloured by
 /// kind, selectable, and copied whole from the header. Plain text only: it

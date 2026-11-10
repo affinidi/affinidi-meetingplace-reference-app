@@ -11,6 +11,7 @@ import '../../../navigation/routes/dashboard_routes.dart';
 import '../../themes/tokens/mc_icons.dart';
 import '../vtc_groups/vtc_groups_screen.dart';
 import '../vtc_join/vtc_flow_diagram.dart';
+import '../vtc_join/vtc_join_json_dialog.dart';
 import '../vtc_join/vtc_trail_step.dart';
 import 'membership_credentials_controller.dart';
 import 'membership_credentials_list.dart';
@@ -257,10 +258,7 @@ class _MembershipTrail extends StatelessWidget {
           documentTitle: l10n.membershipTrailCardDocument,
           documentKey: const Key('membership_trail_card_document'),
           // Only once the member's VTA holds it, under its storage id.
-          documentCommand: switch (entry.stored) {
-            final stored? => 'pnm cred-vault get ${stored.id}',
-            null => null,
-          },
+          documentCommand: pnmCredentialCommand(entry.stored?.id),
         ),
         VtcTrailStep(
           key: const Key('membership_trail_kept'),
