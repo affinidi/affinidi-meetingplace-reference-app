@@ -40,12 +40,27 @@ class VtcContactTrustPanel extends HookConsumerWidget {
       [channelDid, reload.value],
     );
     final trust = useFuture(load).data;
+    // The member's vouches made here, by community and the identity vouched
+    // for, shown without reading the vouches again.
+    final vouched = useState(const <(String, String), PublishedRelationship>{});
     if (channelDid == null || trust == null || trust.communities.isEmpty) {
       return const SizedBox.shrink();
     }
 
     String nameOf(VtcMemberLink link) =>
         contactName.isNotEmpty ? contactName : link.name;
+
+    (String, String) keyOf(VtcMemberLink link) =>
+        (link.communityDid, link.personaDid);
+
+    void showVouched(VtcMemberLink link, PublishedRelationship edge) =>
+        vouched.value = {...vouched.value, keyOf(link): edge};
+
+    _TrustRow shown(_TrustRow row) =>
+        switch ((row.edges, vouched.value[keyOf(row.link)])) {
+          (final edges?, final edge?) => row.withEdges(edges.vouched(edge)),
+          _ => row,
+        };
 
     Future<void> vouch(_TrustRow row) async {
       final edge = await vouchWithConsent(
@@ -57,7 +72,7 @@ class VtcContactTrustPanel extends HookConsumerWidget {
         name: nameOf(row.link),
         entryId: row.link.entryId,
       );
-      if (edge != null) reload.value++;
+      if (edge != null) showVouched(row.link, edge);
     }
 
     Future<void> withdraw(_TrustRow row, PublishedRelationship edge) async {
@@ -69,7 +84,9 @@ class VtcContactTrustPanel extends HookConsumerWidget {
         name: nameOf(row.link),
         edge: edge,
       );
-      if (withdrawn) reload.value++;
+      if (!withdrawn) return;
+      vouched.value = {...vouched.value}..remove(keyOf(row.link));
+      reload.value++;
     }
 
     Future<void> vouchInCommunity() async {
@@ -102,7 +119,7 @@ class VtcContactTrustPanel extends HookConsumerWidget {
         name: nameOf(link),
         entry: entry,
       );
-      if (edge != null) reload.value++;
+      if (edge != null) showVouched(link, edge);
     }
 
     return FormCard(
@@ -111,7 +128,7 @@ class VtcContactTrustPanel extends HookConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          for (final row in trust.rows) ...[
+          for (final row in trust.rows.map(shown)) ...[
             _TrustRowView(
               row: row,
               name: nameOf(row.link),
@@ -286,4 +303,7 @@ class _TrustRow {
   final String communityName;
   final VtcEdges? edges;
   final VtcTrustFailure? failure;
+
+  _TrustRow withEdges(VtcEdges edges) =>
+      _TrustRow(link, communityName, edges: edges);
 }

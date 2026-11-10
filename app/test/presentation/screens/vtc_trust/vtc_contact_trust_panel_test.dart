@@ -94,7 +94,8 @@ class _FakeTrustService extends Fake implements VtcTrustService {
     await held?.future;
     if (refusal case final refusal?) throw VtcTrustException(refusal);
     vouched.add(personaDid);
-    return outgoing = PublishedRelationship(
+    // Not kept as [outgoing]: the panel shows it from what this returns.
+    return PublishedRelationship(
       id: 'edge-1',
       issuerDid: _me,
       subjectDid: personaDid,
@@ -338,6 +339,32 @@ void main() {
     await tapText(tester, 'Vouch');
 
     expect(service.vouched, [_bob]);
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pumpAndSettle();
+    expect(find.text('Vouch back'), findsNothing);
+    expect(
+      find.byTooltip('You and Bob vouched for each other'),
+      findsOneWidget,
+    );
+    expect(find.text('Withdraw'), findsOneWidget);
+  });
+
+  testWidgets('offers to vouch again once a vouch made here is withdrawn', (
+    tester,
+  ) async {
+    service.stored.add(linkToBob());
+    await pumpPanel(tester);
+
+    await tapText(tester, 'Vouch');
+    await tapText(tester, 'Vouch');
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pumpAndSettle();
+    await tapText(tester, 'Withdraw');
+    await tapText(tester, 'Withdraw');
+
+    expect(service.withdrawn, ['edge-1']);
+    expect(find.text('Withdraw'), findsNothing);
+    expect(find.text('Vouch'), findsOneWidget);
   });
 
   testWidgets('opens the signed vouch the member gave', (tester) async {
