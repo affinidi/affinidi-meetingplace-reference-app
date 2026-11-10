@@ -173,7 +173,7 @@ class VtcCommunityPage extends HookConsumerWidget {
             ],
           ),
         if (state.identityCheck case final check?)
-          VtcIdentityCheckView(check: check, communityName: name),
+          VtcIdentityCheckView(check: check, checkerName: name),
         const SizedBox(height: 12),
         OnboardingButton(label: l10n.generalDone, onPressed: onDone),
         leave,

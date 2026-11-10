@@ -8,6 +8,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../domain/models/vtc/vtc_community.dart';
+import '../../../domain/models/vtc/vtc_identity_check.dart';
 import '../../../domain/models/vtc/vtc_left_membership.dart';
 import '../../../domain/models/vtc/vtc_vetting.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
@@ -28,6 +29,7 @@ import 'vtc_claim_type_label.dart';
 import 'vtc_community_page.dart';
 import 'vtc_community_profile.dart';
 import 'vtc_details_card.dart';
+import 'vtc_identity_check_view.dart';
 import 'vtc_join_controller.dart';
 import 'vtc_join_json_dialog.dart';
 import 'vtc_join_state.dart';
@@ -1364,6 +1366,11 @@ class _VettingOutcome extends StatelessWidget {
     final l10n = context.l10n;
     final unanswered = request?.isUnansweredAt(clock.now()) ?? false;
     final status = unanswered ? null : request?.status;
+    final statement = switch (request?.statement) {
+      final credential? when status == VtcVettingStatus.vouched =>
+        VettingStatement.read(credential),
+      _ => null,
+    };
     return Column(
       key: const Key('vtc_join_vetting_outcome'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1392,6 +1399,20 @@ class _VettingOutcome extends StatelessWidget {
           OnboardingSubtitle(message),
         if (request?.failure case final failure?)
           OnboardingSubtitle(l10n.vtcJoinVettingFailure(failure.name)),
+        if (statement != null)
+          VtcIdentityCheckView(
+            check: VtcIdentityCheck(
+              memberDid: statement.applicantDid,
+              method: statement.method.name,
+              documentClasses: statement.documentClasses,
+              claimsVerified: statement.claimsVerified,
+              livenessConfirmed: statement.livenessConfirmed,
+              validFrom: statement.validFrom,
+              validUntil: statement.validUntil,
+              credential: statement.credential,
+            ),
+            checkerName: vetter,
+          ),
         OnboardingButton(
           key: const Key('vtc_join_vetting_outcome_back'),
           label: l10n.vtcApplicantBackToOverview,

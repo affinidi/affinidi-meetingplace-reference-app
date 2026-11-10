@@ -1696,6 +1696,22 @@ void main() {
       expect(find.text('Step 5 of 5 · Done'), findsOneWidget);
       expect(find.text('Bob vouched for you'), findsOneWidget);
       expect(find.byKey(const Key('confetti_overlay')), findsOneWidget);
+      // What Bob's statement says, as the community's own check shows it.
+      final check = find.byKey(const Key('vtc_identity_check'));
+      expect(
+        find.descendant(
+          of: check,
+          matching: find.text('Bob checked your identity'),
+        ),
+        findsOneWidget,
+      );
+      for (final said in ['In person', 'Passport']) {
+        expect(
+          find.descendant(of: check, matching: find.textContaining(said)),
+          findsOneWidget,
+          reason: said,
+        );
+      }
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump(const Duration(seconds: 10));
     });

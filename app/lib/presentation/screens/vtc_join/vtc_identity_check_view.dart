@@ -9,19 +9,21 @@ import 'vtc_claim_type_label.dart';
 import 'vtc_detail_line.dart';
 import 'vtc_join_json_dialog.dart';
 
-/// The community's own check of the member's identity: how it checked,
-/// what it relied on and confirmed, and when, with the signed statement in
-/// full behind a button, along with the `pnm` command that fetches it from
-/// the member's VTA.
+/// A check of the member's identity, by the community itself or by a
+/// vetter: how it was checked, what was relied on and confirmed, and when,
+/// with the signed statement in full behind a button, along with the `pnm`
+/// command that fetches it from the member's VTA.
 class VtcIdentityCheckView extends StatelessWidget {
   const VtcIdentityCheckView({
     super.key,
     required this.check,
-    required this.communityName,
+    required this.checkerName,
   });
 
   final VtcIdentityCheck check;
-  final String communityName;
+
+  /// Who checked: the community, or the vetter who vouched.
+  final String checkerName;
 
   /// The statement's type and predicate, named under its JSON as on the
   /// wire.
@@ -32,7 +34,7 @@ class VtcIdentityCheckView extends StatelessWidget {
     final l10n = context.l10n;
     String date(DateTime at) =>
         DateFormat.yMMMd(l10n.localeName).format(at.toLocal());
-    final heading = l10n.vtcIdentityCheckHeading(communityName);
+    final heading = l10n.vtcIdentityCheckHeading(checkerName);
 
     return GlassCard(
       key: const Key('vtc_identity_check'),

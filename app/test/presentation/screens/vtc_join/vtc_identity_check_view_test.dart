@@ -18,7 +18,7 @@ void main() {
         home: Scaffold(
           body: SingleChildScrollView(
             child: VtcIdentityCheckView(
-              communityName: 'Chess club',
+              checkerName: 'Chess club',
               check: VtcIdentityCheck(
                 memberDid: _me,
                 method: 'inPerson',
