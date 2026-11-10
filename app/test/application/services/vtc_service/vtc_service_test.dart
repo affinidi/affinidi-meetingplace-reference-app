@@ -2185,6 +2185,8 @@ void main() {
     test('keeps a decline made while the desk is checked', () async {
       await requestWith((await service.createVettingTicket(fakeVtcDid)).spoken);
       final [session] = (await service.checkVetterDesk(fakeVtcDid))!.sessions;
+      // Something to pick up, so the check moves the desk on.
+      await sendCard((await sentToApplicant()).last);
 
       final held = network.inboxListHeld = Completer<void>();
       final check = service.checkVetterDesk(fakeVtcDid);
@@ -2200,6 +2202,26 @@ void main() {
       expect(
         (await service.vetterDesk(fakeVtcDid))!.sessions.single.status,
         VtcVetterSessionStatus.declined,
+      );
+    });
+
+    test('confirms a match while the inbox is still read', () async {
+      await requestWith((await service.createVettingTicket(fakeVtcDid)).spoken);
+      final [session] = (await service.checkVetterDesk(fakeVtcDid))!.sessions;
+
+      final held = network.inboxListHeld = Completer<void>();
+      final check = service.checkVetterDesk(fakeVtcDid);
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      final desk = await service
+          .confirmVettingMatch(fakeVtcDid, session.request.requestId)
+          .timeout(const Duration(seconds: 1));
+      held.complete();
+      await check;
+
+      expect(desk.sessions.single.matchConfirmed, isTrue);
+      expect(
+        (await service.vetterDesk(fakeVtcDid))!.sessions.single.matchConfirmed,
+        isTrue,
       );
     });
   });

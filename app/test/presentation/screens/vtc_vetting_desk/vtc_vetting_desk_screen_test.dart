@@ -272,15 +272,23 @@ void main() {
     await close(tester);
   });
 
-  testWidgets('keeps the codes in view while a match is recorded', (
+  testWidgets('moves on from the codes while the inbox is still read', (
     tester,
   ) async {
     await pumpDesk(tester);
     final ticket = await showTicket(tester);
     await tester.runAsync(() => fixture.requestWith(ticket.spoken));
     await check(tester);
-    // A check still reading the inbox holds the match back, as on a slow
-    // network.
+    for (final key in ['vtc_vetter_match_yes', 'vtc_vetter_match_no']) {
+      final button = tester.widget<ElevatedButton>(
+        find.descendant(
+          of: find.byKey(Key(key)),
+          matching: find.byType(ElevatedButton),
+        ),
+      );
+      expect(button.onPressed, isNotNull, reason: key);
+    }
+    // A check still waiting on the mediator, as on a slow network.
     final held = fixture.network.inboxListHeld = Completer<void>();
     final container = ProviderScope.containerOf(tester.element(desk));
     final checking = container
@@ -291,20 +299,12 @@ void main() {
     await tester.ensureVisible(yes);
     await tester.tap(yes);
     await tester.pump();
-
     expect(find.byType(OnboardingSpinner), findsNothing);
-    for (final key in ['vtc_vetter_match_yes', 'vtc_vetter_match_no']) {
-      final button = tester.widget<ElevatedButton>(
-        find.descendant(
-          of: find.byKey(Key(key)),
-          matching: find.byType(ElevatedButton),
-        ),
-      );
-      expect(button.onPressed, isNull, reason: key);
-    }
+    await waitFor(tester, find.byKey(const Key('vtc_vetter_card_waiting')));
+
+    expect(flowStep(tester), VtcVettingFlowStep.details);
     held.complete();
     await tester.runAsync(() => checking);
-    await waitFor(tester, find.byKey(const Key('vtc_vetter_card_waiting')));
     await close(tester);
   });
 

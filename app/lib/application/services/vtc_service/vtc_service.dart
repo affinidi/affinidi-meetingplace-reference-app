@@ -1376,79 +1376,87 @@ class VtcService {
     String communityDid, {
     List<String>? requiredClaims,
     void Function(VtcRequestStep step)? onRequestStep,
-  }) => _deskLocks.synchronized(communityDid, () async {
-    var desk = await _repository.findVetterDesk(communityDid);
+  }) async {
+    final found = await _repository.findVetterDesk(communityDid);
     final member = await _repository.findCommunity(communityDid);
-    if (desk == null || member == null) return desk;
+    if (found == null || member == null) return found;
+    // Read without holding the desk: a step the vetter takes meanwhile,
+    // such as confirming a match, does not wait on the mediator.
     final (vta, collection, vetter) = await _vetter(member);
     await collection.inbox.open();
     final received = await collection.inbox.peerDocuments(
       types: VettingTask.toVetter,
     );
-
+    if (received.isEmpty) return _repository.findVetterDesk(communityDid);
     final handled = <String>[];
-    for (final peer in received) {
-      final document = peer.document;
-      if (document.type == VettingTask.request) {
-        // A request already taken, whose message could not be removed, is
-        // not taken again.
-        final taken = desk!.sessions.any(
-          (session) => session.request.requestDocumentId == document.id,
-        );
-        if (!taken) {
-          desk = await _takeRequest(
-            vta,
-            member,
-            vetter,
-            desk,
-            document,
-            requiredClaims:
-                requiredClaims ?? await _vettingClaims(member.communityDid),
-            onStep: onRequestStep,
+    final checked = await _deskLocks.synchronized(communityDid, () async {
+      // Read again: the vetter may have moved a session on meanwhile.
+      var desk = await _repository.findVetterDesk(communityDid);
+      if (desk == null) return null;
+      for (final peer in received) {
+        final document = peer.document;
+        if (document.type == VettingTask.request) {
+          // A request already taken, whose message could not be removed, is
+          // not taken again.
+          final taken = desk!.sessions.any(
+            (session) => session.request.requestDocumentId == document.id,
           );
-        }
-        handled.add(peer.messageId);
-        continue;
-      }
-      final open = desk!.sessions.where((session) => session.isOpen);
-      if (open
-              .where(
-                (session) => vetter.isDeclinedBy(document, session.request),
-              )
-              .firstOrNull
-          case final session?) {
-        desk = desk.withSession(session.ended());
-        _forgetCard(session.request.requestId);
-        handled.add(peer.messageId);
-        continue;
-      }
-      final session = open
-          .map((session) => session.session)
-          .where((session) => session?.document.id == document.threadId)
-          .firstOrNull;
-      final held = session == null
-          ? null
-          : _vettingCards[session.request.requestId];
-      if (held != null && held.$1 == peer.messageId) continue;
-      if (session == null || held != null) {
-        handled.add(peer.messageId);
-        continue;
-      }
-      try {
-        if (await vetter.receiveCard(document, session: session)
-            case final card?) {
-          _vettingCards[session.request.requestId] = (peer.messageId, card);
+          if (!taken) {
+            desk = await _takeRequest(
+              vta,
+              member,
+              vetter,
+              desk,
+              document,
+              requiredClaims:
+                  requiredClaims ?? await _vettingClaims(member.communityDid),
+              onStep: onRequestStep,
+            );
+          }
+          handled.add(peer.messageId);
           continue;
         }
-      } on VettingCardException {
-        // Dropped: the applicant may send another.
+        final open = desk!.sessions.where((session) => session.isOpen);
+        if (open
+                .where(
+                  (session) => vetter.isDeclinedBy(document, session.request),
+                )
+                .firstOrNull
+            case final session?) {
+          desk = desk.withSession(session.ended());
+          _forgetCard(session.request.requestId);
+          handled.add(peer.messageId);
+          continue;
+        }
+        final session = open
+            .map((session) => session.session)
+            .where((session) => session?.document.id == document.threadId)
+            .firstOrNull;
+        final held = session == null
+            ? null
+            : _vettingCards[session.request.requestId];
+        if (held != null && held.$1 == peer.messageId) continue;
+        if (session == null || held != null) {
+          handled.add(peer.messageId);
+          continue;
+        }
+        try {
+          if (await vetter.receiveCard(document, session: session)
+              case final card?) {
+            _vettingCards[session.request.requestId] = (peer.messageId, card);
+            continue;
+          }
+        } on VettingCardException {
+          // Dropped: the applicant may send another.
+        }
+        handled.add(peer.messageId);
       }
-      handled.add(peer.messageId);
-    }
-    await _repository.saveVetterDesk(desk!);
+      await _repository.saveVetterDesk(desk!);
+      return desk;
+    });
     await _removeFromInbox(collection, handled);
-    return desk;
-  });
+    return checked;
+  }
 
   /// The card the applicant of [requestId] sent, as checked, or null while
   /// none has arrived. Its details are shown for the session only.
