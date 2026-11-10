@@ -2707,6 +2707,30 @@ void main() {
       expect(roles, isEmpty);
     });
 
+    test('tells no new role for the first role card, joining\'s', () async {
+      // The VTA holds no role card yet.
+      network.vta.answerTo[VtaTask.credentialsQuery] = (_) => {
+        'credentials': <Object>[],
+      };
+      await service.watchCommunity(fakeVtcDid);
+      final roles = <String>[];
+      final listening = service.roleChanged.listen(
+        (change) => roles.add(change.role),
+      );
+      addTearDown(listening.cancel);
+      final changed = service.membershipsChanged.first;
+
+      await network.deliver(
+        member,
+        await network.roleCard(member.did, role: 'member'),
+      );
+      network.inboxArrivals.add(null);
+      await changed.timeout(const Duration(seconds: 5));
+      await pumpEventQueue();
+
+      expect(roles, isEmpty);
+    });
+
     test('keeps what was pushed before watching', () async {
       await network.deliver(
         member,

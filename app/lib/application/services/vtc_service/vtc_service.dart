@@ -1186,13 +1186,14 @@ class VtcService {
     return true;
   }
 
-  /// Fires [roleChanged] when [role] is one other than [heldRole].
+  /// Fires [roleChanged] when [role] is one other than [heldRole]. A first
+  /// role, the one joining grants, is no change: the join already says so.
   void _reportRole(
     String communityDid, {
     required String? heldRole,
     required String? role,
   }) {
-    if (role == null || role == heldRole) return;
+    if (role == null || heldRole == null || role == heldRole) return;
     _roleChanged.add(VtcRoleChange(communityDid: communityDid, role: role));
   }
 
