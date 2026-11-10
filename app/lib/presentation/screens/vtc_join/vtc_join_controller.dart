@@ -76,10 +76,10 @@ class VtcJoinController extends _$VtcJoinController {
   /// to run once it ends.
   bool _checkVettingAgain = false;
 
-  /// The community whose inbox is watched while the member waits on a
-  /// vetter, and what picks up the vetter's answers as they arrive.
+  /// The community whose inbox is watched while the member waits on it, its
+  /// card or a vetter, and what picks up what arrives there.
   String? _watchedDid;
-  StreamSubscription<String>? _vetterAnswers;
+  StreamSubscription<String>? _arrivals;
 
   /// Whether the membership card is being read; reads do not overlap.
   bool _readingCard = false;
@@ -103,7 +103,7 @@ class VtcJoinController extends _$VtcJoinController {
     ref.onDispose(() {
       unawaited(membershipChanges.cancel());
       _pendingCheck?.cancel();
-      _unwatchVetters();
+      _unwatchInbox();
       // Forget the identity's keys the VTA lent for collecting the card.
       if (_manifest case final manifest?) {
         unawaited(_service.endCardCollection(manifest.communityDid));
@@ -115,15 +115,17 @@ class VtcJoinController extends _$VtcJoinController {
       final vetting =
           next.step == VtcJoinStep.vetting &&
           (next.vetting?.requests.any((r) => r.isOpen) ?? false);
-      if (vetting) {
-        _watchVetters();
-      } else {
-        _unwatchVetters();
-      }
       final waiting =
           next.step == VtcJoinStep.pending ||
           (next.step == VtcJoinStep.joined && next.membershipCard == null) ||
           vetting;
+      // Watched until the card arrives, too: unwatching forgets the keys
+      // lent for collecting it.
+      if (waiting) {
+        _watchInbox();
+      } else {
+        _unwatchInbox();
+      }
       if (waiting) {
         if (_pendingCheck == null) {
           // The first check waits its whole interval, as before.
@@ -148,27 +150,36 @@ class VtcJoinController extends _$VtcJoinController {
     return VtcJoinState();
   }
 
-  /// Picks up the vetters' answers as they reach the identity's inbox,
-  /// rather than at the next check; the checks stay for a live connection
-  /// that fails.
-  void _watchVetters() {
+  /// Picks up what reaches the identity's inbox over a live connection to
+  /// its mediator, e.g. a vetter's answer or the card an administrator's
+  /// approval sends, rather than at the next check; the checks stay for a
+  /// live connection that fails, and for a decision that sends the inbox
+  /// nothing.
+  void _watchInbox() {
     final communityDid = _manifest?.communityDid;
     if (communityDid == null || _watchedDid == communityDid) return;
-    _unwatchVetters();
+    _unwatchInbox();
     _watchedDid = communityDid;
-    _vetterAnswers = _service.inboxArrived
+    _arrivals = _service.inboxArrived
         .where((arrivedFor) => arrivedFor == communityDid)
-        .listen((_) => unawaited(checkVetting()));
+        .listen((_) => unawaited(_checkOnArrival()));
     unawaited(_service.watchCommunity(communityDid));
   }
 
-  void _unwatchVetters() {
+  void _unwatchInbox() {
     final communityDid = _watchedDid;
     if (communityDid == null) return;
     _watchedDid = null;
-    unawaited(_vetterAnswers?.cancel());
-    _vetterAnswers = null;
+    unawaited(_arrivals?.cancel());
+    _arrivals = null;
     unawaited(_service.unwatchCommunity(communityDid));
+  }
+
+  /// Asks at once what the step waits on, once something reached the
+  /// inbox; the next check waits its whole interval again.
+  Future<void> _checkOnArrival() async {
+    _checkedAt = clock.now();
+    await _checkStep();
   }
 
   /// Asks again once [pendingCheckInterval] passed since the last time, or
@@ -183,12 +194,14 @@ class VtcJoinController extends _$VtcJoinController {
     final checkedAt = _checkedAt;
     if (checkedAt != null && now.difference(checkedAt) < interval) return;
     _checkedAt = now;
-    await switch (state.step) {
-      VtcJoinStep.pending => checkAgain(),
-      VtcJoinStep.vetting => checkVetting(),
-      _ => collectMembershipCard(),
-    };
+    await _checkStep();
   }
+
+  Future<void> _checkStep() => switch (state.step) {
+    VtcJoinStep.pending => checkAgain(),
+    VtcJoinStep.vetting => checkVetting(),
+    _ => collectMembershipCard(),
+  };
 
   /// Starts over with another community's code, e.g. after a failure.
   void restart() {
