@@ -59,7 +59,7 @@ class VtcVettingDeskScreen extends StatelessWidget {
       onClose: close,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: 12,
+        spacing: McSpacing.s3,
         children: [
           OnboardingTitle(l10n.vtcVetterTitle(communityName)),
           VtcVettingDeskView(
@@ -97,7 +97,7 @@ class VtcVettingDeskView extends HookConsumerWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 12,
+      spacing: McSpacing.s3,
       children: [
         ...switch (state.step) {
           VtcVettingDeskStep.loading => [
@@ -231,7 +231,7 @@ class VtcVettingFlowScreen extends HookConsumerWidget {
         showBranding: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: 12,
+          spacing: McSpacing.s3,
           children: [
             OnboardingStepProgress(
               key: const Key('vtc_vetting_flow_progress'),
@@ -254,7 +254,7 @@ class VtcVettingFlowScreen extends HookConsumerWidget {
               (VtcVettingFlowStep.match, null, _) => Column(
                 key: const Key('vtc_vetter_request_progress'),
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                spacing: 12,
+                spacing: McSpacing.s3,
                 children: [
                   OnboardingSubtitle(l10n.vtcVetterApplicantFound),
                   _Steps(
@@ -309,7 +309,7 @@ class _Outcome extends StatelessWidget {
     return Column(
       key: const Key('vtc_vetter_outcome'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 12,
+      spacing: McSpacing.s3,
       children: [
         Icon(
           vouched ? McIcons.verified : McIcons.remove,
@@ -397,7 +397,7 @@ class _Requirements extends StatelessWidget {
       title: l10n.vtcVetterRequirementsHeading(communityName),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: 4,
+        spacing: McSpacing.s1,
         children: [
           for (final type in details)
             OnboardingLine(
@@ -448,7 +448,7 @@ class _TicketView extends StatelessWidget {
       return GlassCard(
         title: l10n.vtcVetterTicketHeading,
         child: Column(
-          spacing: 12,
+          spacing: McSpacing.s3,
           children: [
             // As large as the app's other QR codes, scaled down to fit the
             // card on a narrow phone. A fixed size: the layout measures its
@@ -578,7 +578,7 @@ class _SessionView extends HookWidget {
     if (!session.matchConfirmed) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: 12,
+        spacing: McSpacing.s3,
         children: [
           Text(l10n.vtcVetterMatchIntro, style: onboardingNote(context)),
           GlassCard(
@@ -623,7 +623,7 @@ class _SessionView extends HookWidget {
       // identity lacks one: the vetter can always end the session.
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: 12,
+        spacing: McSpacing.s3,
         children: [
           VtcWaitingForParty(
             l10n.vtcVetterCardWaiting,
@@ -637,7 +637,7 @@ class _SessionView extends HookWidget {
     final chosen = document.value;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 12,
+      spacing: McSpacing.s3,
       children: [
         VtcDetailsCard(
           key: const Key('vtc_vetter_card'),
@@ -716,7 +716,7 @@ class _IssuedList extends StatelessWidget {
       title: l10n.vtcVetterIssuedHeading,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: 4,
+        spacing: McSpacing.s1,
         children: [
           if (issued.isEmpty)
             Text(l10n.vtcVetterIssuedNone, style: onboardingNote(context)),

@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../themes/tokens/mc_spacing.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import 'vtc_vetter_profile_controller.dart';
 import 'vtc_vetter_profile_state.dart';
@@ -49,7 +50,7 @@ class VtcVetterProfileScreen extends HookConsumerWidget {
       onClose: close,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: 12,
+        spacing: McSpacing.s3,
         children: [
           OnboardingTitle(l10n.vtcVetterProfileTitle),
           ...switch (state.step) {
@@ -160,7 +161,7 @@ class _ProfileForm extends HookWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 12,
+      spacing: McSpacing.s3,
       children: [
         if (state.recorded case final recorded?)
           OnboardingMessage(
@@ -177,7 +178,7 @@ class _ProfileForm extends HookWidget {
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 2,
+                spacing: McSpacing.s05,
                 children: [
                   Text(
                     l10n.vtcVetterProfileListed,
