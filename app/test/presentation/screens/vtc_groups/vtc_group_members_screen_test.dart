@@ -134,7 +134,12 @@ void main() {
     );
     expect(inMember('dir_bob', find.text('Vouch back')), findsOneWidget);
     expect(
-      inMember('dir_carol', find.byTooltip('You vouched for Carol')),
+      inMember(
+        'dir_carol',
+        find.byTooltip(
+          'You vouched for Carol. Waiting for them to vouch back.',
+        ),
+      ),
       findsOneWidget,
     );
     expect(
@@ -145,6 +150,25 @@ void main() {
     expect(inMember('dir_dan', find.text('Vouch')), findsOneWidget);
     expect(inMember('dir_anon', find.text('Unnamed member')), findsOneWidget);
     expect(find.textContaining('did:'), findsNothing);
+  });
+
+  testWidgets('marks a vouch that waits for the other member to vouch back', (
+    tester,
+  ) async {
+    await pumpScreen(tester);
+
+    expect(inMember('dir_carol', find.byIcon(McIcons.pending)), findsOneWidget);
+    expect(inMember('dir_bob', find.byIcon(McIcons.pending)), findsNothing);
+
+    await tester.tap(inMember('dir_bob', find.text('Vouch back')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Vouch').last);
+    await tester.pumpAndSettle();
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pumpAndSettle();
+
+    // Vouched for each other: nothing left to wait for.
+    expect(inMember('dir_bob', find.byIcon(McIcons.pending)), findsNothing);
   });
 
   testWidgets('aligns the icons right of every member\'s name', (tester) async {

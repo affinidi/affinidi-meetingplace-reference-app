@@ -3968,6 +3968,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vtcVouchTrailTheVouch => 'The vouch';
 
   @override
+  String vtcTrustWaitingForVouchBack(String name) {
+    return 'You vouched for $name. Waiting for them to vouch back.';
+  }
+
+  @override
   String vtcTrustVouchedForEachOther(String name) {
     return 'You and $name vouched for each other';
   }

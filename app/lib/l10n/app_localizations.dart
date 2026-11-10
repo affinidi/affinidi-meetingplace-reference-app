@@ -5928,6 +5928,12 @@ abstract class AppLocalizations {
   /// **'The vouch'**
   String get vtcVouchTrailTheVouch;
 
+  /// Tooltip of the member's vouch while the other member has not vouched back
+  ///
+  /// In en, this message translates to:
+  /// **'You vouched for {name}. Waiting for them to vouch back.'**
+  String vtcTrustWaitingForVouchBack(String name);
+
   /// Both the member and another member vouched, each for the other
   ///
   /// In en, this message translates to:

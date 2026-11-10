@@ -309,7 +309,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(inMember('dir_bob', find.text(l10n.vtcTrustVouch)), findsNothing);
     expect(
-      inMember('dir_bob', find.byTooltip('You vouched for Bob')),
+      inMember(
+        'dir_bob',
+        find.byTooltip('You vouched for Bob. Waiting for them to vouch back.'),
+      ),
       findsOneWidget,
     );
     // Shown from the vouch itself: the members were not read again.

@@ -4112,6 +4112,15 @@
 	"@vtcVouchTrailTheVouch": {
 		"description": "Step: who vouched for whom"
 	},
+	"vtcTrustWaitingForVouchBack": "You vouched for {name}. Waiting for them to vouch back.",
+	"@vtcTrustWaitingForVouchBack": {
+		"description": "Tooltip of the member's vouch while the other member has not vouched back",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
 	"vtcTrustVouchedForEachOther": "You and {name} vouched for each other",
 	"@vtcTrustVouchedForEachOther": {
 		"description": "Both the member and another member vouched, each for the other",

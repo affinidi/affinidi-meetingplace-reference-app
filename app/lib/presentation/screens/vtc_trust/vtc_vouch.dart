@@ -378,8 +378,9 @@ class VtcVouchTrail extends HookConsumerWidget {
 }
 
 /// A handshake beside [name] when the member and [name] vouched for one
-/// another in [communityName], either way round; nothing otherwise. It
-/// opens the story of each vouch ([showVouches]).
+/// another in [communityName], either way round; nothing otherwise. An
+/// hourglass marks it while the member's vouch waits for [name] to vouch
+/// back. It opens the story of each vouch ([showVouches]).
 class VtcVouchButton extends StatelessWidget {
   const VtcVouchButton({
     super.key,
@@ -406,13 +407,25 @@ class VtcVouchButton extends StatelessWidget {
     final tooltip = switch ((edges.outgoing, edges.incoming)) {
       (null, null) => null,
       (_?, _?) => l10n.vtcTrustVouchedForEachOther(name),
-      (_?, null) => l10n.vtcTrustDoneTitle(name),
+      (_?, null) => l10n.vtcTrustWaitingForVouchBack(name),
       (null, _?) => l10n.vtcTrustTheyVouched(name),
     };
     if (tooltip == null) return const SizedBox.shrink();
+    final isWaiting = edges.outgoing != null && edges.incoming == null;
     return IconButton(
       key: const Key('vtc_vouches'),
-      icon: const Icon(McIcons.handshake, size: 20),
+      icon: Badge(
+        key: const Key('vtc_vouch_waiting'),
+        isLabelVisible: isWaiting,
+        backgroundColor: context.customColors.warning,
+        padding: EdgeInsets.zero,
+        label: Icon(
+          McIcons.pending,
+          size: 10,
+          color: context.colorScheme.surface,
+        ),
+        child: const Icon(McIcons.handshake, size: 20),
+      ),
       tooltip: tooltip,
       visualDensity: VisualDensity.compact,
       onPressed: () => showVouches(
