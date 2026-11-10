@@ -12,6 +12,7 @@ void main() {
     Uri? logoUrl,
     bool? showProgress,
     VoidCallback? onClose,
+    VoidCallback? onBack,
   }) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -24,6 +25,7 @@ void main() {
             logoUrl: logoUrl,
             showProgress: showProgress,
             onClose: onClose,
+            onBack: onBack,
           ),
         ),
       ),
@@ -65,6 +67,22 @@ void main() {
       find.descendant(of: logo, matching: find.byType(Image)),
     );
     expect((image.image as NetworkImage).url, url.toString());
+    expect(tester.getSize(logo), const Size.square(48));
+  });
+
+  testWidgets('shows the title below the way back', (tester) async {
+    var wentBack = false;
+    await pumpHeader(tester, onBack: () => wentBack = true);
+
+    final back = find.byKey(const Key('section_header_back'));
+    expect(
+      tester.getBottomLeft(back).dy,
+      lessThanOrEqualTo(tester.getTopLeft(find.text('Connections')).dy),
+    );
+    expect(find.byIcon(McIcons.menu), findsOneWidget);
+
+    await tester.tap(back);
+    expect(wentBack, isTrue);
   });
 
   testWidgets('shows the icon without a logo', (tester) async {
