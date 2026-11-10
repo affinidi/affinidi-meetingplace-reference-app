@@ -45,11 +45,14 @@ class CommunityScreen extends HookConsumerWidget {
         ref
             .read(contactsScreenControllerProvider.notifier)
             .showCommunity(communityDid);
-        // Read the members and the member's directory card now, for the
-        // Members tab to show them at once.
-        ref
-          ..read(communityMembersControllerProvider(communityDid))
-          ..read(vtcFindableControllerProvider(communityDid));
+        // Read the members now, for the Members tab to show them at once,
+        // and bring the member's directory card in step with the identity
+        // they joined with: a member who lets others find them is shown
+        // under its name, also before they open the Members tab.
+        ref.read(communityMembersControllerProvider(communityDid));
+        unawaited(
+          ref.read(vtcFindableControllerProvider(communityDid).notifier).sync(),
+        );
       });
       // Keep the cards the community pushes while it shows, e.g. a new
       // role card, for its tabs to show them at once.

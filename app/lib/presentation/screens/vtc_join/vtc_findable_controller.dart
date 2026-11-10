@@ -17,7 +17,8 @@ Duration? _noRetry(int retryCount, Object error) => null;
 
 /// Whether other members of [communityDid] can find the member, read once
 /// the community is opened and kept while the app runs, so its settings
-/// show it at once. The settings [sync] it each time they open.
+/// show it at once. The community and its settings [sync] it each time
+/// they open.
 @Riverpod(keepAlive: true, retry: _noRetry)
 class VtcFindableController extends _$VtcFindableController {
   var _isSyncing = false;

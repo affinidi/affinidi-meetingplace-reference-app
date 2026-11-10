@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:meeting_place_vtc/meeting_place_vtc.dart';
+import 'package:mpx_flutter_reference_app/application/services/vtc_trust_service/vtc_trust_service.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_community.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_removal.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/build_context_extensions.dart';
@@ -69,6 +71,36 @@ Future<void> saveCommunities() async {
       joinRequestId: 'request-1',
     ),
   );
+}
+
+/// The member's directory card, recording the names sent to it.
+class _FakeTrustService extends Fake implements VtcTrustService {
+  _FakeTrustService({required this.findable});
+
+  final bool findable;
+  final List<String> names = [];
+
+  @override
+  Future<MyDirectoryCard> directoryCard(String communityDid) async =>
+      MyDirectoryCard(
+        entryId: 'dir_me',
+        isDidVisibleToMembers: findable,
+        isHidden: false,
+      );
+
+  @override
+  Future<String?> identityDid(String communityDid) async =>
+      FakeIdentities.primaryIdentity.did;
+
+  @override
+  Future<void> setDirectoryName(
+    String communityDid, {
+    required String name,
+  }) async => names.add(name);
+
+  @override
+  Future<List<DirectoryEntry>> communityMembers(String communityDid) async =>
+      const [];
 }
 
 void main() {
@@ -279,6 +311,42 @@ void main() {
         tester.element(find.byType(CommunityScreen)),
       );
       expect(container.exists(vtcFindableControllerProvider(chessDid)), isTrue);
+    });
+
+    Future<_FakeTrustService> openChessClub(
+      WidgetTester tester, {
+      required bool findable,
+    }) async {
+      final service = _FakeTrustService(findable: findable);
+      await openCommunitiesTab(
+        tester,
+        overrides: [vtcTrustServiceProvider.overrideWithValue(service)],
+      );
+      await saveCommunities();
+      await pullToRefresh(tester);
+      await tester.tap(find.text('Chess club'));
+      await tester.pumpAndSettle();
+      return service;
+    }
+
+    testWidgets(
+      'shows a findable member to others under their name on opening it',
+      (tester) async {
+        final service = await openChessClub(tester, findable: true);
+
+        // Before the Members tab is opened.
+        expect(service.names, [
+          FakeIdentities.primaryIdentity.card.displayName.trim(),
+        ]);
+      },
+    );
+
+    testWidgets('sends no name for a member who is not findable', (
+      tester,
+    ) async {
+      final service = await openChessClub(tester, findable: false);
+
+      expect(service.names, isEmpty);
     });
 
     testWidgets('reads what its other tabs show on opening it', (tester) async {
