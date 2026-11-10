@@ -435,6 +435,20 @@ void main() {
           .widget<OnboardingLine>(find.byKey(const Key('vtc_community_role')))
           .subtitle;
 
+      testWidgets('welcomes without the logo', (tester) async {
+        await joinCommunity(tester);
+
+        expect(find.text("You're a member of Football club."), findsOneWidget);
+        expect(
+          find.image(
+            const AssetImage(
+              'assets/images/meeting-place-splash-white-1024.png',
+            ),
+          ),
+          findsNothing,
+        );
+      });
+
       testWidgets('shows the role the community granted', (tester) async {
         vtaHoldsRole('member');
 

@@ -167,8 +167,11 @@ class VtcJoinScreen extends HookConsumerWidget {
 
     return OnboardingLayout(
       onClose: close,
-      // Meeting a vetter is the first step of the vetting flow.
-      showBranding: state.step != VtcJoinStep.vetting,
+      // Meeting a vetter is the first step of the vetting flow, and the
+      // welcome after joining stands on its own.
+      showBranding:
+          state.step != VtcJoinStep.vetting &&
+          !(state.step == VtcJoinStep.joined && !state.wasMember),
       child: switch (state.step) {
         VtcJoinStep.scanning => _EnterCode(onSubmit: controller.onScanned),
         VtcJoinStep.working => switch ((
