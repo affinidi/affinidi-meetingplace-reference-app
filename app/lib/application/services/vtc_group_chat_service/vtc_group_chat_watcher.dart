@@ -62,8 +62,10 @@ class VtcGroupChatWatcher with WidgetsBindingObserver {
   }
 
   Future<void> _sync() async {
-    await _service.syncChats();
+    // Joining first: a member waits on it, while who may post in the chats
+    // already joined changes seldom.
     await _service.joinGroupChats();
+    await _service.syncChats();
   }
 }
 

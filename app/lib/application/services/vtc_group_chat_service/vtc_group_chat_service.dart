@@ -321,6 +321,7 @@ class VtcGroupChatService {
   }
 
   Future<void> _joinGroupChats() async {
+    final watch = Stopwatch()..start();
     final joined = {
       for (final chat in await _repository.groupChats()) chat.groupDid,
     };
@@ -336,6 +337,7 @@ class VtcGroupChatService {
         _logFailure('reading groups', error.code.name);
         continue;
       }
+      _logStep('Read groups', watch);
       final candidates = [
         for (final VtcGroupListing(:group, :standing) in listings)
           if (standing == GroupStanding.member &&
@@ -354,16 +356,36 @@ class VtcGroupChatService {
         ]))
           if (isLinked) group,
       ];
+      _logStep('Read chat links', watch);
       if (linked.isEmpty) continue;
-      await _collectCredentials(community.communityDid, {
-        for (final group in linked) group.groupDid,
-      });
+      // The mailbox is slow to open: visited only for the credentials the
+      // VTA does not keep yet.
+      final missing = [
+        for (final (group, holds) in await Future.wait([
+          for (final group in linked)
+            _vtc
+                .holdsGroupCredential(
+                  community.communityDid,
+                  groupDid: group.groupDid,
+                )
+                .then((holds) => (group, holds))
+                .catchError((Object _) => (group, false)),
+        ]))
+          if (!holds) group,
+      ];
+      _logStep('Read held credentials', watch);
+      if (missing.isNotEmpty) {
+        await _collectCredentials(community.communityDid, {
+          for (final group in missing) group.groupDid,
+        });
+        _logStep('Collected credentials', watch);
+      }
       for (final group in linked) {
         try {
           _logger.info('Joining a group chat automatically', name: _logKey);
           await joinChat(community.communityDid, group, identity: identity);
           joined.add(group.groupDid);
-          _logger.info('Joined a group chat automatically', name: _logKey);
+          _logStep('Joined a group chat automatically', watch);
         } on VtcGroupChatException catch (error) {
           // Not linked or not deliverable yet: tried again next time. The
           // reason is logged, as nothing else tells why a member is not in.
@@ -672,6 +694,12 @@ class VtcGroupChatService {
       memberDid: memberDid,
       isModerator: isModerator,
     ),
+  );
+
+  /// Logs [step] of joining the member's chats with the time since it began.
+  void _logStep(String step, Stopwatch watch) => _logger.info(
+    '$step after ${watch.elapsedMilliseconds} ms',
+    name: _logKey,
   );
 
   void _logFailure(String action, Object code) =>
