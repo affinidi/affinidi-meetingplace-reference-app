@@ -128,7 +128,7 @@ class VtcFlowBox extends StatelessWidget {
   final Widget flow;
   final Widget summary;
 
-  static const _padding = 10.0;
+  static const _padding = McSpacing.s2;
 
   @override
   Widget build(BuildContext context) {

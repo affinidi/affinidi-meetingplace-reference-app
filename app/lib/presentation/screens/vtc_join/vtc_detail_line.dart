@@ -46,7 +46,7 @@ class VtcDetailLine extends StatelessWidget {
                 for (final item in items)
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: 6,
+                    spacing: McSpacing.s1,
                     children: [
                       // Screen readers already read each item as its own
                       // line.

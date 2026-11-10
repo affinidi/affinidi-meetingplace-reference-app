@@ -116,13 +116,18 @@ class VtcBackgroundPanel extends StatelessWidget {
         border: Border.all(color: mc.hairline),
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(14, 10, 14, 14),
+        padding: const EdgeInsets.fromLTRB(
+          McSpacing.s3,
+          McSpacing.s2,
+          McSpacing.s3,
+          McSpacing.s3,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: 10,
+          spacing: McSpacing.s2,
           children: [
             Row(
-              spacing: 6,
+              spacing: McSpacing.s1,
               children: [
                 Icon(McIcons.sync, size: 14, color: mc.textSecondary),
                 Flexible(

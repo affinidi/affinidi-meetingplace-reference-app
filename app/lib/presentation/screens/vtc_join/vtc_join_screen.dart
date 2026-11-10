@@ -505,11 +505,11 @@ class _Pill extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: McSpacing.s3,
-          vertical: 6,
+          vertical: McSpacing.s1,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
-          spacing: 6,
+          spacing: McSpacing.s1,
           children: [
             Icon(McIcons.account, size: 18, color: mc.textSecondary),
             Flexible(
@@ -775,7 +775,7 @@ class _Divider extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ColoredBox(
     color: context.mcColors.hairline,
-    child: const SizedBox(height: 1),
+    child: const SizedBox(height: McSpacing.hairline),
   );
 }
 
@@ -812,7 +812,7 @@ class _ConsentItem extends HookWidget {
       child: InkWell(
         onTap: canExpand ? () => expanded.value = !expanded.value : null,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          padding: const EdgeInsets.symmetric(vertical: McSpacing.s2),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             spacing: McSpacing.s3,

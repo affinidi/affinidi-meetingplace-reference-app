@@ -112,10 +112,10 @@ class VtcTrailStep extends HookWidget {
   static const _markerSize = 32.0;
 
   /// Room above each detail, beyond the column's own spacing.
-  static const _detailSpacing = 10.0;
+  static const _detailSpacing = McSpacing.s2;
 
   /// Room between a step's picture and its details, beyond theirs.
-  static const _flowSpacing = 6.0;
+  static const _flowSpacing = McSpacing.s1;
   static const _lineWidth = 2.0;
 
   @override
@@ -178,7 +178,7 @@ class VtcTrailStep extends HookWidget {
             Expanded(
               child: Padding(
                 padding: EdgeInsets.only(
-                  top: 6,
+                  top: McSpacing.s1,
                   bottom: isLast ? 0 : McSpacing.s4,
                 ),
                 child: Column(

@@ -67,7 +67,7 @@ class VtcDetailsCard extends StatelessWidget {
               McSpacing.s5,
               _pictureSize / 2 + McSpacing.s2,
               McSpacing.s5,
-              14,
+              McSpacing.s3,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,

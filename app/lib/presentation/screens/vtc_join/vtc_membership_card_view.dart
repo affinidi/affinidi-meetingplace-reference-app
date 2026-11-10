@@ -145,7 +145,7 @@ class VtcCardView extends StatelessWidget {
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
-                  spacing: 14,
+                  spacing: McSpacing.s3,
                   children: [
                     Row(
                       spacing: McSpacing.s3,
@@ -303,12 +303,12 @@ class _Chip extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(
-          horizontal: 10,
+          horizontal: McSpacing.s2,
           vertical: McSpacing.s1,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
-          spacing: 6,
+          spacing: McSpacing.s1,
           children: [
             Icon(icon, size: 14, color: mc.textSecondary),
             Text(

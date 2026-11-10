@@ -109,7 +109,10 @@ class _JsonSheet extends HookWidget {
           children: [
             Center(
               child: Container(
-                margin: const EdgeInsets.only(top: 10, bottom: 6),
+                margin: const EdgeInsets.only(
+                  top: McSpacing.s2,
+                  bottom: McSpacing.s1,
+                ),
                 width: 36,
                 height: 4,
                 decoration: BoxDecoration(
