@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -113,6 +115,9 @@ class _FakeVtcService extends Fake implements VtcService {
     required String key,
   }) async => records[key];
 
+  /// Holds each write open until completed, to see it while it is posted.
+  Completer<void>? holdWrite;
+
   @override
   Future<RoomWrite> writeRoomRecord(
     String communityDid,
@@ -121,6 +126,7 @@ class _FakeVtcService extends Fake implements VtcService {
     String? body,
   }) async {
     if (refuseWrite case final error?) throw error;
+    await holdWrite?.future;
     written.add((title, body));
     final key = 'k${records.length + 1}';
     writtenKeys.add(key);
@@ -249,6 +255,45 @@ void main() {
       expect(find.text('Opening keynote'), findsOneWidget);
       expect(find.text('Welcome to DevCon 2026'), findsOneWidget);
       expect(find.textContaining('Written by you'), findsOneWidget);
+    });
+
+    testWidgets('shows the record as posting until the room takes it', (
+      tester,
+    ) async {
+      service.holdWrite = Completer<void>();
+      await pump(
+        tester,
+        VtcRoomScreen(
+          communityDid: _club,
+          room: _room(actions: {RoomAction.read, RoomAction.write}),
+        ),
+      );
+
+      await tester.tap(find.byKey(const Key('vtc_room_write')));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const Key('vtc_room_write_title')),
+        'Opening keynote',
+      );
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('vtc_room_write_send')));
+      // The dialog closes while the write is held open.
+      await tester.pump(const Duration(seconds: 1));
+
+      final posting = find.byKey(const Key('vtc_room_posting'));
+      expect(posting, findsOneWidget);
+      expect(
+        find.descendant(of: posting, matching: find.text('Opening keynote')),
+        findsOneWidget,
+      );
+      expect(find.text('Posting…'), findsNWidgets(2));
+
+      service.holdWrite!.complete();
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('vtc_room_posting')), findsNothing);
+      expect(find.text('Posting…'), findsNothing);
+      expect(find.text('Opening keynote'), findsOneWidget);
     });
 
     testWidgets('shows each record posted before the room lists it', (

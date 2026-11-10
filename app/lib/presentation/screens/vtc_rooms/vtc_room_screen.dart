@@ -6,6 +6,7 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../application/services/vtc_service/vtc_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
+import '../../../infrastructure/extensions/vtc_exception_extensions.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import 'vtc_rooms_screen.dart';
 
@@ -41,6 +42,9 @@ class VtcRoomScreen extends HookConsumerWidget {
     // through the VTA takes a while.
     final posted = useState(const <_Opened>[]);
     final writing = useState(false);
+    // The title and text being written, shown at the top until the room
+    // takes them: sealing and storing a record takes a few seconds.
+    final pending = useState<(String, String?)?>(null);
     final load = useMemoized(() async {
       final listing = await service.roomRecords(communityDid, room);
       final newest = [
@@ -59,7 +63,7 @@ class VtcRoomScreen extends HookConsumerWidget {
             // The room's own profile is not a member's record.
             return record == null ? null : (summary, record);
           } on MeetingPlaceVtcSDKException catch (error) {
-            _log(ref, 'opening a record', error.code.name);
+            _log(ref, 'opening a record', error.logCode);
             return (summary, null);
           }
         }),
@@ -78,6 +82,7 @@ class VtcRoomScreen extends HookConsumerWidget {
       final (title, text) = draft;
       final body = text.isEmpty ? null : text;
       writing.value = true;
+      pending.value = (title, body);
       try {
         final written = await service.writeRoomRecord(
           communityDid,
@@ -119,11 +124,14 @@ class VtcRoomScreen extends HookConsumerWidget {
           ref,
           'writing a record',
           error is MeetingPlaceVtcSDKException
-              ? error.code.name
+              ? error.logCode
               : error.runtimeType,
         );
       } finally {
-        if (context.mounted) writing.value = false;
+        if (context.mounted) {
+          writing.value = false;
+          pending.value = null;
+        }
       }
     }
 
@@ -170,7 +178,9 @@ class VtcRoomScreen extends HookConsumerWidget {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.edit_outlined),
-              label: Text(l10n.vtcRoomWrite),
+              label: Text(
+                writing.value ? l10n.vtcRoomPosting : l10n.vtcRoomWrite,
+              ),
               onPressed: writing.value ? null : write,
             )
           : null,
@@ -178,29 +188,45 @@ class VtcRoomScreen extends HookConsumerWidget {
         (AsyncSnapshot(hasError: true, :final error), _) => _Message(
           vtcRoomsFailureMessage(l10n, error),
         ),
-        (_, final records?) when records.isEmpty => _Message(
-          room.canWrite
-              ? l10n.vtcRoomRecordsNoneWriter
-              : l10n.vtcRoomRecordsNone,
-        ),
-        (_, final records?) => ListView.separated(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
-          itemCount: records.length + (room.canWrite ? 0 : 1),
-          separatorBuilder: (_, _) => const SizedBox(height: 12),
-          itemBuilder: (context, index) {
-            if (!room.canWrite && index == 0) {
-              return Text(
-                l10n.vtcRoomReadOnlyNote,
-                key: const Key('vtc_room_read_only'),
-                style: context.textTheme.bodySmall?.copyWith(
-                  color: context.colorScheme.onSurfaceVariant,
-                ),
+        (_, final records?) when records.isEmpty && pending.value == null =>
+          _Message(
+            room.canWrite
+                ? l10n.vtcRoomRecordsNoneWriter
+                : l10n.vtcRoomRecordsNone,
+          ),
+        (_, final records?) => () {
+          // Ahead of the records: the read-only note, else the record being
+          // posted.
+          final lead = !room.canWrite || pending.value != null ? 1 : 0;
+          return ListView.separated(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+            itemCount: records.length + lead,
+            separatorBuilder: (_, _) => const SizedBox(height: 12),
+            itemBuilder: (context, index) {
+              if (index < lead) {
+                return switch (pending.value) {
+                  (final title, final body) when room.canWrite => _PostingCard(
+                    title: title,
+                    body: body,
+                  ),
+                  _ => Text(
+                    l10n.vtcRoomReadOnlyNote,
+                    key: const Key('vtc_room_read_only'),
+                    style: context.textTheme.bodySmall?.copyWith(
+                      color: context.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                };
+              }
+              final (summary, record) = records[index - lead];
+              return _RecordCard(
+                summary: summary,
+                record: record,
+                myDid: myDid,
               );
-            }
-            final (summary, record) = records[index - (room.canWrite ? 0 : 1)];
-            return _RecordCard(summary: summary, record: record, myDid: myDid);
-          },
-        ),
+            },
+          );
+        }(),
         _ => const Center(child: CircularProgressIndicator()),
       },
     );
@@ -213,6 +239,57 @@ class VtcRoomScreen extends HookConsumerWidget {
 
 /// A record as the room lists it, and opened; null when it could not be.
 typedef _Opened = (RoomRecordSummary, RoomRecord?);
+
+/// The record the member is posting, drawn as a record is, faded, with a
+/// spinner, until the room takes it.
+class _PostingCard extends StatelessWidget {
+  const _PostingCard({required this.title, required this.body});
+
+  final String title;
+  final String? body;
+
+  @override
+  Widget build(BuildContext context) {
+    final muted = context.textTheme.bodySmall?.copyWith(
+      color: context.colorScheme.onSurfaceVariant,
+    );
+    return Opacity(
+      key: const Key('vtc_room_posting'),
+      opacity: 0.6,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white.withAlpha(20),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: 8,
+          children: [
+            Text(
+              title,
+              style: context.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (body case final body?)
+              Text(body, style: context.textTheme.bodyMedium),
+            Row(
+              spacing: 8,
+              children: [
+                const SizedBox.square(
+                  dimension: 12,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                Text(context.l10n.vtcRoomPosting, style: muted),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 class _RecordCard extends StatelessWidget {
   const _RecordCard({

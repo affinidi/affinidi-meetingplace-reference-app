@@ -6198,6 +6198,12 @@ abstract class AppLocalizations {
   /// **'Posted.'**
   String get vtcRoomWritten;
 
+  /// Shown on a record and the write button while the record is being written to the room
+  ///
+  /// In en, this message translates to:
+  /// **'Posting…'**
+  String get vtcRoomPosting;
+
   /// Shown when the member's VTA refuses to write because the member may only read
   ///
   /// In en, this message translates to:

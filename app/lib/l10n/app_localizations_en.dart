@@ -4126,6 +4126,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vtcRoomWritten => 'Posted.';
 
   @override
+  String get vtcRoomPosting => 'Posting…';
+
+  @override
   String get vtcRoomWriteRefused =>
       'You can only read this room, so you can\'t add to it.';
 

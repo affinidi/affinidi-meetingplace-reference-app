@@ -4329,6 +4329,10 @@
 	"@vtcRoomWritten": {
 		"description": "Shown once a record was written to the room"
 	},
+	"vtcRoomPosting": "Posting…",
+	"@vtcRoomPosting": {
+		"description": "Shown on a record and the write button while the record is being written to the room"
+	},
 	"vtcRoomWriteRefused": "You can only read this room, so you can't add to it.",
 	"@vtcRoomWriteRefused": {
 		"description": "Shown when the member's VTA refuses to write because the member may only read"

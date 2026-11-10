@@ -10,6 +10,7 @@ import '../../../domain/models/vtc/vtc_community.dart';
 import '../../../domain/models/vtc/vtc_group_chat.dart';
 import '../../../domain/repositories/vtc_repository.dart';
 import '../../../infrastructure/configuration/environment.dart';
+import '../../../infrastructure/extensions/vtc_exception_extensions.dart';
 import '../../../infrastructure/loggers/app_logger/app_logger.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
@@ -334,7 +335,7 @@ class VtcGroupChatService {
       } on VtaNotLinkedException {
         return;
       } on MeetingPlaceVtcSDKException catch (error) {
-        _logFailure('reading groups', error.code.name);
+        _logFailure('reading groups', error.logCode);
         continue;
       }
       _logStep('Read groups', watch);
@@ -409,7 +410,7 @@ class VtcGroupChatService {
     try {
       await _vtc.collectGroupCredentials(communityDid, groupDids: groupDids);
     } on MeetingPlaceVtcSDKException catch (error) {
-      _logFailure('collecting group credentials', error.code.name);
+      _logFailure('collecting group credentials', error.logCode);
     }
   }
 
@@ -577,7 +578,7 @@ class VtcGroupChatService {
         groupId: chat.groupId,
       )).group;
     } on MeetingPlaceVtcSDKException catch (error) {
-      _logFailure('confirming a membership', error.code.name);
+      _logFailure('confirming a membership', error.logCode);
       return true;
     }
     final entryId = members
@@ -625,7 +626,7 @@ class VtcGroupChatService {
           await _sync(sdk, current);
         }
       } on MeetingPlaceVtcSDKException catch (error) {
-        _logFailure('reading a group', error.code.name);
+        _logFailure('reading a group', error.logCode);
       } on Exception catch (error) {
         _logFailure('resolving a group', error.runtimeType);
       }
