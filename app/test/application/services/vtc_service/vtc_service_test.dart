@@ -10,6 +10,7 @@ import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_community.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_left_membership.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_member_link.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_membership_entry.dart';
+import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_removal.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_role_change.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_vetter_desk.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_vetting.dart';
@@ -2235,6 +2236,77 @@ void main() {
 
       expect(roles, ['admin']);
       expect(network.inbox, isEmpty);
+    });
+
+    group('removed', () {
+      bool archived() => network.vta.received.any(
+        (task) => task['type'] == VtaTask.credentialsArchive,
+      );
+
+      test('forgets the community once told it removed the member, and says '
+          'why', () async {
+        await service.watchCommunity(fakeVtcDid);
+        final removal = service.removed.first;
+        // The membership card the member's VTA keeps.
+        network.vta.answerTo.remove(VtaTask.credentialsQuery);
+        network.vta
+          ..answers[VtaTask.credentialsQuery] = {
+            'credentials': [
+              {'id': 'card-1'},
+            ],
+          }
+          ..answers[VtaTask.credentialsGet] = {
+            'credential': {
+              'issuer': fakeVtcDid,
+              'credentialSubject': {'id': member.did},
+            },
+          };
+
+        await network.notifyRemoval(member, reason: 'Spam.');
+        network.inboxArrivals.add(null);
+
+        expect(
+          await removal.timeout(const Duration(seconds: 5)),
+          isA<VtcRemoval>()
+              .having((r) => r.communityDid, 'community', fakeVtcDid)
+              .having((r) => r.reason, 'reason', 'Spam.'),
+        );
+        expect(await service.community(fakeVtcDid), isNull);
+        expect(archived(), isTrue);
+        final left =
+            (await SecureStorageVtcRepository().leftMemberships()).single;
+        expect(left.communityDid, fakeVtcDid);
+        expect(left.card?['issuer'], fakeVtcDid);
+        expect(left.leftAt, DateTime.utc(2026, 11, 10, 9));
+        expect(left.leaveExchange, isNull);
+        expect(left.removalNotice?.issuer, fakeVtcDid);
+        expect(left.removalNotice?.payload['reason'], 'Spam.');
+        expect(network.inbox, isEmpty);
+        expect(network.inboxArrivals.hasListener, isFalse);
+      });
+
+      test('forgets the community told before watching', () async {
+        await network.notifyRemoval(member);
+        final removal = service.removed.first;
+
+        await service.watchCommunity(fakeVtcDid);
+
+        expect(
+          (await removal.timeout(const Duration(seconds: 5))).reason,
+          isNull,
+        );
+        expect(await service.community(fakeVtcDid), isNull);
+        expect(network.inboxArrivals.hasListener, isFalse);
+      });
+
+      test('lets later unwatching be', () async {
+        await network.notifyRemoval(member);
+        await service.watchCommunity(fakeVtcDid);
+
+        await service.unwatchCommunity(fakeVtcDid);
+
+        expect(await service.community(fakeVtcDid), isNull);
+      });
     });
 
     test('lets go of the inbox once unwatched', () async {

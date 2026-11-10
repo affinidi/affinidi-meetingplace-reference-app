@@ -15,6 +15,7 @@ import '../../../domain/models/vtc/vtc_identity_check.dart';
 import '../../../domain/models/vtc/vtc_left_membership.dart';
 import '../../../domain/models/vtc/vtc_membership_card.dart';
 import '../../../domain/models/vtc/vtc_membership_entry.dart';
+import '../../../domain/models/vtc/vtc_removal.dart';
 import '../../../domain/models/vtc/vtc_role_change.dart';
 import '../../../domain/models/vtc/vtc_vetter_card.dart';
 import '../../../domain/models/vtc/vtc_vetter_desk.dart';
@@ -117,6 +118,13 @@ class VtcService {
   /// granting the new one is kept on their VTA, e.g. after an administrator
   /// promoted them.
   Stream<VtcRoleChange> get roleChanged => _roleChanged.stream;
+
+  final _removed = StreamController<VtcRemoval>.broadcast();
+
+  /// Fires each time this phone finds a community removed the member, once
+  /// it forgot the community, e.g. as the community's notice reaches the
+  /// watched inbox.
+  Stream<VtcRemoval> get removed => _removed.stream;
 
   final _inboxArrived = StreamController<String>.broadcast();
 
@@ -1117,7 +1125,9 @@ class VtcService {
   /// For a member, also keeps the cards the community sends as they
   /// arrive: an administrator changing the member's role re-issues their
   /// role card. Keeps those already waiting first. Kept cards fire
-  /// [membershipsChanged], and a new role [roleChanged].
+  /// [membershipsChanged], and a new role [roleChanged]. A notice that the
+  /// community removed the member, waiting or arriving, ends the membership
+  /// on this phone as leaving does, fires [removed] and stops watching.
   ///
   /// Holds the identity's keys, lent by the VTA, while watching. Does
   /// nothing more when already watching, when no VTA is linked or the
@@ -1137,7 +1147,10 @@ class VtcService {
       final community = await _repository.findCommunity(communityDid);
       if (community == null) return;
       final vta = await _grantedVta();
-      if (community.isMember) await _keepWaitingCards(vta, community);
+      if (community.isMember) {
+        if (await _closeIfRemoved(vta, community)) return;
+        await _keepWaitingCards(vta, community);
+      }
       if (!_watches.containsKey(communityDid)) {
         // Unwatched meanwhile: forget the keys borrowed for it.
         await endCardCollection(communityDid);
@@ -1170,9 +1183,58 @@ class VtcService {
   Future<void> unwatchCommunity(String communityDid) async {
     final watch = _watches[communityDid];
     if (watch == null || --watch.holders > 0) return;
-    _watches.remove(communityDid);
-    await watch.cancel();
+    await _stopWatching(communityDid);
+  }
+
+  /// Stops watching [communityDid], whoever holds the watch, and forgets
+  /// the keys lent for it.
+  Future<void> _stopWatching(String communityDid) async {
+    await _watches.remove(communityDid)?.cancel();
     await endCardCollection(communityDid);
+  }
+
+  /// Ends [member]'s membership on this phone when the community's notice
+  /// that it removed them waits in the identity's inbox: keeps the notice
+  /// with the left membership, as [leave] keeps the community's answer,
+  /// fires [removed] and stops watching the community. Returns whether it
+  /// did.
+  ///
+  /// The notice leaves the inbox last, so one only half handled is read
+  /// again on the next arrival. Throws [MeetingPlaceVtcSDKException] when
+  /// the inbox or the VTA cannot be reached.
+  Future<bool> _closeIfRemoved(VtaClient vta, VtcCommunity member) async {
+    final communityDid = member.communityDid;
+    final collection = await _collection(vta, member);
+    await collection.inbox.open();
+    final notices = await collection.inbox.removalNotices(
+      communityDid: communityDid,
+    );
+    // The inbox lists the latest last.
+    final notice = notices.lastOrNull;
+    if (notice == null) return false;
+    final cards = _sdk.communityImport(vta);
+    await _endMembership(
+      member,
+      cards,
+      leftAt: notice.decidedAt,
+      card: await cards.membershipCard(
+        communityDid,
+        personaDid: member.personaDid,
+      ),
+      removalNotice: notice.document,
+    );
+    await _removeFromInbox(collection, [
+      for (final notice in notices) notice.messageId,
+    ]);
+    _removed.add(
+      VtcRemoval(
+        communityDid: communityDid,
+        name: member.name,
+        reason: notice.reason,
+      ),
+    );
+    await _stopWatching(communityDid);
+    return true;
   }
 
   /// Keeps what [communityDid] sent the identity's inbox while watched. A
@@ -1182,7 +1244,9 @@ class VtcService {
     final community = await _repository.findCommunity(communityDid);
     if (community == null || !community.isMember) return;
     try {
-      await _keepWaitingCards(await _grantedVta(), community);
+      final vta = await _grantedVta();
+      if (await _closeIfRemoved(vta, community)) return;
+      await _keepWaitingCards(vta, community);
     } on VtaNotLinkedException {
       return;
     } on MeetingPlaceVtcSDKException {
@@ -2436,14 +2500,38 @@ class VtcService {
     } on MeetingPlaceVtcSDKException catch (error) {
       if (!(error.refusalCode?.endsWith(':notMember') ?? false)) rethrow;
     }
+    await _endMembership(
+      community,
+      cards,
+      leftAt: DateTime.now(),
+      card: card,
+      leaveExchange: leaveExchange,
+      onStep: onStep,
+    );
+  }
+
+  /// Keeps what showed [community]'s membership and its end as a
+  /// [VtcLeftMembership], archives its cards on the VTA behind [cards] and
+  /// forgets the community, firing [membershipsChanged].
+  Future<void> _endMembership(
+    VtcCommunity community,
+    CommunityImport cards, {
+    required DateTime leftAt,
+    Map<String, dynamic>? card,
+    TrustTaskExchange? leaveExchange,
+    TrustTaskDocument? removalNotice,
+    void Function(VtcLeaveStep step)? onStep,
+  }) async {
+    final communityDid = community.communityDid;
     await _repository.saveLeftMembership(
       VtcLeftMembership(
         communityDid: communityDid,
         personaDid: community.personaDid,
-        leftAt: DateTime.now(),
+        leftAt: leftAt,
         name: community.name,
         card: card,
         leaveExchange: leaveExchange,
+        removalNotice: removalNotice,
       ),
     );
     // Else the VTA backup would offer the membership back on the next scan.

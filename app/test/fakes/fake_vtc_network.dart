@@ -480,17 +480,36 @@ class FakeVtcNetwork implements HttpClientAdapter {
 
   /// Delivers [credential] to [persona]'s inbox as the community does: a
   /// signed `credential-exchange/issue` document, sealed to the identity.
-  Future<void> deliver(
+  Future<void> deliver(FakePersona persona, Map<String, dynamic> credential) =>
+      _push(persona, credentialIssueTask, {
+        'credential_response': {'credential': credential},
+      });
+
+  /// Tells [persona] the community removed them, as the community does on
+  /// an administrator's removal: a signed `members/removal-notice`
+  /// document, sealed to the identity.
+  Future<void> notifyRemoval(FakePersona persona, {String? reason}) =>
+      _push(persona, memberRemovalNoticeTask, {
+        'did': persona.did,
+        'code': 'adminRemoved',
+        'disposition': 'tombstone',
+        'reason': ?reason,
+        'decidedAt': '2026-11-10T09:00:00Z',
+        'decidedBy': 'did:key:zAdmin',
+      });
+
+  /// Puts a [type] document the community signed with [payload] in
+  /// [persona]'s inbox, sealed anonymously as the community sends it.
+  Future<void> _push(
     FakePersona persona,
-    Map<String, dynamic> credential,
+    String type,
+    Map<String, dynamic> payload,
   ) async {
     final issue = await TrustTaskDocument.create(
-      type: credentialIssueTask,
+      type: type,
       issuer: fakeVtcDid,
       recipient: persona.did,
-      payload: {
-        'credential_response': {'credential': credential},
-      },
+      payload: payload,
     ).sign(_VtcSigner(_vtcKey), purpose: ProofPurpose.authentication);
     final sealed = await EncryptedMessage.packAnonymously(
       PlainTextMessage(

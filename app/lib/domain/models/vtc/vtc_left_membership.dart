@@ -13,9 +13,10 @@ enum VtcLeaveStep {
   archivingCard,
 }
 
-/// A membership the member ended: the card the community had issued, the
-/// community's signed answer to their leaving, and the last status list
-/// that showed the card's state. Kept on this phone once the community and
+/// A membership that ended: the card the community had issued, the
+/// community's signed answer to the member leaving or its signed notice
+/// that it removed them, and the last status list that showed the card's
+/// state. Kept on this phone once the community and
 /// the VTA no longer show them.
 class VtcLeftMembership {
   /// Creates a [VtcLeftMembership].
@@ -26,6 +27,7 @@ class VtcLeftMembership {
     this.name,
     this.card,
     this.leaveExchange,
+    this.removalNotice,
     this.lastStatus,
   });
 
@@ -42,6 +44,7 @@ class VtcLeftMembership {
         _ => null,
       },
       leaveExchange: _exchangeOf(json['leaveExchange']),
+      removalNotice: _documentOf(json['removalNotice']),
       lastStatus: VtcStatusRecord._of(json['lastStatus']),
     );
   }
@@ -55,13 +58,22 @@ class VtcLeftMembership {
     }
   }
 
+  static TrustTaskDocument? _documentOf(Object? json) {
+    if (json is! Map<String, dynamic>) return null;
+    try {
+      return TrustTaskDocument.fromJson(json);
+    } on MeetingPlaceVtcSDKException {
+      return null;
+    }
+  }
+
   /// DID of the community left.
   final String communityDid;
 
   /// DID of the persona the member was known by there.
   final String personaDid;
 
-  /// When the member left.
+  /// When the member left, or the community decided to remove them.
   final DateTime leftAt;
 
   /// Name of the community, if known.
@@ -74,6 +86,10 @@ class VtcLeftMembership {
   /// The signed request to leave and the community's verified answer; none
   /// when the community already counted the persona as no member.
   final TrustTaskExchange? leaveExchange;
+
+  /// The community's signed `members/removal-notice`, when it removed the
+  /// member rather than they left.
+  final TrustTaskDocument? removalNotice;
 
   /// The last status list read for [card], if any.
   final VtcStatusRecord? lastStatus;
@@ -93,6 +109,7 @@ class VtcLeftMembership {
     name: name,
     card: card,
     leaveExchange: leaveExchange,
+    removalNotice: removalNotice,
     lastStatus: status,
   );
 
@@ -104,6 +121,7 @@ class VtcLeftMembership {
     'name': ?name,
     'card': ?card,
     'leaveExchange': ?leaveExchange?.toJson(),
+    'removalNotice': ?removalNotice?.toJson(),
     'lastStatus': ?lastStatus?.toJson(),
   };
 }
