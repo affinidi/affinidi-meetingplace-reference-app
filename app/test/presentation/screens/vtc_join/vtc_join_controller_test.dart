@@ -66,6 +66,11 @@ class _FakeCommunityOffers implements CommunityOfferService {
   dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
 }
 
+/// How many times, 10 ms apart, a test checks for what a VTA read shows.
+/// Reads overlapping on the VTA share one reader of its DIDComm inbox,
+/// which looks every 700 ms, so a read of a few tasks takes seconds.
+const _vtaReadChecks = 300;
+
 void main() {
   late FakeVtcNetwork network;
   late _FakeCommunityOffers communityOffers;
@@ -846,7 +851,11 @@ void main() {
 
       /// Lets the read the joined step starts finish.
       Future<void> readDone() async {
-        for (var i = 0; i < 50 && state().membershipCard == null; i++) {
+        for (
+          var i = 0;
+          i < _vtaReadChecks && state().membershipCard == null;
+          i++
+        ) {
           await Future<void>.delayed(const Duration(milliseconds: 10));
         }
       }
@@ -1300,7 +1309,7 @@ void main() {
 
     /// Waits until the screen shows [role].
     Future<void> shows(String role) async {
-      for (var i = 0; i < 50 && state().role != role; i++) {
+      for (var i = 0; i < _vtaReadChecks && state().role != role; i++) {
         await Future<void>.delayed(const Duration(milliseconds: 10));
       }
       expect(state().role, role);

@@ -132,6 +132,8 @@ void main() {
     );
     await tapVisible(tester, publishButton());
     await waitFor(tester, find.byKey(const Key('open')).hitTestable());
+    // The page beneath takes taps as soon as the pop starts; let it end.
+    await tester.pumpAndSettle();
 
     expect(fixture.network.vetterProfiles.single['payload'], {
       'listed': true,
