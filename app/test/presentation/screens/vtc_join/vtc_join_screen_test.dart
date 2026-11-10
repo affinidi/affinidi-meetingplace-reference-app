@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service.dart';
@@ -53,6 +54,10 @@ void main() {
   /// The member's identities on this phone.
   var identities = IdentitiesServiceState();
 
+  /// Whether the screen opens over a page of the app's router, as the app
+  /// opens it, rather than as the app's only page.
+  var routed = false;
+
   setUpAll(() {
     AppLogger.initialize(
       File('${Directory.systemTemp.path}/vtc_join_screen_test.log'),
@@ -61,6 +66,7 @@ void main() {
 
   setUp(() async {
     identities = IdentitiesServiceState();
+    routed = false;
     FlutterSecureStorage.setMockInitialValues({});
     network = FakeVtcNetwork();
     persona = Ed25519DidKeySigner.generate();
@@ -112,14 +118,46 @@ void main() {
           ),
           cameraServiceProvider.overrideWith(_NoCamera.new),
         ],
-        child: MaterialApp(
-          theme: theme ?? AppTheme.dark,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: VtcJoinScreen(code: communityDid),
-        ),
+        child: routed
+            ? MaterialApp.router(
+                theme: theme ?? AppTheme.dark,
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                supportedLocales: AppLocalizations.supportedLocales,
+                routerConfig: GoRouter(
+                  routes: [
+                    GoRoute(
+                      path: '/',
+                      builder: (context, _) => Scaffold(
+                        body: TextButton(
+                          onPressed: () =>
+                              VtcJoinScreen.show(context, code: communityDid),
+                          child: const Text('Open joining'),
+                        ),
+                      ),
+                    ),
+                    // The community's page, as the app routes to it.
+                    GoRoute(
+                      path: '/contacts/community/:communityDid',
+                      builder: (_, state) => Text(
+                        'Community page of '
+                        '${state.pathParameters['communityDid']}',
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            : MaterialApp(
+                theme: theme ?? AppTheme.dark,
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                supportedLocales: AppLocalizations.supportedLocales,
+                home: VtcJoinScreen(code: communityDid),
+              ),
       ),
     );
+    if (routed) {
+      await tester.tap(find.text('Open joining'));
+      await tester.pumpAndSettle();
+    }
   }
 
   /// Lets the fake network answer, then the spinner give way. Settles for
@@ -1794,6 +1832,28 @@ void main() {
         network.joinRequests.where((sent) => sent['type'] == JoinTask.submit),
         hasLength(1),
       );
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(const Duration(seconds: 10));
+    });
+
+    testWidgets('opens the community at its channels once joined', (
+      tester,
+    ) async {
+      routed = true;
+      final criterion =
+          (network.joinManifest['criteria'] as List).single
+              as Map<String, dynamic>;
+      (criterion['vetting'] as Map<String, dynamic>)['minStatements'] = 1;
+      await vouchedByBob(tester);
+
+      await tapVisible(
+        tester,
+        find.byKey(const Key('vtc_join_vetting_outcome_join')),
+      );
+      await settle(tester);
+
+      expect(find.byType(VtcJoinScreen), findsNothing);
+      expect(find.text('Community page of $fakeVtcDid'), findsOneWidget);
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump(const Duration(seconds: 10));
     });
