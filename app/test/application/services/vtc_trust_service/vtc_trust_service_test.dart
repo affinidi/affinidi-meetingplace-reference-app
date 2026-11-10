@@ -102,11 +102,20 @@ class _FakeVtcService extends Fake implements VtcService {
     return membersOf[groupId] ?? groupMembersList;
   }
 
+  /// The most entries read at once.
+  int mostEntriesRead = 0;
+  int _entriesRead = 0;
+
   @override
   Future<DirectoryEntry?> memberEntry(
     String communityDid, {
     required String entryId,
-  }) async => entries[entryId];
+  }) async {
+    if (++_entriesRead > mostEntriesRead) mostEntriesRead = _entriesRead;
+    await Future<void>.delayed(Duration.zero);
+    _entriesRead--;
+    return entries[entryId];
+  }
 
   List<PublishedRelationship> naming = [];
   Map<String, dynamic>? publicCard;
@@ -405,6 +414,23 @@ void main() {
 
       expect(members.map((m) => m.entryId), ['dir_bob']);
       expect(vtc.groupsRead, ['everyone']);
+    });
+
+    test('reads the entries a few at once, keeping their order', () async {
+      final ids = [for (var i = 0; i < 14; i++) 'dir_$i'];
+      vtc
+        ..groups = [listing('everyone')]
+        ..membersOf = {
+          'everyone': [
+            for (final id in ids) VtcGroupMember(entryId: id, state: 'active'),
+          ],
+        }
+        ..entries = {for (final id in ids) id: DirectoryEntry(entryId: id)};
+
+      final members = await service.communityMembers(_club);
+
+      expect(members.map((m) => m.entryId), ids);
+      expect(vtc.mostEntriesRead, 6);
     });
 
     test('says why the community did not answer', () {

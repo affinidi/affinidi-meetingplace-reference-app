@@ -42,9 +42,9 @@ class CommunityMembersController extends _$CommunityMembersController {
 
   Future<CommunityMembers> _read() async {
     final service = ref.read(vtcTrustServiceProvider);
-    return (
-      await service.communityMembers(communityDid),
-      await service.edgesByMember(communityDid),
-    );
+    // Read together; a failure of the vouches still reaches the caller,
+    // once the members are read.
+    final edges = service.edgesByMember(communityDid)..ignore();
+    return (await service.communityMembers(communityDid), await edges);
   }
 }

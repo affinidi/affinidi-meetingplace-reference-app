@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image/image.dart' as img;
@@ -117,6 +118,11 @@ class VtcTrustService {
 
   static const _logKey = 'VtcTrustService';
 
+  /// How many reads a list of members sends to the community at once: each
+  /// waits on the VTA's mediator, so reading together saves most of the
+  /// wait, while a cap keeps a large community from flooding either.
+  static const _parallelReads = 6;
+
   final Ref _ref;
   final VtcRepository _repository;
 
@@ -175,17 +181,19 @@ class VtcTrustService {
   Future<List<DirectoryEntry>> communityMembers(String communityDid) =>
       _guard('reading community members', () async {
         await _personaDid(communityDid);
+        final groups = [
+          for (final VtcGroupListing(:group, :standing)
+              in await _vtc.memberGroups(communityDid))
+            if (standing == GroupStanding.member &&
+                group.showMembers != GroupAudience.admins)
+              group,
+        ];
         final members = <String, VtcGroupMember>{};
-        for (final VtcGroupListing(:group, :standing)
-            in await _vtc.memberGroups(communityDid)) {
-          if (standing != GroupStanding.member ||
-              group.showMembers == GroupAudience.admins) {
-            continue;
-          }
-          for (final member in await _vtc.groupMembers(
-            communityDid,
-            groupId: group.groupId,
-          )) {
+        for (final groupMembers in await Future.wait([
+          for (final group in groups)
+            _vtc.groupMembers(communityDid, groupId: group.groupId),
+        ])) {
+          for (final member in groupMembers) {
             // Active in one group is enough, whatever the others say.
             if (member.isActive) members[member.entryId] = member;
           }
@@ -200,14 +208,16 @@ class VtcTrustService {
     Iterable<VtcGroupMember> members,
   ) async {
     final me = (await _vtc.myDirectoryCard(communityDid)).entryId;
+    final others = members.where(
+      (member) => member.isActive && member.entryId != me,
+    );
     final entries = <DirectoryEntry>[];
-    for (final member in members) {
-      if (!member.isActive || member.entryId == me) continue;
-      final entry = await _vtc.memberEntry(
-        communityDid,
-        entryId: member.entryId,
-      );
-      if (entry != null) entries.add(entry);
+    for (final batch in others.slices(_parallelReads)) {
+      final read = await Future.wait([
+        for (final member in batch)
+          _vtc.memberEntry(communityDid, entryId: member.entryId),
+      ]);
+      entries.addAll(read.nonNulls);
     }
     return entries;
   }
