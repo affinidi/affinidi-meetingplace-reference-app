@@ -6672,6 +6672,18 @@ abstract class AppLocalizations {
   /// **'{status, select, vouched{{vetter} vouched for you} declined{{vetter} declined to vouch for you} refused{{vetter} couldn\'t take your request} unanswered{No answer from {vetter}. Ask them for a new ticket.} other{You ended the session with {vetter}}}'**
   String vtcApplicantOutcome(String status, String vetter);
 
+  /// On the last step of being vetted: the statements gathered meet what the community asks
+  ///
+  /// In en, this message translates to:
+  /// **'All the vetters {name} asks for vouched for you. You can join now.'**
+  String vtcApplicantVettingComplete(String name);
+
+  /// On the last step of being vetted, once all required vetters vouched: applies with the statements gathered
+  ///
+  /// In en, this message translates to:
+  /// **'Join community'**
+  String get vtcApplicantJoinAction;
+
   /// Leaves being vetted by one vetter for the overview of what the community asks and the statements gathered
   ///
   /// In en, this message translates to:

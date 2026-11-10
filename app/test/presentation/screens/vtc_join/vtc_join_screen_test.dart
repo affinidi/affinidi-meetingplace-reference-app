@@ -1642,7 +1642,9 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
     });
 
-    testWidgets('celebrates once the vetter vouched', (tester) async {
+    /// Asks Bob, shows him the member's details, and has him vouch, up to
+    /// the last step of the flow.
+    Future<void> vouchedByBob(WidgetTester tester) async {
       network.vta
         ..answers[VtaTask.disclosurePreview] = {
           'previewId': 'preview-1',
@@ -1692,10 +1694,20 @@ void main() {
       );
       await tester.pump(VtcJoinController.vettingCheckInterval);
       await settle(tester);
+    }
+
+    testWidgets('celebrates once the vetter vouched', (tester) async {
+      await vouchedByBob(tester);
 
       expect(find.text('Step 5 of 5 · Done'), findsOneWidget);
       expect(find.text('Bob vouched for you'), findsOneWidget);
       expect(find.byKey(const Key('confetti_overlay')), findsOneWidget);
+      // One of the two vouches the club asks for.
+      expect(find.textContaining('You can join now'), findsNothing);
+      expect(
+        find.byKey(const Key('vtc_join_vetting_outcome_back')),
+        findsOneWidget,
+      );
       // What Bob's statement says, as the community's own check shows it.
       final check = find.byKey(const Key('vtc_identity_check'));
       expect(
@@ -1712,6 +1724,44 @@ void main() {
           reason: said,
         );
       }
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(const Duration(seconds: 10));
+    });
+
+    testWidgets('offers to join once all required vetters vouched', (
+      tester,
+    ) async {
+      final criterion =
+          (network.joinManifest['criteria'] as List).single
+              as Map<String, dynamic>;
+      (criterion['vetting'] as Map<String, dynamic>)['minStatements'] = 1;
+      await vouchedByBob(tester);
+
+      expect(find.text('Bob vouched for you'), findsOneWidget);
+      expect(
+        find.text(
+          'All the vetters Football club asks for vouched for you. '
+          'You can join now.',
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('vtc_join_vetting_outcome_back')),
+        findsNothing,
+      );
+      final join = find.byKey(const Key('vtc_join_vetting_outcome_join'));
+      expect(
+        find.descendant(of: join, matching: find.text('Join community')),
+        findsOneWidget,
+      );
+
+      await tapVisible(tester, join);
+      await settle(tester);
+      expect(find.byKey(const Key('vtc_join_vetting_outcome')), findsNothing);
+      expect(
+        network.joinRequests.where((sent) => sent['type'] == JoinTask.submit),
+        hasLength(1),
+      );
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump(const Duration(seconds: 10));
     });

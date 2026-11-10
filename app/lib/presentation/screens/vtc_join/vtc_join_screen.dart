@@ -1335,7 +1335,10 @@ class _VettingFlow extends StatelessWidget {
       (VtcApplicantStep.done, _) => _VettingOutcome(
         request: state.vetting?.requestTo(vetterDid ?? ''),
         vetter: vetter,
+        communityName: state.communityName ?? '',
+        satisfied: state.vettingProgress?.satisfied ?? false,
         onBack: controller.backToVetting,
+        onJoin: controller.sendVettedApplication,
       ),
     };
 
@@ -1355,17 +1358,26 @@ class _VettingFlow extends StatelessWidget {
   }
 }
 
-/// How being vetted by one vetter ended, and the way back to the overview.
+/// How being vetted by one vetter ended, and the way back to the overview;
+/// once all required vetters vouched, the way to join instead.
 class _VettingOutcome extends StatelessWidget {
   const _VettingOutcome({
     required this.request,
     required this.vetter,
+    required this.communityName,
+    required this.satisfied,
     required this.onBack,
+    required this.onJoin,
   });
 
   final VtcVettingRequest? request;
   final String vetter;
+  final String communityName;
+
+  /// Whether the statements gathered meet what the community asks.
+  final bool satisfied;
   final VoidCallback onBack;
+  final VoidCallback onJoin;
 
   @override
   Widget build(BuildContext context) {
@@ -1401,6 +1413,8 @@ class _VettingOutcome extends StatelessWidget {
             color: context.mcColors.textPrimary,
           ),
         ),
+        if (satisfied && status == VtcVettingStatus.vouched)
+          OnboardingSubtitle(l10n.vtcApplicantVettingComplete(communityName)),
         if (request?.declineMessage case final message?)
           OnboardingSubtitle(message),
         if (request?.failure case final failure?)
@@ -1419,11 +1433,18 @@ class _VettingOutcome extends StatelessWidget {
             ),
             checkerName: vetter,
           ),
-        OnboardingButton(
-          key: const Key('vtc_join_vetting_outcome_back'),
-          label: l10n.vtcApplicantBackToOverview,
-          onPressed: onBack,
-        ),
+        if (satisfied)
+          OnboardingButton(
+            key: const Key('vtc_join_vetting_outcome_join'),
+            label: l10n.vtcApplicantJoinAction,
+            onPressed: onJoin,
+          )
+        else
+          OnboardingButton(
+            key: const Key('vtc_join_vetting_outcome_back'),
+            label: l10n.vtcApplicantBackToOverview,
+            onPressed: onBack,
+          ),
       ],
     );
   }

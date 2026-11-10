@@ -4569,6 +4569,14 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String vtcApplicantVettingComplete(String name) {
+    return 'All the vetters $name asks for vouched for you. You can join now.';
+  }
+
+  @override
+  String get vtcApplicantJoinAction => 'Join community';
+
+  @override
   String get vtcApplicantBackToOverview => 'Back to the overview';
 
   @override
