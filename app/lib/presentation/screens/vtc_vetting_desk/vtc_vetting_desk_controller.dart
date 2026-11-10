@@ -33,14 +33,25 @@ class VtcVettingDeskController extends _$VtcVettingDeskController {
 
   Timer? _check;
 
+  /// Picks up what applicants send as it reaches the inbox, while the
+  /// community is watched for the desk.
+  StreamSubscription<String>? _arrivals;
+
   /// Whether applicants' messages are being picked up; checks do not
   /// overlap.
   bool _checking = false;
+
+  /// Whether a check was asked for while one ran, to run once it ends.
+  bool _checkAgain = false;
 
   @override
   VtcVettingDeskState build(String communityDid) {
     ref.onDispose(() {
       _check?.cancel();
+      if (_arrivals case final arrivals?) {
+        unawaited(arrivals.cancel());
+        unawaited(_service.unwatchCommunity(communityDid));
+      }
       // Forget the identity's keys the VTA lent for the desk.
       unawaited(_service.endCardCollection(communityDid));
     });
@@ -76,6 +87,14 @@ class VtcVettingDeskController extends _$VtcVettingDeskController {
         waitingCheckInterval,
         (_) => unawaited(_checkWhenDue()),
       );
+      // What applicants send shows as it arrives; the checks above cover a
+      // live connection that fails.
+      if (_arrivals == null) {
+        _arrivals = _service.inboxArrived
+            .where((arrivedFor) => arrivedFor == communityDid)
+            .listen((_) => unawaited(check()));
+        unawaited(_service.watchCommunity(communityDid));
+      }
       await check();
       await readIssued();
     } on Exception catch (error, stackTrace) {
@@ -108,7 +127,11 @@ class VtcVettingDeskController extends _$VtcVettingDeskController {
 
   /// Picks up what applicants sent, and shows where each session stands.
   Future<void> check() async {
-    if (_checking || state.step != VtcVettingDeskStep.open) return;
+    if (state.step != VtcVettingDeskStep.open) return;
+    if (_checking) {
+      _checkAgain = true;
+      return;
+    }
     _checking = true;
     _checkedAt = clock.now();
     try {
@@ -128,6 +151,11 @@ class VtcVettingDeskController extends _$VtcVettingDeskController {
     } finally {
       _checking = false;
       if (ref.mounted) state = state.copyWith(requestStep: null);
+    }
+    // Something arrived while checking: it may not have been read yet.
+    if (_checkAgain && ref.mounted) {
+      _checkAgain = false;
+      await check();
     }
   }
 

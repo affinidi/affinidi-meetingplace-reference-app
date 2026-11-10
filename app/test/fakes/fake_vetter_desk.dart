@@ -1,5 +1,6 @@
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
+import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_vetter_desk.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/vtc/user_verification_key.dart';
 import 'package:ssi/ssi.dart' show ProofPurpose;
@@ -160,4 +161,21 @@ class CheckedVtcService extends VtcService {
   @override
   Future<bool> canVet(String communityDid) =>
       super.canVet(communityDid).whenComplete(() => vetterChecks++);
+
+  /// How many [checkVetterDesk] checks started.
+  int deskChecks = 0;
+
+  @override
+  Future<VtcVetterDesk?> checkVetterDesk(
+    String communityDid, {
+    List<String>? requiredClaims,
+    void Function(VtcRequestStep step)? onRequestStep,
+  }) {
+    deskChecks++;
+    return super.checkVetterDesk(
+      communityDid,
+      requiredClaims: requiredClaims,
+      onRequestStep: onRequestStep,
+    );
+  }
 }

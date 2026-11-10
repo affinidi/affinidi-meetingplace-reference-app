@@ -300,6 +300,41 @@ void main() {
     await close(tester);
   });
 
+  test('checks as soon as something reaches the inbox', () async {
+    final container = ProviderContainer(
+      overrides: [vtcServiceProvider.overrideWithValue(fixture.service)],
+    );
+    addTearDown(container.dispose);
+    final provider = vtcVettingDeskControllerProvider(fakeVtcDid);
+    final open = container.listen(provider, (_, _) {});
+    addTearDown(open.close);
+    for (var i = 0; i < 200; i++) {
+      if (fixture.network.inboxArrivals.hasListener &&
+          fixture.service.deskChecks > 0) {
+        break;
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+    }
+    // Just checked, so no check falls due for a while.
+    await container.read(provider.notifier).check();
+    final checks = fixture.service.deskChecks;
+
+    fixture.network.inboxArrivals.add(null);
+    await pumpEventQueue();
+
+    expect(fixture.service.deskChecks, checks + 1);
+  });
+
+  testWidgets('lets go of the inbox once the desk closes', (tester) async {
+    await pumpDesk(tester);
+    await waitFor(tester, find.byKey(const Key('vtc_vetter_show_ticket')));
+    expect(fixture.network.inboxArrivals.hasListener, isTrue);
+
+    await close(tester);
+
+    expect(fixture.network.inboxArrivals.hasListener, isFalse);
+  });
+
   testWidgets('ends when the applicant ends the session', (tester) async {
     await pumpDesk(tester);
     final ticket = await showTicket(tester);
