@@ -292,7 +292,7 @@ void main() {
       copied,
       startsWith(
         'pnm did-mgmt dids edit --did $_managedDid --document '
-        '<(pnm did-mgmt dids get-log --did $_managedDid | jq ',
+        '<(pnm did-mgmt dids get-log $_managedDid | jq ',
       ),
     );
     expect(copied, contains('"id":"$_managedDid#meeting-place"'));

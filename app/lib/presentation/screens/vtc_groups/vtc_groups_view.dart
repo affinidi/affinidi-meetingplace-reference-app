@@ -445,7 +445,7 @@ String _pnmAddServiceCommand(String groupDid, Map<String, dynamic> service) {
   // reopens the quoting rather than ending the argument.
   final serviceArg = "'${jsonEncode(service).replaceAll("'", r"'\''")}'";
   return 'pnm did-mgmt dids edit --did $groupDid --document <('
-      'pnm did-mgmt dids get-log --did $groupDid'
+      'pnm did-mgmt dids get-log $groupDid'
       ' | jq -s --argjson s $serviceArg'
       r" 'last.state | .service = [(.service // [])[] | select(.id != $s.id)]"
       r" + [$s]')";
