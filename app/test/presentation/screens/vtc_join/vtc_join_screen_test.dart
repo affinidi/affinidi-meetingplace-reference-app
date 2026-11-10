@@ -1600,6 +1600,45 @@ void main() {
       );
     });
 
+    testWidgets("aligns a way's icons with its text", (tester) async {
+      network.joinManifest = {
+        ...network.joinManifest,
+        'criteria': [
+          {
+            'id': 'open',
+            'admission': 'automatic',
+            'requirementsDigest': 'zOpen',
+            'description': 'Open to all.',
+          },
+        ],
+      };
+      await pumpScreen(tester);
+      await enterCode(tester, fakeVtcDid);
+      final deck = find.byKey(const Key('vtc_join_ways'));
+      double centreOf(Finder finder) =>
+          tester.getCenter(find.descendant(of: deck, matching: finder)).dy;
+
+      // The symbol sits beside the eyebrow and title together.
+      final eyebrow = tester.getTopLeft(
+        find.descendant(of: deck, matching: find.text('AUTOMATIC')),
+      );
+      final title = tester.getBottomLeft(
+        find.descendant(
+          of: deck,
+          matching: find.text('You become a member when you apply'),
+        ),
+      );
+      expect(
+        centreOf(find.byIcon(McIcons.userCheck)),
+        moreOrLessEquals((eyebrow.dy + title.dy) / 2, epsilon: 0.5),
+      );
+      // A detail's icon is centred on its line of text.
+      expect(
+        centreOf(find.byIcon(McIcons.info)),
+        moreOrLessEquals(centreOf(find.text('Open to all.')), epsilon: 0.5),
+      );
+    });
+
     testWidgets('shows the manifest as sent from the title', (tester) async {
       network.joinManifest = {
         ...network.joinManifest,

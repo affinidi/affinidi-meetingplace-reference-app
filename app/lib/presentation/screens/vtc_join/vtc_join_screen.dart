@@ -948,6 +948,7 @@ class _WayCard extends StatelessWidget {
   final VtcJoinWay way;
 
   static const _symbolSize = 24.0;
+  static const _detailIconSize = 16.0;
 
   /// Strength of the tint across the whole card: a hint of the kind's
   /// colour under the stronger corner wash, not a fill.
@@ -960,6 +961,7 @@ class _WayCard extends StatelessWidget {
     final l10n = context.l10n;
     final supported = way.unsupported == null;
     final accent = _accentOf(way);
+    final detailStyle = textTheme.bodySmall?.copyWith(color: mc.textPrimary);
     final details = <(IconData, String)>[
       if (way.credentialType case final type?)
         (McIcons.credentials, l10n.vtcJoinWayWithCredential(type)),
@@ -989,8 +991,9 @@ class _WayCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               spacing: McSpacing.s3,
               children: [
+                // Centred, so the symbol sits beside the eyebrow and title
+                // together rather than level with the eyebrow alone.
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   spacing: McSpacing.s3,
                   children: [
                     Expanded(
@@ -1028,15 +1031,13 @@ class _WayCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: McSpacing.s2,
                     children: [
-                      Icon(icon, size: 16, color: mc.textSecondary),
-                      Expanded(
-                        child: Text(
-                          value,
-                          style: textTheme.bodySmall?.copyWith(
-                            color: mc.textPrimary,
-                          ),
-                        ),
+                      FirstLineIcon(
+                        icon,
+                        size: _detailIconSize,
+                        color: mc.textSecondary,
+                        style: detailStyle,
                       ),
+                      Expanded(child: Text(value, style: detailStyle)),
                     ],
                   ),
               ],
