@@ -327,6 +327,27 @@ void main() {
     await close(tester);
   });
 
+  testWidgets('offers a decline in the danger colour', (tester) async {
+    await pumpDesk(tester);
+    final ticket = await showTicket(tester);
+    await tester.runAsync(() => fixture.requestWith(ticket.spoken));
+    await check(tester);
+    await tap(tester, find.byKey(const Key('vtc_vetter_match_yes')));
+    await waitFor(tester, find.byKey(const Key('vtc_vetter_card_waiting')));
+
+    final button = tester.widget<ElevatedButton>(
+      find.descendant(
+        of: find.byKey(const Key('vtc_vetter_decline')),
+        matching: find.byType(ElevatedButton),
+      ),
+    );
+    expect(
+      button.style?.foregroundColor?.resolve({}),
+      AppTheme.dark.extension<McColors>()!.dangerText,
+    );
+    await close(tester);
+  });
+
   testWidgets('keeps the ticket open when the flow is closed', (tester) async {
     await pumpDesk(tester);
     await waitFor(tester, find.byKey(const Key('vtc_vetter_show_ticket')));

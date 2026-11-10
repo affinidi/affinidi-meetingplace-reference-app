@@ -611,9 +611,10 @@ class _SessionView extends HookWidget {
     }
 
     final details = claims;
-    final decline = OnboardingTextButton(
+    final decline = OnboardingButton(
       key: const Key('vtc_vetter_decline'),
       label: l10n.vtcVetterDecline,
+      isDestructive: true,
       onPressed: () => controller.decline(requestId, code: 'couldNotVerify'),
     );
     if (details == null) {
