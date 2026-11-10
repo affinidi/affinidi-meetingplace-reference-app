@@ -174,6 +174,16 @@ class _FakeSdk extends Fake implements MeetingPlaceMatrixSDK {
 
   @override
   Future<Group?> findGroupById(String groupId) async => groups[groupId];
+
+  /// The channels Meeting Place holds, by the other party's DID.
+  Map<String, Channel> channels = {};
+  final channelLookups = <String>[];
+
+  @override
+  Future<Channel?> findChannelByOtherPartyPermanentDid(String did) async {
+    channelLookups.add(did);
+    return channels[did];
+  }
 }
 
 /// Records the chats it is asked to join instead of joining them.
@@ -365,6 +375,43 @@ void main() {
 
       expect(sdk.approved, isEmpty);
       expect(sdk.rejected, isEmpty);
+    });
+
+    test('decides a request left waiting again at the next sync', () async {
+      vtc.isCommunityDown = true;
+      await service.decideJoinRequest(_joinRequest(), _proof);
+      expect(sdk.approved, isEmpty);
+
+      vtc.isCommunityDown = false;
+      sdk.channels = {_memberDid: _joinRequest()};
+      await service.syncChats();
+
+      expect(sdk.approved, [_memberDid]);
+      expect((await stored()).members, {_memberDid: 'entry-member'});
+    });
+
+    test(
+      'forgets a request left waiting once it is decided elsewhere',
+      () async {
+        vtc.isCommunityDown = true;
+        await service.decideJoinRequest(_joinRequest(), _proof);
+
+        vtc.isCommunityDown = false;
+        await service.syncChats();
+        await service.syncChats();
+
+        expect(sdk.channelLookups, [_memberDid]);
+        expect(sdk.approved, isEmpty);
+      },
+    );
+
+    test('keeps no request to a chat it does not own', () async {
+      await repository.removeGroupChat('chat-1');
+      await service.decideJoinRequest(_joinRequest(), _proof);
+
+      await service.syncChats();
+
+      expect(sdk.channelLookups, isEmpty);
     });
 
     test('leaves requests to other chats alone', () async {

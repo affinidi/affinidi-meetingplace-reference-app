@@ -38,6 +38,7 @@ import '../../../infrastructure/services/unsent_messages_service/unsent_messages
 import '../contacts_service/contacts_service.dart';
 import '../identities_service/identities_service.dart';
 import '../network_connectivity_service/network_connectivity_service.dart';
+import '../vtc_group_chat_service/vtc_group_chat_service.dart';
 import 'chat_protocol_router.dart';
 import 'chat_service.dart';
 import 'chat_service_state.dart';
@@ -86,6 +87,11 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
   MeetingPlaceChatSDK? _chatSDK;
   String? _chatId;
   bool _isGroupChat = false;
+
+  /// Whether this is a community group chat this phone owns, whose members
+  /// are let in by the group's credential as they ask: no request to join
+  /// it is put to the owner.
+  bool _admitsByCredential = false;
   String? _otherPartyFirstName;
   ChatStream? _chatStreamRef;
 
@@ -291,6 +297,19 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
         if (!ref.mounted) return;
         if (group != null) {
           state = state.copyWith(group: group);
+          try {
+            _admitsByCredential = await ref
+                .read(vtcGroupChatServiceProvider)
+                .admitsByCredential(group.id);
+          } on Exception catch (error) {
+            // Unknown: requests to join are shown, as in any group chat.
+            _logger.warning(
+              'Failed reading whether the chat follows a community group: '
+              '${error.runtimeType}',
+              name: _logKey,
+            );
+          }
+          if (!ref.mounted) return;
         }
       }
 
@@ -345,7 +364,11 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
       final baseMessages =
           [EncryptionNotice(), ...chatSession.messages, ...replayMessages]
-              .where((item) => !_isHiddenSupersededCallItem(item))
+              .where(
+                (item) =>
+                    !_isHiddenSupersededCallItem(item) &&
+                    !_isRequestToJoinDecidedByCredential(item),
+              )
               .sortedBy((item) => item.dateCreated)
               .reversed
               .toList();
@@ -813,7 +836,10 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
 
   @override
   void upsertChatItem(ChatItem item) {
-    if (_isHiddenSupersededCallItem(item)) return;
+    if (_isHiddenSupersededCallItem(item) ||
+        _isRequestToJoinDecidedByCredential(item)) {
+      return;
+    }
 
     final existing = state.messages;
     final idx = _indexOfChatItem(existing, item);
@@ -1218,6 +1244,15 @@ class ChatSessionService extends _$ChatSessionService implements ChatService {
       );
     }
   }
+
+  /// Whether [item] asks the owner to let someone into a community group
+  /// chat whose members the group's credential lets in: the community's
+  /// chat service decides each request as it arrives, so letting someone in
+  /// by hand would skip the credential.
+  bool _isRequestToJoinDecidedByCredential(ChatItem item) =>
+      _admitsByCredential &&
+      item is ConciergeMessage &&
+      item.conciergeType == ConciergeMessageType.permissionToJoinGroup;
 
   bool _isHiddenSupersededCallItem(ChatItem item) {
     if (_hiddenSupersededCallIds.isEmpty || item is! Message) return false;

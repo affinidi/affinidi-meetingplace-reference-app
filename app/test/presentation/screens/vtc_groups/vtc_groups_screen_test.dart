@@ -89,8 +89,31 @@ class _FakeChats extends Fake implements VtcGroupChatService {
   /// The identities the chats were created and joined as, by their id.
   final actedAs = <String>[];
 
+  /// The chats this phone owns or joined.
+  final stored = <VtcGroupChat>[];
+
+  /// Whether joining the member's chats joins the linked one.
+  bool joinsLinked = false;
+  int joinedAll = 0;
+
   @override
-  Future<List<VtcGroupChat>> chats() async => const [];
+  Future<List<VtcGroupChat>> chats() async => [...stored];
+
+  @override
+  Future<void> joinGroupChats() async {
+    joinedAll++;
+    if (!joinsLinked) return;
+    stored.add(
+      const VtcGroupChat(
+        chatGroupId: 'chat-g2',
+        communityDid: _communityDid,
+        groupId: 'g2',
+        groupDid: _linkedDid,
+        name: 'Book club',
+        isOwner: false,
+      ),
+    );
+  }
 
   @override
   Future<Identity?> memberIdentity(String communityDid) async => member;
@@ -270,6 +293,15 @@ void main() {
       ),
       findsOneWidget,
     );
+  });
+
+  testWidgets('joins a linked chat without asking', (tester) async {
+    chats.joinsLinked = true;
+    await pumpScreen(tester);
+
+    expect(chats.joinedAll, 1);
+    expect(find.byKey(const Key('vtc_group_join_g2')), findsNothing);
+    expect(chats.joined, isEmpty);
   });
 
   testWidgets('joins a linked chat', (tester) async {
