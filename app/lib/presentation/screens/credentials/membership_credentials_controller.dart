@@ -5,7 +5,6 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../application/services/vtc_service/vtc_service.dart';
-import '../../../domain/models/vtc/vtc_group_card.dart';
 import '../../../domain/models/vtc/vtc_membership_entry.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
 import 'membership_credentials_state.dart';
@@ -67,7 +66,6 @@ class MembershipCredentialsController
     final entries = await _read();
     if (!ref.mounted) return;
     if (entries == null) {
-      state = state.copyWith(isSyncing: false);
       await Future.wait([
         for (final entry in state.entries)
           if (!state.statuses.containsKey(entry.key)) check(entry.key),
@@ -79,19 +77,7 @@ class MembershipCredentialsController
       readAt: DateTime.now(),
       statuses: const {},
     );
-    final checks = [for (final entry in entries) check(entry.key)];
-    // Still syncing while the group cards are read: they show after.
-    final groupCards = await _readGroupCards();
-    if (!ref.mounted) return;
-    state = state.copyWith(
-      isSyncing: false,
-      groupCards: groupCards ?? state.groupCards,
-    );
-    await Future.wait([
-      ...checks,
-      for (final card in state.groupCards)
-        _check(card.key, () => _service.checkGroupCardStatus(card)),
-    ]);
+    await Future.wait([for (final entry in entries) check(entry.key)]);
   }
 
   /// The cards on the VTA, or null when it cannot be read, with why.
@@ -106,37 +92,22 @@ class MembershipCredentialsController
       failure = MembershipCredentialsFailure.unreachable;
     } finally {
       if (ref.mounted) {
-        state = state.copyWith(isLoading: false, failure: failure);
+        state = state.copyWith(
+          isSyncing: false,
+          isLoading: false,
+          failure: failure,
+        );
       }
     }
     return null;
   }
 
-  /// The group cards on the VTA, or null when it cannot be read.
-  Future<List<VtcGroupCard>?> _readGroupCards() async {
-    try {
-      return await _service.groupCards();
-    } on VtaNotLinkedException {
-      return null;
-    } on MeetingPlaceVtcSDKException catch (error) {
-      _log(error.code);
-      return null;
-    }
-  }
-
   /// Asks the community of the card [key] whether it still holds it.
   Future<void> check(String key) async {
     final entry = state.entries.where((entry) => entry.key == key).firstOrNull;
-    if (entry == null) return;
-    await _check(key, () => _service.checkMembershipStatus(entry));
-  }
-
-  /// Records what [read] says of the card [key]. Does nothing while the
-  /// card is being checked.
-  Future<void> _check(String key, Future<VtcCardStatus> Function() read) async {
-    if (state.checking.contains(key)) return;
+    if (entry == null || state.checking.contains(key)) return;
     state = state.copyWith(checking: {...state.checking, key});
-    final status = await read();
+    final status = await _service.checkMembershipStatus(entry);
     if (status.failure case final code?) _log(code);
     if (!ref.mounted) return;
     state = state.copyWith(

@@ -18,11 +18,9 @@ mixin _$MembershipCredentialsState {
 /// and the VTA not read.
  bool get isLoading;/// Whether the cards are being read from the VTA again.
  bool get isSyncing;/// The member's membership cards: held on their VTA, then left.
- List<VtcMembershipEntry> get entries;/// The cards the groups of the member's communities issued, as last read
-/// from the VTA.
- List<VtcGroupCard> get groupCards;/// When the cards were read from the VTA.
- DateTime? get readAt;/// What each card's community said of it, by [VtcMembershipEntry.key]
-/// or [VtcGroupCard.key]; none while it is being checked.
+ List<VtcMembershipEntry> get entries;/// When the cards were read from the VTA.
+ DateTime? get readAt;/// What each card's community said of it, by [VtcMembershipEntry.key];
+/// none while it is being checked.
  Map<String, VtcCardStatus> get statuses;/// The cards being checked with their community right now.
  Set<String> get checking; MembershipCredentialsFailure? get failure;
 /// Create a copy of MembershipCredentialsState
@@ -35,16 +33,16 @@ $MembershipCredentialsStateCopyWith<MembershipCredentialsState> get copyWith => 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MembershipCredentialsState&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.isSyncing, isSyncing) || other.isSyncing == isSyncing)&&const DeepCollectionEquality().equals(other.entries, entries)&&const DeepCollectionEquality().equals(other.groupCards, groupCards)&&(identical(other.readAt, readAt) || other.readAt == readAt)&&const DeepCollectionEquality().equals(other.statuses, statuses)&&const DeepCollectionEquality().equals(other.checking, checking)&&(identical(other.failure, failure) || other.failure == failure));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MembershipCredentialsState&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.isSyncing, isSyncing) || other.isSyncing == isSyncing)&&const DeepCollectionEquality().equals(other.entries, entries)&&(identical(other.readAt, readAt) || other.readAt == readAt)&&const DeepCollectionEquality().equals(other.statuses, statuses)&&const DeepCollectionEquality().equals(other.checking, checking)&&(identical(other.failure, failure) || other.failure == failure));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,isLoading,isSyncing,const DeepCollectionEquality().hash(entries),const DeepCollectionEquality().hash(groupCards),readAt,const DeepCollectionEquality().hash(statuses),const DeepCollectionEquality().hash(checking),failure);
+int get hashCode => Object.hash(runtimeType,isLoading,isSyncing,const DeepCollectionEquality().hash(entries),readAt,const DeepCollectionEquality().hash(statuses),const DeepCollectionEquality().hash(checking),failure);
 
 @override
 String toString() {
-  return 'MembershipCredentialsState(isLoading: $isLoading, isSyncing: $isSyncing, entries: $entries, groupCards: $groupCards, readAt: $readAt, statuses: $statuses, checking: $checking, failure: $failure)';
+  return 'MembershipCredentialsState(isLoading: $isLoading, isSyncing: $isSyncing, entries: $entries, readAt: $readAt, statuses: $statuses, checking: $checking, failure: $failure)';
 }
 
 
@@ -55,7 +53,7 @@ abstract mixin class $MembershipCredentialsStateCopyWith<$Res>  {
   factory $MembershipCredentialsStateCopyWith(MembershipCredentialsState value, $Res Function(MembershipCredentialsState) _then) = _$MembershipCredentialsStateCopyWithImpl;
 @useResult
 $Res call({
- bool isLoading, bool isSyncing, List<VtcMembershipEntry> entries, List<VtcGroupCard> groupCards, DateTime? readAt, Map<String, VtcCardStatus> statuses, Set<String> checking, MembershipCredentialsFailure? failure
+ bool isLoading, bool isSyncing, List<VtcMembershipEntry> entries, DateTime? readAt, Map<String, VtcCardStatus> statuses, Set<String> checking, MembershipCredentialsFailure? failure
 });
 
 
@@ -72,13 +70,12 @@ class _$MembershipCredentialsStateCopyWithImpl<$Res>
 
 /// Create a copy of MembershipCredentialsState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? isLoading = null,Object? isSyncing = null,Object? entries = null,Object? groupCards = null,Object? readAt = freezed,Object? statuses = null,Object? checking = null,Object? failure = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? isLoading = null,Object? isSyncing = null,Object? entries = null,Object? readAt = freezed,Object? statuses = null,Object? checking = null,Object? failure = freezed,}) {
   return _then(_self.copyWith(
 isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,isSyncing: null == isSyncing ? _self.isSyncing : isSyncing // ignore: cast_nullable_to_non_nullable
 as bool,entries: null == entries ? _self.entries : entries // ignore: cast_nullable_to_non_nullable
-as List<VtcMembershipEntry>,groupCards: null == groupCards ? _self.groupCards : groupCards // ignore: cast_nullable_to_non_nullable
-as List<VtcGroupCard>,readAt: freezed == readAt ? _self.readAt : readAt // ignore: cast_nullable_to_non_nullable
+as List<VtcMembershipEntry>,readAt: freezed == readAt ? _self.readAt : readAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,statuses: null == statuses ? _self.statuses : statuses // ignore: cast_nullable_to_non_nullable
 as Map<String, VtcCardStatus>,checking: null == checking ? _self.checking : checking // ignore: cast_nullable_to_non_nullable
 as Set<String>,failure: freezed == failure ? _self.failure : failure // ignore: cast_nullable_to_non_nullable
@@ -167,10 +164,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool isLoading,  bool isSyncing,  List<VtcMembershipEntry> entries,  List<VtcGroupCard> groupCards,  DateTime? readAt,  Map<String, VtcCardStatus> statuses,  Set<String> checking,  MembershipCredentialsFailure? failure)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool isLoading,  bool isSyncing,  List<VtcMembershipEntry> entries,  DateTime? readAt,  Map<String, VtcCardStatus> statuses,  Set<String> checking,  MembershipCredentialsFailure? failure)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MembershipCredentialsState() when $default != null:
-return $default(_that.isLoading,_that.isSyncing,_that.entries,_that.groupCards,_that.readAt,_that.statuses,_that.checking,_that.failure);case _:
+return $default(_that.isLoading,_that.isSyncing,_that.entries,_that.readAt,_that.statuses,_that.checking,_that.failure);case _:
   return orElse();
 
 }
@@ -188,10 +185,10 @@ return $default(_that.isLoading,_that.isSyncing,_that.entries,_that.groupCards,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool isLoading,  bool isSyncing,  List<VtcMembershipEntry> entries,  List<VtcGroupCard> groupCards,  DateTime? readAt,  Map<String, VtcCardStatus> statuses,  Set<String> checking,  MembershipCredentialsFailure? failure)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool isLoading,  bool isSyncing,  List<VtcMembershipEntry> entries,  DateTime? readAt,  Map<String, VtcCardStatus> statuses,  Set<String> checking,  MembershipCredentialsFailure? failure)  $default,) {final _that = this;
 switch (_that) {
 case _MembershipCredentialsState():
-return $default(_that.isLoading,_that.isSyncing,_that.entries,_that.groupCards,_that.readAt,_that.statuses,_that.checking,_that.failure);case _:
+return $default(_that.isLoading,_that.isSyncing,_that.entries,_that.readAt,_that.statuses,_that.checking,_that.failure);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -208,10 +205,10 @@ return $default(_that.isLoading,_that.isSyncing,_that.entries,_that.groupCards,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool isLoading,  bool isSyncing,  List<VtcMembershipEntry> entries,  List<VtcGroupCard> groupCards,  DateTime? readAt,  Map<String, VtcCardStatus> statuses,  Set<String> checking,  MembershipCredentialsFailure? failure)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool isLoading,  bool isSyncing,  List<VtcMembershipEntry> entries,  DateTime? readAt,  Map<String, VtcCardStatus> statuses,  Set<String> checking,  MembershipCredentialsFailure? failure)?  $default,) {final _that = this;
 switch (_that) {
 case _MembershipCredentialsState() when $default != null:
-return $default(_that.isLoading,_that.isSyncing,_that.entries,_that.groupCards,_that.readAt,_that.statuses,_that.checking,_that.failure);case _:
+return $default(_that.isLoading,_that.isSyncing,_that.entries,_that.readAt,_that.statuses,_that.checking,_that.failure);case _:
   return null;
 
 }
@@ -223,7 +220,7 @@ return $default(_that.isLoading,_that.isSyncing,_that.entries,_that.groupCards,_
 
 
 class _MembershipCredentialsState implements MembershipCredentialsState {
-   _MembershipCredentialsState({this.isLoading = true, this.isSyncing = false, final  List<VtcMembershipEntry> entries = const <VtcMembershipEntry>[], final  List<VtcGroupCard> groupCards = const <VtcGroupCard>[], this.readAt, final  Map<String, VtcCardStatus> statuses = const <String, VtcCardStatus>{}, final  Set<String> checking = const <String>{}, this.failure}): _entries = entries,_groupCards = groupCards,_statuses = statuses,_checking = checking;
+   _MembershipCredentialsState({this.isLoading = true, this.isSyncing = false, final  List<VtcMembershipEntry> entries = const <VtcMembershipEntry>[], this.readAt, final  Map<String, VtcCardStatus> statuses = const <String, VtcCardStatus>{}, final  Set<String> checking = const <String>{}, this.failure}): _entries = entries,_statuses = statuses,_checking = checking;
   
 
 /// Whether there is nothing to show yet: no cards kept on this phone,
@@ -240,24 +237,13 @@ class _MembershipCredentialsState implements MembershipCredentialsState {
   return EqualUnmodifiableListView(_entries);
 }
 
-/// The cards the groups of the member's communities issued, as last read
-/// from the VTA.
- final  List<VtcGroupCard> _groupCards;
-/// The cards the groups of the member's communities issued, as last read
-/// from the VTA.
-@override@JsonKey() List<VtcGroupCard> get groupCards {
-  if (_groupCards is EqualUnmodifiableListView) return _groupCards;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_groupCards);
-}
-
 /// When the cards were read from the VTA.
 @override final  DateTime? readAt;
-/// What each card's community said of it, by [VtcMembershipEntry.key]
-/// or [VtcGroupCard.key]; none while it is being checked.
+/// What each card's community said of it, by [VtcMembershipEntry.key];
+/// none while it is being checked.
  final  Map<String, VtcCardStatus> _statuses;
-/// What each card's community said of it, by [VtcMembershipEntry.key]
-/// or [VtcGroupCard.key]; none while it is being checked.
+/// What each card's community said of it, by [VtcMembershipEntry.key];
+/// none while it is being checked.
 @override@JsonKey() Map<String, VtcCardStatus> get statuses {
   if (_statuses is EqualUnmodifiableMapView) return _statuses;
   // ignore: implicit_dynamic_type
@@ -285,16 +271,16 @@ _$MembershipCredentialsStateCopyWith<_MembershipCredentialsState> get copyWith =
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MembershipCredentialsState&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.isSyncing, isSyncing) || other.isSyncing == isSyncing)&&const DeepCollectionEquality().equals(other._entries, _entries)&&const DeepCollectionEquality().equals(other._groupCards, _groupCards)&&(identical(other.readAt, readAt) || other.readAt == readAt)&&const DeepCollectionEquality().equals(other._statuses, _statuses)&&const DeepCollectionEquality().equals(other._checking, _checking)&&(identical(other.failure, failure) || other.failure == failure));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MembershipCredentialsState&&(identical(other.isLoading, isLoading) || other.isLoading == isLoading)&&(identical(other.isSyncing, isSyncing) || other.isSyncing == isSyncing)&&const DeepCollectionEquality().equals(other._entries, _entries)&&(identical(other.readAt, readAt) || other.readAt == readAt)&&const DeepCollectionEquality().equals(other._statuses, _statuses)&&const DeepCollectionEquality().equals(other._checking, _checking)&&(identical(other.failure, failure) || other.failure == failure));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,isLoading,isSyncing,const DeepCollectionEquality().hash(_entries),const DeepCollectionEquality().hash(_groupCards),readAt,const DeepCollectionEquality().hash(_statuses),const DeepCollectionEquality().hash(_checking),failure);
+int get hashCode => Object.hash(runtimeType,isLoading,isSyncing,const DeepCollectionEquality().hash(_entries),readAt,const DeepCollectionEquality().hash(_statuses),const DeepCollectionEquality().hash(_checking),failure);
 
 @override
 String toString() {
-  return 'MembershipCredentialsState(isLoading: $isLoading, isSyncing: $isSyncing, entries: $entries, groupCards: $groupCards, readAt: $readAt, statuses: $statuses, checking: $checking, failure: $failure)';
+  return 'MembershipCredentialsState(isLoading: $isLoading, isSyncing: $isSyncing, entries: $entries, readAt: $readAt, statuses: $statuses, checking: $checking, failure: $failure)';
 }
 
 
@@ -305,7 +291,7 @@ abstract mixin class _$MembershipCredentialsStateCopyWith<$Res> implements $Memb
   factory _$MembershipCredentialsStateCopyWith(_MembershipCredentialsState value, $Res Function(_MembershipCredentialsState) _then) = __$MembershipCredentialsStateCopyWithImpl;
 @override @useResult
 $Res call({
- bool isLoading, bool isSyncing, List<VtcMembershipEntry> entries, List<VtcGroupCard> groupCards, DateTime? readAt, Map<String, VtcCardStatus> statuses, Set<String> checking, MembershipCredentialsFailure? failure
+ bool isLoading, bool isSyncing, List<VtcMembershipEntry> entries, DateTime? readAt, Map<String, VtcCardStatus> statuses, Set<String> checking, MembershipCredentialsFailure? failure
 });
 
 
@@ -322,13 +308,12 @@ class __$MembershipCredentialsStateCopyWithImpl<$Res>
 
 /// Create a copy of MembershipCredentialsState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? isLoading = null,Object? isSyncing = null,Object? entries = null,Object? groupCards = null,Object? readAt = freezed,Object? statuses = null,Object? checking = null,Object? failure = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? isLoading = null,Object? isSyncing = null,Object? entries = null,Object? readAt = freezed,Object? statuses = null,Object? checking = null,Object? failure = freezed,}) {
   return _then(_MembershipCredentialsState(
 isLoading: null == isLoading ? _self.isLoading : isLoading // ignore: cast_nullable_to_non_nullable
 as bool,isSyncing: null == isSyncing ? _self.isSyncing : isSyncing // ignore: cast_nullable_to_non_nullable
 as bool,entries: null == entries ? _self._entries : entries // ignore: cast_nullable_to_non_nullable
-as List<VtcMembershipEntry>,groupCards: null == groupCards ? _self._groupCards : groupCards // ignore: cast_nullable_to_non_nullable
-as List<VtcGroupCard>,readAt: freezed == readAt ? _self.readAt : readAt // ignore: cast_nullable_to_non_nullable
+as List<VtcMembershipEntry>,readAt: freezed == readAt ? _self.readAt : readAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,statuses: null == statuses ? _self._statuses : statuses // ignore: cast_nullable_to_non_nullable
 as Map<String, VtcCardStatus>,checking: null == checking ? _self._checking : checking // ignore: cast_nullable_to_non_nullable
 as Set<String>,failure: freezed == failure ? _self.failure : failure // ignore: cast_nullable_to_non_nullable
