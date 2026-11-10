@@ -10,7 +10,7 @@ import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_group_chat.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_logger_provider.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
-import 'package:mpx_flutter_reference_app/presentation/screens/vtc_groups/vtc_groups_screen.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/vtc_groups/vtc_groups_view.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 
 import '../../../fakes/fake_identities.dart';
@@ -44,9 +44,11 @@ const _linked = VtcGroup(
 class _FakeVtcService extends Fake implements VtcService {
   bool isVtaMissing = false;
   bool isNotYetMember = false;
+  int reads = 0;
 
   @override
   Future<List<VtcGroupListing>> memberGroups(String communityDid) async {
+    reads++;
     if (isVtaMissing) throw const VtaNotLinkedException();
     if (isNotYetMember) throw const NotACommunityMemberException();
     return const [
@@ -172,9 +174,11 @@ void main() {
           theme: AppTheme.dark,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: const VtcGroupsScreen(
-            communityDid: _communityDid,
-            communityName: 'Football club',
+          home: const Scaffold(
+            body: VtcGroupsView(
+              communityDid: _communityDid,
+              communityName: 'Football club',
+            ),
           ),
         ),
       ),
@@ -198,8 +202,6 @@ void main() {
       'a linked one', (tester) async {
     await pumpScreen(tester);
 
-    expect(find.text('Groups'), findsOneWidget);
-    expect(find.text('Football club'), findsOneWidget);
     expect(find.text('Identity WG'), findsOneWidget);
     expect(find.text('Manager'), findsOneWidget);
     expect(find.byKey(const Key('vtc_group_create_g1')), findsOneWidget);
@@ -349,5 +351,22 @@ void main() {
     await pumpScreen(tester);
 
     expect(find.text('Link your VTA to see your groups.'), findsOneWidget);
+  });
+
+  testWidgets('reads the groups again when pulled down, also after a '
+      'failure', (tester) async {
+    vtc.isVtaMissing = true;
+    await pumpScreen(tester);
+    vtc.isVtaMissing = false;
+
+    await tester.fling(
+      find.text('Link your VTA to see your groups.'),
+      const Offset(0, 300),
+      1000,
+    );
+    await tester.pumpAndSettle();
+
+    expect(vtc.reads, 2);
+    expect(find.text('Identity WG'), findsOneWidget);
   });
 }

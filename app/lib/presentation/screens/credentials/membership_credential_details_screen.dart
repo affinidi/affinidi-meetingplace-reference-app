@@ -9,7 +9,6 @@ import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../navigation/routes/dashboard_routes.dart';
 import '../../themes/tokens/mc_icons.dart';
-import '../vtc_groups/vtc_groups_screen.dart';
 import '../vtc_join/vtc_flow_diagram.dart';
 import '../vtc_join/vtc_join_json_dialog.dart';
 import '../vtc_join/vtc_trail_step.dart';
@@ -90,20 +89,6 @@ class MembershipCredentialDetailsScreen extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  if (entry.left == null)
-                    OutlinedButton.icon(
-                      key: const Key('membership_groups'),
-                      icon: const Icon(McIcons.community),
-                      label: Text(l10n.vtcGroupsOpen),
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => VtcGroupsScreen(
-                            communityDid: entry.card.issuer,
-                            communityName: entry.communityName,
-                          ),
-                        ),
-                      ),
-                    ),
                   if (entry.left == null)
                     OutlinedButton.icon(
                       key: const Key('membership_rooms'),

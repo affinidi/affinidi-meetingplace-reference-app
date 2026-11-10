@@ -18,20 +18,20 @@ import 'vtc_groups_controller.dart';
 import 'vtc_groups_state.dart';
 
 /// The member's groups in one community, each with its chat: a manager
-/// creates it, and members join it with the group's credential. Opened from
-/// a membership card, and drawn as that card's screen is.
-class VtcGroupsScreen extends ConsumerWidget {
-  const VtcGroupsScreen({
+/// creates it, and members join it with the group's credential. The Groups
+/// tab of a community's page; pulled down, it reads them again.
+class VtcGroupsView extends ConsumerWidget {
+  const VtcGroupsView({
     super.key,
     required this.communityDid,
-    this.communityName,
+    required this.communityName,
   });
 
   /// DID of the community whose groups are shown.
   final String communityDid;
 
-  /// The community's name, above its groups; left out when unknown.
-  final String? communityName;
+  /// The community's name, above a group's members.
+  final String communityName;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -58,22 +58,12 @@ class VtcGroupsScreen extends ConsumerWidget {
       }
     });
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.vtcGroupsTitle, style: context.textTheme.titleLarge),
-        actions: [
-          IconButton(
-            key: const Key('vtc_groups_refresh'),
-            icon: const Icon(McIcons.refresh),
-            tooltip: l10n.vtcJoinCheckAgain,
-            onPressed: state.isLoading ? null : controller.refresh,
-          ),
-        ],
-      ),
-      body: switch (state) {
-        VtcGroupsState(isLoading: true, groups: []) => const Center(
-          child: CircularProgressIndicator(),
-        ),
+    if (state case VtcGroupsState(isLoading: true, groups: [])) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    return RefreshIndicator(
+      onRefresh: controller.refresh,
+      child: switch (state) {
         VtcGroupsState(failure: final failure?) => _Message(switch (failure) {
           VtcGroupsFailure.vtaMissing => l10n.vtcGroupsVtaMissing,
           VtcGroupsFailure.unreachable => l10n.vtcGroupsUnreachable,
@@ -81,13 +71,12 @@ class VtcGroupsScreen extends ConsumerWidget {
         }),
         VtcGroupsState(groups: []) => _Message(l10n.vtcGroupsNone),
         _ => SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             spacing: 16,
             children: [
-              if (communityName case final name?)
-                Text(name, style: context.textTheme.titleLarge),
               for (final listing in state.groups)
                 _GroupCard(
                   group: listing.group,
@@ -110,7 +99,7 @@ class VtcGroupsScreen extends ConsumerWidget {
                     MaterialPageRoute<void>(
                       builder: (_) => VtcGroupMembersScreen(
                         communityDid: communityDid,
-                        communityName: communityName ?? communityDid,
+                        communityName: communityName,
                         group: listing.group,
                       ),
                     ),
@@ -140,7 +129,8 @@ class VtcGroupsScreen extends ConsumerWidget {
   }
 }
 
-/// A message in place of the groups, such as why they can't be shown.
+/// A message in place of the groups, such as why they can't be shown;
+/// scrollable, so pulling it down reads them again.
 class _Message extends StatelessWidget {
   const _Message(this.text);
 
@@ -148,11 +138,19 @@ class _Message extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Text(text, textAlign: TextAlign.center),
-      ),
+    return CustomScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      slivers: [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Text(text, textAlign: TextAlign.center),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

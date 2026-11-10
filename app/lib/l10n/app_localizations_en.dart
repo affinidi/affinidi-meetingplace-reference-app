@@ -4028,9 +4028,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get vtcGroupsOpen => 'Groups';
-
-  @override
   String get vtcRoomsOpen => 'Rooms';
 
   @override
@@ -4131,9 +4128,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get vtcRoomWriteRefused =>
       'You can only read this room, so you can\'t add to it.';
-
-  @override
-  String get vtcGroupsTitle => 'Groups';
 
   @override
   String get vtcGroupsNone => 'You\'re not in any of this community\'s groups.';
@@ -4926,6 +4920,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get communityMembersTab => 'Members';
+
+  @override
+  String get communityGroupsTab => 'Groups';
 
   @override
   String communityMembersPrompt(String community) {

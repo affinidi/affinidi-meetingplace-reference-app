@@ -6018,12 +6018,6 @@ abstract class AppLocalizations {
   /// **'You\'re already a member of {name}.'**
   String vtcJoinAlreadyMember(String name);
 
-  /// Button on a membership card that opens the member's groups in the community
-  ///
-  /// In en, this message translates to:
-  /// **'Groups'**
-  String get vtcGroupsOpen;
-
   /// Button on a membership card that opens the community's data rooms the member is offered or in
   ///
   /// In en, this message translates to:
@@ -6209,12 +6203,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You can only read this room, so you can\'t add to it.'**
   String get vtcRoomWriteRefused;
-
-  /// Title of the member's groups in a community, above the community's name
-  ///
-  /// In en, this message translates to:
-  /// **'Groups'**
-  String get vtcGroupsTitle;
 
   /// Shown when the member belongs to no group of the community
   ///
@@ -7319,6 +7307,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Members'**
   String get communityMembersTab;
+
+  /// Tab of a community's screen with the member's groups there and their chats
+  ///
+  /// In en, this message translates to:
+  /// **'Groups'**
+  String get communityGroupsTab;
 
   /// Hint under the search field of a community's Members tab
   ///

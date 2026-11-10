@@ -12,6 +12,7 @@ import '../../widgets/filter_tab_bar.dart';
 import '../../widgets/section_header.dart';
 import '../contacts/contacts_screen.dart';
 import '../contacts/contacts_screen_controller.dart';
+import '../vtc_groups/vtc_groups_view.dart';
 import '../vtc_join/vtc_findable_controller.dart';
 import '../vtc_vetting_desk/vtc_vetting_desk_screen.dart';
 import 'communities_controller.dart';
@@ -25,10 +26,11 @@ import 'community_tabs_providers.dart';
 import 'removal_notice.dart';
 
 /// A community the member belongs to, under its logo if it gives one, with
-/// its channels, its groups' chats, its members, the member's role and
-/// membership card there, what it publishes about itself, and the vetting
-/// desk for a vetter; its join phrase beside its name for an
-/// administrator. Opened from the Communities tab.
+/// its channels, its groups' chats, its members, the member's groups and
+/// their chats, the member's role and membership card there, what it
+/// publishes about itself, and the vetting desk for a vetter; its join
+/// phrase beside its name for an administrator. Opened from the
+/// Communities tab.
 class CommunityScreen extends HookConsumerWidget {
   const CommunityScreen({super.key, required this.communityDid});
 
@@ -84,7 +86,7 @@ class CommunityScreen extends HookConsumerWidget {
     final canVet =
         canVetCheck.value ??
         (!canVetCheck.hasError && (community?.isVetter ?? false));
-    final tabCount = canVet ? 5 : 4;
+    final tabCount = canVet ? 6 : 5;
     // The tab on show stays on show as the Vetting tab comes and goes.
     final shownTab = useRef(0);
     final tabController = useTabController(
@@ -118,6 +120,7 @@ class CommunityScreen extends HookConsumerWidget {
             labels: [
               l10n.communityChannelsTab,
               l10n.communityMembersTab,
+              l10n.communityGroupsTab,
               l10n.communityMembershipTab,
               l10n.communityInfoTab,
               if (canVet) l10n.communityVettingTab,
@@ -132,6 +135,7 @@ class CommunityScreen extends HookConsumerWidget {
                   communityDid: communityDid,
                   communityName: name,
                 ),
+                VtcGroupsView(communityDid: communityDid, communityName: name),
                 CommunityMembershipView(
                   communityDid: communityDid,
                   communityName: name,
