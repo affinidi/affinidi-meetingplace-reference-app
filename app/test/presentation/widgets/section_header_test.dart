@@ -9,6 +9,7 @@ void main() {
     WidgetTester tester, {
     ThemeData? theme,
     String subtitle = 'Who you are connected with',
+    Uri? logoUrl,
     bool? showProgress,
     VoidCallback? onClose,
   }) async {
@@ -20,6 +21,7 @@ void main() {
             icon: McIcons.connections,
             title: 'Connections',
             subtitle: subtitle,
+            logoUrl: logoUrl,
             showProgress: showProgress,
             onClose: onClose,
           ),
@@ -51,6 +53,25 @@ void main() {
     await pumpHeader(tester, subtitle: 'A lead long enough to wrap ' * 6);
 
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('shows the logo in place of the icon when given', (tester) async {
+    final url = Uri.parse('https://chess.example/logo.png');
+    await pumpHeader(tester, logoUrl: url);
+
+    final logo = find.byKey(const Key('section_header_logo'));
+    expect(logo, findsOneWidget);
+    final image = tester.widget<Image>(
+      find.descendant(of: logo, matching: find.byType(Image)),
+    );
+    expect((image.image as NetworkImage).url, url.toString());
+  });
+
+  testWidgets('shows the icon without a logo', (tester) async {
+    await pumpHeader(tester);
+
+    expect(find.byKey(const Key('section_header_logo')), findsNothing);
+    expect(find.byIcon(McIcons.connections), findsOneWidget);
   });
 
   testWidgets('closes through onClose when given', (tester) async {

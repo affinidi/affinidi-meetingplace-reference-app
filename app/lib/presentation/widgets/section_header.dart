@@ -4,6 +4,7 @@ import '../../infrastructure/extensions/build_context_extensions.dart';
 import '../scaffolds/dashboard_shell_scaffold_key.dart';
 import '../themes/tokens/mc_icons.dart';
 import '../themes/tokens/mc_spacing.dart';
+import 'images/logo_avatar.dart';
 
 /// Opens a main section: its icon and title, a muted lead and the
 /// section's action, closed by a hairline, as a Mission Control section
@@ -14,6 +15,7 @@ class SectionHeader extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.subtitle,
+    this.logoUrl,
     this.showProgress,
     this.onClose,
     this.onBack,
@@ -21,6 +23,11 @@ class SectionHeader extends StatelessWidget {
 
   /// The section's symbol, as on its navigation item.
   final IconData icon;
+
+  /// The logo of what the section shows, in place of [icon]; the icon when
+  /// null or while it cannot load.
+  final Uri? logoUrl;
+
   final String title;
   final String subtitle;
   final bool? showProgress;
@@ -47,6 +54,7 @@ class SectionHeader extends StatelessWidget {
     // The icon centres on the title's first line, whatever its size.
     final titleLineHeight =
         (titleStyle?.fontSize ?? _iconSize) * (titleStyle?.height ?? 1);
+    final iconView = Icon(icon, size: _iconSize, color: mc.textSecondary);
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -77,7 +85,15 @@ class SectionHeader extends StatelessWidget {
               ),
             SizedBox(
               height: titleLineHeight,
-              child: Icon(icon, size: _iconSize, color: mc.textSecondary),
+              child: switch (logoUrl) {
+                final url? => LogoAvatar(
+                  key: const Key('section_header_logo'),
+                  url: url,
+                  size: titleLineHeight,
+                  fallback: iconView,
+                ),
+                null => iconView,
+              },
             ),
             Expanded(
               child: Column(

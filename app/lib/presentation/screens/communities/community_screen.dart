@@ -11,16 +11,17 @@ import '../contacts/contacts_screen_controller.dart';
 import '../vtc_join/vtc_findable_controller.dart';
 import 'communities_controller.dart';
 import 'community_info_view.dart';
+import 'community_logo_provider.dart';
 import 'community_members_controller.dart';
 import 'community_members_view.dart';
 import 'community_membership_view.dart';
 import 'community_settings_view.dart';
 import 'community_tabs_providers.dart';
 
-/// A community the member belongs to, with its channels, its groups' chats,
-/// its members, the member's role and membership card there, what it
-/// publishes about itself, and the member's settings there. Opened from the
-/// Communities tab.
+/// A community the member belongs to, under its logo if it gives one, with
+/// its channels, its groups' chats, its members, the member's role and
+/// membership card there, what it publishes about itself, and the member's
+/// settings there. Opened from the Communities tab.
 class CommunityScreen extends HookConsumerWidget {
   const CommunityScreen({super.key, required this.communityDid});
 
@@ -57,6 +58,7 @@ class CommunityScreen extends HookConsumerWidget {
         .firstOrNull;
 
     final name = community?.name ?? l10n.membershipCredentialUnnamed;
+    final logoUrl = ref.watch(communityLogoProvider(communityDid)).value;
     final tabController = useTabController(initialLength: 5);
 
     return SafeArea(
@@ -65,6 +67,7 @@ class CommunityScreen extends HookConsumerWidget {
         children: [
           SectionHeader(
             icon: Tabs.contacts.iconData,
+            logoUrl: logoUrl,
             title: name,
             subtitle: l10n.contactsPanelSubtitle,
             onBack: () => Navigator.of(context).pop(),
