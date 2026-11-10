@@ -15,6 +15,7 @@ import 'community_members_controller.dart';
 import 'community_members_view.dart';
 import 'community_membership_view.dart';
 import 'community_settings_view.dart';
+import 'community_tabs_providers.dart';
 
 /// A community the member belongs to, with its channels, its groups' chats,
 /// its members, the member's role and membership card there, what it
@@ -42,6 +43,13 @@ class CommunityScreen extends HookConsumerWidget {
       });
       return null;
     }, [communityDid]);
+    // Read what the Membership, Info and Settings tabs show as soon as the
+    // community opens, and keep it while it shows, for them to show it at
+    // once.
+    ref
+      ..listen(communityRoleProvider(communityDid), (_, _) {})
+      ..listen(communityMembershipCardProvider(communityDid), (_, _) {})
+      ..listen(communityInfoProvider(communityDid), (_, _) {});
     final community = ref
         .watch(communitiesControllerProvider)
         .value

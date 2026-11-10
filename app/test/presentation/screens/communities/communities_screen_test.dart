@@ -5,6 +5,7 @@ import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_community.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/build_context_extensions.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/communities/community_screen.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/communities/community_tabs_providers.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/credentials/membership_credentials_list.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_findable_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_sign_in/vtc_sign_in_screen.dart';
@@ -177,6 +178,26 @@ void main() {
         tester.element(find.byType(CommunityScreen)),
       );
       expect(container.exists(vtcFindableControllerProvider(chessDid)), isTrue);
+    });
+
+    testWidgets('reads what its other tabs show on opening it', (tester) async {
+      await openCommunitiesTab(tester);
+      await saveCommunities();
+      await pullToRefresh(tester);
+
+      await tester.tap(find.text('Chess club'));
+      await tester.pumpAndSettle();
+
+      // Before the Membership, Info and Settings tabs are opened.
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(CommunityScreen)),
+      );
+      expect(container.exists(communityRoleProvider(chessDid)), isTrue);
+      expect(
+        container.exists(communityMembershipCardProvider(chessDid)),
+        isTrue,
+      );
+      expect(container.exists(communityInfoProvider(chessDid)), isTrue);
     });
 
     testWidgets('shows what a community is in its Info tab', (tester) async {
