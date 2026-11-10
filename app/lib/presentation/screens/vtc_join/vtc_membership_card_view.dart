@@ -26,6 +26,7 @@ class VtcMembershipCardView extends StatelessWidget {
     required this.card,
     this.communityName,
     this.logoUrl,
+    this.showLogo = true,
     this.collapsible = false,
   });
 
@@ -34,6 +35,9 @@ class VtcMembershipCardView extends StatelessWidget {
   /// See [VtcCardView.communityName].
   final String? communityName;
   final Uri? logoUrl;
+
+  /// See [VtcCardView.showLogo].
+  final bool showLogo;
 
   /// See [VtcCardView.collapsible].
   final bool collapsible;
@@ -46,6 +50,7 @@ class VtcMembershipCardView extends StatelessWidget {
       documentKey: const Key('vtc_membership_card_document'),
       communityName: communityName,
       logoUrl: logoUrl,
+      showLogo: showLogo,
       title: l10n.vtcMembershipCardTitle,
       credential: card.credential,
       credentialType: 'MembershipCredential',
@@ -64,13 +69,13 @@ class VtcMembershipCardView extends StatelessWidget {
 }
 
 /// The vetter role card a community issued, as [VtcMembershipCardView]
-/// shows the membership card.
+/// shows the membership card, without the community's logo: it shows on the
+/// community's own screen.
 class VtcVetterCardView extends StatelessWidget {
   const VtcVetterCardView({
     super.key,
     required this.card,
     this.communityName,
-    this.logoUrl,
     this.collapsible = false,
   });
 
@@ -78,7 +83,6 @@ class VtcVetterCardView extends StatelessWidget {
 
   /// See [VtcCardView.communityName].
   final String? communityName;
-  final Uri? logoUrl;
 
   /// See [VtcCardView.collapsible].
   final bool collapsible;
@@ -90,7 +94,7 @@ class VtcVetterCardView extends StatelessWidget {
       cardKey: const Key('vtc_vetter_role_card'),
       documentKey: const Key('vtc_vetter_role_card_document'),
       communityName: communityName,
-      logoUrl: logoUrl,
+      showLogo: false,
       title: l10n.vtcVetterCardTitle,
       credential: card.credential,
       credentialType: 'AuthorityCredential',
@@ -106,19 +110,16 @@ class VtcVetterCardView extends StatelessWidget {
 }
 
 /// The card a community's group issued, as [VtcMembershipCardView] shows
-/// the membership card: the group's name over what the card is.
+/// the membership card: the group's name over what the card is, without
+/// the community's logo, as [VtcVetterCardView].
 class VtcGroupCardView extends StatelessWidget {
   const VtcGroupCardView({
     super.key,
     required this.card,
-    this.logoUrl,
     this.collapsible = false,
   });
 
   final VtcGroupCard card;
-
-  /// The logo of the group's community.
-  final Uri? logoUrl;
 
   /// See [VtcCardView.collapsible].
   final bool collapsible;
@@ -132,7 +133,7 @@ class VtcGroupCardView extends StatelessWidget {
       documentKey: Key('vtc_group_card_document_${card.key}'),
       // The group names the card, as a community does on another's page.
       communityName: card.groupName ?? l10n.groupCredentialUnnamed,
-      logoUrl: logoUrl,
+      showLogo: false,
       title: l10n.vtcGroupCredential,
       credential: membership.credential,
       credentialType: 'MembershipCredential',
@@ -166,6 +167,7 @@ class VtcCardView extends HookWidget {
     required this.holderDid,
     required this.issuer,
     this.logoUrl,
+    this.showLogo = true,
     this.chips = const [],
     this.validFrom,
     this.validUntil,
@@ -179,6 +181,10 @@ class VtcCardView extends HookWidget {
   /// community's own page, where [title] heads the card.
   final String? communityName;
   final Uri? logoUrl;
+
+  /// Whether the community's logo leads the card; not where the community
+  /// already heads the screen, as on its Membership tab.
+  final bool showLogo;
   final String title;
 
   /// The credential exactly as the VTA keeps it, and its type, named under
@@ -254,7 +260,12 @@ class VtcCardView extends HookWidget {
                     Row(
                       spacing: McSpacing.s3,
                       children: [
-                        _Logo(url: logoUrl, size: _logoSize),
+                        if (showLogo)
+                          _Logo(
+                            key: const Key('vtc_card_logo'),
+                            url: logoUrl,
+                            size: _logoSize,
+                          ),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -375,7 +386,7 @@ class VtcCardView extends HookWidget {
 /// The community's logo in a white ring, or a group icon while there is
 /// none or it cannot load.
 class _Logo extends StatelessWidget {
-  const _Logo({required this.url, required this.size});
+  const _Logo({super.key, required this.url, required this.size});
 
   final Uri? url;
   final double size;

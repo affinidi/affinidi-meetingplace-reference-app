@@ -367,6 +367,38 @@ void main() {
     );
   });
 
+  testWidgets('leaves the community\'s logo off its cards', (tester) async {
+    service
+      ..heldVetterCard = _vetterCard
+      ..groupCardsHeld = [
+        const VtcGroupCard(
+          membership: VtcMembershipCard(
+            issuer: 'did:webvh:QmHiking:vtc.example:g1',
+            memberDid: _me,
+            credential: {'id': 'urn:uuid:hiking'},
+          ),
+          communityDid: _club,
+          groupName: 'Hiking club',
+        ),
+      ];
+
+    await pumpView(tester);
+
+    for (final key in [
+      'vtc_membership_card',
+      'vtc_vetter_role_card',
+      'vtc_group_card_urn:uuid:hiking',
+    ]) {
+      expect(
+        find.descendant(
+          of: find.byKey(Key(key)),
+          matching: find.byKey(const Key('vtc_card_logo')),
+        ),
+        findsNothing,
+      );
+    }
+  });
+
   testWidgets('folds each card\'s details away until opened', (tester) async {
     await pumpView(tester);
     expect(find.text(_me), findsNothing);

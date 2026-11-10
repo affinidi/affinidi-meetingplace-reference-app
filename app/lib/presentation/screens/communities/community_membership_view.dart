@@ -12,7 +12,6 @@ import '../vtc_join/vtc_join_screen.dart';
 import '../vtc_join/vtc_membership_card_view.dart';
 import '../vtc_join/vtc_role_name.dart';
 import 'communities_controller.dart';
-import 'community_logo_provider.dart';
 import 'community_tabs_providers.dart';
 
 /// The role a vetter card gives, as a community names it.
@@ -45,7 +44,6 @@ class CommunityMembershipView extends ConsumerWidget {
     // Shown once read; a card the VTA cannot give is not missed here.
     final groupCards =
         ref.watch(communityGroupCardsProvider(communityDid)).value ?? const [];
-    final logoUrl = ref.watch(communityLogoProvider(communityDid)).value;
     final joinedAs = _joinedAs(ref);
     final roleName = switch (role.value) {
       // A vetter card is held alongside the role, e.g. by an administrator.
@@ -98,7 +96,7 @@ class CommunityMembershipView extends ConsumerWidget {
           if (card.value case final card?)
             VtcMembershipCardView(
               card: card,
-              logoUrl: logoUrl,
+              showLogo: false,
               collapsible: true,
             )
           else
@@ -117,13 +115,9 @@ class CommunityMembershipView extends ConsumerWidget {
               ],
             ),
           if (vetterCard != null)
-            VtcVetterCardView(
-              card: vetterCard,
-              logoUrl: logoUrl,
-              collapsible: true,
-            ),
+            VtcVetterCardView(card: vetterCard, collapsible: true),
           for (final card in groupCards)
-            VtcGroupCardView(card: card, logoUrl: logoUrl, collapsible: true),
+            VtcGroupCardView(card: card, collapsible: true),
           const SizedBox(height: 12),
           ElevatedButton(
             key: const Key('community_membership_leave'),

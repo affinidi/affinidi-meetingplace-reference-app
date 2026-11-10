@@ -15,6 +15,7 @@ void main() {
     WidgetTester tester, {
     String? id,
     String? communityName = 'Chess club',
+    bool showLogo = true,
     bool collapsible = false,
   }) => tester.pumpWidget(
     MaterialApp(
@@ -35,6 +36,7 @@ void main() {
                 'credentialSubject': {'id': _me},
               },
             ),
+            showLogo: showLogo,
             collapsible: collapsible,
           ),
         ),
@@ -93,6 +95,17 @@ void main() {
 
       expect(find.text('Chess club'), findsNothing);
       expect(find.text('Membership card'), findsOneWidget);
+    });
+
+    testWidgets('leads with the community\'s logo unless left out', (
+      tester,
+    ) async {
+      final logo = find.byKey(const Key('vtc_card_logo'));
+      await pumpCard(tester);
+      expect(logo, findsOneWidget);
+
+      await pumpCard(tester, showLogo: false);
+      expect(logo, findsNothing);
     });
 
     testWidgets('shows its details at once unless collapsible', (tester) async {
