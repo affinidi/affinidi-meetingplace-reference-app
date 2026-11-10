@@ -4634,6 +4634,24 @@ abstract class AppLocalizations {
   /// **'Your role'**
   String get vtcCommunityRole;
 
+  /// Label of the identity the member joined a community with, on its page
+  ///
+  /// In en, this message translates to:
+  /// **'Your identity'**
+  String get vtcCommunityIdentity;
+
+  /// The identity the member joined a community with, which the community knows by a DID made just for it
+  ///
+  /// In en, this message translates to:
+  /// **'{name}, with a new DID for this community'**
+  String vtcCommunityIdentityNewDid(String name);
+
+  /// The identity the member joined a community with, which the community knows by the identity's own DID
+  ///
+  /// In en, this message translates to:
+  /// **'{name}, with this identity\'s own DID'**
+  String vtcCommunityIdentityOwnDid(String name);
+
   /// Tooltip of the button next to the member's role that opens the community's settings, such as its join phrase
   ///
   /// In en, this message translates to:
