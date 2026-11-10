@@ -118,7 +118,23 @@ class VtcGroupsController extends _$VtcGroupsController {
     );
   });
 
-  /// Forgets the link shown for the chat just created.
+  /// Shows again the link to publish for the chat of [group] this phone
+  /// owns, as when it was created.
+  Future<void> showChatLink(VtcGroup group) async {
+    state = state.copyWith(actionFailed: false);
+    GroupChatLink? link;
+    try {
+      link = await _chats.chatLink(group.groupDid);
+    } on Exception catch (error) {
+      _log('reading a group chat link', error.runtimeType);
+    }
+    if (!ref.mounted) return;
+    state = link == null
+        ? state.copyWith(actionFailed: true)
+        : state.copyWith(createdLink: link, createdForGroupDid: group.groupDid);
+  }
+
+  /// Forgets the link shown for the chat just created, or shown again.
   void dismissCreatedLink() {
     state = state.copyWith(createdLink: null, createdForGroupDid: null);
   }

@@ -6408,6 +6408,12 @@ abstract class AppLocalizations {
   /// **'Copy pnm command'**
   String get vtcGroupChatLinkCopyCommand;
 
+  /// Tooltip of the icon on a group that shows again the service entry to add to the group's DID document, for the manager who created the group's chat
+  ///
+  /// In en, this message translates to:
+  /// **'Show the chat\'s link'**
+  String get vtcGroupChatLinkShow;
+
   /// Shown after a group chat's link is copied
   ///
   /// In en, this message translates to:

@@ -130,6 +130,12 @@ class _FakeChats extends Fake implements VtcGroupChatService {
   Future<Identity?> memberIdentity(String communityDid) async => member;
 
   @override
+  Future<GroupChatLink?> chatLink(String groupDid) async => const GroupChatLink(
+    mnemonic: 'identity-wg',
+    controlPlaneDid: 'did:web:control-plane.example',
+  );
+
+  @override
   Future<GroupChatLink> createChat(
     String communityDid,
     VtcGroup group, {
@@ -283,6 +289,32 @@ void main() {
     await tester.pump();
 
     expect(copied, 'pnm did-mgmt dids edit --did $_managedDid');
+  });
+
+  testWidgets('shows the link to publish again for a chat this phone owns', (
+    tester,
+  ) async {
+    chats.stored.add(
+      const VtcGroupChat(
+        chatGroupId: 'chat-g1',
+        communityDid: _communityDid,
+        groupId: 'g1',
+        groupDid: _managedDid,
+        name: 'Identity WG',
+        isOwner: true,
+      ),
+    );
+    await pumpScreen(tester);
+
+    expect(find.byKey(const Key('vtc_group_link_g2')), findsNothing);
+    await tapVisible(tester, const Key('vtc_group_link_g1'));
+
+    expect(find.text("Publish the chat's link"), findsOneWidget);
+    final service = tester.widget<SelectableText>(
+      find.byKey(const Key('vtc_group_chat_link_service')),
+    );
+    expect(service.data, contains('identity-wg'));
+    expect(service.data, contains('$_managedDid#meeting-place'));
   });
 
   testWidgets('asks who may post, and links only managers posting', (

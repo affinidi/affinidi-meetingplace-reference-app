@@ -4246,6 +4246,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vtcGroupChatLinkCopyCommand => 'Copy pnm command';
 
   @override
+  String get vtcGroupChatLinkShow => 'Show the chat\'s link';
+
+  @override
   String get vtcGroupChatLinkCopied => 'Copied';
 
   @override

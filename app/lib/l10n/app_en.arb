@@ -4466,6 +4466,10 @@
 	"@vtcGroupChatLinkCopyCommand": {
 		"description": "Button that copies the pnm command an operator runs to edit the group's DID document; pnm is a command-line tool's name and stays as is"
 	},
+	"vtcGroupChatLinkShow": "Show the chat's link",
+	"@vtcGroupChatLinkShow": {
+		"description": "Tooltip of the icon on a group that shows again the service entry to add to the group's DID document, for the manager who created the group's chat"
+	},
 	"vtcGroupChatLinkCopied": "Copied",
 	"@vtcGroupChatLinkCopied": {
 		"description": "Shown after a group chat's link is copied"

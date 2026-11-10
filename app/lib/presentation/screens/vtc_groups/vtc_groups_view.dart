@@ -95,6 +95,7 @@ class VtcGroupsView extends ConsumerWidget {
                     );
                   },
                   onJoin: () => controller.joinChat(listing.group),
+                  onShowLink: () => controller.showChatLink(listing.group),
                   onMembers: () => Navigator.of(context).push(
                     MaterialPageRoute<void>(
                       builder: (_) => VtcGroupMembersScreen(
@@ -165,6 +166,7 @@ class _GroupCard extends StatelessWidget {
     required this.isBusy,
     required this.onCreate,
     required this.onJoin,
+    required this.onShowLink,
     this.credentialUntil,
     required this.onMembers,
   });
@@ -178,6 +180,10 @@ class _GroupCard extends StatelessWidget {
   final DateTime? credentialUntil;
   final VoidCallback onCreate;
   final VoidCallback onJoin;
+
+  /// Shows again the link to publish in the group's DID document, for the
+  /// chat this phone owns.
+  final VoidCallback onShowLink;
 
   /// Opens the group's members, to vouch for them.
   final VoidCallback onMembers;
@@ -204,11 +210,28 @@ class _GroupCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: 16,
         children: [
-          Text(
-            group.name,
-            style: context.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  group.name,
+                  style: context.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              if (status == VtcGroupChatStatus.owned)
+                IconButton(
+                  key: Key('vtc_group_link_${group.groupId}'),
+                  icon: Icon(
+                    McIcons.link,
+                    color: context.mcColors.textSecondary,
+                  ),
+                  tooltip: l10n.vtcGroupChatLinkShow,
+                  visualDensity: VisualDensity.compact,
+                  onPressed: onShowLink,
+                ),
+            ],
           ),
           if (group.description case final description?)
             Text(
@@ -351,8 +374,9 @@ Future<GroupChatPosting?> _askPosting(BuildContext context) {
 
 /// The service entry the community's operator adds to the group's DID
 /// document, so members can find the chat and know the community linked
-/// it. An operator using `pnm` can copy the command that opens that
-/// document for editing.
+/// it: shown once the chat is created, and again from the group's icon. An
+/// operator using `pnm` can copy the command that opens that document for
+/// editing.
 class _ChatLinkDialog extends StatelessWidget {
   const _ChatLinkDialog({required this.link, required this.groupDid});
 
