@@ -606,9 +606,10 @@ class _SessionView extends HookWidget {
             isLoading: busy,
             onPressed: () => controller.confirmMatch(requestId),
           ),
-          OnboardingTextButton(
+          OnboardingButton(
             key: const Key('vtc_vetter_match_no'),
             label: l10n.vtcJoinMatchNo,
+            isDestructive: true,
             onPressed: () => controller.mismatch(requestId),
           ),
         ],

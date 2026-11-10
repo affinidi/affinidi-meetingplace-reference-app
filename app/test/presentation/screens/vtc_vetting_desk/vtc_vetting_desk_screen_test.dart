@@ -227,20 +227,35 @@ void main() {
     await close(tester);
   });
 
+  /// The label colour of the button keyed [key].
+  Color? labelColour(WidgetTester tester, String key) => tester
+      .widget<ElevatedButton>(
+        find.descendant(
+          of: find.byKey(Key(key)),
+          matching: find.byType(ElevatedButton),
+        ),
+      )
+      .style
+      ?.foregroundColor
+      ?.resolve({});
+
+  final danger = AppTheme.dark.extension<McColors>()!.dangerText;
+
   testWidgets('offers a new ticket in the danger colour', (tester) async {
     await pumpDesk(tester);
     await showTicket(tester);
 
-    final button = tester.widget<ElevatedButton>(
-      find.descendant(
-        of: find.byKey(const Key('vtc_vetter_new_ticket')),
-        matching: find.byType(ElevatedButton),
-      ),
-    );
-    expect(
-      button.style?.foregroundColor?.resolve({}),
-      AppTheme.dark.extension<McColors>()!.dangerText,
-    );
+    expect(labelColour(tester, 'vtc_vetter_new_ticket'), danger);
+    await close(tester);
+  });
+
+  testWidgets('offers a mismatch in the danger colour', (tester) async {
+    await pumpDesk(tester);
+    final ticket = await showTicket(tester);
+    await tester.runAsync(() => fixture.requestWith(ticket.spoken));
+    await check(tester);
+
+    expect(labelColour(tester, 'vtc_vetter_match_no'), danger);
     await close(tester);
   });
 
