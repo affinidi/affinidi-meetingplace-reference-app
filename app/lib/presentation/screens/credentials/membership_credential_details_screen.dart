@@ -7,10 +7,10 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../domain/models/vtc/vtc_membership_entry.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../navigation/routes/dashboard_routes.dart';
 import '../../themes/tokens/mc_icons.dart';
 import '../vtc_groups/vtc_groups_screen.dart';
 import '../vtc_join/vtc_flow_diagram.dart';
-import '../vtc_join/vtc_join_screen.dart';
 import '../vtc_join/vtc_trail_step.dart';
 import 'membership_credentials_controller.dart';
 import 'membership_credentials_list.dart';
@@ -20,8 +20,8 @@ import 'membership_credentials_list.dart';
 /// what the community's status list says of it now. Each step says who did
 /// it, so the member sees where their VTA took part and where this phone
 /// asked the community directly. The signed documents show in full behind
-/// each step's icon. Under the trail, the community opens in this app and,
-/// when it lists one, on its website.
+/// each step's icon. Under the trail, the community opens in this app,
+/// unless it revoked the card, and, when it lists one, on its website.
 class MembershipCredentialDetailsScreen extends ConsumerWidget {
   const MembershipCredentialDetailsScreen({super.key, required this.entryKey});
 
@@ -36,6 +36,12 @@ class MembershipCredentialDetailsScreen extends ConsumerWidget {
         .where((entry) => entry.key == entryKey)
         .firstOrNull;
     final checking = state.checking.contains(entryKey);
+    // The last status found stands while the card is checked again, so the
+    // community's button does not come and go.
+    final lastStatus = state.statuses[entryKey];
+    final revoked =
+        lastStatus?.state == VtcCardState.revoked ||
+        (lastStatus?.lastKnown?.revoked ?? false);
 
     return Scaffold(
       appBar: AppBar(
@@ -102,7 +108,10 @@ class MembershipCredentialDetailsScreen extends ConsumerWidget {
                     readAt: state.readAt,
                     status: checking ? null : state.statuses[entryKey],
                   ),
-                  _CommunityLinks(communityDid: entry.card.issuer),
+                  _CommunityLinks(
+                    communityDid: entry.card.issuer,
+                    canOpen: !revoked,
+                  ),
                 ],
               ),
             ),
@@ -110,12 +119,16 @@ class MembershipCredentialDetailsScreen extends ConsumerWidget {
   }
 }
 
-/// The card's community: in this app, and on its website once its profile
-/// says where that is.
+/// The card's community: its page in this app, opening on its channels,
+/// and its website once its profile says where that is.
 class _CommunityLinks extends ConsumerWidget {
-  const _CommunityLinks({required this.communityDid});
+  const _CommunityLinks({required this.communityDid, required this.canOpen});
 
   final String communityDid;
+
+  /// Whether the member may open the community's page: not once it revoked
+  /// their card.
+  final bool canOpen;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -125,12 +138,14 @@ class _CommunityLinks extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: 12,
       children: [
-        FilledButton.icon(
-          key: const Key('membership_open_community'),
-          icon: const Icon(McIcons.community),
-          label: Text(l10n.membershipOpenCommunity),
-          onPressed: () => VtcJoinScreen.show(context, code: communityDid),
-        ),
+        if (canOpen)
+          FilledButton.icon(
+            key: const Key('membership_open_community'),
+            icon: const Icon(McIcons.community),
+            label: Text(l10n.membershipOpenCommunity),
+            onPressed: () =>
+                CommunityRoute(communityDid: communityDid).go(context),
+          ),
         if (website != null)
           OutlinedButton.icon(
             key: const Key('membership_open_website'),

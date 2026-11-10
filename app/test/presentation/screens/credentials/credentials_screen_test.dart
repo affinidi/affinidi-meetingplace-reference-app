@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 import 'package:mpx_flutter_reference_app/application/services/credential_service/credential_service.dart';
@@ -17,7 +18,6 @@ import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_reposi
 import 'package:mpx_flutter_reference_app/infrastructure/vtc/user_verification_key.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/credentials/credentials_screen.dart';
-import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 
@@ -156,11 +156,26 @@ void main() {
             ),
           ),
         ],
-        child: MaterialApp(
+        child: MaterialApp.router(
           theme: AppTheme.dark,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: const Scaffold(body: CredentialsScreen()),
+          routerConfig: GoRouter(
+            routes: [
+              GoRoute(
+                path: '/',
+                builder: (_, _) => const Scaffold(body: CredentialsScreen()),
+              ),
+              // The community's page, as the app routes to it.
+              GoRoute(
+                path: '/contacts/community/:communityDid',
+                builder: (_, state) => Text(
+                  'Community page of '
+                  '${state.pathParameters['communityDid']}',
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -500,8 +515,16 @@ void main() {
 
     await tester.tap(find.text('Open community'));
     await settle(tester);
-    expect(find.byType(VtcJoinScreen), findsOneWidget);
-    expect(find.byKey(const Key('vtc_join_did')), findsNothing);
+    expect(find.text('Community page of $fakeVtcDid'), findsOneWidget);
+  });
+
+  testWidgets('offers no way into a community that revoked the card', (
+    tester,
+  ) async {
+    await pumpScreen(tester);
+    await open(tester, 'Football club');
+
+    expect(find.byKey(const Key('membership_open_community')), findsNothing);
   });
 
   testWidgets('offers no website when the community lists none', (
