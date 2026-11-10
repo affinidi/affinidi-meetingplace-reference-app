@@ -182,13 +182,7 @@ void main() {
       find.textContaining('Let members of Club find you to vouch for you'),
       findsOneWidget,
     );
-    expect(
-      find.text(
-        'Members of Club see you as John Doe, with the name and picture of '
-        'the identity you joined with.',
-      ),
-      findsOneWidget,
-    );
+    expect(find.textContaining('see you as'), findsNothing);
     expect(findableSwitch(tester).value, isFalse);
   });
 

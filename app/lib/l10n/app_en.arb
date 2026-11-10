@@ -3927,18 +3927,6 @@
 			}
 		}
 	},
-	"vtcDirectoryNameShown": "Members of {community} see you as {name}, with the name and picture of the identity you joined with.",
-	"@vtcDirectoryNameShown": {
-		"description": "The name other members of a community see, taken from the identity the member joined with",
-		"placeholders": {
-			"community": {
-				"type": "String"
-			},
-			"name": {
-				"type": "String"
-			}
-		}
-	},
 	"vtcTrustRecordDocument": "What {community} keeps",
 	"@vtcTrustRecordDocument": {
 		"description": "Title of the community's record of a vouch",

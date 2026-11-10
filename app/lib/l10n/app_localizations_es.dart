@@ -3889,11 +3889,6 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String vtcDirectoryNameShown(String community, String name) {
-    return 'Members of $community see you as $name, with the name and picture of the identity you joined with.';
-  }
-
-  @override
   String vtcTrustRecordDocument(String community) {
     return 'What $community keeps';
   }

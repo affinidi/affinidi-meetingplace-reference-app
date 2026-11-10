@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../../application/services/identities_service/identities_service.dart';
 import '../../../application/services/vtc_trust_service/vtc_trust_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
@@ -35,9 +34,6 @@ class VtcFindableView extends HookConsumerWidget {
     final l10n = context.l10n;
     final controller = vtcFindableControllerProvider(communityDid);
     final findable = ref.watch(controller);
-    final identities = ref.watch(
-      identitiesServiceProvider.select((state) => state.identities),
-    );
     final syncing = useState<Future<void>?>(null);
     useEffect(() {
       // Not while building: syncing changes what is shown.
@@ -72,14 +68,6 @@ class VtcFindableView extends HookConsumerWidget {
     }
 
     final loaded = findable.value?.card;
-    final identityName =
-        identities
-            .where((identity) => identity.did == findable.value?.identityDid)
-            .firstOrNull
-            ?.card
-            .displayName
-            .trim() ??
-        '';
     final message =
         failure.value ??
         switch (findable.error) {
@@ -119,12 +107,6 @@ class VtcFindableView extends HookConsumerWidget {
               ),
             ],
           ),
-          if (identityName case final name when name.isNotEmpty)
-            Text(
-              l10n.vtcDirectoryNameShown(communityName, name),
-              key: const Key('vtc_directory_name'),
-              style: onboardingNote(context),
-            ),
           if (message case final message?)
             OnboardingMessage(message, isError: true),
         ],

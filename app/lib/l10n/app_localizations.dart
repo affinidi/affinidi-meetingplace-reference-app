@@ -5766,12 +5766,6 @@ abstract class AppLocalizations {
   /// **'{community} doesn\'t accept this name.'**
   String vtcDirectoryNameRefused(String community);
 
-  /// The name other members of a community see, taken from the identity the member joined with
-  ///
-  /// In en, this message translates to:
-  /// **'Members of {community} see you as {name}, with the name and picture of the identity you joined with.'**
-  String vtcDirectoryNameShown(String community, String name);
-
   /// Title of the community's record of a vouch
   ///
   /// In en, this message translates to:
