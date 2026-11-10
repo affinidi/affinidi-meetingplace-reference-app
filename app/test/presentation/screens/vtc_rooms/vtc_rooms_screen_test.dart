@@ -174,6 +174,33 @@ void main() {
       expect(find.textContaining('did:'), findsNothing);
     });
 
+    testWidgets('shows an offer not accepted yet once, as offered', (
+      tester,
+    ) async {
+      const both = {RoomAction.read, RoomAction.write};
+      service.offers = [_offer(actions: both)];
+      // The community lists the offer among the member's places too.
+      service.rooms = [_room(actions: both, state: RoomMemberState.offered)];
+      await pump(tester, const VtcRoomsScreen(communityDid: _club));
+
+      expect(find.text('DevCon 2026 — Talks'), findsOneWidget);
+      expect(find.text('Read and write'), findsOneWidget);
+      expect(find.text('Read only'), findsNothing);
+      expect(find.text('Your rooms'), findsNothing);
+    });
+
+    testWidgets('says what a speaker may do in a room they are in', (
+      tester,
+    ) async {
+      service.rooms = [
+        _room(actions: {RoomAction.read, RoomAction.write}),
+      ];
+      await pump(tester, const VtcRoomsScreen(communityDid: _club));
+
+      expect(find.text('Your rooms'), findsOneWidget);
+      expect(find.text('Read and write'), findsOneWidget);
+    });
+
     testWidgets('says so when there are no rooms', (tester) async {
       await pump(tester, const VtcRoomsScreen(communityDid: _club));
 

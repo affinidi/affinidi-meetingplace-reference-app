@@ -86,7 +86,15 @@ class VtcRoomsScreen extends HookConsumerWidget {
           communityDid: communityDid,
           communityName: communityName,
           offers: offers.open.toList(),
-          rooms: rooms,
+          // An offer not accepted yet is listed with the offers, and a
+          // place the member left is gone.
+          rooms: [
+            for (final room in rooms)
+              if (room.state != RoomMemberState.offered &&
+                  room.state != RoomMemberState.removed &&
+                  !offers.open.any((offer) => offer.roomId == room.roomId))
+                room,
+          ],
           accepting: accepting.value,
           onAccept: accept,
         ),
@@ -173,7 +181,10 @@ class _Rooms extends StatelessWidget {
             _RoomCard(
               key: Key('vtc_room_${room.roomId}'),
               summary: room,
-              readOnly: !room.canWrite,
+              // What the room gives the member, whether or not it is open
+              // to them now; [closed] says when it is not.
+              readOnly:
+                  room.readOnly || !room.actions.contains(RoomAction.write),
               closed: !room.canRead,
               onTap: room.canRead
                   ? () => Navigator.of(context).push(
