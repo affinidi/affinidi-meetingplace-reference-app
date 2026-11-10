@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
 
 import '../../../domain/models/vtc/vtc_membership_card.dart';
@@ -23,11 +24,15 @@ class VtcMembershipCardView extends StatelessWidget {
     required this.card,
     required this.communityName,
     this.logoUrl,
+    this.collapsible = false,
   });
 
   final VtcMembershipCard card;
   final String communityName;
   final Uri? logoUrl;
+
+  /// See [VtcCardView.collapsible].
+  final bool collapsible;
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +54,7 @@ class VtcMembershipCardView extends StatelessWidget {
       issuer: card.issuer,
       validFrom: card.validFrom,
       validUntil: card.validUntil,
+      collapsible: collapsible,
     );
   }
 }
@@ -57,7 +63,7 @@ class VtcMembershipCardView extends StatelessWidget {
 /// community and [title], what the card states, whom it is about and for
 /// how long, and the [credential] in full behind an icon, with the `pnm`
 /// command that fetches it from the member's VTA.
-class VtcCardView extends StatelessWidget {
+class VtcCardView extends HookWidget {
   const VtcCardView({
     super.key,
     required this.cardKey,
@@ -74,6 +80,7 @@ class VtcCardView extends StatelessWidget {
     this.chips = const [],
     this.validFrom,
     this.validUntil,
+    this.collapsible = false,
   });
 
   final Key cardKey;
@@ -99,6 +106,10 @@ class VtcCardView extends StatelessWidget {
   final DateTime? validFrom;
   final DateTime? validUntil;
 
+  /// Whether whom the card is about and for how long start folded away,
+  /// for a list of cards, behind a chevron that opens them.
+  final bool collapsible;
+
   static const _radius = Radius.circular(McRadius.lg);
   static const _blurSigma = 20.0;
   static const _logoSize = 44.0;
@@ -108,6 +119,7 @@ class VtcCardView extends StatelessWidget {
     final l10n = context.l10n;
     final textTheme = context.textTheme;
     final mc = context.mcColors;
+    final expanded = useState(!collapsible);
     String date(DateTime at) =>
         DateFormat.yMMMd(l10n.localeName).format(at.toLocal());
 
@@ -182,6 +194,23 @@ class VtcCardView extends StatelessWidget {
                             command: pnmCredentialCommand(credential['id']),
                           ),
                         ),
+                        if (collapsible)
+                          IconButton(
+                            icon: Icon(
+                              expanded.value
+                                  ? McIcons.chevronUp
+                                  : McIcons.chevronDown,
+                              color: mc.textPrimary,
+                            ),
+                            tooltip: expanded.value
+                                ? MaterialLocalizations.of(
+                                    context,
+                                  ).expandedIconTapHint
+                                : MaterialLocalizations.of(
+                                    context,
+                                  ).collapsedIconTapHint,
+                            onPressed: () => expanded.value = !expanded.value,
+                          ),
                       ],
                     ),
                     for (final (icon, label) in chips)
@@ -189,55 +218,56 @@ class VtcCardView extends StatelessWidget {
                         alignment: Alignment.centerLeft,
                         child: _Chip(icon: icon, label: label),
                       ),
-                    Padding(
-                      padding: const EdgeInsets.only(right: McSpacing.s2),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        spacing: McSpacing.s3,
-                        children: [
-                          VtcDetailLine(
-                            icon: McIcons.identities,
-                            label: holderLabel,
-                            value: holderDid,
-                            isId: true,
-                          ),
-                          VtcDetailLine(
-                            icon: McIcons.community,
-                            label: l10n.vtcMembershipCardIssuedBy,
-                            value: issuer,
-                            isId: true,
-                          ),
-                          if (validFrom case final from?)
+                    if (expanded.value)
+                      Padding(
+                        padding: const EdgeInsets.only(right: McSpacing.s2),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          spacing: McSpacing.s3,
+                          children: [
                             VtcDetailLine(
-                              icon: McIcons.calendarCheck,
-                              label: l10n.vtcMembershipCardValidFrom,
-                              value: date(from),
+                              icon: McIcons.identities,
+                              label: holderLabel,
+                              value: holderDid,
+                              isId: true,
                             ),
-                          if (validUntil case final until?)
                             VtcDetailLine(
-                              icon: McIcons.calendarX,
-                              label: l10n.vtcMembershipCardValidUntil,
-                              value: date(until),
+                              icon: McIcons.community,
+                              label: l10n.vtcMembershipCardIssuedBy,
+                              value: issuer,
+                              isId: true,
                             ),
-                          Row(
-                            spacing: McSpacing.s2,
-                            children: [
-                              Icon(
-                                McIcons.cloudDone,
-                                size: 16,
-                                color: mc.textSecondary,
+                            if (validFrom case final from?)
+                              VtcDetailLine(
+                                icon: McIcons.calendarCheck,
+                                label: l10n.vtcMembershipCardValidFrom,
+                                value: date(from),
                               ),
-                              Expanded(
-                                child: Text(
-                                  l10n.vtcMembershipCardKept,
-                                  style: onboardingNote(context),
+                            if (validUntil case final until?)
+                              VtcDetailLine(
+                                icon: McIcons.calendarX,
+                                label: l10n.vtcMembershipCardValidUntil,
+                                value: date(until),
+                              ),
+                            Row(
+                              spacing: McSpacing.s2,
+                              children: [
+                                Icon(
+                                  McIcons.cloudDone,
+                                  size: 16,
+                                  color: mc.textSecondary,
                                 ),
-                              ),
-                            ],
-                          ),
-                        ],
+                                Expanded(
+                                  child: Text(
+                                    l10n.vtcMembershipCardKept,
+                                    style: onboardingNote(context),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),
