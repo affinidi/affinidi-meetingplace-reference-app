@@ -34,7 +34,7 @@ Future<void> openCommunitiesTab(
   await navigateToLocation(
     tester,
     '/contacts',
-    identities: [FakeIdentities.primaryIdentity],
+    identities: [FakeIdentities.vtaPrimaryIdentity],
     overrides: overrides,
   );
   await tester.pumpAndSettle();
@@ -89,8 +89,8 @@ class _FakeTrustService extends Fake implements VtcTrustService {
       );
 
   @override
-  Future<String?> identityDid(String communityDid) async =>
-      FakeIdentities.primaryIdentity.did;
+  Future<String?> identityContextId(String communityDid) async =>
+      FakeIdentities.vtaContextId;
 
   @override
   Future<void> setDirectoryName(
@@ -336,7 +336,7 @@ void main() {
 
         // Before the Members tab is opened.
         expect(service.names, [
-          FakeIdentities.primaryIdentity.card.displayName.trim(),
+          FakeIdentities.vtaPrimaryIdentity.card.displayName.trim(),
         ]);
       },
     );

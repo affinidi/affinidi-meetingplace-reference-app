@@ -337,18 +337,12 @@ class VtcVouchTrail extends HookConsumerWidget {
   (ImageProvider?, ImageProvider?) _usePictures(WidgetRef ref) {
     final communityDid = this.communityDid;
     final service = ref.read(vtcTrustServiceProvider);
-    final identities = ref.watch(
-      identitiesServiceProvider.select((state) => state.identities),
-    );
+    final identities = ref.watch(identitiesServiceProvider);
     final yours = useFuture(
       useMemoized(() async {
         if (communityDid == null) return null;
-        final identityDid = await service.identityDid(communityDid);
-        final picture = identities
-            .where((identity) => identity.did == identityDid)
-            .firstOrNull
-            ?.card
-            .profilePic;
+        final contextId = await service.identityContextId(communityDid);
+        final picture = identities.vtaPersonaIn(contextId)?.card.profilePic;
         return picture == null ? null : MemoryImage(base64Decode(picture));
       }, [communityDid, identities]),
     ).data;

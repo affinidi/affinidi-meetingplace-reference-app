@@ -34,8 +34,8 @@ class _FakeTrustService extends Fake implements VtcTrustService {
       );
 
   @override
-  Future<String?> identityDid(String communityDid) async =>
-      FakeIdentities.primaryIdentity.did;
+  Future<String?> identityContextId(String communityDid) async =>
+      FakeIdentities.vtaContextId;
 
   List<DirectoryEntry> members = const [
     DirectoryEntry(
@@ -121,8 +121,8 @@ class _FakeVtcService extends Fake implements VtcService {
 
 FakeIdentitiesService identities() => FakeIdentitiesService(
   IdentitiesServiceState(
-    currentIdentity: FakeIdentities.primaryIdentity,
-    identities: [FakeIdentities.primaryIdentity],
+    currentIdentity: FakeIdentities.vtaPrimaryIdentity,
+    identities: [FakeIdentities.vtaPrimaryIdentity],
   ),
 );
 

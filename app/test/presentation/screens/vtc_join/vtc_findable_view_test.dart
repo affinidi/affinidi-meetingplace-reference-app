@@ -68,8 +68,8 @@ class _FakeTrustService extends Fake implements VtcTrustService {
   }
 
   @override
-  Future<String?> identityDid(String communityDid) async =>
-      FakeIdentities.primaryIdentity.did;
+  Future<String?> identityContextId(String communityDid) async =>
+      FakeIdentities.vtaContextId;
 
   @override
   Future<void> setFindable(
@@ -100,7 +100,7 @@ void main() {
 
   setUp(() {
     service = _FakeTrustService();
-    joinedAs = FakeIdentities.primaryIdentity;
+    joinedAs = FakeIdentities.vtaPrimaryIdentity;
   });
 
   /// The primary identity with a picture.
@@ -216,6 +216,22 @@ void main() {
     await pumpView(tester);
 
     expect(service.names, ['John Doe']);
+  });
+
+  testWidgets('sends no name of an identity the member did not join with', (
+    tester,
+  ) async {
+    // The community knows the member under a DID of its own, so only the
+    // VTA context tells which identity joined.
+    joinedAs = FakeIdentities.primaryIdentity.copyWith(
+      vtaContextId: 'other-context',
+      vtaProfileId: 'other-profile',
+    );
+    service.findable = true;
+
+    await pumpView(tester);
+
+    expect(service.names, isEmpty);
   });
 
   testWidgets('makes findable again a card hidden when joining', (

@@ -957,13 +957,10 @@ class VtcJoinController extends _$VtcJoinController {
   /// The name of the identity applying to [communityDid], as the member's
   /// identities show it, or null when it is none of them.
   Future<String?> _applyingIdentityName(String communityDid) async {
-    // A persona of its own lives in the identity's context too.
     final contextId = (await _service.community(communityDid))?.contextId;
     final name = ref
         .read(identitiesServiceProvider)
-        .vtaPersonas
-        .where((identity) => identity.vtaContextId == contextId)
-        .firstOrNull
+        .vtaPersonaIn(contextId)
         ?.card
         .displayName
         .trim();

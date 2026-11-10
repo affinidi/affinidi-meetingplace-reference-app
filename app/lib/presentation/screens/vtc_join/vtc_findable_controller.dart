@@ -7,9 +7,9 @@ import '../../../domain/models/identity/identity.dart';
 
 part 'vtc_findable_controller.g.dart';
 
-/// The member's own directory card in a community, and the DID of the
-/// identity they joined it with, whose name and picture the card shows.
-typedef VtcFindable = ({MyDirectoryCard card, String? identityDid});
+/// The member's own directory card in a community, and the VTA context of
+/// the identity they joined it with, whose name and picture the card shows.
+typedef VtcFindable = ({MyDirectoryCard card, String? identityContextId});
 
 /// No retry behind the member's back: each one asks the VTA to sign, and
 /// the settings ask again each time they open.
@@ -32,15 +32,12 @@ class VtcFindableController extends _$VtcFindableController {
   @override
   Future<VtcFindable> build(String communityDid) async => (
     card: await _service.directoryCard(communityDid),
-    identityDid: await _service.identityDid(communityDid),
+    identityContextId: await _service.identityContextId(communityDid),
   );
 
   /// The identity the member joined with, as this phone holds it now.
-  Identity? _joinedAs(String? identityDid) => ref
-      .read(identitiesServiceProvider)
-      .identities
-      .where((identity) => identity.did == identityDid)
-      .firstOrNull;
+  Identity? _joinedAs(String? identityContextId) =>
+      ref.read(identitiesServiceProvider).vtaPersonaIn(identityContextId);
 
   /// Reads the card again, then keeps it in step with the identity the
   /// member joined with: a member who let others find them stays findable
@@ -54,10 +51,10 @@ class VtcFindableController extends _$VtcFindableController {
     final changes = _changes;
     try {
       // Read just now when first opened: no need to ask again.
-      var (:card, :identityDid) = state.isLoading && !state.hasValue
+      var (:card, :identityContextId) = state.isLoading && !state.hasValue
           ? await future
           : await build(communityDid);
-      final joinedAs = _joinedAs(identityDid);
+      final joinedAs = _joinedAs(identityContextId);
       final name = joinedAs?.card.displayName.trim() ?? '';
       final picture = joinedAs?.card.profilePic;
       if (card.isDidVisibleToMembers) {
@@ -77,7 +74,7 @@ class VtcFindableController extends _$VtcFindableController {
         if (changed) card = await _service.directoryCard(communityDid);
       }
       if (ref.mounted && changes == _changes) {
-        state = AsyncData((card: card, identityDid: identityDid));
+        state = AsyncData((card: card, identityContextId: identityContextId));
       }
     } on VtcTrustException catch (error, stackTrace) {
       if (ref.mounted && !state.hasValue) {
@@ -94,8 +91,8 @@ class VtcFindableController extends _$VtcFindableController {
   /// Throws [VtcTrustException].
   Future<void> setFindable(bool findable) async {
     _changes++;
-    final identityDid = state.value?.identityDid;
-    final joinedAs = _joinedAs(identityDid);
+    final identityContextId = state.value?.identityContextId;
+    final joinedAs = _joinedAs(identityContextId);
     final name = joinedAs?.card.displayName.trim() ?? '';
     final picture = joinedAs?.card.profilePic;
     if (findable && name.isNotEmpty) {
@@ -107,7 +104,7 @@ class VtcFindableController extends _$VtcFindableController {
     await _service.setFindable(communityDid, findable: findable);
     final card = await _service.directoryCard(communityDid);
     if (ref.mounted) {
-      state = AsyncData((card: card, identityDid: identityDid));
+      state = AsyncData((card: card, identityContextId: identityContextId));
     }
   }
 }

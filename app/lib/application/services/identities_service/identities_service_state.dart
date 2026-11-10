@@ -29,4 +29,11 @@ abstract class IdentitiesServiceState with _$IdentitiesServiceState {
       ...personas.where((identity) => !identity.isPrimary),
     ];
   }
+
+  /// The identity on the member's VTA in [contextId], or null when none is.
+  /// A community knows the identity under a DID of its own in that context,
+  /// so the context, not the DID, tells which identity joined it.
+  Identity? vtaPersonaIn(String? contextId) => vtaPersonas.firstWhereOrNull(
+    (identity) => identity.vtaContextId == contextId,
+  );
 }

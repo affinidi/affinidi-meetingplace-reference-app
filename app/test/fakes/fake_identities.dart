@@ -30,4 +30,14 @@ class FakeIdentities {
     ),
     isPrimary: false,
   );
+
+  /// The VTA context of [vtaPrimaryIdentity].
+  static const vtaContextId = 'primary-context';
+
+  /// [primaryIdentity] as a persona of the member's VTA, as a member who
+  /// joined a community with it holds it.
+  static final vtaPrimaryIdentity = primaryIdentity.copyWith(
+    vtaContextId: vtaContextId,
+    vtaProfileId: 'primary-profile',
+  );
 }

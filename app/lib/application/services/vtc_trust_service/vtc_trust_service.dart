@@ -419,12 +419,20 @@ class VtcTrustService {
   );
 
   /// The DID of the identity the member joined [communityDid] with, or null
-  /// when they are no member.
-  Future<String?> identityDid(String communityDid) async {
+  /// when they are no member. It may be a DID of its own for the community,
+  /// not that of any identity on this phone: see [identityContextId].
+  Future<String?> identityDid(String communityDid) async =>
+      (await _joined(communityDid))?.personaDid;
+
+  /// The VTA context of the identity the member joined [communityDid] with,
+  /// or null when they are no member: the context tells which identity it
+  /// is.
+  Future<String?> identityContextId(String communityDid) async =>
+      (await _joined(communityDid))?.contextId;
+
+  Future<VtcCommunity?> _joined(String communityDid) async {
     final community = await _repository.findCommunity(communityDid);
-    return community != null && community.isMember
-        ? community.personaDid
-        : null;
+    return community != null && community.isMember ? community : null;
   }
 
   /// Sets the name other members of [communityDid] see for the member, or

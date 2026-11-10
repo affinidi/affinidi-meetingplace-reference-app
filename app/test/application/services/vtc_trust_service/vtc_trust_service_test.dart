@@ -737,6 +737,14 @@ void main() {
       expect(await service.identityDid('did:webvh:QmOther:vtc.example'), null);
     });
 
+    test('names the VTA context of the identity joined with', () async {
+      expect(await service.identityContextId(_club), 'vta');
+      expect(
+        await service.identityContextId('did:webvh:QmOther:vtc.example'),
+        null,
+      );
+    });
+
     test('says when the community does not let members be found', () {
       vtc.refusal = MeetingPlaceVtcSDKException.refused(
         DirectoryTask.aboveCeiling,
