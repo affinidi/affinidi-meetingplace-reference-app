@@ -321,67 +321,62 @@ void main() {
       communityDid: _club,
       groupName: name,
     );
-    Finder line() =>
-        find.byKey(const Key('community_membership_group_urn:uuid:hiking'));
+    Finder card() => find.byKey(const Key('vtc_group_card_urn:uuid:hiking'));
 
-    testWidgets('lists each group\'s card under the community\'s, with its '
-        'state', (tester) async {
+    testWidgets("shows a group's card as the membership card, under it", (
+      tester,
+    ) async {
       service.groupCardsHeld = [groupCard(name: 'Hiking club')];
 
-      await pumpView(tester);
+      final l10n = await pumpView(tester);
 
-      for (final text in [
-        'Hiking club',
-        'Group credential · until Jan 2, 2027',
-        'Valid',
-      ]) {
+      for (final text in ['Hiking club', l10n.vtcGroupCredential]) {
         expect(
-          find.descendant(of: line(), matching: find.text(text)),
+          find.descendant(of: card(), matching: find.text(text)),
           findsOneWidget,
         );
       }
       expect(
-        tester.getTopLeft(line()).dy,
+        tester.getTopLeft(card()).dy,
         greaterThan(
           tester.getTopLeft(find.byKey(const Key('vtc_membership_card'))).dy,
         ),
       );
+      // Its details folded away, as the membership card's.
+      expect(find.byIcon(McIcons.chevronDown), findsNWidgets(2));
+      expect(find.text('Jan 2, 2027'), findsNothing);
+      await tester.tap(find.byIcon(McIcons.chevronDown).last);
+      await tester.pumpAndSettle();
+      expect(find.text('Jan 2, 2027'), findsOneWidget);
     });
 
-    testWidgets('says when the community revoked its grant to the group', (
-      tester,
-    ) async {
-      service
-        ..groupCardsHeld = [groupCard(name: 'Hiking club')]
-        ..groupCardState = VtcCardState.revoked;
-
-      await pumpView(tester);
-
-      expect(
-        find.descendant(of: line(), matching: find.text('Revoked')),
-        findsOneWidget,
-      );
-    });
-
-    testWidgets('shows a group it cannot name', (tester) async {
+    testWidgets('names a group it cannot name', (tester) async {
       service.groupCardsHeld = [groupCard()];
 
       final l10n = await pumpView(tester);
 
       expect(
         find.descendant(
-          of: line(),
+          of: card(),
           matching: find.text(l10n.groupCredentialUnnamed),
         ),
         findsOneWidget,
       );
     });
 
-    testWidgets('shows none when the member holds none', (tester) async {
-      await pumpView(tester);
+    for (final state in VtcCardState.values.where(
+      (state) => state != VtcCardState.valid,
+    )) {
+      testWidgets('hides a card ${state.name}', (tester) async {
+        service
+          ..groupCardsHeld = [groupCard(name: 'Hiking club')]
+          ..groupCardState = state;
 
-      expect(find.byIcon(McIcons.group), findsNothing);
-    });
+        await pumpView(tester);
+
+        expect(card(), findsNothing);
+      });
+    }
   });
 
   testWidgets('shows no vetter card to a member who is not a vetter', (

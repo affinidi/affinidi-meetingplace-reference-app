@@ -57,11 +57,11 @@ Future<VtcVetterCard?> communityVetterCard(Ref ref, String communityDid) {
 }
 
 /// The cards the groups of [communityDid] issued the member, as their VTA
-/// keeps them, each with what the community says of it now. Read while a
-/// community's page shows, and again as the cards change, never kept on the
-/// phone.
+/// keeps them, that the community says are valid now: none whose state
+/// cannot be told. Read while a community's page shows, and again as the
+/// cards change, never kept on the phone.
 @Riverpod(retry: _noRetry)
-Future<List<(VtcGroupCard, VtcCardStatus)>> communityGroupCards(
+Future<List<VtcGroupCard>> communityGroupCards(
   Ref ref,
   String communityDid,
 ) async {
@@ -71,7 +71,10 @@ Future<List<(VtcGroupCard, VtcCardStatus)>> communityGroupCards(
   final statuses = await Future.wait([
     for (final card in cards) service.checkGroupCardStatus(card),
   ]);
-  return [for (final (index, card) in cards.indexed) (card, statuses[index])];
+  return [
+    for (final (index, card) in cards.indexed)
+      if (statuses[index].state == VtcCardState.valid) card,
+  ];
 }
 
 /// Whether the member may vet for [communityDid]: they hold the

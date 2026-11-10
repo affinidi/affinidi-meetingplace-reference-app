@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
 
+import '../../../domain/models/vtc/vtc_group_card.dart';
 import '../../../domain/models/vtc/vtc_membership_card.dart';
 import '../../../domain/models/vtc/vtc_vetter_card.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
@@ -99,6 +100,48 @@ class VtcVetterCardView extends StatelessWidget {
       issuer: card.issuer,
       validFrom: card.validFrom,
       validUntil: card.validUntil,
+      collapsible: collapsible,
+    );
+  }
+}
+
+/// The card a community's group issued, as [VtcMembershipCardView] shows
+/// the membership card: the group's name over what the card is.
+class VtcGroupCardView extends StatelessWidget {
+  const VtcGroupCardView({
+    super.key,
+    required this.card,
+    this.logoUrl,
+    this.collapsible = false,
+  });
+
+  final VtcGroupCard card;
+
+  /// The logo of the group's community.
+  final Uri? logoUrl;
+
+  /// See [VtcCardView.collapsible].
+  final bool collapsible;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final membership = card.membership;
+    return VtcCardView(
+      cardKey: Key('vtc_group_card_${card.key}'),
+      documentKey: Key('vtc_group_card_document_${card.key}'),
+      // The group names the card, as a community does on another's page.
+      communityName: card.groupName ?? l10n.groupCredentialUnnamed,
+      logoUrl: logoUrl,
+      title: l10n.vtcGroupCredential,
+      credential: membership.credential,
+      credentialType: 'MembershipCredential',
+      documentIcon: McIcons.group,
+      holderLabel: l10n.vtcMembershipCardMember,
+      holderDid: membership.memberDid,
+      issuer: card.groupDid,
+      validFrom: membership.validFrom,
+      validUntil: membership.validUntil,
       collapsible: collapsible,
     );
   }
