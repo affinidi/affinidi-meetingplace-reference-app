@@ -267,6 +267,22 @@ class VtaLinkService extends Notifier<VtaLinkState> {
     }
   }
 
+  /// Forgets a link left by a previous install, on this phone only.
+  ///
+  /// The platform keystore keeps the link across an uninstall on iOS, while
+  /// the rest of the app starts afresh: without this, a fresh install would
+  /// skip asking for the VTA.
+  Future<void> forgetLeftover() async {
+    await ensureLoaded();
+    if (state.status == VtaLinkStatus.unlinked) return;
+    _stopPolling();
+    try {
+      await _service.forget();
+    } finally {
+      await _load();
+    }
+  }
+
   /// Pauses checking while the app is in the background, and resumes it
   /// when the app returns.
   void setInBackground(bool isInBackground) {

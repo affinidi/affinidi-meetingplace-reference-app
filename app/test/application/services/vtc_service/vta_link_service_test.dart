@@ -228,6 +228,23 @@ void main() {
       expect(await c.read(vtcServiceProvider).linkedVta(), isNull);
       expect(c.read(vtaLinkServiceProvider).isPolling, isFalse);
     });
+
+    test('forgets a leftover link without reaching the VTA', () async {
+      final first = container();
+      await loaded(first);
+      await first.read(vtaLinkServiceProvider.notifier).link(vta.did);
+      first.dispose();
+
+      final reinstalled = container();
+      await loaded(reinstalled);
+      vta.isDown = true;
+      await reinstalled.read(vtaLinkServiceProvider.notifier).forgetLeftover();
+
+      final state = reinstalled.read(vtaLinkServiceProvider);
+      expect(state.status, VtaLinkStatus.unlinked);
+      expect(state.isPolling, isFalse);
+      expect(await reinstalled.read(vtcServiceProvider).linkedVta(), isNull);
+    });
   });
 
   group('VtaLinkService enrolment', () {
