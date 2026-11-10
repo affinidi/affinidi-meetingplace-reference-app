@@ -374,6 +374,9 @@ void main() {
     expect(flowStep(tester), VtcVettingFlowStep.match);
     expect(waiting(tester), isFalse);
     expect(find.text('Step 2 of 4 · Compare codes'), findsOneWidget);
+    // The codes are the headline, once.
+    expect(find.text('Do the codes match?'), findsOneWidget);
+    expect(find.text('Vetting for Football club'), findsNothing);
     expect(find.text(vettingMatchCode(session.id)), findsOneWidget);
     await tap(tester, find.byKey(const Key('vtc_vetter_match_yes')));
     await waitFor(tester, find.byKey(const Key('vtc_vetter_card_waiting')));

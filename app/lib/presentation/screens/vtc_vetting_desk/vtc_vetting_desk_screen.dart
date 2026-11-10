@@ -214,6 +214,8 @@ class VtcVettingFlowScreen extends HookConsumerWidget {
     // A ticket no longer live, with no applicant, is shown again from the
     // first step.
     final step = state.flowStep(clock.now()) ?? VtcVettingFlowStep.ticket;
+    final comparingCodes =
+        step == VtcVettingFlowStep.match && state.current != null;
     void close() {
       if (step == VtcVettingFlowStep.done) controller.backToDesk();
       Navigator.of(context).pop();
@@ -236,7 +238,13 @@ class VtcVettingFlowScreen extends HookConsumerWidget {
               total: VtcVettingFlowStep.values.length,
               title: l10n.vtcVettingFlowStep(step.name),
             ),
-            OnboardingTitle(l10n.vtcVetterTitle(communityName)),
+            // Comparing codes, the codes are the headline, as on the
+            // applicant's phone.
+            OnboardingTitle(
+              comparingCodes
+                  ? l10n.vtcJoinMatchTitle
+                  : l10n.vtcVetterTitle(communityName),
+            ),
             switch ((step, state.current, state.ended)) {
               (VtcVettingFlowStep.done, _, final ended?) => _Outcome(
                 session: ended,
@@ -571,7 +579,6 @@ class _SessionView extends HookWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: 12,
         children: [
-          OnboardingSubtitle(l10n.vtcJoinMatchTitle),
           Text(l10n.vtcVetterMatchIntro, style: onboardingNote(context)),
           GlassCard(
             title: l10n.vtcJoinMatchCodeHeading,
