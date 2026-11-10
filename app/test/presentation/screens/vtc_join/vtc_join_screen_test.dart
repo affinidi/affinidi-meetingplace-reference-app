@@ -287,7 +287,7 @@ void main() {
         find.image(
           const AssetImage('assets/images/meeting-place-splash-white-1024.png'),
         ),
-        findsOneWidget,
+        findsNothing,
       );
     });
 
