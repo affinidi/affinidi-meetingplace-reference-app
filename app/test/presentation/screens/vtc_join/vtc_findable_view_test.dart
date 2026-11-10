@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_findable_view.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
+import 'package:mpx_flutter_reference_app/presentation/widgets/onboarding_style/onboarding_style.dart';
 
 import '../../../fakes/fake_identities.dart';
 import '../../../fakes/fake_identities_service.dart';
@@ -40,14 +42,30 @@ class _FakeTrustService extends Fake implements VtcTrustService {
   final List<bool> changes = [];
   final List<String> names = [];
 
+  /// How often the card was read.
+  int reads = 0;
+
+  /// Holds the card back until completed.
+  Completer<void>? readGate;
+
+  /// Why reading the card fails, if it does.
+  VtcTrustFailure? readRefusal;
+
+  /// Holds the name back until completed.
+  Completer<void>? nameGate;
+
   @override
-  Future<MyDirectoryCard> directoryCard(String communityDid) async =>
-      MyDirectoryCard(
-        entryId: 'dir_me',
-        isDidVisibleToMembers: findable,
-        isHidden: hidden,
-        displayName: name,
-      );
+  Future<MyDirectoryCard> directoryCard(String communityDid) async {
+    reads++;
+    await readGate?.future;
+    if (readRefusal case final refusal?) throw VtcTrustException(refusal);
+    return MyDirectoryCard(
+      entryId: 'dir_me',
+      isDidVisibleToMembers: findable,
+      isHidden: hidden,
+      displayName: name,
+    );
+  }
 
   @override
   Future<String?> identityDid(String communityDid) async =>
@@ -69,6 +87,7 @@ class _FakeTrustService extends Fake implements VtcTrustService {
     String communityDid, {
     required String name,
   }) async {
+    await nameGate?.future;
     if (refusal case final refusal?) throw VtcTrustException(refusal);
     names.add(name);
     this.name = name;
@@ -93,38 +112,57 @@ void main() {
     ),
   );
 
-  Future<void> pumpView(WidgetTester tester) async {
+  late FakeIdentitiesService identitiesService;
+
+  /// What the app keeps while it runs, across showing the view again.
+  ProviderContainer keptWhileRunning() {
+    identitiesService = FakeIdentitiesService(
+      IdentitiesServiceState(
+        currentIdentity: joinedAs,
+        identities: [joinedAs, FakeIdentities.secondaryIdentity],
+      ),
+    );
+    final container = ProviderContainer(
+      overrides: [
+        vtcTrustServiceProvider.overrideWithValue(service),
+        identitiesServiceProvider.overrideWith(() => identitiesService),
+      ],
+    );
+    addTearDown(container.dispose);
+    return container;
+  }
+
+  /// Shows the view, or something else in its place, with [container], and
+  /// lets it settle when [settles].
+  Future<void> pumpView(
+    WidgetTester tester, {
+    ProviderContainer? container,
+    bool open = true,
+    bool settles = true,
+  }) async {
     await tester.binding.setSurfaceSize(const Size(400, 1000));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          vtcTrustServiceProvider.overrideWithValue(service),
-          identitiesServiceProvider.overrideWith(
-            () => FakeIdentitiesService(
-              IdentitiesServiceState(
-                currentIdentity: joinedAs,
-                identities: [joinedAs, FakeIdentities.secondaryIdentity],
-              ),
-            ),
-          ),
-        ],
+      UncontrolledProviderScope(
+        container: container ?? keptWhileRunning(),
         child: MaterialApp(
           theme: AppTheme.dark,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: const Scaffold(
+          home: Scaffold(
             body: SingleChildScrollView(
-              child: VtcFindableView(
-                communityDid: _communityDid,
-                communityName: 'Club',
-              ),
+              child: open
+                  ? const VtcFindableView(
+                      communityDid: _communityDid,
+                      communityName: 'Club',
+                    )
+                  : const SizedBox.shrink(),
             ),
           ),
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    if (settles) await tester.pumpAndSettle();
   }
 
   Switch findableSwitch(WidgetTester tester) =>
@@ -290,5 +328,88 @@ void main() {
     await tapKey(tester, 'vtc_findable_switch');
 
     expect(find.text("Couldn't change this. Try again."), findsOneWidget);
+  });
+
+  final syncing = find.byKey(const Key('vtc_findable_syncing'));
+
+  testWidgets('shows the kept answer at once, and asks again', (tester) async {
+    final container = keptWhileRunning();
+    await pumpView(tester, container: container);
+    await pumpView(tester, container: container, open: false);
+    // Already in step with the identity: nothing to write.
+    service
+      ..findable = true
+      ..name = 'John Doe'
+      ..readGate = Completer();
+
+    await pumpView(tester, container: container, settles: false);
+    await tester.pump();
+
+    expect(findableSwitch(tester).value, isFalse);
+    expect(findableSwitch(tester).onChanged, isNotNull);
+    expect(syncing, findsOneWidget);
+    service.readGate!.complete();
+    await tester.pumpAndSettle();
+    expect(findableSwitch(tester).value, isTrue);
+    expect(syncing, findsNothing);
+    expect(service.reads, 2);
+  });
+
+  testWidgets('reads the card once when first opened', (tester) async {
+    await pumpView(tester);
+
+    expect(service.reads, 1);
+  });
+
+  testWidgets('shows the card before bringing it in step', (tester) async {
+    service
+      ..findable = true
+      ..name = 'Johnny'
+      ..nameGate = Completer();
+
+    await pumpView(tester, settles: false);
+    await tester.pump();
+    await tester.pump();
+
+    expect(findableSwitch(tester).value, isTrue);
+    expect(syncing, findsOneWidget);
+    expect(service.names, isEmpty);
+    service.nameGate!.complete();
+    await tester.pumpAndSettle();
+    expect(service.names, ['John Doe']);
+    expect(syncing, findsNothing);
+  });
+
+  testWidgets('keeps the answer when asking again fails', (tester) async {
+    final container = keptWhileRunning();
+    service.findable = true;
+    await pumpView(tester, container: container);
+    await pumpView(tester, container: container, open: false);
+    service.readRefusal = VtcTrustFailure.network;
+
+    await pumpView(tester, container: container);
+
+    expect(findableSwitch(tester).value, isTrue);
+    expect(find.byType(OnboardingMessage), findsNothing);
+  });
+
+  testWidgets('says when the card cannot be read at all', (tester) async {
+    service.readRefusal = VtcTrustFailure.network;
+
+    await pumpView(tester);
+
+    expect(findableSwitch(tester).onChanged, isNull);
+    expect(find.text("Couldn't change this. Try again."), findsOneWidget);
+  });
+
+  testWidgets('asks no more when other identities change', (tester) async {
+    await pumpView(tester);
+
+    identitiesService.setState(
+      IdentitiesServiceState(currentIdentity: joinedAs, identities: [joinedAs]),
+    );
+    await tester.pumpAndSettle();
+
+    expect(service.reads, 1);
   });
 }
