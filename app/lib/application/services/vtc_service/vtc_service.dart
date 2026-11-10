@@ -15,6 +15,7 @@ import '../../../domain/models/vtc/vtc_identity_check.dart';
 import '../../../domain/models/vtc/vtc_left_membership.dart';
 import '../../../domain/models/vtc/vtc_membership_card.dart';
 import '../../../domain/models/vtc/vtc_membership_entry.dart';
+import '../../../domain/models/vtc/vtc_role_change.dart';
 import '../../../domain/models/vtc/vtc_vetter_card.dart';
 import '../../../domain/models/vtc/vtc_vetter_desk.dart';
 import '../../../domain/models/vtc/vtc_vetting.dart';
@@ -109,6 +110,20 @@ class VtcService {
   /// community issued is kept on their VTA, e.g. after a role change, or a
   /// membership is left.
   Stream<void> get membershipsChanged => _membershipsChanged.stream;
+
+  final _roleChanged = StreamController<VtcRoleChange>.broadcast();
+
+  /// Fires each time the member's role in a community changes, as the card
+  /// granting the new one is kept on their VTA, e.g. after an administrator
+  /// promoted them.
+  Stream<VtcRoleChange> get roleChanged => _roleChanged.stream;
+
+  /// The identities' inboxes watched live, by community.
+  final Map<String, _InboxWatch> _watches = {};
+
+  /// How long arrivals settle before the inbox is read, so a burst of
+  /// messages is read once.
+  static const _arrivalSettle = Duration(seconds: 1);
 
   /// The identity keys lent and inboxes open, by community, while a
   /// membership card is collected, so a check every few seconds borrows the
@@ -1045,22 +1060,111 @@ class VtcService {
   }
 
   /// Keeps on [vta] the cards [member]'s community sent the identity's
-  /// inbox, then removes them from it. Returns whether there were any.
+  /// inbox, then removes them from it, firing [roleChanged] when one grants
+  /// a new role. Returns whether there were any.
   Future<bool> _keepWaitingCards(VtaClient vta, VtcCommunity member) async {
     final collection = await _collection(vta, member);
     await collection.inbox.open();
+    final communityDid = member.communityDid;
     final pickup = await collection.inbox.issuedCredentials(
-      issuerDid: member.communityDid,
+      issuerDid: communityDid,
     );
     if (pickup.credentials.isEmpty) return false;
-    await _keepCards(vta, [
-      for (final issued in pickup.credentials) issued.credential,
-    ], member.contextId);
+    final cards = [for (final issued in pickup.credentials) issued.credential];
+    final personaDid = member.personaDid;
+    final heldRole = await _sdk
+        .communityImport(vta)
+        .role(communityDid, personaDid: personaDid);
+    await _keepCards(vta, cards, member.contextId);
     await _removeFromInbox(collection, [
       for (final issued in pickup.credentials) issued.messageId,
     ]);
     _membershipsChanged.add(null);
+    _reportRole(
+      communityDid,
+      heldRole: heldRole,
+      // The inbox lists the latest last.
+      role: cards
+          .map((card) => CommunityImport.roleOf(card, communityDid, personaDid))
+          .nonNulls
+          .lastOrNull,
+    );
     return true;
+  }
+
+  /// Fires [roleChanged] when [role] is one other than [heldRole].
+  void _reportRole(
+    String communityDid, {
+    required String? heldRole,
+    required String? role,
+  }) {
+    if (role == null || role == heldRole) return;
+    _roleChanged.add(VtcRoleChange(communityDid: communityDid, role: role));
+  }
+
+  /// Keeps the cards [communityDid] sends the member's identity there as
+  /// they arrive, until [unwatchCommunity], e.g. while the community's page
+  /// shows: an administrator changing the member's role re-issues their
+  /// role card. Keeps those already waiting first. Kept cards fire
+  /// [membershipsChanged], and a new role [roleChanged].
+  ///
+  /// Holds the identity's keys, lent by the VTA, while watching. Does
+  /// nothing when already watching, when no VTA is linked or the phone
+  /// knows no membership, or when the identity's inbox cannot be reached:
+  /// coming back to the foreground still finds a new role.
+  Future<void> watchCommunity(String communityDid) async {
+    if (_watches.containsKey(communityDid)) return;
+    final watch = _watches[communityDid] = _InboxWatch(
+      () => _keepPushedCards(communityDid),
+      settle: _arrivalSettle,
+    );
+    try {
+      final community = await _repository.findCommunity(communityDid);
+      if (community == null || !community.isMember) return;
+      final vta = await _grantedVta();
+      await _keepWaitingCards(vta, community);
+      if (!_watches.containsKey(communityDid)) {
+        // Unwatched meanwhile: forget the keys borrowed for it.
+        await endCardCollection(communityDid);
+        return;
+      }
+      if (_watches[communityDid] != watch) return;
+      final collection = await _collection(vta, community);
+      watch.subscription = collection.inbox.arrivals().listen(
+        (_) => watch.arrived(),
+        // The connection retries on its own; coming back to the foreground
+        // covers a lasting failure.
+        onError: (Object _) {},
+      );
+    } on VtaNotLinkedException {
+      return;
+    } on MeetingPlaceVtcSDKException {
+      return;
+    }
+  }
+
+  /// Stops [watchCommunity] for [communityDid] and forgets the keys lent
+  /// for it. Does nothing when not watching.
+  Future<void> unwatchCommunity(String communityDid) async {
+    final watch = _watches.remove(communityDid);
+    if (watch == null) return;
+    await watch.cancel();
+    await endCardCollection(communityDid);
+  }
+
+  /// Keeps what [communityDid] sent the identity's inbox while watched. A
+  /// VTA or inbox that cannot be reached is left for the next arrival.
+  Future<void> _keepPushedCards(String communityDid) async {
+    if (!_watches.containsKey(communityDid)) return;
+    final community = await _repository.findCommunity(communityDid);
+    if (community == null || !community.isMember) return;
+    try {
+      await _keepWaitingCards(await _grantedVta(), community);
+    } on VtaNotLinkedException {
+      return;
+    } on MeetingPlaceVtcSDKException {
+      return;
+    }
   }
 
   /// The member's vetting desk for [communityDid], as recorded, or null.
@@ -2157,6 +2261,8 @@ class VtcService {
   /// keys the VTA lent for it, e.g. when the screen collecting the card
   /// closes. Does nothing when none are held.
   Future<void> endCardCollection(String communityDid) async {
+    // Held while watched: [unwatchCommunity] ends it.
+    if (_watches.containsKey(communityDid)) return;
     await _collections.remove(communityDid)?.end();
   }
 
@@ -2201,13 +2307,12 @@ class VtcService {
     final heldRole = await _sdk
         .communityImport(vta)
         .role(communityDid, personaDid: personaDid);
+    final role = CommunityImport.roleOf(cards.role, communityDid, personaDid);
     // Unchanged: keeping the new cards would only fill the VTA's vault.
-    if (CommunityImport.roleOf(cards.role, communityDid, personaDid) ==
-        heldRole) {
-      return;
-    }
+    if (role == heldRole) return;
     await _keepCards(vta, cards.credentials, community.contextId);
     _membershipsChanged.add(null);
+    _reportRole(communityDid, heldRole: heldRole, role: role);
   }
 
   /// Refreshes [communityDid]'s membership unless it was refreshed within
@@ -2734,6 +2839,42 @@ class _CardCollection {
     _idleTimer?.cancel();
     await inbox.close();
     keys.forget();
+  }
+}
+
+/// A live watch of an identity's inbox: reads it once arrivals settle, one
+/// read at a time.
+class _InboxWatch {
+  _InboxWatch(this._read, {required this._settle});
+
+  final Future<void> Function() _read;
+  final Duration _settle;
+  StreamSubscription<void>? subscription;
+  Timer? _timer;
+  bool _isReading = false;
+  bool _readAgain = false;
+
+  void arrived() {
+    _timer?.cancel();
+    _timer = Timer(_settle, _readOnce);
+  }
+
+  Future<void> _readOnce() async {
+    if (_isReading) {
+      _readAgain = true;
+      return;
+    }
+    _isReading = true;
+    do {
+      _readAgain = false;
+      await _read();
+    } while (_readAgain);
+    _isReading = false;
+  }
+
+  Future<void> cancel() async {
+    _timer?.cancel();
+    await subscription?.cancel();
   }
 }
 

@@ -10,6 +10,7 @@ import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_community.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_left_membership.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_member_link.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_membership_entry.dart';
+import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_role_change.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_vetter_desk.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_vetting.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
@@ -715,10 +716,15 @@ void main() {
         network.renewedRole = 'admin';
         var changes = 0;
         final listening = service.membershipsChanged.listen((_) => changes++);
+        final roles = <String>[];
+        final roleListening = service.roleChanged.listen(
+          (change) => roles.add(change.role),
+        );
 
         await service.refreshMembership(fakeVtcDid);
         await Future<void>.delayed(Duration.zero);
         await listening.cancel();
+        await roleListening.cancel();
 
         final renewal = network.memberRequests.firstWhere(
           (request) => request['type'] == MemberTask.renew,
@@ -726,6 +732,7 @@ void main() {
         expect(renewal['issuer'], persona.did);
         expect(kept(), ['urn:uuid:vmc-renewed', 'urn:uuid:vac-renewed']);
         expect(changes, 1);
+        expect(roles, ['admin']);
       });
 
       test('keeps nothing while the role is unchanged', () async {
@@ -2149,6 +2156,100 @@ void main() {
         'requestId': first.request.requestId,
         'code': 'couldNotVerify',
       });
+    });
+  });
+
+  group('VtcService watching a community', () {
+    late FakeVtcNetwork network;
+    late FakePersona member;
+
+    setUp(() async {
+      // A member holding the vetter role.
+      final fixture = FakeVetterDesk();
+      await fixture.setUp();
+      network = fixture.network;
+      member = fixture.vetter;
+      service = fixture.service;
+      addTearDown(() => service.unwatchCommunity(fakeVtcDid));
+    });
+
+    bool kept(String cardId) => network.vta.received.any(
+      (task) =>
+          task['type'] == VtaTask.credentialsReceive &&
+          (task['payload'] as Map<String, dynamic>)['id'] == cardId,
+    );
+
+    test(
+      'keeps a role card pushed while watched and tells the new role',
+      () async {
+        await service.watchCommunity(fakeVtcDid);
+        final change = service.roleChanged.first;
+
+        await network.deliver(
+          member,
+          await network.roleCard(member.did, role: 'admin'),
+        );
+        network.inboxArrivals.add(null);
+
+        expect(
+          await change.timeout(const Duration(seconds: 5)),
+          isA<VtcRoleChange>()
+              .having((change) => change.communityDid, 'community', fakeVtcDid)
+              .having((change) => change.role, 'role', 'admin'),
+        );
+        expect(kept('urn:uuid:admin-card'), isTrue);
+        expect(network.inbox, isEmpty);
+      },
+    );
+
+    test('tells no new role for a card of the role held', () async {
+      await service.watchCommunity(fakeVtcDid);
+      final roles = <String>[];
+      final listening = service.roleChanged.listen(
+        (change) => roles.add(change.role),
+      );
+      addTearDown(listening.cancel);
+      final changed = service.membershipsChanged.first;
+
+      await network.deliver(member, await network.vetterRoleCard(member.did));
+      network.inboxArrivals.add(null);
+      await changed.timeout(const Duration(seconds: 5));
+
+      expect(kept('urn:uuid:vetter-card'), isTrue);
+      expect(roles, isEmpty);
+    });
+
+    test('keeps what was pushed before watching', () async {
+      await network.deliver(
+        member,
+        await network.roleCard(member.did, role: 'admin'),
+      );
+      final roles = <String>[];
+      final listening = service.roleChanged.listen(
+        (change) => roles.add(change.role),
+      );
+      addTearDown(listening.cancel);
+
+      await service.watchCommunity(fakeVtcDid);
+      await pumpEventQueue();
+
+      expect(roles, ['admin']);
+      expect(network.inbox, isEmpty);
+    });
+
+    test('lets go of the inbox once unwatched', () async {
+      await service.watchCommunity(fakeVtcDid);
+      expect(network.inboxArrivals.hasListener, isTrue);
+
+      await service.unwatchCommunity(fakeVtcDid);
+
+      expect(network.inboxArrivals.hasListener, isFalse);
+    });
+
+    test('does nothing for a community it knows no membership of', () async {
+      await service.watchCommunity('did:web:other.example');
+
+      expect(network.inboxArrivals.hasListener, isFalse);
     });
   });
 }

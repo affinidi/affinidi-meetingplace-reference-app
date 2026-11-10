@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -91,6 +92,10 @@ class FakeVtcNetwork implements HttpClientAdapter {
 
   /// How many times an identity signed in to its inbox.
   int inboxOpens = 0;
+
+  /// Signals a message reaching an identity's inbox, over the live
+  /// connection held while listened to.
+  final inboxArrivals = StreamController<void>.broadcast();
 
   /// When true, the mediator cannot be reached.
   bool isMediatorDown = false;
@@ -437,9 +442,24 @@ class FakeVtcNetwork implements HttpClientAdapter {
     String holderDid, {
     int statusIndex = 3,
     String validUntil = '2099-01-01T00:00:00Z',
+  }) => roleCard(
+    holderDid,
+    role: vetterRole,
+    statusIndex: statusIndex,
+    validUntil: validUntil,
+  );
+
+  /// A role card in which the community grants [holderDid] [role], signed
+  /// by the community, its status at place [statusIndex] of the revocation
+  /// list.
+  Future<Map<String, dynamic>> roleCard(
+    String holderDid, {
+    required String role,
+    int statusIndex = 3,
+    String validUntil = '2099-01-01T00:00:00Z',
   }) => EddsaJcs2022.sign(
     {
-      'id': 'urn:uuid:vetter-card',
+      'id': 'urn:uuid:$role-card',
       'type': ['VerifiableCredential', 'DTGCredential', 'AuthorityCredential'],
       'issuer': fakeVtcDid,
       'issuerScope': 'public',
@@ -450,7 +470,7 @@ class FakeVtcNetwork implements HttpClientAdapter {
         'id': holderDid,
         'authority': {
           'scope': fakeVtcDid,
-          'actions': ['role:vetter'],
+          'actions': ['role:$role'],
         },
       },
     },
@@ -774,6 +794,9 @@ class _FakeInbox implements MediatorInbox {
     _network.inboxDeleted.addAll(ids);
     ids.forEach(_network.inbox.remove);
   }
+
+  @override
+  Stream<void> arrivals() => _network.inboxArrivals.stream;
 
   @override
   Future<void> close() async {}
