@@ -152,13 +152,16 @@ void main() {
     expect(find.textContaining('did:'), findsNothing);
   });
 
-  testWidgets('marks a vouch that waits for the other member to vouch back', (
+  testWidgets('marks a vouch that waits, and one made both ways', (
     tester,
   ) async {
     await pumpScreen(tester);
 
     expect(inMember('dir_carol', find.byIcon(McIcons.pending)), findsOneWidget);
+    expect(inMember('dir_carol', find.byIcon(McIcons.check)), findsNothing);
+    // Only Bob vouched: the Vouch back button asks, not a marker.
     expect(inMember('dir_bob', find.byIcon(McIcons.pending)), findsNothing);
+    expect(inMember('dir_bob', find.byIcon(McIcons.check)), findsNothing);
 
     await tester.tap(inMember('dir_bob', find.text('Vouch back')));
     await tester.pumpAndSettle();
@@ -169,6 +172,7 @@ void main() {
 
     // Vouched for each other: nothing left to wait for.
     expect(inMember('dir_bob', find.byIcon(McIcons.pending)), findsNothing);
+    expect(inMember('dir_bob', find.byIcon(McIcons.check)), findsOneWidget);
   });
 
   testWidgets('aligns the icons right of every member\'s name', (tester) async {
