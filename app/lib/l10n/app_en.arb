@@ -5176,10 +5176,6 @@
 	"@communityMembershipTab": {
 		"description": "Tab of a community's screen with the member's role and membership card there"
 	},
-	"communitySettingsTab": "Settings",
-	"@communitySettingsTab": {
-		"description": "Tab of a community's screen with the member's settings there, such as letting members find them"
-	},
 	"communityInfoUnavailable": "The community's profile can't be read right now.",
 	"@communityInfoUnavailable": {
 		"description": "Note on a community's Info tab when its public profile cannot be read"

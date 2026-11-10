@@ -17,6 +17,7 @@ class SectionHeader extends StatelessWidget {
     required this.title,
     required this.subtitle,
     this.logoUrl,
+    this.titleAction,
     this.showProgress,
     this.onClose,
     this.onBack,
@@ -30,6 +31,11 @@ class SectionHeader extends StatelessWidget {
   final Uri? logoUrl;
 
   final String title;
+
+  /// An action about what the section shows, right after [title]; none
+  /// when null.
+  final Widget? titleAction;
+
   final String subtitle;
   final bool? showProgress;
 
@@ -82,7 +88,15 @@ class SectionHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             spacing: McSpacing.s1,
             children: [
-              Text(title, style: titleStyle),
+              switch (titleAction) {
+                final action? => Row(
+                  children: [
+                    Flexible(child: Text(title, style: titleStyle)),
+                    action,
+                  ],
+                ),
+                null => Text(title, style: titleStyle),
+              },
               Text(
                 subtitle,
                 maxLines: 3,

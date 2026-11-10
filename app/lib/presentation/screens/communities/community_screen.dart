@@ -14,17 +14,18 @@ import '../contacts/contacts_screen_controller.dart';
 import '../vtc_join/vtc_findable_controller.dart';
 import 'communities_controller.dart';
 import 'community_info_view.dart';
+import 'community_join_phrase_action.dart';
 import 'community_logo_provider.dart';
 import 'community_members_controller.dart';
 import 'community_members_view.dart';
 import 'community_membership_view.dart';
-import 'community_settings_view.dart';
 import 'community_tabs_providers.dart';
 
 /// A community the member belongs to, under its logo if it gives one, with
 /// its channels, its groups' chats, its members, the member's role and
-/// membership card there, what it publishes about itself, and the member's
-/// settings there. Opened from the Communities tab.
+/// membership card there, and what it publishes about itself; its join
+/// phrase beside its name for an administrator. Opened from the
+/// Communities tab.
 class CommunityScreen extends HookConsumerWidget {
   const CommunityScreen({super.key, required this.communityDid});
 
@@ -51,9 +52,9 @@ class CommunityScreen extends HookConsumerWidget {
       unawaited(service.watchCommunity(communityDid));
       return () => unawaited(service.unwatchCommunity(communityDid));
     }, [communityDid]);
-    // Read what the Members, Membership, Info and Settings tabs show as soon
-    // as the community opens, and keep it while it shows, for them to show
-    // it at once.
+    // Read what the header and the Members, Membership and Info tabs show
+    // as soon as the community opens, and keep it while it shows, for them
+    // to show it at once.
     ref
       ..listen(communityCanVetProvider(communityDid), (_, _) {})
       ..listen(communityRoleProvider(communityDid), (_, _) {})
@@ -67,7 +68,7 @@ class CommunityScreen extends HookConsumerWidget {
 
     final name = community?.name ?? l10n.membershipCredentialUnnamed;
     final logoUrl = ref.watch(communityLogoProvider(communityDid)).value;
-    final tabController = useTabController(initialLength: 5);
+    final tabController = useTabController(initialLength: 4);
 
     return SafeArea(
       child: Column(
@@ -77,6 +78,10 @@ class CommunityScreen extends HookConsumerWidget {
             icon: Tabs.contacts.iconData,
             logoUrl: logoUrl,
             title: name,
+            titleAction: CommunityJoinPhraseAction(
+              communityDid: communityDid,
+              communityName: name,
+            ),
             subtitle: l10n.contactsPanelSubtitle,
             onBack: () => Navigator.of(context).pop(),
           ),
@@ -87,7 +92,6 @@ class CommunityScreen extends HookConsumerWidget {
               l10n.communityMembersTab,
               l10n.communityMembershipTab,
               l10n.communityInfoTab,
-              l10n.communitySettingsTab,
             ],
           ),
           Expanded(
@@ -104,10 +108,6 @@ class CommunityScreen extends HookConsumerWidget {
                   communityName: name,
                 ),
                 CommunityInfoView(communityDid: communityDid),
-                CommunitySettingsView(
-                  communityDid: communityDid,
-                  communityName: name,
-                ),
               ],
             ),
           ),

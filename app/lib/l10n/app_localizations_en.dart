@@ -4752,9 +4752,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get communityMembershipTab => 'Membership';
 
   @override
-  String get communitySettingsTab => 'Settings';
-
-  @override
   String get communityInfoUnavailable =>
       'The community\'s profile can\'t be read right now.';
 

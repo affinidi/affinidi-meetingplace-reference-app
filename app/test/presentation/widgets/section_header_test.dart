@@ -10,6 +10,7 @@ void main() {
     ThemeData? theme,
     String subtitle = 'Who you are connected with',
     Uri? logoUrl,
+    Widget? titleAction,
     bool? showProgress,
     VoidCallback? onClose,
     VoidCallback? onBack,
@@ -23,6 +24,7 @@ void main() {
             title: 'Connections',
             subtitle: subtitle,
             logoUrl: logoUrl,
+            titleAction: titleAction,
             showProgress: showProgress,
             onClose: onClose,
             onBack: onBack,
@@ -143,5 +145,39 @@ void main() {
 
     expect(icon.dy, closeTo(title.top + lineHeight / 2, 1));
     expect(icon.dx, lessThan(title.left));
+  });
+
+  testWidgets('shows the title action right after the title', (tester) async {
+    const action = Icon(McIcons.public, key: Key('title_action'));
+
+    await pumpHeader(tester, titleAction: action);
+
+    final title = tester.getRect(find.text('Connections'));
+    final shown = tester.getRect(find.byKey(const Key('title_action')));
+    expect(shown.left, moreOrLessEquals(title.right));
+    expect(shown.center.dy, moreOrLessEquals(title.center.dy, epsilon: 1));
+  });
+
+  testWidgets('keeps the title action beside a long title', (tester) async {
+    tester.view.physicalSize = const Size(320, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.dark,
+        home: Scaffold(
+          body: SectionHeader(
+            icon: McIcons.connections,
+            title: 'A title long enough to wrap ' * 4,
+            subtitle: 'Lead',
+            titleAction: const Icon(McIcons.public),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(find.byIcon(McIcons.public), findsOneWidget);
   });
 }

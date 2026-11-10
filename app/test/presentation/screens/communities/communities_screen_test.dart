@@ -173,7 +173,7 @@ void main() {
       await tester.tap(find.text('Chess club'));
       await tester.pumpAndSettle();
 
-      // Before the Settings tab is opened.
+      // Before the Members tab is opened.
       final container = ProviderScope.containerOf(
         tester.element(find.byType(CommunityScreen)),
       );
@@ -188,7 +188,7 @@ void main() {
       await tester.tap(find.text('Chess club'));
       await tester.pumpAndSettle();
 
-      // Before the Membership, Info and Settings tabs are opened.
+      // Before the Membership and Info tabs are opened.
       final container = ProviderScope.containerOf(
         tester.element(find.byType(CommunityScreen)),
       );
