@@ -8,6 +8,7 @@ import '../../../navigation/tabs/tabs.dart';
 import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_spacing.dart';
 import '../../widgets/common/app_card.dart';
+import '../../widgets/images/logo_avatar.dart';
 import '../../widgets/section_header.dart';
 import '../credentials/membership_credentials_list.dart';
 import '../vtc_join/vtc_join_screen.dart';
@@ -157,9 +158,8 @@ class _CommunityRow extends StatelessWidget {
   }
 }
 
-/// The community's logo in a white ring, as community logos are drawn for a
-/// light ground; the community icon until it loads, or when it gives none or
-/// cannot load.
+/// The community's logo; the community icon until it loads, or when it
+/// gives none or cannot load.
 class _CommunityLogo extends ConsumerWidget {
   const _CommunityLogo({required this.communityDid});
 
@@ -170,20 +170,11 @@ class _CommunityLogo extends ConsumerWidget {
     final icon = Icon(McIcons.community, color: context.colorScheme.onSurface);
     final url = ref.watch(communityLogoProvider(communityDid)).value;
     if (url == null) return icon;
-    return Container(
+    return LogoAvatar(
       key: Key('community_logo_$communityDid'),
-      width: _logoSize,
-      height: _logoSize,
-      decoration: const BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.white,
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Image.network(
-        url.toString(),
-        fit: BoxFit.cover,
-        errorBuilder: (_, _, _) => icon,
-      ),
+      url: url,
+      size: _logoSize,
+      fallback: icon,
     );
   }
 }
