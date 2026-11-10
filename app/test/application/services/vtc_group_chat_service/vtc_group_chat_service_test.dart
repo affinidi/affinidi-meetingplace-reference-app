@@ -180,6 +180,13 @@ class _FakeSdk extends Fake implements MeetingPlaceMatrixSDK {
   @override
   Future<Group?> findGroupById(String groupId) async => groups[groupId];
 
+  /// The offers Meeting Place holds, by their link.
+  Map<String, ConnectionOffer> offers = const {};
+
+  @override
+  Future<ConnectionOffer?> findConnectionOffer(String offerLink) async =>
+      offers[offerLink];
+
   /// The channels Meeting Place holds, by the other party's DID.
   Map<String, Channel> channels = {};
   final channelLookups = <String>[];
@@ -579,6 +586,49 @@ void main() {
       sdk.groups = {'chat-2': chatGroup('chat-2')};
 
       expect(await service.chatOfferLinks(_communityDid), {'offer://chat-2'});
+    });
+  });
+
+  group('VtcGroupChatService.chatLink', () {
+    final chatGroup = Group(
+      id: 'chat-1',
+      did: _groupDid,
+      offerLink: 'offer://chat',
+      created: DateTime.utc(2026, 11),
+      members: const [],
+    );
+
+    test('rebuilds the link of a chat this phone owns', () async {
+      sdk.groups = {'chat-1': chatGroup};
+      sdk.offers = {'offer://chat': FakeConnectionOffers.groupOfferOwnedByMe};
+
+      final link = await service.chatLink(_groupDid);
+
+      expect(link?.mnemonic, 'my-group-passphrase');
+      expect(link?.posting, GroupChatPosting.everyone);
+    });
+
+    test('is null for a chat this phone does not own', () async {
+      await repository.saveGroupChat(
+        const VtcGroupChat(
+          chatGroupId: 'chat-1',
+          communityDid: _communityDid,
+          groupId: 'g1',
+          groupDid: _groupDid,
+          name: 'Identity WG',
+          isOwner: false,
+        ),
+      );
+      sdk.groups = {'chat-1': chatGroup};
+      sdk.offers = {'offer://chat': FakeConnectionOffers.groupOfferOwnedByMe};
+
+      expect(await service.chatLink(_groupDid), isNull);
+    });
+
+    test('is null when Meeting Place no longer holds the offer', () async {
+      sdk.groups = {'chat-1': chatGroup};
+
+      expect(await service.chatLink(_groupDid), isNull);
     });
   });
 

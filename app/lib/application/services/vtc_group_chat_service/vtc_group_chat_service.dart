@@ -206,6 +206,26 @@ class VtcGroupChatService {
     );
   }
 
+  /// The link the community must publish for the chat of the group
+  /// [groupDid] this phone owns, as [createChat] returned it: null when the
+  /// phone owns no such chat, or Meeting Place no longer holds its offer.
+  Future<GroupChatLink?> chatLink(String groupDid) async {
+    final chat = (await _repository.groupChats())
+        .where((chat) => chat.isOwner && chat.groupDid == groupDid)
+        .firstOrNull;
+    if (chat == null) return null;
+    final sdk = await _ref.read(meetingPlaceSdkProvider.future);
+    final group = await sdk.findGroupById(chat.chatGroupId);
+    if (group == null) return null;
+    final offer = await sdk.findConnectionOffer(group.offerLink);
+    if (offer == null) return null;
+    return GroupChatLink(
+      mnemonic: offer.mnemonic,
+      controlPlaneDid: _ref.read(environmentProvider).controlPlaneDid,
+      posting: chat.posting,
+    );
+  }
+
   /// Asks to join the chat of the group [group] of [communityDid] as
   /// [identity], proving membership with the group's credential.
   ///
