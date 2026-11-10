@@ -17,7 +17,7 @@ import '../vtc_join/vtc_findable_controller.dart';
 import '../vtc_rooms/vtc_rooms_view.dart';
 import '../vtc_vetting_desk/vtc_vetting_desk_screen.dart';
 import 'communities_controller.dart';
-import 'community_info_action.dart';
+import 'community_info_details.dart';
 import 'community_join_phrase_action.dart';
 import 'community_logo_provider.dart';
 import 'community_members_controller.dart';
@@ -27,10 +27,10 @@ import 'community_tabs_providers.dart';
 import 'removal_notice.dart';
 
 /// A community the member belongs to, under its logo if it gives one and
-/// its description, with what else it publishes about itself beside that,
-/// with its channels, its groups' chats, its members, the member's groups
-/// and their chats, the data rooms offered to the member and those they
-/// are in, the member's role and membership card there, and the
+/// its description, with what else it publishes about itself folded under
+/// that, with its channels, its groups' chats, its members, the member's
+/// groups and their chats, the data rooms offered to the member and those
+/// they are in, the member's role and membership card there, and the
 /// vetting desk for a vetter; its join phrase beside its name for an
 /// administrator. Opened from the Communities tab.
 class CommunityScreen extends HookConsumerWidget {
@@ -75,11 +75,7 @@ class CommunityScreen extends HookConsumerWidget {
     ref
       ..listen(communityRoleProvider(communityDid), (_, _) {})
       ..listen(communityMembershipCardProvider(communityDid), (_, _) {});
-    final description = ref
-        .watch(communityInfoProvider(communityDid))
-        .value
-        ?.$1
-        ?.description;
+    final info = ref.watch(communityInfoProvider(communityDid)).value;
     final community = ref
         .watch(communitiesControllerProvider)
         .value
@@ -121,8 +117,16 @@ class CommunityScreen extends HookConsumerWidget {
               communityDid: communityDid,
               communityName: name,
             ),
-            subtitle: description ?? '',
-            subtitleAction: CommunityInfoAction(communityDid: communityDid),
+            subtitle: info?.$1?.description ?? '',
+            // Nothing to unfold until it is read.
+            subtitleDetails: switch (info) {
+              (final profile, final joinPhrase) => CommunityInfoDetails(
+                communityDid: communityDid,
+                profile: profile,
+                joinPhrase: joinPhrase,
+              ),
+              null => null,
+            },
             onBack: () => Navigator.of(context).pop(),
           ),
           FilterTabBar(

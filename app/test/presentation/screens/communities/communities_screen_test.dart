@@ -462,19 +462,26 @@ void main() {
 
       expect(find.text('Chess for everyone'), findsOneWidget);
       expect(find.text('Info'), findsNothing);
+      // Folded away until the description is tapped.
+      expect(find.text('https://chess.example/club'), findsNothing);
 
-      await tester.tap(find.byKey(const Key('community_info')));
+      await tester.tap(find.byKey(const Key('section_header_details_toggle')));
       await tester.pumpAndSettle();
 
       expect(find.text('https://chess.example/club'), findsOneWidget);
       expect(find.text('hello@chess.example'), findsOneWidget);
       expect(find.text(l10n.communityDidLabel), findsOneWidget);
-      // Shown once: under the name, not again in the sheet.
+      // Shown once: under the name, not again in what unfolds.
       expect(find.text('Chess for everyone'), findsOneWidget);
       expect(find.text(l10n.communityInfoUnavailable), findsNothing);
+
+      await tester.tap(find.byKey(const Key('section_header_details_toggle')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('https://chess.example/club'), findsNothing);
     });
 
-    testWidgets("opens a community's DID beside its description", (
+    testWidgets("unfolds a community's DID under its description", (
       tester,
     ) async {
       final l10n = await getL10n();
@@ -484,7 +491,7 @@ void main() {
       await tester.tap(find.text('Chess club'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byKey(const Key('community_info')));
+      await tester.tap(find.byKey(const Key('section_header_details_toggle')));
       await tester.pumpAndSettle();
 
       expect(find.text(l10n.vtcJoinProfileHeading), findsOneWidget);

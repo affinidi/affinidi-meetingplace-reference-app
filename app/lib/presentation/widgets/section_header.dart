@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../infrastructure/extensions/build_context_extensions.dart';
 import '../scaffolds/dashboard_shell_scaffold_key.dart';
@@ -10,7 +11,7 @@ import 'images/logo_avatar.dart';
 /// section's action, closed by a hairline, as a Mission Control section
 /// head. With a way back, the title goes below it, for room to show a
 /// logo.
-class SectionHeader extends StatelessWidget {
+class SectionHeader extends HookWidget {
   const SectionHeader({
     super.key,
     required this.icon,
@@ -18,7 +19,7 @@ class SectionHeader extends StatelessWidget {
     required this.subtitle,
     this.logoUrl,
     this.titleAction,
-    this.subtitleAction,
+    this.subtitleDetails,
     this.showProgress,
     this.onClose,
     this.onBack,
@@ -39,8 +40,10 @@ class SectionHeader extends StatelessWidget {
 
   final String subtitle;
 
-  /// An action about [subtitle], right after it; none when null.
-  final Widget? subtitleAction;
+  /// More about [subtitle], folded away under it until the lead is
+  /// tapped, which then shows in full; the lead cannot be unfolded when
+  /// null.
+  final Widget? subtitleDetails;
 
   final bool? showProgress;
 
@@ -62,6 +65,8 @@ class SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final mc = context.mcColors;
+    final expanded = useState(false);
+    final showsDetails = expanded.value && subtitleDetails != null;
     final textTheme = context.textTheme;
     final titleStyle = textTheme.headlineSmall;
     // The icon centres on the title's first line, whatever its size.
@@ -74,8 +79,8 @@ class SectionHeader extends StatelessWidget {
 
     final subtitleText = Text(
       subtitle,
-      maxLines: 3,
-      overflow: TextOverflow.ellipsis,
+      maxLines: showsDetails ? null : 3,
+      overflow: showsDetails ? null : TextOverflow.ellipsis,
       style: textTheme.bodyMedium?.copyWith(color: mc.textSecondary),
     );
 
@@ -109,15 +114,26 @@ class SectionHeader extends StatelessWidget {
                 ),
                 null => Text(title, style: titleStyle),
               },
-              switch (subtitleAction) {
-                final action? => Row(
-                  children: [
-                    Flexible(child: subtitleText),
-                    action,
-                  ],
+              if (subtitleDetails == null)
+                subtitleText
+              else
+                InkWell(
+                  key: const Key('section_header_details_toggle'),
+                  onTap: () => expanded.value = !expanded.value,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: McSpacing.s1,
+                    children: [
+                      Flexible(child: subtitleText),
+                      Icon(
+                        expanded.value
+                            ? McIcons.chevronUp
+                            : McIcons.chevronDown,
+                        color: mc.textSecondary,
+                      ),
+                    ],
+                  ),
                 ),
-                null => subtitleText,
-              },
             ],
           ),
         ),
@@ -150,6 +166,16 @@ class SectionHeader extends StatelessWidget {
         ),
       ),
     ];
+
+    // Under the lead and the logo both, for the room they take.
+    final headlineWithDetails = switch (subtitleDetails) {
+      final details? when showsDetails => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: McSpacing.s3,
+        children: [headline, details],
+      ),
+      _ => headline,
+    };
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -186,14 +212,14 @@ class SectionHeader extends StatelessWidget {
                   ...actions,
                 ],
               ),
-              headline,
+              headlineWithDetails,
             ],
           ),
           null => Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             spacing: McSpacing.s3,
             children: [
-              Expanded(child: headline),
+              Expanded(child: headlineWithDetails),
               ...actions,
             ],
           ),

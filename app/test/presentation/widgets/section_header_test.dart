@@ -11,6 +11,7 @@ void main() {
     String subtitle = 'Who you are connected with',
     Uri? logoUrl,
     Widget? titleAction,
+    Widget? subtitleDetails,
     bool? showProgress,
     VoidCallback? onClose,
     VoidCallback? onBack,
@@ -25,6 +26,7 @@ void main() {
             subtitle: subtitle,
             logoUrl: logoUrl,
             titleAction: titleAction,
+            subtitleDetails: subtitleDetails,
             showProgress: showProgress,
             onClose: onClose,
             onBack: onBack,
@@ -179,5 +181,44 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(find.byIcon(McIcons.public), findsOneWidget);
+  });
+
+  testWidgets('unfolds the details and the whole lead on a tap', (
+    tester,
+  ) async {
+    final lead = 'A lead long enough to wrap ' * 8;
+    await pumpHeader(
+      tester,
+      subtitle: lead,
+      subtitleDetails: const Text('Details'),
+    );
+
+    final toggle = find.byKey(const Key('section_header_details_toggle'));
+    Text leadText() => tester.widget<Text>(find.text(lead));
+    expect(find.text('Details'), findsNothing);
+    expect(leadText().maxLines, 3);
+    expect(find.byIcon(McIcons.chevronDown), findsOneWidget);
+
+    await tester.tap(toggle);
+    await tester.pump();
+
+    expect(find.text('Details'), findsOneWidget);
+    expect(leadText().maxLines, isNull);
+    expect(find.byIcon(McIcons.chevronUp), findsOneWidget);
+
+    await tester.tap(toggle);
+    await tester.pump();
+
+    expect(find.text('Details'), findsNothing);
+  });
+
+  testWidgets('cannot unfold a lead without details', (tester) async {
+    await pumpHeader(tester);
+
+    expect(
+      find.byKey(const Key('section_header_details_toggle')),
+      findsNothing,
+    );
+    expect(find.byIcon(McIcons.chevronDown), findsNothing);
   });
 }
