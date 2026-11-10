@@ -63,6 +63,7 @@ class VtcTrailStep extends HookWidget {
     this.document,
     this.documentTitle = '',
     this.documentKey,
+    this.documentCommand,
     this.busy = false,
     this.isLast = false,
     this.actor,
@@ -81,6 +82,10 @@ class VtcTrailStep extends HookWidget {
   final Map<String, dynamic>? document;
   final String documentTitle;
   final Key? documentKey;
+
+  /// The command that fetches [document] elsewhere, such as from the
+  /// member's VTA with `pnm`: copied from the document's sheet.
+  final String? documentCommand;
 
   /// Whether the step is being worked on right now, which its marker shows.
   final bool busy;
@@ -213,6 +218,7 @@ class VtcTrailStep extends HookWidget {
                                 final String type => type,
                                 _ => null,
                               },
+                              command: documentCommand,
                             ),
                           ),
                         if (canExpand)

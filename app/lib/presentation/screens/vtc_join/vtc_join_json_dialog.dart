@@ -13,13 +13,16 @@ import '../../themes/tokens/mc_typography.dart';
 /// Shows [json] in a sheet under [title], with [icon] and an optional
 /// [subtitle] such as the document's Trust Task type: indented, coloured by
 /// kind, selectable, and copied whole from the header. Plain text only: it
-/// is a document someone else may have written.
+/// is a document someone else may have written. A [command], such as the
+/// `pnm` command that fetches the same document from the member's VTA, is
+/// copied from the header too.
 Future<void> showVtcJoinJson(
   BuildContext context, {
   required String title,
   required Map<String, dynamic> json,
   IconData icon = McIcons.code,
   String? subtitle,
+  String? command,
   Key textKey = const Key('vtc_join_json'),
 }) {
   return showModalBottomSheet<void>(
@@ -33,6 +36,7 @@ Future<void> showVtcJoinJson(
       json: json,
       icon: icon,
       subtitle: subtitle,
+      command: command,
       textKey: textKey,
     ),
   );
@@ -44,6 +48,7 @@ class _JsonSheet extends HookWidget {
     required this.json,
     required this.icon,
     required this.subtitle,
+    required this.command,
     required this.textKey,
   });
 
@@ -51,6 +56,7 @@ class _JsonSheet extends HookWidget {
   final Map<String, dynamic> json;
   final IconData icon;
   final String? subtitle;
+  final String? command;
   final Key textKey;
 
   static const _radius = Radius.circular(McRadius.xl);
@@ -63,6 +69,7 @@ class _JsonSheet extends HookWidget {
     final mc = context.mcColors;
     final textTheme = context.textTheme;
     final copied = useState(false);
+    final commandCopied = useState(false);
     final text = useMemoized(
       () => const JsonEncoder.withIndent('  ').convert(json),
       [json],
@@ -72,7 +79,7 @@ class _JsonSheet extends HookWidget {
       [json, mc],
     );
 
-    Future<void> copy() async {
+    Future<void> copy(String text, ValueNotifier<bool> copied) async {
       await Clipboard.setData(ClipboardData(text: text));
       copied.value = true;
       await Future<void>.delayed(_copiedFor);
@@ -137,13 +144,24 @@ class _JsonSheet extends HookWidget {
                       ],
                     ),
                   ),
+                  if (command case final command?)
+                    IconButton(
+                      key: const Key('vtc_join_json_copy_command'),
+                      icon: Icon(
+                        commandCopied.value ? McIcons.check : McIcons.terminal,
+                      ),
+                      tooltip: commandCopied.value
+                          ? l10n.copiedToClipboard
+                          : l10n.linkedVtaCopyCommand,
+                      onPressed: () => copy(command, commandCopied),
+                    ),
                   IconButton(
                     key: const Key('vtc_join_json_copy'),
                     icon: Icon(copied.value ? McIcons.check : McIcons.copy),
                     tooltip: copied.value
                         ? l10n.copiedToClipboard
                         : l10n.vtcJoinJsonCopy,
-                    onPressed: copy,
+                    onPressed: () => copy(text, copied),
                   ),
                   IconButton(
                     key: const Key('vtc_join_json_close'),

@@ -256,6 +256,11 @@ class _MembershipTrail extends StatelessWidget {
           document: card.credential,
           documentTitle: l10n.membershipTrailCardDocument,
           documentKey: const Key('membership_trail_card_document'),
+          // Only once the member's VTA holds it, under its storage id.
+          documentCommand: switch (entry.stored) {
+            final stored? => 'pnm cred-vault get ${stored.id}',
+            null => null,
+          },
         ),
         VtcTrailStep(
           key: const Key('membership_trail_kept'),

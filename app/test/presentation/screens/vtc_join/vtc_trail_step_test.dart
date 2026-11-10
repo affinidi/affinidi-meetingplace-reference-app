@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_trail_step.dart';
@@ -170,6 +171,68 @@ void main() {
 
       expect(find.text('Trust Task'), findsNothing);
       expect(find.text('Trust Tasks'), findsNothing);
+    });
+
+    Future<void> openDocument(WidgetTester tester, {String? command}) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.dark,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: VtcTrailStep(
+              icon: McIcons.membership,
+              stage: VtcTrailStage.done,
+              title: 'Issued',
+              summary: 'Your card',
+              document: const {'id': 'urn:uuid:card'},
+              documentTitle: 'Your membership card',
+              documentKey: const Key('document'),
+              documentCommand: command,
+              isLast: true,
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.byKey(const Key('document')));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('copies the command that fetches its document', (tester) async {
+      String? copied;
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          if (call.method == 'Clipboard.setData') {
+            copied = (call.arguments as Map)['text'] as String;
+          }
+          return null;
+        },
+      );
+      addTearDown(
+        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        ),
+      );
+      await openDocument(tester, command: 'pnm cred-vault get urn:uuid:card');
+
+      await tester.tap(find.byKey(const Key('vtc_join_json_copy_command')));
+      await tester.pump();
+
+      expect(copied, 'pnm cred-vault get urn:uuid:card');
+      // Only the command's button says so, not the JSON's.
+      expect(find.byTooltip('Copied to clipboard'), findsOneWidget);
+      expect(find.byTooltip('Copy JSON'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 2));
+      expect(find.byTooltip('Copy command'), findsOneWidget);
+    });
+
+    testWidgets('offers no command without one', (tester) async {
+      await openDocument(tester);
+
+      expect(find.byKey(const Key('vtc_join_json_copy')), findsOneWidget);
+      expect(find.byKey(const Key('vtc_join_json_copy_command')), findsNothing);
     });
   });
 }
