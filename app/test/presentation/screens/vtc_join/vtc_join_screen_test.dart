@@ -979,7 +979,7 @@ void main() {
       }
     });
 
-    testWidgets('words the directory switch as the Members tab does', (
+    testWidgets('explains the directory switch in one sentence', (
       tester,
     ) async {
       await pumpScreen(tester);
@@ -1001,11 +1001,18 @@ void main() {
       );
       expect(
         find.text(
-          "Let members of Football club find you to vouch for you. They'll "
-          'see the identity you joined with.',
+          'Members of Football club can find you to vouch for you and see '
+          'the identity you joined with.',
         ),
         findsOneWidget,
       );
+      const smallPrint = 'If this is off, you may be listed for a moment';
+      expect(find.textContaining(smallPrint), findsNothing);
+
+      await tapVisible(tester, find.byKey(const Key('vtc_join_findable_more')));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining(smallPrint), findsOneWidget);
     });
 
     testWidgets('offers no wider audience than a field allows', (tester) async {

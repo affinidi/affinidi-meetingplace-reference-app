@@ -3732,6 +3732,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String vtcJoinFindableNote(String name) {
+    return 'Members of $name can find you to vouch for you and see the identity you joined with.';
+  }
+
+  @override
   String vtcFindableNotAllowed(String name) {
     return '$name doesn\'t let members show this.';
   }

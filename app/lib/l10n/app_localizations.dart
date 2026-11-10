@@ -5606,6 +5606,12 @@ abstract class AppLocalizations {
   /// **'Let members of {name} find you to vouch for you. They\'ll see the identity you joined with.'**
   String vtcFindableIntro(String name);
 
+  /// One-sentence explanation of the find-me switch on the join screen
+  ///
+  /// In en, this message translates to:
+  /// **'Members of {name} can find you to vouch for you and see the identity you joined with.'**
+  String vtcJoinFindableNote(String name);
+
   /// The community does not let members show the identity they joined with
   ///
   /// In en, this message translates to:

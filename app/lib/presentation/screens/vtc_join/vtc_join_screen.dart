@@ -662,8 +662,9 @@ class _Consent extends StatelessWidget {
 
 /// Whether members may find the member in the community's directory: a
 /// choice of the member's own, so a panel apart from what the community
-/// asks for. Worded as on the Members tab: the same setting.
-class _Findable extends StatelessWidget {
+/// asks for. One sentence says what it does; the small print opens on tap,
+/// as a consent line's does.
+class _Findable extends HookWidget {
   const _Findable({
     required this.state,
     required this.communityName,
@@ -677,43 +678,59 @@ class _Findable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final mc = context.mcColors;
+    final expanded = useState(false);
+    final listed = state.listsNewMembers;
+    final details = [
+      if (listed != null)
+        _Note(
+          listed ? l10n.vtcJoinDirectoryListed : l10n.vtcJoinDirectoryHidden,
+        ),
+      _Note(l10n.vtcJoinListMeNote),
+      if (state.directoryDisclosure?.externalCards ?? false)
+        _Note(l10n.vtcJoinExternalCards),
+    ];
+
     return GlassCard(
       title: l10n.vtcFindableHeading,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: McSpacing.s2,
-        children: [
-          if (state.listsNewMembers case final listed?)
-            Text(
-              listed
-                  ? l10n.vtcJoinDirectoryListed
-                  : l10n.vtcJoinDirectoryHidden,
-              style: onboardingNote(context),
-            ),
-          if (state.listsNewMembers != false)
-            // A Row, not a SwitchListTile: the onboarding layout measures
-            // intrinsic heights, which a ListTile misreports.
-            Row(
+      child: listed == false
+          ? _Note(l10n.vtcJoinDirectoryHidden)
+          // A Row, not a SwitchListTile: the onboarding layout measures
+          // intrinsic heights, which a ListTile misreports.
+          : Row(
               children: [
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: McSpacing.s05,
-                    children: [
-                      Text(
-                        l10n.vtcFindableIntro(communityName),
-                        style: onboardingNote(context),
+                  // Tells screen readers the line opens, as the chevron
+                  // tells the eye.
+                  child: Semantics(
+                    button: true,
+                    expanded: expanded.value,
+                    child: InkWell(
+                      key: const Key('vtc_join_findable_more'),
+                      onTap: () => expanded.value = !expanded.value,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: McSpacing.s2,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              spacing: McSpacing.s1,
+                              children: [
+                                _Note(l10n.vtcJoinFindableNote(communityName)),
+                                if (expanded.value) ...details,
+                              ],
+                            ),
+                          ),
+                          Icon(
+                            expanded.value
+                                ? McIcons.chevronUp
+                                : McIcons.chevronDown,
+                            color: mc.textSecondary,
+                          ),
+                        ],
                       ),
-                      Text(
-                        l10n.vtcJoinListMeNote,
-                        style: onboardingNote(context),
-                      ),
-                      if (state.directoryDisclosure?.externalCards ?? false)
-                        Text(
-                          l10n.vtcJoinExternalCards,
-                          style: onboardingNote(context),
-                        ),
-                    ],
+                    ),
                   ),
                 ),
                 Switch.adaptive(
@@ -723,8 +740,6 @@ class _Findable extends StatelessWidget {
                 ),
               ],
             ),
-        ],
-      ),
     );
   }
 }

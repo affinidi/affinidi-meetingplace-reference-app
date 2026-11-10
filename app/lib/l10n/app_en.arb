@@ -3731,6 +3731,15 @@
 			}
 		}
 	},
+	"vtcJoinFindableNote": "Members of {name} can find you to vouch for you and see the identity you joined with.",
+	"@vtcJoinFindableNote": {
+		"description": "One-sentence explanation of the find-me switch on the join screen",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
 	"vtcFindableNotAllowed": "{name} doesn't let members show this.",
 	"@vtcFindableNotAllowed": {
 		"description": "The community does not let members show the identity they joined with",
