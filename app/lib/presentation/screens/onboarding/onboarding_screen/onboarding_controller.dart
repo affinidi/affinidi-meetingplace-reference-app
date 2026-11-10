@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../../application/services/settings_service/settings_service.dart';
+import '../../../../application/services/vtc_service/vta_link_service.dart';
 import 'onboarding_state.dart';
 
 part 'onboarding_controller.g.dart';
@@ -66,7 +67,10 @@ class OnboardingController extends _$OnboardingController {
     state = state.copyWith(currentPage: page);
   }
 
-  void onFinishOnboarding() async {
+  Future<void> onFinishOnboarding() async {
+    // First, so the router asks for the VTA rather than reuse a link a
+    // previous install left in the keystore.
+    await ref.read(vtaLinkServiceProvider.notifier).forgetLeftover();
     final settingsService = ref.read(settingsServiceProvider.notifier);
     await settingsService.setAlreadyOnboarded(true);
   }
