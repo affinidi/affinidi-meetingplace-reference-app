@@ -51,10 +51,11 @@ class CommunityScreen extends HookConsumerWidget {
       unawaited(service.watchCommunity(communityDid));
       return () => unawaited(service.unwatchCommunity(communityDid));
     }, [communityDid]);
-    // Read what the Membership, Info and Settings tabs show as soon as the
-    // community opens, and keep it while it shows, for them to show it at
-    // once.
+    // Read what the Members, Membership, Info and Settings tabs show as soon
+    // as the community opens, and keep it while it shows, for them to show
+    // it at once.
     ref
+      ..listen(communityCanVetProvider(communityDid), (_, _) {})
       ..listen(communityRoleProvider(communityDid), (_, _) {})
       ..listen(communityMembershipCardProvider(communityDid), (_, _) {})
       ..listen(communityInfoProvider(communityDid), (_, _) {});

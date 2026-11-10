@@ -42,6 +42,16 @@ Future<VtcMembershipCard?> communityMembershipCard(
   return ref.read(vtcServiceProvider).membershipCard(communityDid);
 }
 
+/// Whether the member may vet for [communityDid]: their VTA keeps a vetter
+/// role card the community issued them that is in date and not revoked.
+/// Read while a community's page shows, and again as the cards change; the
+/// vetting desk checks the card again before any ticket.
+@Riverpod(retry: _noRetry)
+Future<bool> communityCanVet(Ref ref, String communityDid) {
+  _readAgainOnCardChanges(ref);
+  return ref.read(vtcServiceProvider).canVet(communityDid);
+}
+
 /// What a community publishes about itself, or null when it cannot be read,
 /// and the join phrase this phone published for it, or null when none is or
 /// Meeting Place cannot be reached.

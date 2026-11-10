@@ -194,6 +194,99 @@ final class CommunityMembershipCardFamily extends $Family
   String toString() => r'communityMembershipCardProvider';
 }
 
+/// Whether the member may vet for [communityDid]: their VTA keeps a vetter
+/// role card the community issued them that is in date and not revoked.
+/// Read while a community's page shows, and again as the cards change; the
+/// vetting desk checks the card again before any ticket.
+
+@ProviderFor(communityCanVet)
+const communityCanVetProvider = CommunityCanVetFamily._();
+
+/// Whether the member may vet for [communityDid]: their VTA keeps a vetter
+/// role card the community issued them that is in date and not revoked.
+/// Read while a community's page shows, and again as the cards change; the
+/// vetting desk checks the card again before any ticket.
+
+final class CommunityCanVetProvider
+    extends $FunctionalProvider<AsyncValue<bool>, bool, FutureOr<bool>>
+    with $FutureModifier<bool>, $FutureProvider<bool> {
+  /// Whether the member may vet for [communityDid]: their VTA keeps a vetter
+  /// role card the community issued them that is in date and not revoked.
+  /// Read while a community's page shows, and again as the cards change; the
+  /// vetting desk checks the card again before any ticket.
+  const CommunityCanVetProvider._({
+    required CommunityCanVetFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: _noRetry,
+         name: r'communityCanVetProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$communityCanVetHash();
+
+  @override
+  String toString() {
+    return r'communityCanVetProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<bool> create(Ref ref) {
+    final argument = this.argument as String;
+    return communityCanVet(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is CommunityCanVetProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$communityCanVetHash() => r'91ef96ca74a1d5ea750ff29bb65683d4f76d6983';
+
+/// Whether the member may vet for [communityDid]: their VTA keeps a vetter
+/// role card the community issued them that is in date and not revoked.
+/// Read while a community's page shows, and again as the cards change; the
+/// vetting desk checks the card again before any ticket.
+
+final class CommunityCanVetFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<bool>, String> {
+  const CommunityCanVetFamily._()
+    : super(
+        retry: _noRetry,
+        name: r'communityCanVetProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Whether the member may vet for [communityDid]: their VTA keeps a vetter
+  /// role card the community issued them that is in date and not revoked.
+  /// Read while a community's page shows, and again as the cards change; the
+  /// vetting desk checks the card again before any ticket.
+
+  CommunityCanVetProvider call(String communityDid) =>
+      CommunityCanVetProvider._(argument: communityDid, from: this);
+
+  @override
+  String toString() => r'communityCanVetProvider';
+}
+
 /// What [communityDid] publishes about itself, read while its page shows.
 
 @ProviderFor(communityInfo)
