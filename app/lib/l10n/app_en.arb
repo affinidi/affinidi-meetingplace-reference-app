@@ -3135,6 +3135,10 @@
 		}
 	},
 	"vtcJoinLeaveAction": "Leave community",
+	"vtcJoinGoToCommunity": "Go to community",
+	"@vtcJoinGoToCommunity": {
+		"description": "Opens the community the administrators just admitted the member to, at its channels"
+	},
 	"vtcJoinLeaveTitle": "Leave {name}?",
 	"@vtcJoinLeaveTitle": {
 		"description": "Asks the member to confirm leaving a community",

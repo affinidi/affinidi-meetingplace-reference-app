@@ -3306,6 +3306,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get vtcJoinLeaveAction => 'Leave community';
 
   @override
+  String get vtcJoinGoToCommunity => 'Go to community';
+
+  @override
   String vtcJoinLeaveTitle(String name) {
     return 'Leave $name?';
   }

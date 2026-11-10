@@ -28,18 +28,23 @@ import 'vtc_trail_step.dart';
 /// a welcome right after joining, else the community's logo and name; their
 /// role, with the community's settings and the vetting desk behind icons
 /// beside it for an administrator and a vetter, the membership card it
-/// issued — or that it is on its way to the member's VTA — then Done and
-/// [leave]. What the community is waits behind an icon beside its name.
+/// issued — or that it is on its way to the member's VTA — then Done, or
+/// [doneLabel], and [leave]. What the community is waits behind an icon
+/// beside its name.
 class VtcCommunityPage extends HookConsumerWidget {
   const VtcCommunityPage({
     required this.state,
     required this.onDone,
     required this.leave,
+    this.doneLabel,
   });
 
   final VtcJoinState state;
   final VoidCallback onDone;
   final Widget leave;
+
+  /// What [onDone] does, where it does more than close; Done if not given.
+  final String? doneLabel;
 
   /// Whether the member may vet here; why not, or why it could not be
   /// told, goes to the log, never a DID or a card.
@@ -176,7 +181,10 @@ class VtcCommunityPage extends HookConsumerWidget {
         if (state.identityCheck case final check?)
           VtcIdentityCheckView(check: check, checkerName: name),
         const SizedBox(height: McSpacing.s3),
-        OnboardingButton(label: l10n.generalDone, onPressed: onDone),
+        OnboardingButton(
+          label: doneLabel ?? l10n.generalDone,
+          onPressed: onDone,
+        ),
         leave,
       ],
     );

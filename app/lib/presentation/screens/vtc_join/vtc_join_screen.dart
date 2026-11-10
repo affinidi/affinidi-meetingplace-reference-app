@@ -64,7 +64,8 @@ class VtcJoinScreen extends HookConsumerWidget {
   final String? leaveCommunityName;
 
   /// Opens joining over the current screen, at the community of [code] if
-  /// given; a community joined once vetted opens at its channels.
+  /// given; a community joined once vetted, or once its administrators
+  /// approve, opens at its channels.
   static Future<void> show(BuildContext context, {String? code}) async {
     final router = GoRouter.of(context);
     final joinedDid = await Navigator.of(context, rootNavigator: true)
@@ -126,8 +127,19 @@ class VtcJoinScreen extends HookConsumerWidget {
       return controller.sendVettedApplication();
     }
 
+    // An application the administrators approve while the member waits
+    // leaves them a way on to the community's channels.
+    final approved = useRef(false);
+
     ref.listen(vtcJoinControllerProvider, (previous, next) {
-      if (next.step == VtcJoinStep.scanning) sentVetted.value = false;
+      if (next.step == VtcJoinStep.scanning) {
+        sentVetted.value = false;
+        approved.value = false;
+      }
+      if (previous?.step == VtcJoinStep.pending &&
+          next.step == VtcJoinStep.joined) {
+        approved.value = true;
+      }
       if (!sentVetted.value ||
           next.step != VtcJoinStep.joined ||
           previous?.step == VtcJoinStep.joined) {
@@ -230,7 +242,10 @@ class VtcJoinScreen extends HookConsumerWidget {
         VtcJoinStep.approveVettingCard => const SizedBox.shrink(),
         VtcJoinStep.joined => VtcCommunityPage(
           state: state,
-          onDone: close,
+          doneLabel: approved.value ? l10n.vtcJoinGoToCommunity : null,
+          onDone: approved.value
+              ? () => Navigator.of(context).pop(state.communityDid)
+              : close,
           leave: OnboardingButton(
             label: l10n.vtcJoinLeaveAction,
             isOutlined: true,

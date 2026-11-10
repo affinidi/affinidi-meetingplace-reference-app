@@ -549,6 +549,37 @@ void main() {
       expect(find.textContaining('Last checked at'), findsOneWidget);
     });
 
+    testWidgets('opens the community at its channels once approved', (
+      tester,
+    ) async {
+      routed = true;
+      network.joinVerdict = {'effect': 'refer'};
+      await pumpScreen(tester);
+      await enterCode(tester, fakeVtcDid);
+      await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
+      await settle(tester);
+
+      network.joinStatus = 'approved';
+      await tapVisible(
+        tester,
+        find.widgetWithText(OutlinedButton, 'Check again'),
+      );
+      await settle(tester);
+
+      expect(find.text("You're a member of Football club."), findsOneWidget);
+      expect(find.widgetWithText(ElevatedButton, 'Done'), findsNothing);
+      await tapVisible(
+        tester,
+        find.widgetWithText(ElevatedButton, 'Go to community'),
+      );
+      await settle(tester);
+
+      expect(find.byType(VtcJoinScreen), findsNothing);
+      expect(find.text('Community page of $fakeVtcDid'), findsOneWidget);
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(const Duration(seconds: 10));
+    });
+
     testWidgets('withdraws a waiting application, then applies again', (
       tester,
     ) async {
