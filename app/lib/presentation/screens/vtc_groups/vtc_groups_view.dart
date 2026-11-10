@@ -13,7 +13,6 @@ import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../../themes/tokens/mc_spacing.dart';
 import '../../themes/tokens/mc_typography.dart';
-import 'vtc_group_members_screen.dart';
 import 'vtc_groups_controller.dart';
 import 'vtc_groups_state.dart';
 
@@ -21,17 +20,10 @@ import 'vtc_groups_state.dart';
 /// creates it, and members join it with the group's credential. The Groups
 /// tab of a community's page; pulled down, it reads them again.
 class VtcGroupsView extends ConsumerWidget {
-  const VtcGroupsView({
-    super.key,
-    required this.communityDid,
-    required this.communityName,
-  });
+  const VtcGroupsView({super.key, required this.communityDid});
 
   /// DID of the community whose groups are shown.
   final String communityDid;
-
-  /// The community's name, above a group's members.
-  final String communityName;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -96,15 +88,6 @@ class VtcGroupsView extends ConsumerWidget {
                   },
                   onJoin: () => controller.joinChat(listing.group),
                   onShowLink: () => controller.showChatLink(listing.group),
-                  onMembers: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => VtcGroupMembersScreen(
-                        communityDid: communityDid,
-                        communityName: communityName,
-                        group: listing.group,
-                      ),
-                    ),
-                  ),
                 ),
             ],
           ),
@@ -168,7 +151,6 @@ class _GroupCard extends StatelessWidget {
     required this.onJoin,
     required this.onShowLink,
     this.credentialUntil,
-    required this.onMembers,
   });
 
   final VtcGroup group;
@@ -184,9 +166,6 @@ class _GroupCard extends StatelessWidget {
   /// Shows again the link to publish in the group's DID document, for the
   /// chat this phone owns.
   final VoidCallback onShowLink;
-
-  /// Opens the group's members, to vouch for them.
-  final VoidCallback onMembers;
 
   @override
   Widget build(BuildContext context) {
@@ -284,13 +263,6 @@ class _GroupCard extends StatelessWidget {
                 canCreate ? l10n.vtcGroupChatCreate : l10n.vtcGroupChatJoin,
               ),
               onPressed: isBusy ? null : (canCreate ? onCreate : onJoin),
-            ),
-          if (group.showsMembersToMembers)
-            OutlinedButton.icon(
-              key: Key('vtc_group_members_${group.groupId}'),
-              icon: const Icon(McIcons.group),
-              label: Text(l10n.vtcGroupMembersOpen),
-              onPressed: onMembers,
             ),
         ],
       ),

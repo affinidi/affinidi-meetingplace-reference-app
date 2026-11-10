@@ -149,7 +149,7 @@ class CommunityScreen extends HookConsumerWidget {
                   communityDid: communityDid,
                   communityName: name,
                 ),
-                VtcGroupsView(communityDid: communityDid, communityName: name),
+                VtcGroupsView(communityDid: communityDid),
                 VtcRoomsView(communityDid: communityDid),
                 CommunityMembershipView(
                   communityDid: communityDid,

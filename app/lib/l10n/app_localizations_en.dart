@@ -3880,14 +3880,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get vtcGroupMembersOpen => 'Members';
-
-  @override
-  String vtcGroupMembersTitle(String group) {
-    return 'Members of $group';
-  }
-
-  @override
   String get vtcGroupMembersNone => 'No other members to show.';
 
   @override

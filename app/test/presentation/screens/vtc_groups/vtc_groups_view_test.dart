@@ -190,10 +190,7 @@ void main() {
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: const Scaffold(
-            body: VtcGroupsView(
-              communityDid: _communityDid,
-              communityName: 'Football club',
-            ),
+            body: VtcGroupsView(communityDid: _communityDid),
           ),
         ),
       ),
@@ -240,11 +237,11 @@ void main() {
     expect(find.text('Valid until Dec 9, 2026'), findsOneWidget);
   });
 
-  testWidgets('offers the members of groups that show them', (tester) async {
+  testWidgets('offers no way to the members of a group', (tester) async {
     await pumpScreen(tester);
 
-    expect(find.byKey(const Key('vtc_group_members_g1')), findsOneWidget);
-    expect(find.byKey(const Key('vtc_group_members_g2')), findsOneWidget);
+    expect(find.byKey(const Key('vtc_group_members_g1')), findsNothing);
+    expect(find.byKey(const Key('vtc_group_members_g2')), findsNothing);
   });
 
   testWidgets('shows the link to publish once the chat is created', (

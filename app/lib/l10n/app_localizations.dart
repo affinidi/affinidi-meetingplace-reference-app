@@ -5802,18 +5802,6 @@ abstract class AppLocalizations {
   /// **'{reason, select, notMember{You\'re not a member of {community} any more.} contactNotMember{{name} isn\'t a member of {community} any more.} notFindable{{name} hasn\'t let members of {community} find them yet.} searchTooShort{Enter at least three letters.} nameRefused{{community} doesn\'t accept this name.} proofRejected{{community} didn\'t accept your VTA\'s signature.} notAllowed{{community} doesn\'t allow this.} tryLater{{community} is busy. Try again in a moment.} vtaUnavailable{Your VTA couldn\'t sign this. Try again when it\'s reachable.} network{Couldn\'t reach {community}.} other{Something went wrong. Try again.}}'**
   String vtcTrustFailure(String reason, String community, String name);
 
-  /// Opens a community group's members, to vouch for them
-  ///
-  /// In en, this message translates to:
-  /// **'Members'**
-  String get vtcGroupMembersOpen;
-
-  /// Title of a community group's members
-  ///
-  /// In en, this message translates to:
-  /// **'Members of {group}'**
-  String vtcGroupMembersTitle(String group);
-
   /// A group shows the member no other members
   ///
   /// In en, this message translates to:

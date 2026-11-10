@@ -3968,19 +3968,6 @@
 			}
 		}
 	},
-	"vtcGroupMembersOpen": "Members",
-	"@vtcGroupMembersOpen": {
-		"description": "Opens a community group's members, to vouch for them"
-	},
-	"vtcGroupMembersTitle": "Members of {group}",
-	"@vtcGroupMembersTitle": {
-		"description": "Title of a community group's members",
-		"placeholders": {
-			"group": {
-				"type": "String"
-			}
-		}
-	},
 	"vtcGroupMembersNone": "No other members to show.",
 	"@vtcGroupMembersNone": {
 		"description": "A group shows the member no other members"
