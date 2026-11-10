@@ -4598,6 +4598,12 @@ abstract class AppLocalizations {
   /// **'{role, select, admin{Administrator} moderator{Moderator} issuer{Issuer} member{Member} vetter{Vetter} other{{role}}}'**
   String vtcCommunityRoleName(String role);
 
+  /// Shown once the member's role in a community changed, e.g. after an administrator promoted them; role is the role's name
+  ///
+  /// In en, this message translates to:
+  /// **'Your role in {community} is now {role}'**
+  String vtcRoleChanged(String community, String role);
+
   /// No description provided for @vtcJoinProfileHeading.
   ///
   /// In en, this message translates to:

@@ -2950,6 +2950,18 @@
 			}
 		}
 	},
+	"vtcRoleChanged": "Your role in {community} is now {role}",
+	"@vtcRoleChanged": {
+		"description": "Shown once the member's role in a community changed, e.g. after an administrator promoted them; role is the role's name",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			},
+			"role": {
+				"type": "String"
+			}
+		}
+	},
 	"vtcJoinProfileHeading": "About the community",
 	"vtcJoinWebsite": "Website",
 	"vtcJoinContact": "Contact",

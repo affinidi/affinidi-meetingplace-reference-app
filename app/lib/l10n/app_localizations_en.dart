@@ -3064,6 +3064,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String vtcRoleChanged(String community, String role) {
+    return 'Your role in $community is now $role';
+  }
+
+  @override
   String get vtcJoinProfileHeading => 'About the community';
 
   @override

@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../../application/services/vtc_service/vtc_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../navigation/tabs/tabs.dart';
 import '../../widgets/filter_tab_bar.dart';
@@ -42,7 +45,11 @@ class CommunityScreen extends HookConsumerWidget {
           ..read(communityMembersControllerProvider(communityDid))
           ..read(vtcFindableControllerProvider(communityDid));
       });
-      return null;
+      // Keep the cards the community pushes while it shows, e.g. a new
+      // role card, for its tabs to show them at once.
+      final service = ref.read(vtcServiceProvider);
+      unawaited(service.watchCommunity(communityDid));
+      return () => unawaited(service.unwatchCommunity(communityDid));
     }, [communityDid]);
     // Read what the Membership, Info and Settings tabs show as soon as the
     // community opens, and keep it while it shows, for them to show it at
