@@ -4807,6 +4807,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String communityMembersPrompt(String community) {
-    return 'Members of your groups are shown. Search the directory of $community to find others.';
+    return 'Search the directory of $community to find others.';
   }
 }

@@ -7035,7 +7035,7 @@ abstract class AppLocalizations {
   /// Hint under the search field of a community's Members tab
   ///
   /// In en, this message translates to:
-  /// **'Members of your groups are shown. Search the directory of {community} to find others.'**
+  /// **'Search the directory of {community} to find others.'**
   String communityMembersPrompt(String community);
 }
 

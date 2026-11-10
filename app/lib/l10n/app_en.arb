@@ -5180,7 +5180,7 @@
 	"@communityMembersTab": {
 		"description": "Tab of a community's screen to search its members"
 	},
-	"communityMembersPrompt": "Members of your groups are shown. Search the directory of {community} to find others.",
+	"communityMembersPrompt": "Search the directory of {community} to find others.",
 	"@communityMembersPrompt": {
 		"description": "Hint under the search field of a community's Members tab",
 		"placeholders": {
