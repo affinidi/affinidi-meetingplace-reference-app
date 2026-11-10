@@ -891,7 +891,13 @@ class _WaysIn extends StatelessWidget {
             maxHeight: _deckHeight,
             initialIndex: position,
             onCardChange: (index) => onChoose(ways[index].id),
-            cardBuilder: (context, way) => _WayCard(way),
+            cardBuilder: (context, way) => _WayCard(
+              way,
+              accent: _accentOf(
+                way,
+                ways.indexWhere((other) => other.id == way.id),
+              ),
+            ),
           ),
         if (ways.length > 1)
           Text(
@@ -907,20 +913,20 @@ class _WaysIn extends StatelessWidget {
 
 /// A way in, as a card in the deck of ways in: the kind of admission as an
 /// eyebrow over what it takes, or why this app cannot apply under it yet,
-/// the way's symbol at the top end, and what it asks for below. Each kind
-/// carries its own colour as the corner wash, a faint tint and the symbol,
-/// as a product does; a way this app cannot apply under stays plain and
-/// muted.
+/// the way's symbol at the top end, and what it asks for below. Its
+/// [accent] colours the corner wash, a faint tint and the symbol; without
+/// one, for a way this app cannot apply under, it stays plain and muted.
 class _WayCard extends StatelessWidget {
-  const _WayCard(this.way);
+  const _WayCard(this.way, {required this.accent});
 
   final VtcJoinWay way;
+  final Color? accent;
 
   static const _symbolSize = 24.0;
   static const _detailIconSize = 16.0;
 
-  /// Strength of the tint across the whole card: a hint of the kind's
-  /// colour under the stronger corner wash, not a fill.
+  /// Strength of the tint across the whole card: a hint of the [accent]
+  /// under the stronger corner wash, not a fill.
   static const _tintStrength = 0.05;
 
   @override
@@ -929,7 +935,6 @@ class _WayCard extends StatelessWidget {
     final textTheme = context.textTheme;
     final l10n = context.l10n;
     final supported = way.unsupported == null;
-    final accent = _accentOf(way);
     final detailStyle = textTheme.bodySmall?.copyWith(color: mc.textPrimary);
     final details = <(IconData, String)>[
       if (way.credentialType case final type?)
@@ -1021,13 +1026,20 @@ class _WayCard extends StatelessWidget {
 /// The kind of admission [way] offers, for its card's eyebrow.
 String _kindOf(VtcJoinWay way) => way.automatic ? 'automatic' : 'reviewed';
 
-/// The colour of [way]'s kind of admission, or null when this app cannot
-/// apply under it.
-Color? _accentOf(VtcJoinWay way) => way.unsupported != null
-    ? null
-    : way.automatic
-    ? McColors.blue
-    : McColors.purple;
+/// Mission Control's brand colours in deck order, so neighbouring ways in
+/// never share one.
+const _wayAccents = [
+  McColors.blue,
+  McColors.lime,
+  McColors.purple,
+  McColors.orange,
+  McColors.pink,
+];
+
+/// The colour of the way in at [position] in the deck, or null when this
+/// app cannot apply under [way].
+Color? _accentOf(VtcJoinWay way, int position) =>
+    way.unsupported != null ? null : _wayAccents[position % _wayAccents.length];
 
 IconData _iconOf(VtcJoinWay way) => way.unsupported != null
     ? McIcons.block

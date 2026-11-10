@@ -1532,11 +1532,20 @@ void main() {
       expect(join().onPressed, isNull);
     });
 
-    testWidgets('colours a way in by its kind of admission', (tester) async {
+    testWidgets('colours neighbouring ways in apart', (tester) async {
       network.joinManifest = {
         ...network.joinManifest,
         'criteria': [
-          {'id': 'open', 'admission': 'review', 'requirementsDigest': 'zOpen'},
+          {
+            'id': 'open',
+            'admission': 'automatic',
+            'requirementsDigest': 'zOpen',
+          },
+          {
+            'id': 'staff',
+            'admission': 'automatic',
+            'requirementsDigest': 'zStaff',
+          },
           {
             'id': 'invited',
             'admission': 'automatic',
@@ -1560,14 +1569,10 @@ void main() {
             .last,
       );
 
-      expect(
-        find.descendant(of: deck, matching: find.text('REVIEWED')),
-        findsOneWidget,
-      );
-      // A card, not a hero panel, washed and faintly tinted in its kind's
-      // colour, with no blur.
-      expect(topCard().accent, McColors.purple);
-      expect(topTint().color, McColors.purple.withValues(alpha: 0.05));
+      // A card, not a hero panel, washed and faintly tinted in its colour,
+      // with no blur.
+      expect(topCard().accent, McColors.blue);
+      expect(topTint().color, McColors.blue.withValues(alpha: 0.05));
       expect(
         (topCard().shape! as RoundedRectangleBorder).borderRadius,
         BorderRadius.circular(McRadius.md),
@@ -1576,6 +1581,11 @@ void main() {
         find.descendant(of: deck, matching: find.byType(BackdropFilter)),
         findsNothing,
       );
+
+      await swipeWays(tester);
+
+      // The same kind of admission, in the next colour.
+      expect(topCard().accent, McColors.lime);
 
       await swipeWays(tester);
 
