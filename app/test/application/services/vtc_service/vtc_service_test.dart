@@ -1465,13 +1465,14 @@ void main() {
       Map<String, dynamic> membership({
         String id = 'urn:uuid:group-card',
         String issuer = groupDid,
+        String? subject,
         String? validUntil = '2999-01-01T00:00:00Z',
       }) => {
         'id': id,
         'type': ['VerifiableCredential', 'MembershipCredential'],
         'issuer': issuer,
         'validUntil': ?validUntil,
-        'credentialSubject': {'id': persona.did},
+        'credentialSubject': {'id': subject ?? persona.did},
       };
 
       Map<String, dynamic> authority({
@@ -1500,6 +1501,7 @@ void main() {
                 {
                   'id': credential['id'],
                   'types': credential['type'],
+                  'issuerDid': credential['issuer'],
                   'validUntil': credential['validUntil'],
                 },
           ],
@@ -1509,46 +1511,66 @@ void main() {
         };
       }
 
+      /// Has the community list the group as one the member belongs to.
+      void listGroup() => network.answerTo[GroupTask.list] = (_) => {
+        'items': [
+          {
+            'group': {
+              'groupId': 'g1',
+              'groupDid': groupDid,
+              'name': 'Hiking club',
+              'visibility': 'members',
+              'showMembers': 'groupMembers',
+            },
+            'myMembership': 'member',
+          },
+        ],
+      };
+
       setUp(() async {
         await service.join(await service.readCommunity(fakeVtcDid));
       });
 
-      test("reads the group's card with the community's grant", () async {
+      test("lists each group's longest-lasting card, named", () async {
+        listGroup();
         hold([
+          membership(id: 'urn:uuid:vmc', issuer: fakeVtcDid),
           membership(id: 'urn:uuid:old', validUntil: '2998-01-01T00:00:00Z'),
           membership(),
         ], grant: authority());
 
-        final card = await service.groupCard(fakeVtcDid, groupDid: groupDid);
+        final card = (await service.groupCards()).single;
 
-        expect(card?.groupDid, groupDid);
-        expect(card?.membership.credential['id'], 'urn:uuid:group-card');
-        expect(card?.authority?['id'], 'urn:uuid:authority');
-        expect(card?.authorityValidUntil, DateTime.utc(2999));
+        expect(card.key, 'urn:uuid:group-card');
+        expect(card.groupDid, groupDid);
+        expect(card.groupName, 'Hiking club');
+        expect(card.communityDid, fakeVtcDid);
+        expect(card.communityName, 'Football club');
+        expect(card.authority?['id'], 'urn:uuid:authority');
+        expect(card.authorityValidUntil, DateTime.utc(2999));
       });
 
-      test(
-        'reads none when the VTA keeps none, or not for the group',
-        () async {
-          hold([]);
-          expect(
-            await service.groupCard(fakeVtcDid, groupDid: groupDid),
-            isNull,
-          );
+      test('lists a card unnamed when the community is down', () async {
+        hold([membership()], grant: authority());
 
-          hold([membership(issuer: 'did:webvh:QmOther:vtc.example:g2')]);
-          expect(
-            await service.groupCard(fakeVtcDid, groupDid: groupDid),
-            isNull,
-          );
-        },
-      );
+        final card = (await service.groupCards()).single;
+
+        expect(card.groupName, isNull);
+      });
+
+      test('lists none the VTA keeps not for the identity', () async {
+        hold([]);
+        expect(await service.groupCards(), isEmpty);
+
+        hold([membership(subject: 'did:webvh:QmSomeoneElse:vta.example')]);
+        expect(await service.groupCards(), isEmpty);
+      });
 
       test('reads a card valid, then revoked with its grant', () async {
         hold([
           membership(),
         ], grant: authority(status: FakeVtcNetwork.statusEntry(3)));
-        final card = (await service.groupCard(fakeVtcDid, groupDid: groupDid))!;
+        final card = (await service.groupCards()).single;
 
         final valid = await service.checkGroupCardStatus(card);
         expect(valid.state, VtcCardState.valid);
@@ -1563,10 +1585,7 @@ void main() {
         hold([
           membership(validUntil: '2020-01-01T00:00:00Z'),
         ], grant: authority(status: FakeVtcNetwork.statusEntry(3)));
-        final expiredCard = (await service.groupCard(
-          fakeVtcDid,
-          groupDid: groupDid,
-        ))!;
+        final expiredCard = (await service.groupCards()).single;
         hold(
           [membership()],
           grant: authority(
@@ -1574,10 +1593,7 @@ void main() {
             status: FakeVtcNetwork.statusEntry(3),
           ),
         );
-        final expiredGrant = (await service.groupCard(
-          fakeVtcDid,
-          groupDid: groupDid,
-        ))!;
+        final expiredGrant = (await service.groupCards()).single;
 
         expect(
           (await service.checkGroupCardStatus(expiredCard)).state,
@@ -1592,10 +1608,7 @@ void main() {
 
       test('cannot tell without the grant, or the community', () async {
         hold([membership()]);
-        final withoutGrant = (await service.groupCard(
-          fakeVtcDid,
-          groupDid: groupDid,
-        ))!;
+        final withoutGrant = (await service.groupCards()).single;
         expect(withoutGrant.authority, isNull);
         expect(
           (await service.checkGroupCardStatus(withoutGrant)).state,
@@ -1605,7 +1618,7 @@ void main() {
         hold([
           membership(),
         ], grant: authority(status: FakeVtcNetwork.statusEntry(3)));
-        final card = (await service.groupCard(fakeVtcDid, groupDid: groupDid))!;
+        final card = (await service.groupCards()).single;
         network.isStatusListDown = true;
 
         final status = await service.checkGroupCardStatus(card);

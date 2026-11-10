@@ -2502,34 +2502,88 @@ class VtcService {
         );
   }
 
-  /// The card of the group [groupDid] of [communityDid] that the member's
-  /// VTA keeps for their identity there, the longest-lasting one if it keeps
-  /// several, with the community's grant to the group; null when it keeps
-  /// none. Throws as [memberGroups] does.
-  Future<VtcGroupCard?> groupCard(
-    String communityDid, {
-    required String groupDid,
-  }) async {
-    final community = await _memberCommunity(communityDid);
+  /// The cards the groups of the member's communities issued to their
+  /// identity in each, as the member's VTA keeps them: the longest-lasting
+  /// one of each group, with the community's grant to the group and the
+  /// group's name, community by community. A name is missing when its
+  /// community cannot be reached.
+  ///
+  /// Throws [VtaNotLinkedException] when no VTA is linked, and
+  /// [MeetingPlaceVtcSDKException] when the VTA refuses or cannot be reached.
+  Future<List<VtcGroupCard>> groupCards() async {
     final vta = await _grantedVta();
-    final held = await vta.findCredentials(
-      type: GroupAdmissionVerifier.membershipType,
-      issuerDid: groupDid,
-      subjectDid: community.personaDid,
-    );
-    HeldCredential? longest;
-    for (final credential in held) {
-      final until = credential.validUntil;
-      final longestUntil = longest?.validUntil;
-      // One without an end outlasts any other.
-      if (longest == null ||
-          (longestUntil != null &&
-              (until == null || until.isAfter(longestUntil)))) {
-        longest = credential;
+    final mockIssuer = await _mockIssuer.did();
+    final cards = <VtcGroupCard>[];
+    for (final community in await _repository.communities()) {
+      if (!community.isMember) continue;
+      final held = await vta.findCredentials(
+        type: GroupAdmissionVerifier.membershipType,
+        subjectDid: community.personaDid,
+      );
+      final longest = <String, HeldCredential>{};
+      for (final credential in held) {
+        final groupDid = credential.issuerDid;
+        // The community's own card, and test ones, are no group's.
+        if (groupDid == null ||
+            groupDid == community.communityDid ||
+            groupDid == mockIssuer) {
+          continue;
+        }
+        if (longest[groupDid] case final kept?
+            when !_outlasts(credential, kept)) {
+          continue;
+        }
+        longest[groupDid] = credential;
+      }
+      if (longest.isEmpty) continue;
+      final names = await _groupNames(community.communityDid);
+      for (final MapEntry(key: groupDid, value: credential)
+          in longest.entries) {
+        final card = await _groupCard(
+          vta,
+          community,
+          credential,
+          groupDid: groupDid,
+          groupName: names[groupDid],
+        );
+        if (card != null) cards.add(card);
       }
     }
-    if (longest == null) return null;
-    final membership = switch (await vta.credential(longest.id)) {
+    return cards;
+  }
+
+  /// Whether [credential] holds longer than [other]: one without an end
+  /// outlasts any other.
+  static bool _outlasts(HeldCredential credential, HeldCredential other) {
+    final until = credential.validUntil;
+    final otherUntil = other.validUntil;
+    return otherUntil != null && (until == null || until.isAfter(otherUntil));
+  }
+
+  /// The names of the groups of [communityDid] the member belongs to, by
+  /// their DIDs; none when the community cannot be reached.
+  Future<Map<String, String>> _groupNames(String communityDid) async {
+    try {
+      return {
+        for (final listing in await memberGroups(communityDid))
+          listing.group.groupDid: listing.group.name,
+      };
+    } on MeetingPlaceVtcSDKException {
+      return const {};
+    }
+  }
+
+  /// The card [credential] the group [groupDid], named [groupName], issued
+  /// to the member's identity in [community], with the community's grant to
+  /// the group; null when the VTA does not give it, or it is no such card.
+  Future<VtcGroupCard?> _groupCard(
+    VtaClient vta,
+    VtcCommunity community,
+    HeldCredential credential, {
+    required String groupDid,
+    String? groupName,
+  }) async {
+    final membership = switch (await vta.credential(credential.id)) {
       final Map<String, dynamic> json => VtcMembershipCard.fromCredential(json),
       null => null,
     };
@@ -2540,11 +2594,14 @@ class VtcService {
     }
     final grant = (await vta.findCredentials(
       type: GroupAdmissionVerifier.authorityType,
-      issuerDid: communityDid,
+      issuerDid: community.communityDid,
       subjectDid: groupDid,
     )).firstOrNull;
     return VtcGroupCard(
       membership: membership,
+      communityDid: community.communityDid,
+      communityName: community.name,
+      groupName: groupName,
       authority: grant == null ? null : await vta.credential(grant.id),
     );
   }
