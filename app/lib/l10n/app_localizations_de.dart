@@ -4077,6 +4077,105 @@ class AppLocalizationsDe extends AppLocalizations {
   String get vtcGroupsOpen => 'Groups';
 
   @override
+  String get vtcRoomsOpen => 'Rooms';
+
+  @override
+  String get vtcRoomsTitle => 'Rooms';
+
+  @override
+  String get vtcRoomsNone =>
+      'No rooms yet. When a group you\'re in is given a room, it\'s offered to you here.';
+
+  @override
+  String get vtcRoomsOffersHeading => 'Offered to you';
+
+  @override
+  String get vtcRoomsMineHeading => 'Your rooms';
+
+  @override
+  String get vtcRoomsAccept => 'Accept';
+
+  @override
+  String vtcRoomsAccepted(String room) {
+    return 'You\'re in $room.';
+  }
+
+  @override
+  String get vtcRoomsReadWrite => 'Read and write';
+
+  @override
+  String get vtcRoomsReadOnly => 'Read only';
+
+  @override
+  String get vtcRoomsClosed => 'Not open to you now';
+
+  @override
+  String get vtcRoomsSealed =>
+      'Sealed: only the room\'s members can read what\'s written here.';
+
+  @override
+  String get vtcRoomsOpenTier =>
+      'Open: the community hosting this room can read what\'s written here.';
+
+  @override
+  String get vtcRoomsVtaMissing => 'Link your VTA to use rooms.';
+
+  @override
+  String get vtcRoomsFailed => 'Couldn\'t reach the room. Try again.';
+
+  @override
+  String get vtcRoomRecordsNone => 'Nothing has been written here yet.';
+
+  @override
+  String get vtcRoomRecordsNoneWriter =>
+      'Nothing has been written here yet. Tap Write to add the first record.';
+
+  @override
+  String get vtcRoomReadOnlyNote =>
+      'You can read this room. Only members who may write can add to it.';
+
+  @override
+  String get vtcRoomRecordUnopened =>
+      'This record couldn\'t be opened or its signature didn\'t check out.';
+
+  @override
+  String get vtcRoomRecordUntitled => 'Untitled';
+
+  @override
+  String get vtcRoomRecordOutdated => 'Marked as outdated';
+
+  @override
+  String get vtcRoomRecordByYou => 'Written by you';
+
+  @override
+  String get vtcRoomRecordByMember => 'Written by another member';
+
+  @override
+  String get vtcRoomWrite => 'Write';
+
+  @override
+  String get vtcRoomWriteTitle => 'New record';
+
+  @override
+  String get vtcRoomWriteTitleLabel => 'Title';
+
+  @override
+  String get vtcRoomWriteBodyLabel => 'Text';
+
+  @override
+  String get vtcRoomWriteSend => 'Post';
+
+  @override
+  String get vtcRoomWriteCancel => 'Cancel';
+
+  @override
+  String get vtcRoomWritten => 'Posted.';
+
+  @override
+  String get vtcRoomWriteRefused =>
+      'You can only read this room, so you can\'t add to it.';
+
+  @override
   String get vtcGroupsTitle => 'Groups';
 
   @override

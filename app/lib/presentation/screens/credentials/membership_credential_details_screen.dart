@@ -13,6 +13,7 @@ import '../vtc_groups/vtc_groups_screen.dart';
 import '../vtc_join/vtc_flow_diagram.dart';
 import '../vtc_join/vtc_join_json_dialog.dart';
 import '../vtc_join/vtc_trail_step.dart';
+import '../vtc_rooms/vtc_rooms_screen.dart';
 import 'membership_credentials_controller.dart';
 import 'membership_credentials_list.dart';
 
@@ -97,6 +98,20 @@ class MembershipCredentialDetailsScreen extends ConsumerWidget {
                       onPressed: () => Navigator.of(context).push(
                         MaterialPageRoute<void>(
                           builder: (_) => VtcGroupsScreen(
+                            communityDid: entry.card.issuer,
+                            communityName: entry.communityName,
+                          ),
+                        ),
+                      ),
+                    ),
+                  if (entry.left == null)
+                    OutlinedButton.icon(
+                      key: const Key('membership_rooms'),
+                      icon: const Icon(Icons.meeting_room_outlined),
+                      label: Text(l10n.vtcRoomsOpen),
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => VtcRoomsScreen(
                             communityDid: entry.card.issuer,
                             communityName: entry.communityName,
                           ),

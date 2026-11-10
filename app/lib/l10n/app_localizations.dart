@@ -6024,6 +6024,186 @@ abstract class AppLocalizations {
   /// **'Groups'**
   String get vtcGroupsOpen;
 
+  /// Button on a membership card that opens the community's data rooms the member is offered or in
+  ///
+  /// In en, this message translates to:
+  /// **'Rooms'**
+  String get vtcRoomsOpen;
+
+  /// Title of the community's data rooms, as the member sees them
+  ///
+  /// In en, this message translates to:
+  /// **'Rooms'**
+  String get vtcRoomsTitle;
+
+  /// Shown when the community offers the member no room and they are in none
+  ///
+  /// In en, this message translates to:
+  /// **'No rooms yet. When a group you\'re in is given a room, it\'s offered to you here.'**
+  String get vtcRoomsNone;
+
+  /// Heading above the rooms the community offers the member, to accept
+  ///
+  /// In en, this message translates to:
+  /// **'Offered to you'**
+  String get vtcRoomsOffersHeading;
+
+  /// Heading above the rooms the member is in
+  ///
+  /// In en, this message translates to:
+  /// **'Your rooms'**
+  String get vtcRoomsMineHeading;
+
+  /// Button that accepts the community's offer of a place in a room
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get vtcRoomsAccept;
+
+  /// Shown once the member accepted a room's offer
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re in {room}.'**
+  String vtcRoomsAccepted(String room);
+
+  /// What the member may do in a room: read and add records
+  ///
+  /// In en, this message translates to:
+  /// **'Read and write'**
+  String get vtcRoomsReadWrite;
+
+  /// What the member may do in a room: only read records
+  ///
+  /// In en, this message translates to:
+  /// **'Read only'**
+  String get vtcRoomsReadOnly;
+
+  /// A room the member was in, which is suspended, removed or archived
+  ///
+  /// In en, this message translates to:
+  /// **'Not open to you now'**
+  String get vtcRoomsClosed;
+
+  /// A sealed room: the community hosting it cannot read its records
+  ///
+  /// In en, this message translates to:
+  /// **'Sealed: only the room\'s members can read what\'s written here.'**
+  String get vtcRoomsSealed;
+
+  /// An open room: the community hosting it can read its records
+  ///
+  /// In en, this message translates to:
+  /// **'Open: the community hosting this room can read what\'s written here.'**
+  String get vtcRoomsOpenTier;
+
+  /// Shown when no VTA is linked, so rooms cannot be used
+  ///
+  /// In en, this message translates to:
+  /// **'Link your VTA to use rooms.'**
+  String get vtcRoomsVtaMissing;
+
+  /// Shown when the community or the VTA could not be reached or refused
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t reach the room. Try again.'**
+  String get vtcRoomsFailed;
+
+  /// Shown in a room with no records, to a member who may only read
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing has been written here yet.'**
+  String get vtcRoomRecordsNone;
+
+  /// Shown in a room with no records, to a member who may write
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing has been written here yet. Tap Write to add the first record.'**
+  String get vtcRoomRecordsNoneWriter;
+
+  /// Above a room's records, for a member who may only read
+  ///
+  /// In en, this message translates to:
+  /// **'You can read this room. Only members who may write can add to it.'**
+  String get vtcRoomReadOnlyNote;
+
+  /// A record the member's VTA could not open, or whose author signature failed
+  ///
+  /// In en, this message translates to:
+  /// **'This record couldn\'t be opened or its signature didn\'t check out.'**
+  String get vtcRoomRecordUnopened;
+
+  /// A record with no title
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled'**
+  String get vtcRoomRecordUntitled;
+
+  /// A record a curator marked as outdated
+  ///
+  /// In en, this message translates to:
+  /// **'Marked as outdated'**
+  String get vtcRoomRecordOutdated;
+
+  /// Under a record the member wrote, its author signature checked
+  ///
+  /// In en, this message translates to:
+  /// **'Written by you'**
+  String get vtcRoomRecordByYou;
+
+  /// Under a record another member of the room wrote, its author signature checked
+  ///
+  /// In en, this message translates to:
+  /// **'Written by another member'**
+  String get vtcRoomRecordByMember;
+
+  /// Button that adds a record to a room
+  ///
+  /// In en, this message translates to:
+  /// **'Write'**
+  String get vtcRoomWrite;
+
+  /// Title of the dialog that writes a record to a room
+  ///
+  /// In en, this message translates to:
+  /// **'New record'**
+  String get vtcRoomWriteTitle;
+
+  /// Field for a new record's title
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get vtcRoomWriteTitleLabel;
+
+  /// Field for a new record's text
+  ///
+  /// In en, this message translates to:
+  /// **'Text'**
+  String get vtcRoomWriteBodyLabel;
+
+  /// Button that writes the new record to the room
+  ///
+  /// In en, this message translates to:
+  /// **'Post'**
+  String get vtcRoomWriteSend;
+
+  /// Button that closes the new record dialog without writing
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get vtcRoomWriteCancel;
+
+  /// Shown once a record was written to the room
+  ///
+  /// In en, this message translates to:
+  /// **'Posted.'**
+  String get vtcRoomWritten;
+
+  /// Shown when the member's VTA refuses to write because the member may only read
+  ///
+  /// In en, this message translates to:
+  /// **'You can only read this room, so you can\'t add to it.'**
+  String get vtcRoomWriteRefused;
+
   /// Title of the member's groups in a community, above the community's name
   ///
   /// In en, this message translates to:

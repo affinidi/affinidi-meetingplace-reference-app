@@ -2092,6 +2092,111 @@ class VtcService {
     );
   }
 
+  /// The community [communityDid]'s offers of a place in its rooms to the
+  /// member, such as one a group's room binding made. Throws as
+  /// [memberGroups] does.
+  Future<RoomOffers> roomOffers(String communityDid) async {
+    final (vta, persona) = await _roomMember(communityDid);
+    return _sdk.roomsClient().offers(
+      communityDid,
+      holder: vta,
+      memberDid: persona.did,
+    );
+  }
+
+  /// Accepts [offer] of a place in a room of [communityDid]: the member's
+  /// VTA keeps the room's credentials and, on a sealed room, joins its key
+  /// group. Safe to repeat. Throws as [memberGroups] does.
+  Future<RoomAcceptance> acceptRoomOffer(
+    String communityDid,
+    RoomOffer offer,
+  ) async {
+    final (vta, persona) = await _roomMember(communityDid);
+    return _sdk.roomsClient().accept(
+      communityDid,
+      holder: vta,
+      member: persona,
+      offer: offer,
+    );
+  }
+
+  /// The member's places in the rooms of [communityDid], in every state.
+  /// Throws as [memberGroups] does.
+  Future<List<RoomMembership>> roomMemberships(String communityDid) async {
+    final (vta, persona) = await _roomMember(communityDid);
+    return _sdk.roomsClient().memberships(
+      communityDid,
+      holder: vta,
+      memberDid: persona.did,
+    );
+  }
+
+  /// The records of [room], without their content. Throws as
+  /// [memberGroups] does.
+  Future<RoomRecords> roomRecords(
+    String communityDid,
+    RoomMembership room,
+  ) async {
+    final (vta, persona) = await _roomMember(communityDid);
+    return _sdk.roomsClient().records(
+      holder: vta,
+      roomId: room.roomId,
+      host: room.host,
+      memberDid: persona.did,
+    );
+  }
+
+  /// The record [key] of [room], opened by the member's VTA and checked
+  /// against its author's signature; null for the room's own profile.
+  /// Throws as [memberGroups] does.
+  Future<RoomRecord?> roomRecord(
+    String communityDid,
+    RoomMembership room, {
+    required String key,
+  }) async {
+    final (vta, persona) = await _roomMember(communityDid);
+    return _sdk.roomsClient().record(
+      holder: vta,
+      roomId: room.roomId,
+      host: room.host,
+      key: key,
+      memberDid: persona.did,
+    );
+  }
+
+  /// Writes a record titled [title] with [body] to [room] as the member.
+  /// Throws as [memberGroups] does; the VTA refuses a member who may only
+  /// read.
+  Future<RoomWrite> writeRoomRecord(
+    String communityDid,
+    RoomMembership room, {
+    required String title,
+    String? body,
+  }) async {
+    final (vta, persona) = await _roomMember(communityDid);
+    return _sdk.roomsClient().write(
+      communityDid,
+      holder: vta,
+      memberDid: persona.did,
+      roomId: room.roomId,
+      visibility: room.visibility,
+      title: title,
+      body: body,
+    );
+  }
+
+  /// The DID the member writes to the rooms of [communityDid] as, to tell
+  /// their own records. Throws as [memberGroups] does.
+  Future<String> roomMemberDid(String communityDid) async =>
+      (await _memberCommunity(communityDid)).personaDid;
+
+  /// The member's VTA, and their persona in [communityDid], to act in its
+  /// rooms.
+  Future<(VtaClient, VtaPersona)> _roomMember(String communityDid) async {
+    final community = await _memberCommunity(communityDid);
+    return (await _grantedVta(), _persona(community));
+  }
+
   /// The members of the group [groupId] that the community shows the
   /// member, with their credentials' ids when the member manages it.
   /// Throws as [memberGroups] does.

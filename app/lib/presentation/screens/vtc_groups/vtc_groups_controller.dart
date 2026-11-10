@@ -82,6 +82,15 @@ class VtcGroupsController extends _$VtcGroupsController {
         _log('reading a group credential', error.code.name);
       }
     }
+    // A member of a group is in its chat without asking: join any linked
+    // since the last time, so only a chat that cannot be joined now is
+    // left to ask for.
+    try {
+      await _chats.joinGroupChats();
+    } on Exception catch (error) {
+      _log('joining group chats', error.runtimeType);
+    }
+    if (!ref.mounted) return;
     final chats = await _chats.chats();
     final statuses = <String, VtcGroupChatStatus>{};
     for (final listing in groups) {

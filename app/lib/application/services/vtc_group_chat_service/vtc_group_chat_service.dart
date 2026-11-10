@@ -84,12 +84,33 @@ class VtcGroupChatService {
   StreamSubscription<ChannelAttachmentEvent>? _joinRequests;
   Future<void>? _joining;
 
+  /// Requests to join a chat this phone owns that could not be decided yet,
+  /// such as while the community was unreachable, by the requester's DID.
+  /// Meeting Place hands a request's proof over once, so it is kept here to
+  /// decide again at the next sync.
+  final _undecided = <String, ChannelAttachmentEvent>{};
+
+  final _chatsChanged = StreamController<void>.broadcast();
+
+  /// Fires when this phone records a chat it created or joined, so lists of
+  /// a community's channels read them again: the chat's contact can be made
+  /// before the chat is recorded.
+  Stream<void> get chatsChanged => _chatsChanged.stream;
+
   VtcService get _vtc => _ref.read(vtcServiceProvider);
 
   AppLogger get _logger => _ref.read(appLoggerProvider);
 
   /// Every chat this phone owns or joined that follows a community group.
   Future<List<VtcGroupChat>> chats() => _repository.groupChats();
+
+  /// Whether this phone owns the chat [chatGroupId] and it follows a
+  /// community group: its members are let in by the group's credential as
+  /// they ask, never approved by hand.
+  Future<bool> admitsByCredential(String chatGroupId) async =>
+      (await _repository.groupChats()).any(
+        (chat) => chat.isOwner && chat.chatGroupId == chatGroupId,
+      );
 
   /// The identity on this phone that is the member of [communityDid], which
   /// creates and joins the chats of its groups whichever identity is
@@ -173,6 +194,7 @@ class VtcGroupChatService {
         posting: posting,
       ),
     );
+    _chatsChanged.add(null);
     return GroupChatLink(
       mnemonic: offer.mnemonic,
       controlPlaneDid: environment.controlPlaneDid,
@@ -193,6 +215,17 @@ class VtcGroupChatService {
     VtcGroup group, {
     required Identity identity,
   }) async {
+    // The link first: a group without a chat yet, the common case each time
+    // the member's chats are joined, asks nothing of the VTA.
+    final link = await _vtc.groupChatLink(group.groupDid);
+    if (link == null) {
+      throw const VtcGroupChatException(VtcGroupChatFailure.notLinked);
+    }
+    if (link.controlPlaneDid !=
+        _ref.read(environmentProvider).controlPlaneDid) {
+      throw const VtcGroupChatException(VtcGroupChatFailure.otherMeetingPlace);
+    }
+
     // The community delivers the credential once; pick it up if waiting.
     try {
       await _vtc.collectGroupCredentials(
@@ -209,14 +242,6 @@ class VtcGroupChatService {
       throw const VtcGroupChatException(VtcGroupChatFailure.noGroupCredential);
     }
 
-    final link = await _vtc.groupChatLink(group.groupDid);
-    if (link == null) {
-      throw const VtcGroupChatException(VtcGroupChatFailure.notLinked);
-    }
-    if (link.controlPlaneDid !=
-        _ref.read(environmentProvider).controlPlaneDid) {
-      throw const VtcGroupChatException(VtcGroupChatFailure.otherMeetingPlace);
-    }
     final sdk = await _ref.read(meetingPlaceSdkProvider.future);
     final offer = (await sdk.findOffer(
       mnemonic: link.mnemonic,
@@ -261,6 +286,7 @@ class VtcGroupChatService {
         posting: link.posting,
       ),
     );
+    _chatsChanged.add(null);
   }
 
   /// Joins, as the identity that is the member, the linked chat of every
@@ -380,19 +406,68 @@ class VtcGroupChatService {
         memberDid == null) {
       return;
     }
+    final request = ChannelAttachmentEvent(
+      channel: channel,
+      attachments: attachments,
+    );
+    final bool isWaiting;
+    try {
+      isWaiting = await _decideJoinRequest(channel, attachments, memberDid);
+    } on Exception {
+      _undecided[memberDid] = request;
+      rethrow;
+    }
+    if (isWaiting) {
+      _undecided[memberDid] = request;
+    } else {
+      _undecided.remove(memberDid);
+    }
+  }
+
+  /// Decides again the requests to join that could not be decided when they
+  /// arrived, each as its channel stands now: one decided since, or gone,
+  /// is forgotten.
+  Future<void> _decideWaitingRequests(MeetingPlaceCoreSDK sdk) async {
+    for (final MapEntry<String, ChannelAttachmentEvent>(
+          key: memberDid,
+          value: request,
+        )
+        in [..._undecided.entries]) {
+      final channel = await sdk.findChannelByOtherPartyPermanentDid(memberDid);
+      if (channel == null ||
+          channel.status != ChannelStatus.waitingForApproval) {
+        _undecided.remove(memberDid);
+        continue;
+      }
+      try {
+        await decideJoinRequest(channel, request.attachments);
+      } on Exception catch (error) {
+        _logFailure('deciding a join request', error.runtimeType);
+      }
+    }
+  }
+
+  /// Lets in or refuses the request of [memberDid], and whether it is left
+  /// waiting instead: false once decided, or when it is not a request to a
+  /// chat this phone owns.
+  Future<bool> _decideJoinRequest(
+    Channel channel,
+    List<Attachment> attachments,
+    String memberDid,
+  ) async {
     final chat = (await _repository.groupChats())
         .where(
           (chat) =>
               chat.isOwner && chat.groupDid == channel.permanentChannelDid,
         )
         .firstOrNull;
-    if (chat == null) return;
+    if (chat == null) return false;
 
     final sdk = await _ref.read(meetingPlaceSdkProvider.future);
     final proof = GroupJoinProof.fromAttachments(attachments);
     if (proof == null) {
       await sdk.rejectConnectionRequest(channel: channel);
-      return;
+      return false;
     }
     final GroupAdmission admission;
     try {
@@ -405,10 +480,10 @@ class VtcGroupChatService {
     } on GroupAdmissionException catch (error) {
       if (error.reason == GroupAdmissionRefusal.authorityStatusUnknown) {
         _logFailure('checking a join request', error.reason.name);
-        return;
+        return true;
       }
       await sdk.rejectConnectionRequest(channel: channel);
-      return;
+      return false;
     }
 
     final List<VtcGroupMember> members;
@@ -424,7 +499,7 @@ class VtcGroupChatService {
       )).group;
     } on MeetingPlaceVtcSDKException catch (error) {
       _logFailure('confirming a membership', error.code.name);
-      return;
+      return true;
     }
     final entryId = members
         .where(
@@ -435,7 +510,7 @@ class VtcGroupChatService {
         ?.entryId;
     if (entryId == null) {
       await sdk.rejectConnectionRequest(channel: channel);
-      return;
+      return false;
     }
 
     await sdk.approveConnectionRequest(
@@ -451,6 +526,7 @@ class VtcGroupChatService {
         moderators: isManager ? {...chat.moderators, memberDid} : null,
       ),
     );
+    return false;
   }
 
   /// Brings every chat this phone owns or joined in step with its group:
@@ -458,9 +534,11 @@ class VtcGroupChatService {
   /// this phone owns, removes those the community no longer lists as active
   /// members, and makes the group's managers, and only them, moderators.
   ///
-  /// A chat whose group cannot be read now is left as it is.
+  /// A chat whose group cannot be read now is left as it is. Requests to
+  /// join left waiting are decided again first.
   Future<void> syncChats() async {
     final sdk = await _ref.read(meetingPlaceSdkProvider.future);
+    await _decideWaitingRequests(sdk);
     for (final chat in await _repository.groupChats()) {
       try {
         final current = await _readPosting(chat);

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -57,6 +59,12 @@ class ContactsScreenController extends _$ContactsScreenController {
         final newIds = nextIds.difference(prevIds);
 
         final newContacts = next.where((c) => newIds.contains(c.mediatorDid));
+        // Contacts share a mediator, so a new channel is told by its offer
+        // link, not by a new mediator.
+        final prevOfferLinks = {...?prev?.map((c) => c.offerLink)};
+        final hasNewChannel = next.any(
+          (c) => !prevOfferLinks.contains(c.offerLink),
+        );
 
         Future.microtask(() async {
           if (_isDisposed) return;
@@ -65,11 +73,21 @@ class ContactsScreenController extends _$ContactsScreenController {
           state = state.copyWith(contacts: _sortContacts(communityContacts));
           _updateContactMediators(newContacts);
           // A group chat just joined is recorded once its contact is made.
-          if (newIds.isNotEmpty) await _readCommunityChannels();
+          if (hasNewChannel) await _readCommunityChannels();
         });
       },
       fireImmediately: true,
     );
+
+    // A group chat created or joined may be recorded after its contact is
+    // made: read the community's channels again once it is.
+    final chatsChanged = ref
+        .read(vtcGroupChatServiceProvider)
+        .chatsChanged
+        .listen((_) {
+          if (!_isDisposed) unawaited(_readCommunityChannels());
+        });
+    ref.onDispose(chatsChanged.cancel);
 
     // Listen to mediator service to update connection mediators when
     // mediators load
