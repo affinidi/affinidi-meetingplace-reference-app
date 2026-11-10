@@ -28,6 +28,25 @@ import '../../../fakes/fake_persona.dart';
 import '../../../fakes/fake_vta.dart';
 import '../../../fakes/fake_vtc_network.dart';
 
+/// The app's service, counting the checks of the vetters' answers.
+class _CountingVtcService extends VtcService {
+  _CountingVtcService({
+    required super.sdk,
+    required super.repository,
+    required super.userVerificationKey,
+    super.platform,
+  });
+
+  /// How many [checkVetting] checks started.
+  int vettingChecks = 0;
+
+  @override
+  Future<VtcVetting?> checkVetting(String communityDid) {
+    vettingChecks++;
+    return super.checkVetting(communityDid);
+  }
+}
+
 /// Finds the communities of [phrases]; any other phrase fails with
 /// [failure].
 class _FakeCommunityOffers implements CommunityOfferService {
@@ -50,7 +69,7 @@ class _FakeCommunityOffers implements CommunityOfferService {
 void main() {
   late FakeVtcNetwork network;
   late _FakeCommunityOffers communityOffers;
-  late VtcService service;
+  late _CountingVtcService service;
   late ProviderContainer container;
   late Ed25519DidKeySigner persona;
 
@@ -107,7 +126,7 @@ void main() {
         'entry': {'id': 'entry-1'},
       };
 
-    service = VtcService(
+    service = _CountingVtcService(
       sdk: network.sdk(),
       repository: SecureStorageVtcRepository(),
       userVerificationKey: UserVerificationKey(
@@ -1397,6 +1416,48 @@ void main() {
       expect(state().vettingRequirements?.minStatements, 1);
       expect(state().vettingProgress?.counted, isEmpty);
       expect(state().vettingProgress?.satisfied, isFalse);
+    });
+
+    /// Lets the watch of the identity's inbox connect, for a while.
+    Future<void> watched({bool isWatched = true}) async {
+      for (var i = 0; i < 100; i++) {
+        if (network.inboxArrivals.hasListener == isWatched) return;
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+      }
+    }
+
+    test('watches the inbox while waiting on the vetter, not after', () async {
+      await askVetter();
+      await watched();
+      expect(network.inboxArrivals.hasListener, isTrue);
+
+      await controller().stopVetting();
+      await watched(isWatched: false);
+
+      expect(network.inboxArrivals.hasListener, isFalse);
+    });
+
+    test("checks the vetter's answers as they arrive", () async {
+      await askVetter();
+      await watched();
+      final checks = service.vettingChecks;
+
+      network.inboxArrivals.add(null);
+      await pumpEventQueue();
+
+      // The checks every second can only add to it.
+      expect(service.vettingChecks, greaterThan(checks));
+    });
+
+    test('lets go of the inbox once the screen closes', () async {
+      await askVetter();
+      await watched();
+
+      container.dispose();
+      await watched(isWatched: false);
+
+      expect(network.inboxArrivals.hasListener, isFalse);
+      useService();
     });
 
     test('stops vetting and goes back to what the community asks', () async {

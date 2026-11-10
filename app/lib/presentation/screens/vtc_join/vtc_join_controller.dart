@@ -68,6 +68,15 @@ class VtcJoinController extends _$VtcJoinController {
   /// overlap.
   bool _checkingVetting = false;
 
+  /// Whether a check of the vetters' answers was asked for while one ran,
+  /// to run once it ends.
+  bool _checkVettingAgain = false;
+
+  /// The community whose inbox is watched while the member waits on a
+  /// vetter, and what picks up the vetter's answers as they arrive.
+  String? _watchedDid;
+  StreamSubscription<String>? _vetterAnswers;
+
   /// Whether the membership card is being read; reads do not overlap.
   bool _readingCard = false;
 
@@ -90,6 +99,7 @@ class VtcJoinController extends _$VtcJoinController {
     ref.onDispose(() {
       unawaited(membershipChanges.cancel());
       _pendingCheck?.cancel();
+      _unwatchVetters();
       // Forget the identity's keys the VTA lent for collecting the card.
       if (_manifest case final manifest?) {
         unawaited(_service.endCardCollection(manifest.communityDid));
@@ -98,11 +108,18 @@ class VtcJoinController extends _$VtcJoinController {
     // While an application waits, or a new member's card has yet to reach
     // their VTA, ask again now and then.
     listenSelf((previous, next) {
+      final vetting =
+          next.step == VtcJoinStep.vetting &&
+          (next.vetting?.requests.any((r) => r.isOpen) ?? false);
+      if (vetting) {
+        _watchVetters();
+      } else {
+        _unwatchVetters();
+      }
       final waiting =
           next.step == VtcJoinStep.pending ||
           (next.step == VtcJoinStep.joined && next.membershipCard == null) ||
-          (next.step == VtcJoinStep.vetting &&
-              (next.vetting?.requests.any((r) => r.isOpen) ?? false));
+          vetting;
       if (waiting) {
         if (_pendingCheck == null) {
           // The first check waits its whole interval, as before.
@@ -125,6 +142,29 @@ class VtcJoinController extends _$VtcJoinController {
       }
     });
     return VtcJoinState();
+  }
+
+  /// Picks up the vetters' answers as they reach the identity's inbox,
+  /// rather than at the next check; the checks stay for a live connection
+  /// that fails.
+  void _watchVetters() {
+    final communityDid = _manifest?.communityDid;
+    if (communityDid == null || _watchedDid == communityDid) return;
+    _unwatchVetters();
+    _watchedDid = communityDid;
+    _vetterAnswers = _service.inboxArrived
+        .where((arrivedFor) => arrivedFor == communityDid)
+        .listen((_) => unawaited(checkVetting()));
+    unawaited(_service.watchCommunity(communityDid));
+  }
+
+  void _unwatchVetters() {
+    final communityDid = _watchedDid;
+    if (communityDid == null) return;
+    _watchedDid = null;
+    unawaited(_vetterAnswers?.cancel());
+    _vetterAnswers = null;
+    unawaited(_service.unwatchCommunity(communityDid));
   }
 
   /// Asks again once [pendingCheckInterval] passed since the last time, or
@@ -605,9 +645,9 @@ class VtcJoinController extends _$VtcJoinController {
   /// for the member to compare its match code.
   Future<void> checkVetting() async {
     final manifest = _manifest;
-    if (state.step != VtcJoinStep.vetting ||
-        manifest == null ||
-        _checkingVetting) {
+    if (state.step != VtcJoinStep.vetting || manifest == null) return;
+    if (_checkingVetting) {
+      _checkVettingAgain = true;
       return;
     }
     _checkingVetting = true;
@@ -632,6 +672,11 @@ class VtcJoinController extends _$VtcJoinController {
       _fail(VtcJoinFailure.vtaMissing);
     } finally {
       _checkingVetting = false;
+    }
+    // Something arrived while checking: it may not have been read yet.
+    if (_checkVettingAgain && ref.mounted) {
+      _checkVettingAgain = false;
+      await checkVetting();
     }
   }
 
