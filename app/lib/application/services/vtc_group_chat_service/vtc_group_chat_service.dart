@@ -679,7 +679,8 @@ class VtcGroupChatService {
   /// reads who may post from the community's link again, and, in a chat
   /// this phone owns, removes those the community no longer lists as active
   /// members, and makes the group's managers, and only them, moderators.
-  /// A chat whose group the community deleted loses everyone it let in.
+  /// A chat whose group the community deleted loses everyone it let in, and
+  /// its owner leaves it, which deletes it on Meeting Place.
   ///
   /// A chat whose group cannot be read now is left as it is. Requests to
   /// join left waiting are decided again first.
@@ -721,6 +722,7 @@ class VtcGroupChatService {
       if (!await _isDeleted(chat, error)) rethrow;
       // A deleted group has no members left, and no managers.
       await _keepInStep(sdk, chat, active: const {}, managers: const {});
+      await _leaveChat(chat);
       return;
     }
     final active = {

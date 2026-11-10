@@ -285,6 +285,19 @@ Channel _chatChannel() => Channel(
   otherPartyPermanentChannelDid: _groupDid,
 );
 
+Channel _ownerChannel() => Channel(
+  offerLink: 'offer://chat',
+  publishOfferDid: 'did:key:oob',
+  mediatorDid: 'did:web:mediator.example',
+  status: ChannelStatus.inaugurated,
+  type: ChannelType.group,
+  transport: ChannelTransport.matrix,
+  isConnectionInitiator: true,
+  contactCard: FakeContacts.sdkContactCard,
+  permanentChannelDid: _ownerDid,
+  otherPartyPermanentChannelDid: _groupDid,
+);
+
 Channel _joinRequest({String memberDid = _memberDid}) => Channel(
   offerLink: 'offer://chat',
   publishOfferDid: 'did:key:oob',
@@ -529,11 +542,30 @@ void main() {
     });
 
     group('when the community no longer finds the group', () {
+      late _DeletingContactsService contacts;
+      final chatContact = FakeContacts.groupContact.copyWith(
+        channelDid: _groupDid,
+      );
+
       setUp(() async {
         vtc.membersRefusal = _membersNotFound;
         await repository.saveGroupChat(
           (await stored()).copyWith(authority: _authority),
         );
+        contacts = _DeletingContactsService([chatContact]);
+        final container = ProviderContainer(
+          overrides: [
+            vtcServiceProvider.overrideWithValue(vtc),
+            meetingPlaceSdkProvider.overrideWith((ref) async => sdk),
+            appLoggerProvider.overrideWithValue(FakeAppLogger()),
+            contactsServiceProvider.overrideWith(() => contacts),
+            vtcGroupChatServiceProvider.overrideWith(
+              (ref) => VtcGroupChatService(ref, repository: repository),
+            ),
+          ],
+        );
+        addTearDown(container.dispose);
+        service = container.read(vtcGroupChatServiceProvider);
       });
 
       test('removes everyone once the community deleted it', () async {
@@ -542,8 +574,28 @@ void main() {
         await service.syncChats();
 
         expect(sdk.removed, unorderedEquals([_memberDid, _ownerDid]));
-        expect((await stored()).members, isEmpty);
-        expect((await stored()).moderators, isEmpty);
+      });
+
+      test('leaves the chat as its owner once the community deleted it, '
+          'with its contact', () async {
+        vtc.isAuthorityRevoked = true;
+
+        await service.syncChats();
+
+        expect(contacts.deleted, [chatContact.id]);
+        expect(await repository.groupChats(), isEmpty);
+      });
+
+      test('leaves the channel of a deleted chat without a contact', () async {
+        contacts = _DeletingContactsService(const []);
+        vtc.isAuthorityRevoked = true;
+        sdk.channels = {_groupDid: _ownerChannel()};
+
+        await service.syncChats();
+
+        expect(contacts.deleted, isEmpty);
+        expect(sdk.left, [_groupDid]);
+        expect(await repository.groupChats(), isEmpty);
       });
 
       test('keeps everyone while it only hides the group', () async {
