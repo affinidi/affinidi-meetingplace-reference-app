@@ -27,8 +27,8 @@ class VtcGroupsController extends _$VtcGroupsController {
     return const VtcGroupsState();
   }
 
-  /// Reads the member's groups again, picks up any credential they issued,
-  /// and finds each one's chat.
+  /// Reads the member's groups again, finds each one's chat, then picks up
+  /// any credential they issued.
   Future<void> refresh() async {
     state = state.copyWith(isLoading: true, failure: null);
     final List<VtcGroupListing> groups;
@@ -65,34 +65,7 @@ class VtcGroupsController extends _$VtcGroupsController {
     await _readChats(groups);
     if (!ref.mounted) return;
 
-    try {
-      await _vtc.collectGroupCredentials(
-        communityDid,
-        groupDids: {for (final listing in groups) listing.group.groupDid},
-      );
-    } on MeetingPlaceVtcSDKException catch (error) {
-      _log('collecting group credentials', error.code.name);
-    }
-    final credentialsUntil = <String, DateTime>{};
-    await Future.wait([
-      for (final listing in groups)
-        _vtc
-            .groupCredentialValidUntil(
-              communityDid,
-              groupDid: listing.group.groupDid,
-            )
-            .then((until) {
-              if (until != null) {
-                credentialsUntil[listing.group.groupId] = until;
-              }
-            })
-            .catchError((Object error) {
-              _log(
-                'reading a group credential',
-                (error as MeetingPlaceVtcSDKException).code.name,
-              );
-            }, test: (error) => error is MeetingPlaceVtcSDKException),
-    ]);
+    final credentialsUntil = await _credentialsUntil(groups);
     if (!ref.mounted) return;
     state = state.copyWith(credentialsUntil: credentialsUntil);
 
@@ -109,27 +82,11 @@ class VtcGroupsController extends _$VtcGroupsController {
     await _readChats(groups);
   }
 
-  /// Where the chat of each of [groups] stands: the chats this phone owns
-  /// or joined, else whether the community linked one, read all at once.
+  /// Shows where the chat of each of [groups] stands.
   Future<void> _readChats(List<VtcGroupListing> groups) async {
-    final chats = await _chats.chats();
-    final statuses = await Future.wait([
-      for (final VtcGroupListing(:group) in groups)
-        switch (chats
-            .where((chat) => chat.groupDid == group.groupDid)
-            .firstOrNull) {
-          VtcGroupChat(isOwner: true) => Future.value(VtcGroupChatStatus.owned),
-          VtcGroupChat() => Future.value(VtcGroupChatStatus.joined),
-          null => _linkStatus(group.groupDid),
-        },
-    ]);
+    final statuses = await _chatStatuses(groups);
     if (!ref.mounted) return;
-    state = state.copyWith(
-      chats: {
-        for (final (index, listing) in groups.indexed)
-          listing.group.groupId: statuses[index],
-      },
-    );
+    state = state.copyWith(chats: statuses);
   }
 
   /// Creates the chat of [group] as the member's current identity, where
@@ -197,6 +154,63 @@ class VtcGroupsController extends _$VtcGroupsController {
       if (ref.mounted) {
         state = state.copyWith(busy: {...state.busy}..remove(group.groupId));
       }
+    }
+  }
+
+  /// Where each group's chat stands, by the group's id: the member's own
+  /// chats, else the link each group publishes, looked up all at once.
+  Future<Map<String, VtcGroupChatStatus>> _chatStatuses(
+    List<VtcGroupListing> groups,
+  ) async {
+    final chats = await _chats.chats();
+    final statuses = await Future.wait([
+      for (final VtcGroupListing(:group) in groups)
+        switch (chats
+            .where((chat) => chat.groupDid == group.groupDid)
+            .firstOrNull) {
+          VtcGroupChat(isOwner: true) => Future.value(VtcGroupChatStatus.owned),
+          VtcGroupChat() => Future.value(VtcGroupChatStatus.joined),
+          null => _linkStatus(group.groupDid),
+        },
+    ]);
+    return Map.fromIterables(
+      groups.map((listing) => listing.group.groupId),
+      statuses,
+    );
+  }
+
+  /// Until when the member's credential of each group holds, by the
+  /// group's id, after picking up any the groups issued.
+  Future<Map<String, DateTime>> _credentialsUntil(
+    List<VtcGroupListing> groups,
+  ) async {
+    try {
+      await _vtc.collectGroupCredentials(
+        communityDid,
+        groupDids: {for (final listing in groups) listing.group.groupDid},
+      );
+    } on MeetingPlaceVtcSDKException catch (error) {
+      _log('collecting group credentials', error.code.name);
+    }
+    final untils = await Future.wait([
+      for (final VtcGroupListing(:group) in groups)
+        _credentialUntil(group.groupDid),
+    ]);
+    return {
+      for (final (index, listing) in groups.indexed)
+        listing.group.groupId: ?untils[index],
+    };
+  }
+
+  Future<DateTime?> _credentialUntil(String groupDid) async {
+    try {
+      return await _vtc.groupCredentialValidUntil(
+        communityDid,
+        groupDid: groupDid,
+      );
+    } on MeetingPlaceVtcSDKException catch (error) {
+      _log('reading a group credential', error.code.name);
+      return null;
     }
   }
 

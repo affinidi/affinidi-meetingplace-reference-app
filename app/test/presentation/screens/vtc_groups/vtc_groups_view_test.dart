@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -46,6 +48,9 @@ class _FakeVtcService extends Fake implements VtcService {
   bool isNotYetMember = false;
   int reads = 0;
 
+  /// Holds the pickup of the groups' credentials until completed.
+  Completer<void>? pickup;
+
   @override
   Future<List<VtcGroupListing>> memberGroups(String communityDid) async {
     reads++;
@@ -61,7 +66,10 @@ class _FakeVtcService extends Fake implements VtcService {
   Future<int> collectGroupCredentials(
     String communityDid, {
     required Set<String> groupDids,
-  }) async => 0;
+  }) async {
+    await pickup?.future;
+    return 0;
+  }
 
   @override
   Future<DateTime?> groupCredentialValidUntil(
@@ -206,6 +214,22 @@ void main() {
     expect(find.text('Manager'), findsOneWidget);
     expect(find.byKey(const Key('vtc_group_create_g1')), findsOneWidget);
     expect(find.byKey(const Key('vtc_group_join_g2')), findsOneWidget);
+    expect(find.text('Valid until Dec 9, 2026'), findsOneWidget);
+  });
+
+  testWidgets('offers the chats before the credentials are picked up', (
+    tester,
+  ) async {
+    vtc.pickup = Completer<void>();
+    await pumpScreen(tester);
+
+    expect(find.byKey(const Key('vtc_group_create_g1')), findsOneWidget);
+    expect(find.byKey(const Key('vtc_group_join_g2')), findsOneWidget);
+    expect(find.text('Valid until Dec 9, 2026'), findsNothing);
+
+    vtc.pickup!.complete();
+    await tester.pumpAndSettle();
+
     expect(find.text('Valid until Dec 9, 2026'), findsOneWidget);
   });
 
