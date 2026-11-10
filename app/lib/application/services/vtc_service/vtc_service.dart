@@ -148,6 +148,9 @@ class VtcService {
   /// keys once: the VTA audits each loan.
   final Map<String, _CardCollection> _collections = {};
 
+  /// The collections whose keys are being borrowed, by community.
+  final Map<String, Future<_CardCollection>> _openingCollections = {};
+
   /// Connection DIDComm keys the VTA lent, by key id, for as long as the
   /// link lasts.
   final Map<String, Future<Uint8List>> _lentConnectionKeys = {};
@@ -2041,12 +2044,20 @@ class VtcService {
     if (_collections[communityDid] case final open?) {
       return open..touch(() => endCardCollection(communityDid));
     }
-    final keys = await vta.borrowPersonaKeys(_persona(member));
-    return _collections[communityDid] = _CardCollection(
-      keys,
-      _sdk.personaInbox(keys),
-      idle: _collectionIdle,
-    )..touch(() => endCardCollection(communityDid));
+    // A watch and a check may open it at once: the keys are borrowed once,
+    // or the first collection would hold its keys unseen.
+    return _openingCollections[communityDid] ??= () async {
+      try {
+        final keys = await vta.borrowPersonaKeys(_persona(member));
+        return _collections[communityDid] = _CardCollection(
+          keys,
+          _sdk.personaInbox(keys),
+          idle: _collectionIdle,
+        )..touch(() => endCardCollection(communityDid));
+      } finally {
+        unawaited(_openingCollections.remove(communityDid));
+      }
+    }();
   }
 
   /// The groups of the community [communityDid] the member belongs to, as

@@ -28,7 +28,8 @@ import '../../../fakes/fake_persona.dart';
 import '../../../fakes/fake_vta.dart';
 import '../../../fakes/fake_vtc_network.dart';
 
-/// The app's service, counting the checks of the vetters' answers.
+/// The app's service, counting the checks of the application and of the
+/// vetters' answers.
 class _CountingVtcService extends VtcService {
   _CountingVtcService({
     required super.sdk,
@@ -37,8 +38,25 @@ class _CountingVtcService extends VtcService {
     super.platform,
   });
 
+  /// How many [checkApplication] checks started.
+  int applicationChecks = 0;
+
   /// How many [checkVetting] checks started.
   int vettingChecks = 0;
+
+  @override
+  Future<JoinStatus?> checkApplication(
+    String communityDid, {
+    void Function(VtcCardDelivery delivery)? onCardDelivery,
+    void Function(MembershipCardStep step)? onCardStep,
+  }) {
+    applicationChecks++;
+    return super.checkApplication(
+      communityDid,
+      onCardDelivery: onCardDelivery,
+      onCardStep: onCardStep,
+    );
+  }
 
   @override
   Future<VtcVetting?> checkVetting(String communityDid) {
@@ -84,6 +102,14 @@ void main() {
   VtcJoinController controller() =>
       container.read(vtcJoinControllerProvider.notifier);
   VtcJoinState state() => container.read(vtcJoinControllerProvider);
+
+  /// Lets the watch of the identity's inbox connect, for a while.
+  Future<void> watched({bool isWatched = true}) async {
+    for (var i = 0; i < 100; i++) {
+      if (network.inboxArrivals.hasListener == isWatched) return;
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+    }
+  }
 
   void useService() {
     container = ProviderContainer(
@@ -1103,6 +1129,42 @@ void main() {
           expect(whenKept?.membershipCard?.memberDid, mailPersona.did);
         });
 
+        test('watches the inbox until the card arrives, not after', () async {
+          await approve();
+          await watched();
+          expect(network.inboxArrivals.hasListener, isTrue);
+
+          await network.deliver(mailPersona, card());
+          await controller().checkAgain();
+          await watched(isWatched: false);
+
+          expect(state().membershipCard?.memberDid, mailPersona.did);
+          expect(network.inboxArrivals.hasListener, isFalse);
+        });
+
+        test(
+          'checks the application as the approval reaches the inbox',
+          () async {
+            await approve();
+            await watched();
+            final checks = service.applicationChecks;
+
+            await network.deliver(mailPersona, card());
+            network.inboxArrivals.add(null);
+            for (
+              var i = 0;
+              i < 100 && state().step != VtcJoinStep.joined;
+              i++
+            ) {
+              await Future<void>.delayed(const Duration(milliseconds: 20));
+            }
+
+            // Sooner than the checks every few seconds.
+            expect(service.applicationChecks, greaterThan(checks));
+            expect(state().step, VtcJoinStep.joined);
+          },
+        );
+
         test('is waited for, then collected on a later check', () async {
           await approve();
           await controller().checkAgain();
@@ -1502,14 +1564,6 @@ void main() {
       expect(state().vettingProgress?.counted, isEmpty);
       expect(state().vettingProgress?.satisfied, isFalse);
     });
-
-    /// Lets the watch of the identity's inbox connect, for a while.
-    Future<void> watched({bool isWatched = true}) async {
-      for (var i = 0; i < 100; i++) {
-        if (network.inboxArrivals.hasListener == isWatched) return;
-        await Future<void>.delayed(const Duration(milliseconds: 20));
-      }
-    }
 
     test('watches the inbox while waiting on the vetter, not after', () async {
       await askVetter();
