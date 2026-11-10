@@ -986,7 +986,19 @@ void main() {
 
       await enterCode(tester, fakeVtcDid);
 
-      expect(find.text('Let members find you'), findsOneWidget);
+      // A section of its own, apart from what the community asks for.
+      final section = find.byWidgetPredicate(
+        (widget) =>
+            widget is GlassCard && widget.title == 'Let members find you',
+      );
+      expect(section, findsOneWidget);
+      expect(
+        find.descendant(
+          of: section,
+          matching: find.byKey(const Key('vtc_join_list_me')),
+        ),
+        findsOneWidget,
+      );
       expect(
         find.text(
           "Let members of Football club find you to vouch for you. They'll "
@@ -994,7 +1006,6 @@ void main() {
         ),
         findsOneWidget,
       );
-      expect(find.byKey(const Key('vtc_join_list_me')), findsOneWidget);
     });
 
     testWidgets('offers no wider audience than a field allows', (tester) async {

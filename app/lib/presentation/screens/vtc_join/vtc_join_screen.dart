@@ -503,12 +503,17 @@ class _Review extends StatelessWidget {
             ),
             isError: false,
           )
-        else
+        else ...[
           _Consent(
+            state: state,
+            communityName: hasName ? name : l10n.vtcJoinThisCommunity,
+          ),
+          _Findable(
             state: state,
             communityName: hasName ? name : l10n.vtcJoinThisCommunity,
             onListInDirectory: onListInDirectory,
           ),
+        ],
         _WaysIn(state: state, onChoose: onChooseWay),
         const SizedBox(height: McSpacing.s3),
         Row(
@@ -564,18 +569,12 @@ class _Chip extends StatelessWidget {
   );
 }
 
-/// What the community gets and shows once the member joins, one line each,
-/// with the member directory's switch below.
+/// What the community gets and shows once the member joins, one line each.
 class _Consent extends StatelessWidget {
-  const _Consent({
-    required this.state,
-    required this.communityName,
-    required this.onListInDirectory,
-  });
+  const _Consent({required this.state, required this.communityName});
 
   final VtcJoinState state;
   final String communityName;
-  final ValueChanged<bool> onListInDirectory;
 
   @override
   Widget build(BuildContext context) {
@@ -604,61 +603,17 @@ class _Consent extends StatelessWidget {
           details: [_Note(l10n.vtcJoinAdminNotesDetail)],
         ),
     ];
+    if (items.isEmpty) return const SizedBox.shrink();
 
     return GlassCard(
       title: l10n.vtcJoinConsentHeading(communityName),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          for (final item in items) ...[item, const _Divider()],
-          if (state.listsNewMembers case final listed?)
-            Padding(
-              padding: const EdgeInsets.only(top: McSpacing.s2),
-              child: Text(
-                listed
-                    ? l10n.vtcJoinDirectoryListed
-                    : l10n.vtcJoinDirectoryHidden,
-                style: onboardingNote(context),
-              ),
-            ),
-          if (state.listsNewMembers != false)
-            // A Row, not a SwitchListTile: the onboarding layout measures
-            // intrinsic heights, which a ListTile misreports.
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: McSpacing.s05,
-                    children: [
-                      // Worded as on the Members tab: the same setting.
-                      Text(
-                        l10n.vtcFindableHeading,
-                        style: TextStyle(color: context.mcColors.textPrimary),
-                      ),
-                      Text(
-                        l10n.vtcFindableIntro(communityName),
-                        style: onboardingNote(context),
-                      ),
-                      Text(
-                        l10n.vtcJoinListMeNote,
-                        style: onboardingNote(context),
-                      ),
-                      if (disclosure?.externalCards ?? false)
-                        Text(
-                          l10n.vtcJoinExternalCards,
-                          style: onboardingNote(context),
-                        ),
-                    ],
-                  ),
-                ),
-                Switch.adaptive(
-                  key: const Key('vtc_join_list_me'),
-                  value: state.listInDirectory,
-                  onChanged: onListInDirectory,
-                ),
-              ],
-            ),
+          for (final (index, item) in items.indexed) ...[
+            if (index > 0) const _Divider(),
+            item,
+          ],
         ],
       ),
     );
@@ -702,6 +657,75 @@ class _Consent extends StatelessWidget {
             ],
           ),
     ];
+  }
+}
+
+/// Whether members may find the member in the community's directory: a
+/// choice of the member's own, so a panel apart from what the community
+/// asks for. Worded as on the Members tab: the same setting.
+class _Findable extends StatelessWidget {
+  const _Findable({
+    required this.state,
+    required this.communityName,
+    required this.onListInDirectory,
+  });
+
+  final VtcJoinState state;
+  final String communityName;
+  final ValueChanged<bool> onListInDirectory;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return GlassCard(
+      title: l10n.vtcFindableHeading,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: McSpacing.s2,
+        children: [
+          if (state.listsNewMembers case final listed?)
+            Text(
+              listed
+                  ? l10n.vtcJoinDirectoryListed
+                  : l10n.vtcJoinDirectoryHidden,
+              style: onboardingNote(context),
+            ),
+          if (state.listsNewMembers != false)
+            // A Row, not a SwitchListTile: the onboarding layout measures
+            // intrinsic heights, which a ListTile misreports.
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: McSpacing.s05,
+                    children: [
+                      Text(
+                        l10n.vtcFindableIntro(communityName),
+                        style: onboardingNote(context),
+                      ),
+                      Text(
+                        l10n.vtcJoinListMeNote,
+                        style: onboardingNote(context),
+                      ),
+                      if (state.directoryDisclosure?.externalCards ?? false)
+                        Text(
+                          l10n.vtcJoinExternalCards,
+                          style: onboardingNote(context),
+                        ),
+                    ],
+                  ),
+                ),
+                Switch.adaptive(
+                  key: const Key('vtc_join_list_me'),
+                  value: state.listInDirectory,
+                  onChanged: onListInDirectory,
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
   }
 }
 
