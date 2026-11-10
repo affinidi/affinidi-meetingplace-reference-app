@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
@@ -257,6 +258,31 @@ void main() {
     expect(service.data, contains('MeetingPlaceGroup'));
     expect(service.data, contains('identity-wg'));
     expect(service.data, contains('$_managedDid#meeting-place'));
+  });
+
+  testWidgets('copies the pnm command that edits the group DID', (
+    tester,
+  ) async {
+    String? copied;
+    final messenger = tester.binding.defaultBinaryMessenger;
+    messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+      if (call.method == 'Clipboard.setData') {
+        copied = (call.arguments as Map)['text'] as String;
+      }
+      return null;
+    });
+    addTearDown(
+      () => messenger.setMockMethodCallHandler(SystemChannels.platform, null),
+    );
+    await pumpScreen(tester);
+
+    await tapVisible(tester, const Key('vtc_group_create_g1'));
+    await tester.tap(find.byKey(const Key('vtc_group_posting_everyone')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('vtc_group_chat_link_copy_command')));
+    await tester.pump();
+
+    expect(copied, 'pnm did-mgmt dids edit --did $_managedDid');
   });
 
   testWidgets('asks who may post, and links only managers posting', (

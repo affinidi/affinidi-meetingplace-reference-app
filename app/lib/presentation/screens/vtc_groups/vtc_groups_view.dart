@@ -351,7 +351,8 @@ Future<GroupChatPosting?> _askPosting(BuildContext context) {
 
 /// The service entry the community's operator adds to the group's DID
 /// document, so members can find the chat and know the community linked
-/// it.
+/// it. An operator using `pnm` can copy the command that opens that
+/// document for editing.
 class _ChatLinkDialog extends StatelessWidget {
   const _ChatLinkDialog({required this.link, required this.groupDid});
 
@@ -364,6 +365,15 @@ class _ChatLinkDialog extends StatelessWidget {
     final service = const JsonEncoder.withIndent(
       '  ',
     ).convert(link.toService(groupDid));
+
+    Future<void> copy(String text) async {
+      await Clipboard.setData(ClipboardData(text: text));
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.vtcGroupChatLinkCopied)));
+    }
+
     return AlertDialog(
       title: Text(l10n.vtcGroupChatLinkTitle),
       content: SingleChildScrollView(
@@ -384,13 +394,12 @@ class _ChatLinkDialog extends StatelessWidget {
       ),
       actions: [
         TextButton(
-          onPressed: () async {
-            await Clipboard.setData(ClipboardData(text: service));
-            if (!context.mounted) return;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(l10n.vtcGroupChatLinkCopied)),
-            );
-          },
+          key: const Key('vtc_group_chat_link_copy_command'),
+          onPressed: () => copy('pnm did-mgmt dids edit --did $groupDid'),
+          child: Text(l10n.vtcGroupChatLinkCopyCommand),
+        ),
+        TextButton(
+          onPressed: () => copy(service),
           child: Text(l10n.vtcGroupChatLinkCopy),
         ),
         FilledButton(
