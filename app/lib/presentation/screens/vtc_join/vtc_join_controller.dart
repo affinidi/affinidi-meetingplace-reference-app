@@ -343,7 +343,8 @@ class VtcJoinController extends _$VtcJoinController {
   /// chose; does nothing when this app does not support it.
   ///
   /// A first application asks which of the member's identities joins, or a
-  /// new one, when the member has any; a later one applies as the identity
+  /// new one, when the member has any; so does one after withdrawing or
+  /// being turned down. One still gathering vetting applies as the identity
   /// recorded for it.
   Future<void> join() async {
     final manifest = _manifest;
@@ -357,7 +358,11 @@ class VtcJoinController extends _$VtcJoinController {
 
     await _run(() async {
       if (await _service.community(manifest.communityDid) != null) {
-        return _apply(manifest);
+        if (!await _service.forgetApplication(manifest.communityDid)) {
+          return _apply(manifest);
+        }
+        // Counted for the identity forgotten: count the member's own.
+        _holders = await _credentialHolders(manifest, null);
       }
       final identities = _joinableIdentities();
       _personas = [

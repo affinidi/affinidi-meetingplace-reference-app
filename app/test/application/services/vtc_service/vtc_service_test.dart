@@ -711,6 +711,40 @@ void main() {
       });
     });
 
+    group('forgetApplication', () {
+      test('forgets the persona of an application turned down', () async {
+        network.joinVerdict = {'effect': 'deny'};
+        await service.join(
+          await service.readCommunity(fakeVtcDid),
+          persona: joinAs,
+        );
+
+        expect(await service.forgetApplication(fakeVtcDid), isTrue);
+        expect(await service.community(fakeVtcDid), isNull);
+      });
+
+      test('keeps the persona of an open application', () async {
+        network.joinVerdict = {'effect': 'refer'};
+        await service.join(
+          await service.readCommunity(fakeVtcDid),
+          persona: joinAs,
+        );
+
+        expect(await service.forgetApplication(fakeVtcDid), isFalse);
+        expect((await service.community(fakeVtcDid))?.isApplying, isTrue);
+      });
+
+      test("keeps a member's persona", () async {
+        await service.join(
+          await service.readCommunity(fakeVtcDid),
+          persona: joinAs,
+        );
+
+        expect(await service.forgetApplication(fakeVtcDid), isFalse);
+        expect((await service.community(fakeVtcDid))?.isMember, isTrue);
+      });
+    });
+
     test('applies again as the same persona', () async {
       network.joinVerdict = {
         'effect': 'deny',

@@ -921,10 +921,24 @@ class VtcService {
       }
     }
     await _repository.removeVetting(communityDid);
+    await forgetApplication(communityDid);
+  }
+
+  /// Forgets the identity recorded for applying to [communityDid], so
+  /// applying again, after withdrawing or being turned down, asks which
+  /// identity joins and the community sees a new DID. A member, one whose
+  /// application is open, and one gathering vetting, whose statements name
+  /// that identity, keep theirs.
+  ///
+  /// Returns whether it was forgotten.
+  Future<bool> forgetApplication(String communityDid) async {
     final community = await _repository.findCommunity(communityDid);
-    if (community != null && !community.isMember && !community.isApplying) {
-      await _repository.removeCommunity(communityDid);
+    if (community == null || community.isMember || community.isApplying) {
+      return false;
     }
+    if (await _repository.findVetting(communityDid) != null) return false;
+    await _repository.removeCommunity(communityDid);
+    return true;
   }
 
   /// Tells the vetter of [request] the member ended it, so the vetter's

@@ -357,6 +357,42 @@ void main() {
       expect(createdPersona(), isTrue);
     });
 
+    test('asks again which identity joins after a refusal', () async {
+      vtaHoldsPersona();
+      network.joinVerdict = {'effect': 'deny'};
+      await controller().onScanned(fakeVtcDid);
+      await controller().join();
+      await controller().useIdentity(persona.did);
+      await controller().useDid(newDid: false);
+      expect(state().step, VtcJoinStep.denied);
+
+      network.joinVerdict = {'effect': 'allow', 'with': <String, dynamic>{}};
+      container.dispose();
+      useService();
+      await controller().onScanned(fakeVtcDid);
+      await controller().join();
+
+      expect(state().step, VtcJoinStep.chooseIdentity);
+      await controller().useIdentity(null);
+      expect(state().step, VtcJoinStep.joined);
+      expect(createdPersona(), isTrue);
+    });
+
+    test('asks again which identity joins after withdrawing', () async {
+      vtaHoldsPersona();
+      network.joinVerdict = {'effect': 'refer'};
+      await controller().onScanned(fakeVtcDid);
+      await controller().join();
+      await controller().useIdentity(persona.did);
+      await controller().useDid(newDid: false);
+      await controller().withdraw();
+
+      controller().applyAgain();
+      await controller().join();
+
+      expect(state().step, VtcJoinStep.chooseIdentity);
+    });
+
     test('ignores an identity the VTA did not offer', () async {
       vtaHoldsPersona();
       await controller().onScanned(fakeVtcDid);
