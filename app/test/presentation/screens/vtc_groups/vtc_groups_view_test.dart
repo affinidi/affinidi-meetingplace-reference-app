@@ -52,6 +52,9 @@ class _FakeVtcService extends Fake implements VtcService {
   /// Holds the pickup of the groups' credentials until completed.
   Completer<void>? pickup;
 
+  /// The groups whose credentials were picked up.
+  final collected = <String>{};
+
   @override
   Future<List<VtcGroupListing>> memberGroups(String communityDid) async {
     reads++;
@@ -69,14 +72,9 @@ class _FakeVtcService extends Fake implements VtcService {
     required Set<String> groupDids,
   }) async {
     await pickup?.future;
+    collected.addAll(groupDids);
     return 0;
   }
-
-  @override
-  Future<DateTime?> groupCredentialValidUntil(
-    String communityDid, {
-    required String groupDid,
-  }) async => groupDid == _managedDid ? DateTime.utc(2026, 12, 9) : null;
 
   @override
   Future<GroupChatLink?> groupChatLink(String groupDid) async =>
@@ -218,7 +216,7 @@ void main() {
     expect(find.text('Manager'), findsOneWidget);
     expect(find.byKey(const Key('vtc_group_create_g1')), findsOneWidget);
     expect(find.byKey(const Key('vtc_group_join_g2')), findsOneWidget);
-    expect(find.text('Valid until Dec 9, 2026'), findsOneWidget);
+    expect(find.text('Group credential'), findsNothing);
   });
 
   testWidgets('offers the chats before the credentials are picked up', (
@@ -229,12 +227,12 @@ void main() {
 
     expect(find.byKey(const Key('vtc_group_create_g1')), findsOneWidget);
     expect(find.byKey(const Key('vtc_group_join_g2')), findsOneWidget);
-    expect(find.text('Valid until Dec 9, 2026'), findsNothing);
+    expect(vtc.collected, isEmpty);
 
     vtc.pickup!.complete();
     await tester.pumpAndSettle();
 
-    expect(find.text('Valid until Dec 9, 2026'), findsOneWidget);
+    expect(vtc.collected, {_managedDid, _linkedDid});
   });
 
   testWidgets('offers no way to the members of a group', (tester) async {

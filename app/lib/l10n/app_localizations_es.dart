@@ -4133,11 +4133,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get vtcGroupCredential => 'Group credential';
 
   @override
-  String vtcGroupCredentialUntil(String date) {
-    return 'Valid until $date';
-  }
-
-  @override
   String get vtcGroupChatUnknown => 'This group\'s chat couldn\'t be checked.';
 
   @override

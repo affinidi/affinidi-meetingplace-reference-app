@@ -65,9 +65,8 @@ class VtcGroupsController extends _$VtcGroupsController {
     await _readChats(groups);
     if (!ref.mounted) return;
 
-    final credentialsUntil = await _credentialsUntil(groups);
+    await _collectCredentials(groups);
     if (!ref.mounted) return;
-    state = state.copyWith(credentialsUntil: credentialsUntil);
 
     // A member of a group is in its chat without asking: join any linked
     // since the last time, so only a chat that cannot be joined now is
@@ -195,11 +194,9 @@ class VtcGroupsController extends _$VtcGroupsController {
     );
   }
 
-  /// Until when the member's credential of each group holds, by the
-  /// group's id, after picking up any the groups issued.
-  Future<Map<String, DateTime>> _credentialsUntil(
-    List<VtcGroupListing> groups,
-  ) async {
+  /// Picks up the member's credentials the groups issued, which joining
+  /// their chats needs.
+  Future<void> _collectCredentials(List<VtcGroupListing> groups) async {
     try {
       await _vtc.collectGroupCredentials(
         communityDid,
@@ -207,26 +204,6 @@ class VtcGroupsController extends _$VtcGroupsController {
       );
     } on MeetingPlaceVtcSDKException catch (error) {
       _log('collecting group credentials', error.code.name);
-    }
-    final untils = await Future.wait([
-      for (final VtcGroupListing(:group) in groups)
-        _credentialUntil(group.groupDid),
-    ]);
-    return {
-      for (final (index, listing) in groups.indexed)
-        listing.group.groupId: ?untils[index],
-    };
-  }
-
-  Future<DateTime?> _credentialUntil(String groupDid) async {
-    try {
-      return await _vtc.groupCredentialValidUntil(
-        communityDid,
-        groupDid: groupDid,
-      );
-    } on MeetingPlaceVtcSDKException catch (error) {
-      _log('reading a group credential', error.code.name);
-      return null;
     }
   }
 

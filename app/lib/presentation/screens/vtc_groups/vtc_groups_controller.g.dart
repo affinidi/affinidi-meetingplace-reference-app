@@ -71,7 +71,7 @@ final class VtcGroupsControllerProvider
 }
 
 String _$vtcGroupsControllerHash() =>
-    r'278b336e60e0bdd55fe989153629531649841c19';
+    r'8f4d4b12f8be8082bf608f34337e4d4399903b00';
 
 /// The member's groups in the community [communityDid], each with its chat:
 /// created by a manager, found through the link the community publishes,

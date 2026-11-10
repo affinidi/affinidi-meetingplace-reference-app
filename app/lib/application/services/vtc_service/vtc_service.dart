@@ -2505,29 +2505,6 @@ class VtcService {
     return held.isNotEmpty;
   }
 
-  /// Until when the credential of the group [groupDid] of [communityDid]
-  /// that the member's VTA keeps for their identity there holds, or null when
-  /// it keeps none. Throws as [memberGroups] does.
-  Future<DateTime?> groupCredentialValidUntil(
-    String communityDid, {
-    required String groupDid,
-  }) async {
-    final community = await _memberCommunity(communityDid);
-    final held = await (await _grantedVta()).findCredentials(
-      type: GroupAdmissionVerifier.membershipType,
-      issuerDid: groupDid,
-      subjectDid: community.personaDid,
-    );
-    return held
-        .map((credential) => credential.validUntil)
-        .nonNulls
-        .fold<DateTime?>(
-          null,
-          (latest, until) =>
-              latest == null || until.isAfter(latest) ? until : latest,
-        );
-  }
-
   /// The cards the groups of [communityDid] issued to the member's identity
   /// there, as the member's VTA keeps them: the longest-lasting one of each
   /// group, with the community's grant to the group and the group's name. A

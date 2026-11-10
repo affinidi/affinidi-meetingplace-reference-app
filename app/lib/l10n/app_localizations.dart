@@ -6162,12 +6162,6 @@ abstract class AppLocalizations {
   /// **'Group credential'**
   String get vtcGroupCredential;
 
-  /// Until when the member's credential of a community group holds
-  ///
-  /// In en, this message translates to:
-  /// **'Valid until {date}'**
-  String vtcGroupCredentialUntil(String date);
-
   /// A group's chat status when its link cannot be read
   ///
   /// In en, this message translates to:
