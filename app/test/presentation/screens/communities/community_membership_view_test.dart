@@ -20,6 +20,7 @@ import 'package:mpx_flutter_reference_app/presentation/screens/communities/commu
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_membership_card_view.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
+import 'package:mpx_flutter_reference_app/presentation/widgets/vta_identity_card.dart';
 
 import '../../../fakes/fake_identities.dart';
 import '../../../fakes/fake_identities_service.dart';
@@ -204,49 +205,40 @@ void main() {
   });
 
   group('identity', () {
-    Finder identityLine() =>
+    Finder identityCard() =>
         find.byKey(const Key('community_membership_identity'));
 
-    testWidgets('shows the identity joined with above the cards', (
+    testWidgets('shows the identity joined with as its card above the cards', (
       tester,
     ) async {
-      identities = IdentitiesServiceState(
-        identities: [_vtaIdentity('did:webvh:QmAda:vta.example:ada', 'Ada')],
-      );
+      final identity = _vtaIdentity('did:webvh:QmAda:vta.example:ada', 'Ada');
+      identities = IdentitiesServiceState(identities: [identity]);
 
-      final l10n = await pumpView(tester);
+      await pumpView(tester);
 
+      final card = tester.widget<VtaIdentityCard>(identityCard());
+      expect(card.identity, identity);
       expect(
-        find.descendant(
-          of: identityLine(),
-          matching: find.text(l10n.vtcCommunityIdentityNewDid('Ada')),
-        ),
+        find.descendant(of: identityCard(), matching: find.text('Ada')),
         findsOneWidget,
       );
       expect(
-        tester.getTopLeft(identityLine()).dy,
+        tester.getTopLeft(identityCard()).dy,
         lessThan(
           tester.getTopLeft(find.byKey(const Key('vtc_membership_card'))).dy,
         ),
       );
     });
 
-    testWidgets('says when the community knows the identity\'s own DID', (
-      tester,
-    ) async {
+    testWidgets('shows the DID the community knows it by', (tester) async {
       identities = IdentitiesServiceState(
-        identities: [_vtaIdentity(_me, 'Ada')],
+        identities: [_vtaIdentity('did:webvh:QmAda:vta.example:ada', 'Ada')],
       );
 
-      final l10n = await pumpView(tester);
+      await pumpView(tester);
 
-      expect(
-        find.descendant(
-          of: identityLine(),
-          matching: find.text(l10n.vtcCommunityIdentityOwnDid('Ada')),
-        ),
-        findsOneWidget,
-      );
+      // A DID made for the community, not the identity's own.
+      expect(tester.widget<VtaIdentityCard>(identityCard()).did, _me);
     });
 
     testWidgets('shows none for a membership of a new identity', (
@@ -263,7 +255,7 @@ void main() {
 
       await pumpView(tester);
 
-      expect(identityLine(), findsNothing);
+      expect(identityCard(), findsNothing);
     });
   });
 

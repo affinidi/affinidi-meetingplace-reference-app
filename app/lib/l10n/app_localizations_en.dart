@@ -3067,19 +3067,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vtcCommunityRole => 'Your role';
 
   @override
-  String get vtcCommunityIdentity => 'Your identity';
-
-  @override
-  String vtcCommunityIdentityNewDid(String name) {
-    return '$name, with a new DID for this community';
-  }
-
-  @override
-  String vtcCommunityIdentityOwnDid(String name) {
-    return '$name, with this identity\'s own DID';
-  }
-
-  @override
   String get vtcCommunitySettings => 'Community settings';
 
   @override
