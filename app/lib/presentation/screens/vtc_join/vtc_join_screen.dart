@@ -1086,9 +1086,8 @@ String _titleOf(AppLocalizations l10n, VtcJoinWay way) => switch (way) {
 };
 
 /// Which identity on the member's VTA joins, in a deck to swipe through as
-/// MPX picks an identity: a new one first, which no other community can link
-/// to, then those the VTA already holds. Under a way in asking for a
-/// credential, the community sees the DID of the identity holding it.
+/// MPX picks an identity. Under a way in asking for a credential, the
+/// community sees the DID of the identity holding it.
 class _ChooseIdentity extends HookWidget {
   const _ChooseIdentity({
     required this.state,
@@ -1097,16 +1096,15 @@ class _ChooseIdentity extends HookWidget {
   });
 
   final VtcJoinState state;
-  final ValueChanged<String?> onChoose;
+  final ValueChanged<String> onChoose;
   final VoidCallback onCancel;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    // Null stands for a new identity.
-    final options = <String?>[null, ...state.identityChoices];
+    final options = state.identityChoices;
     final holders = state.credentialHolders;
-    bool missingCredential(String? did) =>
+    bool missingCredential(String did) =>
         holders != null && !holders.contains(did);
     // Under a way in asking for a credential, start on one who holds it.
     final first = options.indexWhere((did) => !missingCredential(did));
@@ -1117,7 +1115,7 @@ class _ChooseIdentity extends HookWidget {
       spacing: McSpacing.s3,
       children: [
         OnboardingTitle(l10n.vtcJoinChooseIdentity),
-        SwipeableCards<String?>(
+        SwipeableCards<String>(
           key: const Key('vtc_join_identities'),
           items: options,
           maxWidth: double.infinity,
@@ -1127,7 +1125,6 @@ class _ChooseIdentity extends HookWidget {
           initialIndex: current.value,
           onCardChange: (index) => current.value = index,
           cardBuilder: (context, did) => VtaIdentityCard(
-            key: did == null ? const Key('vtc_join_new_identity') : null,
             did: did,
             identity: state.identities[did],
             missingCredential: missingCredential(did),

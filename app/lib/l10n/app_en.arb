@@ -2880,8 +2880,6 @@
 	"vtcJoinCredentialIssuer": "Issued by",
 	"vtcJoinCredentialClaimsHeading": "What presenting it shows",
 	"vtcJoinCredentialNote": "The whole credential goes with your application, which this identity signs.",
-	"vtcJoinNewIdentity": "A new identity",
-	"vtcJoinNewIdentityHost": "Created on your VTA for this community",
 	"vtcJoinExistingIdentity": "Existing identity",
 	"vtcJoinUseIdentity": "Join with this identity",
 	"vtcJoinIdentityPosition": "{position} of {total} · swipe to see the others",
@@ -2911,7 +2909,6 @@
 	"vtcJoinIdentityDidNote": "Every community you join with it sees the same DID, so they can tell it's you.",
 	"vtcJoinUseIdentityDid": "Join with this identity's DID",
 	"vtcJoinCredentialShowsIdentity": "This way in asks for a credential, so the community sees the DID of the identity that holds it.",
-	"vtcJoinNewIdentityNote": "Recommended: your VTA creates it for this community, so other communities can't link you through it.",
 	"vtcJoinWaysHeading": "Ways in",
 	"vtcJoinManifestHeading": "Manifest",
 	"@vtcJoinManifestHeading": {

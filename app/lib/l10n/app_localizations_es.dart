@@ -3001,12 +3001,6 @@ class AppLocalizationsEs extends AppLocalizations {
       'The whole credential goes with your application, which this identity signs.';
 
   @override
-  String get vtcJoinNewIdentity => 'A new identity';
-
-  @override
-  String get vtcJoinNewIdentityHost => 'Created on your VTA for this community';
-
-  @override
   String get vtcJoinExistingIdentity => 'Existing identity';
 
   @override
@@ -3045,10 +3039,6 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get vtcJoinCredentialShowsIdentity =>
       'This way in asks for a credential, so the community sees the DID of the identity that holds it.';
-
-  @override
-  String get vtcJoinNewIdentityNote =>
-      'Recommended: your VTA creates it for this community, so other communities can\'t link you through it.';
 
   @override
   String get vtcJoinWaysHeading => 'Ways in';

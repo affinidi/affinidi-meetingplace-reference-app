@@ -355,10 +355,9 @@ class VtcJoinController extends _$VtcJoinController {
   /// Goes on to apply to the scanned community, under the way in the member
   /// chose; does nothing when this app does not support it.
   ///
-  /// A first application asks which of the member's identities joins, or a
-  /// new one, when the member has any; so does one after withdrawing or
-  /// being turned down. One still gathering vetting applies as the identity
-  /// recorded for it.
+  /// A first application asks which of the member's identities joins; so
+  /// does one after withdrawing or being turned down. One still gathering
+  /// vetting applies as the identity recorded for it.
   Future<void> join() async {
     final manifest = _manifest;
     if (state.step != VtcJoinStep.review ||
@@ -382,7 +381,9 @@ class VtcJoinController extends _$VtcJoinController {
         for (final identity in identities)
           VtaPersona(did: identity.did, contextId: identity.vtaContextId!),
       ];
-      if (_personas.isEmpty) return _apply(manifest);
+      // Every member has a primary identity from their first start: one
+      // without any has no profile for the community to see.
+      if (_personas.isEmpty) return _fail(VtcJoinFailure.profileMissing);
       state = state.copyWith(
         step: VtcJoinStep.chooseIdentity,
         identityChoices: [for (final persona in _personas) persona.did],
@@ -399,21 +400,21 @@ class VtcJoinController extends _$VtcJoinController {
   List<Identity> _joinableIdentities() =>
       ref.read(identitiesServiceProvider).vtaPersonas;
 
-  /// Joins as the VTA identity [personaDid], or as a new identity when
-  /// null. Only an identity the VTA offered is used, and under a way in
-  /// asking for a credential only one holding it.
+  /// Joins as the VTA identity [personaDid]. Only an identity the VTA
+  /// offered is used, and under a way in asking for a credential only one
+  /// holding it.
   ///
-  /// For an identity, the member then chooses which DID the community sees
-  /// ([useDid]); under a way in asking for a credential, it is the
-  /// identity's own, the DID the credential names.
-  Future<void> useIdentity(String? personaDid) async {
+  /// The member then chooses which DID the community sees ([useDid]);
+  /// under a way in asking for a credential, it is the identity's own, the
+  /// DID the credential names.
+  Future<void> useIdentity(String personaDid) async {
     final manifest = _manifest;
     if (state.step != VtcJoinStep.chooseIdentity || manifest == null) return;
     final persona = _personas.where((p) => p.did == personaDid).firstOrNull;
-    if (personaDid != null && persona == null) return;
+    if (persona == null) return;
     final holders = state.credentialHolders;
     if (holders != null && !holders.contains(personaDid)) return;
-    if (persona != null && holders == null) {
+    if (holders == null) {
       _chosenIdentity = state.identities[persona.did];
       state = state.copyWith(step: VtcJoinStep.chooseDid);
       return;

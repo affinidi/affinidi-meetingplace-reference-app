@@ -103,6 +103,18 @@ void main() {
       container.read(vtcJoinControllerProvider.notifier);
   VtcJoinState state() => container.read(vtcJoinControllerProvider);
 
+  /// Applies, joining as the member's identity under a new DID of its own
+  /// once asked which identity joins and which DID the community sees.
+  Future<void> join() async {
+    await controller().join();
+    final identity = state().identityChoices.firstOrNull;
+    if (state().step != VtcJoinStep.chooseIdentity || identity == null) return;
+    await controller().useIdentity(identity);
+    if (state().step == VtcJoinStep.chooseDid) {
+      await controller().useDid(newDid: true);
+    }
+  }
+
   /// Lets the watch of the identity's inbox connect, for a while.
   Future<void> watched({bool isWatched = true}) async {
     for (var i = 0; i < 100; i++) {
@@ -131,11 +143,13 @@ void main() {
   });
 
   setUp(() async {
-    identities = IdentitiesServiceState();
     FlutterSecureStorage.setMockInitialValues({});
     communityOffers = _FakeCommunityOffers();
     network = FakeVtcNetwork();
     persona = Ed25519DidKeySigner.generate();
+    identities = IdentitiesServiceState(
+      identities: [_vtaIdentity(persona.did, 'Ada')],
+    );
     network.vta
       ..persona = persona
       ..answers[VtaTask.contextsList] = {
@@ -250,7 +264,7 @@ void main() {
         await controller().onScanned(fakeVtcDid);
         expect(state().chosenWayId, 'open');
 
-        await controller().join();
+        await join();
 
         expect(submitted()['criterion'], 'zOpen');
       });
@@ -260,7 +274,7 @@ void main() {
 
         controller().chooseWay('reviewed');
         expect(state().chosenWayId, 'reviewed');
-        await controller().join();
+        await join();
 
         expect(submitted()['criterion'], 'zReviewed');
       });
@@ -273,7 +287,7 @@ void main() {
 
         controller().chooseWay('invited');
         expect(state().chosenWayId, 'invited');
-        await controller().join();
+        await join();
 
         expect(state().step, VtcJoinStep.review);
         expect(
@@ -297,7 +311,7 @@ void main() {
       };
 
       await controller().onScanned(fakeVtcDid);
-      await controller().join();
+      await join();
 
       expect(state().ways.single.unsupported, VtcJoinUnsupported.vetting);
       expect(state().canApply, isFalse);
@@ -310,12 +324,6 @@ void main() {
   });
 
   group('VtcJoinController identity', () {
-    void vtaHoldsPersona() {
-      identities = IdentitiesServiceState(
-        identities: [_vtaIdentity(persona.did, 'Ada')],
-      );
-    }
-
     bool createdPersona() =>
         network.vta.received.any((r) => r['type'] == VtaTask.didsCreate);
 
@@ -325,7 +333,6 @@ void main() {
     test(
       'asks which DID the community sees once an identity is chosen',
       () async {
-        vtaHoldsPersona();
         await controller().onScanned(fakeVtcDid);
 
         await controller().join();
@@ -345,7 +352,6 @@ void main() {
     );
 
     test("joins as a new DID wearing the identity's profile", () async {
-      vtaHoldsPersona();
       await controller().onScanned(fakeVtcDid);
       await controller().join();
       await controller().useIdentity(persona.did);
@@ -365,7 +371,6 @@ void main() {
     });
 
     test("joins as the identity's own DID when chosen", () async {
-      vtaHoldsPersona();
       await controller().onScanned(fakeVtcDid);
       await controller().join();
       await controller().useIdentity(persona.did);
@@ -377,19 +382,24 @@ void main() {
       expect(submit()['issuer'], persona.did);
     });
 
-    test('joins as a new identity when chosen', () async {
-      vtaHoldsPersona();
+    test('sends nothing when the member holds no identity', () async {
+      identities = IdentitiesServiceState();
+      container.dispose();
+      useService();
       await controller().onScanned(fakeVtcDid);
+
       await controller().join();
 
-      await controller().useIdentity(null);
-
-      expect(state().step, VtcJoinStep.joined);
-      expect(createdPersona(), isTrue);
+      expect(state().step, VtcJoinStep.failed);
+      expect(state().failure, VtcJoinFailure.profileMissing);
+      expect(createdPersona(), isFalse);
+      expect(
+        network.joinRequests.map((r) => r['type']),
+        isNot(contains(JoinTask.submit)),
+      );
     });
 
     test('asks again which identity joins after a refusal', () async {
-      vtaHoldsPersona();
       network.joinVerdict = {'effect': 'deny'};
       await controller().onScanned(fakeVtcDid);
       await controller().join();
@@ -404,13 +414,13 @@ void main() {
       await controller().join();
 
       expect(state().step, VtcJoinStep.chooseIdentity);
-      await controller().useIdentity(null);
+      await controller().useIdentity(persona.did);
+      await controller().useDid(newDid: true);
       expect(state().step, VtcJoinStep.joined);
       expect(createdPersona(), isTrue);
     });
 
     test('asks again which identity joins after withdrawing', () async {
-      vtaHoldsPersona();
       network.joinVerdict = {'effect': 'refer'};
       await controller().onScanned(fakeVtcDid);
       await controller().join();
@@ -425,7 +435,6 @@ void main() {
     });
 
     test('ignores an identity the VTA did not offer', () async {
-      vtaHoldsPersona();
       await controller().onScanned(fakeVtcDid);
       await controller().join();
 
@@ -528,7 +537,6 @@ void main() {
       expect(state().step, VtcJoinStep.chooseIdentity);
       expect(state().credentialHolders, {persona.did});
 
-      await controller().useIdentity(null);
       await controller().useIdentity(other);
 
       expect(state().step, VtcJoinStep.chooseIdentity);
@@ -601,7 +609,7 @@ void main() {
         ],
       };
       await controller().onScanned(fakeVtcDid);
-      await controller().join();
+      await join();
 
       expect(state().step, VtcJoinStep.approveDetails);
       expect(state().details.map((d) => (d.type, d.value)), [('name', 'Sam')]);
@@ -628,7 +636,7 @@ void main() {
       };
       await controller().onScanned(fakeVtcDid);
 
-      await controller().join();
+      await join();
 
       expect(state().step, VtcJoinStep.failed);
       expect(state().failure, VtcJoinFailure.detailsMissing);
@@ -641,7 +649,7 @@ void main() {
       };
       await controller().onScanned(fakeVtcDid);
 
-      await controller().join();
+      await join();
 
       expect(state().failure, VtcJoinFailure.profileMissing);
       expect(submits(), isEmpty);
@@ -663,7 +671,7 @@ void main() {
 
     test('confirms the membership and leaves the directory', () async {
       await controller().onScanned(fakeVtcDid);
-      await controller().join();
+      await join();
 
       expect(state().step, VtcJoinStep.joined);
       expect(memberTasks(), [MemberTask.vmc, MemberTask.directoryCardUpdate]);
@@ -677,7 +685,7 @@ void main() {
     test('stays in the directory when the member opted in', () async {
       await controller().onScanned(fakeVtcDid);
       controller().setListInDirectory(true);
-      await controller().join();
+      await join();
 
       expect(memberTasks(), [MemberTask.vmc]);
     });
@@ -687,7 +695,7 @@ void main() {
         'code': 'keys/sign-document:permissionDenied',
       };
       await controller().onScanned(fakeVtcDid);
-      await controller().join();
+      await join();
 
       expect(state().step, VtcJoinStep.joined);
       expect(memberTasks(), [MemberTask.directoryCardUpdate]);
@@ -702,7 +710,7 @@ void main() {
         'with': {'code': 'closed', 'reason': 'Berlin residents only'},
       };
       await controller().onScanned(fakeVtcDid);
-      await controller().join();
+      await join();
 
       expect(state().step, VtcJoinStep.denied);
       expect(state().denialReason, 'Berlin residents only');
@@ -711,7 +719,7 @@ void main() {
     test('shows the reason of a rejection found later', () async {
       network.joinVerdict = {'effect': 'refer'};
       await controller().onScanned(fakeVtcDid);
-      await controller().join();
+      await join();
       expect(state().step, VtcJoinStep.pending);
 
       network
@@ -726,7 +734,7 @@ void main() {
     test('says when the community already counts the identity', () async {
       network.joinRefusal = 'vtc/join-requests/submit:alreadyMember';
       await controller().onScanned(fakeVtcDid);
-      await controller().join();
+      await join();
 
       expect(state().step, VtcJoinStep.joined);
       expect(state().wasMember, isTrue);
@@ -770,7 +778,7 @@ void main() {
       expect(state().canApply, isTrue);
       expect(state().chosenWayId, 'open');
 
-      await controller().join();
+      await join();
 
       expect(state().step, VtcJoinStep.joined);
       expect(state().wasMember, isFalse);
@@ -788,7 +796,7 @@ void main() {
     test('waits for a referred application, then sees it approved', () async {
       network.joinVerdict = {'effect': 'refer'};
       await controller().onScanned(fakeVtcDid);
-      await controller().join();
+      await join();
       expect(state().step, VtcJoinStep.pending);
 
       await controller().checkAgain();
@@ -802,7 +810,7 @@ void main() {
     test('shows the signed application while it waits', () async {
       network.joinVerdict = {'effect': 'refer'};
       await controller().onScanned(fakeVtcDid);
-      await controller().join();
+      await join();
 
       expect(state().submitExchange?.receipt.type, JoinTask.submit);
       expect(state().submitExchange?.receipt.signer, persona.did);
@@ -821,7 +829,7 @@ void main() {
     test('says when the administrators put the application off', () async {
       network.joinVerdict = {'effect': 'refer'};
       await controller().onScanned(fakeVtcDid);
-      await controller().join();
+      await join();
 
       network.joinStatus = 'deferred';
       await controller().checkAgain();
@@ -839,7 +847,7 @@ void main() {
     test('checks a waiting application without a spinner', () async {
       network.joinVerdict = {'effect': 'refer'};
       await controller().onScanned(fakeVtcDid);
-      await controller().join();
+      await join();
       final steps = <VtcJoinStep>[];
       container.listen(
         vtcJoinControllerProvider,
@@ -863,7 +871,7 @@ void main() {
     test('keeps waiting when a check fails', () async {
       network.joinVerdict = {'effect': 'refer'};
       await controller().onScanned(fakeVtcDid);
-      await controller().join();
+      await join();
 
       // An answer the app cannot read, as from a community in trouble.
       network.joinStatus = 'lost';
@@ -879,7 +887,7 @@ void main() {
     test('runs one check at a time', () async {
       network.joinVerdict = {'effect': 'refer'};
       await controller().onScanned(fakeVtcDid);
-      await controller().join();
+      await join();
       final sent = network.joinRequests.length;
 
       await Future.wait([controller().checkAgain(), controller().checkAgain()]);
@@ -895,7 +903,7 @@ void main() {
     test('withdraws a waiting application and applies again', () async {
       network.joinVerdict = {'effect': 'refer'};
       await controller().onScanned(fakeVtcDid);
-      await controller().join();
+      await join();
       await controller().checkAgain();
 
       await controller().withdraw();
@@ -911,7 +919,7 @@ void main() {
       expect(state().step, VtcJoinStep.review);
       expect(state().withdrawExchange, isNull);
 
-      await controller().join();
+      await join();
       expect(state().step, VtcJoinStep.pending);
       expect(state().submitExchange?.receipt.type, JoinTask.submit);
       expect(
@@ -923,7 +931,7 @@ void main() {
     test('shows the decision when withdrawing too late', () async {
       network.joinVerdict = {'effect': 'refer'};
       await controller().onScanned(fakeVtcDid);
-      await controller().join();
+      await join();
       network
         ..withdrawRefusal = 'vtc/join-requests/withdraw:alreadyDecided'
         ..joinStatus = 'rejected'
@@ -965,7 +973,7 @@ void main() {
       test('is shown once the administrators approved', () async {
         network.joinVerdict = {'effect': 'refer'};
         await controller().onScanned(fakeVtcDid);
-        await controller().join();
+        await join();
         vtaHoldsCard();
 
         network.joinStatus = 'approved';
@@ -980,7 +988,7 @@ void main() {
       test('is read again until the VTA holds it', () async {
         network.joinVerdict = {'effect': 'refer'};
         await controller().onScanned(fakeVtcDid);
-        await controller().join();
+        await join();
         network.joinStatus = 'approved';
         await controller().checkAgain();
         await readDone();
@@ -995,7 +1003,7 @@ void main() {
       test('says it is being read until the read ends', () async {
         network.joinVerdict = {'effect': 'refer'};
         await controller().onScanned(fakeVtcDid);
-        await controller().join();
+        await join();
         network.joinStatus = 'approved';
         await controller().checkAgain();
         await readDone();
@@ -1013,7 +1021,7 @@ void main() {
       test('says how far finding the card on the VTA got', () async {
         network.joinVerdict = {'effect': 'refer'};
         await controller().onScanned(fakeVtcDid);
-        await controller().join();
+        await join();
         network.joinStatus = 'approved';
         await controller().checkAgain();
         await readDone();
@@ -1035,7 +1043,7 @@ void main() {
 
       test('is shown from the admission, before any VTA read', () async {
         await controller().onScanned(fakeVtcDid);
-        await controller().join();
+        await join();
 
         // The VTA holds no card to read: the one shown came with the
         // admission.
@@ -1046,7 +1054,7 @@ void main() {
       test('is shown for an admission at once', () async {
         vtaHoldsCard();
         await controller().onScanned(fakeVtcDid);
-        await controller().join();
+        await join();
         expect(state().step, VtcJoinStep.joined);
         await readDone();
 
@@ -1070,7 +1078,7 @@ void main() {
         Future<void> approve() async {
           network.joinVerdict = {'effect': 'refer'};
           await controller().onScanned(fakeVtcDid);
-          await controller().join();
+          await join();
           network.joinStatus = 'approved';
         }
 
@@ -1201,7 +1209,7 @@ void main() {
       network.joinVerdict = {'effect': 'deny'};
       await controller().onScanned(fakeVtcDid);
 
-      await controller().join();
+      await join();
 
       expect(state().step, VtcJoinStep.denied);
     });
@@ -1341,7 +1349,7 @@ void main() {
       network.vta.answers[VtaTask.serversList] = {'servers': <Object>[]};
       await controller().onScanned(fakeVtcDid);
 
-      await controller().join();
+      await join();
 
       expect(state().failure, VtcJoinFailure.noDidHosting);
       expect(state().applyStep, isNull);
@@ -1400,7 +1408,7 @@ void main() {
       await service.unlink();
       await controller().onScanned(fakeVtcDid);
 
-      await controller().join();
+      await join();
 
       expect(state().failure, VtcJoinFailure.vtaMissing);
     });
@@ -1495,7 +1503,7 @@ void main() {
 
     Future<void> openVetting() async {
       await controller().onScanned(fakeVtcDid);
-      await controller().join();
+      await join();
     }
 
     Future<void> askVetter() async {
@@ -1557,7 +1565,7 @@ void main() {
       await controller().onScanned(fakeVtcDid);
       expect(state().ways.single.canApply, isTrue);
 
-      await controller().join();
+      await join();
 
       expect(state().step, VtcJoinStep.vetting);
       expect(state().vettingRequirements?.minStatements, 1);

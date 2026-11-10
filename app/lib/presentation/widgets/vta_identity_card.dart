@@ -15,14 +15,12 @@ import '../themes/tokens/mc_typography.dart';
 import 'common/app_card.dart';
 import 'identity_picker/identity_card.dart';
 import 'identity_picker/identity_contact_rows.dart';
-import 'onboarding_style/onboarding_style.dart';
 import 'vta_details.dart';
 
 /// A VTA identity as an MPX identity card: its picture centred over the
 /// card's upper edge, the kind of identity over its name, with the VTA's
 /// shield beside it for where it lives on the VTA, the details its profile
-/// holds as the identity card shows them, and its DID as metadata. A null
-/// [did] is the new identity the VTA would create.
+/// holds as the identity card shows them, and its DID as metadata.
 class VtaIdentityCard extends ConsumerWidget {
   const VtaIdentityCard({
     super.key,
@@ -31,7 +29,7 @@ class VtaIdentityCard extends ConsumerWidget {
     this.missingCredential = false,
   });
 
-  final String? did;
+  final String did;
 
   /// The identity, with its profile as this phone keeps it in step with the
   /// VTA; null for an identity this phone does not hold.
@@ -118,9 +116,7 @@ class VtaIdentityCard extends ConsumerWidget {
                         children: [
                           Flexible(
                             child: Text(
-                              did == null
-                                  ? l10n.vtcJoinNewIdentity
-                                  : displayName.isNotEmpty
+                              displayName.isNotEmpty
                                   ? displayName
                                   : l10n.vtcJoinExistingIdentity,
                               maxLines: 1,
@@ -156,26 +152,10 @@ class VtaIdentityCard extends ConsumerWidget {
                             ),
                           ],
                         ),
-                      if (did == null) ...[
-                        Text(
-                          l10n.vtcJoinNewIdentityHost,
-                          textAlign: TextAlign.center,
-                          style: textTheme.labelMedium?.copyWith(
-                            color: mc.textSecondary,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          l10n.vtcJoinNewIdentityNote,
-                          textAlign: TextAlign.center,
-                          style: onboardingNote(context),
-                        ),
-                      ] else ...[
-                        const SizedBox(height: 8),
-                        if (card != null) IdentityContactRows(card: card),
-                        Divider(height: 12, color: mc.hairline),
-                        _DidMetadata(did: did),
-                      ],
+                      const SizedBox(height: 8),
+                      if (card != null) IdentityContactRows(card: card),
+                      Divider(height: 12, color: mc.hairline),
+                      _DidMetadata(did: did),
                     ],
                   ),
                 ),
@@ -187,10 +167,7 @@ class VtaIdentityCard extends ConsumerWidget {
             right: 0,
             top: -_pictureSize / 2,
             child: Center(
-              child: IdentityCardAvatar(
-                picture: picture,
-                icon: did == null ? McIcons.personAdd : McIcons.person,
-              ),
+              child: IdentityCardAvatar(picture: picture, icon: McIcons.person),
             ),
           ),
         ],

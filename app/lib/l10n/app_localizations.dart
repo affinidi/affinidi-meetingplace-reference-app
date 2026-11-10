@@ -4466,18 +4466,6 @@ abstract class AppLocalizations {
   /// **'The whole credential goes with your application, which this identity signs.'**
   String get vtcJoinCredentialNote;
 
-  /// No description provided for @vtcJoinNewIdentity.
-  ///
-  /// In en, this message translates to:
-  /// **'A new identity'**
-  String get vtcJoinNewIdentity;
-
-  /// No description provided for @vtcJoinNewIdentityHost.
-  ///
-  /// In en, this message translates to:
-  /// **'Created on your VTA for this community'**
-  String get vtcJoinNewIdentityHost;
-
   /// No description provided for @vtcJoinExistingIdentity.
   ///
   /// In en, this message translates to:
@@ -4543,12 +4531,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This way in asks for a credential, so the community sees the DID of the identity that holds it.'**
   String get vtcJoinCredentialShowsIdentity;
-
-  /// No description provided for @vtcJoinNewIdentityNote.
-  ///
-  /// In en, this message translates to:
-  /// **'Recommended: your VTA creates it for this community, so other communities can\'t link you through it.'**
-  String get vtcJoinNewIdentityNote;
 
   /// No description provided for @vtcJoinWaysHeading.
   ///

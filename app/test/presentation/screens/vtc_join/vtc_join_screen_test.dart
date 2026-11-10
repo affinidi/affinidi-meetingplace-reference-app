@@ -66,11 +66,13 @@ void main() {
   });
 
   setUp(() async {
-    identities = IdentitiesServiceState();
     routed = false;
     FlutterSecureStorage.setMockInitialValues({});
     network = FakeVtcNetwork();
     persona = Ed25519DidKeySigner.generate();
+    identities = IdentitiesServiceState(
+      identities: [_vtaIdentity(persona.did, 'Ada')],
+    );
     network.vta
       ..persona = persona
       ..answers[VtaTask.contextsList] = {
@@ -214,6 +216,23 @@ void main() {
     await tester.tap(finder);
   }
 
+  /// Taps Join, then joins as the member's identity under a new DID of its
+  /// own once asked which identity joins and which DID the community sees.
+  Future<void> tapJoin(WidgetTester tester) async {
+    await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
+    await settle(tester);
+    final useIdentity = find.widgetWithText(
+      ElevatedButton,
+      'Join with this identity',
+    );
+    if (useIdentity.evaluate().isEmpty) return;
+    await tapVisible(tester, useIdentity);
+    await settle(tester);
+    final newDid = find.byKey(const Key('vtc_join_new_did'));
+    if (newDid.evaluate().isEmpty) return;
+    await tapVisible(tester, newDid);
+  }
+
   Future<void> enterCode(WidgetTester tester, String code) async {
     await tester.enterText(
       find.descendant(
@@ -311,7 +330,7 @@ void main() {
         'Ways in',
       ]);
 
-      await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
+      await tapJoin(tester);
       await settle(tester);
       expect(find.text("You're a member of Football club."), findsOneWidget);
 
@@ -361,7 +380,7 @@ void main() {
       Future<void> joinCommunity(WidgetTester tester) async {
         await pumpScreen(tester);
         await enterCode(tester, fakeVtcDid);
-        await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
+        await tapJoin(tester);
         await settle(tester);
       }
 
@@ -523,7 +542,7 @@ void main() {
       network.joinVerdict = {'effect': 'refer'};
       await pumpScreen(tester);
       await enterCode(tester, fakeVtcDid);
-      await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
+      await tapJoin(tester);
       await settle(tester);
 
       expect(
@@ -557,7 +576,7 @@ void main() {
       network.joinVerdict = {'effect': 'refer'};
       await pumpScreen(tester);
       await enterCode(tester, fakeVtcDid);
-      await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
+      await tapJoin(tester);
       await settle(tester);
 
       network.joinStatus = 'approved';
@@ -587,7 +606,7 @@ void main() {
       network.joinVerdict = {'effect': 'refer'};
       await pumpScreen(tester);
       await enterCode(tester, fakeVtcDid);
-      await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
+      await tapJoin(tester);
       await settle(tester);
 
       await tapVisible(tester, find.text('Withdraw application'));
@@ -647,7 +666,7 @@ void main() {
         vtaHoldsCard();
         await pumpScreen(tester);
         await enterCode(tester, fakeVtcDid);
-        await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
+        await tapJoin(tester);
         await settle(tester);
 
         final glow = tester.widget<DecoratedBox>(
@@ -668,7 +687,7 @@ void main() {
         final card = vtaHoldsCard();
         await pumpScreen(tester);
         await enterCode(tester, fakeVtcDid);
-        await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
+        await tapJoin(tester);
         await settle(tester);
 
         expect(find.byKey(const Key('vtc_membership_card')), findsOneWidget);
@@ -696,18 +715,18 @@ void main() {
         vtaHoldsCard();
         await pumpScreen(tester);
         await enterCode(tester, fakeVtcDid);
-        await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
+        await tapJoin(tester);
         await settle(tester);
 
         final route = find.byKey(const Key('vtc_join_card_route'));
         await tester.ensureVisible(route);
-        // An identity this phone does not name.
-        expect(flowLabels(tester), ['Community', 'Identity', 'Your VTA']);
+        // The identity the member joined with, under its own name.
+        expect(flowLabels(tester), ['Community', 'Ada', 'Your VTA']);
         expect(
           find.descendant(
             of: route,
             matching: find.text(
-              'Football club issued your membership card to Identity, '
+              'Football club issued your membership card to Ada, '
               'which passed it on to your VTA',
             ),
           ),
@@ -719,7 +738,7 @@ void main() {
         vtaHoldsCard(personhood: true);
         await pumpScreen(tester);
         await enterCode(tester, fakeVtcDid);
-        await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
+        await tapJoin(tester);
         await settle(tester);
 
         expect(find.text('Personhood'), findsOneWidget);
@@ -732,7 +751,7 @@ void main() {
         (network.joinVerdict['with'] as Map).remove('vmc');
         await pumpScreen(tester);
         await enterCode(tester, fakeVtcDid);
-        await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
+        await tapJoin(tester);
         await settle(tester);
 
         expect(find.byKey(const Key('vtc_membership_card')), findsNothing);
@@ -776,7 +795,7 @@ void main() {
         network.joinVerdict = {'effect': 'refer'};
         await pumpScreen(tester);
         await enterCode(tester, fakeVtcDid);
-        await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
+        await tapJoin(tester);
         await settle(tester);
 
         await tester.runAsync(() => network.deliver(mailPersona, card));
@@ -842,7 +861,7 @@ void main() {
       Future<void> join(WidgetTester tester) async {
         await pumpScreen(tester);
         await enterCode(tester, fakeVtcDid);
-        await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
+        await tapJoin(tester);
         await settle(tester);
       }
 
@@ -1172,7 +1191,7 @@ void main() {
         await reachIdentities(tester);
 
         // The deck starts on Ada, who holds it.
-        expect(find.text('2 of 3 · swipe to see the others'), findsOneWidget);
+        expect(find.text('1 of 2 · swipe to see the others'), findsOneWidget);
         expect(
           find.byKey(const Key('vtc_join_credential_shows_identity')),
           findsOneWidget,
@@ -1180,15 +1199,11 @@ void main() {
         expect(useIdentity(tester).onPressed, isNotNull);
 
         await swipeIdentities(tester);
-        expect(find.text('3 of 3 · swipe to see the others'), findsOneWidget);
+        expect(find.text('2 of 2 · swipe to see the others'), findsOneWidget);
         expect(
           find.byKey(const Key('vta_identity_missing_credential')),
           findsWidgets,
         );
-        expect(useIdentity(tester).onPressed, isNull);
-
-        await swipeIdentities(tester);
-        expect(find.text('1 of 3 · swipe to see the others'), findsOneWidget);
         expect(useIdentity(tester).onPressed, isNull);
       });
 
@@ -1243,9 +1258,12 @@ void main() {
 
     group('identity', () {
       setUp(() {
-        // The member has one identity on their VTA, so joining asks which.
+        // The member has two identities on their VTA, so joining asks which.
         identities = IdentitiesServiceState(
-          identities: [_vtaIdentity(persona.did, 'Ada')],
+          identities: [
+            _vtaIdentity('did:webvh:QmBo:host.example', 'Bo'),
+            _vtaIdentity(persona.did, 'Ada'),
+          ],
         );
       });
 
@@ -1282,21 +1300,15 @@ void main() {
         await settle(tester);
       }
 
-      testWidgets('offers a new identity first, in a deck', (tester) async {
+      testWidgets("offers only the member's identities, in a deck", (
+        tester,
+      ) async {
         await reachIdentities(tester);
 
         expect(find.text('Join with which identity?'), findsOneWidget);
-        expect(find.byKey(const Key('vtc_join_new_identity')), findsOneWidget);
         expect(find.text('1 of 2 · swipe to see the others'), findsOneWidget);
-
-        await tapVisible(
-          tester,
-          find.widgetWithText(ElevatedButton, 'Join with this identity'),
-        );
-        await settle(tester);
-
-        expect(find.text("You're a member of Football club."), findsOneWidget);
-        expect(vtaTasks(), contains(VtaTask.didsCreate));
+        expect(find.text('Bo'), findsOneWidget);
+        expect(vtaTasks(), isNot(contains(VtaTask.didsCreate)));
       });
 
       testWidgets('names the identity the card came through', (tester) async {
@@ -1341,10 +1353,10 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text('2 of 2 · swipe to see the others'), findsOneWidget);
         expect(find.text('Ada'), findsOneWidget);
-        // The details its profile holds.
-        expect(find.text('John'), findsOneWidget);
-        expect(find.text('john.doe@example.com'), findsOneWidget);
-        expect(find.text('+1234567890'), findsOneWidget);
+        // The details its profile holds, as Bo's card behind it does.
+        expect(find.text('John'), findsWidgets);
+        expect(find.text('john.doe@example.com'), findsWidgets);
+        expect(find.text('+1234567890'), findsWidgets);
 
         await tapVisible(
           tester,
@@ -1415,7 +1427,7 @@ void main() {
       await swipeWays(tester);
       expect(find.text('2 of 3 · swipe to see the others'), findsOneWidget);
 
-      await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
+      await tapJoin(tester);
       await settle(tester);
 
       final submit = network.joinRequests.lastWhere(
@@ -1615,7 +1627,7 @@ void main() {
     Future<void> openVetting(WidgetTester tester) async {
       await pumpScreen(tester);
       await enterCode(tester, fakeVtcDid);
-      await tapVisible(tester, find.widgetWithText(ElevatedButton, 'Join'));
+      await tapJoin(tester);
       await settle(tester);
     }
 
