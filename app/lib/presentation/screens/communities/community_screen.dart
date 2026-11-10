@@ -95,79 +95,84 @@ class CommunityScreen extends HookConsumerWidget {
         (!canVetCheck.hasError && (community?.isVetter ?? false));
     final tabController = useTabController(initialLength: _tabCount);
 
-    return SafeArea(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SectionHeader(
-            icon: Tabs.contacts.iconData,
-            logoUrl: logoUrl,
-            title: name,
-            titleAction: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CommunityJoinPhraseAction(
-                  communityDid: communityDid,
-                  communityName: name,
-                ),
-                if (canVet)
-                  IconButton(
-                    key: const Key('community_vetting_desk'),
-                    visualDensity: VisualDensity.compact,
-                    icon: Icon(
-                      McIcons.userCheck,
-                      color: context.mcColors.textSecondary,
-                    ),
-                    tooltip: l10n.vtcVetterStart,
-                    onPressed: () => VtcVettingDeskScreen.show(
-                      context,
-                      communityDid: communityDid,
-                      communityName: name,
-                    ),
+    // Opens over the Communities tab, inside the dashboard, whose canvas
+    // the page would otherwise let the tab show through while it slides in.
+    return ColoredBox(
+      color: context.mcColors.canvas,
+      child: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SectionHeader(
+              icon: Tabs.contacts.iconData,
+              logoUrl: logoUrl,
+              title: name,
+              titleAction: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CommunityJoinPhraseAction(
+                    communityDid: communityDid,
+                    communityName: name,
                   ),
-              ],
-            ),
-            subtitle: info?.$1?.description ?? '',
-            // Nothing to unfold until it is read.
-            subtitleDetails: switch (info) {
-              (final profile, final joinPhrase) => CommunityInfoDetails(
-                communityDid: communityDid,
-                profile: profile,
-                joinPhrase: joinPhrase,
+                  if (canVet)
+                    IconButton(
+                      key: const Key('community_vetting_desk'),
+                      visualDensity: VisualDensity.compact,
+                      icon: Icon(
+                        McIcons.userCheck,
+                        color: context.mcColors.textSecondary,
+                      ),
+                      tooltip: l10n.vtcVetterStart,
+                      onPressed: () => VtcVettingDeskScreen.show(
+                        context,
+                        communityDid: communityDid,
+                        communityName: name,
+                      ),
+                    ),
+                ],
               ),
-              null => null,
-            },
-            onBack: () => Navigator.of(context).pop(),
-          ),
-          FilterTabBar(
-            controller: tabController,
-            labels: [
-              l10n.communityChannelsTab,
-              l10n.communityMembersTab,
-              l10n.communityGroupsTab,
-              l10n.communityRoomsTab,
-              l10n.communityMembershipTab,
-            ],
-          ),
-          Expanded(
-            child: TabBarView(
+              subtitle: info?.$1?.description ?? '',
+              // Nothing to unfold until it is read.
+              subtitleDetails: switch (info) {
+                (final profile, final joinPhrase) => CommunityInfoDetails(
+                  communityDid: communityDid,
+                  profile: profile,
+                  joinPhrase: joinPhrase,
+                ),
+                null => null,
+              },
+              onBack: () => Navigator.of(context).pop(),
+            ),
+            FilterTabBar(
               controller: tabController,
-              children: [
-                const ContactsScreen(),
-                CommunityMembersView(
-                  communityDid: communityDid,
-                  communityName: name,
-                ),
-                VtcGroupsView(communityDid: communityDid),
-                VtcRoomsView(communityDid: communityDid),
-                CommunityMembershipView(
-                  communityDid: communityDid,
-                  communityName: name,
-                ),
+              labels: [
+                l10n.communityChannelsTab,
+                l10n.communityMembersTab,
+                l10n.communityGroupsTab,
+                l10n.communityRoomsTab,
+                l10n.communityMembershipTab,
               ],
             ),
-          ),
-        ],
+            Expanded(
+              child: TabBarView(
+                controller: tabController,
+                children: [
+                  const ContactsScreen(),
+                  CommunityMembersView(
+                    communityDid: communityDid,
+                    communityName: name,
+                  ),
+                  VtcGroupsView(communityDid: communityDid),
+                  VtcRoomsView(communityDid: communityDid),
+                  CommunityMembershipView(
+                    communityDid: communityDid,
+                    communityName: name,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -241,6 +241,24 @@ void main() {
       expect(find.text(l10n.communitiesSubtitle), findsOneWidget);
     });
 
+    testWidgets('hides the Communities tab behind it as it opens', (
+      tester,
+    ) async {
+      await openCommunitiesTab(tester);
+      await saveCommunities();
+      await pullToRefresh(tester);
+
+      await tester.tap(find.text('Chess club'));
+      await tester.pumpAndSettle();
+
+      final screen = find.byType(CommunityScreen);
+      final canvas = tester.element(screen).mcColors.canvas;
+      final backdrop = tester.widget<ColoredBox>(
+        find.descendant(of: screen, matching: find.byType(ColoredBox)).first,
+      );
+      expect(backdrop.color, canvas);
+    });
+
     testWidgets('closes a community that removed the member, saying why', (
       tester,
     ) async {
