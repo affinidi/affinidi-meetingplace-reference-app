@@ -45,17 +45,12 @@ class VtcMemberTile extends StatelessWidget {
     return ListTile(
       leading: VtcMemberAvatar(communityDid: communityDid, entry: entry),
       title: Text(name),
-      subtitle: switch ((entry.role, entry.did)) {
-        (null, null) => Text(l10n.vtcTrustNotFindable(name, communityName)),
-        (final role?, null) => Text(
-          '${vtcRoleName(l10n, role)}\n'
-          '${l10n.vtcTrustNotFindable(name, communityName)}',
-        ),
-        (final role?, _) => Text(
+      subtitle: switch (entry.role) {
+        final role? => Text(
           vtcRoleName(l10n, role),
           key: Key('vtc_member_role_${entry.entryId}'),
         ),
-        (null, _) => null,
+        null => null,
       },
       // The icons last, in a slot each, so they line up on the right in
       // every row whether or not it offers to vouch.

@@ -3843,11 +3843,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get vtcTrustUnnamed => 'Unnamed member';
 
   @override
-  String vtcTrustNotFindable(String name, String community) {
-    return '$name hasn\'t let members of $community find them yet.';
-  }
-
-  @override
   String vtcTrustConfirmMatchTitle(String contact) {
     return 'Is this $contact?';
   }

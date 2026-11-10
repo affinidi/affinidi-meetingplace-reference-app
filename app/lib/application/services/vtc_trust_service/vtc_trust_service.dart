@@ -143,7 +143,8 @@ class VtcTrustService {
   Future<List<VtcMemberLink>> links(String channelDid) =>
       _repository.memberLinks(channelDid: channelDid);
 
-  /// The other members of [communityDid] whose entries match [query].
+  /// The other members of [communityDid] whose entries match [query]. A
+  /// member who has not let members find them is left out.
   ///
   /// Throws [VtcTrustException].
   Future<List<DirectoryEntry>> findMembers(
@@ -152,12 +153,12 @@ class VtcTrustService {
   }) => _guard('finding members', () async {
     final me = await _personaDid(communityDid);
     final found = await _vtc.searchMembers(communityDid, query: query);
-    return [...found.where((entry) => entry.did != me)];
+    return [...found.where((entry) => entry.did != null && entry.did != me)];
   });
 
   /// The other active members of the group [groupId] of [communityDid], as
   /// the directory shows them to the member. A member whose entry shows
-  /// the member nothing is left out.
+  /// the member nothing, or who has not let members find them, is left out.
   ///
   /// Throws [VtcTrustException].
   Future<List<DirectoryEntry>> groupMembers(
@@ -202,7 +203,8 @@ class VtcTrustService {
       });
 
   /// The directory entries of the active ones of [members], other than the
-  /// member, that the directory shows the member.
+  /// member, that the directory shows the member with a DID: one without
+  /// is a member who has not let members find them.
   Future<List<DirectoryEntry>> _otherActiveEntries(
     String communityDid,
     Iterable<VtcGroupMember> members,
@@ -217,7 +219,7 @@ class VtcTrustService {
         for (final member in batch)
           _vtc.memberEntry(communityDid, entryId: member.entryId),
       ]);
-      entries.addAll(read.nonNulls);
+      entries.addAll(read.nonNulls.where((entry) => entry.did != null));
     }
     return entries;
   }

@@ -5732,12 +5732,6 @@ abstract class AppLocalizations {
   /// **'Unnamed member'**
   String get vtcTrustUnnamed;
 
-  /// A member who does not show the identity they joined with
-  ///
-  /// In en, this message translates to:
-  /// **'{name} hasn\'t let members of {community} find them yet.'**
-  String vtcTrustNotFindable(String name, String community);
-
   /// Asks whether a directory entry is the contact
   ///
   /// In en, this message translates to:

@@ -39,7 +39,6 @@ class _FakeTrustService extends Fake implements VtcTrustService {
   final List<VtcMemberLink> stored = [];
   List<DirectoryEntry> found = const [
     DirectoryEntry(entryId: 'dir_bob', displayName: 'Bob Meyer', did: _bob),
-    DirectoryEntry(entryId: 'dir_bobby', displayName: 'Bobby'),
   ];
   PublishedRelationship? outgoing;
   PublishedRelationship? incoming;
@@ -166,10 +165,6 @@ void main() {
     await tapText(tester, 'Vouch in a community');
 
     expect(find.text('Find Bob in Football club'), findsOneWidget);
-    expect(
-      find.text("Bobby hasn't let members of Football club find them yet."),
-      findsOneWidget,
-    );
 
     await tapText(tester, 'Bob Meyer');
     expect(find.text('Is this Bob?'), findsOneWidget);

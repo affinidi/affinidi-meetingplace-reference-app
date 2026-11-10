@@ -15,6 +15,7 @@ const _club = 'did:webvh:QmClub:vtc.example';
 const _me = 'did:webvh:QmMe:vta.example:me';
 const _bob = 'did:webvh:QmBob:vta.example:bob';
 const _carol = 'did:webvh:QmCarol:vta.example:carol';
+const _dan = 'did:webvh:QmDan:vta.example:dan';
 
 const _group = VtcGroup(
   groupId: 'g1',
@@ -56,7 +57,12 @@ class _FakeTrustService extends Fake implements VtcTrustService {
       did: _carol,
       role: 'custom:coach',
     ),
-    DirectoryEntry(entryId: 'dir_dan', displayName: 'Dan', role: 'member'),
+    DirectoryEntry(
+      entryId: 'dir_dan',
+      displayName: 'Dan',
+      did: _dan,
+      role: 'member',
+    ),
     DirectoryEntry(entryId: 'dir_anon', did: 'did:webvh:QmAnon:vta.example'),
   ];
   Map<String, VtcEdges> edges = {
@@ -144,16 +150,7 @@ void main() {
       findsNothing,
     );
     expect(inMember('dir_carol', find.byType(FilledButton)), findsNothing);
-    expect(
-      inMember(
-        'dir_dan',
-        find.textContaining(
-          "Dan hasn't let members of Football club find them yet.",
-        ),
-      ),
-      findsOneWidget,
-    );
-    expect(inMember('dir_dan', find.byType(FilledButton)), findsNothing);
+    expect(inMember('dir_dan', find.text('Vouch')), findsOneWidget);
     expect(inMember('dir_anon', find.text('Unnamed member')), findsOneWidget);
     expect(find.textContaining('did:'), findsNothing);
   });
@@ -199,15 +196,7 @@ void main() {
       findsOneWidget,
       reason: 'a role the community defined, by its own name',
     );
-    expect(
-      inMember(
-        'dir_dan',
-        find.text(
-          "Member\nDan hasn't let members of Football club find them yet.",
-        ),
-      ),
-      findsOneWidget,
-    );
+    expect(inMember('dir_dan', find.text('Member')), findsOneWidget);
     expect(
       inMember('dir_anon', find.byKey(const Key('vtc_member_role_dir_anon'))),
       findsNothing,

@@ -265,6 +265,17 @@ void main() {
       expect(found.map((e) => e.entryId), ['dir_bob']);
     });
 
+    test('leaves out members who have not let members find them', () async {
+      vtc.found = const [
+        DirectoryEntry(entryId: 'dir_bob', displayName: 'Bob', did: _bob),
+        DirectoryEntry(entryId: 'dir_carol', displayName: 'Carol'),
+      ];
+
+      final found = await service.findMembers(_club, query: 'o');
+
+      expect(found.map((e) => e.entryId), ['dir_bob']);
+    });
+
     test('says when a search is too short', () {
       vtc.refusal = MeetingPlaceVtcSDKException.refused(
         DirectoryTask.queryTooShort,
@@ -332,6 +343,29 @@ void main() {
         expect(members.map((m) => m.entryId), ['dir_bob']);
       },
     );
+
+    test('leaves out members who have not let members find them', () async {
+      vtc
+        ..groupMembersList = const [
+          VtcGroupMember(entryId: 'dir_bob', state: 'active'),
+          VtcGroupMember(entryId: 'dir_carol', state: 'active'),
+        ]
+        ..entries = const {
+          'dir_bob': DirectoryEntry(
+            entryId: 'dir_bob',
+            displayName: 'Bob',
+            did: _bob,
+          ),
+          'dir_carol': DirectoryEntry(
+            entryId: 'dir_carol',
+            displayName: 'Carol',
+          ),
+        };
+
+      final members = await service.groupMembers(_club, groupId: 'g1');
+
+      expect(members.map((m) => m.entryId), ['dir_bob']);
+    });
 
     test('says when the group hides its members', () {
       vtc.refusal = MeetingPlaceVtcSDKException.refused('permissionDenied');
@@ -425,7 +459,10 @@ void main() {
             for (final id in ids) VtcGroupMember(entryId: id, state: 'active'),
           ],
         }
-        ..entries = {for (final id in ids) id: DirectoryEntry(entryId: id)};
+        ..entries = {
+          for (final id in ids)
+            id: DirectoryEntry(entryId: id, did: 'did:webvh:Qm$id:vta.example'),
+        };
 
       final members = await service.communityMembers(_club);
 

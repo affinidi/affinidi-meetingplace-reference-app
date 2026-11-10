@@ -3825,18 +3825,6 @@
 	"@vtcTrustUnnamed": {
 		"description": "A member who shows no name"
 	},
-	"vtcTrustNotFindable": "{name} hasn't let members of {community} find them yet.",
-	"@vtcTrustNotFindable": {
-		"description": "A member who does not show the identity they joined with",
-		"placeholders": {
-			"name": {
-				"type": "String"
-			},
-			"community": {
-				"type": "String"
-			}
-		}
-	},
 	"vtcTrustConfirmMatchTitle": "Is this {contact}?",
 	"@vtcTrustConfirmMatchTitle": {
 		"description": "Asks whether a directory entry is the contact",

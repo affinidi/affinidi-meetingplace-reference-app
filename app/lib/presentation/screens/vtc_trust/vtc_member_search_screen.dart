@@ -141,19 +141,14 @@ class VtcMemberSearchScreen extends HookConsumerWidget {
                         entry.displayName ??
                         entry.nickname ??
                         l10n.vtcTrustUnnamed;
-                    final isFindable = entry.did != null;
                     return ListTile(
                       key: Key('vtc_member_${entry.entryId}'),
-                      enabled: isFindable,
                       leading: VtcMemberAvatar(
                         communityDid: communityDid,
                         entry: entry,
                       ),
                       title: Text(name),
-                      subtitle: isFindable
-                          ? null
-                          : Text(l10n.vtcTrustNotFindable(name, communityName)),
-                      onTap: isFindable ? () => pick(entry) : null,
+                      onTap: () => pick(entry),
                     );
                   },
                 ),
