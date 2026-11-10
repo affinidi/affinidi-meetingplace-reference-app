@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../application/services/identities_service/identities_service.dart';
+import '../../../domain/models/vtc/vtc_group_card.dart';
 import '../../../domain/models/vtc/vtc_membership_entry.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../l10n/app_localizations.dart';
@@ -34,7 +35,7 @@ class MembershipCredentialsList extends ConsumerWidget {
         child: Center(child: CircularProgressIndicator.adaptive()),
       );
     }
-    if (state.entries.isEmpty) {
+    if (state.entries.isEmpty && state.groupCards.isEmpty) {
       return Padding(
         padding: const EdgeInsets.all(24),
         child: Text(
@@ -61,6 +62,13 @@ class MembershipCredentialsList extends ConsumerWidget {
         l10n.membershipCredentialsSaved,
       null => null,
     };
+    // The communities whose group cards are shown after their own card.
+    final placed = <String>{};
+    Widget groupRow(VtcGroupCard card) => GroupCredentialRow(
+      key: Key('group_credential_${card.key}'),
+      card: card,
+      status: state.statuses[card.key],
+    );
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
@@ -75,13 +83,20 @@ class MembershipCredentialsList extends ConsumerWidget {
                 color: context.colorScheme.onSurfaceVariant,
               ),
             ),
-          for (final entry in state.entries)
+          for (final entry in state.entries) ...[
             MembershipCredentialRow(
               key: Key('membership_credential_${entry.key}'),
               entry: entry,
               status: state.statuses[entry.key],
               onTap: onOpen == null ? null : () => onOpen!(entry),
             ),
+            // A group's card follows the first card held of its community.
+            if (entry.left == null && placed.add(entry.card.issuer))
+              for (final card in state.groupCards)
+                if (card.communityDid == entry.card.issuer) groupRow(card),
+          ],
+          for (final card in state.groupCards)
+            if (!placed.contains(card.communityDid)) groupRow(card),
         ],
       ),
     );
@@ -153,6 +168,75 @@ class MembershipCredentialRow extends ConsumerWidget {
           ),
           MembershipStatusChip(
             key: Key('membership_status_${entry.key}'),
+            status: status,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// One card a community's group issued: the group, its community, until
+/// when it holds, and its state.
+class GroupCredentialRow extends StatelessWidget {
+  const GroupCredentialRow({
+    super.key,
+    required this.card,
+    required this.status,
+  });
+
+  final VtcGroupCard card;
+
+  /// What the group's community says of it; null while being checked.
+  final VtcCardStatus? status;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colors = context.colorScheme;
+    final until = card.membership.validUntil;
+    final community = card.communityName ?? l10n.membershipCredentialUnnamed;
+
+    return AppCard(
+      padding: const EdgeInsets.symmetric(
+        horizontal: McSpacing.s4,
+        vertical: McSpacing.s3,
+      ),
+      child: Row(
+        spacing: 12,
+        children: [
+          Icon(McIcons.group, color: colors.onSurface),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 4,
+              children: [
+                Text(
+                  card.groupName ?? l10n.groupCredentialUnnamed,
+                  style: context.textTheme.titleMedium?.copyWith(
+                    color: colors.onSurface,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Text(
+                  [
+                    l10n.groupCredentialOf(community),
+                    if (until != null)
+                      l10n.membershipCredentialUntil(
+                        DateFormat.yMMMd(
+                          l10n.localeName,
+                        ).format(until.toLocal()),
+                      ),
+                  ].join(' · '),
+                  style: context.textTheme.bodySmall?.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          MembershipStatusChip(
+            key: Key('group_status_${card.key}'),
             status: status,
           ),
         ],

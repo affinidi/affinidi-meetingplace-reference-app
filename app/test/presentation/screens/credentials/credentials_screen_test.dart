@@ -362,6 +362,161 @@ void main() {
     expect(network.statusListFetches, 2);
   });
 
+  group("a community group's card", () {
+    const groupDid = 'did:webvh:QmGroup:vtc.example:group-dids:g1';
+    // Ada's persona in the chess club, which signs as her there.
+    final persona = Ed25519DidKeySigner.generate();
+    final groupCard = {
+      'id': 'urn:uuid:hiking',
+      'type': ['VerifiableCredential', 'MembershipCredential'],
+      'issuer': groupDid,
+      'validUntil': '2027-01-02T10:00:00Z',
+      'credentialSubject': {'id': persona.did},
+    };
+    final grant = {
+      'id': 'urn:uuid:grant',
+      'type': ['VerifiableCredential', 'AuthorityCredential'],
+      'issuer': fakeVtcDid,
+      'validUntil': '2999-01-01T00:00:00Z',
+      'credentialSubject': {'id': groupDid},
+      'credentialStatus': FakeVtcNetwork.statusEntry(5),
+    };
+
+    Map<String, dynamic> described(Map<String, dynamic> credential) => {
+      'id': credential['id'],
+      'types': credential['type'],
+      'issuerDid': credential['issuer'],
+      'validUntil': credential['validUntil'],
+    };
+
+    setUp(() async {
+      // Ada is a member of the chess club, whose hiking group admitted her.
+      await SecureStorageVtcRepository().saveCommunity(
+        VtcCommunity(
+          communityDid: fakeVtcDid,
+          personaDid: persona.did,
+          contextId: 'vta',
+          name: 'Chess club',
+          signingKeyId: '${persona.did}#key-1',
+        ),
+      );
+      network.vta
+        ..persona = persona
+        ..answers[VtaTask.vaultUpsert] = {
+          'entry': {'id': 'entry-1'},
+        };
+      final cards = network.vta.answers[VtaTask.credentialsQuery]!;
+      network.vta.answerTo[VtaTask.credentialsQuery] = (payload) =>
+          switch (payload['type']) {
+            'MembershipCredential' => {
+              'credentials': [described(chessCard), described(groupCard)],
+            },
+            'AuthorityCredential' => {
+              'credentials': [described(grant)],
+            },
+            // The membership cards, as the VTA keeps them.
+            _ => cards,
+          };
+      network.vta.answerTo[VtaTask.credentialsGet] = (payload) =>
+          switch (payload['id']) {
+            'urn:uuid:hiking' => {'credential': groupCard},
+            'urn:uuid:grant' => {'credential': grant},
+            _ => {'credential': chessCard},
+          };
+      network.answerTo[GroupTask.list] = (_) => {
+        'items': [
+          {
+            'group': {
+              'groupId': 'g1',
+              'groupDid': groupDid,
+              'name': 'Hiking club',
+              'visibility': 'members',
+              'showMembers': 'groupMembers',
+            },
+            'myMembership': 'member',
+          },
+        ],
+      };
+    });
+
+    Finder row(String key) => find.byKey(Key(key));
+
+    testWidgets("shows after its community's card, with its state", (
+      tester,
+    ) async {
+      await pumpScreen(tester);
+
+      final hiking = row('group_credential_urn:uuid:hiking');
+      expect(
+        find.descendant(of: hiking, matching: find.text('Hiking club')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: hiking,
+          matching: find.text('group of Chess club · until Jan 2, 2027'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('group_status_urn:uuid:hiking')),
+          matching: find.text('Valid'),
+        ),
+        findsOneWidget,
+      );
+      // Right after the chess club's card, before the card of one left.
+      final top = tester.getTopLeft(hiking).dy;
+      expect(
+        top,
+        greaterThan(
+          tester.getTopLeft(row('membership_credential_urn:uuid:chess')).dy,
+        ),
+      );
+      expect(
+        top,
+        lessThan(
+          tester.getTopLeft(row('membership_credential_urn:uuid:football')).dy,
+        ),
+      );
+
+      // Shown only: it opens nothing.
+      await tester.tap(hiking);
+      await settle(tester);
+      expect(find.text('Issued by Chess club'), findsNothing);
+    });
+
+    testWidgets('says the community revoked its grant to the group', (
+      tester,
+    ) async {
+      network.revoked.add(5);
+
+      await pumpScreen(tester);
+
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('group_status_urn:uuid:hiking')),
+          matching: find.text('Revoked'),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('shows a group it cannot name', (tester) async {
+      network.answerTo.remove(GroupTask.list);
+
+      await pumpScreen(tester);
+
+      expect(
+        find.descendant(
+          of: row('group_credential_urn:uuid:hiking'),
+          matching: find.text('A group'),
+        ),
+        findsOneWidget,
+      );
+    });
+  });
+
   testWidgets("says when a community's list cannot be read", (tester) async {
     network.isStatusListDown = true;
 

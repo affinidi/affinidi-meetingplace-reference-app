@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../../domain/models/vtc/vtc_group_card.dart';
 import '../../../domain/models/vtc/vtc_membership_entry.dart';
 
 part 'membership_credentials_state.freezed.dart';
@@ -26,11 +27,15 @@ abstract class MembershipCredentialsState with _$MembershipCredentialsState {
     /// The member's membership cards: held on their VTA, then left.
     @Default(<VtcMembershipEntry>[]) List<VtcMembershipEntry> entries,
 
+    /// The cards the groups of the member's communities issued, as last read
+    /// from the VTA.
+    @Default(<VtcGroupCard>[]) List<VtcGroupCard> groupCards,
+
     /// When the cards were read from the VTA.
     DateTime? readAt,
 
-    /// What each card's community said of it, by [VtcMembershipEntry.key];
-    /// none while it is being checked.
+    /// What each card's community said of it, by [VtcMembershipEntry.key]
+    /// or [VtcGroupCard.key]; none while it is being checked.
     @Default(<String, VtcCardStatus>{}) Map<String, VtcCardStatus> statuses,
 
     /// The cards being checked with their community right now.

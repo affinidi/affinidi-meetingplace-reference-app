@@ -1713,6 +1713,19 @@
 			}
 		}
 	},
+	"groupCredentialUnnamed": "A group",
+	"@groupCredentialUnnamed": {
+		"description": "Stands for a community group whose name is not known"
+	},
+	"groupCredentialOf": "group of {community}",
+	"@groupCredentialOf": {
+		"description": "Which community a group card's group belongs to",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			}
+		}
+	},
 	"membershipCredentialLeft": "left {date}",
 	"@membershipCredentialLeft": {
 		"description": "When the member left the community of a membership card",
