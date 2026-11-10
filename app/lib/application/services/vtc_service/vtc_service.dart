@@ -136,6 +136,15 @@ class VtcService {
   /// How long a refreshed membership is not asked again in the background.
   static const _refreshInterval = Duration(hours: 1);
 
+  /// The persona signers readied, by VTA, community and persona, with when
+  /// each was readied, so a screen sending many Trust Tasks asks the VTA
+  /// for the persona's vault entry once rather than before each task.
+  final Map<String, (Future<SignInPersona>, DateTime)> _signers = {};
+
+  /// How long a readied persona signer is used before the VTA is asked for
+  /// its vault entry again, e.g. in case the entry was removed meanwhile.
+  static const _signerLifetime = Duration(minutes: 10);
+
   /// The linked VTA, or null when the phone is not linked.
   Future<LinkedVta?> linkedVta() => _repository.getLinkedVta();
 
@@ -256,6 +265,7 @@ class VtcService {
     final linkedVta = await _repository.getLinkedVta();
     if (linkedVta != null) await _vtaClient(linkedVta).signOut();
     _client = null;
+    _signers.clear();
     await _forgetConnectionKeys();
     await _repository.clear();
     await _userVerificationKey.reset();
@@ -2560,11 +2570,34 @@ class VtcService {
   Future<TrustTaskSigner> approvalSigner() => _userVerificationKey.signer();
 
   Future<SignInPersona> _personaSigner(VtaClient vta, VtcCommunity community) {
-    return _sdk.personaSigner(
+    final key = [
+      vta.vtaDid,
+      community.communityDid,
+      community.personaDid,
+      community.contextId,
+    ].join(' ');
+    if (_signers[key] case (
+      final signer,
+      final readiedAt,
+    ) when DateTime.now().difference(readiedAt) < _signerLifetime) {
+      return signer;
+    }
+    final signer = _sdk.personaSigner(
       vta: vta,
       communityDid: community.communityDid,
       persona: _persona(community),
     );
+    _signers[key] = (signer, DateTime.now());
+    unawaited(
+      signer.then(
+        (_) {},
+        onError: (Object _) {
+          // Only this failed attempt is forgotten, not a later one's signer.
+          if (identical(_signers[key]?.$1, signer)) _signers.remove(key);
+        },
+      ),
+    );
+    return signer;
   }
 
   /// Keeps [cards] on the VTA, and returns those it kept. A card that is

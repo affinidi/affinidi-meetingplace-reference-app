@@ -1052,6 +1052,26 @@ void main() {
         );
       });
 
+      test('readies the persona signer once for many tasks', () async {
+        network.answerTo[DirectoryTask.entriesShow] = (payload) => {
+          'entry': {
+            'entryId': payload['entryId'],
+            'fields': {'displayName': 'Bob'},
+          },
+        };
+        network.vta.received.clear();
+
+        await service.memberEntry(fakeVtcDid, entryId: 'dir_bob');
+        await service.memberEntry(fakeVtcDid, entryId: 'dir_carol');
+
+        expect(
+          network.vta.received.map((request) => request['type']),
+          [VtaTask.signTrustTask, VtaTask.signTrustTask],
+          reason: 'the vault entry readied on joining is not asked again',
+        );
+        expect(network.memberRequests, hasLength(2));
+      });
+
       test('reads one member entry', () async {
         network.answerTo[DirectoryTask.entriesShow] = (payload) => {
           'entry': {
