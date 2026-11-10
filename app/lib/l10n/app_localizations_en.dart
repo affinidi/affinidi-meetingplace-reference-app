@@ -4745,6 +4745,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get communitiesNone => 'You have not joined a community yet.';
 
   @override
+  String get communitiesJoinHint =>
+      'Scan or enter a community\'s code to join it and chat with its members.';
+
+  @override
   String get communityPending => 'Pending';
 
   @override

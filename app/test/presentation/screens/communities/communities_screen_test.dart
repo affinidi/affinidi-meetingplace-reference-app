@@ -13,6 +13,7 @@ import 'package:mpx_flutter_reference_app/presentation/screens/communities/commu
 import 'package:mpx_flutter_reference_app/presentation/screens/communities/removal_notice.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/credentials/membership_credentials_list.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_findable_controller.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_sign_in/vtc_sign_in_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_vetting_desk/vtc_vetting_desk_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
@@ -72,13 +73,27 @@ Future<void> saveCommunities() async {
 
 void main() {
   group('When opening the Communities tab', () {
-    testWidgets('says the member has joined none yet', (tester) async {
+    testWidgets('invites a member with no community to join one', (
+      tester,
+    ) async {
       final l10n = await getL10n();
       await openCommunitiesTab(tester);
 
       expect(find.text(l10n.communitiesSubtitle), findsOneWidget);
       expect(find.text(l10n.communitiesNone), findsOneWidget);
-      expect(find.byKey(const Key('join_community_button')), findsOneWidget);
+      expect(find.text(l10n.communitiesJoinHint), findsOneWidget);
+      expect(find.byKey(const Key('join_community_cta')), findsOneWidget);
+      // One way to join, not two.
+      expect(find.byKey(const Key('join_community_button')), findsNothing);
+    });
+
+    testWidgets('joins a community from the call to action', (tester) async {
+      await openCommunitiesTab(tester);
+
+      await tester.tap(find.byKey(const Key('join_community_cta')));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(VtcJoinScreen), findsOneWidget);
     });
 
     testWidgets('lists joined and pending communities', (tester) async {
@@ -105,6 +120,8 @@ void main() {
         findsNothing,
       );
       expect(find.text(l10n.communitiesNone), findsNothing);
+      expect(find.byKey(const Key('join_community_cta')), findsNothing);
+      expect(find.byKey(const Key('join_community_button')), findsOneWidget);
     });
 
     testWidgets('draws each community as a panel, pending in warning', (

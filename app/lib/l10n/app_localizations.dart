@@ -6996,6 +6996,12 @@ abstract class AppLocalizations {
   /// **'You have not joined a community yet.'**
   String get communitiesNone;
 
+  /// Call to action on the Communities tab when the member belongs to no community and applied to none
+  ///
+  /// In en, this message translates to:
+  /// **'Scan or enter a community\'s code to join it and chat with its members.'**
+  String get communitiesJoinHint;
+
   /// Chip on a community the member applied to, while it decides
   ///
   /// In en, this message translates to:

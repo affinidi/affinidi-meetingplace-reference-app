@@ -5169,6 +5169,10 @@
 	"@communitiesNone": {
 		"description": "Shown on the Communities tab when the member belongs to no community and applied to none"
 	},
+	"communitiesJoinHint": "Scan or enter a community's code to join it and chat with its members.",
+	"@communitiesJoinHint": {
+		"description": "Call to action on the Communities tab when the member belongs to no community and applied to none"
+	},
 	"communityPending": "Pending",
 	"@communityPending": {
 		"description": "Chip on a community the member applied to, while it decides"

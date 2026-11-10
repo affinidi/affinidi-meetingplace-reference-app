@@ -29,6 +29,7 @@ class CommunitiesScreen extends ConsumerWidget {
     final l10n = context.l10n;
     final communities = ref.watch(communitiesControllerProvider);
     final controller = ref.read(communitiesControllerProvider.notifier);
+    final hasNone = communities.value?.isEmpty ?? false;
 
     // Joining sends, withdraws or decides an application, which fires no
     // membership change: read again once it closes.
@@ -57,18 +58,22 @@ class CommunitiesScreen extends ConsumerWidget {
                 title: l10n.tabsTitle(Tabs.contacts.name),
                 subtitle: l10n.communitiesSubtitle,
               ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: McSpacing.s4),
-                  child: TextButton.icon(
-                    key: const Key('join_community_button'),
-                    icon: const Icon(McIcons.add),
-                    label: Text(l10n.vtcJoinMenuTitle),
-                    onPressed: join,
+              // With no community yet, the call to action below joins one.
+              if (!hasNone)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: McSpacing.s4,
+                    ),
+                    child: TextButton.icon(
+                      key: const Key('join_community_button'),
+                      icon: const Icon(McIcons.add),
+                      label: Text(l10n.vtcJoinMenuTitle),
+                      onPressed: join,
+                    ),
                   ),
                 ),
-              ),
               switch (communities) {
                 AsyncData(value: final communities)
                     when communities.isNotEmpty =>
@@ -90,7 +95,8 @@ class CommunitiesScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
-                AsyncData() || AsyncError() => Padding(
+                AsyncData() => _JoinCallToAction(onJoin: join),
+                AsyncError() => Padding(
                   padding: const EdgeInsets.all(24),
                   child: Text(
                     l10n.communitiesNone,
@@ -108,6 +114,49 @@ class CommunitiesScreen extends ConsumerWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Invites a member with no community on the phone yet to join one.
+class _JoinCallToAction extends StatelessWidget {
+  const _JoinCallToAction({required this.onJoin});
+
+  final VoidCallback onJoin;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colors = context.colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.all(McSpacing.s6),
+      child: Column(
+        spacing: McSpacing.s3,
+        children: [
+          Icon(McIcons.community, size: 48, color: colors.onSurfaceVariant),
+          Text(
+            l10n.communitiesNone,
+            textAlign: TextAlign.center,
+            style: context.textTheme.titleMedium?.copyWith(
+              color: colors.onSurface,
+            ),
+          ),
+          Text(
+            l10n.communitiesJoinHint,
+            textAlign: TextAlign.center,
+            style: context.textTheme.bodyMedium?.copyWith(
+              color: colors.onSurfaceVariant,
+            ),
+          ),
+          FilledButton.icon(
+            key: const Key('join_community_cta'),
+            icon: const Icon(McIcons.add),
+            label: Text(l10n.vtcJoinMenuTitle),
+            onPressed: onJoin,
+          ),
+        ],
       ),
     );
   }
