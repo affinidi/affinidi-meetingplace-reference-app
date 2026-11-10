@@ -91,7 +91,12 @@ class VtcCommunityProfile extends HookWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: McSpacing.s3,
               children: [
-                Icon(McIcons.identities, size: 20, color: mc.textSecondary),
+                FirstLineIcon(
+                  McIcons.identities,
+                  size: 20,
+                  color: mc.textSecondary,
+                  style: context.textTheme.bodyMedium,
+                ),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

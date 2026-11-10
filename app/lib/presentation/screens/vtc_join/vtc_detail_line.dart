@@ -35,7 +35,12 @@ class VtcDetailLine extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: McSpacing.s2,
       children: [
-        Icon(icon, size: 16, color: mc.textSecondary),
+        FirstLineIcon(
+          icon,
+          size: 16,
+          color: mc.textSecondary,
+          style: onboardingNote(context),
+        ),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

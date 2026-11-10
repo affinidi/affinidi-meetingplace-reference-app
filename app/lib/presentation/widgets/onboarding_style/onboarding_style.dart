@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import '../../../infrastructure/extensions/build_context_extensions.dart';
@@ -354,6 +356,38 @@ class GlassCard extends StatelessWidget {
 TextStyle? onboardingNote(BuildContext context) => context.textTheme.bodySmall
     ?.copyWith(color: context.mcColors.textSecondary);
 
+/// An [icon] at the start of a top-aligned row, centred on the first line
+/// of text set in [style]: the body styles' lines are taller than the icons
+/// beside them, which would otherwise sit above the text.
+class FirstLineIcon extends StatelessWidget {
+  const FirstLineIcon(
+    this.icon, {
+    super.key,
+    required this.size,
+    required this.color,
+    required this.style,
+  });
+
+  final IconData icon;
+  final double size;
+  final Color color;
+  final TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
+    final fontSize =
+        style?.fontSize ?? DefaultTextStyle.of(context).style.fontSize!;
+    final lineHeight =
+        MediaQuery.textScalerOf(context).scale(fontSize) * (style?.height ?? 1);
+    return SizedBox(
+      height: max(lineHeight, size),
+      child: Center(
+        child: Icon(icon, size: size, color: color),
+      ),
+    );
+  }
+}
+
 /// A line in a glass card: an icon, a title, and an optional
 /// explanation.
 class OnboardingLine extends StatelessWidget {
@@ -387,7 +421,15 @@ class OnboardingLine extends StatelessWidget {
           : CrossAxisAlignment.center,
       spacing: 12,
       children: [
-        Icon(icon, size: 20, color: mc.textPrimary),
+        if (trailing == null)
+          FirstLineIcon(
+            icon,
+            size: 20,
+            color: mc.textPrimary,
+            style: context.textTheme.bodyMedium,
+          )
+        else
+          Icon(icon, size: 20, color: mc.textPrimary),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
