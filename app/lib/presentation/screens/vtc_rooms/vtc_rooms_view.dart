@@ -9,37 +9,39 @@ import '../../../infrastructure/providers/app_logger_provider.dart';
 import '../../../l10n/app_localizations.dart';
 import 'vtc_room_screen.dart';
 
-const _logKey = 'VtcRoomsScreen';
+const _logKey = 'VtcRoomsView';
 
 /// The community's data rooms as the member sees them: the places it
 /// offers them, such as through a group's room binding, to accept, and the
-/// rooms they are in. Opened from a membership card.
+/// rooms they are in. The Rooms tab of a community's page; pulled down, it
+/// reads them again.
 ///
 /// Only a failure's code is logged; never a room, a member or a DID.
-class VtcRoomsScreen extends HookConsumerWidget {
-  const VtcRoomsScreen({
-    super.key,
-    required this.communityDid,
-    this.communityName,
-  });
+class VtcRoomsView extends HookConsumerWidget {
+  const VtcRoomsView({super.key, required this.communityDid});
 
   final String communityDid;
-  final String? communityName;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
     final service = ref.read(vtcServiceProvider);
-    final reload = useState(0);
-    final accepting = useState<String?>(null);
-    final load = useMemoized(
-      () async => (
-        await service.roomOffers(communityDid),
-        await service.roomMemberships(communityDid),
-      ),
-      [reload.value],
+    Future<(RoomOffers, List<RoomMembership>)> read() async => (
+      await service.roomOffers(communityDid),
+      await service.roomMemberships(communityDid),
     );
-    final loaded = useFuture(load);
+    final load = useState(useMemoized(read));
+    final loaded = useFuture(load.value);
+    final accepting = useState<String?>(null);
+
+    Future<void> refresh() async {
+      load.value = read();
+      try {
+        await load.value;
+      } on Object {
+        // The tab says why in place of the rooms.
+      }
+    }
 
     Future<void> accept(RoomOffer offer) async {
       if (accepting.value != null) return;
@@ -50,7 +52,7 @@ class VtcRoomsScreen extends HookConsumerWidget {
         messenger.showSnackBar(
           SnackBar(content: Text(l10n.vtcRoomsAccepted(offer.label))),
         );
-        reload.value++;
+        load.value = read();
       } on Exception catch (error) {
         messenger.showSnackBar(
           SnackBar(content: Text(vtcRoomsFailureMessage(l10n, error))),
@@ -61,30 +63,17 @@ class VtcRoomsScreen extends HookConsumerWidget {
       }
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          l10n.vtcRoomsTitle,
-          style: context.textTheme.headlineMedium,
-        ),
-        actions: [
-          IconButton(
-            key: const Key('vtc_rooms_refresh'),
-            icon: const Icon(Icons.refresh),
-            tooltip: l10n.vtcJoinCheckAgain,
-            onPressed: loaded.connectionState == ConnectionState.waiting
-                ? null
-                : () => reload.value++,
-          ),
-        ],
-      ),
-      body: switch (loaded) {
+    if (!loaded.hasData && !loaded.hasError) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    return RefreshIndicator(
+      onRefresh: refresh,
+      child: switch (loaded) {
         AsyncSnapshot(hasError: true, :final error) => _Message(
           vtcRoomsFailureMessage(l10n, error),
         ),
         AsyncSnapshot(data: (final offers, final rooms)) => _Rooms(
           communityDid: communityDid,
-          communityName: communityName,
           offers: offers.open.toList(),
           // An offer not accepted yet is listed with the offers, and a
           // place the member left is gone.
@@ -98,7 +87,7 @@ class VtcRoomsScreen extends HookConsumerWidget {
           accepting: accepting.value,
           onAccept: accept,
         ),
-        _ => const Center(child: CircularProgressIndicator()),
+        _ => const SizedBox.shrink(),
       },
     );
   }
@@ -125,7 +114,6 @@ String vtcRoomsFailureMessage(AppLocalizations l10n, Object? error) =>
 class _Rooms extends StatelessWidget {
   const _Rooms({
     required this.communityDid,
-    required this.communityName,
     required this.offers,
     required this.rooms,
     required this.accepting,
@@ -133,7 +121,6 @@ class _Rooms extends StatelessWidget {
   });
 
   final String communityDid;
-  final String? communityName;
   final List<RoomOffer> offers;
   final List<RoomMembership> rooms;
   final String? accepting;
@@ -144,18 +131,9 @@ class _Rooms extends StatelessWidget {
     final l10n = context.l10n;
     if (offers.isEmpty && rooms.isEmpty) return _Message(l10n.vtcRoomsNone);
     return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(16),
       children: [
-        if (communityName case final name?)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: Text(
-              name,
-              style: context.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
         if (offers.isNotEmpty) ...[
           _Heading(l10n.vtcRoomsOffersHeading),
           for (final offer in offers)
@@ -303,16 +281,26 @@ class _RoomCard extends StatelessWidget {
   }
 }
 
+/// A message in place of the rooms, such as why they can't be shown;
+/// scrollable, so pulling it down reads them again.
 class _Message extends StatelessWidget {
   const _Message(this.text);
 
   final String text;
 
   @override
-  Widget build(BuildContext context) => Center(
-    child: Padding(
-      padding: const EdgeInsets.all(24),
-      child: Text(text, textAlign: TextAlign.center),
-    ),
+  Widget build(BuildContext context) => CustomScrollView(
+    physics: const AlwaysScrollableScrollPhysics(),
+    slivers: [
+      SliverFillRemaining(
+        hasScrollBody: false,
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(text, textAlign: TextAlign.center),
+          ),
+        ),
+      ),
+    ],
   );
 }

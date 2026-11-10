@@ -4005,12 +4005,6 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get vtcRoomsOpen => 'Rooms';
-
-  @override
-  String get vtcRoomsTitle => 'Rooms';
-
-  @override
   String get vtcRoomsNone =>
       'No rooms yet. When a group you\'re in is given a room, it\'s offered to you here.';
 
@@ -4906,4 +4900,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get communityGroupsTab => 'Groups';
+
+  @override
+  String get communityRoomsTab => 'Rooms';
 }

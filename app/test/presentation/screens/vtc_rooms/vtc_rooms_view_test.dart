@@ -8,7 +8,7 @@ import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_s
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_logger_provider.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_rooms/vtc_room_screen.dart';
-import 'package:mpx_flutter_reference_app/presentation/screens/vtc_rooms/vtc_rooms_screen.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/vtc_rooms/vtc_rooms_view.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 
 import '../../../mocks/fake_app_logger.dart';
@@ -167,12 +167,12 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  group('VtcRoomsScreen', () {
+  group('VtcRoomsView', () {
     testWidgets('accepts an offer, then lists the room', (tester) async {
       service.offers = [_offer()];
       await pump(
         tester,
-        const VtcRoomsScreen(communityDid: _club, communityName: 'DevCon'),
+        const Scaffold(body: VtcRoomsView(communityDid: _club)),
       );
 
       expect(find.text('Offered to you'), findsOneWidget);
@@ -194,7 +194,10 @@ void main() {
       service.offers = [_offer(actions: both)];
       // The community lists the offer among the member's places too.
       service.rooms = [_room(actions: both, state: RoomMemberState.offered)];
-      await pump(tester, const VtcRoomsScreen(communityDid: _club));
+      await pump(
+        tester,
+        const Scaffold(body: VtcRoomsView(communityDid: _club)),
+      );
 
       expect(find.text('DevCon 2026 — Talks'), findsOneWidget);
       expect(find.text('Read and write'), findsOneWidget);
@@ -208,16 +211,39 @@ void main() {
       service.rooms = [
         _room(actions: {RoomAction.read, RoomAction.write}),
       ];
-      await pump(tester, const VtcRoomsScreen(communityDid: _club));
+      await pump(
+        tester,
+        const Scaffold(body: VtcRoomsView(communityDid: _club)),
+      );
 
       expect(find.text('Your rooms'), findsOneWidget);
       expect(find.text('Read and write'), findsOneWidget);
     });
 
     testWidgets('says so when there are no rooms', (tester) async {
-      await pump(tester, const VtcRoomsScreen(communityDid: _club));
+      await pump(
+        tester,
+        const Scaffold(body: VtcRoomsView(communityDid: _club)),
+      );
 
       expect(find.textContaining('No rooms yet'), findsOneWidget);
+    });
+
+    testWidgets('pulled down, lists a room offered since', (tester) async {
+      await pump(
+        tester,
+        const Scaffold(body: VtcRoomsView(communityDid: _club)),
+      );
+      service.offers = [_offer()];
+
+      await tester.fling(
+        find.textContaining('No rooms yet'),
+        const Offset(0, 300),
+        1000,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('vtc_room_offer_$_talks')), findsOneWidget);
     });
   });
 

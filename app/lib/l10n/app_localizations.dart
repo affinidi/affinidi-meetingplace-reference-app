@@ -5928,18 +5928,6 @@ abstract class AppLocalizations {
   /// **'You\'re already a member of {name}.'**
   String vtcJoinAlreadyMember(String name);
 
-  /// Button on a membership card that opens the community's data rooms the member is offered or in
-  ///
-  /// In en, this message translates to:
-  /// **'Rooms'**
-  String get vtcRoomsOpen;
-
-  /// Title of the community's data rooms, as the member sees them
-  ///
-  /// In en, this message translates to:
-  /// **'Rooms'**
-  String get vtcRoomsTitle;
-
   /// Shown when the community offers the member no room and they are in none
   ///
   /// In en, this message translates to:
@@ -7235,6 +7223,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Groups'**
   String get communityGroupsTab;
+
+  /// Tab of a community's screen with the data rooms offered to the member there and those they are in
+  ///
+  /// In en, this message translates to:
+  /// **'Rooms'**
+  String get communityRoomsTab;
 }
 
 class _AppLocalizationsDelegate

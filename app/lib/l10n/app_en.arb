@@ -4120,14 +4120,6 @@
 			}
 		}
 	},
-	"vtcRoomsOpen": "Rooms",
-	"@vtcRoomsOpen": {
-		"description": "Button on a membership card that opens the community's data rooms the member is offered or in"
-	},
-	"vtcRoomsTitle": "Rooms",
-	"@vtcRoomsTitle": {
-		"description": "Title of the community's data rooms, as the member sees them"
-	},
 	"vtcRoomsNone": "No rooms yet. When a group you're in is given a room, it's offered to you here.",
 	"@vtcRoomsNone": {
 		"description": "Shown when the community offers the member no room and they are in none"
@@ -5308,5 +5300,9 @@
 	"communityGroupsTab": "Groups",
 	"@communityGroupsTab": {
 		"description": "Tab of a community's screen with the member's groups there and their chats"
+	},
+	"communityRoomsTab": "Rooms",
+	"@communityRoomsTab": {
+		"description": "Tab of a community's screen with the data rooms offered to the member there and those they are in"
 	}
 }

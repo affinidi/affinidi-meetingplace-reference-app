@@ -8,7 +8,7 @@ import '../../../application/services/vtc_service/vtc_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/extensions/vtc_exception_extensions.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
-import 'vtc_rooms_screen.dart';
+import 'vtc_rooms_view.dart';
 
 const _logKey = 'VtcRoomScreen';
 

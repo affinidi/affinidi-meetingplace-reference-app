@@ -14,6 +14,7 @@ import '../contacts/contacts_screen.dart';
 import '../contacts/contacts_screen_controller.dart';
 import '../vtc_groups/vtc_groups_view.dart';
 import '../vtc_join/vtc_findable_controller.dart';
+import '../vtc_rooms/vtc_rooms_view.dart';
 import '../vtc_vetting_desk/vtc_vetting_desk_screen.dart';
 import 'communities_controller.dart';
 import 'community_info_action.dart';
@@ -28,7 +29,8 @@ import 'removal_notice.dart';
 /// A community the member belongs to, under its logo if it gives one and
 /// its description, with what else it publishes about itself beside that,
 /// with its channels, its groups' chats, its members, the member's groups
-/// and their chats, the member's role and membership card there, and the
+/// and their chats, the data rooms offered to the member and those they
+/// are in, the member's role and membership card there, and the
 /// vetting desk for a vetter; its join phrase beside its name for an
 /// administrator. Opened from the Communities tab.
 class CommunityScreen extends HookConsumerWidget {
@@ -93,7 +95,7 @@ class CommunityScreen extends HookConsumerWidget {
     final canVet =
         canVetCheck.value ??
         (!canVetCheck.hasError && (community?.isVetter ?? false));
-    final tabCount = canVet ? 5 : 4;
+    final tabCount = canVet ? 6 : 5;
     // The tab on show stays on show as the Vetting tab comes and goes.
     final shownTab = useRef(0);
     final tabController = useTabController(
@@ -129,6 +131,7 @@ class CommunityScreen extends HookConsumerWidget {
               l10n.communityChannelsTab,
               l10n.communityMembersTab,
               l10n.communityGroupsTab,
+              l10n.communityRoomsTab,
               l10n.communityMembershipTab,
               if (canVet) l10n.communityVettingTab,
             ],
@@ -143,6 +146,7 @@ class CommunityScreen extends HookConsumerWidget {
                   communityName: name,
                 ),
                 VtcGroupsView(communityDid: communityDid, communityName: name),
+                VtcRoomsView(communityDid: communityDid),
                 CommunityMembershipView(
                   communityDid: communityDid,
                   communityName: name,
