@@ -12,6 +12,7 @@ import 'package:mpx_flutter_reference_app/navigation/tabs/tabs.dart';
 import 'package:mpx_flutter_reference_app/presentation/scaffolds/scaffold_with_nav_bar.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/credentials/membership_credentials_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/credentials/membership_credentials_state.dart';
+import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 
 import '../../fakes/fake_environment.dart';
 
@@ -60,6 +61,7 @@ void main() {
         ],
         child: MaterialApp.router(
           routerConfig: router,
+          theme: AppTheme.light,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
         ),
