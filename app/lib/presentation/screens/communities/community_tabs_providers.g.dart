@@ -299,6 +299,112 @@ final class CommunityVetterCardFamily extends $Family
   String toString() => r'communityVetterCardProvider';
 }
 
+/// The cards the groups of [communityDid] issued the member, as their VTA
+/// keeps them, each with what the community says of it now. Read while a
+/// community's page shows, and again as the cards change, never kept on the
+/// phone.
+
+@ProviderFor(communityGroupCards)
+const communityGroupCardsProvider = CommunityGroupCardsFamily._();
+
+/// The cards the groups of [communityDid] issued the member, as their VTA
+/// keeps them, each with what the community says of it now. Read while a
+/// community's page shows, and again as the cards change, never kept on the
+/// phone.
+
+final class CommunityGroupCardsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<(VtcGroupCard, VtcCardStatus)>>,
+          List<(VtcGroupCard, VtcCardStatus)>,
+          FutureOr<List<(VtcGroupCard, VtcCardStatus)>>
+        >
+    with
+        $FutureModifier<List<(VtcGroupCard, VtcCardStatus)>>,
+        $FutureProvider<List<(VtcGroupCard, VtcCardStatus)>> {
+  /// The cards the groups of [communityDid] issued the member, as their VTA
+  /// keeps them, each with what the community says of it now. Read while a
+  /// community's page shows, and again as the cards change, never kept on the
+  /// phone.
+  const CommunityGroupCardsProvider._({
+    required CommunityGroupCardsFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: _noRetry,
+         name: r'communityGroupCardsProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$communityGroupCardsHash();
+
+  @override
+  String toString() {
+    return r'communityGroupCardsProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<(VtcGroupCard, VtcCardStatus)>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<(VtcGroupCard, VtcCardStatus)>> create(Ref ref) {
+    final argument = this.argument as String;
+    return communityGroupCards(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is CommunityGroupCardsProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$communityGroupCardsHash() =>
+    r'590344fc9540f576f78abe5f311551016a77dc08';
+
+/// The cards the groups of [communityDid] issued the member, as their VTA
+/// keeps them, each with what the community says of it now. Read while a
+/// community's page shows, and again as the cards change, never kept on the
+/// phone.
+
+final class CommunityGroupCardsFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<List<(VtcGroupCard, VtcCardStatus)>>,
+          String
+        > {
+  const CommunityGroupCardsFamily._()
+    : super(
+        retry: _noRetry,
+        name: r'communityGroupCardsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// The cards the groups of [communityDid] issued the member, as their VTA
+  /// keeps them, each with what the community says of it now. Read while a
+  /// community's page shows, and again as the cards change, never kept on the
+  /// phone.
+
+  CommunityGroupCardsProvider call(String communityDid) =>
+      CommunityGroupCardsProvider._(argument: communityDid, from: this);
+
+  @override
+  String toString() => r'communityGroupCardsProvider';
+}
+
 /// Whether the member may vet for [communityDid]: they hold the
 /// [communityVetterCard].
 

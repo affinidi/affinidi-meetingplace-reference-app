@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../application/services/identities_service/identities_service.dart';
 import '../../../application/services/vtc_service/vtc_service.dart';
@@ -7,6 +8,7 @@ import '../../../domain/models/identity/identity.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../themes/tokens/mc_icons.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
+import '../credentials/membership_credentials_list.dart';
 import '../vtc_join/vtc_join_screen.dart';
 import '../vtc_join/vtc_membership_card_view.dart';
 import '../vtc_join/vtc_role_name.dart';
@@ -17,7 +19,8 @@ import 'community_tabs_providers.dart';
 /// The member's membership of a community: the identity they joined with,
 /// their role there and the cards it issued them, the membership card and a
 /// vetter's role card, as their VTA keeps them, each with its details
-/// folded away, and a way to leave it.
+/// folded away, the cards its groups issued them, each with its state, and
+/// a way to leave it.
 class CommunityMembershipView extends ConsumerWidget {
   const CommunityMembershipView({
     super.key,
@@ -37,6 +40,9 @@ class CommunityMembershipView extends ConsumerWidget {
     final vetterCard = ref
         .watch(communityVetterCardProvider(communityDid))
         .value;
+    // Shown once read; a card the VTA cannot give is not missed here.
+    final groupCards =
+        ref.watch(communityGroupCardsProvider(communityDid)).value ?? const [];
     final logoUrl = ref.watch(communityLogoProvider(communityDid)).value;
     final joinedAs = _joinedAs(ref);
 
@@ -98,6 +104,20 @@ class CommunityMembershipView extends ConsumerWidget {
               card: vetterCard,
               logoUrl: logoUrl,
               collapsible: true,
+            ),
+          for (final (card, status) in groupCards)
+            OnboardingLine(
+              key: Key('community_membership_group_${card.key}'),
+              icon: McIcons.group,
+              title: card.groupName ?? l10n.groupCredentialUnnamed,
+              subtitle: [
+                l10n.vtcGroupCredential,
+                if (card.membership.validUntil case final until?)
+                  l10n.membershipCredentialUntil(
+                    DateFormat.yMMMd(l10n.localeName).format(until.toLocal()),
+                  ),
+              ].join(' · '),
+              trailing: MembershipStatusChip(status: status),
             ),
           const SizedBox(height: 12),
           ElevatedButton(

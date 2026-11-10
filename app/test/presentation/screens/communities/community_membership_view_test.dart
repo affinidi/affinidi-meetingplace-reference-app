@@ -9,8 +9,10 @@ import 'package:mpx_flutter_reference_app/application/services/identities_servic
 import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
 import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_community.dart';
+import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_group_card.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_left_membership.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_membership_card.dart';
+import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_membership_entry.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_vetter_card.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/providers/app_logger_provider.dart';
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
@@ -55,6 +57,8 @@ class _FakeVtcService extends Fake implements VtcService {
     },
   );
   VtcVetterCard? heldVetterCard;
+  List<VtcGroupCard> groupCardsHeld = const [];
+  VtcCardState groupCardState = VtcCardState.valid;
   Exception? failure;
   final cardChanges = StreamController<void>.broadcast();
 
@@ -76,6 +80,14 @@ class _FakeVtcService extends Fake implements VtcService {
   @override
   Future<VtcVetterCard?> vetterCard(String communityDid) async =>
       heldVetterCard;
+
+  @override
+  Future<List<VtcGroupCard>> groupCards(String communityDid) async =>
+      groupCardsHeld;
+
+  @override
+  Future<VtcCardStatus> checkGroupCardStatus(VtcGroupCard card) async =>
+      VtcCardStatus(state: groupCardState);
 
   @override
   Future<CommunityProfile> readProfile(String communityDid) async =>
@@ -296,6 +308,80 @@ void main() {
       greaterThan(tester.getTopLeft(membershipCard).dy),
     );
     expect(find.byIcon(McIcons.chevronDown), findsNWidgets(2));
+  });
+
+  group('group cards', () {
+    VtcGroupCard groupCard({String? name}) => VtcGroupCard(
+      membership: VtcMembershipCard(
+        issuer: 'did:webvh:QmHiking:vtc.example:g1',
+        memberDid: _me,
+        validUntil: DateTime.utc(2027, 1, 2, 10),
+        credential: const {'id': 'urn:uuid:hiking'},
+      ),
+      communityDid: _club,
+      groupName: name,
+    );
+    Finder line() =>
+        find.byKey(const Key('community_membership_group_urn:uuid:hiking'));
+
+    testWidgets('lists each group\'s card under the community\'s, with its '
+        'state', (tester) async {
+      service.groupCardsHeld = [groupCard(name: 'Hiking club')];
+
+      await pumpView(tester);
+
+      for (final text in [
+        'Hiking club',
+        'Group credential · until Jan 2, 2027',
+        'Valid',
+      ]) {
+        expect(
+          find.descendant(of: line(), matching: find.text(text)),
+          findsOneWidget,
+        );
+      }
+      expect(
+        tester.getTopLeft(line()).dy,
+        greaterThan(
+          tester.getTopLeft(find.byKey(const Key('vtc_membership_card'))).dy,
+        ),
+      );
+    });
+
+    testWidgets('says when the community revoked its grant to the group', (
+      tester,
+    ) async {
+      service
+        ..groupCardsHeld = [groupCard(name: 'Hiking club')]
+        ..groupCardState = VtcCardState.revoked;
+
+      await pumpView(tester);
+
+      expect(
+        find.descendant(of: line(), matching: find.text('Revoked')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('shows a group it cannot name', (tester) async {
+      service.groupCardsHeld = [groupCard()];
+
+      final l10n = await pumpView(tester);
+
+      expect(
+        find.descendant(
+          of: line(),
+          matching: find.text(l10n.groupCredentialUnnamed),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('shows none when the member holds none', (tester) async {
+      await pumpView(tester);
+
+      expect(find.byIcon(McIcons.group), findsNothing);
+    });
   });
 
   testWidgets('shows no vetter card to a member who is not a vetter', (

@@ -3,7 +3,9 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../application/services/community_offer_service/community_offer_service.dart';
 import '../../../application/services/vtc_service/vtc_service.dart';
+import '../../../domain/models/vtc/vtc_group_card.dart';
 import '../../../domain/models/vtc/vtc_membership_card.dart';
+import '../../../domain/models/vtc/vtc_membership_entry.dart';
 import '../../../domain/models/vtc/vtc_vetter_card.dart';
 
 part 'community_tabs_providers.g.dart';
@@ -52,6 +54,24 @@ Future<VtcMembershipCard?> communityMembershipCard(
 Future<VtcVetterCard?> communityVetterCard(Ref ref, String communityDid) {
   _readAgainOnCardChanges(ref);
   return ref.read(vtcServiceProvider).vetterCard(communityDid);
+}
+
+/// The cards the groups of [communityDid] issued the member, as their VTA
+/// keeps them, each with what the community says of it now. Read while a
+/// community's page shows, and again as the cards change, never kept on the
+/// phone.
+@Riverpod(retry: _noRetry)
+Future<List<(VtcGroupCard, VtcCardStatus)>> communityGroupCards(
+  Ref ref,
+  String communityDid,
+) async {
+  _readAgainOnCardChanges(ref);
+  final service = ref.read(vtcServiceProvider);
+  final cards = await service.groupCards(communityDid);
+  final statuses = await Future.wait([
+    for (final card in cards) service.checkGroupCardStatus(card),
+  ]);
+  return [for (final (index, card) in cards.indexed) (card, statuses[index])];
 }
 
 /// Whether the member may vet for [communityDid]: they hold the

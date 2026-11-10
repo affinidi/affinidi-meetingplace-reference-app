@@ -1873,6 +1873,9 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get groupCredentialUnnamed => 'A group';
+
+  @override
   String membershipCredentialLeft(String date) {
     return 'left $date';
   }

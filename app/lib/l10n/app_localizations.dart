@@ -2782,6 +2782,12 @@ abstract class AppLocalizations {
   /// **'until {date}'**
   String membershipCredentialUntil(String date);
 
+  /// Stands for a community group whose name is not known
+  ///
+  /// In en, this message translates to:
+  /// **'A group'**
+  String get groupCredentialUnnamed;
+
   /// When the member left the community of a membership card
   ///
   /// In en, this message translates to:
