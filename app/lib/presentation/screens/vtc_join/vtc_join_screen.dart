@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,7 +16,6 @@ import '../../../l10n/app_localizations.dart';
 import '../../../navigation/routes/dashboard_routes.dart';
 import '../../dialogs/qr_code_picker/qr_code_picker.dart';
 import '../../effects/confetti/confetti_overlay.dart';
-import '../../themes/tokens/mc_colors.dart';
 import '../../themes/tokens/mc_icons.dart';
 import '../../themes/tokens/mc_radius.dart';
 import '../../themes/tokens/mc_spacing.dart';
@@ -906,7 +903,9 @@ class _ConsentItem extends HookWidget {
 
 /// How to get in: each way in the community offers, as a deck to swipe
 /// through, and what admission under it takes. The member applies under the
-/// card on top, when this app supports it.
+/// card on top, when this app supports it. Under a heading, not in a panel:
+/// the ways are cards themselves, and Mission Control stacks no card on a
+/// card.
 class _WaysIn extends StatelessWidget {
   const _WaysIn({required this.state, required this.onChoose});
 
@@ -923,47 +922,49 @@ class _WaysIn extends StatelessWidget {
     final ways = state.ways;
     final top = ways.indexWhere((way) => way.id == state.chosenWayId);
     final position = top < 0 ? 0 : top;
-    return GlassCard(
-      title: l10n.vtcJoinWaysHeading,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: McSpacing.s3,
-        children: [
-          if (ways.isNotEmpty)
-            SwipeableCards<VtcJoinWay>(
-              key: const Key('vtc_join_ways'),
-              items: ways,
-              maxWidth: double.infinity,
-              maxHeight: _deckHeight,
-              initialIndex: position,
-              onCardChange: (index) => onChoose(ways[index].id),
-              cardBuilder: (context, way) => _WayCard(way),
-            ),
-          if (ways.length > 1)
-            Text(
-              l10n.vtcJoinIdentityPosition(position + 1, ways.length),
-              key: const Key('vtc_join_way_position'),
-              textAlign: TextAlign.center,
-              style: onboardingNote(context),
-            ),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: McSpacing.s3,
+      children: [
+        Text(
+          l10n.vtcJoinWaysHeading,
+          style: context.textTheme.titleSmall?.copyWith(
+            color: context.mcColors.textPrimary,
+          ),
+        ),
+        if (ways.isNotEmpty)
+          SwipeableCards<VtcJoinWay>(
+            key: const Key('vtc_join_ways'),
+            items: ways,
+            maxWidth: double.infinity,
+            maxHeight: _deckHeight,
+            initialIndex: position,
+            onCardChange: (index) => onChoose(ways[index].id),
+            cardBuilder: (context, way) => _WayCard(way),
+          ),
+        if (ways.length > 1)
+          Text(
+            l10n.vtcJoinIdentityPosition(position + 1, ways.length),
+            key: const Key('vtc_join_way_position'),
+            textAlign: TextAlign.center,
+            style: onboardingNote(context),
+          ),
+      ],
     );
   }
 }
 
-/// A way in, as a card in the deck of ways in, styled as a small identity
-/// card: the kind of admission as an eyebrow over what it takes, or why
-/// this app cannot apply under it yet, the way's
-/// symbol in a ring at the top end, and what it asks for below. A way this
-/// app supports carries the blue corner wash.
+/// A way in, as a card in the deck of ways in: the kind of admission as an
+/// eyebrow over what it takes, or why this app cannot apply under it yet,
+/// the way's symbol at the top end, and what it asks for below. Plain, with
+/// no corner wash: that marks a product, not whether a way is supported,
+/// which the muted title and symbol already show.
 class _WayCard extends StatelessWidget {
   const _WayCard(this.way);
 
   final VtcJoinWay way;
 
-  static const _symbolSize = 48.0;
-  static const _blurSigma = 20.0;
+  static const _symbolSize = 24.0;
 
   @override
   Widget build(BuildContext context) {
@@ -977,93 +978,76 @@ class _WayCard extends StatelessWidget {
       if (way.description case final description?) (McIcons.info, description),
     ];
 
+    // The card is opaque, so the card stacked behind cannot show through.
     return Padding(
       padding: const EdgeInsets.all(McSpacing.s2),
-      // Blurred behind, as the identity deck is, so the card stacked behind
-      // cannot be read through the panel.
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(McRadius.xl),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: _blurSigma, sigmaY: _blurSigma),
-          child: AppCard(
-            accent: supported ? McColors.blue : null,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(McRadius.xl),
-              side: BorderSide(color: mc.hairline),
-            ),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(
-                McSpacing.s5,
-                McSpacing.s4,
-                McSpacing.s5,
-                McSpacing.s4,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: AppCard(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(McRadius.md),
+          side: BorderSide(color: mc.hairline),
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(
+            McSpacing.s5,
+            McSpacing.s4,
+            McSpacing.s5,
+            McSpacing.s4,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: McSpacing.s3,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: McSpacing.s3,
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: McSpacing.s3,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          spacing: McSpacing.s1,
-                          children: [
-                            Text(
-                              l10n.vtcJoinWayKind(_kindOf(way)).toUpperCase(),
-                              style: McTypography.eyebrow.copyWith(
-                                color: mc.textSecondary,
-                              ),
-                            ),
-                            // A sentence, not a name: shown whole.
-                            Text(
-                              _titleOf(l10n, way),
-                              style: textTheme.titleMedium?.copyWith(
-                                color: supported
-                                    ? mc.textPrimary
-                                    : mc.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        width: _symbolSize,
-                        height: _symbolSize,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: context.colorScheme.surfaceContainerHigh,
-                          border: Border.all(color: mc.hairline),
-                        ),
-                        child: Icon(
-                          _iconOf(way),
-                          size: _symbolSize / 2,
-                          color: supported ? mc.textPrimary : mc.textTertiary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  for (final (icon, value) in details)
-                    Row(
+                  Expanded(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: McSpacing.s2,
+                      spacing: McSpacing.s1,
                       children: [
-                        Icon(icon, size: 16, color: mc.textSecondary),
-                        Expanded(
-                          child: Text(
-                            value,
-                            style: textTheme.bodySmall?.copyWith(
-                              color: mc.textPrimary,
-                            ),
+                        Text(
+                          l10n.vtcJoinWayKind(_kindOf(way)).toUpperCase(),
+                          style: McTypography.eyebrow.copyWith(
+                            color: mc.textSecondary,
+                          ),
+                        ),
+                        // A sentence, not a name: shown whole.
+                        Text(
+                          _titleOf(l10n, way),
+                          style: textTheme.titleMedium?.copyWith(
+                            color: supported
+                                ? mc.textPrimary
+                                : mc.textSecondary,
                           ),
                         ),
                       ],
                     ),
+                  ),
+                  Icon(
+                    _iconOf(way),
+                    size: _symbolSize,
+                    color: supported ? mc.textPrimary : mc.textTertiary,
+                  ),
                 ],
               ),
-            ),
+              for (final (icon, value) in details)
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: McSpacing.s2,
+                  children: [
+                    Icon(icon, size: 16, color: mc.textSecondary),
+                    Expanded(
+                      child: Text(
+                        value,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: mc.textPrimary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+            ],
           ),
         ),
       ),

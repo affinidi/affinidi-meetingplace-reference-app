@@ -324,11 +324,8 @@ void main() {
       final cards = tester
           .widgetList<GlassCard>(find.byType(GlassCard))
           .map((card) => card.title);
-      expect(cards, [
-        'About the community',
-        'If you join, Football club can:',
-        'Ways in',
-      ]);
+      // The ways in are cards themselves, so under a heading, not a panel.
+      expect(cards, ['About the community', 'If you join, Football club can:']);
 
       await tapJoin(tester);
       await settle(tester);
@@ -1490,7 +1487,7 @@ void main() {
       expect(join().onPressed, isNull);
     });
 
-    testWidgets('draws ways in as identity cards', (tester) async {
+    testWidgets('draws ways in as plain cards', (tester) async {
       network.joinManifest = {
         ...network.joinManifest,
         'criteria': [
@@ -1514,10 +1511,15 @@ void main() {
         find.descendant(of: deck, matching: find.text('REVIEWED')),
         findsOneWidget,
       );
-      expect(topCard().accent, McColors.blue);
+      // A card, not a hero panel, with no product wash and no blur.
+      expect(topCard().accent, isNull);
       expect(
         (topCard().shape! as RoundedRectangleBorder).borderRadius,
-        BorderRadius.circular(McRadius.xl),
+        BorderRadius.circular(McRadius.md),
+      );
+      expect(
+        find.descendant(of: deck, matching: find.byType(BackdropFilter)),
+        findsNothing,
       );
 
       await swipeWays(tester);
@@ -1529,11 +1531,7 @@ void main() {
         ),
         findsOneWidget,
       );
-      expect(
-        topCard().accent,
-        isNull,
-        reason: 'no wash for an unsupported way',
-      );
+      expect(topCard().accent, isNull);
     });
 
     testWidgets('shows a single way in as a deck of one', (tester) async {
