@@ -9,7 +9,8 @@ import 'vtc_group_chat_service.dart';
 /// Decides requests to join the community group chats this phone owns as
 /// they arrive, and brings those chats in step with their groups and joins
 /// the chats of the member's groups when the app starts, each time it comes
-/// back to the foreground, when a membership changes, and every
+/// back to the foreground, when a membership changes, when a message reaches
+/// a watched community inbox, and every
 /// [interval] while it stays in the foreground: a community links a group's
 /// chat, and changes a group's members and managers, on its own time, and
 /// tells no member's phone when it does.
@@ -75,14 +76,18 @@ final vtcGroupChatWatcherProvider = Provider<VtcGroupChatWatcher>((ref) {
   final service = ref.read(vtcGroupChatServiceProvider);
   final watcher = VtcGroupChatWatcher(service);
   WidgetsBinding.instance.addObserver(watcher);
-  final memberships = ref
-      .read(vtcServiceProvider)
-      .membershipsChanged
-      .listen((_) => unawaited(watcher.sync()));
+  final vtc = ref.read(vtcServiceProvider);
+  final memberships = vtc.membershipsChanged.listen(
+    (_) => unawaited(watcher.sync()),
+  );
+  // A group's credential reaches the member's inbox as the community puts
+  // them in the group: join its chat then rather than at the next interval.
+  final arrivals = vtc.inboxArrived.listen((_) => unawaited(watcher.sync()));
   ref.onDispose(() {
     watcher.stopTimer();
     WidgetsBinding.instance.removeObserver(watcher);
     unawaited(memberships.cancel());
+    unawaited(arrivals.cancel());
     unawaited(service.stop());
   });
   unawaited(service.start());
