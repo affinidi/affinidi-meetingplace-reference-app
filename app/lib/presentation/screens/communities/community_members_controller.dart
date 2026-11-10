@@ -6,7 +6,7 @@ import '../../../application/services/vtc_trust_service/vtc_trust_service.dart';
 
 part 'community_members_controller.g.dart';
 
-/// The members of a community the member sees without searching, with the
+/// The members of a community the member sees on its Members tab, with the
 /// vouches between them and the member by that member's DID.
 typedef CommunityMembers = (
   List<DirectoryEntry> members,

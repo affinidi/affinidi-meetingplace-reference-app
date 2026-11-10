@@ -5,22 +5,17 @@ import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../application/services/vtc_trust_service/vtc_trust_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
-import '../../themes/tokens/mc_icons.dart';
 import '../vtc_join/vtc_findable_view.dart';
-import '../vtc_trust/vtc_member_search_screen.dart';
 import '../vtc_trust/vtc_member_tile.dart';
 import '../vtc_trust/vtc_vouch.dart';
 import 'community_members_controller.dart';
 
 const _syncingBarHeight = 2.0;
 
-/// Whether other members of a community find the member, and the other
-/// members: those of the member's groups, or
-/// those the member searches the directory for, each with the vouches
-/// between them and the member, to vouch for them. The directory answers
-/// searches only, never lists every member, so the groups' members show
-/// until the member searches. Those are kept from opening the community
-/// and synced each time this tab opens; a search is read each time.
+/// Whether other members of a community find the member, and the members
+/// of the member's groups, each with the vouches between them and the
+/// member, to vouch for them. Those are kept from opening the community and
+/// synced each time this tab opens.
 class CommunityMembersView extends HookConsumerWidget {
   const CommunityMembersView({
     super.key,
@@ -34,10 +29,7 @@ class CommunityMembersView extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final service = ref.read(vtcTrustServiceProvider);
     final cache = communityMembersControllerProvider(communityDid);
-    final query = useState<String?>(null);
-    final reload = useState(0);
     final syncing = useState<Future<void>?>(null);
     Future<void> sync() => syncing.value = ref.read(cache.notifier).sync();
     useEffect(() {
@@ -49,38 +41,7 @@ class CommunityMembersView extends HookConsumerWidget {
         useFuture(syncing.value).connectionState == ConnectionState.waiting;
     final listed = ref.watch(cache);
     // Only over members already shown: until then the list itself waits.
-    final showSyncing = isSyncing && query.value == null && listed.hasValue;
-    final search = useMemoized(() async {
-      final text = query.value;
-      if (text == null) return null;
-      if (text.length < VtcMemberSearchScreen.minQueryLength) {
-        throw const VtcTrustException(VtcTrustFailure.searchTooShort);
-      }
-      return (
-        await service.findMembers(communityDid, query: text),
-        await service.edgesByMember(communityDid),
-      );
-    }, [query.value, reload.value]);
-    final searched = useFuture(search);
-    final loaded = query.value == null
-        ? switch (listed) {
-            AsyncData(:final value) =>
-              AsyncSnapshot<CommunityMembers?>.withData(
-                ConnectionState.done,
-                value,
-              ),
-            AsyncError(:final error, :final stackTrace) =>
-              AsyncSnapshot<CommunityMembers?>.withError(
-                ConnectionState.done,
-                error,
-                stackTrace,
-              ),
-            _ => const AsyncSnapshot<CommunityMembers?>.waiting(),
-          }
-        : searched;
-    final none = query.value == null
-        ? l10n.vtcGroupMembersNone
-        : l10n.vtcTrustSearchNone;
+    final showSyncing = isSyncing && listed.hasValue;
 
     Future<void> vouch(DirectoryEntry entry, String name) async {
       final personaDid = entry.did;
@@ -95,41 +56,19 @@ class CommunityMembersView extends HookConsumerWidget {
         entry: entry,
       );
       if (edge == null) return;
-      if (query.value == null) {
-        await sync();
-      } else {
-        reload.value++;
-      }
+      await sync();
     }
 
     // One scroll view: on a short screen the list still gets room below
-    // the settings and the search.
+    // the settings.
     return CustomScrollView(
       slivers: [
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+          padding: const EdgeInsets.all(16),
           sliver: SliverToBoxAdapter(
             child: VtcFindableView(
               communityDid: communityDid,
               communityName: communityName,
-            ),
-          ),
-        ),
-        SliverPadding(
-          padding: const EdgeInsets.all(16),
-          sliver: SliverToBoxAdapter(
-            child: TextField(
-              key: const Key('community_members_search_field'),
-              textInputAction: TextInputAction.search,
-              decoration: InputDecoration(
-                labelText: l10n.vtcTrustSearchHint,
-                helperText: l10n.communityMembersPrompt(communityName),
-                helperMaxLines: 2,
-                prefixIcon: const Icon(McIcons.search),
-              ),
-              // Nothing to search for shows the groups' members again.
-              onSubmitted: (text) =>
-                  query.value = text.trim().isEmpty ? null : text.trim(),
             ),
           ),
         ),
@@ -144,29 +83,15 @@ class CommunityMembersView extends HookConsumerWidget {
                 : null,
           ),
         ),
-        switch (loaded) {
-          AsyncSnapshot(connectionState: ConnectionState.waiting) =>
-            const _Remaining(Center(child: CircularProgressIndicator())),
-          AsyncSnapshot(hasError: true, :final error) => _Remaining(
-            _Message(
-              vtcTrustFailureMessage(
-                l10n,
-                error is VtcTrustException
-                    ? error.failure
-                    : VtcTrustFailure.failed,
-                community: communityName,
-                name: query.value ?? '',
-              ),
-            ),
-          ),
-          AsyncSnapshot(data: (final members, _)) when members.isEmpty =>
+        switch (listed) {
+          AsyncData(value: (final members, _)) when members.isEmpty =>
             _Remaining(
               _Message(
-                '$none\n\n'
+                '${l10n.vtcGroupMembersNone}\n\n'
                 '${l10n.vtcGroupMembersUnlistedNote(communityName)}',
               ),
             ),
-          AsyncSnapshot(data: (final members, final edges)) =>
+          AsyncData(value: (final members, final edges)) =>
             SliverList.separated(
               // The note first: the community never says who is unlisted.
               itemCount: members.length + 1,
@@ -195,6 +120,18 @@ class CommunityMembersView extends HookConsumerWidget {
                 );
               },
             ),
+          AsyncError(:final error) => _Remaining(
+            _Message(
+              vtcTrustFailureMessage(
+                l10n,
+                error is VtcTrustException
+                    ? error.failure
+                    : VtcTrustFailure.failed,
+                community: communityName,
+                name: '',
+              ),
+            ),
+          ),
           _ => const _Remaining(Center(child: CircularProgressIndicator())),
         },
       ],

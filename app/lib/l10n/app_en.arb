@@ -5376,19 +5376,10 @@
 	},
 	"communityMembersTab": "Members",
 	"@communityMembersTab": {
-		"description": "Tab of a community's screen to search its members"
+		"description": "Tab of a community's screen listing its members"
 	},
 	"communityGroupsTab": "Groups",
 	"@communityGroupsTab": {
 		"description": "Tab of a community's screen with the member's groups there and their chats"
-	},
-	"communityMembersPrompt": "Search the directory of {community} to find others.",
-	"@communityMembersPrompt": {
-		"description": "Hint under the search field of a community's Members tab",
-		"placeholders": {
-			"community": {
-				"type": "String"
-			}
-		}
 	}
 }

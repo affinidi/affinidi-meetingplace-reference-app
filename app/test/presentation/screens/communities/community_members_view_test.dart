@@ -21,9 +21,14 @@ import '../../../fakes/fake_identities_service.dart';
 const _club = 'did:webvh:QmClub:vtc.example';
 const _me = 'did:webvh:QmMe:vta.example:me';
 const _bob = 'did:webvh:QmBob:vta.example:bob';
+const _bobEntry = DirectoryEntry(
+  entryId: 'dir_bob',
+  displayName: 'Bob',
+  did: _bob,
+  role: 'moderator',
+);
 
-/// A community's directory, searched by name, where the member is not shown
-/// to other members.
+/// A community's directory, where the member is not shown to other members.
 class _FakeTrustService extends Fake implements VtcTrustService {
   @override
   Future<MyDirectoryCard> directoryCard(String communityDid) async =>
@@ -37,18 +42,8 @@ class _FakeTrustService extends Fake implements VtcTrustService {
   Future<String?> identityContextId(String communityDid) async =>
       FakeIdentities.vtaContextId;
 
-  List<DirectoryEntry> members = const [
-    DirectoryEntry(
-      entryId: 'dir_bob',
-      displayName: 'Bob',
-      did: _bob,
-      role: 'moderator',
-    ),
-    DirectoryEntry(entryId: 'dir_bea', displayName: 'Bea', role: 'member'),
-  ];
   Map<String, VtcEdges> edges = const {};
   VtcTrustFailure? refusal;
-  final List<String> queries = [];
   final List<String> vouched = [];
 
   @override
@@ -74,20 +69,6 @@ class _FakeTrustService extends Fake implements VtcTrustService {
     await listingGate?.future;
     if (refusal case final refusal?) throw VtcTrustException(refusal);
     return groupsMembers;
-  }
-
-  @override
-  Future<List<DirectoryEntry>> findMembers(
-    String communityDid, {
-    required String query,
-  }) async {
-    queries.add(query);
-    if (refusal case final refusal?) throw VtcTrustException(refusal);
-    return [
-      for (final member in members)
-        if (member.displayName!.toLowerCase().contains(query.toLowerCase()))
-          member,
-    ];
   }
 
   @override
@@ -199,15 +180,6 @@ void main() {
     return container;
   }
 
-  Future<void> search(WidgetTester tester, String text) async {
-    await tester.enterText(
-      find.byKey(const Key('community_members_search_field')),
-      text,
-    );
-    await tester.testTextInput.receiveAction(TextInputAction.search);
-    await tester.pumpAndSettle();
-  }
-
   Finder inMember(String entryId, Finder finder) => find.descendant(
     of: find.byKey(Key('community_member_$entryId')),
     matching: finder,
@@ -216,15 +188,16 @@ void main() {
   testWidgets("lists the members of the member's groups at once", (
     tester,
   ) async {
-    final l10n = await pumpView(tester);
+    await pumpView(tester);
 
     expect(inMember('dir_bea', find.text('Bea')), findsOneWidget);
     expect(find.text('Bob'), findsNothing);
-    expect(
-      find.text(l10n.communityMembersPrompt('Football club')),
-      findsOneWidget,
-    );
-    expect(service.queries, isEmpty);
+  });
+
+  testWidgets('offers no search of the directory', (tester) async {
+    await pumpView(tester);
+
+    expect(find.byType(TextField), findsNothing);
   });
 
   testWidgets('reads the members once when first opened', (tester) async {
@@ -240,7 +213,7 @@ void main() {
     await showTab(tester, container);
     await tester.pumpAndSettle();
     await showTab(tester, container, open: false);
-    service.groupsMembers = [...service.groupsMembers, service.members.first];
+    service.groupsMembers = [...service.groupsMembers, _bobEntry];
 
     await showTab(tester, container);
 
@@ -274,7 +247,7 @@ void main() {
     tester,
   ) async {
     await pumpView(tester);
-    service.groupsMembers = [...service.groupsMembers, service.members.first];
+    service.groupsMembers = [...service.groupsMembers, _bobEntry];
 
     vtc.roleChanges
       ..add(const VtcRoleChange(communityDid: 'did:web:other', role: 'admin'))
@@ -302,82 +275,27 @@ void main() {
   testWidgets('says when the groups show nobody else', (tester) async {
     service.groupsMembers = const [];
     final l10n = await pumpView(tester);
-    await search(tester, 'bob');
-
-    await search(tester, ' ');
 
     expect(find.textContaining(l10n.vtcGroupMembersNone), findsOneWidget);
   });
 
-  testWidgets("shows the groups' members again after an empty search", (
-    tester,
-  ) async {
-    await pumpView(tester);
-    await search(tester, 'bob');
-    expect(find.text('Bea'), findsNothing);
-
-    await search(tester, '');
-
-    expect(inMember('dir_bea', find.text('Bea')), findsOneWidget);
-  });
-
-  testWidgets('lists the members the directory finds', (tester) async {
-    final l10n = await pumpView(tester);
-
-    await search(tester, ' bob ');
-
-    expect(service.queries, ['bob']);
-    expect(inMember('dir_bob', find.text('Bob')), findsOneWidget);
-    expect(find.text('Bea'), findsNothing);
-    expect(
-      find.text(l10n.vtcGroupMembersUnlistedNote('Football club')),
-      findsOneWidget,
-    );
-  });
-
-  testWidgets('asks for a longer search, without asking the community', (
-    tester,
-  ) async {
-    final l10n = await pumpView(tester);
-
-    await search(tester, 'bo');
-
-    expect(service.queries, isEmpty);
-    expect(
-      find.text(
-        l10n.vtcTrustFailure(
-          VtcTrustFailure.searchTooShort.name,
-          'Football club',
-          'bo',
-        ),
-      ),
-      findsOneWidget,
-    );
-  });
-
   testWidgets('says why the community did not answer', (tester) async {
-    final l10n = await pumpView(tester);
     service.refusal = VtcTrustFailure.network;
-
-    await search(tester, 'bob');
+    final l10n = await pumpView(tester);
 
     expect(
       find.text(
-        l10n.vtcTrustFailure(
-          VtcTrustFailure.network.name,
-          'Football club',
-          'bob',
-        ),
+        l10n.vtcTrustFailure(VtcTrustFailure.network.name, 'Football club', ''),
       ),
       findsOneWidget,
     );
   });
 
-  testWidgets('vouches for a member found, once the member consents', (
+  testWidgets('vouches for a member listed, once the member consents', (
     tester,
   ) async {
+    service.groupsMembers = [...service.groupsMembers, _bobEntry];
     final l10n = await pumpView(tester);
-    await search(tester, 'bob');
 
     await tester.tap(inMember('dir_bob', find.text(l10n.vtcTrustVouch)));
     await tester.pumpAndSettle();

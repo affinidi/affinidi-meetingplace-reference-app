@@ -10,6 +10,7 @@ import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_community.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_removal.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/extensions/build_context_extensions.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/communities/community_members_view.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/communities/community_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/communities/community_tabs_providers.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/communities/removal_notice.dart';
@@ -233,10 +234,7 @@ void main() {
 
       await tester.tap(find.text(l10n.communityMembersTab));
       await tester.pumpAndSettle();
-      expect(
-        find.text(l10n.communityMembersPrompt('Chess club')),
-        findsOneWidget,
-      );
+      expect(find.byType(CommunityMembersView), findsOneWidget);
 
       await tester.tap(find.byKey(const Key('section_header_back')));
       await tester.pumpAndSettle();

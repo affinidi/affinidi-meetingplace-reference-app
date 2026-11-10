@@ -4953,9 +4953,4 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get communityGroupsTab => 'Groups';
-
-  @override
-  String communityMembersPrompt(String community) {
-    return 'Search the directory of $community to find others.';
-  }
 }

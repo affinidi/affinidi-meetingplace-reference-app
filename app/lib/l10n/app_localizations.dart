@@ -7296,7 +7296,7 @@ abstract class AppLocalizations {
   /// **'Community DID'**
   String get communityDidLabel;
 
-  /// Tab of a community's screen to search its members
+  /// Tab of a community's screen listing its members
   ///
   /// In en, this message translates to:
   /// **'Members'**
@@ -7307,12 +7307,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Groups'**
   String get communityGroupsTab;
-
-  /// Hint under the search field of a community's Members tab
-  ///
-  /// In en, this message translates to:
-  /// **'Search the directory of {community} to find others.'**
-  String communityMembersPrompt(String community);
 }
 
 class _AppLocalizationsDelegate
