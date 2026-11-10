@@ -645,9 +645,14 @@ class _Consent extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: McSpacing.s05,
                     children: [
+                      // Worded as on the Members tab: the same setting.
                       Text(
-                        l10n.vtcJoinListMe,
+                        l10n.vtcFindableHeading,
                         style: TextStyle(color: context.mcColors.textPrimary),
+                      ),
+                      Text(
+                        l10n.vtcFindableIntro(communityName),
+                        style: onboardingNote(context),
                       ),
                       Text(
                         l10n.vtcJoinListMeNote,

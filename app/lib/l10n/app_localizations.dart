@@ -4604,12 +4604,6 @@ abstract class AppLocalizations {
   /// **'This community doesn\'t list new members in its member directory.'**
   String get vtcJoinDirectoryHidden;
 
-  /// No description provided for @vtcJoinListMe.
-  ///
-  /// In en, this message translates to:
-  /// **'List me in the member directory'**
-  String get vtcJoinListMe;
-
   /// No description provided for @vtcJoinListMeNote.
   ///
   /// In en, this message translates to:

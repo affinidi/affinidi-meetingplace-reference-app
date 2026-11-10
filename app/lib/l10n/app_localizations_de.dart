@@ -3106,9 +3106,6 @@ class AppLocalizationsDe extends AppLocalizations {
       'This community doesn\'t list new members in its member directory.';
 
   @override
-  String get vtcJoinListMe => 'List me in the member directory';
-
-  @override
   String get vtcJoinListMeNote =>
       'If this is off, you may be listed for a moment when you join, until Meeting Place takes your card out of the directory.';
 

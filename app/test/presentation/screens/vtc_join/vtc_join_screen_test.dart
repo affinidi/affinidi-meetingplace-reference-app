@@ -978,6 +978,24 @@ void main() {
       }
     });
 
+    testWidgets('words the directory switch as the Members tab does', (
+      tester,
+    ) async {
+      await pumpScreen(tester);
+
+      await enterCode(tester, fakeVtcDid);
+
+      expect(find.text('Let members find you'), findsOneWidget);
+      expect(
+        find.text(
+          "Let members of Football club find you to vouch for you. They'll "
+          'see the identity you joined with.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('vtc_join_list_me')), findsOneWidget);
+    });
+
     testWidgets('offers no wider audience than a field allows', (tester) async {
       network.joinManifest = {
         ...network.joinManifest,
