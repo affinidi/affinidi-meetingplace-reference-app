@@ -4407,10 +4407,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get vtcVetterShowTicket => 'Show a vetting ticket';
 
   @override
-  String get vtcVetterWaiting =>
-      'Waiting for someone to scan the ticket or enter the code…';
-
-  @override
   String get vtcVetterMatchIntro =>
       'The applicant sees a code too. Ask them to read theirs out and check it\'s the same.';
 

@@ -437,60 +437,43 @@ class _TicketView extends StatelessWidget {
     final ticket = state.liveTicket(clock.now());
 
     if (ticket != null) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: 12,
-        children: [
-          GlassCard(
-            title: l10n.vtcVetterTicketHeading,
-            child: Column(
-              spacing: 12,
-              children: [
-                // A fixed size: the layout measures its content's height,
-                // which the QR code cannot report. It includes the view's
-                // quiet zone on both sides.
-                SizedBox.square(
-                  dimension: _qrSize + 2 * McSpacing.s3,
-                  child: QrCodeView(
-                    key: const Key('vtc_vetter_ticket_qr'),
-                    data: '${ticket.scanned}',
-                    size: _qrSize,
-                  ),
-                ),
-                Text(
-                  l10n.vtcVetterTicketCodeHint,
-                  style: onboardingNote(context),
-                ),
-                SelectableText(
-                  ticket.code,
-                  key: const Key('vtc_vetter_ticket_code'),
-                  style: McTypography.code.copyWith(
-                    fontSize: context.textTheme.titleLarge?.fontSize,
-                    color: context.mcColors.textPrimary,
-                    letterSpacing: 4,
-                  ),
-                ),
-                Text(
-                  l10n.vtcVetterTicketValid(
-                    MaterialLocalizations.of(context).formatTimeOfDay(
-                      TimeOfDay.fromDateTime(ticket.expiresAt.toLocal()),
-                    ),
-                  ),
-                  style: onboardingNote(context),
-                  textAlign: TextAlign.center,
-                ),
-              ],
+      return GlassCard(
+        title: l10n.vtcVetterTicketHeading,
+        child: Column(
+          spacing: 12,
+          children: [
+            // A fixed size: the layout measures its content's height,
+            // which the QR code cannot report. It includes the view's
+            // quiet zone on both sides.
+            SizedBox.square(
+              dimension: _qrSize + 2 * McSpacing.s3,
+              child: QrCodeView(
+                key: const Key('vtc_vetter_ticket_qr'),
+                data: '${ticket.scanned}',
+                size: _qrSize,
+              ),
             ),
-          ),
-          VtcWaitingForParty(l10n.vtcVetterWaiting),
-          OnboardingButton(
-            key: const Key('vtc_vetter_new_ticket'),
-            label: l10n.vtcVetterNewTicket,
-            isDestructive: true,
-            isLoading: state.busy,
-            onPressed: controller.createTicket,
-          ),
-        ],
+            Text(l10n.vtcVetterTicketCodeHint, style: onboardingNote(context)),
+            SelectableText(
+              ticket.code,
+              key: const Key('vtc_vetter_ticket_code'),
+              style: McTypography.code.copyWith(
+                fontSize: context.textTheme.titleLarge?.fontSize,
+                color: context.mcColors.textPrimary,
+                letterSpacing: 4,
+              ),
+            ),
+            Text(
+              l10n.vtcVetterTicketValid(
+                MaterialLocalizations.of(context).formatTimeOfDay(
+                  TimeOfDay.fromDateTime(ticket.expiresAt.toLocal()),
+                ),
+              ),
+              style: onboardingNote(context),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       );
     }
 

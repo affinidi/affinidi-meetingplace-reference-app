@@ -11,6 +11,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/loggers/app_logger/app_
 import 'package:mpx_flutter_reference_app/l10n/app_localizations.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_community_page.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_join_state.dart';
+import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_progress_line.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_vetter_profile/vtc_vetter_profile_screen.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_vetting_desk/vtc_vetting_desk_controller.dart';
 import 'package:mpx_flutter_reference_app/presentation/screens/vtc_vetting_desk/vtc_vetting_desk_screen.dart';
@@ -227,25 +228,12 @@ void main() {
     await close(tester);
   });
 
-  /// The label colour of the button keyed [key].
-  Color? labelColour(WidgetTester tester, String key) => tester
-      .widget<ElevatedButton>(
-        find.descendant(
-          of: find.byKey(Key(key)),
-          matching: find.byType(ElevatedButton),
-        ),
-      )
-      .style
-      ?.foregroundColor
-      ?.resolve({});
-
-  final danger = AppTheme.dark.extension<McColors>()!.dangerText;
-
-  testWidgets('offers a new ticket in the danger colour', (tester) async {
+  testWidgets('shows only the ticket while it is live', (tester) async {
     await pumpDesk(tester);
     await showTicket(tester);
 
-    expect(labelColour(tester, 'vtc_vetter_new_ticket'), danger);
+    expect(find.byKey(const Key('vtc_vetter_new_ticket')), findsNothing);
+    expect(find.byType(VtcWaitingForParty), findsNothing);
     await close(tester);
   });
 
@@ -255,7 +243,16 @@ void main() {
     await tester.runAsync(() => fixture.requestWith(ticket.spoken));
     await check(tester);
 
-    expect(labelColour(tester, 'vtc_vetter_match_no'), danger);
+    final button = tester.widget<ElevatedButton>(
+      find.descendant(
+        of: find.byKey(const Key('vtc_vetter_match_no')),
+        matching: find.byType(ElevatedButton),
+      ),
+    );
+    expect(
+      button.style?.foregroundColor?.resolve({}),
+      AppTheme.dark.extension<McColors>()!.dangerText,
+    );
     await close(tester);
   });
 

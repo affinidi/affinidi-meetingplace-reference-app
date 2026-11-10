@@ -6498,12 +6498,6 @@ abstract class AppLocalizations {
   /// **'Show a vetting ticket'**
   String get vtcVetterShowTicket;
 
-  /// The desk waits for an applicant
-  ///
-  /// In en, this message translates to:
-  /// **'Waiting for someone to scan the ticket or enter the code…'**
-  String get vtcVetterWaiting;
-
   /// Before comparing the match code with the applicant
   ///
   /// In en, this message translates to:

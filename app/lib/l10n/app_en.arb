@@ -4662,10 +4662,6 @@
 	"@vtcVetterShowTicket": {
 		"description": "Creates a ticket and shows it"
 	},
-	"vtcVetterWaiting": "Waiting for someone to scan the ticket or enter the code…",
-	"@vtcVetterWaiting": {
-		"description": "The desk waits for an applicant"
-	},
 	"vtcVetterMatchIntro": "The applicant sees a code too. Ask them to read theirs out and check it's the same.",
 	"@vtcVetterMatchIntro": {
 		"description": "Before comparing the match code with the applicant"
