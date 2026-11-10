@@ -15,6 +15,9 @@ import 'communities_controller.dart';
 import 'community_logo_provider.dart';
 import 'community_tabs_providers.dart';
 
+/// The role a vetter card gives, as a community names it.
+const _vetterRole = 'vetter';
+
 /// The member's membership of a community: the identity they joined with,
 /// their role there and the cards it issued them, the membership card and a
 /// vetter's role card, and the cards its groups issued them that are valid
@@ -45,6 +48,11 @@ class CommunityMembershipView extends ConsumerWidget {
     final logoUrl = ref.watch(communityLogoProvider(communityDid)).value;
     final joinedAs = _joinedAs(ref);
     final roleName = switch (role.value) {
+      // A vetter card is held alongside the role, e.g. by an administrator.
+      final role? when vetterCard != null && role != _vetterRole => [
+        vtcRoleName(l10n, role),
+        vtcRoleName(l10n, _vetterRole),
+      ].join(' · '),
       final role? => vtcRoleName(l10n, role),
       null => null,
     };

@@ -29,6 +29,16 @@ import '../../../mocks/fake_app_logger.dart';
 const _club = 'did:webvh:QmClub:vtc.example';
 const _me = 'did:webvh:QmMe:vta.example:me';
 
+const _vetterCard = VtcVetterCard(
+  issuer: _club,
+  vetterDid: _me,
+  credential: {
+    'type': ['VerifiableCredential', 'AuthorityCredential'],
+    'issuer': _club,
+    'credentialSubject': {'id': _me},
+  },
+);
+
 /// The identity [did] on the member's VTA, named [name], in the context the
 /// membership lives in.
 Identity _vtaIdentity(String did, String name) =>
@@ -255,6 +265,43 @@ void main() {
         findsOneWidget,
       );
       expect(find.byKey(const Key('community_membership_role')), findsNothing);
+    });
+
+    testWidgets('shows a vetter\'s role on the identity\'s card too', (
+      tester,
+    ) async {
+      identities = IdentitiesServiceState(
+        identities: [_vtaIdentity('did:webvh:QmAda:vta.example:ada', 'Ada')],
+      );
+      service.role = 'admin';
+      service.heldVetterCard = _vetterCard;
+
+      await pumpView(tester);
+
+      expect(
+        find.descendant(
+          of: identityCard(),
+          matching: find.text('Administrator · Vetter'),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('shows the vetter role once when it is the role', (
+      tester,
+    ) async {
+      identities = IdentitiesServiceState(
+        identities: [_vtaIdentity('did:webvh:QmAda:vta.example:ada', 'Ada')],
+      );
+      service.role = 'vetter';
+      service.heldVetterCard = _vetterCard;
+
+      await pumpView(tester);
+
+      expect(
+        find.descendant(of: identityCard(), matching: find.text('Vetter')),
+        findsOneWidget,
+      );
     });
 
     testWidgets('shows none for a membership of a new identity', (
