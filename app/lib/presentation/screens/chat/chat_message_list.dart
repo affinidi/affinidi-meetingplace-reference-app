@@ -31,17 +31,10 @@ class _ChatMessageList extends HookConsumerWidget {
     final isGroupChat = ref.watch(
       provider.select((state) => state.group != null),
     );
-    final posting = ref.watch(vtcChatPostingProvider(_contactId)).value;
 
     // Hidden in place, so the list's indexes stay those of the messages.
     bool isHidden(chat.ChatItem item) =>
-        _isVrcRequestOnlyMessage(item) ||
-        zkpPolicy.shouldHide(item) ||
-        // A post by a member where only the group's managers post.
-        (posting != null &&
-            item is chat.Message &&
-            !item.isFromMe &&
-            !posting.allows(item.senderDid));
+        _isVrcRequestOnlyMessage(item) || zkpPolicy.shouldHide(item);
 
     var lastUsedChatItemStatus = chat.ChatItemStatus.error;
 

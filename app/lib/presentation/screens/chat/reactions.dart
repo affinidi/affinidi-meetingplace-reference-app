@@ -31,8 +31,10 @@ class _Reactions extends ConsumerWidget {
     }
 
     // Reacting to one's own message is not supported, mirroring the reaction
-    // picker; chips on own messages are display-only.
-    final onChipTap = _chatItem.isFromMe
+    // picker; chips on own messages are display-only, as are all chips to a
+    // member who may only read.
+    final canPost = ref.watch(chatCanPostProvider(_contactId)).value ?? true;
+    final onChipTap = _chatItem.isFromMe || !canPost
         ? null
         : (String emoji) =>
               controller.setMessageReaction(_chatItem.messageId, emoji);

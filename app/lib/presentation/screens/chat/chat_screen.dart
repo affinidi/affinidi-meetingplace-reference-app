@@ -71,6 +71,7 @@ import '../../widgets/profile_circle_avatar.dart';
 import 'audio_video_call/audio_video_call_screen.dart';
 import 'audio_video_call/rules/call_chat_item_rules.dart';
 import 'chat_activity_progress_indicator.dart';
+import 'chat_can_post_provider.dart';
 import 'chat_items/chat_encryption_notice.dart';
 import 'chat_items/chat_r_card_updated_by_me_notice.dart';
 import 'chat_items/chat_r_cards_exchanged_notice.dart';
@@ -87,7 +88,6 @@ import 'chat_zkp/chat_zkp_concierge_item.dart';
 import 'chat_zkp/chat_zkp_message_list_policy.dart';
 import 'chat_zkp/chat_zkp_overlay.dart';
 import 'proof_flow_controller.dart';
-import 'vtc_chat_posting_provider.dart';
 
 part 'awaiting_members_warning.dart';
 part 'call_chat_item_actions.dart';
@@ -255,8 +255,9 @@ class _AudioVideoCallActions extends ConsumerWidget {
     final isConnected = ref.watch(
       networkConnectivityServiceProvider.select((state) => state.isConnected),
     );
+    final canPost = ref.watch(chatCanPostProvider(_contactId)).value ?? true;
     final canInitiateCall =
-        isCallSupported && isConnected && activeCallState == null;
+        isCallSupported && isConnected && activeCallState == null && canPost;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -318,8 +319,8 @@ class _ChatSection extends StatelessWidget {
   }
 }
 
-/// The message box, or, in a community group chat where only the group's
-/// managers post, a note saying so to a member who is not one.
+/// The message box, or, in a group chat that lets only its owner and
+/// moderators post, a note saying so to a member who is neither.
 class _ChatEntry extends ConsumerWidget {
   const _ChatEntry(this._contactId);
 
@@ -327,8 +328,7 @@ class _ChatEntry extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final posting = ref.watch(vtcChatPostingProvider(_contactId)).value;
-    if (posting == null || posting.canPost) {
+    if (ref.watch(chatCanPostProvider(_contactId)).value ?? true) {
       return _ChatTextEntry(contactId: _contactId);
     }
     return SafeArea(

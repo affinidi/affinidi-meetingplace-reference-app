@@ -30,11 +30,12 @@ class _CallChatItem extends ConsumerWidget {
     final logger = ref.read(appLoggerProvider);
 
     final isFromMe = _message.isFromMe;
-    final isTappable = isCallChatItemTappable(
-      status: call.status,
-      isFromMe: isFromMe,
-    );
-    final isRecallable = isCallChatItemRecallable(call.status);
+    // A member who may only read can neither join nor start a call.
+    final canPost = ref.watch(chatCanPostProvider(_contactId)).value ?? true;
+    final isTappable =
+        canPost &&
+        isCallChatItemTappable(status: call.status, isFromMe: isFromMe);
+    final isRecallable = canPost && isCallChatItemRecallable(call.status);
 
     final colors = resolveCallChatItemColors(
       status: call.status,

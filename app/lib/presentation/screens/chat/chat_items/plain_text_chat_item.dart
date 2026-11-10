@@ -60,8 +60,12 @@ class _PlainTextChatItem extends ConsumerWidget {
       );
     }
 
+    // A member who may only read can neither react, edit nor delete.
+    final canPost = ref.watch(chatCanPostProvider(_contactId)).value ?? true;
+
     void onLongPress() {
       if (chatItem.isDeleted || chatItem.isDeletedLocally) return;
+      if (!canPost) return;
       if (chatItem.isFromMe) {
         if (!supportsMessageActions) return;
         unawaited(showMessageActions());

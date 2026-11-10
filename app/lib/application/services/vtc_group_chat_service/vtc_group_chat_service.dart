@@ -5,7 +5,6 @@ import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../../../domain/models/identity/identity.dart';
-import '../../../domain/models/vtc/vtc_chat_posting.dart';
 import '../../../domain/models/vtc/vtc_community.dart';
 import '../../../domain/models/vtc/vtc_group_chat.dart';
 import '../../../domain/repositories/vtc_repository.dart';
@@ -478,28 +477,6 @@ class VtcGroupChatService {
       if (channel != null) await sdk.leaveChannel(channel);
     }
     await _repository.removeGroupChat(chat.chatGroupId);
-  }
-
-  /// Who may post in the community group chat [chatGroupId], which the
-  /// member on this phone talks in as [channel]: null when everyone may, or
-  /// the chat follows no community group.
-  ///
-  /// Throws the Meeting Place error when the chat cannot be read.
-  Future<VtcChatPosting?> postingIn(
-    Channel channel, {
-    required String chatGroupId,
-  }) async {
-    final chat = (await _repository.groupChats())
-        .where((chat) => chat.chatGroupId == chatGroupId)
-        .firstOrNull;
-    if (chat == null || chat.posting == GroupChatPosting.everyone) {
-      return null;
-    }
-    final sdk = await _ref.read(meetingPlaceSdkProvider.future);
-    return VtcChatPosting(
-      posters: await sdk.groupModerators(channel),
-      memberDid: channel.permanentChannelDid!,
-    );
   }
 
   /// The offer links of the chats of [communityDid]'s groups this phone

@@ -206,11 +206,6 @@ class _FakeSdk extends Fake implements MeetingPlaceMatrixSDK {
   Future<FindOfferResult> findOffer({required String mnemonic}) async =>
       FindOfferResult(connectionOffer: offerToFind);
 
-  Set<String> chatModerators = const {};
-
-  @override
-  Future<Set<String>> groupModerators(Channel channel) async => chatModerators;
-
   /// The chats Meeting Place holds, by their id.
   Map<String, Group> groups = const {};
 
@@ -724,39 +719,6 @@ void main() {
       await service.syncChats();
 
       expect((await stored()).posting, GroupChatPosting.managers);
-    });
-  });
-
-  group('VtcGroupChatService.postingIn', () {
-    test('lets everyone post where the link lets everyone', () async {
-      expect(
-        await service.postingIn(_chatChannel(), chatGroupId: 'chat-1'),
-        isNull,
-      );
-    });
-
-    test("lets only the chat's moderators post where only managers "
-        'do', () async {
-      await repository.saveGroupChat(
-        ownedChat.copyWith(posting: GroupChatPosting.managers),
-      );
-      sdk.chatModerators = {_ownerDid};
-
-      final posting = await service.postingIn(
-        _chatChannel(),
-        chatGroupId: 'chat-1',
-      );
-
-      expect(posting!.canPost, isFalse);
-      expect(posting.allows(_ownerDid), isTrue);
-      expect(posting.allows(_memberDid), isFalse);
-    });
-
-    test('knows nothing of a chat that follows no group', () async {
-      expect(
-        await service.postingIn(_chatChannel(), chatGroupId: 'other'),
-        isNull,
-      );
     });
   });
 
