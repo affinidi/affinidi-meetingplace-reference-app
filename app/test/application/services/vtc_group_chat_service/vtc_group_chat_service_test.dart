@@ -4,10 +4,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_core/meeting_place_core.dart';
 import 'package:meeting_place_matrix/meeting_place_matrix.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
+import 'package:mpx_flutter_reference_app/application/services/contacts_service/contacts_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service_state.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_group_chat_service/vtc_group_chat_service.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
+import 'package:mpx_flutter_reference_app/domain/models/contacts/contact.dart';
 import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_community.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_group_chat.dart';
@@ -17,6 +19,7 @@ import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_reposi
 
 import '../../../fakes/fake_connection_offers.dart';
 import '../../../fakes/fake_contacts.dart';
+import '../../../fakes/fake_contacts_service.dart';
 import '../../../fakes/fake_identities.dart';
 import '../../../fakes/fake_identities_service.dart';
 import '../../../mocks/fake_app_logger.dart';
@@ -196,6 +199,24 @@ class _FakeSdk extends Fake implements MeetingPlaceMatrixSDK {
     channelLookups.add(did);
     return channels[did];
   }
+
+  /// The channels left, by the other party's DID.
+  final left = <String>[];
+
+  @override
+  Future<void> leaveChannel(Channel channel) async =>
+      left.add(channel.otherPartyPermanentChannelDid!);
+}
+
+/// Records the contacts it is asked to delete instead of deleting them.
+class _DeletingContactsService extends FakeContactsService {
+  _DeletingContactsService(List<Contact> contacts) : super(contacts: contacts);
+
+  final deleted = <String>[];
+
+  @override
+  Future<void> deleteContacts(List<Contact> contacts) async =>
+      deleted.addAll(contacts.map((contact) => contact.id));
 }
 
 /// Records the chats it is asked to join instead of joining them.
@@ -634,9 +655,26 @@ void main() {
 
   group('VtcGroupChatService.joinGroupChats', () {
     late _JoinRecordingService joining;
+    late _DeletingContactsService contacts;
     final member = FakeIdentities.primaryIdentity.copyWith(
       vtaContextId: 'mpx-1',
       vtaProfileId: '01PROFILE',
+    );
+    final membership = VtcCommunity(
+      communityDid: _communityDid,
+      personaDid: member.did,
+      contextId: 'mpx-1',
+    );
+    const joinedChat = VtcGroupChat(
+      chatGroupId: 'chat-2',
+      communityDid: _communityDid,
+      groupId: 'g2',
+      groupDid: '$_groupDid-g2',
+      name: 'Announcements',
+      isOwner: false,
+    );
+    final chatContact = FakeContacts.groupContact.copyWith(
+      channelDid: joinedChat.groupDid,
     );
 
     setUp(() {
@@ -644,13 +682,8 @@ void main() {
         mnemonic: 'group-chat',
         controlPlaneDid: '',
       );
-      vtc.memberCommunities = [
-        VtcCommunity(
-          communityDid: _communityDid,
-          personaDid: member.did,
-          contextId: 'mpx-1',
-        ),
-      ];
+      vtc.memberCommunities = [membership];
+      contacts = _DeletingContactsService([chatContact]);
       final container = ProviderContainer(
         overrides: [
           vtcServiceProvider.overrideWithValue(vtc),
@@ -661,6 +694,7 @@ void main() {
               IdentitiesServiceState(identities: [member]),
             ),
           ),
+          contactsServiceProvider.overrideWith(() => contacts),
           vtcGroupChatServiceProvider.overrideWith(
             (ref) => _JoinRecordingService(ref, repository: repository),
           ),
@@ -737,6 +771,62 @@ void main() {
       await joining.joinGroupChats();
 
       expect(joining.joined, isEmpty);
+    });
+
+    test('leaves the chats joined of a community the member left, with '
+        'their contacts, but keeps those it owns', () async {
+      await repository.saveGroupChat(joinedChat);
+      vtc.memberCommunities = const [];
+
+      await joining.joinGroupChats();
+
+      expect(contacts.deleted, [chatContact.id]);
+      expect((await stored()).chatGroupId, ownedChat.chatGroupId);
+    });
+
+    test('leaves the channel of a chat joined without a contact', () async {
+      await repository.saveGroupChat(
+        const VtcGroupChat(
+          chatGroupId: 'chat-3',
+          communityDid: _communityDid,
+          groupId: 'g1',
+          groupDid: _groupDid,
+          name: 'Identity WG',
+          isOwner: false,
+        ),
+      );
+      sdk.channels = {_groupDid: _chatChannel()};
+      vtc.memberCommunities = const [];
+
+      await joining.joinGroupChats();
+
+      expect(contacts.deleted, isEmpty);
+      expect(sdk.left, [_groupDid]);
+      expect((await stored()).chatGroupId, ownedChat.chatGroupId);
+    });
+
+    test('keeps the chats joined of a community the member is in', () async {
+      await repository.saveGroupChat(joinedChat);
+
+      await joining.joinGroupChats();
+
+      expect(contacts.deleted, isEmpty);
+      expect(await repository.groupChats(), hasLength(2));
+    });
+
+    test('joins the chat again once a new identity is the member of the '
+        'community it left', () async {
+      await repository.saveGroupChat(joinedChat);
+      vtc.memberCommunities = const [];
+      await joining.joinGroupChats();
+
+      vtc.memberCommunities = [membership];
+      vtc.groupsOf = {
+        _communityDid: [_listing('g2')],
+      };
+      await joining.joinGroupChats();
+
+      expect(joining.joined, [(_communityDid, 'g2', member.id)]);
     });
   });
 

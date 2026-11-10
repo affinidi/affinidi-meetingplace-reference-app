@@ -17,6 +17,7 @@ import '../../../infrastructure/providers/meeting_place_sdk_provider.dart';
 import '../../../infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
 import '../connections_service/connections_service.dart';
 import '../connections_service/publish_offer_params.dart';
+import '../contacts_service/contacts_service.dart';
 import '../identities_service/identities_service.dart';
 import '../vtc_service/vtc_service.dart';
 
@@ -335,6 +336,10 @@ class VtcGroupChatService {
   /// chats without asking. A group's chat is joined once, so one the member
   /// left stays left. Idempotent while running.
   ///
+  /// The chats joined of a community the member no longer belongs to are
+  /// left first, so an identity that joins the community again joins them
+  /// anew.
+  ///
   /// A chat that cannot be joined now, such as one not linked yet or whose
   /// credential is not delivered yet, is tried again on the next call.
   Future<void> joinGroupChats() {
@@ -343,6 +348,7 @@ class VtcGroupChatService {
 
   Future<void> _joinGroupChats() async {
     final watch = Stopwatch()..start();
+    await _leaveChatsOfCommunitiesLeft();
     final joined = {
       for (final chat in await _repository.groupChats()) chat.groupDid,
     };
@@ -432,6 +438,45 @@ class VtcGroupChatService {
     } on MeetingPlaceVtcSDKException catch (error) {
       _logFailure('collecting group credentials', error.logCode);
     }
+  }
+
+  /// Leaves each chat this phone joined of a community the member no longer
+  /// belongs to, having left it or been removed: its channel and contact go
+  /// with it, as they speak for the persona that was the member. A chat this
+  /// phone owns is kept, as leaving it would end it for every member.
+  ///
+  /// A chat that cannot be left now is tried again on the next call.
+  Future<void> _leaveChatsOfCommunitiesLeft() async {
+    final memberOf = {
+      for (final community in await _vtc.memberships()) community.communityDid,
+    };
+    for (final chat in await _repository.groupChats()) {
+      if (chat.isOwner || memberOf.contains(chat.communityDid)) continue;
+      try {
+        await _leaveChat(chat);
+      } on Exception catch (error) {
+        _logFailure('leaving a group chat', error.runtimeType);
+      }
+    }
+  }
+
+  Future<void> _leaveChat(VtcGroupChat chat) async {
+    final contacts = _ref.read(contactsServiceProvider.notifier);
+    final contact = _ref
+        .read(contactsServiceProvider)
+        .getContactByChannelDid(chat.groupDid);
+    if (contact != null) {
+      await contacts.deleteContacts([contact]);
+    } else {
+      // No contact made for it yet, such as while the owner had still to
+      // let the member in.
+      final sdk = await _ref.read(meetingPlaceSdkProvider.future);
+      final channel = await sdk.findChannelByOtherPartyPermanentDid(
+        chat.groupDid,
+      );
+      if (channel != null) await sdk.leaveChannel(channel);
+    }
+    await _repository.removeGroupChat(chat.chatGroupId);
   }
 
   /// Who may post in the community group chat [chatGroupId], which the
