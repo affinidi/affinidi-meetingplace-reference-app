@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../../application/services/identities_service/identities_service.dart';
 import '../../../application/services/vtc_service/vtc_service.dart';
+import '../../../domain/models/identity/identity.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../themes/tokens/mc_icons.dart';
 import '../../widgets/onboarding_style/onboarding_style.dart';
 import '../vtc_join/vtc_join_screen.dart';
 import '../vtc_join/vtc_membership_card_view.dart';
 import '../vtc_join/vtc_role_name.dart';
+import 'communities_controller.dart';
 import 'community_logo_provider.dart';
 import 'community_tabs_providers.dart';
 
-/// The member's membership of a community: their role there and the cards
-/// it issued them, the membership card and a vetter's role card, as their
-/// VTA keeps them, each with its details folded away, and a way to leave
-/// it.
+/// The member's membership of a community: the identity they joined with,
+/// their role there and the cards it issued them, the membership card and a
+/// vetter's role card, as their VTA keeps them, each with its details
+/// folded away, and a way to leave it.
 class CommunityMembershipView extends ConsumerWidget {
   const CommunityMembershipView({
     super.key,
@@ -35,6 +38,7 @@ class CommunityMembershipView extends ConsumerWidget {
         .watch(communityVetterCardProvider(communityDid))
         .value;
     final logoUrl = ref.watch(communityLogoProvider(communityDid)).value;
+    final joinedAs = _joinedAs(ref);
 
     if (role.error ?? card.error case final error?) {
       return _Message(switch (error) {
@@ -52,6 +56,15 @@ class CommunityMembershipView extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: 12,
         children: [
+          if (joinedAs case (final identity, :final ownDid))
+            OnboardingLine(
+              key: const Key('community_membership_identity'),
+              icon: McIcons.person,
+              title: l10n.vtcCommunityIdentity,
+              subtitle: ownDid
+                  ? l10n.vtcCommunityIdentityOwnDid(identity.card.displayName)
+                  : l10n.vtcCommunityIdentityNewDid(identity.card.displayName),
+            ),
           if (role.value case final role?)
             OnboardingLine(
               key: const Key('community_membership_role'),
@@ -62,7 +75,6 @@ class CommunityMembershipView extends ConsumerWidget {
           if (card.value case final card?)
             VtcMembershipCardView(
               card: card,
-              communityName: communityName,
               logoUrl: logoUrl,
               collapsible: true,
             )
@@ -84,7 +96,6 @@ class CommunityMembershipView extends ConsumerWidget {
           if (vetterCard != null)
             VtcVetterCardView(
               card: vetterCard,
-              communityName: communityName,
               logoUrl: logoUrl,
               collapsible: true,
             ),
@@ -98,6 +109,26 @@ class CommunityMembershipView extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  /// The identity the member joined with, and whether the community knows
+  /// it by the identity's own DID rather than one made for it alone; null
+  /// for a new identity, which has no profile.
+  (Identity, {bool ownDid})? _joinedAs(WidgetRef ref) {
+    final community = ref
+        .watch(communitiesControllerProvider)
+        .value
+        ?.where((community) => community.communityDid == communityDid)
+        .firstOrNull;
+    if (community == null) return null;
+    // A DID made for this community lives in the identity's context too.
+    final identity = ref
+        .watch(identitiesServiceProvider)
+        .vtaPersonas
+        .where((identity) => identity.vtaContextId == community.contextId)
+        .firstOrNull;
+    if (identity == null) return null;
+    return (identity, ownDid: identity.did == community.personaDid);
   }
 
   /// Leaves the community once the member confirms, then closes it: they

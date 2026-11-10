@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
+import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service.dart';
+import 'package:mpx_flutter_reference_app/application/services/identities_service/identities_service_state.dart';
 import 'package:mpx_flutter_reference_app/application/services/vtc_service/vtc_service.dart';
+import 'package:mpx_flutter_reference_app/domain/models/identity/identity.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_community.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_left_membership.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_membership_card.dart';
@@ -16,10 +19,25 @@ import 'package:mpx_flutter_reference_app/presentation/screens/vtc_join/vtc_memb
 import 'package:mpx_flutter_reference_app/presentation/themes/app_theme.dart';
 import 'package:mpx_flutter_reference_app/presentation/themes/tokens/mc_icons.dart';
 
+import '../../../fakes/fake_identities.dart';
+import '../../../fakes/fake_identities_service.dart';
 import '../../../mocks/fake_app_logger.dart';
 
 const _club = 'did:webvh:QmClub:vtc.example';
 const _me = 'did:webvh:QmMe:vta.example:me';
+
+/// The identity [did] on the member's VTA, named [name], in the context the
+/// membership lives in.
+Identity _vtaIdentity(String did, String name) =>
+    FakeIdentities.primaryIdentity.copyWith(
+      did: did,
+      card: FakeIdentities.primaryIdentity.card.copyWith(
+        did: did,
+        displayName: name,
+      ),
+      vtaContextId: 'vta',
+      vtaProfileId: '01PROFILE',
+    );
 
 /// The member's role, membership card and vetter card, as their VTA keeps
 /// them, and their membership until they leave.
@@ -73,6 +91,9 @@ class _FakeVtcService extends Fake implements VtcService {
       : null;
 
   @override
+  Future<List<VtcCommunity>> communities() async => [?await community(_club)];
+
+  @override
   Future<void> leave(
     String communityDid, {
     void Function(VtcLeaveStep step)? onStep,
@@ -84,8 +105,12 @@ class _FakeVtcService extends Fake implements VtcService {
 
 void main() {
   late _FakeVtcService service;
+  var identities = IdentitiesServiceState();
 
-  setUp(() => service = _FakeVtcService());
+  setUp(() {
+    service = _FakeVtcService();
+    identities = IdentitiesServiceState();
+  });
 
   Future<AppLocalizations> pumpView(WidgetTester tester) async {
     await tester.binding.setSurfaceSize(const Size(400, 1600));
@@ -94,6 +119,9 @@ void main() {
       ProviderScope(
         overrides: [
           vtcServiceProvider.overrideWithValue(service),
+          identitiesServiceProvider.overrideWith(
+            () => FakeIdentitiesService(identities),
+          ),
           appLoggerProvider.overrideWithValue(FakeAppLogger()),
         ],
         child: MaterialApp(
@@ -137,6 +165,102 @@ void main() {
       findsOneWidget,
     );
     expect(find.byType(VtcMembershipCardView), findsOneWidget);
+  });
+
+  group('identity', () {
+    Finder identityLine() =>
+        find.byKey(const Key('community_membership_identity'));
+
+    testWidgets('shows the identity joined with above the cards', (
+      tester,
+    ) async {
+      identities = IdentitiesServiceState(
+        identities: [_vtaIdentity('did:webvh:QmAda:vta.example:ada', 'Ada')],
+      );
+
+      final l10n = await pumpView(tester);
+
+      expect(
+        find.descendant(
+          of: identityLine(),
+          matching: find.text(l10n.vtcCommunityIdentityNewDid('Ada')),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        tester.getTopLeft(identityLine()).dy,
+        lessThan(
+          tester.getTopLeft(find.byKey(const Key('vtc_membership_card'))).dy,
+        ),
+      );
+    });
+
+    testWidgets('says when the community knows the identity\'s own DID', (
+      tester,
+    ) async {
+      identities = IdentitiesServiceState(
+        identities: [_vtaIdentity(_me, 'Ada')],
+      );
+
+      final l10n = await pumpView(tester);
+
+      expect(
+        find.descendant(
+          of: identityLine(),
+          matching: find.text(l10n.vtcCommunityIdentityOwnDid('Ada')),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('shows none for a membership of a new identity', (
+      tester,
+    ) async {
+      identities = IdentitiesServiceState(
+        identities: [
+          _vtaIdentity(
+            'did:webvh:QmAda:vta.example:ada',
+            'Ada',
+          ).copyWith(vtaContextId: 'mpx-other'),
+        ],
+      );
+
+      await pumpView(tester);
+
+      expect(identityLine(), findsNothing);
+    });
+  });
+
+  testWidgets('heads each card with its name, not the community\'s', (
+    tester,
+  ) async {
+    service.heldVetterCard = const VtcVetterCard(
+      issuer: _club,
+      vetterDid: _me,
+      credential: {
+        'type': ['VerifiableCredential', 'AuthorityCredential'],
+        'issuer': _club,
+        'credentialSubject': {'id': _me},
+      },
+    );
+
+    final l10n = await pumpView(tester);
+
+    expect(find.text('Football club'), findsNothing);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('vtc_membership_card')),
+        matching: find.text(l10n.vtcMembershipCardTitle),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('vtc_vetter_role_card')),
+        matching: find.text(l10n.vtcVetterCardTitle),
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('folds each card\'s details away until opened', (tester) async {

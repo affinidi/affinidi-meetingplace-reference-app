@@ -14,6 +14,7 @@ void main() {
   Future<void> pumpCard(
     WidgetTester tester, {
     String? id,
+    String? communityName = 'Chess club',
     bool collapsible = false,
   }) => tester.pumpWidget(
     MaterialApp(
@@ -23,7 +24,7 @@ void main() {
       home: Scaffold(
         body: SingleChildScrollView(
           child: VtcMembershipCardView(
-            communityName: 'Chess club',
+            communityName: communityName,
             card: VtcMembershipCard(
               issuer: _club,
               memberDid: _me,
@@ -76,6 +77,22 @@ void main() {
 
       expect(find.byKey(const Key('vtc_join_json_copy')), findsOneWidget);
       expect(find.byKey(const Key('vtc_join_json_copy_command')), findsNothing);
+    });
+
+    testWidgets('names the community over the card\'s name', (tester) async {
+      await pumpCard(tester);
+
+      expect(find.text('Chess club'), findsOneWidget);
+      expect(find.text('Membership card'), findsOneWidget);
+    });
+
+    testWidgets('heads the card with its name without the community', (
+      tester,
+    ) async {
+      await pumpCard(tester, communityName: null);
+
+      expect(find.text('Chess club'), findsNothing);
+      expect(find.text('Membership card'), findsOneWidget);
     });
 
     testWidgets('shows its details at once unless collapsible', (tester) async {
