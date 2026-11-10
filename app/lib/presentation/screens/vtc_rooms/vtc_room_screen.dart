@@ -8,6 +8,9 @@ import '../../../application/services/vtc_service/vtc_service.dart';
 import '../../../infrastructure/extensions/build_context_extensions.dart';
 import '../../../infrastructure/extensions/vtc_exception_extensions.dart';
 import '../../../infrastructure/providers/app_logger_provider.dart';
+import '../../themes/tokens/mc_icons.dart';
+import '../../themes/tokens/mc_radius.dart';
+import '../../themes/tokens/mc_spacing.dart';
 import 'vtc_rooms_view.dart';
 
 const _logKey = 'VtcRoomScreen';
@@ -154,7 +157,7 @@ class VtcRoomScreen extends HookConsumerWidget {
         actions: [
           IconButton(
             key: const Key('vtc_room_refresh'),
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(McIcons.refresh),
             tooltip: l10n.vtcJoinCheckAgain,
             onPressed: refreshing ? null : () => reload.value++,
           ),
@@ -177,7 +180,7 @@ class VtcRoomScreen extends HookConsumerWidget {
                       dimension: 16,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Icon(Icons.edit_outlined),
+                  : const Icon(McIcons.edit),
               label: Text(
                 writing.value ? l10n.vtcRoomPosting : l10n.vtcRoomWrite,
               ),
@@ -201,7 +204,7 @@ class VtcRoomScreen extends HookConsumerWidget {
           return ListView.separated(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
             itemCount: records.length + lead,
-            separatorBuilder: (_, _) => const SizedBox(height: 12),
+            separatorBuilder: (_, _) => const SizedBox(height: 16),
             itemBuilder: (context, index) {
               if (index < lead) {
                 return switch (pending.value) {
@@ -257,10 +260,11 @@ class _PostingCard extends StatelessWidget {
       key: const Key('vtc_room_posting'),
       opacity: 0.6,
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16 - McSpacing.hairline),
         decoration: BoxDecoration(
-          color: Colors.white.withAlpha(20),
-          borderRadius: BorderRadius.circular(16),
+          color: context.colorScheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(McRadius.lg),
+          border: Border.all(color: context.mcColors.hairline),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -269,7 +273,7 @@ class _PostingCard extends StatelessWidget {
             Text(
               title,
               style: context.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
               ),
             ),
             if (body case final body?)
@@ -316,10 +320,13 @@ class _RecordCard extends StatelessWidget {
     final updatedAt = record?.updatedAt ?? summary.updatedAt;
     return Container(
       key: Key('vtc_room_record_${summary.key}'),
-      padding: const EdgeInsets.all(16),
+      // The hairline border takes its width from the padding, so the
+      // content keeps its size.
+      padding: const EdgeInsets.all(16 - McSpacing.hairline),
       decoration: BoxDecoration(
-        color: Colors.white.withAlpha(20),
-        borderRadius: BorderRadius.circular(16),
+        color: context.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(McRadius.lg),
+        border: Border.all(color: context.mcColors.hairline),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -331,7 +338,7 @@ class _RecordCard extends StatelessWidget {
             Text(
               record.title ?? l10n.vtcRoomRecordUntitled,
               style: context.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w500,
               ),
             ),
             if (record.body case final body?)
