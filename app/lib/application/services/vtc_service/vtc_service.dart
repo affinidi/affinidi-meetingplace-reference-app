@@ -1293,15 +1293,55 @@ class VtcService {
     return ticket;
   }
 
-  /// Cancels every ticket the member showed for [communityDid], so none
-  /// admits an applicant any more; sessions already open stay open.
-  /// Returns the desk, or null when there is none.
-  Future<VtcVetterDesk?> cancelVettingTickets(String communityDid) async {
+  /// Clears what an earlier visit left on the member's desk for
+  /// [communityDid], so vetting starts fresh: cancels every ticket, so none
+  /// admits an applicant any more, and declines each open session. Returns
+  /// the desk, or null when there is none.
+  ///
+  /// The applicants are told when they can be reached; their sessions end
+  /// on the desk either way, so none is left to resume.
+  Future<VtcVetterDesk?> restartVetterDesk(String communityDid) async {
     final desk = await _repository.findVetterDesk(communityDid);
-    if (desk == null || desk.tickets.isEmpty) return desk;
-    final cancelled = desk.withoutTickets();
-    await _repository.saveVetterDesk(cancelled);
-    return cancelled;
+    if (desk == null) return null;
+    final open = desk.sessions.where((session) => session.isOpen).toList();
+    if (desk.tickets.isEmpty && open.isEmpty) return desk;
+    var restarted = desk.withoutTickets();
+    if (open.isNotEmpty) await _tellDeclined(communityDid, open);
+    for (final session in open) {
+      restarted = restarted.withSession(session.declined());
+      _forgetCard(session.request.requestId);
+    }
+    await _repository.saveVetterDesk(restarted);
+    return restarted;
+  }
+
+  /// Tells the applicants of [sessions] the member will not vouch for them.
+  /// One who cannot be reached is not told: their request lapses.
+  Future<void> _tellDeclined(
+    String communityDid,
+    List<VtcVetterSession> sessions,
+  ) async {
+    final member = await _repository.findCommunity(communityDid);
+    if (member == null) return;
+    try {
+      final (_, collection, vetter) = await _vetter(member);
+      for (final session in sessions) {
+        try {
+          await vetter.decline(session.request);
+        } on MeetingPlaceVtcSDKException {
+          // Not told; the next applicant is still vetted.
+        }
+      }
+      final cards = [
+        for (final session in sessions)
+          ?_vettingCards[session.request.requestId]?.$1,
+      ];
+      await _removeFromInbox(collection, cards);
+    } on VtaNotLinkedException {
+      return;
+    } on MeetingPlaceVtcSDKException {
+      return;
+    }
   }
 
   /// Picks up what applicants sent the member, as a vetter for

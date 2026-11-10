@@ -2019,13 +2019,35 @@ void main() {
     test('cancels the tickets shown, so none admits an applicant', () async {
       final ticket = await service.createVettingTicket(fakeVtcDid);
 
-      final desk = (await service.cancelVettingTickets(fakeVtcDid))!;
+      final desk = (await service.restartVetterDesk(fakeVtcDid))!;
       expect(desk.tickets, isEmpty);
       expect((await service.vetterDesk(fakeVtcDid))!.tickets, isEmpty);
 
       await requestWith(ticket.spoken);
       final after = (await service.checkVetterDesk(fakeVtcDid))!;
       expect(after.sessions, isEmpty);
+    });
+
+    test('declines the open sessions, so none is left to resume', () async {
+      final ticket = await service.createVettingTicket(fakeVtcDid);
+      await requestWith(ticket.spoken);
+      final [opened] = (await service.checkVetterDesk(fakeVtcDid))!.sessions;
+      await sendCard((await sentToApplicant()).last);
+      await service.checkVetterDesk(fakeVtcDid);
+      final requestId = opened.request.requestId;
+      expect(service.vettingCard(requestId), isNotNull);
+
+      final desk = (await service.restartVetterDesk(fakeVtcDid))!;
+
+      expect(desk.sessions.single.status, VtcVetterSessionStatus.declined);
+      expect(
+        (await service.vetterDesk(fakeVtcDid))!.sessions.single.isOpen,
+        isFalse,
+      );
+      final decline = (await sentToApplicant()).last;
+      expect(decline.type, VettingTask.decline);
+      expect(service.vettingCard(requestId), isNull);
+      expect(network.inbox, isEmpty);
     });
 
     test('reports each step of minting a ticket', () async {

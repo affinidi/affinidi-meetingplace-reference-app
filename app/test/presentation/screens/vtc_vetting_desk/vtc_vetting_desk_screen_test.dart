@@ -209,6 +209,23 @@ void main() {
     await close(tester);
   });
 
+  testWidgets('ends the session of an earlier visit', (tester) async {
+    await tester.runAsync(() async {
+      final ticket = await fixture.service.createVettingTicket(fakeVtcDid);
+      await fixture.requestWith(ticket.spoken);
+      await fixture.service.checkVetterDesk(fakeVtcDid);
+    });
+
+    await pumpDesk(tester);
+    await waitFor(tester, find.byKey(const Key('vtc_vetter_show_ticket')));
+
+    expect(find.byKey(const Key('vtc_vetter_resume')), findsNothing);
+    expect(flowStep(tester), isNull);
+    final decline = (await tester.runAsync(fixture.sentToApplicant))!.last;
+    expect(decline.type, VettingTask.decline);
+    await close(tester);
+  });
+
   testWidgets('keeps the ticket open when the flow is closed', (tester) async {
     await pumpDesk(tester);
     await waitFor(tester, find.byKey(const Key('vtc_vetter_show_ticket')));
