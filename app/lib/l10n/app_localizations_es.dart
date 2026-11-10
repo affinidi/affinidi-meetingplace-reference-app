@@ -3878,6 +3878,21 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String vtcTrustWithdrawing(String name) {
+    return 'Withdrawing your vouch for $name…';
+  }
+
+  @override
+  String vtcTrustWithdrawingDetail(String community) {
+    return '$community stops showing it to its members.';
+  }
+
+  @override
+  String vtcTrustWithdrawn(String name) {
+    return 'You no longer vouch for $name';
+  }
+
+  @override
   String vtcTrustDoneTitle(String name) {
     return 'You vouched for $name';
   }

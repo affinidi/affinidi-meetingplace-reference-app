@@ -88,7 +88,8 @@ Future<PublishedRelationship?> vouchWithConsent(
 }
 
 /// Withdraws [edge], the member's vouch for [name] in [communityDid], once
-/// the member confirms. Returns whether it was withdrawn.
+/// the member confirms, then says it is done. Returns whether it was
+/// withdrawn.
 Future<bool> withdrawWithConfirmation(
   BuildContext context,
   WidgetRef ref, {
@@ -109,7 +110,13 @@ Future<bool> withdrawWithConfirmation(
   if (!confirmed || !context.mounted) return false;
 
   try {
-    await ref.read(vtcTrustServiceProvider).withdraw(communityDid, edge);
+    await _whileWorking(
+      context,
+      title: l10n.vtcTrustWithdrawing(name),
+      detail: l10n.vtcTrustWithdrawingDetail(communityName),
+      () => ref.read(vtcTrustServiceProvider).withdraw(communityDid, edge),
+    );
+    if (context.mounted) _tell(context, l10n.vtcTrustWithdrawn(name));
     return true;
   } on VtcTrustException catch (error) {
     if (context.mounted) {

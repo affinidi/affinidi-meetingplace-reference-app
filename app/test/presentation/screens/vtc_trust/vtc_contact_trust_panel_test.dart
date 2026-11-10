@@ -46,7 +46,7 @@ class _FakeTrustService extends Fake implements VtcTrustService {
   VtcTrustFailure? refusal;
   final List<String> vouched = [];
 
-  /// Holds vouching back until completed.
+  /// Holds vouching and withdrawing back until completed.
   Completer<void>? held;
   final List<String> withdrawn = [];
 
@@ -105,6 +105,7 @@ class _FakeTrustService extends Fake implements VtcTrustService {
 
   @override
   Future<void> withdraw(String communityDid, PublishedRelationship edge) async {
+    await held?.future;
     withdrawn.add(edge.id);
     outgoing = null;
   }
@@ -280,8 +281,41 @@ void main() {
     await tapText(tester, 'Withdraw');
 
     expect(service.withdrawn, ['edge-1']);
+    expect(find.byKey(const Key('vtc_vouch_progress')), findsNothing);
+    expect(find.text('You no longer vouch for Bob'), findsOneWidget);
     expect(find.byTooltip('You vouched for Bob'), findsNothing);
     expect(find.text('No vouches yet'), findsOneWidget);
+  });
+
+  testWidgets('shows that it is withdrawing until it is done', (tester) async {
+    service
+      ..stored.add(linkToBob())
+      ..outgoing = const PublishedRelationship(
+        id: 'edge-1',
+        issuerDid: _me,
+        subjectDid: _bob,
+        vrcDigestMultibase: 'zQm1',
+      );
+    await pumpPanel(tester);
+    final held = service.held = Completer<void>();
+
+    await tapText(tester, 'Withdraw');
+    await tester.tap(find.text('Withdraw').last);
+    // Not settled: the progress indicator spins while withdrawing.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Withdrawing your vouch for Bob…'), findsOneWidget);
+    expect(
+      find.text('Football club stops showing it to its members.'),
+      findsOneWidget,
+    );
+
+    held.complete();
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('vtc_vouch_progress')), findsNothing);
+    expect(find.text('You no longer vouch for Bob'), findsOneWidget);
   });
 
   testWidgets('offers to vouch back for a contact who vouched first', (

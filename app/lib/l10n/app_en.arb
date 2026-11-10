@@ -3911,6 +3911,33 @@
 			}
 		}
 	},
+	"vtcTrustWithdrawing": "Withdrawing your vouch for {name}…",
+	"@vtcTrustWithdrawing": {
+		"description": "Shown while the vouch is being withdrawn",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcTrustWithdrawingDetail": "{community} stops showing it to its members.",
+	"@vtcTrustWithdrawingDetail": {
+		"description": "What happens while withdrawing a vouch",
+		"placeholders": {
+			"community": {
+				"type": "String"
+			}
+		}
+	},
+	"vtcTrustWithdrawn": "You no longer vouch for {name}",
+	"@vtcTrustWithdrawn": {
+		"description": "Shown once the vouch was withdrawn",
+		"placeholders": {
+			"name": {
+				"type": "String"
+			}
+		}
+	},
 	"vtcTrustDoneTitle": "You vouched for {name}",
 	"@vtcTrustDoneTitle": {
 		"description": "Title of what happened once vouched",
