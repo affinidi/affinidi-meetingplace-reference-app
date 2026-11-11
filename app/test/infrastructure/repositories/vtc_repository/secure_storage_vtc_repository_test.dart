@@ -1,6 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
+import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_group_chat.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_left_membership.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_member_link.dart';
 import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_vetter_desk.dart';
@@ -356,6 +357,42 @@ void main() {
 
       await repository.clear();
       expect(await repository.memberLinks(), isEmpty);
+    });
+  });
+
+  group('SecureStorageVtcRepository group chats', () {
+    VtcGroupChat chat(String id) => VtcGroupChat(
+      chatGroupId: 'chat-$id',
+      communityDid: 'did:webvh:club',
+      groupId: id,
+      groupDid: 'did:webvh:club:groups:$id',
+      name: id,
+      isOwner: false,
+    );
+
+    test('keeps every chat saved at once, from any instance', () async {
+      await Future.wait([
+        SecureStorageVtcRepository().saveGroupChat(chat('a')),
+        SecureStorageVtcRepository().saveGroupChat(chat('b')),
+        SecureStorageVtcRepository().saveGroupChat(chat('c')),
+      ]);
+
+      expect(
+        (await SecureStorageVtcRepository().groupChats()).map((c) => c.groupId),
+        unorderedEquals(['a', 'b', 'c']),
+      );
+    });
+
+    test('removes a chat while another is saved, keeping that one', () async {
+      final repository = SecureStorageVtcRepository();
+      await repository.saveGroupChat(chat('a'));
+
+      await Future.wait([
+        repository.removeGroupChat('chat-a'),
+        repository.saveGroupChat(chat('b')),
+      ]);
+
+      expect((await repository.groupChats()).map((c) => c.groupId), ['b']);
     });
   });
 }

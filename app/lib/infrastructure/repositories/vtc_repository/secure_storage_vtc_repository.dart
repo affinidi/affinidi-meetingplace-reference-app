@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
+import 'package:synchronized/synchronized.dart';
 
 import '../../../domain/models/vtc/linked_vta.dart';
 import '../../../domain/models/vtc/vtc_community.dart';
@@ -39,6 +40,10 @@ class SecureStorageVtcRepository implements VtcRepository {
   static const _vetterDesksKey = 'vtc_vetter_desks';
 
   final FlutterSecureStorage _storage;
+
+  /// Serialises changes to the group chats, each a read then a write, across
+  /// every instance: the chats of a community's groups are joined at once.
+  static final _groupChatsLock = Lock();
 
   @override
   Future<LinkedVta?> getLinkedVta() async {
@@ -192,21 +197,23 @@ class SecureStorageVtcRepository implements VtcRepository {
   }
 
   @override
-  Future<void> saveGroupChat(VtcGroupChat chat) async {
-    final others = (await groupChats()).where(
-      (stored) => stored.chatGroupId != chat.chatGroupId,
-    );
-    await _saveGroupChats([...others, chat]);
-  }
+  Future<void> saveGroupChat(VtcGroupChat chat) =>
+      _groupChatsLock.synchronized(() async {
+        final others = (await groupChats()).where(
+          (stored) => stored.chatGroupId != chat.chatGroupId,
+        );
+        await _saveGroupChats([...others, chat]);
+      });
 
   @override
-  Future<void> removeGroupChat(String chatGroupId) async {
-    await _saveGroupChats([
-      ...(await groupChats()).where(
-        (stored) => stored.chatGroupId != chatGroupId,
-      ),
-    ]);
-  }
+  Future<void> removeGroupChat(String chatGroupId) =>
+      _groupChatsLock.synchronized(() async {
+        await _saveGroupChats([
+          ...(await groupChats()).where(
+            (stored) => stored.chatGroupId != chatGroupId,
+          ),
+        ]);
+      });
 
   @override
   Future<List<VtcMemberLink>> memberLinks({String? channelDid}) async {
