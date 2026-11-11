@@ -407,22 +407,37 @@ class VtcGroupChatService {
         });
         _logStep('Collected credentials', watch);
       }
-      for (final group in linked) {
-        try {
-          _logger.info('Joining a group chat automatically', name: _logKey);
-          await joinChat(community.communityDid, group, identity: identity);
-          joined.add(group.groupDid);
-          _logStep('Joined a group chat automatically', watch);
-        } on VtcGroupChatException catch (error) {
-          // Not linked or not deliverable yet: tried again next time. The
-          // reason is logged, as nothing else tells why a member is not in.
-          if (error.failure != VtcGroupChatFailure.notLinked) {
-            _logFailure('joining a group chat', error.failure.name);
-          }
-        } on Exception catch (error) {
-          _logFailure('joining a group chat', error.runtimeType);
-        }
+      // All at once: each is a round trip to Meeting Place and the VTA of
+      // its own, and a member just admitted waits on every one.
+      await Future.wait([
+        for (final group in linked)
+          _joinAutomatically(community.communityDid, group, identity, joined),
+      ]);
+      _logStep('Joined group chats automatically', watch);
+    }
+  }
+
+  /// Joins [group]'s chat as [identity], adding it to [joined]; logs, rather
+  /// than throws, why it could not be joined, to try again next time.
+  Future<void> _joinAutomatically(
+    String communityDid,
+    VtcGroup group,
+    Identity identity,
+    Set<String> joined,
+  ) async {
+    try {
+      _logger.info('Joining a group chat automatically', name: _logKey);
+      await joinChat(communityDid, group, identity: identity);
+      joined.add(group.groupDid);
+      _logger.info('Joined a group chat automatically', name: _logKey);
+    } on VtcGroupChatException catch (error) {
+      // Not linked or not deliverable yet: tried again next time. The
+      // reason is logged, as nothing else tells why a member is not in.
+      if (error.failure != VtcGroupChatFailure.notLinked) {
+        _logFailure('joining a group chat', error.failure.name);
       }
+    } on Exception catch (error) {
+      _logFailure('joining a group chat', error.runtimeType);
     }
   }
 

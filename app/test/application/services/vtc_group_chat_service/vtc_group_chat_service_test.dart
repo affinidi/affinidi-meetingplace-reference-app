@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -263,12 +265,16 @@ class _JoinRecordingService extends VtcGroupChatService {
   /// Groups whose chat cannot be joined yet.
   Set<String> notYetJoinable = const {};
 
+  /// Joins that complete only once their future does, by group.
+  Map<String, Future<void>> heldUntil = const {};
+
   @override
   Future<void> joinChat(
     String communityDid,
     VtcGroup group, {
     required Identity identity,
   }) async {
+    await heldUntil[group.groupId];
     if (notYetJoinable.contains(group.groupId)) {
       throw const VtcGroupChatException(VtcGroupChatFailure.notLinked);
     }
@@ -910,6 +916,31 @@ void main() {
       await joining.joinGroupChats();
 
       expect(joining.joined, isEmpty);
+    });
+
+    test('joins the chats of a community at once, each on its own', () async {
+      vtc.groupsOf = {
+        _communityDid: [
+          _listing('announcements'),
+          _listing('news'),
+          _listing('events'),
+        ],
+      };
+      final release = Completer<void>();
+      joining
+        ..heldUntil = {'announcements': release.future}
+        ..notYetJoinable = {'events'};
+
+      final done = joining.joinGroupChats();
+      await Future<void>.delayed(Duration.zero);
+
+      expect(joining.joined, [(_communityDid, 'news', member.id)]);
+      release.complete();
+      await done;
+      expect(joining.joined, [
+        (_communityDid, 'news', member.id),
+        (_communityDid, 'announcements', member.id),
+      ]);
     });
 
     test('tries a chat it could not join again next time', () async {
