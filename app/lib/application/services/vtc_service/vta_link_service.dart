@@ -256,8 +256,9 @@ class VtaLinkService extends Notifier<VtaLinkState> {
     await _check();
   }
 
-  /// Cancels a pending link or removes the active one: forgets the manager
-  /// key, the link and everything cached from the VTA.
+  /// Cancels a pending link or removes the active one: forgets the link and
+  /// everything cached from the VTA, keeping the manager key for linking it
+  /// again.
   Future<void> remove() async {
     _stopPolling();
     try {

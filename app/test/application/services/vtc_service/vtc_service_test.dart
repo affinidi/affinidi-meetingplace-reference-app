@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
@@ -18,11 +19,13 @@ import 'package:mpx_flutter_reference_app/domain/models/vtc/vtc_vetting.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/repositories/vtc_repository/secure_storage_vtc_repository.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/vtc/mock_credential_issuer.dart';
 import 'package:mpx_flutter_reference_app/infrastructure/vtc/user_verification_key.dart';
+import 'package:mpx_flutter_reference_app/infrastructure/vtc/vta_enrolment_client.dart';
 
 import '../../../fakes/fake_identities.dart';
 import '../../../fakes/fake_persona.dart';
 import '../../../fakes/fake_vetter_desk.dart';
 import '../../../fakes/fake_vta.dart';
+import '../../../fakes/fake_vta_host.dart';
 import '../../../fakes/fake_vtc_network.dart';
 
 void main() {
@@ -129,7 +132,7 @@ void main() {
       expect(keyStorage.did, isNull);
     });
 
-    test('unlink signs out and forgets the VTA and its key', () async {
+    test('unlink signs out and forgets the VTA link', () async {
       await service.startLink(vta.did);
       await service.checkGrant();
 
@@ -139,6 +142,75 @@ void main() {
       expect(await service.linkedVta(), isNull);
       expect(await service.managerDid(), isNull);
       expect(keyStorage.did, isNull);
+    });
+
+    group('the manager key', () {
+      test('is the same when linking the VTA again after unlink', () async {
+        final first = await service.startLink(vta.did);
+        await service.unlink();
+
+        expect(await service.startLink(vta.did), first);
+      });
+
+      test('is the same after forgetting the link', () async {
+        final first = await service.startLink(vta.did);
+        await service.forget();
+
+        expect(await service.startLink(vta.did), first);
+      });
+
+      test('is the same after a try the VTA could not answer', () async {
+        vta.isDown = true;
+        await expectLater(
+          service.startLink(vta.did),
+          throwsA(isA<MeetingPlaceVtcSDKException>()),
+        );
+        final failedTry = (await SecureStorageVtcRepository().findManagerSeed(
+          vta.did,
+        ))!;
+        vta.isDown = false;
+
+        expect(
+          await service.startLink(vta.did),
+          Ed25519DidKeySigner.fromSeed(failedTry).did,
+        );
+      });
+
+      test('is another one for another VTA', () async {
+        final first = await service.startLink(vta.did);
+        await service.forget();
+        final other = FakeVta();
+        final otherService = VtcService(
+          sdk: other.sdk(),
+          repository: SecureStorageVtcRepository(),
+          userVerificationKey: UserVerificationKey(keyStorage),
+          platform: 'ios',
+        );
+
+        expect(await otherService.startLink(other.did), isNot(first));
+      });
+
+      test('is the one an enrolment offer submits', () async {
+        final host = FakeVtaHost(vtaDid: vta.did);
+        final enrolling = VtcService(
+          sdk: vta.sdk(),
+          repository: SecureStorageVtcRepository(),
+          userVerificationKey: UserVerificationKey(keyStorage),
+          enrolmentClient: VtaEnrolmentClient(
+            dio: Dio()..httpClientAdapter = host,
+          ),
+          platform: 'ios',
+        );
+        final first = await enrolling.startLink(vta.did);
+        await enrolling.forget();
+
+        await enrolling.startEnrolment(
+          host.link(expiresAt: DateTime.now().add(const Duration(minutes: 5))),
+        );
+
+        expect(host.did, first);
+        expect(await enrolling.managerDid(), first);
+      });
     });
   });
 

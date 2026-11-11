@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
 
 import '../models/vtc/linked_vta.dart';
@@ -17,6 +19,13 @@ abstract interface class VtcRepository {
 
   /// Stores [linkedVta], replacing any previous link.
   Future<void> saveLinkedVta(LinkedVta linkedVta);
+
+  /// Seed of the manager key this phone uses with the VTA [vtaDid], or null
+  /// when it never minted one for that VTA.
+  Future<Uint8List?> findManagerSeed(String vtaDid);
+
+  /// Keeps [seed] as the manager key this phone uses with the VTA [vtaDid].
+  Future<void> saveManagerSeed(String vtaDid, Uint8List seed);
 
   /// The community with [communityDid], or null when not recorded.
   Future<VtcCommunity?> findCommunity(String communityDid);
@@ -87,6 +96,9 @@ abstract interface class VtcRepository {
   /// Forgets the linked VTA, every community, every left membership, the
   /// membership cards kept, all vetting, every vetting desk and every
   /// contact linked to a member.
+  ///
+  /// Keeps the manager keys: linking the same VTA again shows the same DID,
+  /// one its administrator may have granted already.
   ///
   /// Keeps the group chats: a chat this phone owns lets in only a group's
   /// members, and must keep refusing everyone else while no VTA is linked.

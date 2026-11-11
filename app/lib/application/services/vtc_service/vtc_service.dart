@@ -75,12 +75,14 @@ class VtaNotLinkedException implements Exception {
 /// Communities as personas the VTA holds, and signs the member in to their
 /// communities' portals.
 ///
-/// The link is manual or by an enrolment offer. Manually, the phone mints a
-/// manager key and shows its DID; the VTA's administrator grants it; the
-/// phone then checks for the grant. By an offer the VTA host shows, the
-/// phone submits the manager key to the host, and the administrator grants
-/// it there after comparing codes. The biometric approval key is enrolled
-/// only when a sign-in first needs it.
+/// The link is manual or by an enrolment offer. Manually, the phone shows
+/// the DID of its manager key for the VTA; the VTA's administrator grants
+/// it; the phone then checks for the grant. By an offer the VTA host shows,
+/// the phone submits the manager key to the host, and the administrator
+/// grants it there after comparing codes. The phone mints one manager key
+/// per VTA and keeps it, so linking the same VTA again asks no new grant of
+/// a key already granted. The biometric approval key is enrolled only when
+/// a sign-in first needs it.
 class VtcService {
   /// Creates a [VtcService].
   ///
@@ -199,7 +201,8 @@ class VtcService {
   Future<LinkedVta?> linkedVta() => _repository.getLinkedVta();
 
   /// Starts linking the VTA [vtaDid] and returns the manager DID its
-  /// administrator must grant.
+  /// administrator must grant: the same DID as on any earlier try with that
+  /// VTA.
   ///
   /// The link is stored only once [vtaDid] resolves to a VTA that answers
   /// over HTTPS, at the endpoint its DID document names.
@@ -215,7 +218,7 @@ class VtcService {
       throw const VtaAlreadyLinkedException();
     }
 
-    final manager = _sdk.newManagerKey();
+    final manager = await _managerKeyFor(did);
     final client = _sdk.vtaClient(vtaDid: did, manager: manager);
     await client.checkReachable();
 
@@ -226,9 +229,9 @@ class VtcService {
     return manager.did;
   }
 
-  /// Starts linking the VTA the enrolment offer [link] names: submits a new
-  /// manager key to the VTA host, with a proof bound to the offer, and
-  /// returns the code the app and the host both show.
+  /// Starts linking the VTA the enrolment offer [link] names: submits the
+  /// phone's manager key for that VTA to the VTA host, with a proof bound to
+  /// the offer, and returns the code the app and the host both show.
   ///
   /// The link is stored only once the VTA answers and the host has taken
   /// the key with the same code.
@@ -247,7 +250,7 @@ class VtcService {
       throw const VtaAlreadyLinkedException();
     }
 
-    final manager = _sdk.newManagerKey();
+    final manager = await _managerKeyFor(offer.vtaDid);
     final client = _sdk.vtaClient(vtaDid: offer.vtaDid, manager: manager);
     await client.checkReachable();
     final code = await _enrolmentClient.submit(
@@ -270,6 +273,16 @@ class VtcService {
     );
     _client = client;
     return code;
+  }
+
+  /// The manager key this phone uses with the VTA [vtaDid], minted and kept
+  /// on the first try, before the VTA is reached, so a failed try reuses it.
+  Future<Ed25519DidKeySigner> _managerKeyFor(String vtaDid) async {
+    final seed = await _repository.findManagerSeed(vtaDid);
+    if (seed != null) return Ed25519DidKeySigner.fromSeed(seed);
+    final manager = _sdk.newManagerKey();
+    await _repository.saveManagerSeed(vtaDid, manager.seed);
+    return manager;
   }
 
   /// Asks the VTA host where the pending enrolment stands.
@@ -306,19 +319,20 @@ class VtcService {
     return access;
   }
 
-  /// Forgets the VTA link, the manager key, the communities and the
-  /// approval key, after ending the manager key's sessions on the VTA.
+  /// Forgets the VTA link, the communities and the approval key, after
+  /// ending the manager key's sessions on the VTA.
   ///
   /// The VTA keeps the key on its access list: only its administrator can
-  /// remove it.
+  /// remove it. The phone keeps it too, to link the same VTA again.
   Future<void> unlink() async {
     final linkedVta = await _repository.getLinkedVta();
     if (linkedVta != null) await _vtaClient(linkedVta).signOut();
     await forget();
   }
 
-  /// Forgets the VTA link, the manager key, the communities and the
-  /// approval key on this phone only, without asking the VTA.
+  /// Forgets the VTA link, the communities and the approval key on this
+  /// phone only, without asking the VTA. Keeps the manager key, as
+  /// [unlink] does.
   ///
   /// For a link a previous install left in the platform keystore: the VTA
   /// may no longer be reachable, and its sessions expire on their own.

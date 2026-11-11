@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:meeting_place_vtc/meeting_place_vtc.dart';
@@ -28,6 +29,7 @@ class SecureStorageVtcRepository implements VtcRepository {
           );
 
   static const _linkedVtaKey = 'vtc_linked_vta';
+  static const _managerSeedsKey = 'vtc_manager_seeds';
   static const _communitiesKey = 'vtc_communities';
   static const _leftMembershipsKey = 'vtc_left_memberships';
   static const _membershipCardsKey = 'vtc_membership_cards';
@@ -48,6 +50,24 @@ class SecureStorageVtcRepository implements VtcRepository {
   @override
   Future<void> saveLinkedVta(LinkedVta linkedVta) =>
       _storage.write(key: _linkedVtaKey, value: jsonEncode(linkedVta.toJson()));
+
+  @override
+  Future<Uint8List?> findManagerSeed(String vtaDid) async {
+    final seed = (await _managerSeeds())[vtaDid];
+    return seed == null ? null : Uint8List.fromList(base64Url.decode(seed));
+  }
+
+  @override
+  Future<void> saveManagerSeed(String vtaDid, Uint8List seed) async {
+    final seeds = {...await _managerSeeds(), vtaDid: base64Url.encode(seed)};
+    await _storage.write(key: _managerSeedsKey, value: jsonEncode(seeds));
+  }
+
+  Future<Map<String, String>> _managerSeeds() async {
+    final json = await _storage.read(key: _managerSeedsKey);
+    if (json == null) return const {};
+    return (jsonDecode(json) as Map<String, dynamic>).cast<String, String>();
+  }
 
   @override
   Future<VtcCommunity?> findCommunity(String communityDid) async {
